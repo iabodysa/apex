@@ -2,7 +2,7 @@
 import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import AsyncPanel from "./AsyncPanel.vue";
-import { statusLabel } from "../../../core/displayLabels.js";
+import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 
 const props = defineProps({
     title: String,
@@ -58,12 +58,9 @@ onMounted(() => props.resource.fetch());
         />
         <ul v-else class="salis-list">
             <li v-for="row in rows" :key="row.name || row.id">
-                <div>
-                    <strong
-                        ><bdi>{{
-                            row.subject || row.incident_type || row.type || row.name
-                        }}</bdi></strong
-                    >
+                <div class="record-identity">
+                    <strong dir="auto">{{ recordTitle(row, ["subject", "incident_type", "type", "vehicle_plate", "project"], title) }}</strong>
+                    <bdi v-if="row.name" class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
                     <p>
                         {{
                             row.description ||
@@ -74,7 +71,7 @@ onMounted(() => props.resource.fetch());
                         }}
                     </p>
                 </div>
-                <Badge theme="green" variant="subtle" :label="statusLabel(row.status || 'Open')" />
+                <Badge :theme="statusTheme(row.status || 'Open')" variant="subtle" :label="statusLabel(row.status || 'Open')" />
             </li>
         </ul>
     </section>

@@ -7,11 +7,11 @@ import { configurePortalApi } from "./core/api.js";
 import { createPortalSubscriber } from "./core/realtime.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
-import { createTransportSupervisorGateway } from "./features/transport-supervisor/gateway.js";
 import { createWorkerGateway } from "./features/worker/gateway.js";
 import { portalRoutes } from "./routes.js";
 import "./styles/foundation.css";
 import "./styles/tokens.css";
+import "./styles/frappe-ui-theme.css";
 
 const CONTEXT_TITLES = Object.freeze({
   worker: "مسار",
@@ -23,22 +23,19 @@ const CONTEXT_TITLES = Object.freeze({
 });
 
 function navigationFrom(router) {
-  return router.getRoutes()
+  return router
+    .getRoutes()
     .filter((route) => route.meta?.navigation)
-    .map((route) => Object.freeze({
-      label: route.meta.label,
-      icon: route.meta.icon,
-      to: route.path,
-    }));
+    .map((route) =>
+      Object.freeze({
+        label: route.meta.label,
+        icon: route.meta.icon,
+        to: route.path,
+      }),
+    );
 }
 
-export async function mountPortal({
-  source,
-  shell,
-  csrfToken,
-  routes = portalRoutes,
-  target = "#app",
-} = {}) {
+export async function mountPortal({ source, shell, csrfToken, routes = portalRoutes, target = "#app" } = {}) {
   if (source === undefined && globalThis.document) {
     ({ portal: source, shell, csrfToken } = readPortalDocumentBootstrap(globalThis.document));
   }
@@ -54,6 +51,11 @@ export async function mountPortal({
     routes,
     initialRoute: bootstrap.initial_route,
   });
+  router.afterEach((to) => {
+    if (!globalThis.document) return;
+    const page = to.meta?.label || CONTEXT_TITLES[context.id];
+    globalThis.document.title = `${page} | أبكس`;
+  });
   const application = createApp(App, {
     context,
     title: CONTEXT_TITLES[context.id],
@@ -63,7 +65,6 @@ export async function mountPortal({
   application.provide("portalSubscribe", createPortalSubscriber({ settings: bootstrap }));
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
-  application.provide("transportSupervisorGateway", createTransportSupervisorGateway(call));
   application.use(FrappeUI, { socketio: false });
   application.use(router);
 

@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from frappe.tests.utils import FrappeTestCase
 
@@ -8,6 +8,29 @@ from apex.habitat.api import front_desk
 
 
 class TestHousingPortalScopeContract(FrappeTestCase):
+    def test_quick_check_in_defaults_the_required_date_on_the_server(self):
+        assignment = SimpleNamespace(
+            name="HAS-1",
+            party_type="Employee",
+            party="EMP-1",
+            employee="EMP-1",
+            insert=Mock(),
+            submit=Mock(),
+        )
+        with (
+            patch.object(front_desk.frappe, "has_permission"),
+            patch.object(front_desk.frappe.db, "get_value", return_value=("ROOM-1", "BLD-1")),
+            patch.object(front_desk.frappe, "get_doc", return_value=assignment) as get_doc,
+            patch.object(front_desk, "today", return_value="2026-08-13"),
+        ):
+            front_desk.quick_check_in(
+                "BED-1", party_type="Employee", party="EMP-1", project="PROJ-1"
+            )
+
+        self.assertEqual(get_doc.call_args.args[0]["check_in_date"], "2026-08-13")
+        assignment.insert.assert_called_once_with(ignore_permissions=False)
+        assignment.submit.assert_called_once_with()
+
     def test_resident_supervisor_maintenance_list_uses_building_scope(self):
         with (
             patch.object(permissions, "_resolve_user", return_value="resident@example.com"),

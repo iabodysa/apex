@@ -2,10 +2,11 @@ const LEAFLET_STYLE = "/assets/apex/vendor/leaflet-1.9.4/leaflet.css";
 const LEAFLET_SCRIPT = "/assets/apex/vendor/leaflet-1.9.4/leaflet.js";
 const DEFAULT_CENTER = Object.freeze([24.7136, 46.6753]);
 const TOKEN_FALLBACKS = Object.freeze({
-  primary: "var(--brand-green)",
-  ink: "var(--ink)",
-  surface: "var(--surface)",
-  ring: "var(--surface-2)",
+  primary: "var(--c-primary)",
+  ink: "var(--c-ink)",
+  mint: "var(--c-mint)",
+  surface: "var(--c-surface)",
+  ring: "var(--c-surface-2)",
   stale: "var(--warn)",
 });
 
@@ -13,10 +14,11 @@ export function mapTheme(documentSource, windowSource) {
   const style = windowSource?.getComputedStyle?.(documentSource?.documentElement);
   const token = (name, fallback) => style?.getPropertyValue(name)?.trim() || fallback;
   return Object.freeze({
-    primary: token("--brand-green", TOKEN_FALLBACKS.primary),
-    ink: token("--ink", TOKEN_FALLBACKS.ink),
-    surface: token("--surface", TOKEN_FALLBACKS.surface),
-    ring: token("--surface-2", TOKEN_FALLBACKS.ring),
+    primary: token("--c-primary", TOKEN_FALLBACKS.primary),
+    ink: token("--c-ink", TOKEN_FALLBACKS.ink),
+    mint: token("--c-mint", TOKEN_FALLBACKS.mint),
+    surface: token("--c-surface", TOKEN_FALLBACKS.surface),
+    ring: token("--c-surface-2", TOKEN_FALLBACKS.ring),
     stale: token("--warn", TOKEN_FALLBACKS.stale),
   });
 }
@@ -63,9 +65,13 @@ function loadLeaflet({ documentSource, windowSource }) {
 
 function driverPopup(documentSource, item) {
   const popup = documentSource.createElement("div");
+  popup.className = "transport-map-popup";
+  popup.dir = "rtl";
   const driverName = documentSource.createElement("strong");
   driverName.textContent = item.driver_name || "السائق";
-  const plate = documentSource.createElement("span");
+  const plate = documentSource.createElement("bdi");
+  plate.dir = "auto";
+  plate.translate = false;
   plate.textContent = item.plate || "";
   popup.append(driverName, documentSource.createElement("br"), plate);
   return popup;
@@ -117,9 +123,9 @@ export function createLeafletAdapter({
       if (item.has_position && driver) {
         L.circleMarker(driver, {
           radius: 9,
-          color: theme.ring,
+          color: theme.ink,
           weight: 3,
-          fillColor: item.stale ? theme.stale : theme.primary,
+          fillColor: item.stale ? theme.stale : theme.mint,
           fillOpacity: 1,
         }).bindPopup(driverPopup(documentSource, item)).addTo(layer);
         bounds.push(driver);

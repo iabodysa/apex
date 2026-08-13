@@ -1,6 +1,6 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
 import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
@@ -8,6 +8,21 @@ import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/display
 const route = useRoute();
 const gateway = inject("driverGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
+const tripResource = createResource({
+  url: "apex.salis.api.driver_portal.my_trip_route",
+  method: "GET",
+  auto: false,
+});
+const boardingResource = createResource({
+  url: "apex.salis.api.boarding_flow.get_trip_boarding",
+  method: "GET",
+  auto: false,
+});
+const todayResource = createResource({
+  url: "apex.salis.api.driver_portal.personal.get_masar_today",
+  method: "GET",
+  auto: false,
+});
 const scanner = createQrScanner();
 const state = ref("loading");
 const trip = ref(null);
@@ -23,22 +38,18 @@ let clockTimer;
 let unsubscribers = [];
 
 const dispatchTrip = computed(() => route.params.trip);
-const statusByEmployee = computed(() => new Map(
-  (boarding.value?.workers || []).map((worker) => [worker.employee, worker]),
-));
-const workers = computed(() => (trip.value?.workers || []).map((worker) => ({
-  ...worker,
-  ...(statusByEmployee.value.get(worker.employee) || { status: "Pending", wait_count: 0 }),
-})));
+const statusByEmployee = computed(() => new Map((boarding.value?.workers || []).map((worker) => [worker.employee, worker])));
+const workers = computed(() =>
+  (trip.value?.workers || []).map((worker) => ({
+    ...worker,
+    ...(statusByEmployee.value.get(worker.employee) || { status: "Pending", wait_count: 0 }),
+  })),
+);
 const pendingWorkers = computed(() => workers.value.filter((worker) => worker.status !== "Boarded"));
 const waitLimit = computed(() => boarding.value?.worker_wait_request_max || 0);
 
 function waitSeconds(worker) {
-  return remainingSeconds(
-    worker.wait_at,
-    boarding.value?.worker_wait_request_seconds,
-    now.value,
-  );
+  return remainingSeconds(worker.wait_at, boarding.value?.worker_wait_request_seconds, now.value);
 }
 
 const statusLabels = Object.freeze({
@@ -77,11 +88,7 @@ async function load(quiet = false) {
   if (!quiet) state.value = "loading";
   error.value = "";
   try {
-    const [tripData, boardingData, today] = await Promise.all([
-      gateway.trip(dispatchTrip.value),
-      gateway.tripBoarding(dispatchTrip.value),
-      gateway.today(),
-    ]);
+    const [tripData, boardingData, today] = await Promise.all([tripResource.fetch({ dispatch_trip: dispatchTrip.value }), boardingResource.fetch({ dispatch_trip: dispatchTrip.value }), todayResource.fetch()]);
     trip.value = tripData;
     boarding.value = boardingData || { workers: [] };
     state.value = tripData ? "ready" : "empty";
@@ -130,7 +137,9 @@ async function startCamera() {
 }
 
 onMounted(() => {
-  clockTimer = setInterval(() => { now.value = Date.now(); }, 1000);
+  clockTimer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
   load();
 });
 onBeforeUnmount(stopLive);
@@ -139,21 +148,40 @@ onBeforeUnmount(stopLive);
 <template>
   <section class="feature-page journey-page driver-journey" :aria-busy="state === 'loading'">
     <header class="feature-page__heading journey-heading">
-      <div><p class="feature-page__eyebrow">تنفيذ الرحلة</p><h2>{{ trip?.route_name || 'خط السير' }}</h2><p>المحطات والركاب في شاشة واحدة.</p></div>
+      <div>
+        <p class="feature-page__eyebrow">تنفيذ الرحلة</p>
+        <h2>{{ trip?.route_name || "خط السير" }}</h2>
+        <p>المحطات والركاب في شاشة واحدة.</p>
+      </div>
       <Badge v-if="trip" :label="statusLabel(trip.status)" />
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status"><LoadingIndicator /> جارٍ تجهيز الرحلة…</div>
+    <div v-if="state === 'loading'" class="feature-state" role="status">
+      <LoadingIndicator />
+      جارٍ تجهيز الرحلة…
+    </div>
     <div v-else-if="state === 'denied'" class="feature-state">هذه الرحلة غير متاحة لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error"><ErrorMessage :message="error" /><Button variant="outline" @click="load()">إعادة المحاولة</Button></div>
+    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
+      <ErrorMessage :message="error" />
+      <Button variant="outline" @click="load()">إعادة المحاولة</Button>
+    </div>
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد بيانات لهذه الرحلة.</div>
 
     <template v-else>
       <ErrorMessage v-if="error" :message="error" />
       <section class="journey-command">
-        <div class="journey-command__metric"><strong>{{ workers.filter((worker) => worker.status === 'Boarded').length }}</strong><span>صعد</span></div>
-        <div class="journey-command__metric"><strong>{{ pendingWorkers.length }}</strong><span>بانتظارك</span></div>
-        <div class="journey-command__metric"><strong>{{ trip.stops?.filter((stop) => stop.done).length || 0 }}</strong><span>محطة مكتملة</span></div>
+        <div class="journey-command__metric">
+          <strong>{{ workers.filter((worker) => worker.status === "Boarded").length }}</strong>
+          <span>صعد</span>
+        </div>
+        <div class="journey-command__metric">
+          <strong>{{ pendingWorkers.length }}</strong>
+          <span>بانتظارك</span>
+        </div>
+        <div class="journey-command__metric">
+          <strong>{{ trip.stops?.filter((stop) => stop.done).length || 0 }}</strong>
+          <span>محطة مكتملة</span>
+        </div>
         <div class="journey-actions journey-command__actions">
           <Button theme="green" variant="solid" :disabled="trip.started" :loading="busy === 'start'" @click="run('start', () => gateway.startTrip(dispatchTrip), 'بدأت الرحلة')">بدء الرحلة</Button>
           <Button variant="outline" :disabled="!trip.started" :loading="busy === 'finish'" @click="run('finish', () => gateway.finishTrip(dispatchTrip), 'انتهت الرحلة')">إنهاء الرحلة</Button>
@@ -161,13 +189,22 @@ onBeforeUnmount(stopLive);
       </section>
 
       <section class="journey-section">
-        <div class="journey-section__title"><h3>المحطات</h3><a v-if="trip.maps_route_url" class="journey-link" :href="trip.maps_route_url" target="_blank" rel="noopener">افتح الخريطة</a></div>
+        <div class="journey-section__title">
+          <h3>المحطات</h3>
+          <a v-if="trip.maps_route_url" class="journey-link" :href="trip.maps_route_url" target="_blank" rel="noopener">افتح الخريطة</a>
+        </div>
         <ol class="driver-timeline">
           <li v-for="(stop, index) in trip.stops || []" :key="stop.route_stop || index" :class="{ 'is-done': stop.done }">
             <span class="driver-timeline__number">{{ index + 1 }}</span>
             <div class="driver-timeline__copy">
-              <strong>{{ stop.stop_name || stop.location || 'محطة' }}</strong>
-              <small>{{ stop.arrived ? 'وصلت' : stop.done ? 'اكتملت' : 'قادمة' }}<template v-if="stop.planned_time"> · <bdi>{{ dateTimeLabel(stop.planned_time) }}</bdi></template></small>
+              <strong>{{ stop.stop_name || stop.location || "محطة" }}</strong>
+              <small>
+                {{ stop.arrived ? "وصلت" : stop.done ? "اكتملت" : "قادمة" }}
+                <template v-if="stop.planned_time">
+                  ·
+                  <bdi>{{ dateTimeLabel(stop.planned_time) }}</bdi>
+                </template>
+              </small>
               <div v-if="stop.pickup" class="driver-stop-meta">
                 <span v-if="stop.pickup.building_name">{{ stop.pickup.building_name }}</span>
                 <span v-if="stop.pickup.city">{{ stop.pickup.city }}</span>
@@ -176,7 +213,7 @@ onBeforeUnmount(stopLive);
             </div>
             <div class="journey-actions">
               <Button variant="outline" :disabled="!trip.started || stop.arrived" :loading="busy === `arrive:${stop.route_stop}`" @click="run(`arrive:${stop.route_stop}`, () => gateway.arriveAtStop(dispatchTrip, stop.route_stop), 'تم تنبيه المنتظرين بوصولك')">وصلت</Button>
-              <Button variant="outline" :disabled="!trip.started" :loading="busy === `stop:${stop.route_stop}`" @click="run(`stop:${stop.route_stop}`, () => gateway.setStopProgress(dispatchTrip, stop.route_stop, !stop.done), stop.done ? 'أعيدت المحطة إلى المسار' : 'اكتملت المحطة')">{{ stop.done ? 'إلغاء اكتمال المحطة' : 'غادرت المحطة' }}</Button>
+              <Button variant="outline" :disabled="!trip.started" :loading="busy === `stop:${stop.route_stop}`" @click="run(`stop:${stop.route_stop}`, () => gateway.setStopProgress(dispatchTrip, stop.route_stop, !stop.done), stop.done ? 'أعيدت المحطة إلى المسار' : 'اكتملت المحطة')">{{ stop.done ? "إلغاء اكتمال المحطة" : "غادرت المحطة" }}</Button>
             </div>
           </li>
         </ol>
@@ -184,14 +221,20 @@ onBeforeUnmount(stopLive);
       </section>
 
       <section class="journey-section">
-        <div class="journey-section__title"><h3>الركاب</h3><span>{{ workers.length }}</span></div>
+        <div class="journey-section__title">
+          <h3>الركاب</h3>
+          <span>{{ workers.length }}</span>
+        </div>
         <article v-for="worker in workers" :key="worker.employee" class="passenger-row" :class="{ 'has-wait': worker.wait_count }">
           <div>
             <strong>{{ worker.employee_name || worker.employee }}</strong>
-            <small>{{ worker.pickup_point || 'نقطة التجمع' }}</small>
+            <small>{{ worker.pickup_point || "نقطة التجمع" }}</small>
             <a v-if="worker.phone" class="passenger-call" :href="`tel:${worker.phone}`">اتصل بالعامل</a>
           </div>
-          <span v-if="worker.wait_count" class="wait-signal">طلب الانتظار {{ worker.wait_count }} من {{ waitLimit }}<template v-if="waitSeconds(worker) !== null"> · {{ waitSeconds(worker) }} ث</template></span>
+          <span v-if="worker.wait_count" class="wait-signal">
+            طلب الانتظار {{ worker.wait_count }} من {{ waitLimit }}
+            <template v-if="waitSeconds(worker) !== null">· {{ waitSeconds(worker) }} ث</template>
+          </span>
           <Badge :label="statusLabels[worker.status] || worker.status" />
           <div class="journey-actions">
             <Button v-if="worker.status !== 'Boarded'" variant="outline" :loading="busy === `manual:${worker.employee}`" @click="run(`manual:${worker.employee}`, () => gateway.manualBoard(dispatchTrip, worker.employee), 'تم تسجيل الصعود يدوياً')">تسجيل يدوي</Button>
@@ -206,10 +249,16 @@ onBeforeUnmount(stopLive);
       </section>
 
       <section class="journey-section scanner-panel">
-        <div class="journey-section__title"><h3>بطاقة الصعود</h3><span>رمز سريع</span></div>
+        <div class="journey-section__title">
+          <h3>بطاقة الصعود</h3>
+          <span>رمز سريع</span>
+        </div>
         <video ref="scannerVideo" muted playsinline></video>
         <FormControl v-model="scanToken" label="رمز البطاقة" autocomplete="off" />
-        <div class="journey-actions"><Button variant="outline" @click="startCamera">افتح الكاميرا</Button><Button theme="green" variant="solid" :disabled="!scanToken" :loading="busy === 'scan'" @click="submitScan()">سجل الصعود</Button></div>
+        <div class="journey-actions">
+          <Button variant="outline" @click="startCamera">افتح الكاميرا</Button>
+          <Button theme="green" variant="solid" :disabled="!scanToken" :loading="busy === 'scan'" @click="submitScan()">سجل الصعود</Button>
+        </div>
         <p v-if="scanResult" role="status">{{ scanResult }}</p>
       </section>
     </template>

@@ -49,7 +49,7 @@ _MISBOARD_TTL_SECONDS = 30 * 60
 _ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
 
 
-def _publish(event, dispatch_trip, payload, driver=None, employee=None):
+def _publish(event, dispatch_trip, payload, driver=None, employee=None, employees=None):
     """Announce a boarding flow event to everyone entitled to hear it.
 
     The Dispatch Trip room reaches DESK subscribers, who hold read permission on it.
@@ -71,7 +71,11 @@ def _publish(event, dispatch_trip, payload, driver=None, employee=None):
         )
     except Exception:
         pass
-    for audience, subject in ((DRIVER, driver), (WORKER, employee)):
+    worker_subjects = [employee] if employee else []
+    if employees:
+        worker_subjects.extend(employees)
+    audiences = [(DRIVER, driver), *((WORKER, subject) for subject in dict.fromkeys(worker_subjects))]
+    for audience, subject in audiences:
         if not subject:
             continue
         try:
@@ -104,18 +108,29 @@ def _assigned_request_names(dispatch_trip):
     )
 
 
+def _manifest_request_names(dispatch_trip, transport_request=None):
+    """Ordered Transport Requests that contribute workers to one trip."""
+    if not transport_request:
+        transport_request = frappe.db.get_value(
+            "Dispatch Trip", dispatch_trip, "transport_request"
+        )
+    return list(
+        dict.fromkeys(
+            request
+            for request in [transport_request, *_assigned_request_names(dispatch_trip)]
+            if request
+        )
+    )
+
+
 def _manifest_employees(dispatch_trip, transport_request=None):
     """The trip's expected manifest: the de-duplicated UNION of the Route Plan
     Transport Request's workers and every assigned-request's workers, preserving
     first-seen order. The Route Plan path and the supervisor assignment path are
     additive — a trip can carry either or both."""
-    if not transport_request:
-        transport_request = frappe.db.get_value(
-            "Dispatch Trip", dispatch_trip, "transport_request"
-        )
     seen = set()
     ordered = []
-    for request in [transport_request, *_assigned_request_names(dispatch_trip)]:
+    for request in _manifest_request_names(dispatch_trip, transport_request):
         for employee in _request_workers(request):
             if employee and employee not in seen:
                 seen.add(employee)
@@ -428,9 +443,11 @@ def notify_remaining_passengers(dispatch_trip):
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     now = now_datetime()
     changed = False
+    pending_employees = []
     for row in trip.boarding_state or []:
         if row.status != "Pending":
             continue
+        pending_employees.append(row.employee)
         row.notify_at = now
         if grace_ok and cint(row.notify_count) < max_count:
             row.notify_count = cint(row.notify_count) + 1
@@ -443,6 +460,7 @@ def notify_remaining_passengers(dispatch_trip):
         dispatch_trip,
         {"max_count": max_count, "window": window},
         driver=trip.driver,
+        employees=pending_employees,
     )
 
     return {

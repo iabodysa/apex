@@ -1,20 +1,3 @@
-.feature-page { display: grid; gap: var(--sp-4); }
-.feature-page__heading { display: flex; align-items: start; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-6); border-radius: var(--radius-lg); background: var(--brand-green); color: white; }
-.feature-page__heading svg { inline-size: 28px; block-size: 28px; flex: 0 0 auto; }
-.feature-page__heading p { max-inline-size: 62ch; opacity: .86; }
-.feature-page__eyebrow { font-size: .78rem; font-weight: 800; }
-.feature-state { display: grid; min-block-size: 220px; place-items: center; gap: var(--sp-3); padding: var(--sp-6); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); text-align: center; }
-.feature-state--error, .feature-error { color: var(--danger); }
-.feature-success { color: var(--ok); }
-.feature-grid { display: grid; gap: var(--sp-3); }
-.feature-grid--wide { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.feature-card { display: flex; min-block-size: 96px; align-items: center; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); box-shadow: var(--shadow-sm); }
-.feature-card span { color: var(--muted); }
-.feature-details { display: grid; grid-template-columns: minmax(100px, .4fr) 1fr; gap: var(--sp-2) var(--sp-4); margin: 0; padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
-.feature-details dt { color: var(--muted); }.feature-details dd { margin: 0; font-weight: 700; }
-.feature-form { display: grid; gap: var(--sp-4); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
-.feature-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-
 .journey-page {
   max-inline-size: 920px;
   margin-inline: auto;
@@ -24,10 +7,8 @@
   position: relative;
   min-block-size: 152px;
   align-items: end;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--mint) 48%, transparent), transparent 38%),
-    var(--brand-green);
+  overflow: visible;
+  background: var(--forest);
 }
 
 .journey-heading::after {
@@ -44,7 +25,8 @@
   max-inline-size: 16ch;
   color: white;
   font-size: clamp(1.9rem, 7vw, 3.2rem);
-  line-height: 1.12;
+  line-height: 1.22;
+  padding-block: .04em;
   text-wrap: balance;
 }
 
@@ -76,7 +58,7 @@
 .journey-kicker {
   color: var(--accent-ink);
   font-size: .82rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .journey-live h3,
@@ -191,10 +173,9 @@
 
 .journey-facts dd {
   margin: var(--sp-1) 0 0;
-  overflow: hidden;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .journey-link {
@@ -205,7 +186,7 @@
   border: 1px solid var(--brand-green);
   border-radius: var(--radius-sm);
   color: var(--accent-ink);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .boarding-pass {
@@ -232,7 +213,7 @@
   justify-content: space-between;
   padding: var(--sp-3) var(--sp-4);
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 700;
   list-style: none;
 }
 
@@ -318,7 +299,7 @@
   border-radius: 50%;
   background: var(--brand-green);
   color: white;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .driver-timeline__copy {
@@ -343,7 +324,7 @@
 .driver-stop-meta a,
 .passenger-call {
   color: var(--accent-ink);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .passenger-row {
@@ -367,7 +348,7 @@
   max-inline-size: 18ch;
   color: var(--warn);
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .scanner-panel {

@@ -38,6 +38,7 @@ describe("Leaflet adapter", () => {
     expect(css).toMatch(/\.transport-map \.leaflet-bar a[\s\S]*font-family:\s*var\(--font\)/);
     expect(css).toMatch(/\.transport-map \.leaflet-popup-content-wrapper[\s\S]*var\(--font\)/);
     expect(css).toMatch(/\.transport-map \.leaflet-control-attribution[\s\S]*var\(--muted\)/);
+    expect(css).toMatch(/\.transport-map \.leaflet-tile-pane\s*\{[^}]*filter:/s);
   });
 
   it("normalizes route geometry and owns map drawing and disposal", async () => {
@@ -81,10 +82,11 @@ describe("Leaflet adapter", () => {
   it("reads semantic map colors from Apex design tokens", async () => {
     const { createLeafletAdapter, mapTheme } = await loadModule();
     const tokens = {
-      "--brand-green": "#00844e",
-      "--ink": "#072b1a",
-      "--surface": "#f8f5ee",
-      "--surface-2": "#ffffff",
+      "--c-primary": "#00844e",
+      "--c-ink": "#072b1a",
+      "--c-mint": "#60d297",
+      "--c-surface": "#f8f5ee",
+      "--c-surface-2": "#ffffff",
       "--warn": "#a76609",
     };
     const windowSource = {
@@ -94,6 +96,7 @@ describe("Leaflet adapter", () => {
     expect(mapTheme(document, windowSource)).toEqual({
       primary: "#00844e",
       ink: "#072b1a",
+      mint: "#60d297",
       surface: "#f8f5ee",
       ring: "#ffffff",
       stale: "#a76609",
@@ -112,6 +115,6 @@ describe("Leaflet adapter", () => {
     }]);
     expect(leaflet.polyline).toHaveBeenCalledWith(expect.any(Array), expect.objectContaining({ color: "#00844e" }));
     expect(leaflet.circleMarker).toHaveBeenNthCalledWith(1, expect.any(Array), expect.objectContaining({ color: "#072b1a", fillColor: "#f8f5ee" }));
-    expect(leaflet.circleMarker).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ color: "#ffffff", fillColor: "#a76609" }));
+    expect(leaflet.circleMarker).toHaveBeenNthCalledWith(2, expect.any(Array), expect.objectContaining({ color: "#072b1a", fillColor: "#a76609" }));
   });
 });

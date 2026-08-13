@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
-import { statusLabel } from "../../../core/displayLabels.js";
+import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 const props = defineProps({
     title: String,
     resource: Object,
@@ -49,16 +49,14 @@ onMounted(() => props.resource.fetch());
                         : ''
                 "
                 class="ops-row"
-                ><div>
-                    <strong
-                        ><bdi>{{
-                            row.vehicle_plate || row.plate || row.subject || row.name
-                        }}</bdi></strong
-                    ><span>{{
+                ><div class="record-identity">
+                    <strong dir="auto">{{ recordTitle(row, ["vehicle_plate", "plate", "subject", "driver_name", "project", "location"], title) }}</strong>
+                    <bdi v-if="row.name" class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
+                    <span>{{
                         row.driver_name || row.driver || row.project || row.location || ""
                     }}</span>
                 </div>
-                <Badge theme="green" :label="statusLabel(row.status || row.vehicle_status || 'Open')"
+                <Badge :theme="statusTheme(row.status || row.vehicle_status || 'Open')" :label="statusLabel(row.status || row.vehicle_status || 'Open')"
             /></RouterLink>
         </div>
     </section>

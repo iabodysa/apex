@@ -69,9 +69,20 @@ def start_my_trip(dispatch_trip):
             }
         )
         doc.insert(ignore_permissions=True)
-    from apex.salis.api.boarding_flow import ensure_trip_boarding_state
+    from apex.salis.api.boarding_flow import (
+        _manifest_employees,
+        _publish,
+        ensure_trip_boarding_state,
+    )
 
     ensure_trip_boarding_state(dispatch_trip)
+    _publish(
+        "driver_trip_update",
+        dispatch_trip,
+        {"status": "Started"},
+        driver=driver,
+        employees=_manifest_employees(dispatch_trip),
+    )
     return _trip_log_state(driver, dispatch_trip)
 
 
@@ -110,6 +121,15 @@ def complete_my_trip(dispatch_trip):
         doc.end_datetime = frappe.utils.now_datetime()
     doc.flags.ignore_permissions = True
     doc.save() if not doc.is_new() else doc.insert()
+    from apex.salis.api.boarding_flow import _manifest_employees, _publish
+
+    _publish(
+        "driver_trip_update",
+        dispatch_trip,
+        {"status": "Completed"},
+        driver=driver,
+        employees=_manifest_employees(dispatch_trip),
+    )
     return _trip_log_state(driver, dispatch_trip)
 
 
@@ -164,7 +184,7 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 @rate_limit(limit=30, seconds=60)
 def mark_arrived(dispatch_trip, route_stop):
     """Record arrival at one stop and notify workers waiting there."""
-    from apex.salis.api.boarding_flow import _publish
+    from apex.salis.api.boarding_flow import _manifest_employees, _publish
 
     _require_enabled()
     driver = _resolve_driver()
@@ -194,7 +214,13 @@ def mark_arrived(dispatch_trip, route_stop):
         )
     log.flags.ignore_permissions = True
     log.save()
-    _publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
+    _publish(
+        "boarding_arrived",
+        dispatch_trip,
+        {"route_stop": route_stop},
+        driver=driver,
+        employees=_manifest_employees(dispatch_trip),
+    )
     return {
         "route_stop": route_stop,
         "arrived": True,

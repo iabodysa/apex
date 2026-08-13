@@ -70,5 +70,7 @@ describe("safety feature contract", () => {
     expect(source).toContain("row.evidence_photo");
     expect(source).toContain("row.notes");
     expect(source).toContain("row.linked_maintenance_request");
+    expect(source).toContain('"task.task_title as task_title"');
+    expect(source).toContain("row.task_title");
   });
 });

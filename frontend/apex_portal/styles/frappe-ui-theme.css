@@ -1,0 +1,10 @@
+:root {
+  --surface-green-1: color-mix(in srgb, var(--c-primary) 6%, white);
+  --surface-green-2: color-mix(in srgb, var(--c-primary) 12%, white);
+  --surface-green-3: var(--c-primary);
+  --ink-green-1: var(--c-surface-2);
+  --ink-green-2: var(--c-primary);
+  --ink-green-3: var(--c-primary-hover);
+  --outline-green-1: var(--c-mint);
+  --outline-green-2: var(--c-primary);
+}

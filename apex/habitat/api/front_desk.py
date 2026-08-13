@@ -703,6 +703,8 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
     if not party and employee:
         party_type, party = "Employee", employee
 
+    check_in_date = check_in_date or today()
+
     room, building = frappe.db.get_value("Bed", bed, ["room", "building"])
     if not room or not building:
         frappe.throw(_("Bed {0} is not linked to a room and building.").format(bed))

@@ -1,13 +1,16 @@
 <script setup>
 import { computed, onMounted } from "vue";
-import { Button, Select, createResource } from "frappe-ui";
+import { Button, Select } from "frappe-ui";
 import { building, selectBuilding } from "../building.js";
+import { createSupervisorBuildingsResource } from "../data/buildings.js";
 
-const buildings = createResource({ url: "apex.habitat.api.front_desk.list_supervisor_buildings" });
-const options = computed(() => (buildings.data || []).map((row) => ({
-  label: row.building_title || row.building,
-  value: row.building,
-})));
+const buildings = createSupervisorBuildingsResource();
+const options = computed(() =>
+  (buildings.data || []).map((row) => ({
+    label: row.building_title || row.building,
+    value: row.building,
+  })),
+);
 async function load() {
   try {
     await buildings.fetch();
@@ -26,12 +29,5 @@ onMounted(load);
     <Button variant="outline" label="إعادة المحاولة" @click="load" />
   </div>
   <div v-else-if="!options.length" class="feature-state">لا توجد مبانٍ متاحة.</div>
-  <Select
-    v-else
-    :model-value="building"
-    :options="options"
-    placeholder="اختر المبنى"
-    aria-label="المبنى"
-    @update:model-value="selectBuilding"
-  />
+  <Select v-else :model-value="building" :options="options" placeholder="اختر المبنى" aria-label="المبنى" @update:model-value="selectBuilding" />
 </template>

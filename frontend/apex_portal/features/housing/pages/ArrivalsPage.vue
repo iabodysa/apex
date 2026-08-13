@@ -1,12 +1,13 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, Progress, createResource, toast } from "frappe-ui";
 import { useRouter } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import {
   arrivalRegistrationParams,
   normalizeWorkerLinkResult,
+  summarizeArrivalSession,
 } from "../arrivalFlow.js";
 
 const router = useRouter();
@@ -23,6 +24,7 @@ const links = createResource({
   url: "apex.apex_core.doctype.masar_worker_token.masar_worker_token.batch_issue_worker_links",
 });
 const workers = computed(() => arrivals.data?.workers || []);
+const session = computed(() => summarizeArrivalSession(workers.value));
 const query = ref("");
 const candidates = ref([]);
 const selectedManifest = ref(null);
@@ -55,6 +57,13 @@ function prepareManifest(row) {
   form.worker_name = row.worker_name || "";
   form.passport_number = row.passport_number || "";
   form.nationality = row.nationality || "";
+}
+
+function continueSession() {
+  const row = session.value.next;
+  if (!row) return;
+  if (session.value.nextAction === "assign-bed") chooseBed(row);
+  else prepareManifest(row);
 }
 
 async function findWorker() {
@@ -128,9 +137,20 @@ watch(building, load, { immediate: true });
     <template v-else-if="building">
       <div class="arrival-metrics">
         <article><strong>{{ arrivals.data?.total || 0 }}</strong><span>متوقع اليوم</span></article>
-        <article><strong>{{ arrivals.data?.arrived || 0 }}</strong><span>تم تسجيله</span></article>
-        <article><strong>{{ arrivals.data?.pending || 0 }}</strong><span>بانتظار الإجراء</span></article>
+        <article><strong>{{ session.registered }}</strong><span>تم تسجيله</span></article>
+        <article><strong>{{ session.housed }}</strong><span>تم تسكينه</span></article>
       </div>
+      <section v-if="session.total" class="arrival-session" aria-labelledby="arrival-session-title">
+        <div class="arrival-session__copy">
+          <span>جلسة الوصول</span>
+          <h3 id="arrival-session-title">{{ session.next ? `التالي: ${session.next.worker_name}` : "اكتملت دفعة اليوم" }}</h3>
+          <p>{{ session.housed }} من {{ session.total }} وصلوا إلى أسرّتهم.</p>
+        </div>
+        <Progress :value="session.progress" :label="`${session.progress}٪`" size="lg" />
+        <Button v-if="session.next" theme="green" variant="solid" @click="continueSession">
+          {{ session.nextAction === 'assign-bed' ? 'اختيار سرير' : 'تسجيل الوصول' }}
+        </Button>
+      </section>
       <ErrorMessage v-if="error" :message="error" />
 
       <article v-if="registered" class="arrival-focus">
@@ -161,10 +181,10 @@ watch(building, load, { immediate: true });
         <p v-if="!workers.length" class="feature-page__empty">لا توجد دفعة وصول لهذا المبنى اليوم.</p>
         <article v-for="row in workers" :key="row.row" class="arrival-row">
           <div><strong>{{ row.worker_name }}</strong><small>{{ row.passport_number || 'لا يوجد رقم جواز' }}، {{ row.labour_supplier || row.project || 'بدون جهة محددة' }}</small></div>
-          <Badge :theme="row.arrived ? 'green' : 'orange'" :label="row.arrived ? 'مسجل' : 'منتظر'" />
+          <Badge :theme="row.housed ? 'green' : row.arrived ? 'blue' : 'orange'" :label="row.housed ? 'تم تسكينه' : row.arrived ? 'مسجل' : 'منتظر'" />
           <div class="feature-actions">
             <Button v-if="row.arrived" variant="subtle" @click="printSlip(row)">بطاقة الوصول</Button>
-            <Button v-if="row.arrived" theme="green" variant="solid" @click="chooseBed(row)">اختيار سرير</Button>
+            <Button v-if="row.arrived && !row.housed" theme="green" variant="solid" @click="chooseBed(row)">اختيار سرير</Button>
             <Button v-else-if="canRegister" theme="green" variant="solid" @click="prepareManifest(row)">تسجيل الوصول</Button>
           </div>
         </article>

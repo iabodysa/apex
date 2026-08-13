@@ -110,6 +110,27 @@ export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
 }
 
+const greenStatuses = new Set([
+  "Approved", "Completed", "Fulfilled", "Ready", "Good", "Excellent",
+  "Active", "Closed", "Resolved", "Confirmed", "Received", "Delivered", "Done",
+  "Available", "Valid", "Issued", "Returned", "assigned",
+]);
+const redStatuses = new Set([
+  "Rejected", "Failed", "Cancelled", "Damaged", "Lost", "Expired", "Poor", "Not Done",
+]);
+const orangeStatuses = new Set([
+  "Pending", "Open", "In Progress", "Pending Approval", "Pending Receipt",
+  "Pending Exits", "Under Review", "Needs Cleaning", "Needs Repair", "Expiring Soon",
+  "Under Maintenance", "In Transit", "Waiting Evidence", "Triaged", "Assigned",
+]);
+
+export function statusTheme(value) {
+  if (greenStatuses.has(value)) return "green";
+  if (redStatuses.has(value)) return "red";
+  if (orangeStatuses.has(value)) return "orange";
+  return "gray";
+}
+
 export function floorLabel(value) {
   const text = String(value || "");
   const match = text.match(/^Floor\s+(.+)$/i);
@@ -152,6 +173,18 @@ export function cadenceLabel(value) {
 
 export function vehicleCategoryLabel(value) {
   return vehicleCategoryLabels[value] || value || "";
+}
+
+export function recordTitle(record, fields = [], fallback = "سجل") {
+  for (const field of fields) {
+    const value = String(record?.[field] || "").trim();
+    if (value) return value;
+  }
+  for (const field of ["title", "label"]) {
+    const value = String(record?.[field] || "").trim();
+    if (value) return value;
+  }
+  return fallback;
 }
 
 export function periodLabel(period) {

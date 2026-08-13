@@ -77,6 +77,7 @@ def get_transport_requests(start=0, page_length=PLAN_PAGE_LENGTH):
         "Transport Request",
         [
             "name",
+            "requester_name",
             "request_type",
             "service_line",
             "project",
@@ -151,6 +152,7 @@ def get_dispatch_trips(start=0, page_length=PLAN_PAGE_LENGTH):
         [
             "name",
             "route_plan",
+            "route_plan.route_name as route_name",
             "transport_request",
             "shift_name",
             "trip_date",
@@ -182,7 +184,16 @@ def get_movement_history(start=0, page_length=PLAN_PAGE_LENGTH):
         return []
     return _page(
         "Dispatch Trip",
-        ["name", "route_plan", "trip_date", "status", "driver", "vehicle"],
+        [
+            "name",
+            "route_plan",
+            "route_plan.route_name as route_name",
+            "shift_name",
+            "trip_date",
+            "status",
+            "driver",
+            "vehicle",
+        ],
         start,
         page_length,
         filters=filters,

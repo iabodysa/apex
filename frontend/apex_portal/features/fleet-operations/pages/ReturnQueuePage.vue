@@ -1,12 +1,12 @@
 <script setup>
+import { createResource } from "frappe-ui";
 import QueuePage from "../components/QueuePage.vue";
-import { createFleetOperationsResources } from "../api.js";
-const resource = createFleetOperationsResources().returns;
+const resource = createResource({
+  url: "apex.salis.api.fleet_os.get_return_queue",
+  method: "GET",
+  auto: false,
+});
 </script>
 <template>
-    <QueuePage
-        title="قائمة الإرجاع"
-        :resource="resource"
-        empty="لا توجد مركبات بانتظار الإرجاع."
-    />
+  <QueuePage title="قائمة الإرجاع" :resource="resource" empty="لا توجد مركبات بانتظار الإرجاع." />
 </template>

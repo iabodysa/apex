@@ -7,24 +7,22 @@ const read = (name) => readFileSync(fileURLToPath(new URL(name, import.meta.url)
 describe("Apex portal identity", () => {
   it("uses the approved light palette as semantic tokens", () => {
     const css = read("./tokens.css");
-    expect(css).toContain("--brand-green: #00844e");
-    expect(css).toContain("--canvas: #e9e3d3");
-    expect(css).toContain("--surface: #f8f5ee");
-    expect(css).toContain("--ink: #072b1a");
+    expect(css).toContain("--c-primary: #00844e");
+    expect(css).toContain("--c-canvas: #e9e3d3");
+    expect(css).toContain("--c-surface: #f8f5ee");
+    expect(css).toContain("--c-ink: #072b1a");
     expect(css).toContain("color-scheme: light");
     expect(css).not.toMatch(/prefers-color-scheme|dark/i);
   });
 
-  it("passes Apex semantic colors into frappe-ui components", () => {
-    const css = read("./tokens.css");
-    expect(css).toContain("--surface-green-3: var(--brand-green)");
-    expect(css).toContain("--surface-green-2: color-mix(in srgb, var(--brand-green) 12%, white)");
-    expect(css).toContain("--ink-green-3: var(--accent-ink)");
-    expect(css).toContain("--surface-gray-7: var(--brand-green)");
-    expect(css).toContain("--surface-gray-6: var(--brand-green-hover)");
-    expect(css).toContain("--surface-gray-5: var(--brand-green-active)");
-    expect(css).toContain("--ink-gray-8: var(--ink)");
-    expect(css).toContain("--outline-gray-2: var(--border)");
+  it("keeps brand tokens separate from frappe-ui neutral roles", () => {
+    const tokens = read("./tokens.css");
+    const adapter = read("./frappe-ui-theme.css");
+    expect(tokens).not.toMatch(/--(?:surface|ink|outline)-gray-/);
+    expect(tokens).not.toContain("--surface-green-");
+    expect(adapter).toContain("--surface-green-3: var(--c-primary)");
+    expect(adapter).toContain("--ink-green-3: var(--c-primary-hover)");
+    expect(adapter).not.toMatch(/--(?:surface|ink|outline)-gray-/);
   });
 
   it("keeps the offline fallback on the approved type and color tokens", () => {
@@ -37,12 +35,13 @@ describe("Apex portal identity", () => {
     expect(css).not.toContain("system-ui");
   });
 
-  it("uses a light operations rail with the primary brand color reserved for selection", () => {
+  it("uses forest for bounded brand fields and primary green for actions and selection", () => {
     const css = read("./foundation.css");
     expect(css).toMatch(/\.operations-shell__rail\s*\{[^}]*background:\s*var\(--surface-2\)/s);
     expect(css).toMatch(/\.operations-shell__nav \.portal-nav-link\[aria-current="page"\]\s*\{[^}]*background:\s*var\(--brand-green\)/s);
-    expect(css).toMatch(/\.apex-boot\s*\{[^}]*background:\s*var\(--brand-green\)/s);
-    expect(css).not.toMatch(/background:\s*var\(--forest\)/);
+    expect(css).toMatch(/\.apex-boot\s*\{[^}]*background:\s*var\(--forest\)/s);
+    expect(css).toMatch(/\.mobile-shell__header\s*\{[^}]*background:\s*var\(--forest\)/s);
+    expect(css).toMatch(/\.feature-page__heading\s*\{[^}]*background:\s*var\(--forest\)/s);
   });
 
   it("loads the vendored Thmanyah stylesheet and no remote font", () => {
@@ -93,9 +92,11 @@ describe("Apex portal identity", () => {
   });
 
   it("keeps housing room cards vertical when other feature styles are loaded", () => {
-    const css = read("../features/housing/housing.css");
-    expect(css).toMatch(/\.room-card\s*\{[^}]*display:\s*grid[^}]*align-items:\s*stretch/s);
-    expect(css).toMatch(/\.room-card header > div\s*\{[^}]*display:\s*flex[^}]*gap:/s);
+    const foundation = read("./foundation.css");
+    const housing = read("../features/housing/housing.css");
+    expect(foundation).toMatch(/\.feature-card[^}]*\{[^}]*display:\s*grid/s);
+    expect(housing).toMatch(/\.room-card\s*\{[^}]*grid-template-columns:\s*1fr[^}]*align-items:\s*stretch/s);
+    expect(housing).toMatch(/\.room-card header > div\s*\{[^}]*display:\s*flex[^}]*gap:/s);
   });
 
   it("keeps all safety checklist decisions readable on the iPad", () => {

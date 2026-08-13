@@ -161,7 +161,16 @@ def my_trip_route(dispatch_trip):
     stops = masar._ordered_stops(route_plan)
     _attach_stop_progress(stops, route_plan, trip["name"], driver)
 
-    workers = masar._registered_workers(trip.get("transport_request"))
+    from apex.salis.api.boarding_flow import _manifest_request_names
+
+    workers = []
+    seen_workers = set()
+    for request in _manifest_request_names(dispatch_trip, trip.get("transport_request")):
+        for worker in masar._registered_workers(request):
+            employee = worker.get("employee")
+            if employee and employee not in seen_workers:
+                seen_workers.add(employee)
+                workers.append(worker)
     _enrich_workers_with_phone(workers)
 
     vehicle = trip.get("vehicle")

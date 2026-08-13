@@ -25,6 +25,62 @@ class TestMasarDriverExecution(TestCase):
         self.assertEqual(filters["driver"], "DRV-1")
         self.assertEqual(filters["status"], "Dispatched")
 
+    @patch("apex.salis.api.boarding_flow._manifest_request_names", return_value=["TR-1", "TR-2"])
+    @patch("apex.salis.api.masar._registered_workers")
+    @patch("apex.salis.api.masar._ordered_stops", return_value=[])
+    @patch.object(trips, "_full_route_maps_url", return_value=None)
+    @patch.object(trips, "_attach_stop_progress")
+    @patch.object(trips, "_enrich_workers_with_phone")
+    @patch.object(trips.frappe.db, "exists", return_value=False)
+    @patch.object(trips.frappe.db, "get_value")
+    @patch.object(trips, "_resolve_driver", return_value="DRV-1")
+    @patch.object(trips, "_require_enabled")
+    def test_trip_route_includes_workers_from_assigned_requests(
+        self,
+        _enabled,
+        _driver,
+        get_value,
+        _exists,
+        _phones,
+        _progress,
+        _maps,
+        _stops,
+        registered_workers,
+        manifest_requests,
+    ):
+        get_value.side_effect = [
+            frappe._dict(
+                name="DT-1",
+                route_plan="RP-1",
+                vehicle="BUS-1",
+                transport_request="TR-1",
+                depart_time=None,
+                return_time=None,
+                status="Dispatched",
+            ),
+            "ABC 123",
+            "خط المطار",
+        ]
+        registered_workers.side_effect = [
+            [
+                {"employee": "EMP-1", "employee_name": "عامل 1"},
+                {"employee": "EMP-2", "employee_name": "عامل 2"},
+            ],
+            [
+                {"employee": "EMP-2", "employee_name": "عامل 2"},
+                {"employee": "EMP-3", "employee_name": "عامل 3"},
+            ],
+        ]
+
+        payload = trips.my_trip_route("DT-1")
+
+        manifest_requests.assert_called_once_with("DT-1", "TR-1")
+        self.assertEqual(
+            [worker["employee"] for worker in payload["workers"]],
+            ["EMP-1", "EMP-2", "EMP-3"],
+        )
+        self.assertEqual(payload["expected_count"], 3)
+
     @patch.object(driver_portal.frappe.db, "get_value")
     def test_execution_rejects_a_trip_not_dispatched(self, get_value):
         get_value.return_value = frappe._dict(
@@ -52,6 +108,40 @@ class TestMasarDriverExecution(TestCase):
         execution.start_my_trip("DT-1")
 
         ensure_state.assert_called_once_with("DT-1")
+
+    @patch("apex.salis.api.boarding_flow._publish")
+    @patch("apex.salis.api.boarding_flow._manifest_employees", return_value=["EMP-1", "EMP-2"])
+    @patch("apex.salis.api.boarding_flow.ensure_trip_boarding_state")
+    @patch.object(execution, "_trip_log_state", return_value={"started": True})
+    @patch.object(execution.frappe, "get_doc")
+    @patch.object(execution.frappe.db, "get_value", return_value=None)
+    @patch.object(execution, "_resolve_my_trip", return_value={"vehicle": "BUS-1"})
+    @patch.object(execution, "_resolve_driver", return_value="DRV-1")
+    @patch.object(execution, "_require_enabled")
+    def test_start_notifies_each_worker_portal_room(
+        self,
+        _enabled,
+        _driver,
+        _trip,
+        _value,
+        get_doc,
+        _state,
+        _ensure,
+        manifest,
+        publish,
+    ):
+        get_doc.return_value.insert.return_value = None
+
+        execution.start_my_trip("DT-1")
+
+        manifest.assert_called_once_with("DT-1")
+        publish.assert_called_once_with(
+            "driver_trip_update",
+            "DT-1",
+            {"status": "Started"},
+            driver="DRV-1",
+            employees=["EMP-1", "EMP-2"],
+        )
 
     @patch("apex.apex_core.utils.portal_token_security.portal_room", return_value="driver:opaque")
     @patch.object(personal, "_resolve_linked_employee", return_value="EMP-1")

@@ -16,6 +16,8 @@ const shell = computed(() => (
 
 <template>
   <component :is="shell" :title="title" :navigation="navigation">
-    <RouterView />
+    <RouterView v-slot="{ Component, route }">
+      <component :is="Component" :key="route.fullPath" />
+    </RouterView>
   </component>
 </template>

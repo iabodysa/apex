@@ -3,9 +3,11 @@ import {
   cadenceLabel,
   dateTimeLabel,
   floorLabel,
+  recordTitle,
   remainingSeconds,
   periodLabel,
   statusLabel,
+  statusTheme,
   vehicleCategoryLabel,
 } from "./displayLabels.js";
 
@@ -32,6 +34,16 @@ describe("portal display labels", () => {
     expect(statusLabel("Not Tracked")).toBe("غير متابع");
     expect(statusLabel("Standard")).toBe("عادي");
     expect(statusLabel("Custom State")).toBe("Custom State");
+  });
+
+  it("maps workflow meaning to native frappe-ui badge themes", () => {
+    expect(statusTheme("Completed")).toBe("green");
+    expect(statusTheme("Approved")).toBe("green");
+    expect(statusTheme("Pending")).toBe("orange");
+    expect(statusTheme("Open")).toBe("orange");
+    expect(statusTheme("Failed")).toBe("red");
+    expect(statusTheme("Rejected")).toBe("red");
+    expect(statusTheme("Draft")).toBe("gray");
   });
 
   it("localizes generated floor labels without changing custom names", () => {
@@ -62,5 +74,19 @@ describe("portal display labels", () => {
     expect(cadenceLabel("Daily")).toBe("يومية");
     expect(periodLabel({ kind: "day" })).toBe("اليوم");
     expect(periodLabel({ kind: "quarter", quarter: 3, year: 2026 })).toBe("الربع 3 من 2026");
+  });
+
+  it("uses configured human fields and never promotes a naming-series id to the title", () => {
+    expect(recordTitle(
+      { name: "TR-2026-00042", requester_name: "محمد سالم", service_line: "سكن إلى مشروع" },
+      ["requester_name", "service_line"],
+      "طلب نقل",
+    )).toBe("محمد سالم");
+    expect(recordTitle(
+      { name: "DT-2026-00007", route_name: "رحلة الوردية الصباحية" },
+      ["route_name", "shift_name"],
+      "رحلة",
+    )).toBe("رحلة الوردية الصباحية");
+    expect(recordTitle({ name: "DT-2026-00007" }, ["route_name"], "رحلة")).toBe("رحلة");
   });
 });

@@ -776,11 +776,19 @@ def get_expected_arrivals(date=None, building=None) -> dict:
 
     Returns the expected workers for ``date`` (default today), optionally scoped to
     one ``building``, each flagged ``arrived`` once its row has been matched to a
-    registered Temporary Worker (the batch row's ``temporary_worker`` link), plus a
-    running ``arrived``/``pending``/``total`` tally. Read-only; bounded queries; the
+    registered Temporary Worker (the batch row's ``temporary_worker`` link), and
+    ``housed`` once that worker has an active Housing Assignment. Includes running
+    registration and housing tallies. Read-only; bounded queries; the
     Arrival Batch DocType may not exist yet (returns an empty manifest then)."""
     if not frappe.db.exists("DocType", "Arrival Batch"):
-        return {"date": date or frappe.utils.today(), "workers": [], "total": 0, "arrived": 0, "pending": 0}
+        return {
+            "date": date or frappe.utils.today(),
+            "workers": [],
+            "total": 0,
+            "arrived": 0,
+            "housed": 0,
+            "pending": 0,
+        }
     frappe.has_permission("Arrival Batch", "read", throw=True)
     if building:
         frappe.has_permission("Building", "read", doc=building, throw=True)
@@ -801,6 +809,19 @@ def get_expected_arrivals(date=None, building=None) -> dict:
             fields=["name", "parent", "worker_name", "passport_number", "nationality", "temporary_worker"],
             order_by="idx asc",
         )
+        registered_parties = [r.temporary_worker for r in rows if r.temporary_worker]
+        housed_parties = set()
+        if registered_parties:
+            housed_parties = set(
+                frappe.get_list(
+                    "Housing Assignment",
+                    filters=occupancy.active_assignment_filters(
+                        party_type=PARTY_TEMPORARY_WORKER,
+                        party=["in", registered_parties],
+                    ),
+                    pluck="party",
+                )
+            )
         for r in rows:
             b = batch_meta.get(r.parent)
             workers.append(
@@ -814,10 +835,12 @@ def get_expected_arrivals(date=None, building=None) -> dict:
                     "labour_supplier": b.labour_supplier if b else None,
                     "project": b.project if b else None,
                     "arrived": bool(r.temporary_worker),
+                    "housed": r.temporary_worker in housed_parties,
                     "temporary_worker": r.temporary_worker,
                 }
             )
     arrived = sum(1 for w in workers if w["arrived"])
+    housed = sum(1 for w in workers if w.get("housed"))
     total = len(workers)
     return {
         "date": date,
@@ -825,6 +848,7 @@ def get_expected_arrivals(date=None, building=None) -> dict:
         "workers": workers,
         "total": total,
         "arrived": arrived,
+        "housed": housed,
         "pending": total - arrived,
     }
 

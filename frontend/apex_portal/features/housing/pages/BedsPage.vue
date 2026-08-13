@@ -40,7 +40,15 @@ async function setReady(room) {
     <p v-else-if="!rooms.length && building" class="feature-page__empty">لا توجد غرف في هذا المبنى.</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">
       <header>
-        <div><strong>{{ room.room_number }}</strong><small>{{ floorLabel(room.floor_label) }} · {{ statusLabel(room.readiness_status) }}</small></div>
+        <div>
+          <strong>{{ room.room_number }}</strong>
+          <small>
+            {{ floorLabel(room.floor_label) }} · {{ room.room_type || "غرفة" }} ·
+            {{ room.current_occupancy || 0 }} من {{ room.bed_capacity || room.beds.length }} ·
+            {{ statusLabel(room.readiness_status) }}
+          </small>
+          <small v-if="room.dominant_project" dir="auto">المشروع الغالب: {{ room.dominant_project }}</small>
+        </div>
         <Button v-if="canSetReadiness && room.readiness_status !== 'Ready'" variant="subtle" :loading="readiness.loading" @click="setReady(room)">تأكيد الجاهزية</Button>
       </header>
       <div class="bed-grid">
@@ -55,6 +63,7 @@ async function setReady(room) {
           <strong>{{ bed.bed_code || bed.bed }}</strong>
           <small v-if="bed.occupant" dir="auto">{{ bed.occupant.employee_name }}</small>
           <small v-else>{{ candidate ? 'اختر هذا السرير' : 'متاح' }}</small>
+          <small class="bed-meta">{{ statusLabel(bed.condition) }}<template v-if="bed.is_temporary"> · مؤقت</template></small>
         </component>
       </div>
     </section>

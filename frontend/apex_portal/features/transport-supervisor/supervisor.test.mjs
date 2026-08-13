@@ -1,46 +1,70 @@
 import { describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
+import { createListResource } from "frappe-ui";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { createTransportSupervisorGateway } from "./gateway.js";
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
+import RoutePlanForm from "./RoutePlanForm.vue";
 import SupervisorPage from "./SupervisorPage.vue";
+
+const { resourceData, insertPlan } = vi.hoisted(() => ({
+  resourceData: new Map(),
+  insertPlan: vi.fn().mockResolvedValue({ name: "RP-1" }),
+}));
 
 vi.mock("frappe-ui", () => ({
   Badge: { template: "<span />" },
   Button: { template: "<button><slot /></button>" },
   FeatherIcon: { template: "<i />" },
+  FormControl: { template: "<input />" },
+  createResource: vi.fn((options) => {
+    let url = options.url;
+    return {
+      update(next) {
+        if (next.url) url = next.url;
+      },
+      fetch: vi.fn(async (params) => {
+        const value = resourceData.get(url);
+        if (value instanceof Error) throw value;
+        return typeof value === "function" ? value(params) : value;
+      }),
+    };
+  }),
+  createListResource: vi.fn(() => ({ insert: { submit: insertPlan } })),
 }));
 
 describe("Masar transport supervisor feature", () => {
   it("keeps map view, Leaflet, state, styles, and server access in focused files", () => {
     const root = path.dirname(fileURLToPath(import.meta.url));
-    for (const name of ["leafletAdapter.js", "transportMapState.js", "styles.css", "gateway.js"]) {
+    for (const name of ["leafletAdapter.js", "transportMapState.js", "styles.css"]) {
       expect(existsSync(path.join(root, name))).toBe(true);
     }
+    expect(existsSync(path.join(root, "gateway.js"))).toBe(false);
     const page = readFileSync(path.join(root, "TransportMapPage.vue"), "utf8");
     expect(page).toContain('from "./leafletAdapter.js"');
     expect(page).toContain('from "./transportMapState.js"');
     expect(page).toContain('import "./styles.css"');
+    expect(page).toContain("createResource");
+    expect(page).toContain("apex.salis.api.route_supervisor.get_active_driver_positions");
+    expect(page).not.toContain("transportSupervisorGateway");
     expect(page).toMatch(/<Button[^>]*icon-left="refresh-cw"[^>]*>تحديث<\/Button>/);
     expect(page).not.toMatch(/window\.L|document\.createElement|L\.map|L\.tileLayer|<style/);
   });
 
   it("centres operations on requests, shifts, plans and dispatch trips", () => {
-    expect(supervisorRoutes.map((route) => route.path)).toEqual([
-      "/requests",
-      "/shifts",
-      "/plans",
-      "/plans/new",
-      "/plans/:name",
-      "/trips",
-      "/trips/:name",
-      "/map",
-      "/history",
-    ]);
+    expect(supervisorRoutes.map((route) => route.path)).toEqual(["/requests", "/shifts", "/plans", "/plans/new", "/plans/:name", "/trips", "/trips/:name", "/map", "/history"]);
+  });
+
+  it("declares human title fields for every operations collection", () => {
+    const collectionRoutes = supervisorRoutes.filter((route) => route.meta?.view?.collections);
+    expect(collectionRoutes).not.toHaveLength(0);
+    for (const route of collectionRoutes) {
+      expect(route.meta.view.titleFields?.length, route.path).toBeGreaterThan(0);
+      expect(route.meta.view.fallbackTitle, route.path).toBeTruthy();
+    }
   });
 
   it("preserves the legacy hash redirects", () => {
@@ -58,38 +82,48 @@ describe("Masar transport supervisor feature", () => {
     expect(mapRoute.meta.navigation).toBe(true);
   });
 
-  it("uses workflow actions instead of parallel supervisor approval fields", async () => {
-    const call = vi.fn().mockResolvedValue({ message: { status: "Validated" } });
-    const gateway = createTransportSupervisorGateway(call);
-    await gateway.applyRequestAction("TR-1", "Validate");
-    expect(call).toHaveBeenCalledWith(
-      "apex.salis.api.route_supervisor.apply_transport_request_action",
-      { name: "TR-1", action: "Validate" },
-    );
-  });
+  it("uses the native Route Plan insert resource on the create page", async () => {
+    insertPlan.mockClear();
+    const wrapper = mount(RoutePlanForm);
 
-  it("keeps active driver positions behind the supervisor gateway", async () => {
-    const call = vi.fn().mockResolvedValue({ message: { positions: [] } });
-    const gateway = createTransportSupervisorGateway(call);
-    await expect(gateway.map()).resolves.toEqual({ positions: [] });
-    expect(call).toHaveBeenCalledWith("apex.salis.api.route_supervisor.get_active_driver_positions");
+    await wrapper.get("form").trigger("submit");
+
+    expect(createListResource).toHaveBeenCalledWith({
+      doctype: "Route Plan",
+      auto: false,
+    });
+    expect(insertPlan).toHaveBeenCalledWith({
+      route_name: "",
+      project: "",
+      shift: "",
+      driver: "",
+      vehicle: "",
+    });
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{
-        path: "/requests",
-        component: SupervisorPage,
-        meta: { view: { gateway: "requests", collections: ["items"], empty: "لا توجد عمليات." } },
-      }],
+      routes: [
+        {
+          path: "/requests",
+          component: SupervisorPage,
+          meta: {
+            view: {
+              endpoint: "apex.test.supervisor.requests",
+              collections: ["items"],
+              empty: "لا توجد عمليات.",
+            },
+          },
+        },
+      ],
     });
+    resourceData.set("apex.test.supervisor.requests", { items: [] });
     await router.push("/requests");
     await router.isReady();
     const wrapper = mount(SupervisorPage, {
       global: {
         plugins: [router],
-        provide: { transportSupervisorGateway: { requests: vi.fn().mockResolvedValue({ items: [] }) } },
       },
     });
     await flushPromises();

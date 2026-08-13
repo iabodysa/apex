@@ -4,6 +4,7 @@ import {
   arrivalRegistrationParams,
   bedAssignmentTarget,
   housingCandidateFromQuery,
+  summarizeArrivalSession,
 } from "./arrivalFlow.js";
 
 describe("housing arrival flow", () => {
@@ -50,5 +51,22 @@ describe("housing arrival flow", () => {
 
   it("opens an ordinary bed when no arrival candidate was selected", () => {
     expect(bedAssignmentTarget("BED-1", null)).toEqual({ path: "/beds/BED-1" });
+  });
+
+  it("advances a reception session from registration to bed assignment", () => {
+    const workers = [
+      { row: "ROW-1", worker_name: "عامل أ", arrived: false, housed: false },
+      { row: "ROW-2", worker_name: "عامل ب", arrived: true, housed: false, temporary_worker: "TW-2" },
+      { row: "ROW-3", worker_name: "عامل ج", arrived: true, housed: true, temporary_worker: "TW-3" },
+    ];
+
+    expect(summarizeArrivalSession(workers)).toMatchObject({
+      total: 3,
+      registered: 2,
+      housed: 1,
+      progress: 33,
+      next: workers[1],
+      nextAction: "assign-bed",
+    });
   });
 });

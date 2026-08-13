@@ -10,7 +10,7 @@
 }
 .ops-heading > div > p {
     color: var(--accent-ink);
-    font-weight: 800;
+    font-weight: 700;
 }
 .ops-heading h2 {
     font-size: clamp(1.75rem, 4vw, 3rem);
@@ -52,6 +52,13 @@
 .ops-row > div {
     display: grid;
     min-inline-size: 0;
+}
+.ops-row strong,
+.ops-row span,
+.ops-card h3,
+.ops-card p {
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
 }
 .ops-row span {
     color: var(--muted);

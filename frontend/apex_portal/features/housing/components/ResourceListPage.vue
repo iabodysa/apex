@@ -1,41 +1,39 @@
 <script setup>
-import { computed, onMounted, watch } from "vue";
-import { Button, ErrorMessage, LoadingIndicator, createResource } from "frappe-ui";
-import { statusLabel } from "../../../core/displayLabels.js";
+import { computed } from "vue";
+import { Button, ErrorMessage, LoadingIndicator } from "frappe-ui";
+import { recordTitle, statusLabel } from "../../../core/displayLabels.js";
 
 const props = defineProps({
   title: { type: String, required: true },
-  endpoint: { type: String, required: true },
-  params: { type: Object, default: () => ({}) },
-  rowsKey: { type: String, default: "" },
+  rows: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: [Object, String], default: null },
+  refresh: { type: Function, required: true },
   emptyText: { type: String, default: "لا توجد بيانات حالياً." },
+  titleFields: { type: Array, default: () => [] },
+  fallbackTitle: { type: String, default: "سجل" },
 });
 
-const resource = createResource({ url: props.endpoint, makeParams: () => props.params });
-const titleId = computed(() => `${props.endpoint.replace(/[^a-z0-9]+/gi, "-")}-title`);
-const rows = computed(() => {
-  const data = resource.data;
-  if (Array.isArray(data)) return data;
-  if (props.rowsKey && Array.isArray(data?.[props.rowsKey])) return data[props.rowsKey];
-  return data ? [data] : [];
-});
-onMounted(() => resource.fetch());
-watch(() => props.params, () => resource.fetch(), { deep: true });
+const titleId = computed(() => `resource-list-${props.title.replace(/\s+/g, "-")}`);
+const errorMessage = computed(() => props.error?.message || props.error || "تعذر تحميل البيانات.");
 </script>
 
 <template>
   <section class="feature-page" :aria-labelledby="titleId">
     <header class="feature-page__header">
       <h2 :id="titleId">{{ title }}</h2>
-      <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="resource.loading" @click="resource.fetch()" />
+      <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
     </header>
-    <LoadingIndicator v-if="resource.loading && !rows.length" aria-label="جارٍ التحميل" />
-    <ErrorMessage v-else-if="resource.error" :message="resource.error.message || 'تعذر تحميل البيانات.'" />
+    <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />
+    <ErrorMessage v-else-if="error" :message="errorMessage" />
     <p v-else-if="!rows.length" class="feature-page__empty">{{ emptyText }}</p>
     <ul v-else class="feature-page__list">
       <li v-for="(row, index) in rows" :key="row.name || index">
         <slot name="row" :row="row">
-          <strong dir="auto">{{ row.title || row.label || row.name || `السجل ${index + 1}` }}</strong>
+          <div class="record-identity">
+            <strong dir="auto">{{ recordTitle(row, titleFields, `${fallbackTitle} ${index + 1}`) }}</strong>
+            <bdi v-if="row.name" class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
+          </div>
           <small v-if="row.status">{{ statusLabel(row.status) }}</small>
         </slot>
       </li>

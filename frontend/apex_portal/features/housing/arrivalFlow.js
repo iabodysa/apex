@@ -49,3 +49,20 @@ export function normalizeWorkerLinkResult(result = []) {
     phone: row.phone || null,
   });
 }
+
+export function summarizeArrivalSession(workers = []) {
+  const rows = Array.isArray(workers) ? workers : [];
+  const registered = rows.filter((row) => row.arrived).length;
+  const housed = rows.filter((row) => row.housed).length;
+  const next = rows.find((row) => row.arrived && !row.housed)
+    || rows.find((row) => !row.arrived)
+    || null;
+  return Object.freeze({
+    total: rows.length,
+    registered,
+    housed,
+    progress: rows.length ? Math.round((housed / rows.length) * 100) : 0,
+    next,
+    nextAction: next ? (next.arrived ? "assign-bed" : "register") : null,
+  });
+}

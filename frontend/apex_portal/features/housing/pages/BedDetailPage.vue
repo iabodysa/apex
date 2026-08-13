@@ -1,7 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
 import { statusLabel } from "../../../core/displayLabels.js";
 
@@ -9,14 +9,25 @@ const route = useRoute();
 const router = useRouter();
 const error = ref("");
 const checkInForm = reactive({ party_type: "Employee", party: "", project: "" });
+const capabilities = globalThis.window?.apex_portal?.capabilities || [];
+const canCheckIn = capabilities.includes("check_in");
+const canCheckOut = capabilities.includes("check_out");
 const bed = createDocumentResource({ doctype: "Bed", name: route.params.bed });
+const projects = createListResource({
+  doctype: "Project",
+  fields: ["name", "project_name"],
+  orderBy: "project_name asc",
+  pageLength: 200,
+  auto: canCheckIn,
+});
 const checkIn = createResource({ url: "apex.habitat.api.front_desk.quick_check_in" });
 const checkOut = createResource({ url: "apex.habitat.api.front_desk.quick_check_out" });
 const occupied = computed(() => bed.doc?.status === "Occupied");
 const candidate = computed(() => housingCandidateFromQuery(route.query));
-const capabilities = globalThis.window?.apex_portal?.capabilities || [];
-const canCheckIn = capabilities.includes("check_in");
-const canCheckOut = capabilities.includes("check_out");
+const projectOptions = computed(() => (projects.data || []).map((project) => ({
+  label: project.project_name || project.name,
+  value: project.name,
+})));
 watch(candidate, (value) => {
   Object.assign(checkInForm, value
     ? { party_type: value.party_type, party: value.party, project: value.project }
@@ -61,9 +72,9 @@ async function depart() {
         <template v-else>
           <FormControl v-model="checkInForm.party_type" type="select" label="نوع الساكن" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
           <FormControl v-model="checkInForm.party" label="رقم الساكن" required />
-          <FormControl v-model="checkInForm.project" label="المشروع" />
         </template>
-        <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party">{{ candidate ? `تسكين ${candidate.label}` : 'تسكين' }}</Button>
+        <FormControl v-if="!candidate?.project" v-model="checkInForm.project" type="select" label="المشروع" :options="projectOptions" required />
+        <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party || !checkInForm.project">{{ candidate ? `تسكين ${candidate.label}` : 'تسكين' }}</Button>
       </form>
       <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>
       <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>

@@ -56,6 +56,206 @@ h3 {
   text-align: start;
 }
 
+.feature-page {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--sp-4);
+}
+
+.feature-page__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+  border-radius: var(--radius-lg);
+  background: var(--forest);
+  color: var(--surface-2);
+}
+
+.feature-page__heading > *,
+.feature-card > *,
+.feature-page__list li > * {
+  min-inline-size: 0;
+}
+
+.feature-page__heading svg {
+  inline-size: 28px;
+  block-size: 28px;
+  flex: 0 0 auto;
+}
+
+.feature-page__heading p {
+  max-inline-size: 62ch;
+  opacity: .86;
+}
+
+.feature-page__eyebrow {
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.feature-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.feature-page__header h2 {
+  font-size: 1.6rem;
+}
+
+.feature-state {
+  display: grid;
+  min-block-size: 220px;
+  place-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  text-align: center;
+}
+
+.feature-state--error,
+.feature-error {
+  color: var(--danger);
+}
+
+.feature-success {
+  color: var(--ok);
+}
+
+.feature-grid,
+.feature-page__list {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.feature-grid--wide {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.feature-page__list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.feature-card,
+.feature-page__list li {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.feature-card span {
+  color: var(--muted);
+}
+
+.record-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-block-size: 96px;
+  gap: var(--sp-3);
+}
+
+.record-card__copy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--sp-1);
+}
+
+.record-identity {
+  display: grid;
+  min-inline-size: 0;
+  gap: 2px;
+}
+
+.record-identity strong,
+.record-reference {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.record-reference {
+  color: var(--muted);
+  font-family: var(--font);
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-card__title,
+.record-card__description,
+.record-card__meta,
+.feature-details dd {
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.record-card__title {
+  line-height: 1.35;
+}
+
+.record-card__description {
+  color: var(--muted);
+}
+
+.record-card__meta {
+  max-inline-size: 18ch;
+  text-align: end;
+}
+
+.feature-details {
+  display: grid;
+  grid-template-columns: minmax(100px, .4fr) minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.feature-details dt {
+  color: var(--muted);
+}
+
+.feature-details dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.feature-form {
+  display: grid;
+  max-inline-size: 680px;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.feature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.feature-page__empty {
+  padding: var(--sp-6);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  text-align: center;
+}
+
 .apex-boot {
   display: grid;
   min-block-size: 100dvh;
@@ -63,7 +263,7 @@ h3 {
   justify-items: center;
   gap: var(--sp-4);
   padding: var(--sp-6);
-  background: var(--brand-green);
+  background: var(--forest);
   color: var(--surface-2);
   text-align: center;
 }
@@ -164,7 +364,7 @@ h3 {
   justify-content: space-between;
   gap: var(--sp-4);
   padding: calc(var(--sp-6) + env(safe-area-inset-top)) var(--sp-4) var(--sp-4);
-  background: var(--brand-green);
+  background: var(--forest);
   color: var(--surface-2);
 }
 
@@ -316,7 +516,8 @@ h3 {
 
 .operations-shell__title {
   font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1;
+  line-height: 1.2;
+  padding-block: .05em;
 }
 
 .operations-shell__main {
@@ -359,6 +560,15 @@ h3 {
 
   .operations-shell__body {
     block-size: auto;
+  }
+
+  .record-card {
+    grid-template-columns: 1fr;
+  }
+
+  .record-card__meta {
+    max-inline-size: none;
+    text-align: start;
   }
 }
 
