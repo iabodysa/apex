@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/assets/logo/apex-mark.svg" alt="Apex" width="112" height="112">
+  <img src="apex/public/icons/brand/apex-mark.svg" alt="Apex" width="112" height="112">
 </p>
 
 <h1 align="center">Apex</h1>
@@ -171,21 +171,16 @@ bench --site <site> migrate
 ```
 
 Production installations should use a reviewed tag and full commit SHA, take a verified
-backup, and prove the same application combination in staging. Follow the
-[production installation guide](docs/administration/installation.md) before changing an
-existing site.
+backup, and prove the same application combination in staging before changing an existing
+site.
 
-If a reverse proxy, load balancer, or CDN sits in front of Frappe, complete the
-[reverse-proxy prerequisite](docs/administration/reverse-proxy.md) before exposing Apex.
+If a reverse proxy, load balancer, or CDN sits in front of Frappe, preserve the original
+client address and trusted-proxy configuration before exposing Apex.
 
 ## Documentation
 
 - [Documentation home](docs/README.md) — choose the shortest guide for your role
 - [Training guide](docs/training/README.md) — learn the daily workflows with scoped examples
-- [Installation and administration](docs/administration/installation.md) — deploy and verify safely
-- [Integration guide](docs/administration/integration.md) — connect through supported Frappe APIs
-- [Modules, workspaces, and routes](docs/reference/routes-workspaces.md) — inspect the shipped surface
-- [Apex identity](docs/brand/README.md) — use the approved logo and product system
 
 ## License
 

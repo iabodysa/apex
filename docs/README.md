@@ -54,26 +54,6 @@ payment handoff.
 
 ## Operate Apex
 
-- [Installation](administration/installation.md) — install a reviewed release and verify the site
-- [Reverse proxy prerequisite](administration/reverse-proxy.md) — protect address-based controls
 - [Settings](training/settings.md) — change product behavior safely on a non-production site
-- [Troubleshooting](reference/troubleshooting.md) — start from the visible symptom
-- [Scheduled automation](reference/automation.md) — understand due work and background follow-up
 
-## Build and integrate
-
-- [Integration guide](administration/integration.md) — connect through supported Frappe APIs
-- [Workspace authoring](administration/workspace-authoring.md) — maintain task-focused navigation
-- [Frontend architecture](administration/frontend-architecture.md) — build and serve the portals
-- [Shared frontend runtime](administration/frontend-shared.md) — understand the common Vue runtime and build contract
-- [Apex identity](brand/index.html) — logo, interface foundations, layouts, and communication assets
-- [Portal implementation contract](brand/portal-design.md) — source-level layout and interaction rules
-- [Portal source contract](../frontend/apex_portal/CONTRACTS.md) — contexts, shells, features, and shared boundaries
-
-## Reference
-
-- [Modules, workspaces, and routes](reference/routes-workspaces.md)
-- [Business glossary](reference/glossary.md)
-
-Training pages explain the work. Administration pages explain controlled change. Reference
-pages contain exact inventories that should not be copied into user guides.
+Training pages explain the work and the responsibilities of each role.

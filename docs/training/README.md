@@ -132,7 +132,3 @@ result when another role owns the decision.
 Use these only when a trainer or administrator needs to verify the shipped configuration:
 
 - **Role Permissions Manager** at `/app/permission-manager`
-- [Modules, workspaces, and routes](../reference/routes-workspaces.md)
-- [Scheduled automation](../reference/automation.md)
-- [Business glossary](../reference/glossary.md)
-- [Troubleshooting](../reference/troubleshooting.md)
