@@ -48,5 +48,7 @@ describe("Apex portal identity", () => {
     expect(css).toMatch(/\.operations-shell__body\s*\{[^}]*block-size:\s*100dvh[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\)/s);
     expect(css).toMatch(/\.operations-shell__main\s*\{[^}]*overflow-y:\s*auto/s);
     expect(css).toContain("@media (max-width: 1023px)");
+    expect(css).toMatch(/@media \(max-width: 1023px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+    expect(css).toMatch(/@media \(max-width: 1023px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
   });
 });

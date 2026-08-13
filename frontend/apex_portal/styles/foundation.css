@@ -275,6 +275,8 @@ h3 {
   }
 
   .operations-shell__rail {
+    min-inline-size: 0;
+    max-inline-size: 100%;
     overflow: hidden;
     padding: calc(var(--sp-4) + env(safe-area-inset-top)) var(--sp-4) var(--sp-3);
     border-inline-end: 0;
@@ -287,6 +289,8 @@ h3 {
 
   .operations-shell__nav {
     display: flex;
+    min-inline-size: 0;
+    max-inline-size: 100%;
     overflow-x: auto;
     overscroll-behavior-inline: contain;
   }
