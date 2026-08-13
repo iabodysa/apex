@@ -181,6 +181,10 @@ class MasarWorkerToken(Document):
         """Generates a fresh raw token, stages its hash and encrypted copy, and resets the expiry."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
+        if not self.is_new() and frappe.db.table_exists("Portal Push Subscription"):
+            from apex.salis.api.web_push import disable_subject_subscriptions
+
+            disable_subject_subscriptions(audience, subject)
         raw = _new_token()
         self.token = _hash_token(raw)
         self.token_enc = encrypt(raw)

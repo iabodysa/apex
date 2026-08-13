@@ -35,7 +35,7 @@ function save() {
         {{ action.error.value }}
       </p>
       <p v-if="action.state.value === 'saved'" class="feature-success" role="status">تم حفظ الخطة.</p>
-      <Button type="submit" variant="solid" :loading="action.state.value === 'saving'">حفظ</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="action.state.value === 'saving'">حفظ</Button>
     </form>
   </section>
 </template>

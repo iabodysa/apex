@@ -14,7 +14,7 @@ self.addEventListener("push", (event) => {
   }
   event.waitUntil(self.registration.showNotification(data.title || ${JSON.stringify(params.push.title)}, {
     body: data.body || "",
-    icon: "/assets/apex/images/apex-app-icon.svg",
+    icon: ${JSON.stringify(params.push.icon)},
     data: { url: normalizeNotificationUrl(data.url) },
     tag: data.tag || ${JSON.stringify(params.push.tag)},
   }));

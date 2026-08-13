@@ -119,7 +119,7 @@ async function submit() {
       <ul><li v-for="row in state.cart" :key="row.key || row.article" dir="auto">{{ row.article }} × {{ row.qty }}</li></ul>
       <p v-if="!allowed" class="feature-page__empty">يمكنك مشاهدة العهد، لكن صلاحية تنفيذ هذه العملية غير متاحة.</p>
       <ErrorMessage v-if="error" :message="error" />
-      <Button variant="solid" :disabled="!allowed || !state.holder || !state.cart.length" :loading="issue.loading || returnItems.loading" @click="submit">{{ actionLabel }}</Button>
+      <Button theme="green" variant="solid" :disabled="!allowed || !state.holder || !state.cart.length" :loading="issue.loading || returnItems.loading" @click="submit">{{ actionLabel }}</Button>
     </div>
   </section>
 </template>

@@ -90,7 +90,7 @@ async function submit() {
         ]"
       />
       <ErrorMessage v-if="error" :message="error" />
-      <Button type="submit" variant="solid" :loading="requests.insert.loading" :disabled="!building || !form.room || !form.issue_description">إرسال الطلب</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="requests.insert.loading" :disabled="!building || !form.room || !form.issue_description">إرسال الطلب</Button>
     </form>
   </section>
 </template>

@@ -5,6 +5,18 @@ from apex.salis.api import route_supervisor_operations as operations
 
 
 class TestRouteSupervisorOperations(TestCase):
+    def test_transport_request_title_prefers_route_then_business_service(self):
+        self.assertEqual(
+            operations._transport_request_title(
+                {"from_location": "السكن", "to_location": "المشروع", "service_line": "Site Transport"}
+            ),
+            "السكن إلى المشروع",
+        )
+        self.assertEqual(
+            operations._transport_request_title({"service_line": "Site Transport"}),
+            "نقل العاملين",
+        )
+
     @patch.object(operations, "_require_portal_role")
     @patch.object(operations.frappe, "get_list", return_value=[])
     def test_transport_request_list_uses_permission_aware_query(self, get_list, _role):
@@ -12,6 +24,10 @@ class TestRouteSupervisorOperations(TestCase):
 
         get_list.assert_called_once()
         self.assertEqual(get_list.call_args.args[0], "Transport Request")
+        self.assertEqual(
+            get_list.call_args.kwargs["order_by"],
+            "`tabTransport Request`.modified desc, `tabTransport Request`.name desc",
+        )
         self.assertNotIn("get_all", operations.get_transport_requests.__doc__ or "")
 
     @patch.object(operations, "_require_portal_role")

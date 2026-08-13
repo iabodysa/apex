@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
+import PortalPushPrompt from "../components/PortalPushPrompt.vue";
 
 const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
 const primaryLimit = 4;
@@ -36,6 +37,7 @@ const overflowActive = computed(() => (
       <div class="mobile-shell__actions"><slot name="actions" /></div>
     </header>
     <main id="portal-content" class="mobile-shell__main" tabindex="-1">
+      <PortalPushPrompt />
       <slot />
     </main>
     <nav v-if="navigation.length" class="mobile-shell__nav" :aria-label="ar.primaryNavigation">

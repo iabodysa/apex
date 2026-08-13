@@ -48,7 +48,7 @@ async function submit() {
       <FormControl v-model="form.condition" label="الحالة" />
       <FormControl v-model="form.notes" label="ملاحظة" />
       <ErrorMessage v-if="error" :message="error" />
-      <Button type="submit" variant="solid" :loading="save.loading">حفظ</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="save.loading">حفظ</Button>
     </form>
   </section>
 </template>

@@ -64,6 +64,7 @@ Inspect a building with the guided Safety Round form and save the result for man
 Inspection logged: {0}
 Intake
 JSON
+Kitchen Cabinet
 Latest
 Launchpad
 Lease payment reference: {0}
@@ -95,8 +96,10 @@ Sales Taxes and Charges Template
 Scanner
 Set automatically when this request is generated from a safety inspection report.
 Shifts
+Single Bed Frame
 Site Code
 Source Field
+Split AC Unit
 TRAINING
 TS Intake Source
 The vehicle's project supervisor, resolved when the alert is raised; drives the Critical-alert notification.

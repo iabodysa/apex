@@ -394,6 +394,31 @@ h3 {
   padding: var(--sp-4);
 }
 
+.portal-push-prompt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-block-end: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--radius);
+  background: var(--brand-green);
+  color: var(--surface-2);
+}
+
+.portal-push-prompt > svg {
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+.portal-push-prompt p {
+  opacity: .9;
+}
+
+.portal-push-prompt button {
+  white-space: nowrap;
+}
+
 .mobile-shell__nav {
   position: relative;
   z-index: 20;
@@ -528,6 +553,15 @@ h3 {
 }
 
 @media (max-width: 767px) {
+  .portal-push-prompt {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .portal-push-prompt button {
+    grid-column: 1 / -1;
+    inline-size: 100%;
+  }
+
   .operations-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);

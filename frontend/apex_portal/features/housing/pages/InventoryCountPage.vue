@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
+import { conditionLabel } from "../../../core/displayLabels.js";
 
 const values = reactive({});
 const error = ref("");
@@ -12,7 +13,9 @@ const inventory = createResource({
 });
 const save = createResource({ url: "apex.habitat.api.housing_count.submit_counts" });
 const rows = computed(() => inventory.data?.items || []);
-const conditions = computed(() => (inventory.data?.conditions || []).map((value) => ({ label: value, value })));
+const conditions = computed(() => (
+  inventory.data?.conditions || []
+).map((value) => ({ label: conditionLabel(value), value })));
 
 watch(building, async (value) => {
   Object.keys(values).forEach((key) => delete values[key]);
@@ -53,13 +56,13 @@ async function submit() {
     <p v-else-if="!rows.length && building" class="feature-page__empty">لا توجد أصناف جرد لهذا المبنى.</p>
     <form v-else-if="rows.length" class="inventory-form" @submit.prevent="submit">
       <article v-for="row in rows" :key="row.name" class="feature-card inventory-row">
-        <div><strong dir="auto">{{ row.item_name }}</strong><small>{{ row.room_label || 'المبنى' }} · المتوقع {{ row.expected_quantity }}</small></div>
+        <div><strong dir="auto">{{ row.item_label || row.item_name }}</strong><small>{{ row.room_label || 'المبنى' }} · المتوقع {{ row.expected_quantity }}</small></div>
         <FormControl v-model="valueFor(row).counted_quantity" type="number" label="العدد الفعلي" min="0" required />
         <FormControl v-model="valueFor(row).condition" type="select" label="الحالة" :options="conditions" />
-        <FormControl v-model="valueFor(row).notes" label="ملاحظة" />
+        <FormControl v-model="valueFor(row).notes" class="inventory-row__notes" type="textarea" label="ملاحظة" :rows="2" />
       </article>
       <ErrorMessage v-if="error" :message="error" />
-      <Button type="submit" variant="solid" :loading="save.loading">حفظ الجرد</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="save.loading">حفظ الجرد</Button>
     </form>
   </section>
 </template>

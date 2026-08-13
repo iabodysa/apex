@@ -50,9 +50,12 @@ describe("portal PWA contract", () => {
     }
   });
 
-  it("keeps driver notification targets inside the driver path", () => {
-    const source = renderServiceWorker({ ...parameters().driver, build: "deadbeef0000" });
-    expect(source).toContain("target.origin === self.location.origin");
-    expect(source).toContain("target.pathname.startsWith(NAV_PATH)");
+  it("keeps worker and driver notification targets inside their own paths", () => {
+    for (const entry of Object.values(parameters())) {
+      const source = renderServiceWorker({ ...entry, build: "deadbeef0000" });
+      expect(source).toContain('self.addEventListener("push"');
+      expect(source).toContain("target.origin === self.location.origin");
+      expect(source).toContain("target.pathname.startsWith(NAV_PATH)");
+    }
   });
 });

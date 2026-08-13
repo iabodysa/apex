@@ -66,7 +66,7 @@ async function ratify() {
         </li>
       </ul>
       <ErrorMessage v-if="error" :message="error" />
-      <Button v-if="canReview && round.doc?.docstatus === 0" variant="solid" :loading="submit.loading" @click="ratify">اعتماد الجولة</Button>
+      <Button v-if="canReview && round.doc?.docstatus === 0" theme="green" variant="solid" :loading="submit.loading" @click="ratify">اعتماد الجولة</Button>
       <p v-else-if="round.doc?.docstatus === 0" class="feature-page__empty">الجولة تنتظر مراجعة مشرف السكن.</p>
     </template>
   </section>

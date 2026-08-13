@@ -59,7 +59,7 @@ watch(() => route.fullPath, load, { immediate: true });
         <div class="record-card__copy">
           <strong class="record-card__title" dir="auto">{{ recordTitle(row, spec.titleFields, spec.fallbackTitle) }}</strong>
           <bdi v-if="row.name" class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
-          <span>{{ row.project || row.shift || row.trip_date }}</span>
+          <span>{{ row.project_label || row.project || row.shift || row.trip_date }}</span>
         </div>
         <Badge :theme="statusTheme(row.workflow_state || row.status)" :label="statusLabel(row.workflow_state || row.status)" />
       </component>

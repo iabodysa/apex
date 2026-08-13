@@ -400,6 +400,10 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
         )
         log_credential_event(audience, subject, REVOKED, row.name)
         disabled += 1
+    if frappe.db.table_exists("Portal Push Subscription"):
+        from apex.salis.api.web_push import disable_subject_subscriptions
+
+        disable_subject_subscriptions(audience, subject)
     return disabled
 
 

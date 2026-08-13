@@ -4,6 +4,13 @@ import frappe
 
 PLAN_PAGE_LENGTH = 50
 
+_SERVICE_LINE_LABELS = {
+    "Site Transport": "نقل العاملين",
+    "Inter-City Relocation": "نقل بين المدن",
+    "Airport Transfer": "نقل المطار",
+    "Hospital Transfer": "نقل المستشفى",
+}
+
 
 def _require_portal_role():
     from apex.salis.api.route_supervisor import _require_portal_role as require
@@ -58,6 +65,19 @@ def _workflow_result(doc) -> dict:
     return {"name": doc.name, "status": doc.status, "docstatus": doc.docstatus}
 
 
+def _transport_request_title(row) -> str:
+    origin = (row.get("from_location") or "").strip()
+    destination = (row.get("to_location") or "").strip()
+    if origin and destination:
+        return f"{origin} إلى {destination}"
+    if origin or destination:
+        return origin or destination
+    requester = (row.get("requester_name") or "").strip()
+    if requester:
+        return requester
+    return _SERVICE_LINE_LABELS.get(row.get("service_line"), "طلب نقل")
+
+
 def _page(doctype, fields, start, page_length, **kwargs):
     start, page_length = _validate_page(start, page_length)
     return frappe.get_list(
@@ -73,7 +93,7 @@ def _page(doctype, fields, start, page_length, **kwargs):
 def get_transport_requests(start=0, page_length=PLAN_PAGE_LENGTH):
     """Return permission-scoped transport work through native User Permissions."""
     _require_portal_role()
-    return _page(
+    rows = _page(
         "Transport Request",
         [
             "name",
@@ -81,6 +101,7 @@ def get_transport_requests(start=0, page_length=PLAN_PAGE_LENGTH):
             "request_type",
             "service_line",
             "project",
+            "project.project_name as project_label",
             "from_location",
             "to_location",
             "pickup_datetime",
@@ -89,8 +110,14 @@ def get_transport_requests(start=0, page_length=PLAN_PAGE_LENGTH):
         ],
         start,
         page_length,
-        order_by="modified desc, name desc",
+        order_by=(
+            "`tabTransport Request`.modified desc, "
+            "`tabTransport Request`.name desc"
+        ),
     )
+    for row in rows:
+        row["display_title"] = _transport_request_title(row)
+    return rows
 
 
 @frappe.whitelist()

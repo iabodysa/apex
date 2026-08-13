@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { housingRoutes } from "./routes.js";
 import { nextCustodySelection } from "./custodyState.js";
+
+const read = (name) => readFileSync(fileURLToPath(new URL(name, import.meta.url)), "utf8");
 
 describe("housing feature contract", () => {
   it("ships every approved housing route exactly once", () => {
@@ -42,5 +46,13 @@ describe("housing feature contract", () => {
       holder: { party_type: "Temporary Worker", party: "TW-2" },
       cart: [],
     });
+  });
+
+  it("keeps long inventory notes readable instead of clipping them in one line", () => {
+    const page = read("./pages/InventoryCountPage.vue");
+    const css = read("./housing.css");
+    expect(page).toContain('class="inventory-row__notes" type="textarea"');
+    expect(css).toMatch(/\.inventory-row__notes textarea\s*\{[^}]*white-space:\s*pre-wrap/s);
+    expect(css).toMatch(/@media \(max-width: 1100px\)[\s\S]*?\.inventory-row__notes\s*\{[^}]*grid-column:\s*1 \/ -1/s);
   });
 });

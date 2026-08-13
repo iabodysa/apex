@@ -17,7 +17,7 @@ const page = (path, name, capability, label, icon, endpoint, view = {}) => ({
 });
 
 export const supervisorRoutes = Object.freeze([
-  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", "apex.salis.api.route_supervisor.get_transport_requests", { collections: ["requests"], titleFields: ["requester_name", "service_line", "to_location", "from_location"], fallbackTitle: "طلب نقل" }),
+  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", "apex.salis.api.route_supervisor.get_transport_requests", { collections: ["requests"], titleFields: ["display_title"], fallbackTitle: "طلب نقل" }),
   page("/shifts", "transport-shifts", "transport.shift.read", "الشفتات", "calendar", "apex.salis.api.route_supervisor.get_shift_routes", { collections: ["items"], titleFields: ["shift_name", "route_name"], fallbackTitle: "شفت تشغيل" }),
   page("/plans", "transport-plans", "transport.plan.read", "خطط المسار", "map", "apex.salis.api.route_supervisor.get_route_plans", { collections: ["plans"], titleFields: ["route_name"], fallbackTitle: "خطة مسار", detail: "/plans/:name" }),
   {

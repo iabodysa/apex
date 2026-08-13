@@ -36,9 +36,7 @@ A code can only be regenerated once the delivery is Released.,لا يمكن إع
 A completion photo is required before closing a Maintenance Work Order.,يجب إرفاق صورة إنجاز قبل إغلاق أمر عمل الصيانة.
 A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف العهدة وقد يترتب عليه خصم من الراتب
 A deduction is due and no payroll entry has been raised yet.,يوجد مبلغ مستحق ولم يُسجَّل خصم على الراتب حتى الآن.
-A device is active until the driver opts out or the browser endpoint stops accepting pushes.,يبقى الجهاز نشطًا حتى يلغي السائق الاشتراك أو يتوقف عنوان المتصفح عن استقبال الإشعارات.
 A driver clearance is blocked and must be resolved before the driver is redeployed,تم تعليق إخلاء طرف السائق ويجب معالجته قبل إعادة تكليفه.
-"A driver's Web Push subscription: the browser PushSubscription endpoint and keys captured on opt-in, used to deliver background push to that driver's device. One row per device/endpoint.",اشتراك السائق في الإشعارات الفورية: عنوان الاشتراك في المتصفح ومفاتيحه تُلتقط عند الموافقة، وتُستخدم لإرسال الإشعارات في الخلفية إلى جهاز السائق. صف واحد لكل جهاز أو عنوان.
 A failed safety task ({0}) on a task that requires evidence must carry a photo. Please attach an Evidence Photo before submitting.,إذا كانت مهمة السلامة غير المجتازة ({0}) تتطلب إثباتًا، فأرفق صورة إثبات قبل الاعتماد.
 "A fleet incident event (accident or theft) captured against a vehicle, with location, report number and evidence. Distinct from a damage write-off (the disposition) and a vehicle stop (the state change).",حادثة أسطول (حادث أو سرقة) تُسجَّل على مركبة، مع الموقع ورقم البلاغ والمرفقات. وتختلف عن إعدام الأضرار وهو قرار المعالجة، وعن إيقاف المركبة وهو تغيير الحالة.
 A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,سُجّل فرق عند التسليم. أنشئ سجل شطب أضرار للمركبة {0} للحصول على الاعتماد حسب مستوى الصلاحية.
@@ -549,6 +547,8 @@ Back-link to the Maintenance Request spawned from this finding. Presence makes t
 Backdating Days,أيام التأريخ الرجعي
 Backdating Role,دور التأريخ الرجعي
 Backdating days cannot be negative.,لا يمكن أن تكون أيام التأريخ الرجعي سالبة.
+Background notification devices registered by the worker and driver portals.,أجهزة مسجلة لاستقبال تنبيهات بوابتي العامل والسائق في الخلفية.
+Background notifications are not configured.,إعدادات التنبيهات غير مكتملة.
 Balady Certificate,شهادة بلدي
 Balance Qty,الكمية المتبقية
 Base Accommodation Cost,تكلفة السكن الأساسية
@@ -1507,7 +1507,6 @@ Driver Portal,بوابة السائق
 Driver Portal Link,رابط بوابة السائق
 Driver Portal Theme,مظهر بوابة السائق
 Driver Position Updated At,وقت آخر تحديث لموقع السائق
-Driver Push Subscription,اشتراك إشعارات السائق
 Driver Record Status,حالة سجل السائق
 Driver Rejected,مرفوض من السائق
 Driver Suspension,إيقاف سائق
@@ -1522,6 +1521,7 @@ Driver is required.,السائق مطلوب.
 Driver license expired on {0}.,انتهت صلاحية رخصة السائق في {0}.
 Driver license has expired. Renew before assigning to trips.,انتهت صلاحية رخصة القيادة. يرجى التجديد قبل الإسناد للرحلات.
 Driver link revoked.,تم إلغاء رابط السائق.
+Driver notification devices require one driver.,يجب ربط جهاز التنبيهات بسائق واحد.
 Driver on Duty,السائق المناوب
 Driver or vehicle that carried the stock between the two stores.,السائق أو المركبة التي نقلت المواد بين المستودعين.
 Driver portal is not enabled.,بوابة السائق غير مفعّلة.
@@ -2229,6 +2229,7 @@ Invalid submission.,طلب غير صالح.
 Inventory Completed,اكتمل الجرد
 Inventory Count,جرد المخزون
 Inventory In Progress,الجرد جارٍ
+Inventory Item,صنف الجرد
 Inventory Notes,ملاحظات الجرد
 Investigation Status,حالة التحقيق
 "Investigation stage of the fuel exception, tracking whether it is open, under investigation, awaiting evidence, resolved, rejected, or closed.",مرحلة التحقيق في استثناء الوقود، وتوضح ما إذا كانت الحالة مفتوحة أو قيد التحقيق أو بانتظار الأدلة أو تمت معالجتها أو رُفضت أو أُغلقت.
@@ -2312,6 +2313,7 @@ Key Reports,التقارير المهمة
 "Kind of utility this account represents, used to group meters and bills by service so consumption and cost can be tracked per utility.",نوع خدمة المرافق التي يمثلها هذا الحساب، ويُستخدم لتجميع العدادات والفواتير حسب الخدمة لتتبع الاستهلاك والتكلفة لكل منها.
 "Kind of vehicle compliance document being tracked, such as registration, insurance, periodic inspection, or operating card, each monitored for expiry.",نوع وثيقة امتثال المركبة المُتتبَّعة، كالاستمارة أو التأمين أو الفحص الدوري أو بطاقة التشغيل، تُراقَب كل منها من حيث انتهاء الصلاحية.
 Kitchen,المطبخ
+Kitchen Cabinet,خزانة مطبخ
 Kitchen gas cooker / stove for accommodation. Durable kitchenware.,موقد / طبّاخ غاز للمطبخ في السكن. أدوات مطبخ معمّرة.
 Kitchenware,أدوات مطبخ
 Labour Hours,ساعات العمل
@@ -2819,7 +2821,12 @@ Notice Period (Days),مدة الإشعار (أيام)
 Notice received by,استلم الإشعار
 Notice served on,موجّه إلى
 Notification,إشعار
+Notification endpoint,عنوان التنبيهات
+Notification holder type must be Worker or Driver.,نوع مستخدم التنبيهات يجب أن يكون عاملاً أو سائقاً.
+Notification key,مفتاح التنبيهات
 Notification Log,سجل الإشعارات
+Notification secret,رمز التنبيهات السري
+Notification subscription keys are required.,يلزم مفتاحا اشتراك التنبيهات.
 Notifications,الإشعارات
 Notify Count,عدد الإشعارات
 Notify Finance on Liability Transfer,إشعار المالية عند نقل الالتزام
@@ -3261,11 +3268,15 @@ Policy,السياسة
 Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,مهام سلامة بنتائج ضعيفة
+Portal Push Subscription,اشتراك تنبيهات البوابة
+Portal Type,نوع البوابة
+Portal User,مستخدم البوابة
 Portal credential issued for {0} {1},أُصدرت بيانات دخول البوابة لـ {0} {1}
 Portal credential re-shared for {0} {1},أُعيدت مشاركة بيانات دخول البوابة لـ {0} {1}
 Portal credential reissued for {0} {1},أُعيد إصدار بيانات دخول البوابة لـ {0} {1}
 Portal credential revoked for {0} {1},أُلغيت بيانات دخول البوابة لـ {0} {1}
 Portal credential rotated for {0} {1},جُدِّدت بيانات دخول البوابة لـ {0} {1}
+Portal notification audience must be Worker or Driver.,نوع مستلم التنبيهات يجب أن يكون عاملاً أو سائقاً.
 Portal token audience must be Worker or Driver.,يجب أن تكون فئة رمز البوابة عاملًا أو سائقًا.
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
 Portal token subject binding is invalid.,ارتباط صاحب رمز البوابة غير صالح.
@@ -4057,6 +4068,7 @@ Select a valid worker type (Employee or Temporary Worker).,اختر نوع عا�
 Select a worker before continuing.,اختر عاملاً قبل المتابعة.
 Select a worker before issuing.,اختر عاملاً قبل الصرف.
 Select a worker before returning.,اختر عاملاً قبل الإرجاع.
+Select a worker to board.,اختر عاملاً لتسجيل صعوده.
 Select a worker to load held custody.,اختر عاملًا لعرض العهدة التي بحوزته.
 Select all,تحديد الكل
 Select at least one passenger.,اختر راكباً واحداً على الأقل.
@@ -4244,6 +4256,7 @@ Signed Qty,الكمية الموجبة أو السالبة
 Signed handover evidence is required before submitting.,إثبات تسليم موقّع مطلوب قبل الاعتماد.
 Signed on paper below,التوقيع على الورق أدناه
 "Signing records that the notice was served and read, not that its value is agreed.",التوقيع يثبت أن الإشعار سُلِّم وقُرئ، ولا يعني الموافقة على المبلغ.
+Single Bed Frame,هيكل سرير فردي
 "Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
 "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
 Single configuration record for optional Masar portal brand overrides.,سجل إعدادات واحد لتخصيص علامة بوابة مسار اختيارياً.
@@ -4308,6 +4321,7 @@ Specific Buildings,مباني محددة
 Specific Location,الموقع المحدّد
 Specific Rate for this Building (SAR),تسعيرة المبنى الخاصة (ريال)
 Specific fixed asset this request concerns (e.g. AC-001). Enables maintenance history per asset.,الأصل الثابت المحدد الذي يخصه هذا الطلب (مثل AC-001). يتيح سجل الصيانة لكل أصل.
+Split AC Unit,مكيف سبليت
 Split air-conditioning unit for accommodation cooling. Durable appliance; periodic maintenance and refrigerant refill.,وحدة تكييف منفصلة لتبريد السكن. جهاز معمّر؛ صيانة دورية وإعادة تعبئة غاز التبريد.
 Sponsorship Fee,رسوم كفالة
 "Stage of the goods receipt, tracking whether stock has been received into custody, handed over to the end holder, or the receipt was cancelled.",مرحلة استلام البضاعة، وتوضح هل أُدخل المخزون إلى العهدة أو سُلم إلى المستلم النهائي أو أُلغي الاستلام.
@@ -4347,6 +4361,7 @@ Start Review,بدء المراجعة
 Start Task,بدء المهمة
 Start Time,وقت البداية
 Start Work,بدء العمل
+Start the trip before marking arrival.,ابدأ الرحلة قبل تسجيل الوصول.
 Start the trip before marking stops.,ابدأ الرحلة قبل وضع علامات على المحطات.
 Start the work first — only a Work Order In Progress can be Completed.,ابدأ العمل أولاً — لا يُوسم كمكتمل إلا أمر عمل قيد التنفيذ.
 Started,بدأ
@@ -4574,7 +4589,6 @@ The Trip Start Log this scan boarded onto (set only when a boarding row was crea
 The approval carries the moment it was given,الاعتماد يحمل وقت صدوره
 The article's standard cost frozen at issue; a later change to the master does not move it.,تكلفة الصنف القياسية مثبّتة وقت الصرف؛ تعديلها لاحقاً في بطاقة الصنف لا يغيّرها.
 The assigned vehicle has been returned,رجّع المركبة المسندة له
-The browser PushSubscription endpoint URL the push service delivers to. Unique per device. Treat as a secret.,رابط نقطة اشتراك المتصفح التي ترسل إليها خدمة الإشعارات. يختلف لكل جهاز ويجب التعامل معه كمعلومة سرية.
 "The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل لأن {0} غرفة تستخدمه في أرقامها، وتغييره سيفصلها عن المبنى. احذف الغرف المولدة أولًا إذا كان تغيير الرمز ضروريًا.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
 The checks above are complete but the clearance has not been signed off yet. This paper does not release the driver until the clearance status reads Cleared.,الفحوصات أعلاه مكتملة لكن إخلاء الطرف ما اعتُمد بعد. هذه الورقة ما تخلي طرف السائق حتى تصير حالة إخلاء الطرف مخلى الطرف.
@@ -4604,13 +4618,11 @@ The current link cannot be shown again. Rotating issues a NEW link and QR and in
 "The damage described above is passed to the insurer as a claim on the policy in force, and the company keeps the right to the balance the insurer does not settle.",التلف الموصوف أعلاه يُرفع لشركة التأمين كمطالبة على الوثيقة السارية، وتحتفظ الشركة بحقها في الباقي الذي ما يغطيه التأمين.
 "The damage described above is repairable. This notice authorises repair up to the estimated cost shown, and any excess needs a fresh authority.",التلف الموصوف أعلاه قابل للإصلاح. هذا الإشعار يصرّح بالإصلاح في حدود التكلفة التقديرية المبينة، وأي زيادة تحتاج اعتماد جديد.
 The day the settled amount falls due to the rental office.,اليوم الذي يستحق فيه المبلغ لمكتب التأجير.
-"The device/browser user agent captured at opt-in, to help an operator recognise a stale device.",بيانات المتصفح والجهاز المسجلة عند تفعيل الإشعارات، وتساعد المشغل على معرفة الأجهزة غير المستخدمة.
 The difference against metered consumption is inside the allowed margin,الفرق مع المستهلك بالعداد داخل الهامش المسموح
 "The dispatching store confirms it handed over the quantities listed above and released them from its own stock. The receiving store confirms it took them into custody in the stated quantities and in usable condition, and carries them from the received date onward. Anything short, damaged or missing must be written on this note before it is signed.",يقر المستودع المرسِل بأنه سلّم الكميات المذكورة أعلاه وأخرجها من رصيده. ويقر المستودع المستلِم بأنه استلمها بالكميات المذكورة وبحالة صالحة للاستعمال، ويتحمّلها من تاريخ الاستلام. وأي نقص أو تلف أو فقد يُكتب على هذا السند قبل التوقيع عليه.
 "The driver confirms that only the persons listed on this sheet travelled with him on this trip, that each one boarded and left at the point written against his name, and that he carried nobody else.",يقر السائق أن الأشخاص المذكورين في هذا الكشف هم وحدهم من ركبوا معه في هذه الرحلة، وأن كل واحد صعد ونزل في النقطة المكتوبة أمام اسمه، وأنه ما نقل أحدًا غيرهم.
 The driver licence is valid on the trip date,رخصة السائق سارية في تاريخ الرحلة
 "The driver states that what is written above is a true account of the incident, and that he did not leave the site before the competent authority attended or the report was raised.",يقر السائق أن ما كُتب أعلاه وصف صحيح للحادث، وأنه ما غادر الموقع قبل حضور الجهة المختصة أو رفع المحضر.
-The driver this device subscription belongs to.,السائق الذي يخصه اشتراك هذا الجهاز.
 "The driver's current assigned vehicle, captured for reference.",المركبة المسندة حالياً للسائق، مسجّلة للمرجع.
 "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",مستخدم دخول السائق، منقول من السائق المرتبط، ويُستخدم لإرسال الإشعار إليه.
 "The employee agrees that the amount above is deducted from his pay in the instalments shown, until the whole amount is settled.",يوافق الموظف على خصم المبلغ أعلاه من راتبه بالأقساط المبينة حتى يُسدد كامل المبلغ.
@@ -4628,12 +4640,12 @@ The keys a worker or driver holds instead of a desk account.,المفاتيح ا
 "The last day the driver actually worked. HR settles from this date, not from the day the paper was signed.",آخر يوم عمل فيه السائق فعلاً. تحسب الموارد البشرية المستحقات من هذا التاريخ، لا من يوم توقيع الورقة.
 The lease for,عقد إيجار
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
-The login the subscription was created under (the driver's session user).,الحساب الذي أُنشئ الاشتراك تحته (مستخدم جلسة السائق).
 The manifest worker this boarding state tracks.,العامل في كشف الركاب الذي تتبعه حالة الصعود هذه.
 The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. اضبطها أولًا في إعدادات تكامل أبكس.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The notice carries an approving officer,الإشعار عليه مسؤول معتمد
 The notification number given by whoever was told outside the company.,رقم البلاغ الذي أعطته الجهة التي أُبلغت خارج الشركة.
+The notification endpoint is not an approved push service.,عنوان التنبيهات لا يتبع خدمة معتمدة.
 The number listed fits the seats in the vehicle,عدد المذكورين يناسب مقاعد المركبة
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
 The one role allowed to post further back than the window above.,الدور الوحيد الذي يجوز له التسجيل أبعد من النافذة أعلاه.
@@ -4683,8 +4695,6 @@ The stock engine is switched off in Apex Stock Settings.,محرّك المخزو
 The submitted Custody Issue whose receipt is being acknowledged.,صرف العهدة المعتمد الذي يجري الإقرار باستلامه.
 The submitted landlord invoice this payment settles.,فاتورة المؤجّر المعتمدة التي تسددها هذه الدفعة.
 The submitted supplier invoice this payment settles.,فاتورة المورّد المعتمدة التي يسددها هذا الدفع.
-The subscription's auth secret (client auth token for payload encryption).,المفتاح السري لمصادقة الاشتراك (رمز مصادقة العميل لتشفير الحمولة).
-The subscription's p256dh public key (client key for payload encryption).,المفتاح العام p256dh للاشتراك (مفتاح العميل لتشفير الحمولة).
 The supervisor user who recorded the approval decision.,المستخدم المشرف الذي سجّل قرار الاعتماد.
 "The supervisor's own signature accepting custody of these assets. A signature can be copied and reused, so only the custody desk roles can see this field.",توقيع المشرف بقبول عهدة هذه الأصول. يمكن نسخ التوقيع وإعادة استخدامه، لذلك لا يظهر هذا الحقل إلا لموظفي مكتب العهدة.
 "The technician certifies that the scope of work above was carried out at the site named, on the actual dates shown, and that the materials listed were the materials consumed. The supervisor certifies that the work was inspected on site and accepted. Work not written on this sheet was not ordered and is not accepted.",يقر الفنّي بأن نطاق العمل أعلاه نُفّذ في الموقع المذكور بالتواريخ الفعلية المبيّنة، وأن المواد المدرجة هي المواد التي استُهلكت. ويقر المشرف بأنه عاين العمل في الموقع وقبله. وأي عمل غير مكتوب في هذه الورقة لم يُطلب ولا يُقبل.
@@ -4741,6 +4751,7 @@ This fuel request has been pending approval for too long,ظل طلب الوقو�
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
 This plan has already been {0}.,تم {0} هذه الخطة مسبقاً.
 This portal access token is invalid or inactive.,رمز الوصول إلى البوابة غير صالح أو غير نشط.
+This notification device belongs to another portal holder.,جهاز التنبيهات مرتبط بمستخدم آخر.
 This portal is for route supervisors.,هذه البوابة مخصصة لمشرفي المسارات.
 This poster is out of service. Speak to your facility supervisor instead.,هذا الملصق غير مفعّل. راجع مشرف المنشأة مباشرة.
 This queue contains the maintenance work orders you are allowed to see.,تحتوي هذه القائمة على أوامر عمل الصيانة المسموح لك برؤيتها.
@@ -4970,6 +4981,7 @@ Unsatisfactory,غير مُرضٍ
 Unsigned,غير موقَّع
 Unsigned Only,غير الموقَّعة فقط
 Unspecified,غير محدد
+Unknown portal notification entry.,بوابة التنبيهات غير معروفة.
 Unsupported supervisor decision.,قرار المشرف غير مدعوم.
 Updating status...,جارٍ تحديث الحالة...
 Upload Photo (Optional),رفع صورة (اختياري)
@@ -5177,7 +5189,6 @@ When the recipient acknowledged receipt at the kiosk.,وقت إقرار المس
 When the resident accepted the housing terms at the tablet.,وقت موافقة الساكن على شروط السكن عبر الجهاز اللوحي.
 When the supervisor recorded the approval decision.,وقت تسجيل المشرف لقرار الاعتماد.
 When the worker self-claimed boarding (drives the auto-confirm timeout).,وقت تأكيد العامل صعوده بنفسه، ومنه تبدأ مهلة التأكيد التلقائي.
-When this device last refreshed or confirmed its subscription.,وقت آخر تحديث أو تأكيد لاشتراك هذا الجهاز.
 "When this passenger boarded, so a late boarding is on the paper and not only in the driver's memory.",متى ركب هذا الراكب، ليظهر التأخر في الورقة لا في ذاكرة السائق وحدها.
 "When unchecked, the worker's personal Masar link stops resolving.",عند إلغاء التفعيل، يتوقف رابط مسار العامل الشخصي عن العمل.
 "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",موقع المشكلة المُبلّغ عنها داخل السكن أو حوله، يساعد الموظفين على تحديد موضع المشكلة وتجميع الأعطال المتكررة حسب المنطقة.
@@ -5243,6 +5254,7 @@ Worker towel. Consumable sanitary item.,منشفة للعامل. من مستلز
 Worker type changed — the cart was cleared.,تغيّر نوع العامل — أُفرغت السلة.
 Worker {0} is not on this trip's boarding state.,العامل {0} غير مدرج في سجل حالة الصعود لهذه الرحلة.
 Worker {0} is not on this trip's manifest.,العامل {0} غير مدرج في كشف ركاب هذه الرحلة.
+Worker notification devices require one employee.,يجب ربط جهاز التنبيهات بعامل واحد.
 Workers,العمال
 Workers Requests Open,طلبات العمالة المفتوحة
 Workers Requests by Status,طلبات العمالة حسب الحالة
@@ -5394,6 +5406,7 @@ workshop status,حالة الورشة
 {0} free,{0} متاح
 {0} free of {1} beds,{0} متاح من أصل {1} سرير
 {0} is not a demo DocType; the demo removal would never clear it.,{0} ليس نوع مستند تجريبي، فإزالة البيانات التجريبية لن تمسحه أبدًا.
+{0} is invalid.,قيمة {0} غير صحيحة.
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
 {0} is not a valid return condition.,{0} ليست حالة إرجاع صالحة.
 {0} is too long.,{0} طويل جداً.

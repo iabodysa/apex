@@ -21,10 +21,7 @@ class TestPortalShellContract(TestCase):
             self.assertFalse((driver_api / module).exists(), module)
 
         forbidden_symbols = {
-            driver_api / "__init__.py": (
-                "def mark_arrived(",
-                "def save_push_subscription(",
-            ),
+            driver_api / "__init__.py": ("def mark_arrived(",),
             driver_api / "execution.py": ("def push_driver_position(",),
             driver_api / "profile.py": (
                 "def get_driver_context(",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cadenceLabel,
+  conditionLabel,
   dateTimeLabel,
   floorLabel,
   recordTitle,
@@ -55,6 +56,12 @@ describe("portal display labels", () => {
     expect(vehicleCategoryLabel("Coach")).toBe("حافلة");
     expect(vehicleCategoryLabel("Crew Van")).toBe("فان طاقم");
     expect(vehicleCategoryLabel("Custom Vehicle")).toBe("Custom Vehicle");
+  });
+
+  it("renders inventory conditions in the language of the housing task", () => {
+    expect(conditionLabel("Good")).toBe("جيدة");
+    expect(conditionLabel("Needs Maintenance")).toBe("تحتاج صيانة");
+    expect(conditionLabel("Missing")).toBe("مفقودة");
   });
 
   it("turns Frappe date and time values into concise Arabic business labels", () => {

@@ -184,7 +184,7 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 @rate_limit(limit=30, seconds=60)
 def mark_arrived(dispatch_trip, route_stop):
     """Record arrival at one stop and notify workers waiting there."""
-    from apex.salis.api.boarding_flow import _manifest_employees, _publish
+    from apex.salis.api.boarding_flow import _manifest_employees_for_stop, _publish
 
     _require_enabled()
     driver = _resolve_driver()
@@ -219,7 +219,7 @@ def mark_arrived(dispatch_trip, route_stop):
         dispatch_trip,
         {"route_stop": route_stop},
         driver=driver,
-        employees=_manifest_employees(dispatch_trip),
+        employees=_manifest_employees_for_stop(dispatch_trip, route_stop),
     )
     return {
         "route_stop": route_stop,

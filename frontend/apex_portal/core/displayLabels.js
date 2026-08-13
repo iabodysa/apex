@@ -106,6 +106,15 @@ const vehicleCategoryLabels = Object.freeze({
   Minibus: "حافلة صغيرة",
 });
 
+const inventoryConditionLabels = Object.freeze({
+  New: "جديدة",
+  Good: "جيدة",
+  Fair: "مقبولة",
+  "Needs Maintenance": "تحتاج صيانة",
+  Damaged: "تالفة",
+  Missing: "مفقودة",
+});
+
 export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
 }
@@ -173,6 +182,10 @@ export function cadenceLabel(value) {
 
 export function vehicleCategoryLabel(value) {
   return vehicleCategoryLabels[value] || value || "";
+}
+
+export function conditionLabel(value) {
+  return inventoryConditionLabels[value] || value || "";
 }
 
 export function recordTitle(record, fields = [], fallback = "سجل") {

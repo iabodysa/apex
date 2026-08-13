@@ -82,6 +82,18 @@ def _publish(event, dispatch_trip, payload, driver=None, employee=None, employee
             publish_to_portal_subject(audience, subject, event, body)
         except Exception:
             pass
+    try:
+        from apex.salis.api.web_push import enqueue_boarding_event
+
+        enqueue_boarding_event(
+            event,
+            dispatch_trip,
+            driver=driver,
+            employees=worker_subjects,
+            payload=payload,
+        )
+    except Exception:
+        frappe.log_error(title="Boarding push enqueue failed")
 
 
 def _request_workers(transport_request):
@@ -136,6 +148,48 @@ def _manifest_employees(dispatch_trip, transport_request=None):
                 seen.add(employee)
                 ordered.append(employee)
     return ordered
+
+
+def _manifest_employees_for_stop(dispatch_trip, route_stop):
+    """Workers whose request pickup matches one route stop."""
+    stop = frappe.db.get_value(
+        "Route Stop",
+        route_stop,
+        ["stop_name", "accommodation_building"],
+        as_dict=True,
+    )
+    requests = _manifest_request_names(dispatch_trip)
+    if not stop or not requests:
+        return []
+
+    request_buildings = {
+        row.name: row.accommodation_building
+        for row in frappe.get_all(
+            "Transport Request",
+            filters={"name": ["in", requests]},
+            fields=["name", "accommodation_building"],
+        )
+    }
+    rows = frappe.get_all(
+        "Transport Request Worker",
+        filters={"parent": ["in", requests], "parenttype": "Transport Request"},
+        fields=["parent", "employee", "pickup_point"],
+        order_by="parent asc, idx asc",
+    )
+    return list(
+        dict.fromkeys(
+            row.employee
+            for row in rows
+            if row.employee
+            and (
+                (row.pickup_point and row.pickup_point == stop.stop_name)
+                or (
+                    stop.accommodation_building
+                    and request_buildings.get(row.parent) == stop.accommodation_building
+                )
+            )
+        )
+    )
 
 
 def ensure_trip_boarding_state(dispatch_trip, transport_request=None):

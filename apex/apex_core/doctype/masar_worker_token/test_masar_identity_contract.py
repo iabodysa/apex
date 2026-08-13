@@ -56,3 +56,20 @@ class TestMasarIdentityContract(TestCase):
         )
         with self.assertRaises(frappe.PermissionError):
             security.resolve_portal_subject(security.WORKER, "expired", required=True)
+
+    def test_revocation_disables_the_subjects_notification_devices(self):
+        with (
+            patch.object(security, "_lock_subject_row", return_value=frappe._dict(name="EMP-1")),
+            patch.object(
+                security,
+                "_lock_subject_token_rows",
+                return_value=[frappe._dict(name="TOKEN-1", enabled=1)],
+            ),
+            patch.object(security, "log_credential_event"),
+            patch.object(security.frappe.db, "set_value"),
+            patch.object(security.frappe.db, "table_exists", return_value=True),
+            patch("apex.salis.api.web_push.disable_subject_subscriptions") as disable,
+        ):
+            self.assertEqual(security.revoke_subject_tokens(security.WORKER, "EMP-1"), 1)
+
+        disable.assert_called_once_with(security.WORKER, "EMP-1")

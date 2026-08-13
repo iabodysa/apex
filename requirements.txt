@@ -1,5 +1,2 @@
-# Runtime dependencies for Apex Habitat are declared via required_apps in hooks.py
-# (frappe, erpnext, hrms). Frappe bench resolves these automatically during
-# bench get-app / bench install-app — no pip pinning is needed or expected for
-# Frappe bench apps. Development dependencies are listed in pyproject.toml under
-# [project.optional-dependencies].
+# Frappe applications and Python runtime packages are declared in hooks.py and
+# pyproject.toml/setup.py respectively.

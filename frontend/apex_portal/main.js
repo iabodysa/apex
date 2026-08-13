@@ -6,6 +6,7 @@ import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./core/sessio
 import { configurePortalApi } from "./core/api.js";
 import { createPortalSubscriber } from "./core/realtime.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
+import { createPortalPushController } from "./core/pushNotifications.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
 import { createWorkerGateway } from "./features/worker/gateway.js";
 import { portalRoutes } from "./routes.js";
@@ -62,7 +63,11 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     navigation: navigationFrom(router),
   });
   const call = configurePortalApi();
+  const portalPush = ["worker", "driver"].includes(context.id)
+    ? createPortalPushController({ entry: context.id, call })
+    : null;
   application.provide("portalSubscribe", createPortalSubscriber({ settings: bootstrap }));
+  application.provide("portalPush", portalPush);
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
   application.use(FrappeUI, { socketio: false });
@@ -72,7 +77,9 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   if (!currentHash || currentHash === "/") await router.replace(bootstrap.initial_route);
   await router.isReady();
   application.mount(target);
-  void registerPortalWorker(shell).catch(() => {});
+  void registerPortalWorker(shell)
+    .then((registration) => portalPush?.initialize(registration))
+    .catch(() => {});
   return Object.freeze({ application, router, bootstrap, context });
 }
 

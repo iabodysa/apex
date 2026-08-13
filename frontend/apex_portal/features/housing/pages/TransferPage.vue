@@ -22,6 +22,6 @@ async function submit() {
     <FormControl v-model="form.target_bed" label="السرير الجديد" required />
     <FormControl v-model="form.reason" type="textarea" label="سبب النقل" />
     <ErrorMessage v-if="error" :message="error" />
-    <Button type="submit" variant="solid" :loading="transfer.loading">تنفيذ النقل</Button>
+    <Button type="submit" theme="green" variant="solid" :loading="transfer.loading">تنفيذ النقل</Button>
   </form></section>
 </template>

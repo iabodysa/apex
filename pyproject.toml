@@ -9,7 +9,7 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = { text = "MIT" }
 
-dependencies = []
+dependencies = ["pywebpush>=2,<2.4"]
 
 [project.urls]
 Repository = "https://github.com/iabodysa/apex"

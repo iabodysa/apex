@@ -114,6 +114,7 @@ def get_inventory_for_building(building, room=None):
             labels[r.name] = r.room_number or r.name
     for it in items:
         it["room_label"] = labels.get(it.room) if it.room else None
+        it["item_label"] = _(it.item_name) if it.item_name else _("Inventory Item")
 
     return {
         "building": building,

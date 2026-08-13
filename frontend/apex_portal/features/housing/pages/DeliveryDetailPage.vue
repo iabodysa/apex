@@ -59,12 +59,12 @@ async function run(resource, params, message) {
         <Badge :theme="statusTheme(delivery.doc.status)" :label="statusLabel(delivery.doc.status)" />
       </article>
       <div class="feature-actions">
-        <Button v-if="capabilities.includes('clear_exit_1')" variant="solid" :loading="exit1.loading" :disabled="busy || delivery.doc.exit1_security_cleared" @click="run(exit1, { delivery: delivery.doc.name }, 'تم اعتماد بوابة التسليم')">اعتماد بوابة التسليم</Button>
-        <Button v-if="capabilities.includes('clear_exit_3')" variant="solid" :loading="exit3.loading" :disabled="busy || delivery.doc.exit3_receiving_cleared" @click="run(exit3, { delivery: delivery.doc.name }, 'تم اعتماد الاستلام')">اعتماد الاستلام</Button>
+        <Button v-if="capabilities.includes('clear_exit_1')" theme="green" variant="solid" :loading="exit1.loading" :disabled="busy || delivery.doc.exit1_security_cleared" @click="run(exit1, { delivery: delivery.doc.name }, 'تم اعتماد بوابة التسليم')">اعتماد بوابة التسليم</Button>
+        <Button v-if="capabilities.includes('clear_exit_3')" theme="green" variant="solid" :loading="exit3.loading" :disabled="busy || delivery.doc.exit3_receiving_cleared" @click="run(exit3, { delivery: delivery.doc.name }, 'تم اعتماد الاستلام')">اعتماد الاستلام</Button>
       </div>
       <form v-if="capabilities.includes('confirm_delivery_receipt') && delivery.doc.status === 'Released'" class="feature-form" @submit.prevent="run(receipt, { delivery: delivery.doc.name, code }, 'تم تأكيد الاستلام')">
         <FormControl v-model="code" label="رمز الاستلام" inputmode="numeric" required />
-        <Button type="submit" variant="solid" :loading="receipt.loading" :disabled="code.length !== 6">تأكيد الاستلام</Button>
+        <Button type="submit" theme="green" variant="solid" :loading="receipt.loading" :disabled="code.length !== 6">تأكيد الاستلام</Button>
       </form>
       <ErrorMessage v-if="error" :message="error" />
     </template>
