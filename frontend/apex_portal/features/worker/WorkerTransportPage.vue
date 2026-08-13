@@ -1,8 +1,9 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
-import { Badge, Button, ErrorMessage, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, remainingSeconds } from "../../core/displayLabels.js";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
@@ -144,10 +145,7 @@ onBeforeUnmount(stopLive);
       </div>
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status">
-      <LoadingIndicator />
-      جارٍ تحميل الرحلة…
-    </div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="2" label="جارٍ تحميل الرحلة" />
     <div v-else-if="state === 'denied'" class="feature-state">هذا القسم غير متاح لحسابك.</div>
     <div v-else-if="state === 'error'" class="feature-state feature-state--error">
       <ErrorMessage :message="error" />

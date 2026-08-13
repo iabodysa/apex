@@ -12,15 +12,20 @@ const trips = createListResource({
     "route_assignment",
     "route_template",
     "project",
+    "project.project_name as project_label",
     "shift_name",
     "trip_date",
     "planned_start",
     "status",
     "driver",
+    "driver.full_name as driver_label",
     "vehicle",
+    "vehicle.plate_number as vehicle_label",
+    "route_template.template_name as route_template_label",
   ],
   orderBy: "trip_date desc, modified desc, name desc",
-  pageLength: 50,
+  filters: { status: ["not in", ["Completed", "Cancelled"]] },
+  pageLength: 20,
   auto: false,
 });
 </script>
@@ -31,6 +36,9 @@ const trips = createListResource({
     description="رحلات التشغيل الحالية مع السائق والمركبة وحالة التنفيذ."
     icon="navigation"
     :resource="trips"
+    date-field="trip_date"
+    :base-filters="{ status: ['not in', ['Completed', 'Cancelled']] }"
+    :status-options="[{ label: 'مخططة', value: 'Planned' }, { label: 'في الطريق', value: 'Dispatched' }]"
     empty="لا توجد رحلات تشغيل حالياً."
   >
     <template #default="{ rows }">
@@ -44,7 +52,8 @@ const trips = createListResource({
             <div class="record-identity">
               <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'رحلة تشغيل') }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
-              <span dir="auto">{{ trip.driver || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle || 'المركبة غير مسندة' }}</bdi></span>
+              <span dir="auto">{{ trip.driver_label || trip.driver || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle_label || trip.vehicle || 'المركبة غير مسندة' }}</bdi></span>
+              <small v-if="trip.project_label || trip.project" dir="auto">{{ trip.project_label || trip.project }}</small>
             </div>
             <Badge :theme="statusTheme(trip.status)" :label="statusLabel(trip.status)" />
             <FeatherIcon class="supervisor-row-chevron" name="arrow-left" aria-hidden="true" />

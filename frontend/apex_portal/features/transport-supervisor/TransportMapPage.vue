@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { statusLabel } from "../../core/displayLabels.js";
 import { createLeafletAdapter } from "./leafletAdapter.js";
-import { createTransportMapState } from "./transportMapState.js";
+import { createTransportMapState, selectedMapRows } from "./transportMapState.js";
 import "./styles.css";
 
 const positions = createResource({
@@ -21,7 +21,7 @@ const selected = computed(() => visible.value.find((item) => item.dispatch_trip 
 async function draw() {
   if (!mapRoot.value || state.value !== "ready") return;
   try {
-    await mapAdapter.draw(mapRoot.value, visible.value);
+    await mapAdapter.draw(mapRoot.value, selectedMapRows(visible.value, selectedTrip.value));
   } catch (reason) {
     mapState.fail(reason);
   }

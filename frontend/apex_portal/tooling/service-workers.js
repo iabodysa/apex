@@ -33,7 +33,7 @@ export function workerParameters({ assetUrls = builtAssets() } = {}) {
     worker: {
       swFilename: "masar-sw.min.js", navPath: "/masar/", scope: "/masar/",
       appId: "/masar/", offlinePath: `${assetBase}/offline.html`,
-      immutableAssets: [...common, `${assetBase}/icons/masar-icon-192.png`, `${assetBase}/icons/masar-icon-512.png`, `${assetBase}/icons/masar-apple-touch-icon-180.png`],
+      immutableAssets: [...common, `${assetBase}/icons/masar-icon-192.png`, `${assetBase}/icons/masar-icon-maskable-512.png`, `${assetBase}/icons/masar-apple-touch-icon-180.png`],
       cacheNamespace: "apex:masar:", legacyCachePatterns: ["^masar-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$"],
       skipWaitingOnInstall: false,
       enablePush: true,
@@ -42,7 +42,7 @@ export function workerParameters({ assetUrls = builtAssets() } = {}) {
     driver: {
       swFilename: "driver-sw.min.js", navPath: "/driver/", scope: "/driver/",
       appId: "/driver/", offlinePath: `${assetBase}/offline.html`,
-      immutableAssets: [...common, `${assetBase}/icons/driver-icon-192.png`, `${assetBase}/icons/driver-icon-512.png`, `${assetBase}/icons/driver-apple-touch-icon-180.png`],
+      immutableAssets: [...common, `${assetBase}/icons/driver-icon-192.png`, `${assetBase}/icons/driver-icon-maskable-512.png`, `${assetBase}/icons/driver-apple-touch-icon-180.png`],
       cacheNamespace: "apex:driver:", legacyCachePatterns: ["^driver-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$"],
       skipWaitingOnInstall: true,
       enablePush: true,

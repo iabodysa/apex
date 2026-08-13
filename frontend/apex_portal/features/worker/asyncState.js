@@ -1,9 +1,14 @@
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 
-export function createDraftAction(initial) {
-  const draft = reactive({ ...initial });
+export function createDraftAction(initial, { store = null, key = "" } = {}) {
+  const restored = store && key ? store.read(key) : null;
+  const draft = reactive({ ...initial, ...(restored || {}) });
   const state = ref("ready");
   const error = ref("");
+
+  if (store && key) {
+    watch(draft, (value) => store.write(key, { ...value }), { deep: true });
+  }
 
   async function submit(operation) {
     state.value = "saving";
@@ -11,6 +16,7 @@ export function createDraftAction(initial) {
     try {
       const result = await operation({ ...draft });
       state.value = "saved";
+      if (store && key) store.clear(key);
       return result;
     } catch (reason) {
       state.value = "error";

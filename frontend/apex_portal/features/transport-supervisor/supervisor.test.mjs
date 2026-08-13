@@ -73,6 +73,7 @@ describe("Masar transport supervisor feature", () => {
   it("centres operations on requests, recurring assignments and actual trips", () => {
     expect(supervisorRoutes.map((route) => route.path)).toEqual([
       "/requests",
+      "/requests/:name",
       "/assignments",
       "/assignments/:name",
       "/trips",
@@ -156,6 +157,18 @@ describe("Masar transport supervisor feature", () => {
       expect(source, name).toContain("createListResource");
       expect(source, name).not.toContain("route_supervisor.get_");
     }
+  });
+
+  it("requests human Link titles and protects a missing passenger name", () => {
+    const root = path.dirname(fileURLToPath(import.meta.url));
+    for (const name of ["RouteAssignmentsPage.vue", "DispatchTripsPage.vue", "MovementHistoryPage.vue"]) {
+      const source = readFileSync(path.join(root, "pages", name), "utf8");
+      expect(source, name).toMatch(/project\.project_name as project_label/);
+      expect(source, name).toMatch(/driver\.full_name as driver_label/);
+      expect(source, name).toMatch(/vehicle\.plate_number as vehicle_label/);
+    }
+    expect(readFileSync(path.join(root, "SupervisorPage.vue"), "utf8"))
+      .toContain("passenger.passenger_name || 'راكب غير مسمى'");
   });
 
   it("renders a clear missing-record state on a native detail route", async () => {

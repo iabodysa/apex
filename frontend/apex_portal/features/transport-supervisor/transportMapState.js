@@ -4,6 +4,10 @@ function uniqueValues(rows, key) {
   return [...new Set(rows.map((row) => row[key]).filter(Boolean))];
 }
 
+export function selectedMapRows(rows, selectedTrip) {
+  return rows.filter((row) => row.dispatch_trip === selectedTrip);
+}
+
 export function createTransportMapState() {
   const phase = ref("loading");
   const error = ref("");

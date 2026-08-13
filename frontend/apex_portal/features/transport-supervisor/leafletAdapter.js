@@ -1,6 +1,7 @@
 const LEAFLET_STYLE = "/assets/apex/vendor/leaflet-1.9.4/leaflet.css";
 const LEAFLET_SCRIPT = "/assets/apex/vendor/leaflet-1.9.4/leaflet.js";
 const DEFAULT_CENTER = Object.freeze([24.7136, 46.6753]);
+const SAUDI_BOUNDS = Object.freeze({ minLat: 16, maxLat: 33, minLng: 34, maxLng: 56 });
 const TOKEN_FALLBACKS = Object.freeze({
   primary: "var(--c-primary)",
   ink: "var(--c-ink)",
@@ -27,7 +28,11 @@ function coordinatePair(point) {
   const pair = Array.isArray(point)
     ? [Number(point[0]), Number(point[1])]
     : [Number(point?.lat), Number(point?.lng)];
-  return pair.every(Number.isFinite) ? pair : null;
+  if (!pair.every(Number.isFinite)) return null;
+  const [lat, lng] = pair;
+  if (lat < SAUDI_BOUNDS.minLat || lat > SAUDI_BOUNDS.maxLat) return null;
+  if (lng < SAUDI_BOUNDS.minLng || lng > SAUDI_BOUNDS.maxLng) return null;
+  return pair;
 }
 
 export function routeCoordinates(item) {

@@ -19,7 +19,7 @@ const requests = createListResource({
     "assigned_to_trip",
   ],
   orderBy: "modified desc, name desc",
-  pageLength: 50,
+  pageLength: 20,
   auto: false,
 });
 
@@ -37,13 +37,20 @@ function requestTitle(request) {
     description="طلبات العاملين مرتبة لتحديد الرحلة التالية ومتابعة حالتها."
     icon="inbox"
     :resource="requests"
+    date-field="pickup_datetime"
+    :status-options="[
+      { label: 'معتمد', value: 'Approved' },
+      { label: 'مجدول', value: 'Scheduled' },
+      { label: 'مرفوض', value: 'Rejected' },
+      { label: 'مكتمل', value: 'Fulfilled' },
+    ]"
     empty="لا توجد طلبات نقل تحتاج متابعة."
   >
     <template #default="{ rows }">
       <ol class="supervisor-request-queue">
         <li v-for="(request, index) in rows" :key="request.name" class="supervisor-request-card">
           <span class="supervisor-sequence"><bdi>{{ String(index + 1).padStart(2, '0') }}</bdi></span>
-          <div class="supervisor-request-card__copy">
+          <RouterLink class="supervisor-request-card__copy" :to="`/requests/${encodeURIComponent(request.name)}`">
             <strong dir="auto">{{ requestTitle(request) }}</strong>
             <bdi class="record-reference" dir="auto" translate="no">{{ request.name }}</bdi>
             <div class="supervisor-route-line">
@@ -57,7 +64,7 @@ function requestTitle(request) {
               <span v-if="request.project_label || request.project" dir="auto">{{ request.project_label || request.project }}</span>
               <span v-if="request.assigned_to_trip" dir="auto">ضمن {{ request.assigned_to_trip }}</span>
             </div>
-          </div>
+          </RouterLink>
           <Badge :theme="statusTheme(request.status)" :label="statusLabel(request.status)" />
         </li>
       </ol>

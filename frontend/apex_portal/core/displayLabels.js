@@ -5,6 +5,7 @@ const statusLabels = Object.freeze({
   Rejected: "مرفوض",
   Planned: "مجدولة",
   Dispatched: "في الطريق",
+  Boarded: "صعد",
   Scheduled: "مجدولة",
   Fulfilled: "مكتملة",
   Unassigned: "غير مسندة",

@@ -29,6 +29,19 @@ export const supervisorRoutes = Object.freeze([
     titleFields: ["from_location", "to_location", "requester_name"],
     fallbackTitle: "طلب نقل",
   }),
+  page("/requests/:name", "transport-request-detail", "transport.request.read", "تفاصيل طلب النقل", "file-text", SupervisorPage, {
+    doctype: "Transport Request",
+    fields: [
+      { key: "requester_name", label: "مقدم الطلب" },
+      { key: "service_line", label: "نوع النقل" },
+      { key: "project", label: "المشروع" },
+      { key: "from_location", label: "الانطلاق" },
+      { key: "to_location", label: "الوجهة" },
+      { key: "pickup_datetime", label: "موعد الانطلاق" },
+      { key: "worker_count", label: "عدد الركاب" },
+      { key: "assigned_to_trip", label: "الرحلة المسندة" },
+    ],
+  }),
   page("/assignments", "route-assignments", "transport.assignment.read", "التشغيل المتكرر", "repeat", pages.assignments, {
     doctype: "Route Assignment",
     titleFields: ["assignment_name", "shift_name"],

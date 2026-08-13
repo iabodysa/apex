@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
+import { nextTick } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 
 import { createWorkerGateway } from "./gateway.js";
@@ -65,6 +66,18 @@ describe("Masar worker feature", () => {
 
     expect(resourceCalls).toContainEqual(["apex.salis.api.masar.get_worker_home", undefined]);
     expect(JSON.stringify(resourceCalls)).not.toContain("employee_id");
+    wrapper.unmount();
+  });
+
+  it("shows the shared record skeleton while a personal read is pending", async () => {
+    resourceData.set("apex.salis.api.masar.get_worker_home", () => new Promise(() => {}));
+    const router = createRouter({ history: createMemoryHistory(), routes: workerRoutes });
+    await router.push("/home");
+    await router.isReady();
+    const wrapper = mount(WorkerPage, { global: { plugins: [router] } });
+
+    expect(wrapper.find(".portal-skeleton").exists()).toBe(true);
+    expect(wrapper.find(".feature-page__empty").exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -138,6 +151,32 @@ describe("Masar worker feature", () => {
       subject: "طلب صيانة",
       description: "المكيف لا يعمل",
     });
+  });
+
+  it("restores a subject-scoped draft and clears it only after a successful submit", async () => {
+    let saved = { subject: "طلب صيانة", description: "المكيف لا يعمل" };
+    const store = {
+      read: vi.fn(() => saved),
+      write: vi.fn((_key, value) => { saved = value; }),
+      clear: vi.fn(() => { saved = null; }),
+    };
+    const action = createDraftAction(
+      { subject: "", description: "" },
+      { store, key: "service-request" },
+    );
+
+    expect(action.draft).toEqual({ subject: "طلب صيانة", description: "المكيف لا يعمل" });
+    action.draft.description = "المكيف لا يعمل منذ الصباح";
+    await nextTick();
+    expect(store.write).toHaveBeenLastCalledWith("service-request", {
+      subject: "طلب صيانة",
+      description: "المكيف لا يعمل منذ الصباح",
+    });
+
+    await action.submit(vi.fn().mockRejectedValue(new Error("network")));
+    expect(store.clear).not.toHaveBeenCalled();
+    await action.submit(vi.fn().mockResolvedValue({ name: "REQ-1" }));
+    expect(store.clear).toHaveBeenCalledWith("service-request");
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {

@@ -1,12 +1,23 @@
 <script setup>
+import { computed } from "vue";
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
 
-defineProps({
+const props = defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
+});
+
+const mobileGroups = computed(() => {
+  const groups = new Map();
+  for (const item of props.navigation) {
+    const name = item.group || "أخرى";
+    if (!groups.has(name)) groups.set(name, []);
+    groups.get(name).push(item);
+  }
+  return [...groups.entries()].map(([label, items]) => ({ label, items }));
 });
 </script>
 
@@ -36,6 +47,20 @@ defineProps({
             <span>{{ item.label }}</span>
           </a>
         </RouterLink>
+      </nav>
+      <nav v-if="mobileGroups.length" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
+        <details v-for="group in mobileGroups" :key="group.label" class="operations-shell__mobile-group">
+          <summary>{{ group.label }}</summary>
+          <RouterLink
+            v-for="item in group.items"
+            :key="item.to"
+            class="portal-nav-link"
+            :to="item.to"
+          >
+            <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+            <span>{{ item.label }}</span>
+          </RouterLink>
+        </details>
       </nav>
     </aside>
     <div class="operations-shell__body">

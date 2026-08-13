@@ -12,8 +12,12 @@ const assignments = createListResource({
     "work_shift",
     "shift_name",
     "project",
+    "project.project_name as project_label",
     "driver",
+    "driver.full_name as driver_label",
     "vehicle",
+    "vehicle.plate_number as vehicle_label",
+    "route_template.template_name as route_template_label",
     "starts_on",
     "ends_on",
     "enabled",
@@ -22,7 +26,7 @@ const assignments = createListResource({
     "generated_through",
   ],
   orderBy: "modified desc, name desc",
-  pageLength: 50,
+  pageLength: 20,
   auto: false,
 });
 </script>
@@ -33,6 +37,8 @@ const assignments = createListResource({
     description="الشفت والمسار والمشروع والإسناد الافتراضي في سجل واحد يعتمد قبل توليد الرحلات."
     icon="repeat"
     :resource="assignments"
+    date-field="starts_on"
+    :status-options="[{ label: 'نشط', value: 'Active' }, { label: 'متوقف', value: 'Inactive' }]"
     empty="لا يوجد تشغيل متكرر مسند إليك."
   >
     <template #default="{ rows }">
@@ -52,9 +58,10 @@ const assignments = createListResource({
           </header>
           <dl>
             <div><dt>الشفت</dt><dd dir="auto">{{ assignment.work_shift || assignment.shift_name || 'غير محدد' }}</dd></div>
-            <div><dt>المسار</dt><dd dir="auto">{{ assignment.route_template || 'غير محدد' }}</dd></div>
-            <div><dt>المشروع</dt><dd dir="auto">{{ assignment.project || 'غير محدد' }}</dd></div>
-            <div><dt>السائق</dt><dd dir="auto">{{ assignment.driver || 'غير مسند' }}</dd></div>
+            <div><dt>المسار</dt><dd dir="auto">{{ assignment.route_template_label || assignment.route_template || 'غير محدد' }}</dd></div>
+            <div><dt>المشروع</dt><dd dir="auto">{{ assignment.project_label || assignment.project || 'غير محدد' }}</dd></div>
+            <div><dt>السائق</dt><dd dir="auto">{{ assignment.driver_label || assignment.driver || 'غير مسند' }}</dd></div>
+            <div><dt>المركبة</dt><dd><bdi dir="auto">{{ assignment.vehicle_label || assignment.vehicle || 'غير مسندة' }}</bdi></dd></div>
             <div><dt>يبدأ في</dt><dd>{{ dateTimeLabel(assignment.starts_on) || 'غير محدد' }}</dd></div>
             <div><dt>مولّد حتى</dt><dd>{{ dateTimeLabel(assignment.generated_through) || 'لم يبدأ' }}</dd></div>
           </dl>

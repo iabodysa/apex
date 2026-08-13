@@ -77,6 +77,18 @@ describe("Masar driver feature", () => {
     wrapper.unmount();
   });
 
+  it("shows the shared record skeleton while a driver read is pending", async () => {
+    resourceData.set("apex.salis.api.driver_portal.personal.get_masar_today", () => new Promise(() => {}));
+    const router = createRouter({ history: createMemoryHistory(), routes: driverRoutes });
+    await router.push("/today");
+    await router.isReady();
+    const wrapper = mount(DriverPage, { global: { plugins: [router] } });
+
+    expect(wrapper.find(".portal-skeleton").exists()).toBe(true);
+    expect(wrapper.find(".feature-page__empty").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it("keeps boarding, arrival, and exception handling on the trip screen", async () => {
     const tripRoute = driverRoutes.find((route) => route.path === "/route/:trip");
     expect(tripRoute.component).toBe(DriverTripPage);

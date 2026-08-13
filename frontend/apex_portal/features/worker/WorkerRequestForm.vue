@@ -5,6 +5,7 @@ import { createDraftAction } from "./asyncState.js";
 
 const props = defineProps({ transport: { type: Boolean, default: false } });
 const gateway = inject("workerGateway", null);
+const drafts = inject("portalDrafts", null);
 const requestTypes = [
   { label: "صيانة", value: "Maintenance" },
   { label: "سلامة", value: "Safety" },
@@ -14,7 +15,10 @@ const requestTypes = [
 ];
 const action = createDraftAction(props.transport
   ? { pickup_point: "", destination: "", travel_date: "", reason: "" }
-  : { request_type: "Maintenance", subject: "", description: "" });
+  : { request_type: "Maintenance", subject: "", description: "" }, {
+  store: drafts,
+  key: props.transport ? "transport-request" : "service-request",
+});
 
 function save() {
   const method = props.transport ? gateway?.createTransportRequest : gateway?.createRequest;

@@ -22,6 +22,15 @@ describe("housing feature contract", () => {
     expect(pages.every((page) => page.default)).toBe(true);
   });
 
+  it("keeps overview and creation routes out of the primary navigation and groups operations by domain", () => {
+    const navigation = housingRoutes.filter((route) => route.meta.navigation);
+    expect(navigation.map((route) => route.path)).not.toContain("/overview");
+    expect(navigation.map((route) => route.path)).not.toContain("/maintenance/new");
+    expect(navigation.find((route) => route.path === "/count").meta.group).toBe("العهد والجرد");
+    expect(navigation.find((route) => route.path === "/custody").meta.group).toBe("العهد والجرد");
+    expect(navigation.find((route) => route.path === "/delivery").meta.group).toBe("العهد والجرد");
+  });
+
   it("clears holder and cart when building changes", () => {
     const state = {
       building: "BLD-A",

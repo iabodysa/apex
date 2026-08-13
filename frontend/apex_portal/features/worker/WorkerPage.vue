@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { Button, FeatherIcon, createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { recordTitle, statusLabel } from "../../core/displayLabels.js";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
 
 const route = useRoute();
 let resource;
@@ -53,7 +54,7 @@ watch(() => route.fullPath, load, { immediate: true });
       <FeatherIcon :name="spec.icon || 'circle'" aria-hidden="true" />
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ التحميل…</div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
     <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية عرض هذه الصفحة.</div>
     <div v-else-if="state === 'error'" class="feature-state feature-state--error">
       <p>{{ error }}</p>

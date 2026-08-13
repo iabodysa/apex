@@ -87,4 +87,17 @@ describe("operations identity", () => {
     expect(wrapper.get(".operations-shell__brand img").attributes("src"))
       .toBe("/assets/apex/icons/brand/apex-mark.svg");
   });
+
+  it("offers grouped mobile navigation instead of a horizontally scrolling route strip", async () => {
+    const navigation = [
+      { label: "مهام اليوم", to: "/today", icon: "home", group: "اليوم" },
+      { label: "القادمون", to: "/arrivals", icon: "users", group: "السكن" },
+      { label: "العهد", to: "/custody", icon: "briefcase", group: "العهد والجرد" },
+    ];
+    const { wrapper } = await mountShell(OperationsShell, { navigation });
+
+    expect(wrapper.find(".operations-shell__mobile-nav").exists()).toBe(true);
+    expect(wrapper.findAll(".operations-shell__mobile-group")).toHaveLength(4);
+    expect(wrapper.find(".operations-shell__mobile-nav").text()).toContain("العهد والجرد");
+  });
 });

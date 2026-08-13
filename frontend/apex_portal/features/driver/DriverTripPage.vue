@@ -1,9 +1,10 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
 import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -156,10 +157,7 @@ onBeforeUnmount(stopLive);
       <Badge v-if="trip" :label="statusLabel(trip.status)" />
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status">
-      <LoadingIndicator />
-      جارٍ تجهيز الرحلة…
-    </div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" label="جارٍ تجهيز الرحلة" />
     <div v-else-if="state === 'denied'" class="feature-state">هذه الرحلة غير متاحة لحسابك.</div>
     <div v-else-if="state === 'error'" class="feature-state feature-state--error">
       <ErrorMessage :message="error" />

@@ -31,6 +31,17 @@ describe("transport map state", () => {
     expect(mapState.visible.value.map((row) => row.dispatch_trip)).toEqual(["TRIP-3"]);
   });
 
+  it("returns only the selected trip for viewport framing", async () => {
+    const { selectedMapRows } = await loadModule();
+    const rows = [
+      { dispatch_trip: "RIYADH", lat: 24.7, lng: 46.7 },
+      { dispatch_trip: "JEDDAH", lat: 21.5, lng: 39.2 },
+    ];
+
+    expect(selectedMapRows(rows, "JEDDAH")).toEqual([rows[1]]);
+    expect(selectedMapRows(rows, "MISSING")).toEqual([]);
+  });
+
   it("distinguishes empty, denied, and failed reads", async () => {
     const { createTransportMapState } = await loadModule();
     const mapState = createTransportMapState();

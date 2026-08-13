@@ -16,6 +16,27 @@
   block-size: 28px;
 }
 
+.supervisor-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.supervisor-result-count {
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+.supervisor-load-more {
+  justify-self: center;
+  min-inline-size: 180px;
+}
+
 .supervisor-primary-link {
   display: inline-flex;
   align-items: center;
@@ -497,6 +518,10 @@
 }
 
 @media (max-width: 640px) {
+  .supervisor-filters {
+    grid-template-columns: 1fr;
+  }
+
   .supervisor-collection__heading,
   .supervisor-request-card,
   .supervisor-trip-board > li > a,

@@ -122,7 +122,7 @@ watch(doc, loadTransitions, { immediate: true });
           <li v-for="stop in doc.stops" :key="stop.name || stop.stop_key">
             <bdi>{{ String(stop.idx || 0).padStart(2, '0') }}</bdi>
             <div><strong dir="auto">{{ stop.stop_name }}</strong><span dir="auto">{{ stop.location || stop.accommodation_building || 'الموقع غير محدد' }}</span></div>
-            <span>{{ stop.planned_time || '—' }}</span>
+            <span>{{ dateTimeLabel(stop.planned_time) || '—' }}</span>
           </li>
         </ol>
       </section>
@@ -151,7 +151,7 @@ watch(doc, loadTransitions, { immediate: true });
         <header><h3>قائمة الركاب</h3><span>{{ doc.boarding_state.length }}</span></header>
         <ol class="supervisor-passenger-list">
           <li v-for="passenger in doc.boarding_state" :key="passenger.passenger_key || passenger.name">
-            <div><strong dir="auto">{{ passenger.passenger_name }}</strong><span dir="auto">{{ passenger.pickup_stop }} ← {{ passenger.dropoff_stop }}</span></div>
+            <div><strong dir="auto">{{ passenger.passenger_name || 'راكب غير مسمى' }}</strong><span dir="auto">{{ passenger.pickup_stop }} ← {{ passenger.dropoff_stop }}</span></div>
             <Badge :theme="statusTheme(passenger.status)" :label="statusLabel(passenger.status)" />
           </li>
         </ol>

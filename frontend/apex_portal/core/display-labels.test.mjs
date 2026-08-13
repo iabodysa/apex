@@ -17,6 +17,7 @@ describe("portal display labels", () => {
     expect(statusLabel("New")).toBe("جديد");
     expect(statusLabel("Completed")).toBe("مكتملة");
     expect(statusLabel("Dispatched")).toBe("في الطريق");
+    expect(statusLabel("Boarded")).toBe("صعد");
     expect(statusLabel("Unassigned")).toBe("غير مسندة");
     expect(statusLabel("assigned")).toBe("مسندة");
     expect(statusLabel("Ready")).toBe("جاهزة");

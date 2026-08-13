@@ -1,6 +1,8 @@
 <script setup>
-import { computed, onMounted } from "vue";
-import { Button, FeatherIcon } from "frappe-ui";
+import { computed, inject, reactive, watch } from "vue";
+import { Button, FeatherIcon, FormControl } from "frappe-ui";
+import { routeLocationKey, routerKey } from "vue-router";
+import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -9,7 +11,14 @@ const props = defineProps({
   resource: { type: Object, required: true },
   collections: { type: Array, default: () => [] },
   empty: { type: String, required: true },
+  baseFilters: { type: Object, default: () => ({}) },
+  dateField: { type: String, default: "" },
+  statusOptions: { type: Array, default: () => [] },
 });
+
+const route = inject(routeLocationKey, reactive({ query: {} }));
+const router = inject(routerKey, null);
+const filters = reactive({ status: "", project: "", date: "" });
 
 const rows = computed(() => {
   if (Array.isArray(props.resource.data)) return props.resource.data;
@@ -25,7 +34,32 @@ function refresh() {
   return props.resource.reload?.() ?? props.resource.fetch?.();
 }
 
-onMounted(refresh);
+async function applyQuery(query) {
+  Object.assign(filters, {
+    status: typeof query?.status === "string" ? query.status : "",
+    project: typeof query?.project === "string" ? query.project : "",
+    date: typeof query?.date === "string" ? query.date : "",
+  });
+  props.resource.update?.({
+    filters: filtersFromQuery(filters, {
+      base: props.baseFilters,
+      dateField: props.dateField,
+    }),
+  });
+  await refresh();
+}
+
+function updateFilters() {
+  const query = queryFromFilters(filters);
+  if (router) return router.replace({ query });
+  return applyQuery(query);
+}
+
+function loadMore() {
+  return props.resource.next?.();
+}
+
+watch(() => route.query, applyQuery, { immediate: true, deep: true });
 </script>
 
 <template>
@@ -50,6 +84,19 @@ onMounted(refresh);
       </div>
     </header>
 
+    <form class="supervisor-filters" aria-label="تصفية القائمة" @submit.prevent="updateFilters">
+      <FormControl
+        v-if="statusOptions.length"
+        v-model="filters.status"
+        type="select"
+        label="الحالة"
+        :options="[{ label: 'كل الحالات', value: '' }, ...statusOptions]"
+      />
+      <FormControl v-model="filters.project" label="المشروع" />
+      <FormControl v-if="dateField" v-model="filters.date" type="date" label="التاريخ" />
+      <Button type="submit" variant="outline">تطبيق</Button>
+    </form>
+
     <div v-if="loading && !resource.data" class="feature-state" role="status">
       جارٍ تحميل {{ title }}…
     </div>
@@ -58,6 +105,18 @@ onMounted(refresh);
       <Button variant="outline" @click="refresh">إعادة المحاولة</Button>
     </div>
     <div v-else-if="!rows.length" class="feature-state">{{ empty }}</div>
-    <slot v-else :rows="rows" :data="resource.data" />
+    <template v-else>
+      <p class="supervisor-result-count" role="status">{{ resultCountLabel(rows.length, resource.hasNextPage) }}</p>
+      <slot :rows="rows" :data="resource.data" />
+      <Button
+        v-if="resource.hasNextPage"
+        class="supervisor-load-more"
+        variant="outline"
+        :loading="loading"
+        @click="loadMore"
+      >
+        تحميل المزيد
+      </Button>
+    </template>
   </section>
 </template>
