@@ -6,8 +6,8 @@ import { createSupervisorBuildingsResource } from "../data/buildings.js";
 
 const props = defineProps({ resource: { type: Object, default: null } });
 const capabilities = globalThis.window?.apex_portal?.capabilities || [];
-const canReadEstate = capabilities.includes("estate_read");
-const buildings = props.resource || (canReadEstate ? createSupervisorBuildingsResource() : null);
+const canSelectBuilding = capabilities.includes("estate_read") || capabilities.includes("check_in");
+const buildings = props.resource || (canSelectBuilding ? createSupervisorBuildingsResource() : null);
 // The parent that already reads the portfolio owns the request; this picker only reads it.
 const ownsRequest = Boolean(buildings) && !props.resource;
 const options = computed(() =>

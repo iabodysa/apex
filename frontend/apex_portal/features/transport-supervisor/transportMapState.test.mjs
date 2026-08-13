@@ -17,16 +17,19 @@ describe("transport map state", () => {
 
     await mapState.load(async () => ({
       positions: [
-        { dispatch_trip: "TRIP-1", project: "Project A", status: "Running" },
-        { dispatch_trip: "TRIP-2", project: "Project B", status: "Waiting" },
-        { dispatch_trip: "TRIP-3", project: "Project A", status: "Waiting" },
+        { dispatch_trip: "TRIP-1", project: "PROJ-A", project_label: "Project A", status: "Running" },
+        { dispatch_trip: "TRIP-2", project: "PROJ-B", project_label: "Project B", status: "Waiting" },
+        { dispatch_trip: "TRIP-3", project: "PROJ-A", project_label: "Project A", status: "Waiting" },
       ],
     }));
 
     expect(mapState.phase.value).toBe("ready");
-    expect(mapState.projects.value).toEqual(["Project A", "Project B"]);
+    expect(mapState.projects.value).toEqual([
+      { value: "PROJ-A", label: "Project A" },
+      { value: "PROJ-B", label: "Project B" },
+    ]);
     expect(mapState.statuses.value).toEqual(["Running", "Waiting"]);
-    mapState.project.value = "Project A";
+    mapState.project.value = "PROJ-A";
     mapState.status.value = "Waiting";
     expect(mapState.visible.value.map((row) => row.dispatch_trip)).toEqual(["TRIP-3"]);
   });

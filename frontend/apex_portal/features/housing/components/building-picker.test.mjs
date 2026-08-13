@@ -50,15 +50,15 @@ describe("BuildingPicker", () => {
     expect(empty.find("select").exists()).toBe(false);
   });
 
-  it("renders nothing and requests no building for a role without estate_read", async () => {
+  it("loads scoped buildings for check-in without estate portfolio access", async () => {
     globalThis.window.apex_portal = { capabilities: ["check_in"] };
     const wrapper = mount(BuildingPicker);
     await flushPromises();
 
-    expect(wrapper.text()).toBe("");
+    expect(wrapper.text()).toContain("لا توجد مبانٍ متاحة");
     expect(wrapper.find("select").exists()).toBe(false);
-    expect(createResource).not.toHaveBeenCalled();
-    expect(resource.fetch).not.toHaveBeenCalled();
+    expect(createResource).toHaveBeenCalledOnce();
+    expect(resource.fetch).toHaveBeenCalledOnce();
   });
 
   it("reads a parent-owned resource without issuing its own request", async () => {

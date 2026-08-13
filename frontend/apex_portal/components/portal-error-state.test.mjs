@@ -72,4 +72,16 @@ describe("shared portal error state", () => {
       "لا تملك صلاحية عرض هذه الصفحة.",
     );
   });
+
+  it("uses the localized fallback for frappe-ui's generic server message", () => {
+    const error = {
+      messages: ["Internal Server Error"],
+      response: { status: 500 },
+    };
+
+    expect(errorStatus(error)).toBe(500);
+    expect(safeErrorMessage(error, "تعذّر تحميل حركة المركبات.")).toBe(
+      "تعذّر تحميل حركة المركبات.",
+    );
+  });
 });

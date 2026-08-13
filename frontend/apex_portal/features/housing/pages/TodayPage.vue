@@ -14,7 +14,8 @@ const canCreateMaintenance = capabilities.includes("maintenance_create");
 const canSeeCustody = capabilities.includes("custody_read");
 const canSeeSafety = capabilities.includes("safety_read");
 const canSeePortfolio = canSeeBeds;
-const buildings = createSupervisorBuildingsResource();
+const canSelectBuilding = canSeePortfolio || canSeeArrivals;
+const buildings = canSeePortfolio ? createSupervisorBuildingsResource() : null;
 const grid = createResource({ url: "apex.habitat.api.front_desk.get_building_grid" });
 const requests = createResource({ url: "apex.habitat.api.front_desk.building_open_requests" });
 const arrivals = createResource({ url: "apex.habitat.api.arrivals_desk.get_expected_arrivals" });
@@ -61,7 +62,7 @@ onMounted(() => {
   <section class="feature-page today-page">
     <header class="feature-page__header arrivals-heading">
       <div><p class="feature-kicker">وردية السكن</p><h2>ما يحتاج انتباهك اليوم</h2><p>صورة سريعة للمبنى، ثم أقرب إجراء.</p></div>
-      <BuildingPicker v-if="canSeePortfolio" :resource="buildings" />
+      <BuildingPicker v-if="canSelectBuilding" :resource="buildings" />
     </header>
 
     <section v-if="canSeePortfolio" class="today-portfolio" aria-labelledby="today-portfolio-title">

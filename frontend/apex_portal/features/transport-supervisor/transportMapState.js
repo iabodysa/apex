@@ -69,7 +69,18 @@ export function createTransportMapState() {
   const positions = ref([]);
   const project = ref("");
   const status = ref("");
-  const projects = computed(() => uniqueValues(positions.value, "project"));
+  const projects = computed(() => {
+    const options = new Map();
+    positions.value.forEach((row) => {
+      if (row.project && !options.has(row.project)) {
+        options.set(row.project, {
+          value: row.project,
+          label: row.project_label || row.project,
+        });
+      }
+    });
+    return [...options.values()];
+  });
   const statuses = computed(() => uniqueValues(positions.value, "status"));
   const visible = computed(() => positions.value.filter((item) =>
     (!project.value || item.project === project.value)

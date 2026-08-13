@@ -53,6 +53,7 @@ class TestActiveTripMap(FrappeTestCase):
                 trip_title="السكن إلى المشروع",
                 route_assignment="RA-1",
                 project="PROJ-1",
+                project_label="مشروع المطار",
                 status="Dispatched",
                 driver="DRV-1",
                 vehicle="VEH-1",
@@ -88,7 +89,13 @@ class TestActiveTripMap(FrappeTestCase):
         )
         self.assertEqual(result["positions"][0]["route_name"], "السكن إلى المشروع")
         self.assertEqual(result["positions"][0]["route_assignment"], "RA-1")
+        self.assertEqual(result["positions"][0]["project"], "PROJ-1")
+        self.assertEqual(result["positions"][0]["project_label"], "مشروع المطار")
         self.assertEqual(result["positions"][0]["driver_name"], "السائق أحمد")
+        self.assertIn(
+            "project.project_name as project_label",
+            get_list.call_args.kwargs["fields"],
+        )
         self.assertFalse(result["has_more"])
 
     @patch.object(route_supervisor, "_label_map", return_value={})

@@ -33,9 +33,9 @@ const endpoints = Object.freeze({
   safety: "apex.habitat.api.safety_checklist.get_due_cadences",
 });
 
-async function mountToday(capabilities) {
+async function mountToday(capabilities, initialBuilding = "BLD-1") {
   globalThis.window.apex_portal = { capabilities };
-  selectBuilding("BLD-1");
+  selectBuilding(initialBuilding);
   const wrapper = mount(TodayPage, {
     global: {
       stubs: {
@@ -68,16 +68,16 @@ describe("housing Today capability boundaries", () => {
     delete globalThis.window.apex_portal;
   });
 
-  it("calls and links only arrivals when check-in is the sole housing-domain capability", async () => {
-    const wrapper = await mountToday(["today", "check_in"]);
+  it("selects a scoped building and loads only arrivals for a check-in user", async () => {
+    const wrapper = await mountToday(["today", "check_in"], "");
     const urls = calls.map(([url]) => url);
 
+    expect(urls).toContain(endpoints.buildings);
     expect(urls).toContain(endpoints.arrivals);
     expect(urls).not.toContain(endpoints.beds);
     expect(urls).not.toContain(endpoints.maintenance);
     expect(urls).not.toContain(endpoints.safety);
-    expect(urls).not.toContain(endpoints.buildings);
-    expect(wrapper.find("[data-building-select]").exists()).toBe(false);
+    expect(wrapper.find("[data-building-select]").exists()).toBe(true);
     expect(wrapper.text()).not.toContain("جاري تحميل المباني");
     expect(wrapper.find('[data-to="/arrivals"]').exists()).toBe(true);
     for (const unauthorized of ["/beds", "/maintenance", "/maintenance/new", "/custody", "/rounds"]) {

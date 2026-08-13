@@ -62,7 +62,7 @@ export function isRetryablePortalError(source) {
 export function safeErrorMessage(source, fallback = "تحقق من الاتصال ثم حاول مرة أخرى.", title = "") {
   for (const candidate of candidatesFrom(source)) {
     const clean = cleanText(candidate);
-    if (!clean || clean === title || INTERNAL_DETAIL.test(clean)) continue;
+    if (!clean || clean === title || clean === "Internal Server Error" || INTERNAL_DETAIL.test(clean)) continue;
     return clean;
   }
   return fallback;

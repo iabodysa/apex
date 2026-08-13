@@ -25,7 +25,7 @@ describe("transport map selection", () => {
     fetch.mockReset();
     fetch.mockResolvedValue({
       positions: [
-        { dispatch_trip: "TRIP-1", project: "A", status: "Running", path: [[24.7, 46.7]] },
+        { dispatch_trip: "TRIP-1", project: "PROJ-A", project_label: "مشروع ألف", status: "Running", path: [[24.7, 46.7]] },
         { dispatch_trip: "TRIP-2", project: "B", status: "Waiting", path: [[21.5, 39.2]] },
       ],
     });
@@ -62,6 +62,16 @@ describe("transport map selection", () => {
     const status = wrapper.get(".transport-map-status");
     expect(status.text()).toBe("الموقع غير متاح");
     expect(status.attributes("data-state")).toBe("offline");
+    wrapper.unmount();
+  });
+
+  it("shows the project title while retaining its identifier for filters", async () => {
+    const wrapper = mount(TransportMapPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    expect(wrapper.findAll(".transport-map-selection dd")[2].text()).toBe("مشروع ألف");
     wrapper.unmount();
   });
 });

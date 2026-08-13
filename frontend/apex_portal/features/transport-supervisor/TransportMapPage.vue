@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد رحلات نشطة الآن.</div>
     <template v-else>
       <div class="transport-map-filters">
-        <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects.map((value) => ({ label: value, value }))]" @change="applyFilters" />
+        <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects]" @change="applyFilters" />
         <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @change="applyFilters" />
       </div>
       <ul class="transport-map-legend" aria-label="دليل الخريطة">
@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
         <dl>
           <div><dt>السائق</dt><dd>{{ selected.driver_name || "غير مسند" }}</dd></div>
           <div><dt>المركبة</dt><dd><bdi dir="auto" translate="no">{{ selected.plate || "غير مسندة" }}</bdi></dd></div>
-          <div><dt>المشروع</dt><dd dir="auto">{{ selected.project || "غير محدد" }}</dd></div>
+          <div><dt>المشروع</dt><dd dir="auto">{{ selected.project_label || selected.project || "غير محدد" }}</dd></div>
         </dl>
         <RouterLink class="transport-map-selection__action" :to="`/trips/${selected.dispatch_trip}`">فتح تشغيل الرحلة</RouterLink>
       </article>
