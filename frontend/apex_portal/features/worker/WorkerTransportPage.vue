@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { Badge, Button, ErrorMessage, LoadingIndicator, toast } from "frappe-ui";
 import QRCode from "qrcode";
+import { dateTimeLabel } from "../../core/displayLabels.js";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
@@ -173,7 +174,7 @@ onBeforeUnmount(stopLive);
             <p>{{ trip.pickup_point || trip.my_pickup?.stop_name || 'نقطة التجمع' }}</p>
           </div>
           <dl class="journey-facts">
-            <div><dt>الموعد</dt><dd><bdi>{{ trip.pickup_datetime || trip.depart_time || 'يحدد لاحقاً' }}</bdi></dd></div>
+            <div><dt>الموعد</dt><dd><bdi>{{ dateTimeLabel(trip.pickup_datetime || trip.depart_time) || 'يحدد لاحقاً' }}</bdi></dd></div>
             <div><dt>الحافلة</dt><dd>{{ trip.vehicle?.plate_number || 'تحت الإسناد' }}</dd></div>
             <div><dt>السائق</dt><dd>{{ trip.driver?.full_name || 'تحت الإسناد' }}</dd></div>
           </dl>
@@ -193,7 +194,7 @@ onBeforeUnmount(stopLive);
         <summary>الرحلات السابقة <span>{{ pastTrips.length }}</span></summary>
         <article v-for="trip in pastTrips" :key="trip.transport_request" class="journey-history__row">
           <strong>{{ trip.destination?.location || trip.pickup_point || 'رحلة مسار' }}</strong>
-          <bdi>{{ trip.pickup_datetime }}</bdi>
+          <bdi>{{ dateTimeLabel(trip.pickup_datetime) }}</bdi>
         </article>
       </details>
     </template>

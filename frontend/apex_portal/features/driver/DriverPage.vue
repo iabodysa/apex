@@ -2,6 +2,7 @@
 import { computed, inject, onMounted, ref } from "vue";
 import { Button, Badge, FeatherIcon } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
+import { dateTimeLabel, statusLabel } from "../../core/displayLabels.js";
 
 const route = useRoute();
 const gateway = inject("driverGateway", null);
@@ -49,8 +50,8 @@ onMounted(load);
     <div v-else-if="state === 'empty'" class="feature-state">{{ spec.empty || 'لا توجد بيانات حالياً.' }}</div>
     <div v-else class="feature-grid">
       <component :is="spec.detail ? RouterLink : 'article'" v-for="row in rows" :key="row.name" class="feature-card" :to="spec.detail ? spec.detail.replace(':trip', row.name) : undefined">
-        <strong>{{ row.route_name || row.employee_name || row.name }}</strong><Badge :label="row.status || 'جاهز'" />
-        <span>{{ row.depart_time || row.trip_date || row.description }}</span>
+        <strong>{{ row.route_name || row.employee_name || row.name }}</strong><Badge :label="statusLabel(row.status || 'جاهز')" />
+        <span>{{ dateTimeLabel(row.depart_time || row.trip_date) || row.description }}</span>
       </component>
       <dl v-if="!rows.length" class="feature-details"><template v-for="field in spec.fields || []" :key="field.key"><dt>{{ field.label }}</dt><dd dir="auto">{{ data?.[field.key] || '—' }}</dd></template></dl>
       <div v-if="spec.execution" class="feature-actions"><Button variant="solid" @click="execute('startTrip')">بدء الرحلة</Button><Button variant="outline" @click="execute('finishTrip')">إنهاء مسار السائق</Button></div>

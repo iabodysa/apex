@@ -185,7 +185,8 @@ h3 {
 
 .mobile-shell__title {
   font-size: clamp(1.75rem, 8vw, 2.5rem);
-  line-height: 1.05;
+  line-height: 1.25;
+  padding-block: 0.08em;
 }
 
 .mobile-shell__main {

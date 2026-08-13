@@ -3,6 +3,7 @@ import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
+import { statusLabel } from "../../core/displayLabels.js";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -124,7 +125,7 @@ onBeforeUnmount(stopLive);
   <section class="feature-page journey-page driver-journey" :aria-busy="state === 'loading'">
     <header class="feature-page__heading journey-heading">
       <div><p class="feature-page__eyebrow">تنفيذ الرحلة</p><h2>{{ trip?.route_name || 'خط السير' }}</h2><p>المحطات والركاب في شاشة واحدة.</p></div>
-      <Badge v-if="trip" :label="trip.status" />
+      <Badge v-if="trip" :label="statusLabel(trip.status)" />
     </header>
 
     <div v-if="state === 'loading'" class="feature-state" role="status"><LoadingIndicator /> جارٍ تجهيز الرحلة…</div>
