@@ -413,6 +413,60 @@ class TestBackendBoardContract(unittest.TestCase):
         )
         frappe.delete_doc.assert_not_called()
 
+    @patch.object(converge_patch, "_delete_unused_legacy_holiday_list")
+    @patch.object(converge_patch, "frappe")
+    def test_non_issue_link_disables_and_retains_legacy_sla(
+        self, frappe, delete_legacy_holiday_list
+    ):
+        legacy = SimpleNamespace(
+            name=salis_support.SLA_NAME,
+            holiday_list="Apex Support 24x7",
+            priorities=[
+                SimpleNamespace(
+                    priority=priority,
+                    response_time=response,
+                    resolution_time=resolution,
+                    default_priority=is_default,
+                )
+                for priority, response, resolution, is_default in salis_support.SLA_PRIORITIES
+            ],
+            support_and_resolution=[
+                SimpleNamespace(
+                    workday=day,
+                    start_time="00:00:00",
+                    end_time="23:59:59",
+                )
+                for day in converge_patch._LEGACY_DAYS
+            ],
+            sla_fulfilled_on=[
+                SimpleNamespace(status="Resolved"),
+                SimpleNamespace(status="Closed"),
+            ],
+        )
+        frappe.LinkExistsError = frappe_framework.LinkExistsError
+        frappe.db.get_value.return_value = salis_support.SLA_NAME
+        frappe.get_doc.return_value = legacy
+        frappe.db.exists.return_value = None
+        frappe.delete_doc.side_effect = frappe_framework.LinkExistsError(
+            "linked from a non-Issue document"
+        )
+
+        converge_patch._retire_untouched_legacy_sla()
+
+        frappe.delete_doc.assert_called_once_with(
+            "Service Level Agreement",
+            salis_support.SLA_NAME,
+            ignore_permissions=True,
+        )
+        frappe.db.set_value.assert_called_once_with(
+            "Service Level Agreement",
+            salis_support.SLA_NAME,
+            "enabled",
+            0,
+            update_modified=False,
+        )
+        delete_legacy_holiday_list.assert_not_called()
+
     def test_salis_issue_masters_are_native_fixtures(self):
         hooks = (APP_ROOT / "hooks.py").read_text(encoding="utf-8")
         self.assertIn('"dt": "Issue Type"', hooks)

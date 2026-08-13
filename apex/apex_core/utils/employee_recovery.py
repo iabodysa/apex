@@ -41,9 +41,11 @@ either side.
 
 from __future__ import annotations
 
+from datetime import date
+
 import frappe
 from frappe import _
-from frappe.utils import flt, get_first_day, get_last_day, getdate, today
+from frappe.utils import flt, getdate, today
 from hrms.hr.doctype.employee_advance import employee_advance as native_employee_advance
 from hrms.payroll.doctype.salary_structure import (
     salary_structure as native_salary_structure,
@@ -276,6 +278,22 @@ def _salary_preview(employee: str, payroll_date: str):
     return preview, assignment
 
 
+def _salary_period(preview) -> tuple[date, date] | None:
+    """Return the native preview's authoritative payroll boundaries."""
+    start = getattr(preview, "start_date", None)
+    end = getattr(preview, "end_date", None)
+    if not (start and end):
+        return None
+    try:
+        start = getdate(start)
+        end = getdate(end)
+    except (TypeError, ValueError):
+        return None
+    if not (start and end) or start > end:
+        return None
+    return start, end
+
+
 def _draft_deductions(
     employee: str,
     start: str,
@@ -363,6 +381,7 @@ def compute_recovery_installment(
     *,
     exclude_additional_salary: str | None = None,
     locked_advance=None,
+    salary_preview=None,
 ) -> float:
     """SAR recoverable from ONE pay period against ``advance``.
 
@@ -413,8 +432,17 @@ def compute_recovery_installment(
     if not enabled:
         return 0.0
 
-    preview, _assignment = _salary_preview(advance_doc.employee, payroll_date)
+    preview = salary_preview
+    if preview is None:
+        preview, _assignment = _salary_preview(advance_doc.employee, payroll_date)
     if not preview:
+        return 0.0
+    period = _salary_period(preview)
+    if not period:
+        frappe.logger().warning(
+            "employee_recovery: native Salary Slip preview has no valid pay period for "
+            f"employee {advance_doc.employee} on {payroll_date}. Recovery deferred."
+        )
         return 0.0
 
     cap_percent = min(
@@ -426,8 +454,7 @@ def compute_recovery_installment(
         or MAX_RECOVERY_PERCENT,
         MAX_RECOVERY_PERCENT,
     )
-    period_start = get_first_day(payroll_date)
-    period_end = get_last_day(payroll_date)
+    period_start, period_end = period
     headroom = max(
         flt(preview.net_pay)
         - _draft_deductions(
@@ -464,6 +491,27 @@ def validate_recovery_additional_salary(doc, method=None):
         return
     if advance.docstatus != 1 or advance.status not in OPEN_ADVANCE_STATUSES:
         frappe.throw(_("The linked Employee Advance is no longer open for recovery."))
+    component = _recovery_component()
+    advance_employee = advance.get("employee")
+    advance_company = advance.get("company")
+    advance_currency = advance.get("currency")
+    if not (
+        advance_employee
+        and getattr(doc, "employee", None) == advance_employee
+        and advance_company
+        and getattr(doc, "company", None) == advance_company
+        and advance_currency
+        and getattr(doc, "currency", None) == advance_currency
+        and component
+        and getattr(doc, "salary_component", None) == component
+        and getattr(doc, "type", None) == "Deduction"
+    ):
+        frappe.throw(
+            _(
+                "This recovery Additional Salary no longer matches its Employee Advance "
+                "or the configured deduction component. Cancel it and schedule a new draft."
+            )
+        )
     allowed = compute_recovery_installment(
         advance.name,
         doc.payroll_date,
@@ -514,8 +562,15 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     frappe.has_permission("Additional Salary", "create", throw=True)
 
     payroll_date = payroll_date or today()
-    period_start = get_first_day(payroll_date)
-    period_end = get_last_day(payroll_date)
+    preview, _assignment = _salary_preview(advance_doc.employee, payroll_date)
+    period = _salary_period(preview)
+    if not period:
+        frappe.logger().warning(
+            "employee_recovery: native Salary Slip preview has no valid pay period for "
+            f"employee {advance_doc.employee} on {payroll_date}. Recovery deferred."
+        )
+        return None
+    period_start, period_end = period
 
     if frappe.db.exists(
         "Additional Salary",
@@ -532,7 +587,12 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     if not component:
         return None
 
-    amount = compute_recovery_installment(advance, payroll_date)
+    amount = compute_recovery_installment(
+        advance,
+        payroll_date,
+        locked_advance=advance_doc,
+        salary_preview=preview,
+    )
     if amount <= 0:
         frappe.logger().info(
             f"employee_recovery: nothing recoverable from advance {advance} for {payroll_date}. Deferred."

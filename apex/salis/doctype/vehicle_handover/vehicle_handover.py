@@ -255,10 +255,38 @@ class VehicleHandover(Document):
         )
 
     def on_cancel(self):
-        """Restores the vehicle's current driver back to the outgoing driver."""
+        """Restore mirrors from the assignment that remains authoritative."""
         lock_vehicle(self.vehicle)
 
-        if (
+        active_receipt_assignment = None
+        if self.direction == "Receipt" and self.vehicle_assignment:
+            assignment = frappe.get_doc(
+                "Vehicle Assignment",
+                self.vehicle_assignment,
+                for_update=True,
+            )
+            if (
+                assignment.docstatus == 1
+                and assignment.status == "Active"
+                and assignment.vehicle == self.vehicle
+                and assignment.driver
+            ):
+                active_receipt_assignment = assignment
+
+        if active_receipt_assignment:
+            frappe.db.set_value(
+                "Salis Vehicle",
+                self.vehicle,
+                "current_driver",
+                active_receipt_assignment.driver,
+            )
+            frappe.db.set_value(
+                "Salis Driver",
+                active_receipt_assignment.driver,
+                "current_vehicle",
+                self.vehicle,
+            )
+        elif (
             frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver")
             == self.to_driver
         ):

@@ -101,6 +101,73 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
         )
         frappe.get_list.assert_not_called()
 
+    @patch.object(vehicle_handover, "lock_vehicle")
+    @patch.object(vehicle_handover, "add_timeline_note")
+    @patch.object(vehicle_handover, "frappe")
+    @patch.object(vehicle_handover, "_", side_effect=lambda message: message)
+    def test_receipt_submit_then_cancel_preserves_authoritative_active_assignment(
+        self, _translate, frappe, _timeline, _lock_vehicle
+    ):
+        state = {"vehicle_driver": None, "driver_vehicle": None}
+        assignment = SimpleNamespace(
+            name="VA-1",
+            vehicle="VEH-1",
+            driver="DRV-1",
+            status="Active",
+            docstatus=1,
+        )
+        frappe.get_doc.return_value = assignment
+
+        def get_value(doctype, _name, fieldname):
+            if (doctype, fieldname) == ("Salis Vehicle", "current_driver"):
+                return state["vehicle_driver"]
+            if (doctype, fieldname) == ("Salis Driver", "current_vehicle"):
+                return state["driver_vehicle"]
+            return None
+
+        def set_value(doctype, _name, fieldname, value=None, **_kwargs):
+            updates = fieldname if isinstance(fieldname, dict) else {fieldname: value}
+            if doctype == "Salis Vehicle" and "current_driver" in updates:
+                state["vehicle_driver"] = updates["current_driver"]
+            if doctype == "Salis Driver" and "current_vehicle" in updates:
+                state["driver_vehicle"] = updates["current_vehicle"]
+
+        frappe.db.get_value.side_effect = get_value
+        frappe.db.set_value.side_effect = set_value
+        doc = self._doc(
+            name="GV-1",
+            direction="Receipt",
+            from_driver=None,
+            to_driver="DRV-1",
+            odometer_reading=150,
+            handover_date="2026-08-14",
+            discrepancy_status="Clean",
+            add_comment=MagicMock(),
+        )
+
+        vehicle_handover.VehicleHandover.on_submit(doc)
+
+        self.assertEqual(state["vehicle_driver"], "DRV-1")
+        self.assertEqual(state["driver_vehicle"], "VEH-1")
+        state.update(vehicle_driver=None, driver_vehicle=None)
+        frappe.db.set_value.reset_mock()
+
+        vehicle_handover.VehicleHandover.on_cancel(doc)
+
+        self.assertEqual(state["vehicle_driver"], "DRV-1")
+        self.assertEqual(state["driver_vehicle"], "VEH-1")
+        self.assertIn(
+            call("Salis Vehicle", "VEH-1", "current_driver", "DRV-1"),
+            frappe.db.set_value.call_args_list,
+        )
+        self.assertIn(
+            call("Salis Driver", "DRV-1", "current_vehicle", "VEH-1"),
+            frappe.db.set_value.call_args_list,
+        )
+        frappe.get_doc.assert_called_once_with(
+            "Vehicle Assignment", "VA-1", for_update=True
+        )
+
     @patch.object(vehicle_handover, "_", side_effect=lambda message: message)
     @patch.object(vehicle_handover.frappe, "throw", side_effect=frappe.ValidationError)
     @patch.object(vehicle_handover.frappe.db, "get_value", return_value="GV-OLD")

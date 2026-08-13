@@ -74,9 +74,21 @@ def _retire_untouched_legacy_sla():
             update_modified=False,
         )
         return
-    frappe.delete_doc(
-        "Service Level Agreement", name, ignore_permissions=True, force=True
-    )
+    try:
+        frappe.delete_doc(
+            "Service Level Agreement",
+            name,
+            ignore_permissions=True,
+        )
+    except frappe.LinkExistsError:
+        frappe.db.set_value(
+            "Service Level Agreement",
+            name,
+            "enabled",
+            0,
+            update_modified=False,
+        )
+        return
     _delete_unused_legacy_holiday_list()
 
 

@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
 import frappe
+from frappe.utils import getdate
 from hrms.hr.doctype.employee_advance import employee_advance as native_advance
 from hrms.payroll.doctype.additional_salary import (
     additional_salary as native_additional_salary,
@@ -46,6 +47,8 @@ class TestEmployeeRecovery(unittest.TestCase):
         ]
         frappe_mock.db.get_single_value.side_effect = [1, 50]
         preview = MagicMock(
+            start_date="2026-08-01",
+            end_date="2026-08-31",
             net_pay=350,
             gross_pay=800,
             deductions=[
@@ -92,13 +95,83 @@ class TestEmployeeRecovery(unittest.TestCase):
             frappe._dict(salary_structure="Monthly", base=1000),
         ]
         frappe_mock.db.get_single_value.side_effect = [1, 50]
-        make_salary_slip.return_value = MagicMock(net_pay=100, gross_pay=1000)
+        make_salary_slip.return_value = MagicMock(
+            start_date="2026-08-01",
+            end_date="2026-08-31",
+            net_pay=100,
+            gross_pay=1000,
+        )
 
         self.assertEqual(
             employee_recovery.compute_recovery_installment("ADV-1", "2026-08-31"),
             0,
         )
         make_salary_slip.assert_called_once()
+
+    @patch.object(employee_recovery, "_pending_installments", return_value=0)
+    @patch.object(employee_recovery, "_source_link_available", return_value=True)
+    @patch.object(native_salary_structure, "make_salary_slip")
+    @patch.object(employee_recovery, "frappe")
+    def test_weekly_preview_dates_bound_draft_headroom_to_that_pay_period(
+        self, frappe_mock, make_salary_slip, _links, _pending
+    ):
+        frappe_mock.db.get_value.side_effect = [
+            frappe._dict(
+                employee="EMP-1",
+                paid_amount=1000,
+                claimed_amount=0,
+                return_amount=0,
+                docstatus=1,
+                custom_source_doctype="Vehicle Incident",
+                custom_source_document="VI-1",
+                custom_agreed_installment=0,
+            ),
+            frappe._dict(salary_structure="Weekly", base=1000),
+        ]
+        frappe_mock.db.get_single_value.side_effect = [1, 50]
+        make_salary_slip.return_value = MagicMock(
+            start_date="2026-08-08",
+            end_date="2026-08-14",
+            net_pay=300,
+            gross_pay=1000,
+        )
+
+        def drafts_for_requested_period(_doctype, *, or_filters, **_kwargs):
+            period = or_filters[0][2]
+            if period == [getdate("2026-08-08"), getdate("2026-08-14")]:
+                return [
+                    frappe._dict(
+                        amount=50,
+                        is_recurring=0,
+                        from_date=None,
+                        to_date=None,
+                    )
+                ]
+            return [
+                frappe._dict(
+                    amount=250,
+                    is_recurring=0,
+                    from_date=None,
+                    to_date=None,
+                )
+            ]
+
+        frappe_mock.get_all.side_effect = drafts_for_requested_period
+
+        amount = employee_recovery.compute_recovery_installment(
+            "ADV-1", "2026-08-14"
+        )
+
+        self.assertEqual(amount, 250)
+        draft_query = frappe_mock.get_all.call_args
+        self.assertEqual(
+            draft_query.kwargs["or_filters"][0],
+            [
+                "payroll_date",
+                "between",
+                [getdate("2026-08-08"), getdate("2026-08-14")],
+            ],
+        )
 
     @patch.object(employee_recovery, "_pending_installments", return_value=0)
     @patch.object(employee_recovery, "_source_link_available", return_value=True)
@@ -252,12 +325,20 @@ class TestEmployeeRecovery(unittest.TestCase):
 
     @patch.object(employee_recovery, "compute_recovery_installment", return_value=100)
     @patch.object(employee_recovery, "_recovery_component", return_value="Recovery")
+    @patch.object(
+        employee_recovery,
+        "_salary_preview",
+        return_value=(
+            SimpleNamespace(start_date="2026-08-01", end_date="2026-08-31"),
+            None,
+        ),
+    )
     @patch.object(native_advance, "create_return_through_additional_salary")
     @patch.object(employee_recovery, "frappe")
     def test_scheduler_locks_advance_and_uses_native_draft_factory(
-        self, frappe_mock, native_factory, _component, _amount
+        self, frappe_mock, native_factory, _preview, _component, _amount
     ):
-        advance = SimpleNamespace(name="ADV-1")
+        advance = SimpleNamespace(name="ADV-1", employee="EMP-1")
         installment = MagicMock(name="installment")
         installment.name = "AS-1"
         native_factory.return_value = installment
@@ -280,11 +361,19 @@ class TestEmployeeRecovery(unittest.TestCase):
         frappe_mock.db.set_value.assert_not_called()
         self.assertEqual(result, "AS-1")
 
+    @patch.object(
+        employee_recovery,
+        "_salary_preview",
+        return_value=(
+            SimpleNamespace(start_date="2026-08-01", end_date="2026-08-31"),
+            None,
+        ),
+    )
     @patch.object(employee_recovery, "frappe")
     def test_existing_draft_or_submitted_installment_is_not_duplicated(
-        self, frappe_mock
+        self, frappe_mock, _preview
     ):
-        advance = SimpleNamespace(name="ADV-1")
+        advance = SimpleNamespace(name="ADV-1", employee="EMP-1")
         frappe_mock.get_doc.return_value = advance
         frappe_mock.db.exists.return_value = "AS-1"
 
@@ -300,11 +389,62 @@ class TestEmployeeRecovery(unittest.TestCase):
         )
 
     @patch.object(employee_recovery, "compute_recovery_installment", return_value=100)
+    @patch.object(employee_recovery, "_recovery_component", return_value="Recovery")
+    @patch.object(employee_recovery, "_salary_preview")
+    @patch.object(native_advance, "create_return_through_additional_salary")
+    @patch.object(employee_recovery, "frappe")
+    def test_weekly_august_7_draft_does_not_dedupe_august_14_period(
+        self,
+        frappe_mock,
+        native_factory,
+        salary_preview,
+        _component,
+        _amount,
+    ):
+        advance = SimpleNamespace(name="ADV-1", employee="EMP-1")
+        installment = MagicMock(name="installment")
+        installment.name = "AS-14"
+        frappe_mock.get_doc.return_value = advance
+        frappe_mock.logger.return_value = MagicMock()
+        native_factory.return_value = installment
+        salary_preview.return_value = (
+            SimpleNamespace(start_date="2026-08-08", end_date="2026-08-14"),
+            SimpleNamespace(salary_structure="Weekly"),
+        )
+
+        def existing_august_7(_doctype, filters):
+            start, end = filters["payroll_date"][1]
+            return (
+                "AS-07"
+                if getdate(start)
+                <= getdate("2026-08-07")
+                <= getdate(end)
+                else None
+            )
+
+        frappe_mock.db.exists.side_effect = existing_august_7
+
+        result = employee_recovery.schedule_recovery_deduction(
+            "ADV-1", "2026-08-14"
+        )
+
+        self.assertEqual(result, "AS-14")
+        duplicate_filters = frappe_mock.db.exists.call_args.args[1]
+        self.assertEqual(
+            duplicate_filters["payroll_date"],
+            [
+                "between",
+                [getdate("2026-08-08"), getdate("2026-08-14")],
+            ],
+        )
+
+    @patch.object(employee_recovery, "compute_recovery_installment", return_value=100)
+    @patch.object(employee_recovery, "_recovery_component", return_value="Recovery")
     @patch.object(employee_recovery, "_source_link_available", return_value=True)
     @patch.object(employee_recovery, "_", side_effect=lambda message: message)
     @patch.object(employee_recovery, "frappe")
     def test_recovery_before_submit_rejects_cancelled_stale_and_overclaim(
-        self, frappe_mock, _translate, _links, compute_installment
+        self, frappe_mock, _translate, _links, _component, compute_installment
     ):
         handler = getattr(
             employee_recovery, "validate_recovery_additional_salary", None
@@ -317,6 +457,11 @@ class TestEmployeeRecovery(unittest.TestCase):
             ref_docname="ADV-1",
             amount=101,
             payroll_date="2026-08-31",
+            employee="EMP-1",
+            company="Company A",
+            currency="SAR",
+            salary_component="Recovery",
+            type="Deduction",
         )
 
         frappe_mock.db.get_value.return_value = "Vehicle Incident"
@@ -326,24 +471,36 @@ class TestEmployeeRecovery(unittest.TestCase):
                 name="ADV-1",
                 docstatus=2,
                 status="Cancelled",
+                employee="EMP-1",
+                company="Company A",
+                currency="SAR",
                 custom_source_doctype="Vehicle Incident",
             ),
             frappe._dict(
                 name="ADV-1",
                 docstatus=1,
                 status="Returned",
+                employee="EMP-1",
+                company="Company A",
+                currency="SAR",
                 custom_source_doctype="Vehicle Incident",
             ),
             frappe._dict(
                 name="ADV-1",
                 docstatus=1,
                 status="Partly Claimed and Returned",
+                employee="EMP-1",
+                company="Company A",
+                currency="SAR",
                 custom_source_doctype="Vehicle Incident",
             ),
             frappe._dict(
                 name="ADV-1",
                 docstatus=1,
                 status="Paid",
+                employee="EMP-1",
+                company="Company A",
+                currency="SAR",
                 custom_source_doctype="Vehicle Incident",
             ),
         ):
@@ -358,6 +515,62 @@ class TestEmployeeRecovery(unittest.TestCase):
             exclude_additional_salary="AS-1",
             locked_advance=frappe_mock.get_doc.return_value,
         )
+
+    @patch.object(employee_recovery, "compute_recovery_installment", return_value=100)
+    @patch.object(employee_recovery, "_recovery_component", return_value="Recovery")
+    @patch.object(employee_recovery, "_source_link_available", return_value=True)
+    @patch.object(employee_recovery, "_", side_effect=lambda message: message)
+    @patch.object(employee_recovery, "frappe")
+    def test_before_submit_rejects_mismatched_recovery_identity_before_native_mutation(
+        self,
+        frappe_mock,
+        _translate,
+        _links,
+        _component,
+        compute_installment,
+    ):
+        frappe_mock.throw.side_effect = frappe.ValidationError
+        frappe_mock.db.get_value.return_value = "Vehicle Incident"
+        advance = frappe._dict(
+            name="ADV-1",
+            employee="EMP-A",
+            company="Company A",
+            currency="SAR",
+            return_amount=40,
+            docstatus=1,
+            status="Paid",
+            custom_source_doctype="Vehicle Incident",
+        )
+        frappe_mock.get_doc.return_value = advance
+        valid = {
+            "name": "AS-1",
+            "ref_doctype": "Employee Advance",
+            "ref_docname": "ADV-1",
+            "employee": "EMP-A",
+            "company": "Company A",
+            "currency": "SAR",
+            "salary_component": "Recovery",
+            "type": "Deduction",
+            "amount": 50,
+            "payroll_date": "2026-08-14",
+        }
+        attacks = {
+            "employee B": {"employee": "EMP-B"},
+            "earning": {"type": "Earning"},
+            "wrong component": {"salary_component": "Bonus"},
+            "wrong company": {"company": "Company B"},
+            "wrong currency": {"currency": "USD"},
+        }
+
+        for attack, changes in attacks.items():
+            with self.subTest(attack=attack):
+                row = SimpleNamespace(**(valid | changes))
+                with self.assertRaises(frappe.ValidationError):
+                    employee_recovery.validate_recovery_additional_salary(row)
+                self.assertEqual(advance.return_amount, 40)
+                frappe_mock.db.set_value.assert_not_called()
+                compute_installment.assert_not_called()
+                frappe_mock.throw.reset_mock()
 
     @patch.object(employee_recovery, "_source_link_available", return_value=True)
     @patch.object(employee_recovery, "_", side_effect=lambda message: message)
