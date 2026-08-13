@@ -505,11 +505,14 @@ def validate_recovery_additional_salary(doc, method=None):
         and component
         and getattr(doc, "salary_component", None) == component
         and getattr(doc, "type", None) == "Deduction"
+        and getattr(doc, "is_recurring", None) == 0
+        and getattr(doc, "overwrite_salary_structure_amount", None) == 0
+        and getattr(doc, "payroll_date", None)
     ):
         frappe.throw(
             _(
                 "This recovery Additional Salary no longer matches its Employee Advance "
-                "or the configured deduction component. Cancel it and schedule a new draft."
+                "or the configured one-period deduction. Cancel it and schedule a new draft."
             )
         )
     allowed = compute_recovery_installment(

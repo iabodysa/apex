@@ -462,6 +462,8 @@ class TestEmployeeRecovery(unittest.TestCase):
             currency="SAR",
             salary_component="Recovery",
             type="Deduction",
+            is_recurring=0,
+            overwrite_salary_structure_amount=0,
         )
 
         frappe_mock.db.get_value.return_value = "Vehicle Incident"
@@ -521,7 +523,7 @@ class TestEmployeeRecovery(unittest.TestCase):
     @patch.object(employee_recovery, "_source_link_available", return_value=True)
     @patch.object(employee_recovery, "_", side_effect=lambda message: message)
     @patch.object(employee_recovery, "frappe")
-    def test_before_submit_rejects_mismatched_recovery_identity_before_native_mutation(
+    def test_before_submit_rejects_mismatched_recovery_contract_before_native_mutation(
         self,
         frappe_mock,
         _translate,
@@ -553,6 +555,8 @@ class TestEmployeeRecovery(unittest.TestCase):
             "type": "Deduction",
             "amount": 50,
             "payroll_date": "2026-08-14",
+            "is_recurring": 0,
+            "overwrite_salary_structure_amount": 0,
         }
         attacks = {
             "employee B": {"employee": "EMP-B"},
@@ -560,6 +564,9 @@ class TestEmployeeRecovery(unittest.TestCase):
             "wrong component": {"salary_component": "Bonus"},
             "wrong company": {"company": "Company B"},
             "wrong currency": {"currency": "USD"},
+            "recurring": {"is_recurring": 1},
+            "overwrite": {"overwrite_salary_structure_amount": 1},
+            "missing payroll date": {"payroll_date": None},
         }
 
         for attack, changes in attacks.items():
