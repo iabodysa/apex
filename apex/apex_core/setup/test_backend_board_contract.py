@@ -189,6 +189,25 @@ class TestBackendBoardContract(unittest.TestCase):
         self.assertEqual(sequence, ["switch", "insert"])
         sla.insert.assert_called_once_with(ignore_permissions=True)
 
+    @patch.object(salis_support, "frappe")
+    def test_support_switch_is_enabled_when_native_sla_already_exists(self, frappe):
+        frappe.db.exists.side_effect = [True, True]
+        frappe.db.get_value.return_value = "SLA-EXISTING"
+
+        result = salis_support.configure_support_sla(
+            enabled=True,
+            holiday_list="Saudi Holidays",
+            workdays=["Sunday"],
+            start_time="08:00:00",
+            end_time="17:00:00",
+        )
+
+        self.assertEqual(result, "SLA-EXISTING")
+        frappe.db.set_single_value.assert_called_once_with(
+            "Support Settings", "track_service_level_agreement", 1
+        )
+        frappe.new_doc.assert_not_called()
+
     def test_salis_issue_masters_are_native_fixtures(self):
         hooks = (APP_ROOT / "hooks.py").read_text(encoding="utf-8")
         self.assertIn('"dt": "Issue Type"', hooks)

@@ -51,6 +51,10 @@ def configure_support_sla(
         )
     if not frappe.db.exists("Holiday List", holiday_list):
         frappe.throw(_("Holiday List {0} does not exist.").format(holiday_list))
+    # Native SLA tracking is the opt-in switch for both newly-created and
+    # operator-owned existing SLAs. Keep this before either success path so an
+    # existing Salis SLA cannot leave Issue tracking disabled.
+    frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
     if frappe.db.exists("Service Level Agreement", {"service_level": SLA_NAME}):
         return frappe.db.get_value(
             "Service Level Agreement", {"service_level": SLA_NAME}, "name"
@@ -81,9 +85,6 @@ def configure_support_sla(
         )
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
-    # ERPNext validates this switch during Service Level Agreement.insert(). The
-    # surrounding setup/install transaction rolls it back if native validation fails.
-    frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
     doc.insert(ignore_permissions=True)
     return doc.name
 
