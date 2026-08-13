@@ -91,6 +91,8 @@ curl_output*.txt
 # that ships.
 !apex/translations/
 !apex/translations/*.csv
+# Local ratchet state for the translation audit; it is tooling data, not app content.
+apex/translations/*.stale-baseline.txt
 
 # Markdown outside the documentation tree stays private by default.
 *.md
