@@ -4,6 +4,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.utils import get_time, getdate
 
 
 SLA_NAME = "Salis Support SLA"
@@ -35,6 +36,119 @@ def _parse_workdays(value) -> list[str]:
     return [str(day).strip() for day in (value or []) if str(day).strip()]
 
 
+def ensure_support_holiday_list(
+    *,
+    name=None,
+    from_date=None,
+    to_date=None,
+    weekly_off=None,
+    country=None,
+    subdivision=None,
+):
+    """Resolve or create the setup calendar through ERPNext's native Holiday List."""
+    name = (name or "").strip()
+    if not (name and from_date and to_date):
+        frappe.throw(
+            _(
+                "Holiday List name, From Date and To Date are required to enable support SLA."
+            )
+        )
+    if getdate(from_date) > getdate(to_date):
+        frappe.throw(_("Holiday List To Date cannot be before From Date."))
+
+    existing = frappe.db.exists("Holiday List", name)
+    if existing:
+        holiday_list = frappe.get_doc("Holiday List", existing)
+        expected = {
+            "from_date": str(getdate(from_date)),
+            "to_date": str(getdate(to_date)),
+            "weekly_off": weekly_off or "",
+            "country": country or "",
+            "subdivision": subdivision or "",
+        }
+        actual = {
+            "from_date": str(getdate(holiday_list.from_date)),
+            "to_date": str(getdate(holiday_list.to_date)),
+            "weekly_off": holiday_list.weekly_off or "",
+            "country": holiday_list.country or "",
+            "subdivision": holiday_list.subdivision or "",
+        }
+        if actual != expected:
+            frappe.throw(
+                _(
+                    "Holiday List {0} already exists with a different calendar definition."
+                ).format(existing)
+            )
+        return existing
+
+    holiday_list = frappe.new_doc("Holiday List")
+    holiday_list.holiday_list_name = name
+    holiday_list.from_date = from_date
+    holiday_list.to_date = to_date
+    holiday_list.weekly_off = weekly_off or None
+    holiday_list.country = country or None
+    holiday_list.subdivision = subdivision or None
+    if weekly_off:
+        holiday_list.get_weekly_off_dates()
+    if country:
+        holiday_list.get_local_holidays()
+    holiday_list.insert(ignore_permissions=True)
+    return holiday_list.name
+
+
+def _sla_contract(doc):
+    priorities = {
+        (
+            row.priority,
+            int(row.response_time or 0),
+            int(row.resolution_time or 0),
+            int(row.default_priority or 0),
+        )
+        for row in doc.priorities
+    }
+    schedule = {
+        (
+            row.workday,
+            str(get_time(row.start_time)),
+            str(get_time(row.end_time)),
+        )
+        for row in doc.support_and_resolution
+    }
+    fulfilled = {row.status for row in doc.sla_fulfilled_on}
+    return priorities, schedule, fulfilled
+
+
+def _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time):
+    priorities, schedule, fulfilled = _sla_contract(doc)
+    expected_schedule = {
+        (day, str(get_time(start_time)), str(get_time(end_time))) for day in workdays
+    }
+    compatible = (
+        doc.service_level == SLA_NAME
+        and bool(doc.enabled)
+        and doc.document_type == "Issue"
+        and bool(doc.default_service_level_agreement)
+        and bool(doc.apply_sla_for_resolution)
+        and doc.default_priority == "Medium"
+        and doc.holiday_list == holiday_list
+        and not getattr(doc, "entity_type", None)
+        and not getattr(doc, "entity", None)
+        and not getattr(doc, "condition", None)
+        and not getattr(doc, "start_date", None)
+        and not getattr(doc, "end_date", None)
+        and not getattr(doc, "pause_sla_on", None)
+        and priorities == set(SLA_PRIORITIES)
+        and schedule == expected_schedule
+        and fulfilled == {"Resolved", "Closed"}
+    )
+    if not compatible:
+        frappe.throw(
+            _(
+                "Service Level Agreement {0} already exists with an incompatible contract."
+            ).format(doc.name)
+        )
+
+
 def configure_support_sla(
     *, enabled=False, holiday_list=None, workdays=None, start_time=None, end_time=None
 ):
@@ -51,13 +165,25 @@ def configure_support_sla(
         )
     if not frappe.db.exists("Holiday List", holiday_list):
         frappe.throw(_("Holiday List {0} does not exist.").format(holiday_list))
-    # Native SLA tracking is the opt-in switch for both newly-created and
-    # operator-owned existing SLAs. Keep this before either success path so an
-    # existing Salis SLA cannot leave Issue tracking disabled.
-    frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
-    if frappe.db.exists("Service Level Agreement", {"service_level": SLA_NAME}):
-        return frappe.db.get_value(
-            "Service Level Agreement", {"service_level": SLA_NAME}, "name"
+    existing = frappe.db.exists("Service Level Agreement", {"service_level": SLA_NAME})
+    if existing:
+        doc = frappe.get_doc("Service Level Agreement", existing)
+        _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time)
+        frappe.db.set_single_value(
+            "Support Settings", "track_service_level_agreement", 1
+        )
+        return doc.name
+
+    missing_priorities = [
+        priority
+        for priority, _response, _resolution, _is_default in SLA_PRIORITIES
+        if not frappe.db.exists("Issue Priority", priority)
+    ]
+    if missing_priorities:
+        frappe.throw(
+            _("Required Issue Priorities are missing: {0}.").format(
+                ", ".join(missing_priorities)
+            )
         )
 
     doc = frappe.new_doc("Service Level Agreement")
@@ -68,16 +194,15 @@ def configure_support_sla(
     doc.apply_sla_for_resolution = 1
     doc.holiday_list = holiday_list
     for priority, response, resolution, is_default in SLA_PRIORITIES:
-        if frappe.db.exists("Issue Priority", priority):
-            doc.append(
-                "priorities",
-                {
-                    "priority": priority,
-                    "response_time": response,
-                    "resolution_time": resolution,
-                    "default_priority": is_default,
-                },
-            )
+        doc.append(
+            "priorities",
+            {
+                "priority": priority,
+                "response_time": response,
+                "resolution_time": resolution,
+                "default_priority": is_default,
+            },
+        )
     for day in workdays:
         doc.append(
             "support_and_resolution",
@@ -85,6 +210,8 @@ def configure_support_sla(
         )
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
+    # ERPNext's Service Level Agreement validator requires this native switch.
+    frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
     doc.insert(ignore_permissions=True)
     return doc.name
 

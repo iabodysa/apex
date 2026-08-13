@@ -119,6 +119,9 @@ doc_events = {
     "Employee": {
         "on_change": "apex.apex_core.utils.portal_token_security.on_employee_change",
     },
+    "Additional Salary": {
+        "before_submit": "apex.apex_core.utils.employee_recovery.validate_recovery_additional_salary",
+    },
     "Salis Driver": {
         "on_change": "apex.apex_core.utils.portal_token_security.on_salis_driver_change",
     },
@@ -484,6 +487,7 @@ after_install = [
 after_sync = []
 after_migrate = [
     "apex.setup.after_migrate",
+    "apex.apex_core.utils.employee_recovery.backfill_recovery_snapshots",
     "apex.apex_core.setup.seed.seed_all",
     "apex.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",

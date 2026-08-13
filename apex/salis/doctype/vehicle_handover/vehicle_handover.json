@@ -9,6 +9,7 @@
   "vehicle_handover_tab_overview",
   "vehicle_handover_sec_main",
   "vehicle",
+  "vehicle_assignment",
   "direction",
   "from_driver",
   "to_driver",
@@ -54,6 +55,17 @@
    "label": "Vehicle",
    "options": "Salis Vehicle",
    "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "description": "The submitted assignment whose receipt or return this document records.",
+   "fieldname": "vehicle_assignment",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Assignment",
+   "mandatory_depends_on": "eval:doc.direction=='Receipt' || doc.direction=='Return'",
+   "no_copy": 1,
+   "options": "Vehicle Assignment",
    "search_index": 1
   },
   {
@@ -226,7 +238,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-08-12 08:43:00.000000",
+ "modified": "2026-08-14 03:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",

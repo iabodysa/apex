@@ -14,11 +14,15 @@ from apex.apex_core.setup.salis_support import (
 
 
 _LEGACY_HOLIDAY_LIST = "Apex Support 24x7"
-_LEGACY_DAYS = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
-_REDUNDANT_EMPLOYEE_ADVANCE_FIELDS = (
-    "custom_signed_recovery_evidence",
-    "custom_agreed_installment_amount",
-)
+_LEGACY_DAYS = {
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+}
 
 
 def execute():
@@ -27,7 +31,6 @@ def execute():
     _retire_untouched_legacy_sla()
     seed_recovery_component()
     _migrate_deduction_policy()
-    _remove_redundant_employee_advance_fields()
     _repair_demo_import_residue()
     _assert_select_consistency()
 
@@ -61,6 +64,15 @@ def _retire_untouched_legacy_sla():
         and all(row[2] == "23:59:59" for row in schedule)
     )
     if not generated:
+        return
+    if frappe.db.exists("Issue", {"service_level_agreement": name}):
+        frappe.db.set_value(
+            "Service Level Agreement",
+            name,
+            "enabled",
+            0,
+            update_modified=False,
+        )
         return
     frappe.delete_doc(
         "Service Level Agreement", name, ignore_permissions=True, force=True
@@ -126,23 +138,6 @@ def _migrate_deduction_policy():
             frappe.delete_doc("DocType", doctype, ignore_permissions=True, force=True)
 
 
-def _remove_redundant_employee_advance_fields():
-    """Keep source evidence and the agreed installment on the operational record."""
-    for fieldname in _REDUNDANT_EMPLOYEE_ADVANCE_FIELDS:
-        custom_field = frappe.db.get_value(
-            "Custom Field",
-            {"dt": "Employee Advance", "fieldname": fieldname},
-            "name",
-        )
-        if custom_field:
-            frappe.delete_doc(
-                "Custom Field",
-                custom_field,
-                ignore_permissions=True,
-                force=True,
-            )
-
-
 def _repair_demo_import_residue():
     if frappe.db.table_exists("Dispatch Trip"):
         frappe.db.set_value(
@@ -154,19 +149,20 @@ def _repair_demo_import_residue():
         )
     if not frappe.db.table_exists("Bed"):
         return
-    invalid_beds = frappe.get_all(
-        "Bed",
-        filters={"status": ["not in", ["Available", "Occupied", "Out of Service"]]},
-        pluck="name",
+    blank_beds = frappe.get_all(
+        "Bed", filters={"status": ["is", "not set"]}, pluck="name"
     )
-    invalid_beds += frappe.get_all("Bed", filters={"status": ["is", "not set"]}, pluck="name")
-    for bed in set(invalid_beds):
+    for bed in blank_beds:
         occupied = frappe.db.exists(
             "Housing Assignment",
             {"bed": bed, "docstatus": 1, "check_out_date": ["is", "not set"]},
         )
         frappe.db.set_value(
-            "Bed", bed, "status", "Occupied" if occupied else "Available", update_modified=False
+            "Bed",
+            bed,
+            "status",
+            "Occupied" if occupied else "Available",
+            update_modified=False,
         )
 
 

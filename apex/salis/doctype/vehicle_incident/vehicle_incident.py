@@ -191,6 +191,7 @@ class VehicleIncident(Document):
             advance,
             ["name", "docstatus", "paid_amount", "return_amount"],
             as_dict=True,
+            for_update=True,
         )
         return state if state and state.docstatus == 1 else None
 
@@ -217,11 +218,28 @@ class VehicleIncident(Document):
 
         Cancelling the advance reverses the recovered balance natively (HRMS reverses
         each linked Additional Salary's contribution on its own cancel). The paid /
-        recovered refusal is not re-checked here - before_cancel has already run and
-        nothing between the two hooks can pay the advance.
+        recovered refusal is not re-checked here: ``before_cancel`` already locked
+        the advance row for this transaction, so nothing between the two hooks can
+        pay it.
         """
         state = self._live_recovery_advance()
         if state:
+            for installment in frappe.get_all(
+                "Additional Salary",
+                filters={
+                    "ref_doctype": "Employee Advance",
+                    "ref_docname": state.name,
+                    "docstatus": 0,
+                },
+                pluck="name",
+            ):
+                frappe.db.set_value(
+                    "Additional Salary",
+                    installment,
+                    "disabled",
+                    1,
+                    update_modified=False,
+                )
             frappe.get_doc("Employee Advance", state.name).cancel()
 
     def on_cancel(self):

@@ -106,7 +106,7 @@ apex.setup.slides_settings = [
 				label: __("Maximum Recovery Percent"),
 				fieldtype: "Percent",
 				default: 50,
-				description: __("Per-installment scheduling limit. It cannot exceed 50% of monthly base salary."),
+				description: __("Per-installment scheduling limit. It cannot exceed 50% of actual pay-period gross pay from the native Salary Slip preview."),
 			},
 			{
 				fieldname: "apex_support_sb",
@@ -122,9 +122,37 @@ apex.setup.slides_settings = [
 			},
 			{
 				fieldname: "apex_salis_support_holiday_list",
-				label: __("Support Holiday List"),
-				fieldtype: "Link",
-				options: "Holiday List",
+				label: __("Support Holiday List Name"),
+				fieldtype: "Data",
+				description: __("Name for the native ERPNext Holiday List created during setup."),
+			},
+			{
+				fieldname: "apex_salis_support_holiday_from_date",
+				label: __("Holiday Calendar From Date"),
+				fieldtype: "Date",
+			},
+			{
+				fieldname: "apex_salis_support_holiday_to_date",
+				label: __("Holiday Calendar To Date"),
+				fieldtype: "Date",
+			},
+			{
+				fieldname: "apex_salis_support_weekly_off",
+				label: __("Weekly Off"),
+				fieldtype: "Select",
+				options: "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
+			},
+			{
+				fieldname: "apex_salis_support_country",
+				label: __("Holiday Country Code"),
+				fieldtype: "Data",
+				description: __("Optional ISO country code used by ERPNext's native local-holiday generator."),
+			},
+			{
+				fieldname: "apex_salis_support_subdivision",
+				label: __("Holiday Subdivision Code"),
+				fieldtype: "Data",
+				description: __("Optional subdivision code for the selected country."),
 			},
 			{
 				fieldname: "apex_salis_support_workdays",

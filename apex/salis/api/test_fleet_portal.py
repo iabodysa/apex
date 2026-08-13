@@ -12,9 +12,14 @@ from apex.salis.utils import reassign_vehicle_driver
 class FleetEmployeePortalTest(FrappeTestCase):
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
+    @patch.object(
+        fleet_employee_services,
+        "_active_assignment_for_driver",
+        return_value=SimpleNamespace(name="VA-1", vehicle="VEH-1"),
+    )
     @patch.object(fleet_employee_services, "_handover_checklist_template")
     def test_handover_checklist_is_loaded_from_native_template(
-        self, checklist_template, _driver, _vehicle
+        self, checklist_template, _assignment, _driver, _vehicle
     ):
         checklist_template.return_value = SimpleNamespace(
             name="Daily Inspection",
@@ -28,11 +33,157 @@ class FleetEmployeePortalTest(FrappeTestCase):
 
         checklist_template.assert_called_once_with("VEH-1")
         self.assertEqual(result["direction"], "Return")
+        self.assertIn("assignment", result)
         self.assertEqual(result["template"], "Daily Inspection")
-        self.assertEqual(result["items"], [
-            {"check_item": "Tyres", "default_remark": ""},
-            {"check_item": "Lights", "default_remark": "Check all lamps"},
-        ])
+        self.assertEqual(
+            result["items"],
+            [
+                {"check_item": "Tyres", "default_remark": ""},
+                {"check_item": "Lights", "default_remark": "Check all lamps"},
+            ],
+        )
+
+    @patch.object(
+        fleet_employee_services.base, "_session_vehicle", return_value="VEH-1"
+    )
+    @patch.object(fleet_employee_services.base, "_session_driver", return_value="DRV-1")
+    @patch.object(fleet_employee_services, "_active_assignment_for_driver", create=True)
+    @patch.object(fleet_employee_services, "_handover_checklist_template")
+    def test_handover_checklist_returns_stable_assignment_identity(
+        self, checklist_template, active_assignment, _driver, _vehicle
+    ):
+        active_assignment.return_value = SimpleNamespace(
+            name="VA-1", vehicle="VEH-1", driver="DRV-1", status="Active", docstatus=1
+        )
+        checklist_template.return_value = SimpleNamespace(
+            name="Daily Inspection",
+            items=[SimpleNamespace(check_item="Tyres", remark="")],
+        )
+
+        result = fleet_employee_services.get_handover_checklist("Receipt")
+
+        self.assertEqual(result["assignment"], "VA-1")
+        self.assertEqual(result["vehicle"], "VEH-1")
+
+    @patch.object(fleet_employee_services.base, "_session_driver", return_value="DRV-1")
+    @patch.object(
+        fleet_employee_services.base, "_session_vehicle", return_value="VEH-1"
+    )
+    @patch.object(fleet_employee_services, "_locked_session_assignment", create=True)
+    @patch.object(fleet_employee_services, "_owned_evidence_file")
+    @patch.object(
+        fleet_employee_services.frappe.db, "get_value", return_value="GV-RETURN"
+    )
+    def test_return_retry_dedupes_by_assignment_before_evidence_validation(
+        self, _duplicate, owned_evidence, locked_assignment, _vehicle, _driver
+    ):
+        locked_assignment.return_value = SimpleNamespace(
+            name="VA-1",
+            vehicle="VEH-1",
+            driver="DRV-1",
+            status="Ended",
+            docstatus=1,
+        )
+
+        result = fleet_employee_services.return_vehicle(
+            assignment="VA-1",
+            odometer=150,
+            signed_evidence=None,
+            inspection_rows=None,
+        )
+
+        self.assertEqual(result, {"name": "GV-RETURN", "status": "Submitted"})
+        owned_evidence.assert_not_called()
+
+    @patch.object(fleet_employee_services.base, "_session_driver", return_value="DRV-1")
+    @patch.object(
+        fleet_employee_services.base, "_session_vehicle", return_value="VEH-1"
+    )
+    @patch.object(fleet_employee_services, "_locked_session_assignment", create=True)
+    @patch.object(fleet_employee_services.frappe.db, "get_value", return_value=None)
+    @patch.object(fleet_employee_services.frappe, "get_doc")
+    def test_failed_checklist_derives_discrepancy_and_binds_assignment(
+        self, get_doc, _duplicate, locked_assignment, _vehicle, _driver
+    ):
+        locked_assignment.return_value = SimpleNamespace(
+            name="VA-1",
+            vehicle="VEH-1",
+            driver="DRV-1",
+            status="Active",
+            docstatus=1,
+            end_date=None,
+        )
+        template = SimpleNamespace(
+            name="Daily Inspection",
+            items=[
+                SimpleNamespace(check_item="Tyres", remark=""),
+                SimpleNamespace(check_item="Lights", remark=""),
+            ],
+        )
+        evidence = SimpleNamespace(
+            name="FILE-1", attached_to_doctype=None, attached_to_name=None
+        )
+        handover = MagicMock(name="handover")
+        handover.name = "GV-1"
+        get_doc.return_value = handover
+        with (
+            patch(
+                "apex.salis.api.fleet_employee_services.frappe.utils.today",
+                return_value="2026-08-14",
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_handover_checklist_template",
+                return_value=template,
+            ),
+            patch.object(
+                fleet_employee_services,
+                "_owned_evidence_file",
+                return_value=evidence,
+            ),
+            patch.object(fleet_employee_services, "lock_vehicle"),
+        ):
+            fleet_employee_services.return_vehicle(
+                assignment="VA-1",
+                odometer=150,
+                signed_evidence="/private/files/return.pdf",
+                inspection_rows=[
+                    {"check_item": "Tyres", "ok": 1, "remark": ""},
+                    {"check_item": "Lights", "ok": 0, "remark": "Cracked"},
+                ],
+            )
+
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["vehicle_assignment"], "VA-1")
+        self.assertEqual(payload["discrepancy_status"], "Discrepancy")
+        self.assertEqual(payload["discrepancy_notes"], "Lights: Cracked")
+
+    @patch.object(fleet_employee_services, "_", side_effect=lambda message: message)
+    @patch.object(
+        fleet_employee_services.frappe,
+        "throw",
+        side_effect=frappe.PermissionError,
+    )
+    @patch.object(fleet_employee_services.frappe, "get_doc")
+    def test_assignment_must_belong_to_session_driver(
+        self, get_doc, _throw, _translate
+    ):
+        handler = getattr(fleet_employee_services, "_locked_session_assignment", None)
+        self.assertIsNotNone(handler)
+        get_doc.return_value = SimpleNamespace(
+            name="VA-OTHER",
+            vehicle="VEH-2",
+            driver="DRV-OTHER",
+            status="Active",
+            docstatus=1,
+        )
+
+        with self.assertRaises(frappe.PermissionError):
+            handler("VA-OTHER", "DRV-1")
+
+        get_doc.assert_called_once_with(
+            "Vehicle Assignment", "VA-OTHER", for_update=True
+        )
 
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value=None)
     def test_context_returns_typed_unlinked_state(self, _driver):
@@ -43,10 +194,15 @@ class FleetEmployeePortalTest(FrappeTestCase):
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
-    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch(
+        "apex.salis.api.fleet_employee_services.frappe.utils.today",
+        return_value="2026-08-12",
+    )
     @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
     @patch.object(fleet_employee.frappe, "get_doc")
-    def test_receipt_binds_vehicle_and_driver_to_session(self, get_doc, _duplicate, _today, _driver, _vehicle):
+    def test_receipt_binds_vehicle_and_driver_to_session(
+        self, get_doc, _duplicate, _today, _driver, _vehicle
+    ):
         doc = MagicMock(name="handover")
         doc.name = "GV-1"
         doc.status = "Submitted"
@@ -60,6 +216,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-1", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Active",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle"),
             patch.object(
                 fleet_employee_services.frappe.db, "set_value"
@@ -77,6 +244,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             result = fleet_employee.receive_vehicle(
                 odometer=120,
+                assignment="VA-1",
                 fuel_level="Half",
                 signed_evidence="/private/files/receipt.pdf",
                 inspection_rows=[{"check_item": "Tyres", "ok": 1}],
@@ -103,10 +271,15 @@ class FleetEmployeePortalTest(FrappeTestCase):
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
-    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch(
+        "apex.salis.api.fleet_employee_services.frappe.utils.today",
+        return_value="2026-08-12",
+    )
     @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
     @patch.object(fleet_employee.frappe, "get_doc")
-    def test_return_uses_pool_direction_without_fake_driver(self, get_doc, _duplicate, _today, _driver, _vehicle):
+    def test_return_uses_pool_direction_without_fake_driver(
+        self, get_doc, _duplicate, _today, _driver, _vehicle
+    ):
         doc = MagicMock(name="handover")
         doc.name = "GV-2"
         get_doc.return_value = doc
@@ -119,6 +292,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-2", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Active",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle"),
             patch.object(
                 fleet_employee_services,
@@ -133,6 +317,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             fleet_employee.return_vehicle(
                 odometer=150,
+                assignment="VA-1",
                 fuel_level="Quarter",
                 signed_evidence="/private/files/return.pdf",
                 inspection_rows=[{"check_item": "Tyres", "ok": 1}],
@@ -145,7 +330,10 @@ class FleetEmployeePortalTest(FrappeTestCase):
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
-    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch(
+        "apex.salis.api.fleet_employee_services.frappe.utils.today",
+        return_value="2026-08-12",
+    )
     @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
     @patch.object(fleet_employee_services, "_handover_checklist_template")
     @patch.object(fleet_employee.frappe, "get_doc")
@@ -167,6 +355,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-3", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Active",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle"),
             patch.object(
                 fleet_employee_services,
@@ -176,6 +375,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             fleet_employee.return_vehicle(
                 odometer=150,
+                assignment="VA-1",
                 signed_evidence="/private/files/return.pdf",
                 checklist_template="Daily Inspection",
                 inspection_rows=[
@@ -187,22 +387,37 @@ class FleetEmployeePortalTest(FrappeTestCase):
         checklist_template.assert_called_once_with("VEH-1", "Daily Inspection")
         payload = get_doc.call_args.args[0]
         self.assertEqual(payload["checklist_template"], "Daily Inspection")
-        self.assertEqual(payload["handover_check_items"], [
-            {"check_item": "Tyres", "ok": 1, "remark": ""},
-            {"check_item": "Lights", "ok": 0, "remark": "Left lamp cracked"},
-        ])
+        self.assertEqual(
+            payload["handover_check_items"],
+            [
+                {"check_item": "Tyres", "ok": 1, "remark": ""},
+                {"check_item": "Lights", "ok": 0, "remark": "Left lamp cracked"},
+            ],
+        )
         doc.insert.assert_called_once_with(ignore_permissions=True)
         doc.submit.assert_called_once_with()
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
-    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch(
+        "apex.salis.api.fleet_employee_services.frappe.utils.today",
+        return_value="2026-08-12",
+    )
     @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
-    @patch.object(fleet_employee_services.frappe, "throw", side_effect=frappe.ValidationError)
+    @patch.object(
+        fleet_employee_services.frappe, "throw", side_effect=frappe.ValidationError
+    )
     @patch.object(fleet_employee_services, "_", side_effect=lambda message: message)
     @patch.object(fleet_employee_services, "_handover_checklist_template")
     def test_handover_rejects_missing_native_template_answers(
-        self, checklist_template, _translate, _throw, _duplicate, _today, _driver, _vehicle
+        self,
+        checklist_template,
+        _translate,
+        _throw,
+        _duplicate,
+        _today,
+        _driver,
+        _vehicle,
     ):
         checklist_template.return_value = SimpleNamespace(
             name="Daily Inspection",
@@ -216,6 +431,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-4", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Active",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle"),
             patch.object(
                 fleet_employee_services,
@@ -226,6 +452,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             fleet_employee.return_vehicle(
                 odometer=150,
+                assignment="VA-1",
                 signed_evidence="/private/files/return.pdf",
                 checklist_template="Daily Inspection",
                 inspection_rows=[{"check_item": "Tyres", "ok": 1}],
@@ -253,7 +480,10 @@ class FleetEmployeePortalTest(FrappeTestCase):
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
     @patch.object(fleet_employee, "get_driver_for_session_user", return_value="DRV-1")
-    @patch("apex.salis.api.fleet_employee_services.frappe.utils.today", return_value="2026-08-12")
+    @patch(
+        "apex.salis.api.fleet_employee_services.frappe.utils.today",
+        return_value="2026-08-12",
+    )
     @patch.object(fleet_employee.frappe.db, "get_value", return_value=None)
     @patch.object(fleet_employee.frappe, "get_doc")
     def test_receipt_rejects_omitted_checklist_answers(
@@ -267,6 +497,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-5", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Active",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle"),
             patch.object(
                 fleet_employee_services,
@@ -292,6 +533,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             fleet_employee.receive_vehicle(
                 odometer=120,
+                assignment="VA-1",
                 signed_evidence="/private/files/receipt.pdf",
             )
 
@@ -303,7 +545,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         fleet_employee_services.frappe.db, "get_value", return_value="GV-EXISTING"
     )
     @patch.object(fleet_employee_services.frappe, "get_doc")
-    def test_retried_handover_returns_submitted_document_after_locks(
+    def test_retried_handover_returns_submitted_document_before_evidence(
         self, get_doc, _duplicate, _driver, _vehicle
     ):
         template = SimpleNamespace(
@@ -314,6 +556,17 @@ class FleetEmployeePortalTest(FrappeTestCase):
             name="FILE-6", attached_to_doctype=None, attached_to_name=None
         )
         with (
+            patch.object(
+                fleet_employee_services,
+                "_locked_session_assignment",
+                return_value=SimpleNamespace(
+                    name="VA-1",
+                    vehicle="VEH-1",
+                    driver="DRV-1",
+                    status="Ended",
+                    docstatus=1,
+                ),
+            ),
             patch.object(fleet_employee_services, "lock_vehicle") as lock_vehicle,
             patch.object(
                 fleet_employee_services,
@@ -328,12 +581,13 @@ class FleetEmployeePortalTest(FrappeTestCase):
         ):
             result = fleet_employee.return_vehicle(
                 odometer=150,
+                assignment="VA-1",
                 signed_evidence="/private/files/return.pdf",
                 inspection_rows=[{"check_item": "Tyres", "ok": 1}],
             )
 
-        lock_vehicle.assert_called_once_with("VEH-1")
-        owned_evidence.assert_called_once_with("/private/files/return.pdf")
+        lock_vehicle.assert_not_called()
+        owned_evidence.assert_not_called()
         get_doc.assert_not_called()
         self.assertEqual(result, {"name": "GV-EXISTING", "status": "Submitted"})
 

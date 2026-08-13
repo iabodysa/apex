@@ -103,13 +103,85 @@ def _owned_evidence_file(file_url):
     return evidence
 
 
-def _handover_payload(direction, driver, vehicle, odometer, fuel_level=None,
-                      condition_notes=None, signed_evidence=None,
-                      checklist_template=None, inspection_rows=None):
+def _active_assignment_for_driver(driver):
+    """Return the caller's submitted Active assignment, or fail closed."""
+    name = frappe.db.get_value(
+        "Vehicle Assignment",
+        {"driver": driver, "status": "Active", "docstatus": 1},
+        "name",
+        order_by="start_date desc",
+    )
+    if not name:
+        frappe.throw(_("No active vehicle assignment is available for this handover."))
+    assignment = frappe.get_doc("Vehicle Assignment", name)
+    session_vehicle = base._session_vehicle(driver)
+    if not session_vehicle or assignment.vehicle != session_vehicle:
+        frappe.throw(
+            _("Your active vehicle assignment does not match your current vehicle."),
+            frappe.PermissionError,
+        )
+    return assignment
+
+
+def _locked_session_assignment(assignment, driver):
+    """Lock the supplied assignment and prove that it belongs to the caller."""
+    if not assignment:
+        frappe.throw(_("Vehicle Assignment is required for this handover."))
+    doc = frappe.get_doc("Vehicle Assignment", assignment, for_update=True)
+    if doc.driver != driver:
+        frappe.throw(
+            _("That vehicle assignment does not belong to your account."),
+            frappe.PermissionError,
+        )
+    if doc.docstatus != 1:
+        frappe.throw(_("Vehicle Assignment {0} is not submitted.").format(doc.name))
+    return doc
+
+
+def _existing_handover(assignment, direction):
+    return frappe.db.get_value(
+        "Vehicle Handover",
+        {
+            "vehicle_assignment": assignment,
+            "direction": direction,
+            "docstatus": 1,
+        },
+        "name",
+    )
+
+
+def _validate_active_session_assignment(assignment, driver):
+    if assignment.status != "Active":
+        frappe.throw(
+            _("Vehicle Assignment {0} is no longer active.").format(assignment.name)
+        )
+    session_vehicle = base._session_vehicle(driver)
+    if not session_vehicle or assignment.vehicle != session_vehicle:
+        frappe.throw(
+            _("Vehicle Assignment {0} does not match your current vehicle.").format(
+                assignment.name
+            ),
+            frappe.PermissionError,
+        )
+
+
+def _handover_payload(
+    direction,
+    driver,
+    assignment,
+    odometer,
+    fuel_level=None,
+    condition_notes=None,
+    signed_evidence=None,
+    checklist_template=None,
+    inspection_rows=None,
+):
+    failures = [row for row in (inspection_rows or []) if not row["ok"]]
     payload = {
         "doctype": "Vehicle Handover",
         "direction": direction,
-        "vehicle": vehicle,
+        "vehicle": assignment.vehicle,
+        "vehicle_assignment": assignment.name,
         "from_driver": driver if direction in ("Transfer", "Return") else None,
         "to_driver": driver if direction == "Receipt" else None,
         "handover_date": frappe.utils.today(),
@@ -117,47 +189,55 @@ def _handover_payload(direction, driver, vehicle, odometer, fuel_level=None,
         "fuel_level": fuel_level or None,
         "condition_notes": (condition_notes or "").strip(),
         "signed_evidence": signed_evidence or None,
-        "discrepancy_status": "Clean",
+        "discrepancy_status": "Discrepancy" if failures else "Clean",
+        "discrepancy_notes": "; ".join(
+            f"{row['check_item']}: {row['remark']}" for row in failures
+        )
+        or None,
     }
     if checklist_template:
-        payload.update({
-            "checklist_template": checklist_template.name,
-            "handover_check_items": _inspection_rows(checklist_template, inspection_rows),
-        })
+        payload.update(
+            {
+                "checklist_template": checklist_template.name,
+                "handover_check_items": inspection_rows,
+            }
+        )
     return payload
 
 
-def _submit_session_handover(direction, odometer, fuel_level=None,
-                             condition_notes=None, signed_evidence=None,
-                             checklist_template=None, inspection_rows=None):
+def _submit_session_handover(
+    direction,
+    assignment,
+    odometer,
+    fuel_level=None,
+    condition_notes=None,
+    signed_evidence=None,
+    checklist_template=None,
+    inspection_rows=None,
+):
     driver = base._session_driver(required=True)
-    vehicle = base._session_vehicle(driver)
-    if not vehicle:
-        frappe.throw(_("No vehicle is assigned to you."))
-    lock_vehicle(vehicle)
-    evidence = _owned_evidence_file(signed_evidence)
-    template = _handover_checklist_template(vehicle, checklist_template)
-    answers = _inspection_rows(template, inspection_rows)
-    duplicate = frappe.db.get_value(
-        "Vehicle Handover",
-        {
-            "direction": direction,
-            "vehicle": vehicle,
-            "from_driver": driver if direction == "Return" else ["is", "not set"],
-            "to_driver": driver if direction == "Receipt" else ["is", "not set"],
-            "signed_evidence": signed_evidence,
-            "docstatus": 1,
-        },
-        "name",
-    )
+    assignment_doc = _locked_session_assignment(assignment, driver)
+    duplicate = _existing_handover(assignment_doc.name, direction)
     if duplicate:
         return {"name": duplicate, "status": "Submitted"}
+    _validate_active_session_assignment(assignment_doc, driver)
+    lock_vehicle(assignment_doc.vehicle)
+    evidence = _owned_evidence_file(signed_evidence)
+    template = _handover_checklist_template(assignment_doc.vehicle, checklist_template)
+    answers = _inspection_rows(template, inspection_rows)
     if evidence.attached_to_doctype or evidence.attached_to_name:
         frappe.throw(_("Signed evidence is already attached to another document."))
     doc = frappe.get_doc(
         _handover_payload(
-            direction, driver, vehicle, odometer, fuel_level, condition_notes,
-            signed_evidence, template, answers
+            direction,
+            driver,
+            assignment_doc,
+            odometer,
+            fuel_level,
+            condition_notes,
+            signed_evidence,
+            template,
+            answers,
         )
     )
     doc.insert(ignore_permissions=True)
@@ -175,20 +255,46 @@ def _submit_session_handover(direction, odometer, fuel_level=None,
 
 
 @frappe.whitelist(methods=["POST"])
-def receive_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None,
-                    checklist_template=None, inspection_rows=None):
+def receive_vehicle(
+    odometer,
+    assignment=None,
+    fuel_level=None,
+    condition_notes=None,
+    signed_evidence=None,
+    checklist_template=None,
+    inspection_rows=None,
+):
     return _submit_session_handover(
-        "Receipt", odometer, fuel_level, condition_notes, signed_evidence,
-        checklist_template, inspection_rows
+        "Receipt",
+        assignment,
+        odometer,
+        fuel_level,
+        condition_notes,
+        signed_evidence,
+        checklist_template,
+        inspection_rows,
     )
 
 
 @frappe.whitelist(methods=["POST"])
-def return_vehicle(odometer, fuel_level=None, condition_notes=None, signed_evidence=None,
-                   checklist_template=None, inspection_rows=None):
+def return_vehicle(
+    odometer,
+    assignment=None,
+    fuel_level=None,
+    condition_notes=None,
+    signed_evidence=None,
+    checklist_template=None,
+    inspection_rows=None,
+):
     return _submit_session_handover(
-        "Return", odometer, fuel_level, condition_notes, signed_evidence,
-        checklist_template, inspection_rows
+        "Return",
+        assignment,
+        odometer,
+        fuel_level,
+        condition_notes,
+        signed_evidence,
+        checklist_template,
+        inspection_rows,
     )
 
 
@@ -198,13 +304,12 @@ def get_handover_checklist(direction):
     if direction not in ("Receipt", "Return"):
         frappe.throw(_("Direction must be Receipt or Return."))
     driver = base._session_driver(required=True)
-    vehicle = base._session_vehicle(driver)
-    if not vehicle:
-        frappe.throw(_("No vehicle is assigned to you."))
-    template = _handover_checklist_template(vehicle)
+    assignment = _active_assignment_for_driver(driver)
+    template = _handover_checklist_template(assignment.vehicle)
     return {
         "direction": direction,
-        "vehicle": vehicle,
+        "vehicle": assignment.vehicle,
+        "assignment": assignment.name,
         "template": template.name,
         "items": [
             {"check_item": item.check_item, "default_remark": item.remark or ""}

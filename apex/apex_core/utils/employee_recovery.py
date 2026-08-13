@@ -27,7 +27,9 @@ its recovery from wages is capped by KSA Labor Law Art. 91.
 
 Recovery is predicated on the company having actually paid: outstanding is measured
 from ``paid_amount``, which only the native payment entry sets. Nothing is deducted
-from a wage for money the company never disbursed.
+from a wage for money the company never disbursed. The per-period headroom comes from
+an unsaved native HRMS Salary Slip preview, so structure deductions, tax, loans and
+payment-day proration remain HRMS-owned.
 
 Source linkage is two-way and duplicate-safe: the source row is locked before the
 existing-link check and insert, and the source document keeps its own
@@ -40,15 +42,21 @@ either side.
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.utils import flt, get_first_day, get_last_day, getdate, today
 from hrms.hr.doctype.employee_advance import employee_advance as native_employee_advance
+from hrms.payroll.doctype.salary_structure import (
+    salary_structure as native_salary_structure,
+)
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 
 SOURCE_DOCTYPE_FIELD = "custom_source_doctype"
 SOURCE_DOCNAME_FIELD = "custom_source_document"
+SIGNED_EVIDENCE_FIELD = "custom_signed_evidence"
+AGREED_INSTALLMENT_FIELD = "custom_agreed_installment"
 
-OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid", "Partly Claimed and Returned")
+OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid")
 
 
 def _source_link_available() -> bool:
@@ -73,6 +81,54 @@ def find_recovery_advance(source_doctype: str, source_name: str) -> str | None:
         },
         "name",
     )
+
+
+def backfill_recovery_snapshots():
+    """Fill new immutable snapshots from linked Vehicle Incidents after customization sync."""
+    meta = frappe.get_meta("Employee Advance")
+    if not all(
+        meta.has_field(fieldname)
+        for fieldname in (SIGNED_EVIDENCE_FIELD, AGREED_INSTALLMENT_FIELD)
+    ):
+        return
+    advances = frappe.get_all(
+        "Employee Advance",
+        filters={
+            SOURCE_DOCTYPE_FIELD: "Vehicle Incident",
+            SOURCE_DOCNAME_FIELD: ["is", "set"],
+        },
+        fields=[
+            "name",
+            SOURCE_DOCNAME_FIELD,
+            SIGNED_EVIDENCE_FIELD,
+            AGREED_INSTALLMENT_FIELD,
+        ],
+    )
+    for advance in advances:
+        evidence_blank = not advance.get(SIGNED_EVIDENCE_FIELD)
+        installment_blank = advance.get(AGREED_INSTALLMENT_FIELD) in (None, "", 0, 0.0)
+        if not (evidence_blank or installment_blank):
+            continue
+        source = frappe.db.get_value(
+            "Vehicle Incident",
+            advance.get(SOURCE_DOCNAME_FIELD),
+            ["worker_signature", "installment_amount"],
+            as_dict=True,
+        )
+        if not source:
+            continue
+        updates = {}
+        if evidence_blank and source.get("worker_signature"):
+            updates[SIGNED_EVIDENCE_FIELD] = source.worker_signature
+        if installment_blank:
+            updates[AGREED_INSTALLMENT_FIELD] = flt(source.get("installment_amount"))
+        if updates:
+            frappe.db.set_value(
+                "Employee Advance",
+                advance.name,
+                updates,
+                update_modified=False,
+            )
 
 
 def raise_recovery_advance(
@@ -108,9 +164,17 @@ def raise_recovery_advance(
         )
         return None
 
-    if not frappe.db.get_value(
-        source_doctype, source_name, "name", for_update=True
-    ):
+    source_fields = ["name"]
+    if source_doctype == "Vehicle Incident":
+        source_fields += ["worker_signature", "installment_amount"]
+    source = frappe.db.get_value(
+        source_doctype,
+        source_name,
+        source_fields,
+        as_dict=True,
+        for_update=True,
+    )
+    if not source:
         logger.warning(
             f"employee_recovery: source {source_doctype} {source_name} does not exist. "
             "No Employee Advance raised."
@@ -129,7 +193,9 @@ def raise_recovery_advance(
         )
         return None
 
-    advance_account = frappe.db.get_value("Company", company, "default_employee_advance_account")
+    advance_account = frappe.db.get_value(
+        "Company", company, "default_employee_advance_account"
+    )
     if not advance_account:
         logger.warning(
             f"employee_recovery: {source_doctype} {source_name} — company {company} has no Default "
@@ -158,6 +224,16 @@ def raise_recovery_advance(
             "repay_unclaimed_amount_from_salary": 1,
             SOURCE_DOCTYPE_FIELD: source_doctype,
             SOURCE_DOCNAME_FIELD: source_name,
+            SIGNED_EVIDENCE_FIELD: (
+                source.get("worker_signature")
+                if source_doctype == "Vehicle Incident"
+                else None
+            ),
+            AGREED_INSTALLMENT_FIELD: (
+                flt(source.get("installment_amount"))
+                if source_doctype == "Vehicle Incident"
+                else 0
+            ),
         }
     )
     advance.insert(ignore_permissions=True)
@@ -168,34 +244,60 @@ def raise_recovery_advance(
     return advance.name
 
 
-def _monthly_wage(employee: str, on_date: str) -> float:
-    """The worker's native monthly wage: the ``base`` of the Salary Structure
-    Assignment in force on ``on_date``. 0.0 when the worker has no assignment (no
-    wage known, so nothing may be deducted)."""
-    base = frappe.db.get_value(
+def _salary_preview(employee: str, payroll_date: str):
+    """Return an unsaved native Salary Slip preview and its active assignment."""
+    assignment = frappe.db.get_value(
         "Salary Structure Assignment",
-        {"employee": employee, "docstatus": 1, "from_date": ["<=", on_date]},
-        "base",
+        {
+            "employee": employee,
+            "docstatus": 1,
+            "from_date": ["<=", payroll_date],
+        },
+        ["salary_structure", "base"],
         order_by="from_date desc",
+        as_dict=True,
     )
-    return flt(base)
+    if not assignment or not assignment.salary_structure:
+        return None, None
+    try:
+        preview = native_salary_structure.make_salary_slip(
+            assignment.salary_structure,
+            employee=employee,
+            posting_date=payroll_date,
+            ignore_permissions=True,
+            for_preview=0,
+        )
+    except Exception:
+        frappe.logger().warning(
+            "employee_recovery: native Salary Slip preview failed for "
+            f"employee {employee} on {payroll_date}. Recovery deferred."
+        )
+        return None, assignment
+    return preview, assignment
 
 
-def _scheduled_deductions(employee: str, start: str, end: str) -> float:
-    """Deductions already claiming the pay period ``start``..``end`` for a worker.
+def _draft_deductions(
+    employee: str,
+    start: str,
+    end: str,
+    exclude_additional_salary: str | None = None,
+) -> float:
+    """Other draft deductions not yet visible to HRMS's native Salary Slip preview.
 
-    Counts drafts as well as submitted rows: a queued installment is money already
-    spoken for, so including it is what keeps repeated runs from over-committing the
-    same wage.
+    Submitted Additional Salaries are already included by ``make_salary_slip``. Drafts
+    are subtracted separately using HRMS's same period-end recurring-row semantics.
     """
+    filters = {
+        "employee": employee,
+        "type": "Deduction",
+        "disabled": 0,
+        "docstatus": 0,
+    }
+    if exclude_additional_salary:
+        filters["name"] = ["!=", exclude_additional_salary]
     rows = frappe.get_all(
         "Additional Salary",
-        filters={
-            "employee": employee,
-            "type": "Deduction",
-            "disabled": 0,
-            "docstatus": ["<", 2],
-        },
+        filters=filters,
         or_filters=[
             ["payroll_date", "between", [start, end]],
             ["is_recurring", "=", 1],
@@ -207,36 +309,37 @@ def _scheduled_deductions(employee: str, start: str, end: str) -> float:
         if row.is_recurring:
             if not (row.from_date and row.to_date):
                 continue
-            if getdate(row.from_date) > getdate(end) or getdate(row.to_date) < getdate(end):
+            if getdate(row.from_date) > getdate(end) or getdate(row.to_date) < getdate(
+                end
+            ):
                 continue
         total += flt(row.amount)
     return total
 
 
-def _pending_installments(advance: str) -> float:
+def _pending_installments(
+    advance: str, exclude_additional_salary: str | None = None
+) -> float:
     """Installments already queued against an advance but not yet submitted.
 
     A submitted installment has already moved the advance's ``return_amount``
     natively; a draft has not, so it must be subtracted from the outstanding balance
     by hand or the next run would queue the same money twice.
     """
+    filters = {
+        "ref_doctype": "Employee Advance",
+        "ref_docname": advance,
+        "docstatus": 0,
+        "disabled": 0,
+    }
+    if exclude_additional_salary:
+        filters["name"] = ["!=", exclude_additional_salary]
     queued = frappe.get_all(
         "Additional Salary",
-        filters={"ref_doctype": "Employee Advance", "ref_docname": advance, "docstatus": 0},
+        filters=filters,
         pluck="amount",
     )
     return sum(flt(amount) for amount in queued)
-
-
-def _agreed_installment(source_doctype: str | None, source_name: str | None) -> float:
-    """Read the agreement from the linked operational source without duplicating it."""
-    if not (source_doctype and source_name):
-        return 0.0
-    if not frappe.db.exists("DocType", source_doctype):
-        return 0.0
-    if not frappe.get_meta(source_doctype).has_field("installment_amount"):
-        return 0.0
-    return flt(frappe.db.get_value(source_doctype, source_name, "installment_amount"))
 
 
 def bounded_installment(
@@ -254,34 +357,52 @@ def bounded_installment(
     return max(round(float(min(limits)), 2), 0.0)
 
 
-def compute_recovery_installment(advance: str, payroll_date: str | None = None) -> float:
+def compute_recovery_installment(
+    advance: str,
+    payroll_date: str | None = None,
+    *,
+    exclude_additional_salary: str | None = None,
+    locked_advance=None,
+) -> float:
     """SAR recoverable from ONE pay period against ``advance``.
 
     The lowest of every binding limit, floored at zero:
 
       * outstanding — what the company actually paid out and has not recovered yet,
         minus installments already queued;
-      * the agreed installment recorded on the source document (0 = none agreed);
-      * the configured scheduling limit, itself never above 50% of monthly base;
-      * known Additional Salary deductions already queued for the same period.
-
-    This scheduler does not calculate the final salary, loan repayments, or every
-    Salary Structure deduction. It therefore makes no net-pay guarantee; the draft
-    remains subject to native payroll review and calculation.
+      * the agreed installment snapshotted on the Employee Advance (0 = none agreed);
+      * the configured scheduling limit, never above 50% of actual-period gross pay;
+      * nonnegative native preview net pay less other draft deductions.
 
     0.0 means "recover nothing this period" (policy off, no wage known, balance
     cleared, or the period is fully committed) and the caller must defer, not post.
     """
     payroll_date = payroll_date or today()
-    fields = ["employee", "paid_amount", "return_amount", "docstatus"]
+    fields = [
+        "employee",
+        "paid_amount",
+        "claimed_amount",
+        "return_amount",
+        "docstatus",
+        "status",
+    ]
     if _source_link_available():
-        fields += [SOURCE_DOCTYPE_FIELD, SOURCE_DOCNAME_FIELD]
-    advance_doc = frappe.db.get_value("Employee Advance", advance, fields, as_dict=True)
+        fields += [
+            SOURCE_DOCTYPE_FIELD,
+            SOURCE_DOCNAME_FIELD,
+            AGREED_INSTALLMENT_FIELD,
+        ]
+    advance_doc = locked_advance or frappe.db.get_value(
+        "Employee Advance", advance, fields, as_dict=True
+    )
     if not advance_doc or advance_doc.docstatus != 1:
         return 0.0
 
     outstanding = (
-        flt(advance_doc.paid_amount) - flt(advance_doc.return_amount) - _pending_installments(advance)
+        flt(advance_doc.paid_amount)
+        - flt(advance_doc.get("claimed_amount"))
+        - flt(advance_doc.return_amount)
+        - _pending_installments(advance, exclude_additional_salary)
     )
     if outstanding <= 0:
         return 0.0
@@ -292,8 +413,8 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
     if not enabled:
         return 0.0
 
-    wage = _monthly_wage(advance_doc.employee, payroll_date)
-    if wage <= 0:
+    preview, _assignment = _salary_preview(advance_doc.employee, payroll_date)
+    if not preview:
         return 0.0
 
     cap_percent = min(
@@ -305,17 +426,57 @@ def compute_recovery_installment(advance: str, payroll_date: str | None = None) 
         or MAX_RECOVERY_PERCENT,
         MAX_RECOVERY_PERCENT,
     )
-    known_deductions = _scheduled_deductions(
-        advance_doc.employee, get_first_day(payroll_date), get_last_day(payroll_date)
+    period_start = get_first_day(payroll_date)
+    period_end = get_last_day(payroll_date)
+    headroom = max(
+        flt(preview.net_pay)
+        - _draft_deductions(
+            advance_doc.employee,
+            period_start,
+            period_end,
+            exclude_additional_salary,
+        ),
+        0.0,
     )
     return bounded_installment(
         outstanding=outstanding,
-        configured_limit=(wage * cap_percent / 100.0) - known_deductions,
-        agreed=_agreed_installment(
-            advance_doc.get(SOURCE_DOCTYPE_FIELD),
-            advance_doc.get(SOURCE_DOCNAME_FIELD),
+        configured_limit=min(
+            flt(preview.gross_pay) * cap_percent / 100.0,
+            headroom,
         ),
+        agreed=flt(advance_doc.get(AGREED_INSTALLMENT_FIELD)),
     )
+
+
+def validate_recovery_additional_salary(doc, method=None):
+    """Revalidate an Apex recovery draft immediately before native HRMS submission."""
+    if doc.ref_doctype != "Employee Advance" or not doc.ref_docname:
+        return
+    if not _source_link_available():
+        return
+    source_doctype = frappe.db.get_value(
+        "Employee Advance", doc.ref_docname, SOURCE_DOCTYPE_FIELD
+    )
+    if not source_doctype:
+        return
+    advance = frappe.get_doc("Employee Advance", doc.ref_docname, for_update=True)
+    if not advance.get(SOURCE_DOCTYPE_FIELD):
+        return
+    if advance.docstatus != 1 or advance.status not in OPEN_ADVANCE_STATUSES:
+        frappe.throw(_("The linked Employee Advance is no longer open for recovery."))
+    allowed = compute_recovery_installment(
+        advance.name,
+        doc.payroll_date,
+        exclude_additional_salary=doc.name,
+        locked_advance=advance,
+    )
+    if allowed <= 0 or flt(doc.amount) > allowed:
+        frappe.throw(
+            _(
+                "This recovery installment is stale or exceeds the current payroll headroom. "
+                "Cancel it and schedule a new draft."
+            )
+        )
 
 
 def _recovery_component() -> str | None:

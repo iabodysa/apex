@@ -141,11 +141,27 @@ def _apply_employee_advance_recovery(args, company):
 
 def _apply_salis_support(args):
     """Create an Issue SLA only when the setup answers include a complete schedule."""
-    from apex.apex_core.setup.salis_support import configure_support_sla
+    from apex.apex_core.setup.salis_support import (
+        configure_support_sla,
+        ensure_support_holiday_list,
+    )
+
+    enabled = bool(cint(args.get("apex_enable_salis_support_sla")))
+    if not enabled:
+        configure_support_sla(enabled=False)
+        return
+    holiday_list = ensure_support_holiday_list(
+        name=args.get("apex_salis_support_holiday_list"),
+        from_date=args.get("apex_salis_support_holiday_from_date"),
+        to_date=args.get("apex_salis_support_holiday_to_date"),
+        weekly_off=args.get("apex_salis_support_weekly_off"),
+        country=args.get("apex_salis_support_country"),
+        subdivision=args.get("apex_salis_support_subdivision"),
+    )
 
     configure_support_sla(
-        enabled=bool(cint(args.get("apex_enable_salis_support_sla"))),
-        holiday_list=args.get("apex_salis_support_holiday_list"),
+        enabled=True,
+        holiday_list=holiday_list,
         workdays=args.get("apex_salis_support_workdays"),
         start_time=args.get("apex_salis_support_start_time"),
         end_time=args.get("apex_salis_support_end_time"),
