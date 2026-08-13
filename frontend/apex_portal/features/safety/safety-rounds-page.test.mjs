@@ -30,7 +30,10 @@ vi.mock("frappe-ui", () => ({
     template: "<button :disabled='disabled'><slot /></button>",
   },
   ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
-  LoadingIndicator: { template: "<span />" },
+  Progress: {
+    props: ["value", "label"],
+    template: "<div class='test-progress' role='progressbar' :aria-valuenow='value'><span>{{ label }}</span><slot name='hint' /></div>",
+  },
   createResource: ({ url }) => url.endsWith("submit_due_rounds") ? submitResource : dueResource,
   toast: { create: vi.fn() },
 }));
@@ -55,7 +58,18 @@ const taskStub = {
 describe("safety round checklist", () => {
   beforeEach(() => {
     selectBuilding("BLD-0001");
+    dueResource.loading = false;
     submitResource.submit.mockReset();
+  });
+
+  it("uses a shape skeleton instead of a spinner during initial loading", () => {
+    dueResource.loading = true;
+    const wrapper = mount(SafetyRoundsPage, {
+      global: { stubs: { BuildingPicker: true, SafetyTaskRow: taskStub } },
+    });
+
+    expect(wrapper.find(".safety-checklist__skeleton").exists()).toBe(true);
+    expect(wrapper.text()).toContain("جارٍ تحميل جولات السلامة");
   });
 
   it("keeps save disabled until every due task has an explicit decision", async () => {
@@ -70,6 +84,7 @@ describe("safety round checklist", () => {
     await nextTick();
 
     const save = wrapper.get(".safety-checklist__save");
+    expect(wrapper.find(".test-progress").exists()).toBe(true);
     expect(save.attributes("disabled")).toBeDefined();
     expect(wrapper.text()).toContain("0 من 2");
 

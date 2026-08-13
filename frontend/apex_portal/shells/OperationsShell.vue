@@ -2,7 +2,7 @@
 import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 
-const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
+const brandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
 
 defineProps({
   title: { type: String, required: true },

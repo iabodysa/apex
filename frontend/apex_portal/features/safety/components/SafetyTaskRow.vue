@@ -32,7 +32,10 @@ function uploaded(file) {
 </script>
 
 <template>
-  <article class="feature-card safety-task">
+  <article
+    class="feature-card safety-task"
+    :data-status="result.execution_status || undefined"
+  >
     <div>
       <strong dir="auto">{{ task.task_title || task.name }}</strong>
       <p v-if="task.instructions">{{ task.instructions }}</p>
@@ -41,18 +44,21 @@ function uploaded(file) {
       <Button
         class="safety-checklist__decision safety-checklist__decision--good"
         variant="outline"
+        icon-left="check"
         :aria-pressed="result.execution_status === 'Good'"
         @click="choose('Good')"
       >سليم</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--poor"
         variant="outline"
+        icon-left="alert-triangle"
         :aria-pressed="result.execution_status === 'Poor'"
         @click="choose('Poor')"
       >يحتاج معالجة</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--not-done"
         variant="outline"
+        icon-left="minus-circle"
         :aria-pressed="result.execution_status === 'Not Done'"
         @click="choose('Not Done')"
       >لم يُفحص</Button>

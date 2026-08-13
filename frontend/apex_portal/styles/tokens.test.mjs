@@ -15,6 +15,21 @@ describe("Apex portal identity", () => {
     expect(css).not.toMatch(/prefers-color-scheme|dark/i);
   });
 
+  it("passes Apex semantic colors into frappe-ui components", () => {
+    const css = `${read("./tokens.css")}\n${read("../features/housing/housing.css")}`;
+    expect(css).toContain("--surface-gray-7: var(--brand-green)");
+    expect(css).toContain("--surface-gray-6: var(--brand-green-hover)");
+    expect(css).toContain("--surface-gray-5: var(--brand-green-active)");
+    expect(css).toContain("--ink-gray-8: var(--ink)");
+    expect(css).toContain("--outline-gray-2: var(--border)");
+  });
+
+  it("uses the approved brand field for operations navigation", () => {
+    const css = read("./foundation.css");
+    expect(css).toMatch(/\.operations-shell__rail\s*\{[^}]*background:\s*var\(--forest\)/s);
+    expect(css).toMatch(/\.operations-shell__nav \.portal-nav-link\[aria-current="page"\]\s*\{[^}]*background:\s*var\(--brand-green\)/s);
+  });
+
   it("loads the vendored Thmanyah stylesheet and no remote font", () => {
     const css = `${read("./tokens.css")}\n${read("./foundation.css")}`;
     const html = read("../index.html");
@@ -33,6 +48,16 @@ describe("Apex portal identity", () => {
     expect(css).toContain("text-align: start");
     expect(css).toMatch(/min-(?:block-size|height): 44px/);
     expect(css).toContain("env(safe-area-inset-bottom)");
+  });
+
+  it("ships branded waiting and reduced-motion states", () => {
+    const css = `${read("./tokens.css")}\n${read("./foundation.css")}`;
+    const html = read("../index.html");
+    expect(html).toContain('class="apex-boot"');
+    expect(html).toContain('/assets/apex/icons/brand/apex-mark-reverse.svg');
+    expect(html).toContain("نجهّز أبكس لك");
+    expect(css).toContain("--motion-fast: 120ms");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
   });
 
   it("defines every spacing step consumed by portal feature styles", () => {

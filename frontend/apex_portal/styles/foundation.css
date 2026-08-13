@@ -58,6 +58,53 @@ h3 {
   text-align: start;
 }
 
+.apex-boot {
+  display: grid;
+  min-block-size: 100dvh;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-6);
+  background: var(--forest);
+  color: var(--surface-2);
+  text-align: center;
+}
+
+.apex-boot img {
+  inline-size: 84px;
+  block-size: 84px;
+}
+
+.apex-boot h1 {
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  text-align: center;
+}
+
+.apex-boot p {
+  opacity: .78;
+}
+
+.apex-boot__track {
+  inline-size: min(280px, 70vw);
+  block-size: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--surface-2) 22%, transparent);
+}
+
+.apex-boot__track span {
+  display: block;
+  inline-size: 62%;
+  block-size: 100%;
+  background: var(--mint);
+  animation: apex-boot-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes apex-boot-pulse {
+  from { opacity: .42; }
+  to { opacity: 1; }
+}
+
 :focus-visible {
   outline: 3px solid var(--mint);
   outline-offset: 3px;
@@ -215,13 +262,14 @@ h3 {
   min-block-size: 0;
   overflow-y: auto;
   padding: calc(var(--sp-6) + env(safe-area-inset-top)) var(--sp-4) var(--sp-6);
-  border-inline-end: 1px solid var(--border);
-  background: var(--surface);
+  border-inline-end: 1px solid color-mix(in srgb, var(--surface) 18%, transparent);
+  background: var(--forest);
+  color: var(--surface);
 }
 
 .operations-shell__brand {
   margin-block-end: var(--sp-8);
-  color: var(--accent-ink);
+  color: var(--surface);
   font-family: var(--font-display);
   font-size: 1.6rem;
   font-weight: 700;
@@ -234,6 +282,17 @@ h3 {
 
 .operations-shell__nav .portal-nav-link {
   padding-inline: var(--sp-3);
+  color: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.operations-shell__nav .portal-nav-link:hover {
+  background: color-mix(in srgb, var(--surface) 9%, transparent);
+  color: var(--surface);
+}
+
+.operations-shell__nav .portal-nav-link[aria-current="page"] {
+  background: var(--brand-green);
+  color: var(--surface-2);
 }
 
 .operations-shell__body {
@@ -301,5 +360,11 @@ h3 {
 
   .operations-shell__body {
     block-size: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apex-boot__track span {
+    animation: none;
   }
 }

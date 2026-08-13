@@ -15,7 +15,14 @@
     <title>{{ shell_meta.title }}</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <section class="apex-boot" role="status" aria-live="polite">
+        <img src="/assets/apex/icons/brand/apex-mark-reverse.svg" alt="" />
+        <h1>نجهّز أبكس لك…</h1>
+        <div class="apex-boot__track" aria-hidden="true"><span></span></div>
+        <p>لحظات ويكون كل شيء جاهز.</p>
+      </section>
+    </div>
     <script>
       window.csrf_token = {{ csrf_token | tojson }};
       window.apex_portal_shell = {{ shell_meta | tojson }};

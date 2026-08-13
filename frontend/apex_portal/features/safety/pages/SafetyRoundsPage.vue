@@ -1,6 +1,6 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
-import { Button, ErrorMessage, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
 import { building } from "../../housing/building.js";
 import SafetyTaskRow from "../components/SafetyTaskRow.vue";
@@ -17,6 +17,9 @@ const groups = computed(() => due.data?.due || []);
 const awaiting = computed(() => due.data?.awaiting || []);
 const taskCount = computed(() => groups.value.reduce((total, group) => total + group.tasks.length, 0));
 const checkedCount = computed(() => Object.values(results).filter((row) => row.execution_status).length);
+const checkedPercent = computed(() => taskCount.value
+  ? Math.round((checkedCount.value / taskCount.value) * 100)
+  : 0);
 const missingEvidence = computed(() => groups.value.some((group) => group.tasks.some((task) => {
   const row = results[`${group.cadence}:${task.name}`];
   return Boolean(task.evidence_required)
@@ -29,7 +32,7 @@ const checklistComplete = computed(() => taskCount.value > 0
 const progressLabel = computed(() => {
   if (missingEvidence.value) return "أكمل الصور المطلوبة قبل حفظ الجولة.";
   if (checklistComplete.value) return "اكتملت بنود الجولة.";
-  return `${checkedCount.value} من ${taskCount.value} تم فحصها.`;
+  return "تقدم الجولة";
 });
 
 watch(building, async (value) => {
@@ -75,9 +78,19 @@ async function saveRound() {
 </script>
 
 <template>
-  <section class="feature-page">
+  <section class="feature-page safety-rounds-page">
     <header class="feature-page__header"><h2>جولات السلامة</h2><BuildingPicker /></header>
-    <LoadingIndicator v-if="due.loading" aria-label="جارٍ تحميل الجولات" />
+    <section
+      v-if="due.loading"
+      class="safety-checklist__skeleton"
+      role="status"
+      aria-label="جارٍ تحميل جولات السلامة"
+    >
+      <strong>جارٍ تحميل جولات السلامة…</strong>
+      <article v-for="index in 3" :key="index" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </article>
+    </section>
     <ErrorMessage v-else-if="due.error" message="تعذر تحميل جولات السلامة." />
     <template v-else-if="building">
       <section v-if="awaiting.length" class="feature-card">
@@ -97,7 +110,16 @@ async function saveRound() {
         />
       </section>
       <ErrorMessage v-if="error" :message="error" />
-      <p v-if="groups.length" class="safety-checklist__progress" role="status">{{ progressLabel }}</p>
+      <Progress
+        v-if="groups.length"
+        class="safety-checklist__progress"
+        :value="checkedPercent"
+        :label="progressLabel"
+        size="lg"
+        hint
+      >
+        <template #hint>{{ checkedCount }} من {{ taskCount }}</template>
+      </Progress>
       <Button
         v-if="groups.length"
         class="safety-checklist__save"

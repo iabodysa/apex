@@ -80,3 +80,11 @@ describe("mobile navigation", () => {
     );
   });
 });
+
+describe("operations identity", () => {
+  it("uses the approved reverse mark on the brand color band", async () => {
+    const { wrapper } = await mountShell(OperationsShell);
+    expect(wrapper.get(".operations-shell__brand img").attributes("src"))
+      .toBe("/assets/apex/icons/brand/apex-mark-reverse.svg");
+  });
+});

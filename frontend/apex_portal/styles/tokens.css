@@ -1,6 +1,8 @@
 :root {
   color-scheme: light;
   --brand-green: #00844e;
+  --brand-green-hover: #006f41;
+  --brand-green-active: #005936;
   --accent-ink: #006f42;
   --forest: #072b1a;
   --mint: #60d297;
@@ -10,6 +12,10 @@
   --ink: #072b1a;
   --muted: #47584f;
   --border: #d8d0bd;
+  --control-edge: #8d8168;
+  --disabled-surface: #ece8de;
+  --disabled-ink: #8a938e;
+  --skeleton: #e7e2d6;
   --ok: #14804a;
   --warn: #a76609;
   --danger: #b42318;
@@ -26,6 +32,8 @@
   --radius-lg: 24px;
   --shadow-sm: 0 10px 28px rgb(7 43 26 / 8%);
   --shadow-lg: 0 24px 70px rgb(7 43 26 / 12%);
+  --motion-fast: 120ms;
+  --motion-page: 200ms;
   --font-display: "Thmanyah Serif Display", serif;
   --font-serif: "Thmanyah Serif Text", serif;
   --font: "Thmanyah Sans", sans-serif;

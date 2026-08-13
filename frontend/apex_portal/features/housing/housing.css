@@ -16,17 +16,56 @@
 .bed-grid a[data-state="orange"], .bed-grid a[data-state="gray"] { border-inline-start: 4px solid var(--warn); }
 .inventory-form, .safety-group { display: grid; gap: var(--sp-3); }
 .inventory-row { grid-template-columns: minmax(160px, 1fr) repeat(3, minmax(120px, .6fr)); align-items: end; }
-.safety-task { grid-template-columns: minmax(200px, 1fr) minmax(150px, .5fr); align-items: start; }
+.safety-rounds-page {
+  --surface-white: var(--surface-2);
+  --surface-gray-2: var(--disabled-surface);
+  --surface-gray-3: var(--canvas);
+  --surface-gray-4: var(--border);
+  --surface-gray-5: var(--brand-green-active);
+  --surface-gray-6: var(--brand-green-hover);
+  --surface-gray-7: var(--brand-green);
+  --ink-white: var(--surface-2);
+  --ink-gray-4: var(--disabled-ink);
+  --ink-gray-7: var(--muted);
+  --ink-gray-8: var(--ink);
+  --outline-gray-1: var(--border);
+  --outline-gray-2: var(--border);
+  --outline-gray-3: var(--control-edge);
+}
+.safety-task { grid-template-columns: minmax(200px, 1fr) minmax(150px, .5fr); align-items: start; transition: border-color var(--motion-fast) ease; }
+.safety-task[data-status="Good"] { border-color: color-mix(in srgb, var(--brand-green) 34%, var(--border)); }
+.safety-task[data-status="Poor"] { border-color: color-mix(in srgb, var(--warn) 46%, var(--border)); }
+.safety-task[data-status="Not Done"] { border-color: color-mix(in srgb, var(--danger) 46%, var(--border)); }
 .safety-checklist__decisions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
-.safety-checklist__decision { min-block-size: 44px; }
-.safety-checklist__decision[aria-pressed="true"] { border-color: var(--brand-green); background: var(--brand-green); color: white; }
-.safety-checklist__decision--poor[aria-pressed="true"] { border-color: var(--warn); background: var(--warn); color: white; }
-.safety-checklist__decision--not-done[aria-pressed="true"] { border-color: var(--danger); background: var(--danger); color: white; }
+.safety-checklist__decision { min-block-size: 44px; transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease, background-color var(--motion-fast) ease; }
+.safety-checklist__decision:active { transform: scale(.98); }
+.safety-checklist__decision[aria-pressed="true"] { border-color: var(--brand-green); background: var(--brand-green); color: var(--surface-2); }
+.safety-checklist__decision--poor[aria-pressed="true"] { border-color: var(--warn); background: var(--warn); color: var(--surface-2); }
+.safety-checklist__decision--not-done[aria-pressed="true"] { border-color: var(--danger); background: var(--danger); color: var(--surface-2); }
 .safety-checklist__note-toggle { justify-self: start; }
 .safety-checklist__evidence { display: grid; gap: var(--sp-1); }
-.safety-checklist__progress { margin: 0; color: var(--muted); }
+.safety-checklist__progress { max-inline-size: 680px; color: var(--muted); }
+.safety-checklist__progress [role="progressbar"] > div { background: var(--brand-green); transition: width var(--motion-page) ease; }
 .safety-checklist__save { min-block-size: 44px; justify-self: start; }
+.safety-checklist__skeleton { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+.safety-checklist__skeleton article { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); }
+.safety-checklist__skeleton span { display: block; block-size: 14px; border-radius: var(--radius-sm); background: var(--skeleton); animation: safety-skeleton-pulse 900ms ease-in-out infinite alternate; }
+.safety-checklist__skeleton span:nth-child(2) { inline-size: 78%; }
+.safety-checklist__skeleton span:nth-child(3) { inline-size: 52%; }
+@keyframes safety-skeleton-pulse { from { opacity: .48; } to { opacity: 1; } }
 .safety-evidence { display: block; inline-size: min(100%, 320px); block-size: auto; border-radius: var(--radius-sm); }
+
+@media (prefers-reduced-motion: reduce) {
+  .safety-task,
+  .safety-checklist__decision,
+  .safety-checklist__progress [role="progressbar"] > div {
+    transition: none;
+  }
+
+  .safety-checklist__skeleton span {
+    animation: none;
+  }
+}
 
 @media (max-width: 760px) {
   .inventory-row, .safety-task { grid-template-columns: 1fr; }
