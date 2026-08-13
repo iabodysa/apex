@@ -28,7 +28,10 @@ async function submit() {
   error.value = "";
   try {
     const result = await insert.submit({ doc: { doctype: "Maintenance Request", building: building.value, ...form } });
-    toast({ title: "تم تسجيل طلب الصيانة", text: result?.name, icon: "check" });
+    toast.create({
+      type: "success",
+      message: result?.name ? `تم تسجيل طلب الصيانة ${result.name}` : "تم تسجيل طلب الصيانة",
+    });
     Object.assign(form, { room: "", issue_type: "Other", issue_description: "", priority: "Medium" });
   } catch (exception) {
     error.value = exception.message || "تعذر تسجيل الطلب.";

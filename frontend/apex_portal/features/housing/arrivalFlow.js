@@ -13,6 +13,7 @@ export function arrivalRegistrationParams(form = {}, manifestRow = null, buildin
 }
 
 export function housingCandidateFromQuery(query = {}) {
+  query = query && typeof query === "object" ? query : {};
   const partyType = typeof query.party_type === "string" ? query.party_type : "";
   const party = typeof query.party === "string" ? query.party : "";
   if (!PARTY_TYPES.has(partyType) || !party) return null;

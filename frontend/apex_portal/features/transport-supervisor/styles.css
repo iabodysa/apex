@@ -13,6 +13,53 @@
   background: var(--surface);
 }
 
+.transport-map .leaflet-container,
+.transport-map .leaflet-control,
+.transport-map .leaflet-popup-content-wrapper {
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+.transport-map .leaflet-bar {
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.transport-map .leaflet-bar a {
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--accent-ink);
+  font-family: var(--font);
+}
+
+.transport-map .leaflet-bar a:hover,
+.transport-map .leaflet-bar a:focus-visible {
+  background: var(--surface);
+  color: var(--brand-green);
+}
+
+.transport-map .leaflet-popup-content-wrapper,
+.transport-map .leaflet-popup-tip {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.transport-map .leaflet-popup-content-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.transport-map .leaflet-control-attribution {
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  color: var(--muted);
+  font-family: var(--font);
+}
+
+.transport-map .leaflet-control-attribution a {
+  color: var(--accent-ink);
+}
+
 .transport-map-legend {
   display: flex;
   flex-wrap: wrap;

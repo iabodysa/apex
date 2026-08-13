@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 import { Button, FileUploader, FormControl } from "frappe-ui";
 import { createSingleFlight } from "../state.js";
+import { statusLabel } from "../../../core/displayLabels.js";
 
 const props = defineProps({
     title: String,
@@ -26,7 +27,7 @@ async function submit() {
     error.value = "";
     try {
         const result = await submitOnce(props.actionKey, () => props.resource.submit({ ...form }));
-        notice.value = `تم الحفظ بالحالة: ${result?.status || "Pending"}`;
+        notice.value = `تم الحفظ بالحالة: ${statusLabel(result?.status || "Pending")}`;
         emit("saved", result);
     } catch (caught) {
         error.value = caught?.message || "تعذر الحفظ. بقيت البيانات كما أدخلتها.";

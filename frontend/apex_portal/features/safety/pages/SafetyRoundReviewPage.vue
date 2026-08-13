@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Button, ErrorMessage, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { cadenceLabel, statusLabel } from "../../../core/displayLabels.js";
 
 const route = useRoute();
 const error = ref("");
@@ -28,7 +29,7 @@ async function ratify() {
     if (round.data?.docstatus === 0) {
       await submit.submit({ doc: { ...round.data, doctype: "Safety Round" } });
     }
-    toast({ title: "تم اعتماد الجولة", icon: "check" });
+    toast.create({ type: "success", message: "تم اعتماد الجولة" });
     await Promise.all([round.fetch(), executions.fetch()]);
   } catch (exception) { error.value = exception.message || "تعذر اعتماد الجولة."; }
 }
@@ -38,11 +39,11 @@ async function ratify() {
     <LoadingIndicator v-if="round.loading || executions.loading" aria-label="جارٍ التحميل" />
     <ErrorMessage v-else-if="round.error || executions.error" message="تعذر تحميل الجولة." />
     <template v-else>
-      <div class="feature-card"><strong dir="auto">{{ round.data?.name }}</strong><span>{{ round.data?.building }} · {{ round.data?.cadence }}</span></div>
+      <div class="feature-card"><strong dir="auto">{{ round.data?.name }}</strong><span>{{ round.data?.building }} · {{ cadenceLabel(round.data?.cadence) }}</span></div>
       <ul class="feature-page__list">
         <li v-for="row in rows" :key="row.name">
           <strong dir="auto">{{ row.task }}</strong>
-          <span>{{ row.execution_status }}</span>
+          <span>{{ statusLabel(row.execution_status) }}</span>
           <p v-if="row.notes">{{ row.notes }}</p>
           <a v-if="row.evidence_photo" :href="row.evidence_photo" target="_blank" rel="noopener">
             <img class="safety-evidence" :src="row.evidence_photo" alt="صورة الملاحظة" />

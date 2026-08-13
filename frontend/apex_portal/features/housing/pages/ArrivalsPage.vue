@@ -75,7 +75,7 @@ async function addTemporary() {
     registered.value = { ...result, project: selectedManifest.value?.project || "" };
     selectedManifest.value = null;
     Object.assign(form, { worker_name: "", passport_number: "", nationality: "", cell_number: "" });
-    toast({ title: "تم تسجيل العامل", icon: "check" });
+    toast.create({ type: "success", message: "تم تسجيل العامل" });
     await arrivals.fetch();
   } catch (reason) {
     error.value = reason?.message || "تعذّر تسجيل العامل.";
@@ -145,7 +145,7 @@ watch(building, load, { immediate: true });
 
       <section class="arrival-panel">
         <div class="arrival-panel__title"><h3>ابحث عن عامل مسجل</h3><span>بالاسم أو الرقم</span></div>
-        <div class="arrival-search"><FormControl v-model="query" label="العامل" /><Button icon="search" variant="outline" :loading="search.loading" @click="findWorker">بحث</Button></div>
+        <div class="arrival-search"><FormControl v-model="query" label="العامل" /><Button icon-left="search" variant="outline" :loading="search.loading" @click="findWorker">بحث</Button></div>
         <article v-for="row in candidates" :key="`${row.party_type}:${row.party}`" class="arrival-row">
           <div><strong>{{ row.label }}</strong><small>{{ row.sub }}</small></div>
           <Badge :label="row.party_type === 'Employee' ? 'موظف' : 'عامل مؤقت'" />

@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { Badge, Button, FormControl } from "frappe-ui";
 import { createFleetOperationsResources } from "../api.js";
 import { actionAvailability, createSingleFlight } from "../state.js";
+import { statusLabel } from "../../../core/displayLabels.js";
 const route = useRoute(),
     r = createFleetOperationsResources(),
     vehicle = computed(() => {
@@ -50,7 +51,7 @@ onMounted(load);
             <Badge
                 v-if="vehicle"
                 theme="green"
-                :label="vehicle.vehicle_status || vehicle.status"
+                :label="statusLabel(vehicle.vehicle_status || vehicle.status)"
             />
         </header>
         <div v-if="r.vehicles.loading" class="ops-state">جاري تحميل المركبة…</div>
@@ -107,7 +108,7 @@ onMounted(load);
                 </article>
                 <article class="ops-card">
                     <h3>الالتزام</h3>
-                    <p>{{ vehicle.compliance_status || "غير متابع" }}</p>
+                    <p>{{ statusLabel(vehicle.compliance_status || "Not Tracked") }}</p>
                 </article>
                 <article class="ops-card">
                     <h3>الاسترداد والمعالجة</h3>

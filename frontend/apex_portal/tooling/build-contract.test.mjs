@@ -12,12 +12,15 @@ describe("unified build contract", () => {
     expect(rootPackage.scripts.test).toBe("npm test -w apex_portal");
   });
 
-  it("has one HTML source, one mount call, one router creation, and one token entry", () => {
+  it("has one HTML source, one mount call, one router creation, and a final token override", () => {
     expect(readdirSync(root).filter((name) => name === "index.html")).toEqual(["index.html"]);
     const main = read("main.js");
     expect(main.match(/\.mount\(/g)).toHaveLength(1);
     expect(main.match(/createPortalRouter\(/g)).toHaveLength(1);
     expect(main.match(/styles\/foundation\.css/g)).toHaveLength(1);
+    expect(main.match(/styles\/tokens\.css/g)).toHaveLength(1);
+    expect(main.indexOf('styles/foundation.css')).toBeLessThan(main.indexOf('styles/tokens.css'));
+    expect(read("styles/foundation.css")).not.toContain('@import "./tokens.css"');
   });
 
   it("keeps bootstrap data non-executable and offline styles external", () => {
@@ -34,8 +37,10 @@ describe("unified build contract", () => {
     const offline = new DOMParser().parseFromString(read("public/offline.html"), "text/html");
     expect(offline.querySelector("style")).toBeNull();
     expect(offline.querySelector("[style]")).toBeNull();
-    expect(offline.querySelector('link[rel="stylesheet"]')?.getAttribute("href"))
-      .toBe("/assets/apex/apex_portal/offline.css");
+    const stylesheets = [...offline.querySelectorAll('link[rel="stylesheet"]')]
+      .map((link) => link.getAttribute("href"));
+    expect(stylesheets).toContain("/assets/apex/vendor/thmanyah-v1/thmanyah.css");
+    expect(stylesheets).toContain("/assets/apex/apex_portal/offline.css");
   });
 
   it("uses both shells and declares all seven domain feature slots without fake pages", () => {

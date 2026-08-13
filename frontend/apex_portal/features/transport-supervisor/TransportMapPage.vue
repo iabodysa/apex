@@ -1,6 +1,7 @@
 <script setup>
 import { inject, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { Button, FormControl } from "frappe-ui";
+import { statusLabel } from "../../core/displayLabels.js";
 import { createLeafletAdapter } from "./leafletAdapter.js";
 import { createTransportMapState } from "./transportMapState.js";
 import "./styles.css";
@@ -36,7 +37,7 @@ onBeforeUnmount(mapAdapter.destroy);
   <section class="feature-page transport-map-page" :aria-busy="state === 'loading'">
     <header class="feature-page__heading">
       <div><p class="feature-page__eyebrow">تشغيل النقل</p><h2>الخريطة المباشرة</h2><p>مواقع السائقين ومسارات الرحلات المسندة إليك.</p></div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" @click="load" />
+      <Button variant="outline" icon-left="refresh-cw" @click="load">تحديث</Button>
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
     <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذه الرحلات.</div>
@@ -45,7 +46,7 @@ onBeforeUnmount(mapAdapter.destroy);
     <template v-else>
       <div class="transport-map-filters">
         <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects.map((value) => ({ label: value, value }))]" @change="applyFilters" />
-        <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: value, value }))]" @change="applyFilters" />
+        <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @change="applyFilters" />
       </div>
       <ul class="transport-map-legend" aria-label="دليل الخريطة">
         <li data-kind="route">مسار الرحلة</li>

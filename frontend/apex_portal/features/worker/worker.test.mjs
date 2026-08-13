@@ -8,9 +8,15 @@ import { createDraftAction } from "./asyncState.js";
 import WorkerPage from "./WorkerPage.vue";
 import WorkerTransportPage from "./WorkerTransportPage.vue";
 
+const { toastCreate } = vi.hoisted(() => ({ toastCreate: vi.fn() }));
+
 vi.mock("frappe-ui", () => ({
+  Badge: { props: ["label"], template: "<span>{{ label }}</span>" },
   Button: { template: "<button><slot /></button>" },
+  ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
   FeatherIcon: { template: "<i />" },
+  LoadingIndicator: { template: "<span />" },
+  toast: { create: toastCreate },
 }));
 
 describe("Masar worker feature", () => {
@@ -55,6 +61,47 @@ describe("Masar worker feature", () => {
       ["apex.salis.api.boarding_flow.worker_claim_boarded"],
       ["apex.salis.api.masar.get_worker_boarding_pass", { transport_request: "TR-1" }],
     ]);
+  });
+
+  it("shows the active wait quota and driver reminder window", async () => {
+    toastCreate.mockReset();
+    const now = new Date(Date.now() - 30_000).toISOString();
+    const requestWait = vi.fn().mockResolvedValue({});
+    const wrapper = mount(WorkerTransportPage, {
+      global: {
+        provide: {
+          portalSubscribe: () => () => {},
+          workerGateway: {
+            transport: vi.fn().mockResolvedValue({ upcoming: [], past: [] }),
+            boarding: vi.fn().mockResolvedValue({
+              dispatch_trip: "DT-1",
+              status: "Pending",
+              wait_count: 1,
+              wait_max: 3,
+              wait_at: now,
+              wait_window_seconds: 120,
+              notify_at: now,
+              notify_window_seconds: 120,
+              boarding_window: { state: "at_stop", can_confirm: true },
+            }),
+            profile: vi.fn().mockResolvedValue({ realtime_room: "" }),
+            requestWait,
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("طلب الانتظار 1 من 3");
+    expect(wrapper.text()).toContain("السائق نبهك");
+    await wrapper.get("button").trigger("click");
+    await flushPromises();
+    expect(requestWait).toHaveBeenCalledOnce();
+    expect(toastCreate).toHaveBeenCalledWith({
+      type: "success",
+      message: "وصل طلب الانتظار إلى السائق",
+    });
+    wrapper.unmount();
   });
 
   it("keeps entered values after a recoverable submission error", async () => {

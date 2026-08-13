@@ -2,7 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { Badge, Button, ErrorMessage, LoadingIndicator, toast } from "frappe-ui";
 import QRCode from "qrcode";
-import { dateTimeLabel } from "../../core/displayLabels.js";
+import { dateTimeLabel, remainingSeconds } from "../../core/displayLabels.js";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
@@ -13,7 +13,9 @@ const error = ref("");
 const busy = ref("");
 const pass = ref(null);
 const passImage = ref("");
+const now = ref(Date.now());
 let pollTimer;
+let clockTimer;
 let activeRoom = "";
 let unsubscribers = [];
 
@@ -28,6 +30,16 @@ const canWait = computed(() => (
 const canConfirm = computed(() => (
   boarding.value?.boarding_window?.can_confirm
   && boarding.value.status !== "Boarded"
+));
+const waitSeconds = computed(() => remainingSeconds(
+  boarding.value?.wait_at,
+  boarding.value?.wait_window_seconds,
+  now.value,
+));
+const notifySeconds = computed(() => remainingSeconds(
+  boarding.value?.notify_at,
+  boarding.value?.notify_window_seconds,
+  now.value,
 ));
 
 const statusLabels = Object.freeze({
@@ -44,7 +56,9 @@ const statusLabel = (value) => statusLabels[value] || value || "بانتظار �
 
 function stopLive() {
   clearInterval(pollTimer);
+  clearInterval(clockTimer);
   pollTimer = undefined;
+  clockTimer = undefined;
   while (unsubscribers.length) unsubscribers.pop()();
   activeRoom = "";
 }
@@ -87,7 +101,7 @@ async function run(key, action, message) {
   busy.value = key;
   try {
     await action();
-    toast({ title: message, icon: "check" });
+    toast.create({ type: "success", message });
     await load(true);
   } catch (reason) {
     error.value = reason?.message || "تعذّر تنفيذ الإجراء.";
@@ -112,7 +126,10 @@ async function showPass(request) {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  clockTimer = setInterval(() => { now.value = Date.now(); }, 1000);
+  load();
+});
 onBeforeUnmount(stopLive);
 </script>
 
@@ -146,6 +163,9 @@ onBeforeUnmount(stopLive);
           <Badge :label="statusLabel(boarding.status)" />
         </div>
         <p v-if="boarding.driver_arrived" class="journey-alert">وصل السائق إلى نقطة تجمعك.</p>
+        <p v-if="notifySeconds !== null" class="journey-alert journey-alert--notice">
+          {{ notifySeconds > 0 ? `السائق نبهك، موعد المغادرة خلال ${notifySeconds} ثانية.` : 'الحافلة تستعد للمغادرة الآن.' }}
+        </p>
         <p v-if="boarding.wrong_bus" class="journey-alert journey-alert--danger">أنت عند حافلة مختلفة. راجع رقم الرحلة قبل التأكيد.</p>
         <div class="journey-actions">
           <Button
@@ -162,6 +182,10 @@ onBeforeUnmount(stopLive);
             @click="run('boarded', gateway.claimBoarded, 'تم تسجيل صعودك')"
           >أنا في الحافلة</Button>
         </div>
+        <small v-if="boarding.wait_max" class="journey-wait-note">
+          طلب الانتظار {{ boarding.wait_count || 0 }} من {{ boarding.wait_max }}
+          <template v-if="waitSeconds"> · طلبك فعال لمدة {{ waitSeconds }} ثانية</template>
+        </small>
         <small v-if="!canConfirm && boarding.status !== 'Boarded'">يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.</small>
       </article>
 

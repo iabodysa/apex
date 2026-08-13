@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import AsyncPanel from "./AsyncPanel.vue";
+import { statusLabel } from "../../../core/displayLabels.js";
 
 const props = defineProps({
     title: String,
@@ -73,7 +74,7 @@ onMounted(() => props.resource.fetch());
                         }}
                     </p>
                 </div>
-                <Badge theme="green" variant="subtle" :label="row.status || 'مفتوح'" />
+                <Badge theme="green" variant="subtle" :label="statusLabel(row.status || 'Open')" />
             </li>
         </ul>
     </section>

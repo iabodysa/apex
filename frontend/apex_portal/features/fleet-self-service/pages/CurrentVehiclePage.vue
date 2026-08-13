@@ -16,7 +16,7 @@ onMounted(() => resource.fetch());
                 <p class="salis-eyebrow">عهدتك الحالية</p>
                 <h2>المركبة</h2>
             </div>
-            <Button variant="ghost" icon="refresh-cw" label="تحديث" @click="resource.fetch()" />
+            <Button variant="ghost" icon-left="refresh-cw" label="تحديث" @click="resource.fetch()" />
         </header>
         <AsyncPanel
             v-if="resource.loading"

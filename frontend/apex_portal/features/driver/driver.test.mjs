@@ -8,9 +8,13 @@ import DriverPage from "./DriverPage.vue";
 import DriverTripPage from "./DriverTripPage.vue";
 
 vi.mock("frappe-ui", () => ({
-  Badge: { template: "<span />" },
-  Button: { template: "<button><slot /></button>" },
+  Badge: { props: ["label"], template: "<span>{{ label }}</span>" },
+  Button: { props: ["disabled"], template: "<button :disabled='disabled'><slot /></button>" },
+  ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
   FeatherIcon: { template: "<i />" },
+  FormControl: { template: "<input />" },
+  LoadingIndicator: { template: "<span />" },
+  toast: { create: vi.fn() },
 }));
 
 describe("Masar driver feature", () => {
@@ -68,6 +72,64 @@ describe("Masar driver feature", () => {
       ["apex.salis.api.boarding_flow.driver_mark_not_boarded", { dispatch_trip: "DT-1", employee: "EMP-1" }],
       ["apex.salis.api.boarding_flow.depart_and_finalize", { dispatch_trip: "DT-1" }],
     ]);
+  });
+
+  it("lets the driver undo a completed stop through the canonical endpoint", async () => {
+    const call = vi.fn().mockResolvedValue({ message: {} });
+    const gateway = createDriverGateway(call);
+
+    await gateway.setStopProgress("DT-1", "STOP-1", false);
+
+    expect(call).toHaveBeenCalledWith(
+      "apex.salis.api.driver_portal.mark_stop_progress",
+      { dispatch_trip: "DT-1", route_stop: "STOP-1", done: 0 },
+    );
+  });
+
+  it("shows stop details, passenger calls, and active wait requests", async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/route/:trip", component: DriverTripPage }],
+    });
+    await router.push("/route/DT-1");
+    await router.isReady();
+    const wrapper = mount(DriverTripPage, {
+      global: {
+        plugins: [router],
+        provide: {
+          portalSubscribe: () => () => {},
+          driverGateway: {
+            trip: vi.fn().mockResolvedValue({
+              route_name: "خط السكن",
+              status: "Dispatched",
+              started: true,
+              stops: [{
+                route_stop: "STOP-1",
+                stop_name: "بوابة السكن",
+                planned_time: "06:30:00",
+                pickup: { building_name: "سكن العرض", city: "الرياض", google_maps_url: "https://maps.example/stop" },
+              }],
+              workers: [{ employee: "EMP-1", employee_name: "عامل العرض", pickup_point: "البوابة", phone: "0500000000" }],
+            }),
+            tripBoarding: vi.fn().mockResolvedValue({
+              worker_wait_request_max: 3,
+              worker_wait_request_seconds: 120,
+              grace_elapsed: false,
+              workers: [{ employee: "EMP-1", status: "Pending", wait_count: 1 }],
+            }),
+            today: vi.fn().mockResolvedValue({ realtime_room: "" }),
+          },
+        },
+      },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("6:30 ص");
+    expect(wrapper.text()).toContain("سكن العرض");
+    expect(wrapper.text()).toContain("الرياض");
+    expect(wrapper.text()).toContain("طلب الانتظار 1 من 3");
+    expect(wrapper.get('a[href="tel:0500000000"]').text()).toContain("اتصل بالعامل");
+    wrapper.unmount();
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {

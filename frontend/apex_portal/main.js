@@ -11,6 +11,7 @@ import { createTransportSupervisorGateway } from "./features/transport-superviso
 import { createWorkerGateway } from "./features/worker/gateway.js";
 import { portalRoutes } from "./routes.js";
 import "./styles/foundation.css";
+import "./styles/tokens.css";
 
 const CONTEXT_TITLES = Object.freeze({
   worker: "مسار",

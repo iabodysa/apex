@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { statusLabel } from "../../../core/displayLabels.js";
 
 const route = useRoute();
 const code = ref("");
@@ -39,7 +40,7 @@ async function run(resource, params, message) {
       <article class="feature-card">
         <strong dir="auto">{{ delivery.data.facility_asset }}</strong>
         <span>{{ delivery.data.from_building }} ← {{ delivery.data.to_building }}</span>
-        <small>{{ delivery.data.status }}</small>
+        <small>{{ statusLabel(delivery.data.status) }}</small>
       </article>
       <div class="feature-actions">
         <Button

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { Badge, Button, Dialog, FormControl } from "frappe-ui";
 import { createFleetOperationsResources } from "../api.js";
 import { actionAvailability, createSingleFlight } from "../state.js";
+import { statusLabel } from "../../../core/displayLabels.js";
 const r = createFleetOperationsResources(),
     rows = computed(() => r.fuelQueue.data || []),
     selected = ref(null),
@@ -55,11 +56,11 @@ async function act(kind, row) {
                         ><bdi>{{ row.vehicle_plate || row.vehicle }}</bdi></strong
                     ><span
                         ><bdi>{{ row.topup_litres || row.requested_litres }} لتر</bdi> ·
-                        {{ row.request_type }}</span
+                        {{ statusLabel(row.request_type) }}</span
                     >
                 </div>
                 <div class="ops-actions">
-                    <Badge theme="orange" :label="row.status" /><Button
+                    <Badge theme="orange" :label="statusLabel(row.status)" /><Button
                         variant="solid"
                         theme="green"
                         label="اعتماد"

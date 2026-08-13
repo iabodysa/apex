@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
+import { statusLabel } from "../../../core/displayLabels.js";
 const props = defineProps({
     title: String,
     resource: Object,
@@ -57,7 +58,7 @@ onMounted(() => props.resource.fetch());
                         row.driver_name || row.driver || row.project || row.location || ""
                     }}</span>
                 </div>
-                <Badge theme="green" :label="row.status || row.vehicle_status || 'مفتوح'"
+                <Badge theme="green" :label="statusLabel(row.status || row.vehicle_status || 'Open')"
             /></RouterLink>
         </div>
     </section>

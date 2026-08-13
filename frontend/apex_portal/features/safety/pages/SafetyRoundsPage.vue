@@ -38,7 +38,7 @@ const progressLabel = computed(() => {
 watch(building, async (value) => {
   Object.keys(results).forEach((key) => delete results[key]);
   if (value) await due.fetch();
-});
+}, { immediate: true });
 function update(task, cadence, value) {
   results[`${cadence}:${task}`] = { ...value, task, cadence };
 }

@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createResource, toast } from "frappe-ui";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
+import { statusLabel } from "../../../core/displayLabels.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -51,7 +52,7 @@ async function depart() {
     <LoadingIndicator v-if="bed.get.loading" aria-label="جارٍ التحميل" />
     <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
     <template v-else-if="bed.doc">
-      <article class="feature-card"><strong>{{ bed.doc.bed_code || bed.doc.name }}</strong><span>{{ bed.doc.room }}</span><small>{{ bed.doc.status }} · {{ bed.doc.condition }}</small></article>
+      <article class="feature-card"><strong>{{ bed.doc.bed_code || bed.doc.name }}</strong><span>{{ bed.doc.room }}</span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>
       <form v-if="!occupied && canCheckIn" class="feature-form" @submit.prevent="arrive">
         <article v-if="candidate" class="selected-resident">
           <div><span>الساكن المحدد</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>

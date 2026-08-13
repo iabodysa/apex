@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import AsyncPanel from "../components/AsyncPanel.vue";
 import { createFleetSelfResources } from "../api.js";
+import { statusLabel } from "../../../core/displayLabels.js";
 const r = createFleetSelfResources();
 const quota = computed(() => r.quota.data?.quota || null);
 onMounted(() => Promise.all([r.quota.fetch(), r.fuel.fetch()]));
@@ -14,7 +15,7 @@ onMounted(() => Promise.all([r.quota.fetch(), r.fuel.fetch()]));
                 <p class="salis-eyebrow">هذا الشهر</p>
                 <h2>رصيد الوقود</h2>
             </div>
-            <Button variant="ghost" icon="refresh-cw" label="تحديث" @click="r.quota.fetch()" />
+            <Button variant="ghost" icon-left="refresh-cw" label="تحديث" @click="r.quota.fetch()" />
         </header>
         <AsyncPanel
             v-if="r.quota.loading"
@@ -34,7 +35,7 @@ onMounted(() => Promise.all([r.quota.fetch(), r.fuel.fetch()]));
             message="راجع مشرف التشغيل إذا كنت تحتاج حصة وقود."
         />
         <article v-else class="salis-card">
-            <Badge theme="green" :label="quota.status" />
+            <Badge theme="green" :label="statusLabel(quota.status)" />
             <div class="salis-metrics">
                 <div class="salis-metric">
                     <strong

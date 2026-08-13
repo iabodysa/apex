@@ -47,4 +47,8 @@ describe("housing arrival flow", () => {
   it("rejects an incomplete client query instead of inventing a resident", () => {
     expect(housingCandidateFromQuery({ party_type: "Employee" })).toBeNull();
   });
+
+  it("opens an ordinary bed when no arrival candidate was selected", () => {
+    expect(bedAssignmentTarget("BED-1", null)).toEqual({ path: "/beds/BED-1" });
+  });
 });

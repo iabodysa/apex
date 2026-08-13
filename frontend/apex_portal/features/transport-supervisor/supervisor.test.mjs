@@ -25,6 +25,7 @@ describe("Masar transport supervisor feature", () => {
     expect(page).toContain('from "./leafletAdapter.js"');
     expect(page).toContain('from "./transportMapState.js"');
     expect(page).toContain('import "./styles.css"');
+    expect(page).toMatch(/<Button[^>]*icon-left="refresh-cw"[^>]*>تحديث<\/Button>/);
     expect(page).not.toMatch(/window\.L|document\.createElement|L\.map|L\.tileLayer|<style/);
   });
 

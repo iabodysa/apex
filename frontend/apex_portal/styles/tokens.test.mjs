@@ -16,12 +16,25 @@ describe("Apex portal identity", () => {
   });
 
   it("passes Apex semantic colors into frappe-ui components", () => {
-    const css = `${read("./tokens.css")}\n${read("../features/housing/housing.css")}`;
+    const css = read("./tokens.css");
+    expect(css).toContain("--surface-green-3: var(--brand-green)");
+    expect(css).toContain("--surface-green-2: color-mix(in srgb, var(--brand-green) 12%, white)");
+    expect(css).toContain("--ink-green-3: var(--accent-ink)");
     expect(css).toContain("--surface-gray-7: var(--brand-green)");
     expect(css).toContain("--surface-gray-6: var(--brand-green-hover)");
     expect(css).toContain("--surface-gray-5: var(--brand-green-active)");
     expect(css).toContain("--ink-gray-8: var(--ink)");
     expect(css).toContain("--outline-gray-2: var(--border)");
+  });
+
+  it("keeps the offline fallback on the approved type and color tokens", () => {
+    const html = read("../public/offline.html");
+    const css = read("../public/offline.css");
+    expect(html).toContain('/assets/apex/vendor/thmanyah-v1/thmanyah.css');
+    expect(css).toContain('font-family: "Thmanyah Sans", sans-serif');
+    expect(css).toContain("color: #072b1a");
+    expect(css).toContain("color: #47584f");
+    expect(css).not.toContain("system-ui");
   });
 
   it("uses a light operations rail with the primary brand color reserved for selection", () => {
@@ -77,5 +90,17 @@ describe("Apex portal identity", () => {
     expect(css).toContain("@media (max-width: 767px)");
     expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__rail\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
     expect(css).toMatch(/@media \(max-width: 767px\)[\s\S]*?\.operations-shell__nav\s*\{[^}]*min-inline-size:\s*0[^}]*max-inline-size:\s*100%/);
+  });
+
+  it("keeps housing room cards vertical when other feature styles are loaded", () => {
+    const css = read("../features/housing/housing.css");
+    expect(css).toMatch(/\.room-card\s*\{[^}]*display:\s*grid[^}]*align-items:\s*stretch/s);
+    expect(css).toMatch(/\.room-card header > div\s*\{[^}]*display:\s*flex[^}]*gap:/s);
+  });
+
+  it("keeps all safety checklist decisions readable on the iPad", () => {
+    const css = read("../features/housing/housing.css");
+    expect(css).toMatch(/\.safety-checklist__decision \.truncate\s*\{[^}]*white-space:\s*normal/s);
+    expect(css).toMatch(/@media \(max-width: 1100px\)[\s\S]*?\.safety-task\s*\{[^}]*grid-template-columns:\s*1fr/s);
   });
 });

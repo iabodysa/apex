@@ -15,6 +15,61 @@ const statusLabels = Object.freeze({
   Started: "بدأت",
   Completed: "مكتملة",
   Cancelled: "ملغاة",
+  Ready: "جاهزة",
+  "Needs Cleaning": "تحتاج تنظيف",
+  "Needs Repair": "تحتاج إصلاح",
+  "Out of Service": "خارج الخدمة",
+  Available: "متاح",
+  Occupied: "مشغول",
+  Good: "جيدة",
+  Excellent: "ممتازة",
+  Average: "متوسطة",
+  Poor: "ضعيفة",
+  "Not Done": "لم تُنفذ",
+  High: "عالية",
+  Medium: "متوسطة",
+  Low: "منخفضة",
+  Active: "نشط",
+  Inactive: "غير نشط",
+  Exhausted: "مستنفد",
+  Closed: "مغلق",
+  Open: "مفتوح",
+  Unknown: "غير معروف",
+  Scrapped: "مستبعد",
+  Stopped: "متوقف",
+  "On Leave": "في إجازة",
+  "Under Maintenance": "تحت الصيانة",
+  Released: "خارج العهدة",
+  "Not Tracked": "غير متابع",
+  Compliant: "ملتزم",
+  "Expiring Soon": "ينتهي قريباً",
+  Expired: "منتهي",
+  Valid: "ساري",
+  Standard: "عادي",
+  Additional: "إضافي",
+  Draft: "مسودة",
+  "In Progress": "قيد التنفيذ",
+  Resolved: "محلول",
+  Reopened: "أعيد فتحه",
+  "Pending Approval": "بانتظار الاعتماد",
+  "Pending Receipt": "بانتظار الاستلام",
+  "Pending Exits": "بانتظار الخروج",
+  "Under Review": "قيد المراجعة",
+  Confirmed: "مؤكد",
+  Issued: "مصروف",
+  Returned: "مسترجع",
+  "Partially Returned": "مسترجع جزئياً",
+  Lost: "مفقود",
+  Damaged: "تالف",
+  "In Transit": "في الطريق",
+  Received: "مستلم",
+  Delivered: "تم التسليم",
+  Failed: "فشل",
+  Reverted: "أعيد",
+  Done: "منجز",
+  Triaged: "مصنف",
+  Assigned: "مسند",
+  "Waiting Evidence": "بانتظار الإثبات",
 });
 
 const frappeDateTime = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
@@ -55,6 +110,12 @@ export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
 }
 
+export function floorLabel(value) {
+  const text = String(value || "");
+  const match = text.match(/^Floor\s+(.+)$/i);
+  return match ? `الطابق ${match[1]}` : text;
+}
+
 export function dateTimeLabel(value) {
   if (!value) return "";
   const text = String(value).trim();
@@ -71,6 +132,18 @@ export function dateTimeLabel(value) {
   match = text.match(frappeDate);
   if (match) return dateFormatter.format(riyadhDate(match.slice(1)));
   return text;
+}
+
+export function remainingSeconds(value, durationSeconds, now = Date.now()) {
+  if (!value) return null;
+  const text = String(value).trim();
+  const match = text.match(frappeDateTime);
+  const started = match
+    ? riyadhDate(match.slice(1)).getTime()
+    : Date.parse(text);
+  if (!Number.isFinite(started)) return null;
+  const duration = Math.max(Number(durationSeconds) || 0, 0) * 1000;
+  return Math.max(Math.ceil((started + duration - now) / 1000), 0);
 }
 
 export function cadenceLabel(value) {

@@ -9,7 +9,7 @@ async function submit() {
   error.value = "";
   try {
     await transfer.submit({ ...form });
-    toast({ title: "تم نقل الساكن", icon: "check" });
+    toast.create({ type: "success", message: "تم نقل الساكن" });
     Object.assign(form, { source_bed: "", target_bed: "", reason: "" });
   } catch (exception) {
     error.value = exception.message || "تعذر تنفيذ النقل.";

@@ -3,7 +3,7 @@ import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
-import { statusLabel } from "../../core/displayLabels.js";
+import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -17,7 +17,9 @@ const busy = ref("");
 const scanToken = ref("");
 const scanResult = ref("");
 const scannerVideo = ref(null);
+const now = ref(Date.now());
 let pollTimer;
+let clockTimer;
 let unsubscribers = [];
 
 const dispatchTrip = computed(() => route.params.trip);
@@ -29,6 +31,15 @@ const workers = computed(() => (trip.value?.workers || []).map((worker) => ({
   ...(statusByEmployee.value.get(worker.employee) || { status: "Pending", wait_count: 0 }),
 })));
 const pendingWorkers = computed(() => workers.value.filter((worker) => worker.status !== "Boarded"));
+const waitLimit = computed(() => boarding.value?.worker_wait_request_max || 0);
+
+function waitSeconds(worker) {
+  return remainingSeconds(
+    worker.wait_at,
+    boarding.value?.worker_wait_request_seconds,
+    now.value,
+  );
+}
 
 const statusLabels = Object.freeze({
   Pending: "بانتظار الصعود",
@@ -46,6 +57,7 @@ const scanMessages = Object.freeze({
 
 function stopLive() {
   clearInterval(pollTimer);
+  clearInterval(clockTimer);
   while (unsubscribers.length) unsubscribers.pop()();
   scanner.stop();
 }
@@ -86,7 +98,7 @@ async function run(key, action, message) {
   error.value = "";
   try {
     await action();
-    toast({ title: message, icon: "check" });
+    toast.create({ type: "success", message });
     await load(true);
   } catch (reason) {
     error.value = reason?.message || "تعذّر تنفيذ الإجراء.";
@@ -117,7 +129,10 @@ async function startCamera() {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  clockTimer = setInterval(() => { now.value = Date.now(); }, 1000);
+  load();
+});
 onBeforeUnmount(stopLive);
 </script>
 
@@ -150,26 +165,40 @@ onBeforeUnmount(stopLive);
         <ol class="driver-timeline">
           <li v-for="(stop, index) in trip.stops || []" :key="stop.route_stop || index" :class="{ 'is-done': stop.done }">
             <span class="driver-timeline__number">{{ index + 1 }}</span>
-            <div class="driver-timeline__copy"><strong>{{ stop.stop_name || stop.location || 'محطة' }}</strong><small>{{ stop.arrived ? 'وصلت' : stop.done ? 'اكتملت' : 'قادمة' }}</small></div>
+            <div class="driver-timeline__copy">
+              <strong>{{ stop.stop_name || stop.location || 'محطة' }}</strong>
+              <small>{{ stop.arrived ? 'وصلت' : stop.done ? 'اكتملت' : 'قادمة' }}<template v-if="stop.planned_time"> · <bdi>{{ dateTimeLabel(stop.planned_time) }}</bdi></template></small>
+              <div v-if="stop.pickup" class="driver-stop-meta">
+                <span v-if="stop.pickup.building_name">{{ stop.pickup.building_name }}</span>
+                <span v-if="stop.pickup.city">{{ stop.pickup.city }}</span>
+                <a v-if="stop.pickup.google_maps_url" :href="stop.pickup.google_maps_url" target="_blank" rel="noopener">افتح موقع المحطة</a>
+              </div>
+            </div>
             <div class="journey-actions">
               <Button variant="outline" :disabled="!trip.started || stop.arrived" :loading="busy === `arrive:${stop.route_stop}`" @click="run(`arrive:${stop.route_stop}`, () => gateway.arriveAtStop(dispatchTrip, stop.route_stop), 'تم تنبيه المنتظرين بوصولك')">وصلت</Button>
-              <Button variant="outline" :disabled="!trip.started || stop.done" :loading="busy === `stop:${stop.route_stop}`" @click="run(`stop:${stop.route_stop}`, () => gateway.markStop(dispatchTrip, stop.route_stop), 'اكتملت المحطة')">غادرت المحطة</Button>
+              <Button variant="outline" :disabled="!trip.started" :loading="busy === `stop:${stop.route_stop}`" @click="run(`stop:${stop.route_stop}`, () => gateway.setStopProgress(dispatchTrip, stop.route_stop, !stop.done), stop.done ? 'أعيدت المحطة إلى المسار' : 'اكتملت المحطة')">{{ stop.done ? 'إلغاء اكتمال المحطة' : 'غادرت المحطة' }}</Button>
             </div>
           </li>
         </ol>
+        <p v-if="!(trip.stops || []).length" class="feature-state">لا توجد محطات مخططة لهذه الرحلة.</p>
       </section>
 
       <section class="journey-section">
         <div class="journey-section__title"><h3>الركاب</h3><span>{{ workers.length }}</span></div>
         <article v-for="worker in workers" :key="worker.employee" class="passenger-row" :class="{ 'has-wait': worker.wait_count }">
-          <div><strong>{{ worker.employee_name || worker.employee }}</strong><small>{{ worker.pickup_point || 'نقطة التجمع' }}</small></div>
-          <span v-if="worker.wait_count" class="wait-signal">يطلب الانتظار</span>
+          <div>
+            <strong>{{ worker.employee_name || worker.employee }}</strong>
+            <small>{{ worker.pickup_point || 'نقطة التجمع' }}</small>
+            <a v-if="worker.phone" class="passenger-call" :href="`tel:${worker.phone}`">اتصل بالعامل</a>
+          </div>
+          <span v-if="worker.wait_count" class="wait-signal">طلب الانتظار {{ worker.wait_count }} من {{ waitLimit }}<template v-if="waitSeconds(worker) !== null"> · {{ waitSeconds(worker) }} ث</template></span>
           <Badge :label="statusLabels[worker.status] || worker.status" />
           <div class="journey-actions">
             <Button v-if="worker.status !== 'Boarded'" variant="outline" :loading="busy === `manual:${worker.employee}`" @click="run(`manual:${worker.employee}`, () => gateway.manualBoard(dispatchTrip, worker.employee), 'تم تسجيل الصعود يدوياً')">تسجيل يدوي</Button>
             <Button v-else variant="outline" :loading="busy === `unmark:${worker.employee}`" @click="run(`unmark:${worker.employee}`, () => gateway.markNotBoarded(dispatchTrip, worker.employee), 'أعيد العامل إلى قائمة الانتظار')">ليس في الحافلة</Button>
           </div>
         </article>
+        <p v-if="!workers.length" class="feature-state">لا يوجد ركاب مسجلون لهذه الرحلة.</p>
         <div class="journey-actions">
           <Button variant="outline" :disabled="!pendingWorkers.length" :loading="busy === 'notify'" @click="run('notify', () => gateway.notifyPassengers(dispatchTrip), 'تم تنبيه المتبقين')">نبه المتبقين</Button>
           <Button theme="green" variant="solid" :disabled="!boarding.grace_elapsed" :loading="busy === 'depart'" @click="run('depart', () => gateway.depart(dispatchTrip), 'أغلق الصعود وغادرت الحافلة')">أغلق الصعود وغادر</Button>

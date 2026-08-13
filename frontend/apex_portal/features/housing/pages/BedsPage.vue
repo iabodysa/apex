@@ -5,6 +5,7 @@ import { RouterLink, useRoute } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { bedAssignmentTarget, housingCandidateFromQuery } from "../arrivalFlow.js";
+import { floorLabel, statusLabel } from "../../../core/displayLabels.js";
 
 const route = useRoute();
 const grid = createResource({
@@ -39,7 +40,7 @@ async function setReady(room) {
     <p v-else-if="!rooms.length && building" class="feature-page__empty">لا توجد غرف في هذا المبنى.</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">
       <header>
-        <div><strong>{{ room.room_number }}</strong><small>{{ room.floor_label }} · {{ room.readiness_status }}</small></div>
+        <div><strong>{{ room.room_number }}</strong><small>{{ floorLabel(room.floor_label) }} · {{ statusLabel(room.readiness_status) }}</small></div>
         <Button v-if="canSetReadiness && room.readiness_status !== 'Ready'" variant="subtle" :loading="readiness.loading" @click="setReady(room)">تأكيد الجاهزية</Button>
       </header>
       <div class="bed-grid">

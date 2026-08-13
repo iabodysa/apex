@@ -99,6 +99,17 @@
   color: var(--danger);
 }
 
+.journey-alert--notice {
+  border-inline-start-color: var(--info);
+  color: var(--info);
+}
+
+.journey-wait-note {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
 .journey-actions {
   display: flex;
   flex-wrap: wrap;
@@ -312,6 +323,27 @@
 
 .driver-timeline__copy {
   display: grid;
+  gap: var(--sp-1);
+}
+
+.driver-stop-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-2);
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.driver-stop-meta > * + *::before {
+  margin-inline-end: var(--sp-2);
+  color: var(--border-strong);
+  content: "·";
+}
+
+.driver-stop-meta a,
+.passenger-call {
+  color: var(--accent-ink);
+  font-weight: 800;
 }
 
 .passenger-row {
@@ -332,7 +364,9 @@
 }
 
 .wait-signal {
+  max-inline-size: 18ch;
   color: var(--warn);
+  font-variant-numeric: tabular-nums;
   font-weight: 800;
 }
 

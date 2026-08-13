@@ -59,7 +59,17 @@ describe("safety round checklist", () => {
   beforeEach(() => {
     selectBuilding("BLD-0001");
     dueResource.loading = false;
+    dueResource.fetch.mockReset();
     submitResource.submit.mockReset();
+  });
+
+  it("loads due rounds when the shared building was selected before navigation", async () => {
+    mount(SafetyRoundsPage, {
+      global: { stubs: { BuildingPicker: true, SafetyTaskRow: taskStub } },
+    });
+    await nextTick();
+
+    expect(dueResource.fetch).toHaveBeenCalledOnce();
   });
 
   it("uses a shape skeleton instead of a spinner during initial loading", () => {

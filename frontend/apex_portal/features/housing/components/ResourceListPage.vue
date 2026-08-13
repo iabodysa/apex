@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, watch } from "vue";
 import { Button, ErrorMessage, LoadingIndicator, createResource } from "frappe-ui";
+import { statusLabel } from "../../../core/displayLabels.js";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -26,7 +27,7 @@ watch(() => props.params, () => resource.fetch(), { deep: true });
   <section class="feature-page" :aria-labelledby="titleId">
     <header class="feature-page__header">
       <h2 :id="titleId">{{ title }}</h2>
-      <Button variant="subtle" icon="refresh-cw" label="تحديث" :loading="resource.loading" @click="resource.fetch()" />
+      <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="resource.loading" @click="resource.fetch()" />
     </header>
     <LoadingIndicator v-if="resource.loading && !rows.length" aria-label="جارٍ التحميل" />
     <ErrorMessage v-else-if="resource.error" :message="resource.error.message || 'تعذر تحميل البيانات.'" />
@@ -35,7 +36,7 @@ watch(() => props.params, () => resource.fetch(), { deep: true });
       <li v-for="(row, index) in rows" :key="row.name || index">
         <slot name="row" :row="row">
           <strong dir="auto">{{ row.title || row.label || row.name || `السجل ${index + 1}` }}</strong>
-          <small v-if="row.status">{{ row.status }}</small>
+          <small v-if="row.status">{{ statusLabel(row.status) }}</small>
         </slot>
       </li>
     </ul>

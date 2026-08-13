@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it, vi } from "vitest";
@@ -32,6 +32,14 @@ function leafletFixture() {
 }
 
 describe("Leaflet adapter", () => {
+  it("restyles vendor map chrome with Apex tokens", () => {
+    const css = readFileSync(path.join(path.dirname(modulePath), "styles.css"), "utf8");
+    expect(css).toMatch(/\.transport-map \.leaflet-bar a[\s\S]*var\(--surface-2\)/);
+    expect(css).toMatch(/\.transport-map \.leaflet-bar a[\s\S]*font-family:\s*var\(--font\)/);
+    expect(css).toMatch(/\.transport-map \.leaflet-popup-content-wrapper[\s\S]*var\(--font\)/);
+    expect(css).toMatch(/\.transport-map \.leaflet-control-attribution[\s\S]*var\(--muted\)/);
+  });
+
   it("normalizes route geometry and owns map drawing and disposal", async () => {
     const { createLeafletAdapter, routeCoordinates } = await loadModule();
     expect(routeCoordinates({ path: [[24.7, 46.6], { lat: "24.8", lng: "46.7" }, ["bad", 1]] }))
