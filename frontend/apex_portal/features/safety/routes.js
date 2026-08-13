@@ -9,6 +9,6 @@ export const safetyRoutes = Object.freeze([
     path: "/rounds/:name", name: "safety-round-review", feature: "safety",
     capability: "safety_read",
     component: () => import("./pages/SafetyRoundReviewPage.vue"),
-    meta: { navigation: false, capability: "safety_read" },
+    meta: { navigation: false, label: "مراجعة جولة السلامة", capability: "safety_read" },
   },
 ]);

@@ -5,7 +5,7 @@ import { actionAvailability, createSingleFlight } from "./state.js";
 
 describe("Salis fleet operations feature", () => {
   it("publishes the complete iPad route contract", () => {
-    expect(createFleetOperationsRoutes().map(({ path }) => path)).toEqual(["/", "/vehicles", "/vehicles/:vehicle", "/assignments", "/handovers", "/returns", "/fuel-approvals", "/incidents", "/incidents/:name", "/problems", "/problems/:name"]);
+    expect(createFleetOperationsRoutes().map(({ path }) => path)).toEqual(["/", "/vehicles", "/vehicles/:vehicle", "/assignments", "/handovers", "/handovers/:name", "/returns", "/returns/:name", "/fuel-approvals", "/incidents", "/incidents/:name", "/problems", "/problems/:name"]);
     expect(createFleetOperationsRoutes().every((route) => route.feature === "fleet-operations")).toBe(true);
   });
 

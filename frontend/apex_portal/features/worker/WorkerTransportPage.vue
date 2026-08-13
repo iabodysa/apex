@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, remainingSeconds } from "../../core/displayLabels.js";
@@ -36,6 +36,8 @@ const busy = ref("");
 const pass = ref(null);
 const passImage = ref("");
 const now = ref(Date.now());
+const ratingDrafts = reactive({});
+const ratingMessages = reactive({});
 let pollTimer;
 let clockTimer;
 let activeRoom = "";
@@ -60,6 +62,34 @@ const statusLabels = Object.freeze({
   finished: "انتهت الرحلة",
 });
 const statusLabel = (value) => statusLabels[value] || value || "بانتظار التحديث";
+
+function ratingDraft(trip) {
+  if (!ratingDrafts[trip.dispatch_trip]) {
+    ratingDrafts[trip.dispatch_trip] = { rating: 0, feedback: "" };
+  }
+  return ratingDrafts[trip.dispatch_trip];
+}
+
+async function rateTrip(trip) {
+  const draft = ratingDraft(trip);
+  if (!draft.rating) return;
+  const key = `rating:${trip.dispatch_trip}`;
+  busy.value = key;
+  error.value = "";
+  try {
+    await gateway.submitTripRating({
+      dispatch_trip: trip.dispatch_trip,
+      rating: draft.rating,
+      feedback: draft.feedback,
+    });
+    trip.has_rated = true;
+    ratingMessages[trip.dispatch_trip] = "تم إرسال تقييمك، شكراً لك.";
+  } catch (reason) {
+    error.value = reason?.message || "تعذّر إرسال التقييم.";
+  } finally {
+    busy.value = "";
+  }
+}
 
 function stopLive() {
   clearInterval(pollTimer);
@@ -235,8 +265,49 @@ onBeforeUnmount(stopLive);
           <span>{{ pastTrips.length }}</span>
         </summary>
         <article v-for="trip in pastTrips" :key="trip.transport_request" class="journey-history__row">
-          <strong>{{ trip.destination?.location || trip.pickup_point || "رحلة مسار" }}</strong>
-          <bdi>{{ dateTimeLabel(trip.pickup_datetime) }}</bdi>
+          <div>
+            <strong>{{ trip.destination?.location || trip.pickup_point || "رحلة مسار" }}</strong>
+            <bdi>{{ dateTimeLabel(trip.pickup_datetime) }}</bdi>
+          </div>
+          <form
+            v-if="trip.dispatch_trip && trip.trip_status === 'Completed' && !trip.has_rated"
+            class="journey-rating"
+            @submit.prevent="rateTrip(trip)"
+          >
+            <fieldset>
+              <legend>قيّم الرحلة</legend>
+              <div class="journey-rating__stars">
+                <button
+                  v-for="score in 5"
+                  :key="score"
+                  type="button"
+                  :aria-label="`${score} نجوم`"
+                  :aria-pressed="ratingDraft(trip).rating === score"
+                  @click="ratingDraft(trip).rating = score"
+                >★</button>
+              </div>
+            </fieldset>
+            <label>
+              ملاحظات اختيارية
+              <textarea
+                v-model="ratingDraft(trip).feedback"
+                :data-rating-feedback="trip.dispatch_trip"
+                maxlength="2000"
+                rows="2"
+              />
+            </label>
+            <Button
+              type="button"
+              variant="outline"
+              :disabled="!ratingDraft(trip).rating"
+              :loading="busy === `rating:${trip.dispatch_trip}`"
+              :data-rating-submit="trip.dispatch_trip"
+              @click="rateTrip(trip)"
+            >إرسال التقييم</Button>
+          </form>
+          <p v-else-if="trip.has_rated || ratingMessages[trip.dispatch_trip]" class="journey-rating__thanks" role="status">
+            {{ ratingMessages[trip.dispatch_trip] || "تم إرسال تقييمك مسبقاً." }}
+          </p>
         </article>
       </details>
     </template>

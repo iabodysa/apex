@@ -93,6 +93,64 @@ describe("Masar worker feature", () => {
     expect(call.mock.calls).toEqual([["apex.salis.api.boarding_flow.worker_request_wait"], ["apex.salis.api.boarding_flow.worker_claim_boarded"]]);
   });
 
+  it("submits a completed-trip rating through the worker-scoped endpoint", async () => {
+    const call = vi.fn().mockResolvedValue({ message: { status: "success" } });
+    const gateway = createWorkerGateway(call);
+
+    await gateway.submitTripRating({
+      dispatch_trip: "DT-1",
+      rating: 5,
+      feedback: "رحلة ممتازة",
+    });
+
+    expect(call).toHaveBeenCalledWith("apex.salis.api.masar.submit_trip_rating", {
+      dispatch_trip: "DT-1",
+      rating: 5,
+      feedback: "رحلة ممتازة",
+    });
+  });
+
+  it("offers rating only for an unrated completed trip", async () => {
+    resourceData.set("apex.salis.api.masar.get_worker_transport", {
+      upcoming: [],
+      past: [
+        {
+          transport_request: "TR-1",
+          dispatch_trip: "DT-1",
+          trip_status: "Completed",
+          has_rated: false,
+          pickup_point: "السكن",
+        },
+      ],
+    });
+    resourceData.set("apex.salis.api.boarding_flow.worker_trip_boarding", null);
+    resourceData.set("apex.salis.api.masar.get_worker_context", { realtime_room: "" });
+    const submitTripRating = vi.fn().mockResolvedValue({ status: "success" });
+    const wrapper = mount(WorkerTransportPage, {
+      global: {
+        provide: {
+          portalSubscribe: () => () => {},
+          workerGateway: { submitTripRating },
+        },
+      },
+    });
+    await flushPromises();
+
+    await wrapper.get("summary").trigger("click");
+    await wrapper.get('[aria-label="5 نجوم"]').trigger("click");
+    await wrapper.get('[data-rating-feedback="DT-1"]').setValue("رحلة ممتازة");
+    await wrapper.get('[data-rating-submit="DT-1"]').trigger("click");
+    await flushPromises();
+
+    expect(submitTripRating).toHaveBeenCalledWith({
+      dispatch_trip: "DT-1",
+      rating: 5,
+      feedback: "رحلة ممتازة",
+    });
+    expect(wrapper.text()).toContain("تم إرسال تقييمك");
+    wrapper.unmount();
+  });
+
   it("shows the active wait quota and driver reminder window", async () => {
     toastCreate.mockReset();
     const now = new Date(Date.now() - 30_000).toISOString();
