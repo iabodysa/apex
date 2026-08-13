@@ -1,23 +1,34 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import { useRoute } from "vue-router";
-import { Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createResource, toast } from "frappe-ui";
+import { housingCandidateFromQuery } from "../arrivalFlow.js";
 
 const route = useRoute();
+const router = useRouter();
 const error = ref("");
 const checkInForm = reactive({ party_type: "Employee", party: "", project: "" });
-const bed = createResource({ url: "frappe.client.get", makeParams: () => ({ doctype: "Bed", name: route.params.bed }) });
+const bed = createDocumentResource({ doctype: "Bed", name: route.params.bed });
 const checkIn = createResource({ url: "apex.habitat.api.front_desk.quick_check_in" });
 const checkOut = createResource({ url: "apex.habitat.api.front_desk.quick_check_out" });
-const occupied = computed(() => bed.data?.status === "Occupied");
-onMounted(() => bed.fetch());
+const occupied = computed(() => bed.doc?.status === "Occupied");
+const candidate = computed(() => housingCandidateFromQuery(route.query));
+const capabilities = globalThis.window?.apex_portal?.capabilities || [];
+const canCheckIn = capabilities.includes("check_in");
+const canCheckOut = capabilities.includes("check_out");
+watch(candidate, (value) => {
+  Object.assign(checkInForm, value
+    ? { party_type: value.party_type, party: value.party, project: value.project }
+    : { party_type: "Employee", party: "", project: "" });
+}, { immediate: true });
 async function arrive() {
   error.value = "";
   try {
     await checkIn.submit({ bed: route.params.bed, ...checkInForm });
     toast.create({ type: "success", message: "تم تسكين العامل" });
     Object.assign(checkInForm, { party_type: "Employee", party: "", project: "" });
-    await bed.fetch();
+    await bed.reload();
+    if (candidate.value) await router.push("/arrivals");
   } catch (exception) { error.value = exception.message || "تعذر التسكين."; }
 }
 async function depart() {
@@ -29,7 +40,7 @@ async function depart() {
       return;
     }
     toast.create({ type: "success", message: "تم تسجيل المغادرة" });
-    await bed.fetch();
+    await bed.reload();
   } catch (exception) { error.value = exception.message || "تعذر تسجيل المغادرة."; }
 }
 </script>
@@ -37,17 +48,25 @@ async function depart() {
 <template>
   <section class="feature-page">
     <h2>تفاصيل السرير</h2>
-    <LoadingIndicator v-if="bed.loading" aria-label="جارٍ التحميل" />
-    <ErrorMessage v-else-if="bed.error" message="تعذر تحميل السرير." />
-    <template v-else-if="bed.data">
-      <article class="feature-card"><strong>{{ bed.data.bed_code || bed.data.name }}</strong><span>{{ bed.data.room }}</span><small>{{ bed.data.status }} · {{ bed.data.condition }}</small></article>
-      <form v-if="!occupied" class="feature-form" @submit.prevent="arrive">
-        <FormControl v-model="checkInForm.party_type" type="select" label="نوع الساكن" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
-        <FormControl v-model="checkInForm.party" label="رقم الساكن" required />
-        <FormControl v-model="checkInForm.project" label="المشروع" />
-        <Button type="submit" variant="solid" :loading="checkIn.loading">تسكين</Button>
+    <LoadingIndicator v-if="bed.get.loading" aria-label="جارٍ التحميل" />
+    <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
+    <template v-else-if="bed.doc">
+      <article class="feature-card"><strong>{{ bed.doc.bed_code || bed.doc.name }}</strong><span>{{ bed.doc.room }}</span><small>{{ bed.doc.status }} · {{ bed.doc.condition }}</small></article>
+      <form v-if="!occupied && canCheckIn" class="feature-form" @submit.prevent="arrive">
+        <article v-if="candidate" class="selected-resident">
+          <div><span>الساكن المحدد</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
+          <RouterLink to="/arrivals">تغيير العامل</RouterLink>
+        </article>
+        <template v-else>
+          <FormControl v-model="checkInForm.party_type" type="select" label="نوع الساكن" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
+          <FormControl v-model="checkInForm.party" label="رقم الساكن" required />
+          <FormControl v-model="checkInForm.project" label="المشروع" />
+        </template>
+        <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party">{{ candidate ? `تسكين ${candidate.label}` : 'تسكين' }}</Button>
       </form>
-      <Button v-else variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>
+      <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>
+      <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>
+      <p v-else class="feature-page__empty">السرير مشغول، وليس لديك صلاحية تسجيل المغادرة.</p>
       <RouterLink v-if="error.includes('العهد')" to="/custody">الانتقال إلى العهد</RouterLink>
       <ErrorMessage v-if="error" :message="error" />
     </template>
