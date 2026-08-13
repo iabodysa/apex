@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { createTransportSupervisorGateway } from "./gateway.js";
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
@@ -13,6 +16,18 @@ vi.mock("frappe-ui", () => ({
 }));
 
 describe("Masar transport supervisor feature", () => {
+  it("keeps map view, Leaflet, state, styles, and server access in focused files", () => {
+    const root = path.dirname(fileURLToPath(import.meta.url));
+    for (const name of ["leafletAdapter.js", "transportMapState.js", "styles.css", "gateway.js"]) {
+      expect(existsSync(path.join(root, name))).toBe(true);
+    }
+    const page = readFileSync(path.join(root, "TransportMapPage.vue"), "utf8");
+    expect(page).toContain('from "./leafletAdapter.js"');
+    expect(page).toContain('from "./transportMapState.js"');
+    expect(page).toContain('import "./styles.css"');
+    expect(page).not.toMatch(/window\.L|document\.createElement|L\.map|L\.tileLayer|<style/);
+  });
+
   it("centres operations on requests, shifts, plans and dispatch trips", () => {
     expect(supervisorRoutes.map((route) => route.path)).toEqual([
       "/requests",
@@ -50,6 +65,13 @@ describe("Masar transport supervisor feature", () => {
       "apex.salis.api.route_supervisor.apply_transport_request_action",
       { name: "TR-1", action: "Validate" },
     );
+  });
+
+  it("keeps active driver positions behind the supervisor gateway", async () => {
+    const call = vi.fn().mockResolvedValue({ message: { positions: [] } });
+    const gateway = createTransportSupervisorGateway(call);
+    await expect(gateway.map()).resolves.toEqual({ positions: [] });
+    expect(call).toHaveBeenCalledWith("apex.salis.api.route_supervisor.get_active_driver_positions");
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {

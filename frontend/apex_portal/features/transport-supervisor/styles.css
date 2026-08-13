@@ -1,0 +1,32 @@
+.transport-map-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+  margin-block-end: var(--sp-4);
+}
+
+.transport-map {
+  min-height: 460px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.transport-map-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-4);
+}
+
+@media (max-width: 640px) {
+  .transport-map-filters,
+  .transport-map-list {
+    grid-template-columns: 1fr;
+  }
+
+  .transport-map {
+    min-height: 360px;
+  }
+}
