@@ -14,8 +14,8 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 class TestBackendBoardContract(unittest.TestCase):
     def test_salis_issue_masters_are_native_fixtures(self):
         hooks = (APP_ROOT / "hooks.py").read_text(encoding="utf-8")
-        self.assertIn('{"dt": "Issue Type"', hooks)
-        self.assertIn('{"dt": "Issue Priority"', hooks)
+        self.assertIn('"dt": "Issue Type"', hooks)
+        self.assertIn('"dt": "Issue Priority"', hooks)
         self.assertNotIn("seeders.salis_issue_seed", hooks)
 
         issue_types = json.loads(
