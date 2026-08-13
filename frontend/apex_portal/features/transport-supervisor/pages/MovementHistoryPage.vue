@@ -1,11 +1,26 @@
 <script setup>
-import { Badge, createResource } from "frappe-ui";
+import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
-const history = createResource({
-  url: "apex.salis.api.route_supervisor.get_movement_history",
-  method: "GET",
+const history = createListResource({
+  doctype: "Dispatch Trip",
+  fields: [
+    "name",
+    "trip_title",
+    "trip_type",
+    "route_assignment",
+    "route_template",
+    "project",
+    "shift_name",
+    "trip_date",
+    "status",
+    "driver",
+    "vehicle",
+  ],
+  filters: { status: ["in", ["Completed", "Cancelled"]] },
+  orderBy: "trip_date desc, modified desc, name desc",
+  pageLength: 50,
   auto: false,
 });
 </script>
@@ -16,7 +31,6 @@ const history = createResource({
     description="سجل زمني للرحلات المكتملة والملغاة للرجوع السريع."
     icon="clock"
     :resource="history"
-    :collections="['items']"
     empty="لا توجد رحلات سابقة في السجل."
   >
     <template #default="{ rows }">
@@ -24,7 +38,7 @@ const history = createResource({
         <li v-for="trip in rows" :key="trip.name">
           <span class="supervisor-history__marker" aria-hidden="true" />
           <div class="supervisor-history__copy">
-            <strong dir="auto">{{ recordTitle(trip, ['route_name', 'shift_name'], 'حركة سابقة') }}</strong>
+            <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'حركة سابقة') }}</strong>
             <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
             <span>{{ dateTimeLabel(trip.trip_date) || 'التاريخ غير محدد' }}</span>
             <small dir="auto">{{ trip.driver || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle || 'المركبة غير مسندة' }}</bdi></small>

@@ -18,16 +18,18 @@ const rows = computed(() => {
   }
   return [];
 });
+const loading = computed(() => props.resource.list?.loading ?? props.resource.loading);
+const error = computed(() => props.resource.list?.error ?? props.resource.error);
 
 function refresh() {
-  return props.resource.fetch();
+  return props.resource.reload?.() ?? props.resource.fetch?.();
 }
 
 onMounted(refresh);
 </script>
 
 <template>
-  <section class="feature-page supervisor-collection" :aria-busy="resource.loading">
+  <section class="feature-page supervisor-collection" :aria-busy="loading">
     <header class="feature-page__heading supervisor-collection__heading">
       <div>
         <p class="feature-page__eyebrow">تشغيل النقل</p>
@@ -39,7 +41,7 @@ onMounted(refresh);
         <Button
           variant="outline"
           icon-left="refresh-cw"
-          :loading="resource.loading"
+          :loading="loading"
           @click="refresh"
         >
           تحديث
@@ -48,10 +50,10 @@ onMounted(refresh);
       </div>
     </header>
 
-    <div v-if="resource.loading && !resource.data" class="feature-state" role="status">
+    <div v-if="loading && !resource.data" class="feature-state" role="status">
       جارٍ تحميل {{ title }}…
     </div>
-    <div v-else-if="resource.error" class="feature-state feature-state--error">
+    <div v-else-if="error" class="feature-state feature-state--error">
       <p role="alert">تعذّر تحميل {{ title }}.</p>
       <Button variant="outline" @click="refresh">إعادة المحاولة</Button>
     </div>

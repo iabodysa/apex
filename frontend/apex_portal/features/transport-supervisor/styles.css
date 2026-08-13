@@ -71,8 +71,7 @@
 }
 
 .supervisor-request-card__copy,
-.supervisor-shift-card,
-.supervisor-plan-card,
+.supervisor-assignment-card,
 .supervisor-history__copy {
   display: grid;
   min-inline-size: 0;
@@ -98,15 +97,13 @@
   font-size: .88rem;
 }
 
-.supervisor-shift-grid,
-.supervisor-plan-grid {
+.supervisor-assignment-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--sp-3);
 }
 
-.supervisor-shift-card,
-.supervisor-plan-card {
+.supervisor-assignment-card {
   padding: var(--sp-5);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -114,49 +111,36 @@
   box-shadow: var(--shadow-sm);
 }
 
-.supervisor-shift-card header,
-.supervisor-plan-card header {
+.supervisor-assignment-card header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--sp-3);
 }
 
-.supervisor-shift-card header {
-  display: grid;
-  padding-block-end: var(--sp-3);
-  border-block-end: 1px solid var(--border);
-}
-
-.supervisor-shift-card header span,
-.supervisor-shift-card dt,
-.supervisor-plan-card dt,
+.supervisor-assignment-card dt,
 .supervisor-trip-date span,
 .supervisor-history__copy span,
 .supervisor-history__copy small {
   color: var(--muted);
 }
 
-.supervisor-shift-card dl,
-.supervisor-plan-card dl {
+.supervisor-assignment-card dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-3);
   margin: 0;
 }
 
-.supervisor-shift-card dl > div,
-.supervisor-plan-card dl > div {
+.supervisor-assignment-card dl > div {
   min-inline-size: 0;
 }
 
-.supervisor-shift-card dt,
-.supervisor-plan-card dt {
+.supervisor-assignment-card dt {
   font-size: .78rem;
 }
 
-.supervisor-shift-card dd,
-.supervisor-plan-card dd {
+.supervisor-assignment-card dd {
   margin: 0;
   overflow-wrap: anywhere;
   font-weight: 700;
@@ -222,6 +206,108 @@
   border-radius: 50%;
   background: var(--brand-green);
   box-shadow: 0 0 0 1px var(--brand-green);
+}
+
+.supervisor-detail__heading {
+  align-items: center;
+}
+
+.supervisor-detail__heading > svg {
+  inline-size: 32px;
+  block-size: 32px;
+  color: var(--brand-green);
+}
+
+.supervisor-detail__status,
+.supervisor-detail__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.supervisor-request-assignment__form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: var(--sp-3);
+}
+
+.supervisor-detail__facts {
+  margin-block: var(--sp-4);
+}
+
+.supervisor-detail__section {
+  display: grid;
+  gap: var(--sp-3);
+  margin-block-start: var(--sp-5);
+}
+
+.supervisor-detail__section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.supervisor-detail__section h3 {
+  margin: 0;
+}
+
+.supervisor-detail__section > header > span {
+  display: grid;
+  min-inline-size: 32px;
+  block-size: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand-green) 12%, var(--surface-2));
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.supervisor-stop-list,
+.supervisor-assigned-list,
+.supervisor-passenger-list {
+  display: grid;
+  gap: var(--sp-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.supervisor-stop-list > li,
+.supervisor-assigned-list > li,
+.supervisor-passenger-list > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-3);
+  min-block-size: 64px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.supervisor-stop-list > li > div,
+.supervisor-passenger-list > li > div {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--sp-1);
+}
+
+.supervisor-stop-list > li > div > span,
+.supervisor-passenger-list > li > div > span,
+.supervisor-assigned-list > li > span {
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.supervisor-detail__actions {
+  justify-content: flex-end;
+  padding-block-start: var(--sp-5);
+  margin-block-start: var(--sp-5);
+  border-block-start: 1px solid var(--border);
 }
 
 .transport-map-filters {
@@ -459,5 +545,23 @@
   .transport-map-selection,
   .transport-map-selection dl {
     grid-template-columns: 1fr;
+  }
+
+  .supervisor-stop-list > li,
+  .supervisor-assigned-list > li,
+  .supervisor-passenger-list > li {
+    grid-template-columns: 1fr;
+  }
+
+  .supervisor-request-assignment__form {
+    grid-template-columns: 1fr;
+  }
+
+  .supervisor-detail__actions {
+    justify-content: stretch;
+  }
+
+  .supervisor-detail__actions > * {
+    flex: 1 1 100%;
   }
 }

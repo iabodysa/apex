@@ -17,6 +17,6 @@ export const portalRoutes = Object.freeze([
   ...supervisorRedirects.map((route) => Object.freeze({
     ...route,
     feature: "transport-supervisor",
-    capability: "transport.plan.read",
+    capability: "transport.assignment.read",
   })),
 ]);

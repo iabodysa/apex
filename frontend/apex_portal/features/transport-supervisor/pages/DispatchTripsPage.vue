@@ -1,11 +1,26 @@
 <script setup>
-import { Badge, FeatherIcon, createResource } from "frappe-ui";
+import { Badge, FeatherIcon, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
-const trips = createResource({
-  url: "apex.salis.api.route_supervisor.get_dispatch_trips",
-  method: "GET",
+const trips = createListResource({
+  doctype: "Dispatch Trip",
+  fields: [
+    "name",
+    "trip_title",
+    "trip_type",
+    "route_assignment",
+    "route_template",
+    "project",
+    "shift_name",
+    "trip_date",
+    "planned_start",
+    "status",
+    "driver",
+    "vehicle",
+  ],
+  orderBy: "trip_date desc, modified desc, name desc",
+  pageLength: 50,
   auto: false,
 });
 </script>
@@ -16,7 +31,6 @@ const trips = createResource({
     description="رحلات التشغيل الحالية مع السائق والمركبة وحالة التنفيذ."
     icon="navigation"
     :resource="trips"
-    :collections="['trips']"
     empty="لا توجد رحلات تشغيل حالياً."
   >
     <template #default="{ rows }">
@@ -28,7 +42,7 @@ const trips = createResource({
               <strong><bdi>{{ dateTimeLabel(trip.trip_date) || 'غير محدد' }}</bdi></strong>
             </div>
             <div class="record-identity">
-              <strong dir="auto">{{ recordTitle(trip, ['route_name', 'shift_name'], 'رحلة تشغيل') }}</strong>
+              <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'رحلة تشغيل') }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
               <span dir="auto">{{ trip.driver || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle || 'المركبة غير مسندة' }}</bdi></span>
             </div>

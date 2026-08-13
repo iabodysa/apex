@@ -206,16 +206,3 @@ def get_trip_driver_position(dispatch_trip):
         "age_seconds": age_seconds,
         "stale": stale,
     }
-
-
-from apex.salis.api.route_supervisor_operations import (  # noqa: E402,F401
-    apply_dispatch_trip_action,
-    apply_route_assignment_action,
-    apply_transport_request_action,
-    get_dispatch_trip,
-    get_dispatch_trips,
-    get_movement_history,
-    get_route_assignment,
-    get_route_assignments,
-    get_transport_requests,
-)

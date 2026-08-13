@@ -7,12 +7,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
-import RoutePlanForm from "./RoutePlanForm.vue";
 import SupervisorPage from "./SupervisorPage.vue";
 
-const { resourceData, insertPlan } = vi.hoisted(() => ({
+const { resourceData } = vi.hoisted(() => ({
   resourceData: new Map(),
-  insertPlan: vi.fn().mockResolvedValue({ name: "RP-1" }),
 }));
 
 vi.mock("frappe-ui", () => ({
@@ -42,7 +40,16 @@ vi.mock("frappe-ui", () => ({
       }),
     };
   }),
-  createListResource: vi.fn(() => ({ insert: { submit: insertPlan } })),
+  createListResource: vi.fn((options) => ({
+    data: resourceData.get(`doctype:${options.doctype}`) || [],
+    list: { loading: false, error: null },
+    reload: vi.fn(),
+  })),
+  createDocumentResource: vi.fn(() => ({
+    doc: null,
+    get: { loading: false, error: null },
+    reload: vi.fn(),
+  })),
 }));
 
 describe("Masar transport supervisor feature", () => {
@@ -63,8 +70,16 @@ describe("Masar transport supervisor feature", () => {
     expect(page).not.toMatch(/window\.L|document\.createElement|L\.map|L\.tileLayer|<style/);
   });
 
-  it("centres operations on requests, shifts, plans and dispatch trips", () => {
-    expect(supervisorRoutes.map((route) => route.path)).toEqual(["/requests", "/shifts", "/plans", "/plans/new", "/plans/:name", "/trips", "/trips/:name", "/map", "/history"]);
+  it("centres operations on requests, recurring assignments and actual trips", () => {
+    expect(supervisorRoutes.map((route) => route.path)).toEqual([
+      "/requests",
+      "/assignments",
+      "/assignments/:name",
+      "/trips",
+      "/trips/:name",
+      "/map",
+      "/history",
+    ]);
   });
 
   it("gives every sidebar destination its own page component", () => {
@@ -78,14 +93,13 @@ describe("Masar transport supervisor feature", () => {
   it("renders a distinct operations layout for every list destination", async () => {
     const expectations = new Map([
       ["/requests", ["طلبات النقل", ".supervisor-request-queue"]],
-      ["/shifts", ["الشفتات", ".supervisor-shift-grid"]],
-      ["/plans", ["خطط المسار", ".supervisor-plan-grid"]],
+      ["/assignments", ["التشغيل المتكرر", ".supervisor-assignment-grid"]],
       ["/trips", ["الرحلات", ".supervisor-trip-board"]],
       ["/history", ["سجل الحركة", ".supervisor-history"]],
     ]);
     for (const [path, [title, layout]] of expectations) {
       const route = supervisorRoutes.find((candidate) => candidate.path === path);
-      resourceData.set(route.meta.view.endpoint, [{ name: `${path}-1` }]);
+      resourceData.set(`doctype:${route.meta.view.doctype}`, [{ name: `${path}-1` }]);
       const module = await route.component();
       const wrapper = mount(module.default);
       await flushPromises();
@@ -97,7 +111,9 @@ describe("Masar transport supervisor feature", () => {
   });
 
   it("declares human title fields for every operations collection", () => {
-    const collectionRoutes = supervisorRoutes.filter((route) => route.meta?.view?.collections);
+    const collectionRoutes = supervisorRoutes.filter(
+      (route) => route.meta?.navigation && route.meta?.view?.doctype,
+    );
     expect(collectionRoutes).not.toHaveLength(0);
     for (const route of collectionRoutes) {
       expect(route.meta.view.titleFields?.length, route.path).toBeGreaterThan(0);
@@ -105,13 +121,14 @@ describe("Masar transport supervisor feature", () => {
     }
   });
 
-  it("preserves the legacy hash redirects", () => {
+  it("redirects legacy route-plan URLs to recurring assignments", () => {
     expect(supervisorRedirects).toEqual([
       { path: "/approvals", redirect: "/requests" },
-      { path: "/routes", redirect: "/plans" },
-      { path: "/plan/:name/:tab?", redirect: expect.any(Function) },
+      { path: "/routes", redirect: "/assignments" },
+      { path: "/shifts", redirect: "/assignments" },
+      { path: "/plans", redirect: "/assignments" },
+      { path: "/plan/:name/:tab?", redirect: "/assignments" },
     ]);
-    expect(supervisorRedirects[2].redirect({ params: { name: "RP-1" } })).toBe("/plans/RP-1");
   });
 
   it("keeps the live map on its specialized map component", () => {
@@ -120,26 +137,25 @@ describe("Masar transport supervisor feature", () => {
     expect(mapRoute.meta.navigation).toBe(true);
   });
 
-  it("uses the native Route Plan insert resource on the create page", async () => {
-    insertPlan.mockClear();
-    const wrapper = mount(RoutePlanForm);
-
-    await wrapper.get("form").trigger("submit");
-
-    expect(createListResource).toHaveBeenCalledWith({
-      doctype: "Route Plan",
-      auto: false,
-    });
-    expect(insertPlan).toHaveBeenCalledWith({
-      route_name: "",
-      project: "",
-      shift: "",
-      driver: "",
-      vehicle: "",
-    });
+  it("uses native Frappe resources for records and workflow", () => {
+    const root = path.dirname(fileURLToPath(import.meta.url));
+    const page = readFileSync(path.join(root, "SupervisorPage.vue"), "utf8");
+    expect(page).toContain("createDocumentResource");
+    expect(page).toContain("frappe.model.workflow.get_transitions");
+    expect(page).toContain("frappe.model.workflow.apply_workflow");
+    for (const name of [
+      "TransportRequestsPage.vue",
+      "RouteAssignmentsPage.vue",
+      "DispatchTripsPage.vue",
+      "MovementHistoryPage.vue",
+    ]) {
+      const source = readFileSync(path.join(root, "pages", name), "utf8");
+      expect(source, name).toContain("createListResource");
+      expect(source, name).not.toContain("route_supervisor.get_");
+    }
   });
 
-  it("renders an empty state for an object containing an empty collection", async () => {
+  it("renders a clear missing-record state on a native detail route", async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -148,15 +164,13 @@ describe("Masar transport supervisor feature", () => {
           component: SupervisorPage,
           meta: {
             view: {
-              endpoint: "apex.test.supervisor.requests",
-              collections: ["items"],
-              empty: "لا توجد عمليات.",
+              doctype: "Route Assignment",
+              title: "تفاصيل التشغيل المتكرر",
             },
           },
         },
       ],
     });
-    resourceData.set("apex.test.supervisor.requests", { items: [] });
     await router.push("/requests");
     await router.isReady();
     const wrapper = mount(SupervisorPage, {
@@ -166,7 +180,7 @@ describe("Masar transport supervisor feature", () => {
     });
     await flushPromises();
 
-    expect(wrapper.text()).toContain("لا توجد عمليات.");
+    expect(wrapper.text()).toContain("السجل غير موجود.");
     expect(wrapper.find(".feature-details").exists()).toBe(false);
   });
 });

@@ -1,17 +1,15 @@
 import SupervisorPage from "./SupervisorPage.vue";
-import RoutePlanForm from "./RoutePlanForm.vue";
 import TransportMapPage from "./TransportMapPage.vue";
 import "./styles.css";
 
 const pages = Object.freeze({
   requests: () => import("./pages/TransportRequestsPage.vue"),
-  shifts: () => import("./pages/ShiftRoutesPage.vue"),
-  plans: () => import("./pages/RoutePlansPage.vue"),
+  assignments: () => import("./pages/RouteAssignmentsPage.vue"),
   trips: () => import("./pages/DispatchTripsPage.vue"),
   history: () => import("./pages/MovementHistoryPage.vue"),
 });
 
-const page = (path, name, capability, label, icon, component, endpoint, view = {}) => ({
+const page = (path, name, capability, label, icon, component, view = {}) => ({
   path,
   name,
   feature: "transport-supervisor",
@@ -21,33 +19,50 @@ const page = (path, name, capability, label, icon, component, endpoint, view = {
     navigation: !path.includes(":"),
     label,
     icon,
-    view: { title: label, icon, endpoint, ...view },
+    view: { title: label, icon, ...view },
   },
 });
 
 export const supervisorRoutes = Object.freeze([
-  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", pages.requests, "apex.salis.api.route_supervisor.get_transport_requests", { collections: ["requests"], titleFields: ["display_title"], fallbackTitle: "طلب نقل" }),
-  page("/shifts", "transport-shifts", "transport.shift.read", "الشفتات", "calendar", pages.shifts, "apex.salis.api.route_supervisor.get_shift_routes", { collections: ["items"], titleFields: ["shift_name", "route_name"], fallbackTitle: "شفت تشغيل" }),
-  page("/plans", "transport-plans", "transport.plan.read", "خطط المسار", "map", pages.plans, "apex.salis.api.route_supervisor.get_route_plans", { collections: ["plans"], titleFields: ["route_name"], fallbackTitle: "خطة مسار", detail: "/plans/:name" }),
-  {
-    path: "/plans/new",
-    name: "transport-plan-new",
-    feature: "transport-supervisor",
-    capability: "transport.plan.create",
-    component: RoutePlanForm,
-    meta: { navigation: false, label: "خطة جديدة", icon: "plus" },
-  },
-  page("/plans/:name", "transport-plan-detail", "transport.plan.read", "تفاصيل الخطة", "map-pin", SupervisorPage, "apex.salis.api.route_supervisor.get_route_plan", {
+  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", pages.requests, {
+    doctype: "Transport Request",
+    titleFields: ["from_location", "to_location", "requester_name"],
+    fallbackTitle: "طلب نقل",
+  }),
+  page("/assignments", "route-assignments", "transport.assignment.read", "التشغيل المتكرر", "repeat", pages.assignments, {
+    doctype: "Route Assignment",
+    titleFields: ["assignment_name", "shift_name"],
+    fallbackTitle: "تشغيل متكرر",
+    detail: "/assignments/:name",
+  }),
+  page("/assignments/:name", "route-assignment-detail", "transport.assignment.read", "تفاصيل التشغيل المتكرر", "repeat", SupervisorPage, {
+    doctype: "Route Assignment",
     fields: [
-      { key: "route_name", label: "المسار" },
-      { key: "shift", label: "الشفت" },
-      { key: "driver", label: "السائق" },
+      { key: "assignment_name", label: "التشغيل" },
+      { key: "work_shift", label: "الشفت" },
+      { key: "route_template", label: "المسار" },
+      { key: "project", label: "المشروع" },
+      { key: "driver", label: "السائق الافتراضي" },
+      { key: "vehicle", label: "المركبة الافتراضية" },
+      { key: "starts_on", label: "يبدأ في" },
+      { key: "ends_on", label: "ينتهي في" },
+      { key: "generated_through", label: "وُلّدت الرحلات حتى" },
     ],
   }),
-  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", pages.trips, "apex.salis.api.route_supervisor.get_dispatch_trips", { collections: ["trips"], titleFields: ["route_name", "shift_name"], fallbackTitle: "رحلة تشغيل", detail: "/trips/:name" }),
-  page("/trips/:name", "dispatch-trip-control", "transport.trip.dispatch", "تشغيل الرحلة", "play-circle", SupervisorPage, "apex.salis.api.route_supervisor.get_dispatch_trip", {
+  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", pages.trips, {
+    doctype: "Dispatch Trip",
+    titleFields: ["trip_title", "shift_name"],
+    fallbackTitle: "رحلة تشغيل",
+    detail: "/trips/:name",
+  }),
+  page("/trips/:name", "dispatch-trip-control", "transport.trip.read", "تشغيل الرحلة", "play-circle", SupervisorPage, {
+    doctype: "Dispatch Trip",
     fields: [
       { key: "status", label: "الحالة" },
+      { key: "trip_date", label: "التاريخ" },
+      { key: "route_assignment", label: "التشغيل المتكرر" },
+      { key: "route_template", label: "المسار" },
+      { key: "project", label: "المشروع" },
       { key: "vehicle", label: "المركبة" },
       { key: "driver", label: "السائق" },
     ],
@@ -60,11 +75,17 @@ export const supervisorRoutes = Object.freeze([
     component: TransportMapPage,
     meta: { navigation: true, label: "الخريطة", icon: "map-pin" },
   },
-  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", pages.history, "apex.salis.api.route_supervisor.get_movement_history", { collections: ["items"], titleFields: ["route_name", "shift_name"], fallbackTitle: "حركة سابقة" }),
+  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", pages.history, {
+    doctype: "Dispatch Trip",
+    titleFields: ["trip_title", "shift_name"],
+    fallbackTitle: "حركة سابقة",
+  }),
 ]);
 
 export const supervisorRedirects = Object.freeze([
   { path: "/approvals", redirect: "/requests" },
-  { path: "/routes", redirect: "/plans" },
-  { path: "/plan/:name/:tab?", redirect: ({ params }) => `/plans/${params.name}` },
+  { path: "/routes", redirect: "/assignments" },
+  { path: "/shifts", redirect: "/assignments" },
+  { path: "/plans", redirect: "/assignments" },
+  { path: "/plan/:name/:tab?", redirect: "/assignments" },
 ]);
