@@ -5,6 +5,7 @@ import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
 import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -158,11 +159,8 @@ onBeforeUnmount(stopLive);
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="3" label="جارٍ تجهيز الرحلة" />
-    <div v-else-if="state === 'denied'" class="feature-state">هذه الرحلة غير متاحة لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <ErrorMessage :message="error" />
-      <Button variant="outline" @click="load()">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلة" message="هذه الرحلة غير متاحة لحسابك." @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلة" :message="error" @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد بيانات لهذه الرحلة.</div>
 
     <template v-else>

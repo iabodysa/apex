@@ -4,6 +4,7 @@ import { Badge, Button, FeatherIcon, createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const route = useRoute();
 let resource;
@@ -47,11 +48,8 @@ watch(() => route.fullPath, load, { immediate: true });
       <FeatherIcon :name="spec.icon || 'navigation'" />
     </header>
     <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
-    <div v-else-if="state === 'denied'" class="feature-state">هذا القسم غير متاح لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p>{{ error }}</p>
-      <Button variant="outline" @click="load">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح القسم" message="هذا القسم غير متاح لحسابك." @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الصفحة" :message="error" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">
       {{ spec.empty || "لا توجد بيانات حالياً." }}
     </div>

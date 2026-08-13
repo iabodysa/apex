@@ -4,6 +4,7 @@ import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, remainingSeconds } from "../../core/displayLabels.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
@@ -146,11 +147,8 @@ onBeforeUnmount(stopLive);
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="2" label="جارٍ تحميل الرحلة" />
-    <div v-else-if="state === 'denied'" class="feature-state">هذا القسم غير متاح لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <ErrorMessage :message="error" />
-      <Button variant="outline" @click="load()">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلات" message="هذا القسم غير متاح لحسابك." @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلات" :message="error" @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">
       <strong>يومك هادئ</strong>
       <p>لا توجد رحلة مجدولة لك حالياً.</p>
