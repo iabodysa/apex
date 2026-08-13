@@ -318,6 +318,7 @@ Apex messaging gateway test message.,رسالة اختبار بوابة مراس
 "Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه الدفع.
 Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
+Apex — Recovery and Support,أبكس: الاسترداد والدعم
 Apex — Salary Deductions,أبكس — الخصومات من الراتب
 App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
 Appearance,المظهر
@@ -919,6 +920,7 @@ Common Area,منطقة مشتركة
 Common area,منطقة مشتركة
 Company,الشركة
 Company & Currency,الشركة والعملة
+Company is required to enable Employee Advance recovery.,الشركة مطلوبة لتفعيل استرداد سلفة الموظف.
 Company VAT Registration Number,الرقم الضريبي للشركة
 Company custody items have been returned,سلّم عهدة الشركة
 Company whose payroll these deductions post against. Falls back to Habitat Settings company when blank.,الشركة التي تُرحّل هذه الخصومات على مسير رواتبها. تعود افتراضيًا إلى الشركة المحددة في إعدادات هابيتات عند تركها فارغة.
@@ -1603,6 +1605,8 @@ Emp,موظف
 Employee,الموظف
 Employee (Custodian),الموظف (مستلم العهدة)
 Employee Advance,سلفة الموظف
+Employee Advance Recovery,استرداد سلفة الموظف
+"Employee Advance recovery and the Salis support SLA are off by default. Enable them only after Payroll, Accounts, and Support have supplied the native records and schedule below.",استرداد سلفة الموظف واتفاقية مستوى دعم ساليس معطّلان افتراضيًا. لا تفعّلهما إلا بعد أن تجهّز إدارات الرواتب والحسابات والدعم السجلات الأساسية وجدول العمل أدناه.
 Employee Cost Center,مركز تكلفة الموظف
 Employee Custody,عهدة الموظف
 Employee Daily Share,الحصة اليومية للموظف
@@ -1623,6 +1627,7 @@ Empty,فارغ
 Enable Approvals,تفعيل الموافقات
 Enable Driver Portal,تفعيل بوابة السائق
 Enable Driver Web Push,تفعيل إشعارات الويب للسائق
+Enable Employee Advance Recovery,تفعيل استرداد سلفة الموظف
 Enable ERPNext Asset Link,تفعيل الربط مع أصول ERPNext
 Enable Email Notifications,تفعيل إشعارات البريد الإلكتروني
 Enable GL Entry Posting,تفعيل ترحيل قيود دفتر الأستاذ العام
@@ -1634,9 +1639,11 @@ Enable Stock Engine,تشغيل محرّك المخزون
 Enable Stock Entry Posting,تفعيل ترحيل حركة المخزون
 Enable Supplier Markup,تفعيل هامش المورد
 Enable approval routing for fleet transactions?,تفعيل توجيه الاعتماد لحركات الأسطول؟
+Enable Employee Advance recovery?,هل تريد تفعيل استرداد سلفة الموظف؟
 Enable email notifications?,تفعيل تنبيهات البريد الإلكتروني؟
 Enable if this meter covers multiple units,فعّل هذا الخيار إذا كان هذا العدّاد يغطّي عدة وحدات
 Enable operational notifications?,تفعيل التنبيهات التشغيلية؟
+Enable the Salis support SLA?,هل تريد تفعيل اتفاقية مستوى دعم ساليس؟
 Enable the driver self-service portal?,تفعيل بوابة الخدمة الذاتية للسائق؟
 Enabled,مفعّل
 End Date,تاريخ الانتهاء
@@ -2066,6 +2073,8 @@ Historical only. The deprecated Safety Inspection Report this request came from.
 Historical supervisor value retained for earlier route plans.,بيانات إشراف سابقة محفوظة لخطط المسار القديمة.
 Holder,مستلم العهدة
 Holder Type,نوع حامل الرمز
+Holiday List {0} does not exist.,قائمة العطلات {0} غير موجودة.
+"Holiday List, workdays, support start time and support end time are required to enable the Salis support SLA.",قائمة العطلات وأيام العمل ووقت بدء الدعم ووقت انتهائه مطلوبة لتفعيل اتفاقية مستوى دعم ساليس.
 "Holder's login user, mirrored from the employee so receipt notifications can reach a real address.",حساب دخول مستلم العهدة، ويُنسخ من سجل الموظف لتصل إشعارات الاستلام إلى عنوان فعلي.
 "Holder's receipt confirmation for a Custody Issue, captured from the My Custody Acknowledgment Web Form (with a signature fallback).",إقرار مستلم العهدة باستلام الأصناف المصروفة، ويُسجّل عبر نموذج «إقرار استلام عهدتي» مع إمكانية استخدام التوقيع بدلًا من التأكيد.
 Hours an open Critical alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.,عدد الساعات التي يبقى فيها التنبيه الحرج مفتوحًا قبل ظهوره كمتأخر في القائمة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
@@ -2602,6 +2611,8 @@ Materials required for the repair.,المواد المطلوبة للإصلاح.
 Max % of Salary,الحد الأقصى للخصم من الراتب (%)
 Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.,"الحد الأقصى لطلبات ""يرجى الانتظار"" التي يمكن للعامل إرسالها إلى السائق في كل رحلة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
 Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.,الحد الأقصى لإشعارات «الركاب المتبقون» التي يرسلها السائق إلى العامل قبل تسجيله غائبًا عند المغادرة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
+Maximum Recovery Percent,الحد الأقصى لنسبة الاسترداد
+Maximum Recovery Percent must be greater than 0 and no more than {0}.,يجب أن تكون نسبة الاسترداد القصوى أكبر من صفر ولا تتجاوز {0}.
 Maximum share of the worker's wage this type may take in any single pay period. KSA Labor Law Art. 91 caps total wage deductions at 50% of wage; this conservative per-type default (10%) keeps the aggregate well under the lawful ceiling. Do not raise without legal review.,أعلى نسبة يمكن خصمها من أجر العامل لهذا النوع خلال فترة رواتب واحدة. تحدد المادة 91 من نظام العمل السعودي إجمالي الخصومات بحد أقصى 50% من الأجر، وتبقي النسبة الافتراضية المتحفظة لكل نوع (10%) الإجمالي دون هذا الحد. لا ترفعها دون مراجعة قانونية.
 May,مايو
 Medium,متوسطة
@@ -2709,6 +2720,8 @@ Nationality,الجنسية
 Nature,النوع
 "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",طبيعة استثناء الوقود قيد التحقيق، مثل الاستهلاك الزائد أو عدم تطابق GPS أو تكرار المطالبات أو الاشتباه بالاحتيال أو نزاع الحصة، وهي ما يحدد مسار التحقيق.
 "Nature of the resident request, which determines the responsible team and workflow; ranges from physical issues such as maintenance, cleaning, and utilities to administrative items such as custody, reimbursement, complaints, and suggestions.",طبيعة طلب الساكن، وهي التي تحدد الفريق المسؤول ومسار العمل؛ وتتراوح بين المشكلات الميدانية مثل الصيانة والنظافة والخدمات، والبنود الإدارية مثل العهدة والتعويض والشكاوى والمقترحات.
+Native HRMS Deduction component used for Employee Advance installments.,مكوّن خصم في HRMS يُستخدم لأقساط سلفة الموظف.
+Native HRMS deduction component used for Employee Advance installments.,مكوّن خصم في HRMS يُستخدم لأقساط سلفة الموظف.
 Needs Attention,تتطلب متابعة
 Needs Cleaning,يحتاج تنظيفاً
 Needs Improvement,يحتاج تحسيناً
@@ -2918,10 +2931,12 @@ Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة 
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
 Odometer {0} is lower than the last reading for this vehicle ({1}).,قراءة العدّاد {0} أقل من آخر قراءة لهذه المركبة ({1}).
 "Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن تجريبيًا يضم غرفًا وأسرّة وساكنًا وطلب صيانة مفتوحًا. يمكنك إزالة هذه البيانات لاحقًا من إعدادات أبكس.
+Off by default — creates the native ERPNext Issue SLA only with a complete operating schedule.,معطّلة افتراضيًا. لا تنشئ اتفاقية مستوى الخدمة للبلاغات في ERPNext إلا بعد اكتمال جدول العمل.
 Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
 Off by default — no automatic housing-allowance deduction. Requires legal/HR review.,معطّل افتراضيًا — لا خصم تلقائي لبدل السكن. يتطلّب مراجعة قانونية وموارد بشرية.
 "Off by default — operational memo only, no GL entries until you enable it.",معطّل افتراضيًا — مذكّرة تشغيلية فقط، بلا قيود في دفتر الأستاذ العام حتى تفعّله.
 Off by default — post expiry and overdue reminders as timeline comments on the source document.,معطّل افتراضيًا — ينشر تذكيرات الانتهاء والتأخّر كتعليقات في مسار المستند المصدر.
+Off by default — schedules draft HRMS Additional Salary installments only after native accounts and payroll are configured.,معطّل افتراضيًا. لا ينشئ مسودات أقساط «راتب إضافي» في HRMS إلا بعد إعداد حسابات السلف والرواتب.
 Off by default — turn on only after the site's outgoing email (SMTP) is configured.,معطّل افتراضيًا — فعّله بعد ضبط البريد الصادر (SMTP) للموقع فقط.
 Off by default. Requires legal/HR review.,معطّل افتراضيًا. يتطلّب مراجعة قانونية وموارد بشرية.
 "Off, a posting that would drive a store or a holder below zero is refused.",عند الإيقاف تُرفض أي حركة تُنزل المخزن أو الحائز تحت الصفر.
@@ -3222,6 +3237,8 @@ Pending Utility Bills,فواتير الخدمات المعلّقة
 Pending Vehicle Write-Offs,طلبات شطب المركبات المعلّقة
 Pending on manifest,المتبقّون في كشف الوصول
 Per Pay Period,لكل فترة دفع
+"Per-installment scheduling limit, capped at 50% of monthly base salary. Native payroll remains responsible for the final salary calculation.",حد جدولة القسط الواحد، وبحد أقصى ٥٠٪ من الراتب الأساسي الشهري. يظل نظام الرواتب في HRMS مسؤولًا عن الحساب النهائي للراتب.
+Per-installment scheduling limit. It cannot exceed 50% of monthly base salary.,حد جدولة القسط الواحد. لا يمكن أن يتجاوز ٥٠٪ من الراتب الأساسي الشهري.
 "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",حالة صعود ومغادرة كل عامل في كشف الركاب. تُعبأ من الكشف عند بدء الرحلة بأول مسح أو تأكيد ذاتي، ويحدّثها النظام ضمن إجراءات الصعود.
 Per-stop completion the driver marks as the trip runs; persisted so it survives a reload.,حالة إكمال كل محطة، ويحددها السائق أثناء الرحلة وتُحفظ لتبقى بعد إعادة تحميل الصفحة.
 Per-type rules sourced from operations. Each row is disabled by default. Damage / Rent / Fuel / Custody.,قواعد لكل نوع مصدرها العمليات. كل صف معطّل افتراضيًا. الضرر / الإيجار / الوقود / العهدة.
@@ -3593,6 +3610,7 @@ Recover Cost from Driver,استرداد التكلفة من السائق
 Recover From Employee,الاسترداد من الموظف
 Recover from Driver,استرداد من السائق
 Recover the repair cost from the driver. On submit this raises one Employee Advance (the receivable); the wage installments are then governed by the Salary Deduction Policy and are OFF until it is activated.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد تُنشأ سلفة موظف واحدة (المديونية)؛ وتخضع أقساط الخصم من الأجر بعدها لسياسة خصومات الرواتب وتظل موقوفة حتى تفعيلها.
+Recover the repair cost from the driver. On submit this raises one native Employee Advance; payroll installments remain off until Employee Advance Recovery is enabled in Salis Settings.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد، تُنشأ سلفة موظف واحدة في HRMS. تظل أقساط الرواتب معطّلة حتى تفعيل استرداد سلفة الموظف في إعدادات ساليس.
 Recovered,مُسترد
 Recovered Share,نسبة المسترد
 Recoveries,الاستردادات
@@ -3600,6 +3618,9 @@ Recovery,الاسترداد
 Recovery Advance,سلفة الاسترداد
 Recovery Amount,مبلغ الاسترداد
 Recovery Details,تفاصيل الاسترداد
+Recovery Salary Component,مكوّن راتب الاسترداد
+Recovery Salary Component is required to enable recovery.,مكوّن راتب الاسترداد مطلوب لتفعيل الاسترداد.
+Recovery Salary Component must be a Deduction.,يجب أن يكون مكوّن راتب الاسترداد من نوع «خصم».
 Recovery Type,نوع الاسترداد
 "Recurrence interval used to generate task instances from this template, from daily through annually.",فترة التكرار المستخدمة لإنشاء سجلات تنفيذ المهام من هذا القالب، من يومي إلى سنوي.
 Recurring Amount,المبلغ الدوري
@@ -4063,6 +4084,7 @@ Salis Payment Request,طلب دفع ساليس
 Salis Rentals Costs Settlements Pending Approval,تسويات تكاليف إيجار ساليس بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات أسطول مندوبي ساليس الموقوفة
 Salis Settings,إعدادات ساليس
+Salis Support SLA,اتفاقية مستوى دعم ساليس
 Salis Vehicle,مركبة ساليس
 Salis Vehicle Compliance,امتثال مركبات ساليس
 Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout.,أُنشئ نقل مغادرة في ساليس بسبب مغادرة السكن للخروج النهائي أو انتهاء العقد.
@@ -4093,6 +4115,7 @@ Scans,عمليات المسح
 Schedule,الجدول الزمني
 Schedule & Status,الجدول والحالة
 Schedule and Approval,الجدولة والاعتماد
+Schedule native Additional Salary installments against paid Employee Advances. Disabled until payroll and accounts are configured.,جدولة أقساط «راتب إضافي» في HRMS مقابل سلف الموظفين المدفوعة. تظل معطّلة حتى إعداد الرواتب والحسابات.
 Scheduled,مجدول
 Scheduled Awaiting Dispatch,مجدولة بانتظار التسيير
 Scheduled Date,التاريخ المجدول
@@ -4133,6 +4156,7 @@ Security Gate Cleared,تم اجتياز بوابة الأمن
 See who is currently housed across your buildings.,اطّلع على الساكنين حاليًا في مبانيك.
 "Select 'Building' if leasing an entire building, or 'Apartment' if leasing a single unit.",اختر 'مبنى' إذا كان العقد لعمارة كاملة، أو 'شقة' إذا كان العقد لوحدة مستقلة.
 Select a building before issuing.,اختر مبنى قبل الصرف.
+Select a Salary Component of type Deduction for recovery.,اختر مكوّن راتب من نوع «خصم» للاسترداد.
 Select a building to load the board.,اختر مبنى لتحميل اللوحة.
 Select a building to load the catalog.,اختر مبنى لتحميل الكتالوج.
 Select a building to load the map.,اختر مبنى لتحميل الخريطة.
@@ -4234,6 +4258,7 @@ Set on the reversal row posted when the source movement is cancelled. The origin
 Set only when the request concerns a specific bed.,يُحدَّد فقط عندما يخص الطلب سريرًا معيّنًا.
 Set the Cadence,حدّد تكرار الجولة
 Set the Check-in Date,حدّد تاريخ التسكين
+Set the Company's Default Employee Advance Account before enabling recovery.,اضبط حساب سلفة الموظف الافتراضي في الشركة قبل تفعيل الاسترداد.
 Set the Checkout Date,حدّد تاريخ المغادرة
 Set the Departure Time,حدّد وقت المغادرة
 Set the Handover Date,حدّد تاريخ التسليم
@@ -4550,6 +4575,10 @@ Supplier Name,اسم المورّد
 Supplier VAT Registration Number,الرقم الضريبي للمورّد
 Supplier-Billed Cost This Month,التكلفة المفوترة من المورّد هذا الشهر
 Suppliers,الموردون
+Support End Time,وقت انتهاء الدعم
+Support Holiday List,قائمة عطلات الدعم
+Support Start Time,وقت بدء الدعم
+Support Workdays,أيام عمل الدعم
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
 Surveillance Cameras at the Site,كاميرات المراقبة في الموقع
@@ -4655,6 +4684,7 @@ Thank you. Your receipt of the custody items has been recorded.,شكراً لك.
 That did not go through.,ما تمت العملية.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Apex demo data could not be built. It stopped at {0}; the Error Log has why.,ما قدر يبني بيانات أبكس التجريبية. وقف عند {0}، والسبب في سجل الأخطاء.
+The Default Employee Advance Account must be Receivable.,يجب أن يكون حساب سلفة الموظف الافتراضي حساب ذمم مدينة.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التسيير الجاري تنفيذها؛ ويحمل طلب النقل المرتبط بها كشف الركاب الذي يسجل هذا السجل صعودهم.
 The Dispatch Trip the scanned pass was issued against.,رحلة التسيير التي صدر التصريح الممسوح مقابلها.
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.

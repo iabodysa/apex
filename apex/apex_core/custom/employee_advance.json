@@ -41,6 +41,30 @@
    "no_copy": 1,
    "search_index": 1,
    "translatable": 0
+  },
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_signed_evidence",
+   "label": "Signed Recovery Evidence",
+   "description": "Immutable snapshot of the signed evidence on the operational source when this advance was raised.",
+   "fieldtype": "Signature",
+   "insert_after": "custom_source_document",
+   "read_only": 1,
+   "no_copy": 1,
+   "translatable": 0
+  },
+  {
+   "dt": "Employee Advance",
+   "fieldname": "custom_agreed_installment",
+   "label": "Agreed Installment",
+   "description": "Immutable per-pay-period installment agreed on the operational source when this advance was raised.",
+   "fieldtype": "Currency",
+   "insert_after": "custom_signed_evidence",
+   "options": "currency",
+   "read_only": 1,
+   "no_copy": 1,
+   "non_negative": 1,
+   "translatable": 0
   }
  ],
  "custom_perms": [],

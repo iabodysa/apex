@@ -102,6 +102,10 @@
   },
   {
    "read": 1,
+   "role": "Driver"
+  },
+  {
+   "read": 1,
    "report": 1,
    "role": "Fleet Supervisor"
   }

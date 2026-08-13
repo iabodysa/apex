@@ -289,7 +289,7 @@
   },
   {
    "default": "0",
-   "description": "Recover the repair cost from the driver. On submit this raises one Employee Advance (the receivable); the wage installments are then governed by the Salary Deduction Policy and are OFF until it is activated.",
+   "description": "Recover the repair cost from the driver. On submit this raises one native Employee Advance; payroll installments remain off until Employee Advance Recovery is enabled in Salis Settings.",
    "fieldname": "recover_from_driver",
    "fieldtype": "Check",
    "label": "Recover Cost from Driver"
@@ -405,7 +405,7 @@
    "link_fieldname": "source_incident"
   }
  ],
- "modified": "2026-08-12 08:43:00.000000",
+ "modified": "2026-08-14 01:30:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Incident",

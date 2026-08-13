@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
 import frappe
@@ -10,6 +11,7 @@ from apex.salis.doctype.dispatch_trip.dispatch_trip import (
     _normalise_request_assignments,
     _request_rider_count,
     assign_requests_to_trip,
+    create_ad_hoc_trip,
 )
 
 
@@ -344,3 +346,129 @@ class TestDispatchTripAggregate(FrappeTestCase):
 
         self.assertFalse(trip.assigned_requests)
         drive.assert_not_called()
+
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.assign_requests_to_trip")
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.has_permission",
+        return_value=True,
+    )
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_roles")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_doc")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.release_savepoint")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.savepoint")
+    def test_ad_hoc_creation_inserts_trip_then_reuses_atomic_assignment(
+        self, savepoint, _release, get_doc, get_roles, _has_permission, assign
+    ):
+        get_roles.return_value = ["Fleet Supervisor"]
+        trip = SimpleNamespace(name="DT-1", insert=MagicMock())
+        get_doc.return_value = trip
+        assign.return_value = ["TR-1"]
+
+        result = create_ad_hoc_trip(
+            {
+                "project": "PROJ-1",
+                "trip_date": "2026-08-14",
+                "vehicle": "VEH-1",
+                "driver": "DRV-1",
+                "stops": [
+                    {"stop_key": "housing", "stop_name": "Housing"},
+                    {"stop_key": "office", "stop_name": "Office"},
+                ],
+                "status": "Completed",
+                "assigned_requests": [{"transport_request": "TR-OTHER"}],
+            },
+            [
+                {
+                    "transport_request": "TR-1",
+                    "pickup_stop": "housing",
+                    "dropoff_stop": "office",
+                }
+            ],
+        )
+
+        savepoint.assert_called_once_with("create_ad_hoc_dispatch_trip")
+        payload = get_doc.call_args.args[0]
+        self.assertEqual(payload["doctype"], "Dispatch Trip")
+        self.assertEqual(payload["trip_type"], "Ad Hoc")
+        self.assertEqual(payload["status"], "Planned")
+        self.assertNotIn("assigned_requests", payload)
+        trip.insert.assert_called_once_with()
+        assign.assert_called_once()
+        self.assertEqual(assign.call_args.args[0], "DT-1")
+        self.assertEqual(result, {"name": "DT-1", "assigned_requests": ["TR-1"]})
+
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.assign_requests_to_trip",
+        side_effect=frappe.ValidationError("assignment failed"),
+    )
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.has_permission",
+        return_value=True,
+    )
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_roles")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_doc")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.rollback")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.savepoint")
+    def test_ad_hoc_creation_rolls_back_trip_when_assignment_fails(
+        self, savepoint, rollback, get_doc, get_roles, _has_permission, _assign
+    ):
+        get_roles.return_value = ["Fleet Supervisor"]
+        trip = SimpleNamespace(name="DT-1", insert=MagicMock())
+        get_doc.return_value = trip
+
+        with self.assertRaises(frappe.ValidationError):
+            create_ad_hoc_trip(
+                {
+                    "project": "PROJ-1",
+                    "trip_date": "2026-08-14",
+                    "vehicle": "VEH-1",
+                    "driver": "DRV-1",
+                    "stops": [
+                        {"stop_key": "housing", "stop_name": "Housing"},
+                        {"stop_key": "office", "stop_name": "Office"},
+                    ],
+                },
+                [{"transport_request": "TR-1"}],
+            )
+
+        rollback.assert_called_once_with(save_point="create_ad_hoc_dispatch_trip")
+
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.db.savepoint")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_doc")
+    @patch("apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.get_roles")
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.has_permission",
+        return_value=True,
+    )
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip.frappe.throw",
+        side_effect=frappe.ValidationError,
+    )
+    @patch(
+        "apex.salis.doctype.dispatch_trip.dispatch_trip._", side_effect=lambda value: value
+    )
+    def test_ad_hoc_creation_rejects_serialized_empty_request_list_before_insert(
+        self,
+        _translate,
+        _throw,
+        _has_permission,
+        get_roles,
+        get_doc,
+        savepoint,
+    ):
+        get_roles.return_value = ["Fleet Supervisor"]
+
+        with self.assertRaises(frappe.ValidationError):
+            create_ad_hoc_trip(
+                {
+                    "project": "PROJ-1",
+                    "trip_date": "2026-08-14",
+                    "vehicle": "VEH-1",
+                    "driver": "DRV-1",
+                    "stops": [{"stop_key": "housing", "stop_name": "Housing"}],
+                },
+                "[]",
+            )
+
+        get_doc.assert_not_called()
+        savepoint.assert_not_called()
