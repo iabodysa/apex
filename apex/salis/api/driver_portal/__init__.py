@@ -268,5 +268,6 @@ from apex.salis.api.driver_portal.trips import (  # noqa: E402
 from apex.salis.api.driver_portal.execution import (  # noqa: E402
     start_my_trip,
     complete_my_trip,
+    mark_arrived,
     mark_stop_progress,
 )

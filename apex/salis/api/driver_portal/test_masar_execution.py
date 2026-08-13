@@ -3,8 +3,9 @@ from unittest.mock import patch
 
 import frappe
 
+from apex.apex_core.utils.portal_token_security import DRIVER
 from apex.salis.api import driver_portal
-from apex.salis.api.driver_portal import trips
+from apex.salis.api.driver_portal import execution, personal, trips
 
 
 class TestMasarDriverExecution(TestCase):
@@ -35,3 +36,32 @@ class TestMasarDriverExecution(TestCase):
 
         with self.assertRaises(frappe.ValidationError):
             driver_portal._resolve_my_trip("DT-1", "DRV-1")
+
+    @patch("apex.salis.api.boarding_flow.ensure_trip_boarding_state")
+    @patch.object(execution, "_trip_log_state", return_value={"started": True})
+    @patch.object(execution.frappe, "get_doc")
+    @patch.object(execution.frappe.db, "get_value", return_value=None)
+    @patch.object(execution, "_resolve_my_trip", return_value={"vehicle": "BUS-1"})
+    @patch.object(execution, "_resolve_driver", return_value="DRV-1")
+    @patch.object(execution, "_require_enabled")
+    def test_start_seeds_the_existing_boarding_state(
+        self, _enabled, _driver, _trip, _value, get_doc, _state, ensure_state
+    ):
+        get_doc.return_value.insert.return_value = None
+
+        execution.start_my_trip("DT-1")
+
+        ensure_state.assert_called_once_with("DT-1")
+
+    @patch("apex.apex_core.utils.portal_token_security.portal_room", return_value="driver:opaque")
+    @patch.object(personal, "_resolve_linked_employee", return_value="EMP-1")
+    @patch.object(personal, "_resolve_driver", return_value="DRV-1")
+    @patch.object(personal, "_require_enabled")
+    @patch("apex.salis.api.driver_portal.trips.my_trips_today", return_value=[])
+    def test_today_returns_the_driver_realtime_room(
+        self, _trips, _enabled, _driver, _employee, portal_room
+    ):
+        payload = personal.get_masar_today()
+
+        self.assertEqual(payload["realtime_room"], "driver:opaque")
+        portal_room.assert_called_once_with(DRIVER)

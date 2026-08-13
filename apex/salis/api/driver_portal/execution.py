@@ -69,6 +69,9 @@ def start_my_trip(dispatch_trip):
             }
         )
         doc.insert(ignore_permissions=True)
+    from apex.salis.api.boarding_flow import ensure_trip_boarding_state
+
+    ensure_trip_boarding_state(dispatch_trip)
     return _trip_log_state(driver, dispatch_trip)
 
 
@@ -153,5 +156,47 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
     return {
         "route_stop": route_stop,
         "done": bool(done),
+        "stop_progress": _stop_progress_map(dispatch_trip, driver),
+    }
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=30, seconds=60)
+def mark_arrived(dispatch_trip, route_stop):
+    """Record arrival at one stop and notify workers waiting there."""
+    from apex.salis.api.boarding_flow import _publish
+
+    _require_enabled()
+    driver = _resolve_driver()
+    trip = _resolve_my_trip(dispatch_trip, driver)
+    stop = _resolve_trip_route_stop(trip, route_stop)
+    log = _open_trip_log(dispatch_trip, driver)
+    if not log:
+        frappe.throw(_("Start the trip before marking arrival."))
+
+    row = next((item for item in (log.stop_progress or []) if item.route_stop == route_stop), None)
+    now = frappe.utils.now_datetime()
+    if row:
+        row.sequence = stop.get("idx")
+        row.stop_name = stop.get("stop_name")
+        row.arrived = 1
+        row.arrived_at = now
+    else:
+        log.append(
+            "stop_progress",
+            {
+                "route_stop": route_stop,
+                "sequence": stop.get("idx"),
+                "stop_name": stop.get("stop_name"),
+                "arrived": 1,
+                "arrived_at": now,
+            },
+        )
+    log.flags.ignore_permissions = True
+    log.save()
+    _publish("boarding_arrived", dispatch_trip, {"route_stop": route_stop})
+    return {
+        "route_stop": route_stop,
+        "arrived": True,
         "stop_progress": _stop_progress_map(dispatch_trip, driver),
     }

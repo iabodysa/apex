@@ -34,8 +34,14 @@ def get_masar_today():
     driver = _resolve_driver()
     employee = _resolve_linked_employee()
     from apex.salis.api.driver_portal.trips import my_trips_today
+    from apex.apex_core.utils.portal_token_security import DRIVER, portal_room
 
-    return {"driver": driver, "employee": employee, "trips": my_trips_today()}
+    return {
+        "driver": driver,
+        "employee": employee,
+        "trips": my_trips_today(),
+        "realtime_room": portal_room(DRIVER),
+    }
 
 
 @frappe.whitelist(allow_guest=True)

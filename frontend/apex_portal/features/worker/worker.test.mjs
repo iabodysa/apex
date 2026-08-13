@@ -6,6 +6,7 @@ import { createWorkerGateway } from "./gateway.js";
 import { workerRoutes } from "./routes.js";
 import { createDraftAction } from "./asyncState.js";
 import WorkerPage from "./WorkerPage.vue";
+import WorkerTransportPage from "./WorkerTransportPage.vue";
 
 vi.mock("frappe-ui", () => ({
   Button: { template: "<button><slot /></button>" },
@@ -35,6 +36,25 @@ describe("Masar worker feature", () => {
     await expect(gateway.home()).resolves.toEqual({ employee_name: "عامل تجريبي" });
     expect(call).toHaveBeenCalledWith("apex.salis.api.masar.get_worker_home");
     expect(JSON.stringify(call.mock.calls)).not.toContain("employee");
+  });
+
+  it("keeps the archived boarding journey on the dedicated transport screen", async () => {
+    const transport = workerRoutes.find((route) => route.path === "/transport");
+    expect(transport.component).toBe(WorkerTransportPage);
+
+    const call = vi.fn().mockResolvedValue({ message: {} });
+    const gateway = createWorkerGateway(call);
+    await gateway.boarding();
+    await gateway.requestWait();
+    await gateway.claimBoarded();
+    await gateway.boardingPass("TR-1");
+
+    expect(call.mock.calls).toEqual([
+      ["apex.salis.api.boarding_flow.worker_trip_boarding"],
+      ["apex.salis.api.boarding_flow.worker_request_wait"],
+      ["apex.salis.api.boarding_flow.worker_claim_boarded"],
+      ["apex.salis.api.masar.get_worker_boarding_pass", { transport_request: "TR-1" }],
+    ]);
   });
 
   it("keeps entered values after a recoverable submission error", async () => {

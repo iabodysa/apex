@@ -4,6 +4,7 @@ import App from "./App.vue";
 import { createPortalRouter, getPortalContext } from "./core/router.js";
 import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./core/session.js";
 import { configurePortalApi } from "./core/api.js";
+import { createPortalSubscriber } from "./core/realtime.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
 import { createTransportSupervisorGateway } from "./features/transport-supervisor/gateway.js";
@@ -58,6 +59,7 @@ export async function mountPortal({
     navigation: navigationFrom(router),
   });
   const call = configurePortalApi();
+  application.provide("portalSubscribe", createPortalSubscriber({ settings: bootstrap }));
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
   application.provide("transportSupervisorGateway", createTransportSupervisorGateway(call));

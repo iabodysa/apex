@@ -1,3 +1,61 @@
+import { io } from "socket.io-client";
+
+function socketUrl(settings, origin) {
+  const source = new URL(origin);
+  const local = source.hostname === "localhost"
+    || source.hostname === "127.0.0.1"
+    || source.hostname.endsWith(".localhost");
+  const base = local
+    ? `${source.protocol}//${source.hostname}:${settings.socketio_port}`
+    : origin;
+  return `${base}/${settings.site_name}`;
+}
+
+export function createPortalSubscriber({
+  settings = {},
+  origin = globalThis.location?.origin || "",
+  ioFactory = io,
+} = {}) {
+  if (!settings.site_name || !settings.socketio_port || !origin) return () => () => {};
+  let socket;
+  let room;
+  let listeners = 0;
+  let join;
+
+  return (nextRoom, event, callback) => {
+    if (!nextRoom || !event || typeof callback !== "function") return () => {};
+    if (room && room !== nextRoom) throw new TypeError("Portal realtime owns one subject room");
+    if (!socket) {
+      room = nextRoom;
+      socket = ioFactory(socketUrl(settings, origin), {
+        withCredentials: true,
+        reconnectionAttempts: 5,
+        secure: globalThis.location?.protocol === "https:",
+      });
+      join = () => socket?.emit("task_subscribe", room);
+      socket.on("connect", join);
+      socket.on("reconnect", join);
+    }
+    socket.on(event, callback);
+    listeners += 1;
+    let active = true;
+    return () => {
+      if (!active || !socket) return;
+      active = false;
+      socket.off(event, callback);
+      listeners -= 1;
+      if (listeners) return;
+      socket.emit("task_unsubscribe", room);
+      socket.off("connect", join);
+      socket.off("reconnect", join);
+      socket.disconnect();
+      socket = undefined;
+      room = undefined;
+      join = undefined;
+    };
+  };
+}
+
 export function connectContextRooms({ socket, entry, rooms }) {
   if (!socket || typeof socket.emit !== "function") {
     throw new TypeError("A Frappe realtime socket is required");

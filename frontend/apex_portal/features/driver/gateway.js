@@ -3,7 +3,23 @@ async function unwrap(call, method, params) {
   return response?.message ?? response;
 }
 
+function mutationGate() {
+  const pending = new Map();
+  return (key, action) => {
+    if (pending.has(key)) return pending.get(key);
+    const request = Promise.resolve().then(action);
+    pending.set(key, request);
+    request.then(
+      () => pending.delete(key),
+      () => pending.delete(key),
+    );
+    return request;
+  };
+}
+
 export function createDriverGateway(call) {
+  const mutate = mutationGate();
+  const submit = (key, method, params) => mutate(key, () => unwrap(call, method, params));
   return Object.freeze({
     today: () => unwrap(call, "apex.salis.api.driver_portal.personal.get_masar_today"),
     profile: () => unwrap(call, "apex.salis.api.driver_portal.get_driver_profile"),
@@ -13,8 +29,15 @@ export function createDriverGateway(call) {
     route: () => unwrap(call, "apex.salis.api.driver_portal.my_worker_route_today"),
     trip: (dispatchTrip) => unwrap(call, "apex.salis.api.driver_portal.my_trip_route", { dispatch_trip: dispatchTrip }),
     trips: () => unwrap(call, "apex.salis.api.driver_portal.my_trips_recent"),
-    startTrip: (dispatchTrip) => unwrap(call, "apex.salis.api.driver_portal.start_my_trip", { dispatch_trip: dispatchTrip }),
-    finishTrip: (dispatchTrip) => unwrap(call, "apex.salis.api.driver_portal.complete_my_trip", { dispatch_trip: dispatchTrip }),
-    markStop: (dispatchTrip, routeStop) => unwrap(call, "apex.salis.api.driver_portal.mark_stop_progress", { dispatch_trip: dispatchTrip, route_stop: routeStop }),
+    startTrip: (dispatchTrip) => submit(`start:${dispatchTrip}`, "apex.salis.api.driver_portal.start_my_trip", { dispatch_trip: dispatchTrip }),
+    finishTrip: (dispatchTrip) => submit(`finish:${dispatchTrip}`, "apex.salis.api.driver_portal.complete_my_trip", { dispatch_trip: dispatchTrip }),
+    markStop: (dispatchTrip, routeStop) => submit(`stop:${dispatchTrip}:${routeStop}`, "apex.salis.api.driver_portal.mark_stop_progress", { dispatch_trip: dispatchTrip, route_stop: routeStop }),
+    arriveAtStop: (dispatchTrip, routeStop) => submit(`arrive:${dispatchTrip}:${routeStop}`, "apex.salis.api.driver_portal.mark_arrived", { dispatch_trip: dispatchTrip, route_stop: routeStop }),
+    tripBoarding: (dispatchTrip) => unwrap(call, "apex.salis.api.boarding_flow.get_trip_boarding", { dispatch_trip: dispatchTrip }),
+    scanPass: (passToken) => submit(`scan:${passToken}`, "apex.salis.api.boarding.scan_boarding_pass", { pass_token: passToken }),
+    manualBoard: (dispatchTrip, employee) => submit(`manual:${dispatchTrip}:${employee}`, "apex.salis.api.manual_boarding.board_worker", { dispatch_trip: dispatchTrip, employee }),
+    notifyPassengers: (dispatchTrip) => submit(`notify:${dispatchTrip}`, "apex.salis.api.boarding_flow.notify_remaining_passengers", { dispatch_trip: dispatchTrip }),
+    markNotBoarded: (dispatchTrip, employee) => submit(`unmark:${dispatchTrip}:${employee}`, "apex.salis.api.boarding_flow.driver_mark_not_boarded", { dispatch_trip: dispatchTrip, employee }),
+    depart: (dispatchTrip) => submit(`depart:${dispatchTrip}`, "apex.salis.api.boarding_flow.depart_and_finalize", { dispatch_trip: dispatchTrip }),
   });
 }

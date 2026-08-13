@@ -5,6 +5,7 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { createDriverGateway } from "./gateway.js";
 import { driverRoutes } from "./routes.js";
 import DriverPage from "./DriverPage.vue";
+import DriverTripPage from "./DriverTripPage.vue";
 
 vi.mock("frappe-ui", () => ({
   Badge: { template: "<span />" },
@@ -46,6 +47,27 @@ describe("Masar driver feature", () => {
     expect(call).toHaveBeenCalledWith(
       "apex.salis.api.driver_portal.personal.get_masar_today",
     );
+  });
+
+  it("keeps boarding, arrival, and exception handling on the trip screen", async () => {
+    const tripRoute = driverRoutes.find((route) => route.path === "/route/:trip");
+    expect(tripRoute.component).toBe(DriverTripPage);
+
+    const call = vi.fn().mockResolvedValue({ message: {} });
+    const gateway = createDriverGateway(call);
+    await gateway.tripBoarding("DT-1");
+    await gateway.arriveAtStop("DT-1", "STOP-1");
+    await gateway.notifyPassengers("DT-1");
+    await gateway.markNotBoarded("DT-1", "EMP-1");
+    await gateway.depart("DT-1");
+
+    expect(call.mock.calls).toEqual([
+      ["apex.salis.api.boarding_flow.get_trip_boarding", { dispatch_trip: "DT-1" }],
+      ["apex.salis.api.driver_portal.mark_arrived", { dispatch_trip: "DT-1", route_stop: "STOP-1" }],
+      ["apex.salis.api.boarding_flow.notify_remaining_passengers", { dispatch_trip: "DT-1" }],
+      ["apex.salis.api.boarding_flow.driver_mark_not_boarded", { dispatch_trip: "DT-1", employee: "EMP-1" }],
+      ["apex.salis.api.boarding_flow.depart_and_finalize", { dispatch_trip: "DT-1" }],
+    ]);
   });
 
   it("renders an empty state for an object containing an empty collection", async () => {

@@ -32,12 +32,18 @@ class TestDriverPersonalService(TestCase):
     @patch.object(personal, "_require_enabled")
     @patch.object(personal, "_resolve_driver", return_value="DRV-1")
     @patch.object(personal, "_resolve_linked_employee", return_value="EMP-1")
+    @patch("apex.apex_core.utils.portal_token_security.portal_room", return_value="driver:opaque")
     @patch("apex.salis.api.driver_portal.trips.my_trips_today", return_value=[])
     def test_today_contains_masar_trip_and_personal_scope_only(
-        self, my_trips, _employee, _driver, _enabled
+        self, my_trips, _room, _employee, _driver, _enabled
     ):
         self.assertEqual(
             personal.get_masar_today(),
-            {"driver": "DRV-1", "employee": "EMP-1", "trips": []},
+            {
+                "driver": "DRV-1",
+                "employee": "EMP-1",
+                "trips": [],
+                "realtime_room": "driver:opaque",
+            },
         )
         my_trips.assert_called_once_with()
