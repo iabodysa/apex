@@ -160,7 +160,7 @@
 }
 
 .supervisor-assignment-card dt {
-  font-size: .78rem;
+  font-size: .8125rem;
 }
 
 .supervisor-assignment-card dd {
@@ -553,7 +553,7 @@
 }
 
 .transport-map-selection dl > div { min-inline-size: 0; }
-.transport-map-selection dt { color: var(--muted); font-size: .78rem; }
+.transport-map-selection dt { color: var(--muted); font-size: .8125rem; }
 .transport-map-selection dd { margin: 0; overflow-wrap: anywhere; font-weight: 700; }
 .transport-map-selection__action { display: inline-grid; min-block-size: 44px; place-items: center; padding-inline: var(--sp-4); border-radius: var(--radius-sm); background: var(--brand-green); color: var(--surface-2); font-weight: 700; }
 

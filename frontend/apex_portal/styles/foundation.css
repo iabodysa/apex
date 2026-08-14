@@ -191,7 +191,7 @@ h3 {
   color: var(--muted);
   direction: ltr;
   font-family: var(--font);
-  font-size: .78rem;
+  font-size: .8125rem;
   font-variant-numeric: tabular-nums;
   text-align: start;
   text-overflow: ellipsis;

@@ -5,7 +5,7 @@
 .room-card header > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-1) var(--sp-2); }
 .bed-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: var(--sp-2); }
 .bed-grid > * { display: grid; min-block-size: 72px; padding: var(--sp-3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink); text-decoration: none; }
-.bed-meta { color: var(--muted); font-size: .78rem; }
+.bed-meta { color: var(--muted); font-size: .8125rem; }
 .bed-grid > [data-state="green"] { border-inline-start: 4px solid var(--ok); }
 .bed-grid > [data-state="red"] { border-inline-start: 4px solid var(--danger); }
 .bed-grid > [data-state="amber"], .bed-grid > [data-state="grey"] { border-inline-start: 4px solid var(--warn); }
