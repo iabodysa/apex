@@ -220,6 +220,33 @@ describe("Masar driver feature", () => {
     wrapper.unmount();
   });
 
+  it("subscribes to the trip room once, not again on every poll", async () => {
+    resourceData.set("apex.salis.api.driver_portal.my_trip_route", { name: "DT-1", stops: [], workers: [] });
+    resourceData.set("apex.salis.api.boarding_flow.get_trip_boarding", { workers: [] });
+    resourceData.set("apex.salis.api.driver_portal.personal.get_masar_today", { realtime_room: "trip:DT-1" });
+    const subscribe = vi.fn(() => () => {});
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/route/:trip", component: DriverTripPage }],
+    });
+    await router.push("/route/DT-1");
+    await router.isReady();
+    vi.useFakeTimers();
+    const wrapper = mount(DriverTripPage, {
+      global: { plugins: [router], provide: { portalSubscribe: subscribe, driverGateway: {} } },
+    });
+    await flushPromises();
+    const afterFirstLoad = subscribe.mock.calls.length;
+
+    await vi.advanceTimersByTimeAsync(30000);
+    await flushPromises();
+
+    expect(afterFirstLoad).toBeGreaterThan(0);
+    expect(subscribe).toHaveBeenCalledTimes(afterFirstLoad);
+    wrapper.unmount();
+    vi.useRealTimers();
+  });
+
   it("renders an empty state for an object containing an empty collection", async () => {
     const router = createRouter({
       history: createMemoryHistory(),

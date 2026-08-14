@@ -39,6 +39,7 @@ const now = ref(Date.now());
 let pollTimer;
 let clockTimer;
 let unsubscribers = [];
+let liveRoom = null;
 
 const dispatchTrip = computed(() => route.params.trip);
 const statusByEmployee = computed(() => new Map((boarding.value?.workers || []).map((worker) => [worker.employee, worker])));
@@ -79,11 +80,16 @@ const scanMessages = Object.freeze({
 function stopLive() {
   clearInterval(pollTimer);
   clearInterval(clockTimer);
+  liveRoom = null;
   while (unsubscribers.length) unsubscribers.pop()();
   scanner.stop();
 }
 
+// Every poll calls this, so it must be a no-op while the room holds: tearing the five listeners
+// down and rebuilding them every ten seconds also restarted the poll that called it.
 function startLive(room) {
+  if (room === liveRoom) return;
+  liveRoom = room;
   while (unsubscribers.length) unsubscribers.pop()();
   if (room) {
     for (const event of ["boarding_update", "boarding_confirmed", "boarding_unmarked", "boarding_arrived", "wait_request"]) {
