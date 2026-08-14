@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe.model.rename_doc import rename_doc
 
 from apex.apex_core.setup.employee_advance_recovery import (
     configure_recovery,
@@ -215,7 +216,7 @@ def _retire_untouched_legacy_utility_card():
     canonical_exists = bool(
         frappe.db.exists("Number Card", _CANONICAL_UTILITY_CARD)
     )
-    frappe.rename_doc(
+    rename_doc(
         "Number Card",
         _LEGACY_UTILITY_CARD,
         _CANONICAL_UTILITY_CARD,

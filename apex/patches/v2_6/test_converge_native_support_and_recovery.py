@@ -1,4 +1,5 @@
 import importlib
+import inspect
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,6 +12,11 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
+    def test_utility_card_rename_uses_permission_aware_model_primitive(self):
+        self.assertIn(
+            "ignore_permissions", inspect.signature(convergence.rename_doc).parameters
+        )
+
     def test_untouched_legacy_utility_card_merges_into_canonical_card(self):
         retire = getattr(convergence, "_retire_untouched_legacy_utility_card", None)
         self.assertIsNotNone(retire)
@@ -31,7 +37,7 @@ class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
         with (
             patch.object(convergence.frappe.db, "exists", side_effect=[True, True]),
             patch.object(convergence.frappe.db, "get_value", return_value=legacy),
-            patch.object(convergence.frappe, "rename_doc") as rename_doc,
+            patch.object(convergence, "rename_doc") as rename_doc,
         ):
             retire()
 
@@ -56,7 +62,7 @@ class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
                 "get_value",
                 return_value={"label": "My Utility Exceptions"},
             ),
-            patch.object(convergence.frappe, "rename_doc") as rename_doc,
+            patch.object(convergence, "rename_doc") as rename_doc,
         ):
             retire()
 
@@ -68,7 +74,7 @@ class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
         with (
             patch.object(convergence.frappe.db, "exists", side_effect=[True, False]),
             patch.object(convergence.frappe.db, "get_value", return_value=legacy),
-            patch.object(convergence.frappe, "rename_doc") as rename_doc,
+            patch.object(convergence, "rename_doc") as rename_doc,
             patch.object(convergence.frappe.db, "set_value") as set_value,
         ):
             convergence._retire_untouched_legacy_utility_card()
