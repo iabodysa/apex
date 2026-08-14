@@ -33,6 +33,7 @@ async function act(kind, row) {
       reason: reason.value || undefined,
     }),
   );
+  // TODO(A-532): the dialog clears unconditionally after await, so a refusal reads as success
   selected.value = null;
   reason.value = "";
   await fuelQueue.fetch();

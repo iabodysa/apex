@@ -8,6 +8,7 @@ const resource = createResource({
 });
 const fields = [
   { name: "litres", type: "number", label: "الكمية باللتر", required: true },
+  // TODO(A-532): free text goes into a Link field
   { name: "station", label: "محطة الوقود" },
   { name: "notes", type: "textarea", rows: 3, label: "ملاحظة" },
 ];

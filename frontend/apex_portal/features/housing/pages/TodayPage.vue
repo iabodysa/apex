@@ -37,6 +37,7 @@ const unavailableBeds = computed(() => ["blocked", "out_of_service"]
 const dueRounds = computed(() => safety.data?.due?.length || 0);
 
 function selectBuilding(name) {
+  // TODO(A-532): writes to a readonly ref
   building.value = name;
 }
 

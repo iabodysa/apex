@@ -62,6 +62,7 @@ async function saveRound() {
     const response = await submit.submit({
       building: building.value,
       round_date: today(),
+      // TODO(A-532): reports full success while response.failed is non-empty
       results: JSON.stringify(Object.values(results)),
     });
     if (!response?.ok) throw new Error(response?.failed?.[0]?.message || "لم تُحفظ الجولة.");

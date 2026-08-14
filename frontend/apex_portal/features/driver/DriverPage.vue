@@ -56,6 +56,7 @@ watch(() => route.fullPath, load, { immediate: true });
       {{ spec.empty || "لا توجد بيانات حالياً." }}
     </div>
     <div v-else class="feature-grid">
+      <!-- TODO(A-532): /route rows carry dispatch_trip, not name, so every card links to /route/undefined -->
       <component :is="spec.detail ? RouterLink : 'article'" v-for="row in rows" :key="row.name" class="feature-card record-card" :to="spec.detail ? spec.detail.replace(':trip', row.name) : undefined">
         <div class="record-card__copy">
           <strong class="record-card__title" dir="auto">{{ recordTitle(row, spec.titleFields, spec.fallbackTitle) }}</strong>

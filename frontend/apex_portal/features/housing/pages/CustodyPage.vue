@@ -41,6 +41,7 @@ async function refreshBalances() {
   if (state.holder) requests.push(held.fetch());
   await Promise.all(requests);
 }
+// TODO(A-532): no immediate:true, so a preselected building never loads
 watch(building, async (value) => {
   replace({ building: value });
   await refreshBalances();

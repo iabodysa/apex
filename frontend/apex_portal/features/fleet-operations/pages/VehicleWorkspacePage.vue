@@ -59,7 +59,9 @@ async function act(name) {
     notice.value = state.reason;
     return;
   }
+  // TODO(A-532): sends reason where the endpoint reads notes, so the operator's note is dropped
   await once(`${name}:${route.params.vehicle}`, () => actions[name].submit({ plate: route.params.vehicle, reason: reason.value || undefined }));
+  // TODO(A-532): notice reports success unconditionally, so a refused action looks like it worked
   notice.value = "تم تنفيذ الإجراء";
   await load();
 }
