@@ -53,6 +53,20 @@ function _bdi(value) {
 	return `<bdi>${frappe.utils.escape_html(value == null ? "" : String(value))}</bdi>`;
 }
 
+function _cell_text(value) {
+	return frappe.utils.escape_html(value == null ? "" : String(value));
+}
+
+const TABLE_COLUMNS = [
+	{ id: "plate_number", label: "Plate", format: _bdi },
+	{ id: "vehicle_category", label: "Category" },
+	{ id: "status", label: "Status" },
+	{ id: "current_driver_name", label: "Driver" },
+	{ id: "rental_office", label: "Office" },
+	{ id: "project", label: "Project" },
+	{ id: "open_incidents", label: "Open Incidents" },
+];
+
 class FleetControl {
 	constructor(page) {
 		this.page = page;
@@ -357,7 +371,7 @@ class FleetControl {
 
 	_render_board_error(retry, r) {
 		this.$summary.empty();
-		this.$grid.empty();
+		this._clear_grid();
 		this._render_error(this.$grid, retry, r);
 	}
 
@@ -371,7 +385,7 @@ class FleetControl {
 		for (let i = 0; i < 4; i++) {
 			$('<div class="skeleton-block"></div>').appendTo(this.$summary);
 		}
-		this.$grid.empty();
+		this._clear_grid();
 		for (let i = 0; i < 6; i++) {
 			$('<div class="skeleton-block"></div>').appendTo(this.$grid);
 		}
@@ -520,7 +534,7 @@ class FleetControl {
 			this._render_queue();
 			return;
 		}
-		this.$grid.empty();
+		this._clear_grid();
 		this.$grid.toggleClass("fc-grid-table", this.view === "table").removeClass("fc-grid-queue");
 		const vehicles = this._visible_vehicles();
 		this._update_count(vehicles.length, false);
@@ -638,20 +652,45 @@ class FleetControl {
 	}
 
 	_render_table(vehicles) {
-		const cols = [
-			["Plate", "plate_number"], ["Category", "vehicle_category"], ["Status", "status"],
-			["Driver", "current_driver_name"], ["Office", "rental_office"], ["Project", "project"],
-			["Open Incidents", "open_incidents"],
-		];
-		const $t = $('<table class="table table-bordered fc-table"></table>').appendTo(this.$grid);
-		const $hr = $("<tr></tr>").appendTo($("<thead></thead>").appendTo($t));
-		cols.forEach((c) => $("<th></th>").text(__(c[0])).appendTo($hr));
-		const $tb = $("<tbody></tbody>").appendTo($t);
-		(vehicles || this.data.vehicles).forEach((v) => {
-			const $r = $("<tr></tr>").appendTo($tb);
-			$r.on("click", () => this.open_detail(v));
-			cols.forEach((c) => $("<td></td>").text(v[c[1]] == null ? "" : String(v[c[1]])).appendTo($r));
+		const rows = vehicles || this.data.vehicles || [];
+		const $mount = $('<div class="fc-table"></div>').appendTo(this.$grid);
+		this.table_rows = rows;
+		this.datatable = new frappe.DataTable($mount.get(0), {
+			columns: TABLE_COLUMNS.map(({ id, label, format }) => ({
+				id,
+				name: __(label),
+				editable: false,
+				format: format || _cell_text,
+			})),
+			data: rows,
+			layout: "fluid",
+			serialNoColumn: false,
+			checkboxColumn: false,
+			/* The filter row ships an untranslatable English title on every box, and the
+			   page already filters server-side and inside the operator's project scope. */
+			inlineFilters: false,
+			cellHeight: 35,
+			language: frappe.boot.lang,
+			translations: frappe.utils.datatable.get_translations(),
+			direction: frappe.utils.is_rtl() ? "rtl" : "ltr",
 		});
+		/* The row is read from the data index stamped on the cell, not from its rendered
+		   position: sorting a column reorders the view and leaves that index alone. */
+		$mount.on("click", ".dt-scrollable .dt-cell", (e) => {
+			const v = this.table_rows[cint($(e.currentTarget).attr("data-row-index"))];
+			if (v) this.open_detail(v);
+		});
+	}
+
+	/* The table registers listeners on document, released only by destroy(); emptying the
+	   grid around it leaks one pair per render. */
+	_clear_grid() {
+		if (this.datatable) {
+			this.datatable.destroy();
+			this.datatable = null;
+			this.table_rows = null;
+		}
+		this.$grid.empty();
 	}
 
 	_alert_matches_facets(a) {
@@ -663,7 +702,8 @@ class FleetControl {
 	}
 
 	_render_queue() {
-		this.$grid.empty().removeClass("fc-grid-table").addClass("fc-grid-queue");
+		this._clear_grid();
+		this.$grid.removeClass("fc-grid-table").addClass("fc-grid-queue");
 		const sorted = (this.alerts || [])
 			.filter((a) => this._alert_matches_facets(a))
 			.slice()

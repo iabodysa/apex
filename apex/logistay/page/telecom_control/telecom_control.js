@@ -94,7 +94,10 @@ class TelecomControl {
 		this.$tableWrap = $('<div class="tc-table-wrap"></div>').attr('style', TC_STYLE.table_wrap).appendTo(this.$root);
 		this.$pager = $('<div class="tc-pager"></div>').attr('style', TC_STYLE.pager).appendTo(this.$root);
 		this.$empty = $('<div class="tc-empty"></div>').attr('style', TC_STYLE.empty).appendTo(this.$root).hide();
-		this.$backdrop = $('<div class="tc-backdrop"></div>').appendTo(document.body);
+		/* The overlay sits on <body> so the fixed drawer is not trapped in the page's
+		   stacking context; it carries the page root class so its rule in
+		   telecom_control.css can be scoped like every other rule in that file. */
+		this.$backdrop = $('<div class="telecom-control tc-backdrop"></div>').appendTo(document.body);
 		this.$drawer = $('<div class="tc-drawer" role="dialog" aria-modal="true"></div>')
 			.attr('style', TC_STYLE.drawer)
 			.attr('aria-label', __('SIM details'))

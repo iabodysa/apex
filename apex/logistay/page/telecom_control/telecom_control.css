@@ -1,14 +1,19 @@
-.tc-table tbody tr {
+/* Copyright (c) 2026, afmcoltd */
+
+/* A Desk page stylesheet is injected into the whole app, not into the page.
+   Every selector below is held under .telecom-control for that reason. */
+
+.telecom-control .tc-table tbody tr {
 	cursor: pointer;
 }
 
 @media (hover: hover) {
-	.tc-table tbody tr:hover {
+	.telecom-control .tc-table tbody tr:hover {
 		background-color: var(--fg-hover-color);
 	}
 }
 
-.tc-backdrop {
+.telecom-control.tc-backdrop {
 	position: fixed;
 	inset: 0;
 	background: rgba(0, 0, 0, 0.35);

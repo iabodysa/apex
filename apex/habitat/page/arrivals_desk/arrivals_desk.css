@@ -1,0 +1,879 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* A Desk page stylesheet is injected into the whole app, not into the page.
+   Every selector below is held under .arrivals-desk for that reason. */
+
+.arrivals-desk {
+	position: relative;
+	height: calc(100vh - var(--navbar-height) - var(--page-head-height) - 16px);
+	min-block-size: 420px;
+	display: flex;
+	flex-direction: column;
+}
+
+.arrivals-desk .ax-strip {
+	display: flex;
+	gap: 24px;
+	flex-wrap: wrap;
+	padding-block: 8px;
+	margin-block-end: 8px;
+	border-block-end: 1px solid var(--border-color);
+}
+
+.arrivals-desk .ax-strip-stat {
+	display: flex;
+	flex-direction: column;
+	min-inline-size: 96px;
+}
+
+.arrivals-desk .ax-strip-num {
+	font-size: 1.6rem;
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--heading-color);
+}
+
+.arrivals-desk .ax-strip-label {
+	font-size: 0.8rem;
+	color: var(--text-muted);
+}
+
+.arrivals-desk .ax-body {
+	display: grid;
+	grid-template-columns: minmax(300px, 26%) 1fr minmax(320px, 28%);
+	gap: 12px;
+	flex: 1;
+	min-block-size: 0;
+	overflow: hidden;
+}
+
+.arrivals-desk .ax-zone {
+	overflow-y: auto;
+	min-inline-size: 0;
+}
+
+.arrivals-desk .ax-zone-intake {
+	border-inline-end: 1px solid var(--border-color);
+	padding-inline-end: 12px;
+}
+
+.arrivals-desk .ax-zone-floor {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.arrivals-desk .ax-zone-actions {
+	border-inline-start: 1px solid var(--border-color);
+	padding-inline-start: 12px;
+}
+
+.arrivals-desk .ax-zone-head {
+	position: sticky;
+	inset-block-start: 0;
+	z-index: 2;
+	background: var(--fg-color);
+	padding-block: 6px;
+	margin-block-end: 8px;
+	font-weight: 700;
+	color: var(--heading-color);
+	border-block-end: 1px solid var(--border-color);
+}
+
+.arrivals-desk .ax-anchor {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 12px;
+	padding-block-end: 10px;
+	margin-block-end: 4px;
+}
+
+.arrivals-desk .ax-anchor-field {
+	flex: 1 1 180px;
+	min-inline-size: 160px;
+}
+
+.arrivals-desk .ax-capacity {
+	flex: 1 1 100%;
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 12px;
+	min-block-size: 22px;
+}
+
+.arrivals-desk .ax-cap-title {
+	font-weight: 700;
+	color: var(--heading-color);
+	font-size: var(--text-lg);
+}
+
+.arrivals-desk .ax-cap-wrap {
+	flex: 1 1 100%;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+}
+
+.arrivals-desk .ax-cap-meter {
+	flex: 1 1 160px;
+	min-inline-size: 120px;
+	block-size: 12px;
+	display: flex;
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--gray-100);
+	border: 1px solid var(--border-color);
+}
+
+.arrivals-desk .ax-cap-fill {
+	block-size: 100%;
+}
+
+.arrivals-desk .ax-cap-fill--free {
+	background: var(--green-500);
+}
+
+.arrivals-desk .ax-cap-fill--occ {
+	background: var(--red-500);
+}
+
+.arrivals-desk .ax-cap-fill--over {
+	background: var(--red-500);
+	box-shadow: inset 0 0 0 2px var(--orange-500);
+}
+
+.arrivals-desk .ax-cap-legend {
+	font-size: var(--text-sm);
+	color: var(--text-muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.arrivals-desk .ax-cap-swatch {
+	inline-size: 10px;
+	block-size: 10px;
+	border-radius: 2px;
+	display: inline-block;
+}
+
+.arrivals-desk .ax-cap-legend--free .ax-cap-swatch {
+	background: var(--green-500);
+}
+
+.arrivals-desk .ax-cap-legend--occ .ax-cap-swatch {
+	background: var(--red-500);
+}
+
+.arrivals-desk .ax-cap-legend--over .ax-cap-swatch {
+	background: var(--orange-500);
+}
+
+.arrivals-desk .ax-stages {
+	flex: 1 1 100%;
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.arrivals-desk .ax-step {
+	appearance: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding-block: 4px;
+	padding-inline: 6px 10px;
+	border-radius: 14px;
+	border: 1px solid var(--border-color);
+	background: var(--card-bg);
+	font-size: var(--text-sm);
+	color: var(--text-muted);
+}
+
+.arrivals-desk .ax-step--done {
+	border-color: var(--green-500);
+	color: var(--green-700);
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-step--now {
+	border-color: var(--primary);
+	color: var(--primary);
+}
+
+.arrivals-desk .ax-step--todo {
+	cursor: default;
+}
+
+.arrivals-desk .ax-step-num {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 20px;
+	block-size: 20px;
+	border-radius: 50%;
+	font-size: var(--text-xs);
+	font-weight: 700;
+	background: var(--gray-100);
+	color: var(--gray-600);
+}
+
+.arrivals-desk .ax-step--done .ax-step-num {
+	background: var(--green-500);
+	color: var(--text-on-blue);
+}
+
+.arrivals-desk .ax-step--now .ax-step-num {
+	background: var(--primary);
+	color: var(--text-on-blue);
+}
+
+.arrivals-desk .ax-floor {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding-inline-end: 6px;
+}
+
+.arrivals-desk .ax-floor-group {
+	margin-block-end: 16px;
+}
+
+.arrivals-desk .ax-floor-header {
+	font-weight: 700;
+	color: var(--heading-color);
+	border-block-end: 1px solid var(--border-color);
+	padding-block-end: 4px;
+	margin-block-end: 8px;
+}
+
+.arrivals-desk .ax-floor-banner {
+	margin-block-end: 10px;
+	padding-block: 8px;
+	padding-inline: 12px;
+	border-radius: 6px;
+	font-size: var(--text-sm);
+	color: var(--orange-700);
+	background: var(--yellow-100);
+	border: 1px solid var(--orange-500);
+}
+
+.arrivals-desk .ax-rooms {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 10px;
+}
+
+.arrivals-desk .ax-room {
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	padding: 8px;
+	background: var(--card-bg);
+}
+
+.arrivals-desk .ax-room--same-project {
+	border-color: var(--primary);
+	box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.arrivals-desk .ax-room-proj {
+	display: inline-block;
+	margin-inline-start: 6px;
+	padding-block: 0;
+	padding-inline: 5px;
+	border-radius: 3px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: var(--text-on-blue);
+	background: var(--primary);
+	vertical-align: middle;
+}
+
+.arrivals-desk .ax-room-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-block-end: 6px;
+}
+
+.arrivals-desk .ax-room-number {
+	font-weight: 600;
+}
+
+.arrivals-desk .ax-room-meta {
+	font-size: var(--text-xs);
+	color: var(--text-muted);
+}
+
+.arrivals-desk .ax-room-oc {
+	appearance: none;
+	margin-block-start: 6px;
+	inline-size: 100%;
+	font-size: var(--text-xs);
+	font-weight: 600;
+	color: var(--primary);
+	background: transparent;
+	border: 1px dashed var(--primary);
+	border-radius: 6px;
+	padding-block: 4px;
+	padding-inline: 6px;
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-beds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+	gap: 6px;
+}
+
+.arrivals-desk .ax-bed {
+	position: relative;
+	border-radius: 6px;
+	padding-block: 6px 5px;
+	padding-inline: 6px;
+	min-block-size: 72px;
+	font-size: var(--text-sm);
+	border: 1px solid transparent;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.arrivals-desk .ax-bed--green {
+	background: var(--green-100);
+	color: var(--green-700);
+	border-color: var(--green-500);
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-bed--red {
+	background: var(--red-100);
+	color: var(--red-700);
+	border-color: var(--red-500);
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-bed--amber {
+	background: var(--yellow-100);
+	color: var(--orange-700);
+	border-color: var(--orange-500);
+}
+
+.arrivals-desk .ax-bed--grey {
+	background: var(--gray-100);
+	color: var(--gray-600);
+	border-color: var(--gray-400);
+}
+
+.arrivals-desk .ax-bed--temp {
+	border-style: dashed;
+	border-width: 2px;
+}
+
+.arrivals-desk .ax-bed--busy {
+	pointer-events: none;
+	opacity: 0.75;
+}
+
+.arrivals-desk .ax-bed-code {
+	font-weight: 700;
+}
+
+.arrivals-desk .ax-bed-occupant {
+	font-size: var(--text-xs);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.arrivals-desk .ax-bed-badge {
+	position: absolute;
+	inset-block-start: 3px;
+	inset-inline-end: 4px;
+	font-size: var(--text-xs);
+}
+
+.arrivals-desk .ax-bed-blocker {
+	font-size: var(--text-xs);
+	font-weight: 600;
+	color: var(--orange-700);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.arrivals-desk .ax-bed-chip {
+	display: inline-block;
+	margin-inline-start: 4px;
+	padding-block: 0;
+	padding-inline: 4px;
+	border-radius: 3px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	vertical-align: middle;
+}
+
+.arrivals-desk .ax-bed-chip--temp {
+	color: var(--orange-700);
+	background: var(--yellow-100);
+	border: 1px solid var(--orange-500);
+}
+
+.arrivals-desk .ax-empty,
+.arrivals-desk .ax-error {
+	text-align: center;
+	color: var(--text-muted);
+	padding-block: 48px;
+	padding-inline: 16px;
+}
+
+.arrivals-desk .ax-error-msg {
+	margin-block-end: 10px;
+	color: var(--red-700);
+}
+
+.arrivals-desk .ax-skeleton {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+	gap: 10px;
+}
+
+.arrivals-desk .ax-skeleton-room {
+	block-size: 110px;
+	border-radius: 8px;
+	background: var(--skeleton-bg);
+}
+
+.arrivals-desk .ax-search-input {
+	margin-block-end: 8px;
+}
+
+.arrivals-desk .ax-results {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.arrivals-desk .ax-result {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-block: 6px;
+	padding-inline: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-result--active {
+	border-color: var(--primary);
+	background: var(--bg-light-gray);
+}
+
+.arrivals-desk .ax-result-label {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.arrivals-desk .ax-result-sub {
+	font-size: var(--text-xs);
+	margin-inline-start: auto;
+	flex: 0 0 auto;
+}
+
+.arrivals-desk .ax-results-empty {
+	font-size: var(--text-sm);
+	padding-block: 8px;
+	padding-inline: 4px;
+}
+
+.arrivals-desk .ax-results-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.arrivals-desk .ax-result-ghost {
+	block-size: 34px;
+	border-radius: 6px;
+	background: var(--skeleton-bg);
+}
+
+.arrivals-desk .ax-results-error {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 8px;
+	border: 1px solid var(--red-500);
+	border-radius: 6px;
+	background: var(--red-100);
+}
+
+.arrivals-desk .ax-results-error-msg {
+	font-size: var(--text-sm);
+	color: var(--red-700);
+}
+
+.arrivals-desk .ax-register-row {
+	margin-block-start: 8px;
+	inline-size: 100%;
+	text-align: start;
+}
+
+.arrivals-desk .ax-register-plus {
+	font-weight: 700;
+	color: var(--primary);
+}
+
+.arrivals-desk .ax-manifest {
+	margin-block-start: 14px;
+}
+
+.arrivals-desk .ax-manifest-title {
+	font-weight: 700;
+	color: var(--heading-color);
+	font-size: var(--text-sm);
+}
+
+.arrivals-desk .ax-manifest-tally {
+	font-size: var(--text-xs);
+	margin-block-end: 6px;
+}
+
+.arrivals-desk .ax-manifest-list {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.arrivals-desk .ax-manifest-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding-block: 5px;
+	padding-inline: 8px;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.arrivals-desk .ax-manifest-row--done {
+	background: var(--green-100);
+	border-color: var(--green-500);
+}
+
+.arrivals-desk .ax-manifest-tick {
+	font-weight: 700;
+	color: var(--text-muted);
+}
+
+.arrivals-desk .ax-manifest-row--done .ax-manifest-tick {
+	color: var(--green-700);
+}
+
+.arrivals-desk .ax-manifest-name {
+	font-weight: 600;
+	font-size: var(--text-sm);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.arrivals-desk .ax-manifest-sub {
+	font-size: var(--text-xs);
+	margin-inline-start: auto;
+	flex: 0 0 auto;
+}
+
+.arrivals-desk .ax-active {
+	margin-block-start: 14px;
+}
+
+.arrivals-desk .ax-active-card {
+	border: 1px solid var(--primary);
+	border-radius: 8px;
+	padding: 10px;
+	background: var(--card-bg);
+}
+
+.arrivals-desk .ax-active-card--load {
+	border-style: dashed;
+	border-color: var(--border-color);
+}
+
+.arrivals-desk .ax-active-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+}
+
+.arrivals-desk .ax-active-name {
+	font-weight: 700;
+	color: var(--heading-color);
+}
+
+.arrivals-desk .ax-active-sub {
+	font-size: var(--text-sm);
+	margin-block-start: 2px;
+}
+
+.arrivals-desk .ax-active-foot {
+	margin-block-start: 8px;
+	font-size: var(--text-sm);
+}
+
+.arrivals-desk .ax-active-hint {
+	color: var(--primary);
+	font-weight: 600;
+}
+
+.arrivals-desk .ax-active-bed {
+	font-weight: 600;
+}
+
+.arrivals-desk .ax-cart {
+	margin-block-end: 16px;
+}
+
+.arrivals-desk .ax-cart-title {
+	font-weight: 700;
+	color: var(--heading-color);
+	font-size: var(--text-sm);
+	border-block-end: 1px solid var(--border-color);
+	padding-block-end: 4px;
+	margin-block-end: 6px;
+}
+
+.arrivals-desk .ax-cart-list {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.arrivals-desk .ax-cart-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: 4px 8px;
+	padding-block: 4px;
+	padding-inline: 8px;
+	border-radius: 6px;
+	background: var(--bg-light-gray);
+	border-inline-start: 3px solid transparent;
+}
+
+.arrivals-desk .ax-cart-item--done {
+	background: var(--green-100);
+	border-inline-start-color: var(--green-500);
+}
+
+.arrivals-desk .ax-cart-name {
+	font-weight: 600;
+	font-size: var(--text-sm);
+}
+
+.arrivals-desk .ax-cart-bed {
+	font-size: var(--text-xs);
+}
+
+.arrivals-desk .ax-cart-dots {
+	flex: 1 1 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 10px;
+}
+
+.arrivals-desk .ax-cart-dot {
+	font-size: var(--text-xs);
+	color: var(--text-muted);
+}
+
+.arrivals-desk .ax-cart-dot--on {
+	color: var(--green-700);
+	font-weight: 600;
+}
+
+.arrivals-desk .ax-cart-dot--off {
+	color: var(--orange-700);
+}
+
+.arrivals-desk .ax-cart-dot--na {
+	color: var(--text-muted);
+	opacity: 0.6;
+}
+
+.arrivals-desk .ax-deck-sec {
+	margin-block-end: 12px;
+}
+
+.arrivals-desk .ax-deck-head {
+	font-weight: 700;
+	color: var(--heading-color);
+	font-size: var(--text-sm);
+	border-block-end: 1px solid var(--border-color);
+	padding-block-end: 4px;
+	margin-block-end: 6px;
+}
+
+.arrivals-desk .ax-deck-list {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.arrivals-desk .ax-deck-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	min-block-size: 36px;
+	padding-block: 4px;
+}
+
+.arrivals-desk .ax-deck-name {
+	font-weight: 600;
+	font-size: var(--text-sm);
+	flex: 1 1 auto;
+}
+
+.arrivals-desk .ax-tr-row {
+	cursor: pointer;
+	margin: 0;
+}
+
+.arrivals-desk .ax-tr-go {
+	margin-block-start: 6px;
+	inline-size: 100%;
+}
+
+.arrivals-desk .ax-tr-note {
+	font-size: var(--text-sm);
+	padding-block: 4px;
+}
+
+.arrivals-desk .ax-custody-cart {
+	inline-size: 100%;
+	margin-block-start: 6px;
+	padding: 6px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	background: var(--bg-light-gray);
+}
+
+.arrivals-desk .ax-custody-lines {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-block-end: 6px;
+}
+
+.arrivals-desk .ax-custody-line {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: var(--text-sm);
+}
+
+.arrivals-desk .ax-custody-add {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+
+.arrivals-desk .ax-custody-article {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+}
+
+.arrivals-desk .ax-custody-qty {
+	inline-size: 64px;
+	flex: 0 0 auto;
+}
+
+.arrivals-desk .ax-custody-foot {
+	margin-block-start: 6px;
+}
+
+.arrivals-desk .ax-custody-issue {
+	inline-size: 100%;
+}
+
+.arrivals-desk .ax-catalog-error {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	padding-block: 6px;
+	padding-inline: 8px;
+	margin-block-end: 6px;
+	border-radius: 6px;
+	font-size: var(--text-sm);
+	color: var(--red-700);
+	background: var(--red-100);
+	border: 1px solid var(--red-500);
+}
+
+.arrivals-desk .ax-qr-all {
+	inline-size: 100%;
+	margin-block-start: 6px;
+}
+
+.arrivals-desk .ax-qr-block {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-block-start: 8px;
+}
+
+.arrivals-desk .ax-qr-item {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius);
+	padding: 8px;
+	text-align: center;
+	background: var(--card-bg);
+}
+
+.arrivals-desk .ax-qr-name {
+	font-weight: 600;
+	font-size: var(--text-sm);
+	margin-block-end: 4px;
+}
+
+.arrivals-desk .ax-qr-pending {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-size: var(--text-sm);
+	color: var(--text-muted);
+	padding-block: 12px;
+}
+
+.arrivals-desk .ax-qr-spinner {
+	inline-size: 16px;
+	block-size: 16px;
+	border-radius: 50%;
+	border: 2px solid var(--gray-400);
+	border-block-start-color: var(--primary);
+	display: inline-block;
+}
+
+.arrivals-desk .ax-qr-img {
+	inline-size: 120px;
+	block-size: 120px;
+}
+
+.arrivals-desk .ax-qr-link {
+	display: block;
+	font-size: var(--text-xs);
+	word-break: break-all;
+	margin-block-start: 4px;
+}

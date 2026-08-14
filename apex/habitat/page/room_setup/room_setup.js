@@ -51,6 +51,19 @@ const RS_STYLE = {
 	fatal: "padding-block:var(--padding-xl,30px);text-align:center;",
 };
 
+/* `doc` is the plain floor/room object this page already keeps in memory. A control built
+   without a frm writes straight back into it (base_control.set_model_value), so the state
+   stays in one place and no change handler has to copy the value across. */
+function rs_control(parent, df, doc) {
+	return frappe.ui.form.make_control({
+		df: Object.assign({ input_class: "input-sm" }, df),
+		parent: parent.get(0),
+		doc,
+		render_input: true,
+		only_input: true,
+	});
+}
+
 class RoomSetup {
 	constructor(page) {
 		this.page = page;
@@ -143,27 +156,21 @@ class RoomSetup {
 		const $r = $('<div class="rs-frow"></div>').attr("style", RS_STYLE.frow).appendTo($tbl);
 		$('<div class="rs-fcell rs-fno"></div>').attr("style", RS_STYLE.fcell + RS_STYLE.fno).text(f.number).appendTo($r);
 
-		const $type = $('<select class="form-control input-sm"></select>').appendTo(
-			$('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r)
+		const cell = () => $('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r);
+
+		rs_control(cell(), { fieldtype: "Select", fieldname: "type", options: RS_FLOOR_TYPES }, f);
+		rs_control(
+			cell(),
+			{
+				fieldtype: "Int",
+				fieldname: "rooms_per_floor",
+				// A floor with no rooms cannot be laid out, so an empty or zero entry reads as one.
+				onchange: () => (f.rooms_per_floor = cint(f.rooms_per_floor) || 1),
+			},
+			f
 		);
-		RS_FLOOR_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($type));
-		$type.val(f.type).on("change", () => (f.type = $type.val()));
-
-		const $rooms = $('<input type="number" min="1" class="form-control input-sm">')
-			.val(f.rooms_per_floor)
-			.appendTo($('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r));
-		$rooms.on("change", () => (f.rooms_per_floor = cint($rooms.val()) || 1));
-
-		const $dtype = $('<select class="form-control input-sm"></select>').appendTo(
-			$('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r)
-		);
-		RS_ROOM_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($dtype));
-		$dtype.val(f.def_type).on("change", () => (f.def_type = $dtype.val()));
-
-		const $beds = $('<input type="number" min="0" class="form-control input-sm">')
-			.val(f.def_beds)
-			.appendTo($('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r));
-		$beds.on("change", () => (f.def_beds = cint($beds.val())));
+		rs_control(cell(), { fieldtype: "Select", fieldname: "def_type", options: RS_ROOM_TYPES }, f);
+		rs_control(cell(), { fieldtype: "Int", fieldname: "def_beds" }, f);
 
 		const $del = $('<div class="rs-fcell"></div>').attr("style", RS_STYLE.fcell).appendTo($r);
 		if (this.floors.length > 1) {
@@ -194,11 +201,8 @@ class RoomSetup {
 			.text(__("Walk each floor and set the type of every room."))
 			.appendTo($wrap);
 		this._orderedFloors().forEach((f) =>
-			this._floor_block($wrap, f, (rm) => {
-				const $sel = $('<select class="form-control input-sm"></select>');
-				RS_ROOM_TYPES.forEach((t) => $("<option></option>").val(t).text(__(t)).appendTo($sel));
-				$sel.val(rm.type).on("change", () => (rm.type = $sel.val()));
-				return $sel;
+			this._floor_block($wrap, f, (rm, $card) => {
+				rs_control($card, { fieldtype: "Select", fieldname: "type", options: RS_ROOM_TYPES }, rm);
 			})
 		);
 		this._footer(
@@ -214,8 +218,8 @@ class RoomSetup {
 			.text(__("Set the number of beds in each room. Use − / + to adjust."))
 			.appendTo($wrap);
 		this._orderedFloors().forEach((f) =>
-			this._floor_block($wrap, f, (rm) => {
-				const $st = $('<div class="rs-stepper"></div>').attr("style", RS_STYLE.stepper);
+			this._floor_block($wrap, f, (rm, $card) => {
+				const $st = $('<div class="rs-stepper"></div>').attr("style", RS_STYLE.stepper).appendTo($card);
 				const $val = $('<span class="rs-bed-val"></span>').attr("style", RS_STYLE.bed_val).text(rm.beds);
 				$('<button class="btn btn-xs btn-default">−</button>')
 					.on("click", () => { rm.beds = Math.max(0, cint(rm.beds) - 1); $val.text(rm.beds); })
@@ -224,7 +228,6 @@ class RoomSetup {
 				$('<button class="btn btn-xs btn-default">+</button>')
 					.on("click", () => { rm.beds = cint(rm.beds) + 1; $val.text(rm.beds); })
 					.appendTo($st);
-				return $st;
 			})
 		);
 		this._footer(
@@ -244,7 +247,7 @@ class RoomSetup {
 		(f.rooms || []).forEach((rm, i) => {
 			const $card = $('<div class="rs-room"></div>').attr("style", RS_STYLE.room).appendTo($grid);
 			$('<div class="rs-room-no"></div>').attr("style", RS_STYLE.room_no).text("#" + (i + 1)).appendTo($card);
-			cellFn(rm).appendTo($card);
+			cellFn(rm, $card);
 		});
 	}
 

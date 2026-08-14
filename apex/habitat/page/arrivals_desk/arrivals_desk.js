@@ -9,179 +9,6 @@ frappe.pages['arrivals-desk'].on_page_load = function (wrapper) {
 	wrapper.arrivals_desk = new ArrivalsDesk(page);
 };
 
-const AX_BED_PALETTE = {
-	green: "background:var(--green-100);color:var(--green-700);border-color:var(--green-500);cursor:pointer;",
-	red: "background:var(--red-100);color:var(--red-700);border-color:var(--red-500);cursor:pointer;",
-	amber: "background:var(--yellow-100);color:var(--orange-700);border-color:var(--orange-500);",
-	grey: "background:var(--gray-100);color:var(--gray-600);border-color:var(--gray-400);",
-};
-const AX_STYLE = {
-	root:
-		"position:relative;height:calc(100vh - var(--navbar-height) - var(--page-head-height) - 16px);min-block-size:420px;display:flex;flex-direction:column;",
-	strip:
-		"display:flex;gap:24px;flex-wrap:wrap;padding-block:8px;margin-block-end:8px;border-block-end:1px solid var(--border-color);",
-	strip_stat: "display:flex;flex-direction:column;min-inline-size:96px;",
-	strip_num: "font-size:1.6rem;font-weight:700;line-height:1.1;color:var(--heading-color);",
-	strip_label: "font-size:0.8rem;color:var(--text-muted);",
-	body:
-		"display:grid;grid-template-columns:minmax(300px,26%) 1fr minmax(320px,28%);gap:12px;flex:1;min-block-size:0;overflow:hidden;",
-	zone: "overflow-y:auto;min-inline-size:0;",
-	zone_head:
-		"position:sticky;inset-block-start:0;z-index:2;background:var(--fg-color);padding-block:6px;margin-block-end:8px;font-weight:700;color:var(--heading-color);border-block-end:1px solid var(--border-color);",
-	zone_intake: "border-inline-end:1px solid var(--border-color);padding-inline-end:12px;",
-	zone_floor: "display:flex;flex-direction:column;overflow:hidden;",
-	zone_actions: "border-inline-start:1px solid var(--border-color);padding-inline-start:12px;",
-	anchor: "display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;padding-block-end:10px;margin-block-end:4px;",
-	anchor_field: "flex:1 1 180px;min-inline-size:160px;",
-	capacity: "flex:1 1 100%;display:flex;align-items:baseline;flex-wrap:wrap;gap:12px;min-block-size:22px;",
-	cap_title: "font-weight:700;color:var(--heading-color);font-size:var(--text-lg);",
-	cap_wrap: "flex:1 1 100%;display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;",
-	cap_meter:
-		"flex:1 1 160px;min-inline-size:120px;block-size:12px;display:flex;border-radius:6px;overflow:hidden;background:var(--gray-100);border:1px solid var(--border-color);",
-	cap_fill: "block-size:100%;",
-	cap_fill_free: "background:var(--green-500);",
-	cap_fill_occ: "background:var(--red-500);",
-	cap_fill_over:
-		"background:var(--red-500);box-shadow:inset 0 0 0 2px var(--orange-500);",
-	cap_legend: "font-size:var(--text-sm);color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;",
-	cap_swatch: "inline-size:10px;block-size:10px;border-radius:2px;display:inline-block;",
-	stages: "flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;",
-	floor: "flex:1 1 auto;overflow-y:auto;padding-inline-end:6px;",
-	floor_group: "margin-block-end:16px;",
-	floor_header:
-		"font-weight:700;color:var(--heading-color);border-block-end:1px solid var(--border-color);padding-block-end:4px;margin-block-end:8px;",
-	rooms: "display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;",
-	room: "border:1px solid var(--border-color);border-radius:8px;padding:8px;background:var(--card-bg);",
-	room_same_project: "border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary);",
-	room_proj:
-		"display:inline-block;margin-inline-start:6px;padding-block:0;padding-inline:5px;border-radius:3px;font-size:0.65rem;font-weight:700;color:var(--text-on-blue);background:var(--primary);vertical-align:middle;",
-	room_header: "display:flex;justify-content:space-between;align-items:baseline;margin-block-end:6px;",
-	room_number: "font-weight:600;",
-	room_meta: "font-size:var(--text-xs);color:var(--text-muted);",
-	room_oc:
-		"appearance:none;margin-block-start:6px;inline-size:100%;font-size:var(--text-xs);font-weight:600;color:var(--primary);background:transparent;border:1px dashed var(--primary);border-radius:6px;padding-block:4px;padding-inline:6px;cursor:pointer;",
-	beds: "display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px;",
-	bed:
-		"position:relative;border-radius:6px;padding-block:6px 5px;padding-inline:6px;min-block-size:72px;font-size:var(--text-sm);border:1px solid transparent;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;",
-	bed_temp: "border-style:dashed;border-width:2px;",
-	bed_busy: "pointer-events:none;opacity:0.75;",
-	bed_code: "font-weight:700;",
-	bed_occupant: "font-size:var(--text-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;",
-	bed_badge: "position:absolute;inset-block-start:3px;inset-inline-end:4px;font-size:var(--text-xs);",
-	bed_blocker:
-		"font-size:var(--text-xs);font-weight:600;color:var(--orange-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;",
-	bed_chip:
-		"display:inline-block;margin-inline-start:4px;padding-block:0;padding-inline:4px;border-radius:3px;font-size:0.65rem;font-weight:700;vertical-align:middle;",
-	bed_chip_temp: "color:var(--orange-700);background:var(--yellow-100);border:1px solid var(--orange-500);",
-	empty: "text-align:center;color:var(--text-muted);padding-block:48px;padding-inline:16px;",
-	error_msg: "margin-block-end:10px;color:var(--red-700);",
-	floor_banner:
-		"margin-block-end:10px;padding-block:8px;padding-inline:12px;border-radius:6px;font-size:var(--text-sm);color:var(--orange-700);background:var(--yellow-100);border:1px solid var(--orange-500);",
-	skeleton: "display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;",
-	skeleton_room: "block-size:110px;border-radius:8px;background:var(--skeleton-bg);",
-	search_input: "margin-block-end:8px;",
-	results: "display:flex;flex-direction:column;gap:4px;",
-	result:
-		"display:flex;align-items:center;gap:8px;padding-block:6px;padding-inline:8px;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;",
-	result_active: "border-color:var(--primary);background:var(--bg-light-gray);",
-	result_label: "font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
-	result_sub: "font-size:var(--text-xs);margin-inline-start:auto;flex:0 0 auto;",
-	results_empty: "font-size:var(--text-sm);padding-block:8px;padding-inline:4px;",
-	results_skeleton: "display:flex;flex-direction:column;gap:4px;",
-	result_ghost: "block-size:34px;border-radius:6px;background:var(--skeleton-bg);",
-	results_error:
-		"display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:8px;border:1px solid var(--red-500);border-radius:6px;background:var(--red-100);",
-	results_error_msg: "font-size:var(--text-sm);color:var(--red-700);",
-	register_row: "margin-block-start:8px;inline-size:100%;text-align:start;",
-	register_plus: "font-weight:700;color:var(--primary);",
-	manifest: "margin-block-start:14px;",
-	manifest_title: "font-weight:700;color:var(--heading-color);font-size:var(--text-sm);",
-	manifest_tally: "font-size:var(--text-xs);margin-block-end:6px;",
-	manifest_list: "display:flex;flex-direction:column;gap:3px;",
-	manifest_row:
-		"display:flex;align-items:center;gap:8px;padding-block:5px;padding-inline:8px;border:1px solid var(--border-color);border-radius:6px;cursor:pointer;",
-	manifest_row_done: "background:var(--green-100);border-color:var(--green-500);",
-	manifest_tick: "font-weight:700;",
-	manifest_name: "font-weight:600;font-size:var(--text-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
-	manifest_sub: "font-size:var(--text-xs);margin-inline-start:auto;flex:0 0 auto;",
-	active: "margin-block-start:14px;",
-	active_card: "border:1px solid var(--primary);border-radius:8px;padding:10px;background:var(--card-bg);",
-	active_card_load: "border-style:dashed;border-color:var(--border-color);",
-	active_head: "display:flex;justify-content:space-between;align-items:center;gap:8px;",
-	active_name: "font-weight:700;color:var(--heading-color);",
-	active_sub: "font-size:var(--text-sm);margin-block-start:2px;",
-	active_foot: "margin-block-start:8px;font-size:var(--text-sm);",
-	active_hint: "color:var(--primary);font-weight:600;",
-	active_bed: "font-weight:600;",
-	cart: "margin-block-end:16px;",
-	cart_title:
-		"font-weight:700;color:var(--heading-color);font-size:var(--text-sm);border-block-end:1px solid var(--border-color);padding-block-end:4px;margin-block-end:6px;",
-	cart_list: "display:flex;flex-direction:column;gap:3px;",
-	cart_item:
-		"display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 8px;padding-block:4px;padding-inline:8px;border-radius:6px;background:var(--bg-light-gray);border-inline-start:3px solid transparent;",
-	cart_item_done: "background:var(--green-100);border-inline-start-color:var(--green-500);",
-	cart_name: "font-weight:600;font-size:var(--text-sm);",
-	cart_bed: "font-size:var(--text-xs);",
-	cart_dots: "flex:1 1 100%;display:flex;flex-wrap:wrap;gap:4px 10px;",
-	cart_dot: "font-size:var(--text-xs);color:var(--text-muted);",
-	cart_dot_on: "font-size:var(--text-xs);color:var(--green-700);font-weight:600;",
-	cart_dot_off: "font-size:var(--text-xs);color:var(--orange-700);",
-	cart_dot_na: "font-size:var(--text-xs);color:var(--text-muted);opacity:0.6;",
-	deck_sec: "margin-block-end:12px;",
-	deck_head:
-		"font-weight:700;color:var(--heading-color);font-size:var(--text-sm);border-block-end:1px solid var(--border-color);padding-block-end:4px;margin-block-end:6px;",
-	deck_list: "display:flex;flex-direction:column;gap:4px;",
-	deck_row: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-block-size:36px;padding-block:4px;",
-	deck_name: "font-weight:600;font-size:var(--text-sm);flex:1 1 auto;",
-	tr_row: "display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-block-size:36px;padding-block:4px;cursor:pointer;margin:0;",
-	tr_go: "margin-block-start:6px;inline-size:100%;",
-	tr_note: "font-size:var(--text-sm);padding-block:4px;",
-	custody_cart:
-		"inline-size:100%;margin-block-start:6px;padding:6px;border:1px solid var(--border-color);border-radius:var(--border-radius);background:var(--bg-light-gray);",
-	custody_lines: "display:flex;flex-direction:column;gap:2px;margin-block-end:6px;",
-	custody_line: "display:flex;justify-content:space-between;align-items:center;font-size:var(--text-sm);",
-	custody_add: "display:flex;gap:4px;align-items:center;",
-	custody_article: "flex:1 1 auto;min-inline-size:0;",
-	custody_qty: "inline-size:64px;flex:0 0 auto;",
-	custody_foot: "margin-block-start:6px;",
-	custody_issue_btn: "inline-size:100%;",
-	catalog_error:
-		"display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-block:6px;padding-inline:8px;margin-block-end:6px;border-radius:6px;font-size:var(--text-sm);color:var(--red-700);background:var(--red-100);border:1px solid var(--red-500);",
-	qr_all: "inline-size:100%;margin-block-start:6px;",
-	qr_pending:
-		"display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--text-sm);color:var(--text-muted);padding-block:12px;",
-	qr_spinner:
-		"inline-size:16px;block-size:16px;border-radius:50%;border:2px solid var(--gray-400);border-block-start-color:var(--primary);display:inline-block;",
-	qr_block: "display:flex;flex-direction:column;gap:10px;margin-block-start:8px;",
-	qr_item: "border:1px solid var(--border-color);border-radius:var(--border-radius);padding:8px;text-align:center;background:var(--card-bg);",
-	qr_name: "font-weight:600;font-size:var(--text-sm);margin-block-end:4px;",
-	qr_img: "inline-size:120px;block-size:120px;",
-	qr_link: "display:block;font-size:var(--text-xs);word-break:break-all;margin-block-start:4px;",
-};
-const AX_STEP = {
-	base:
-		"appearance:none;display:inline-flex;align-items:center;gap:6px;padding-block:4px;padding-inline:6px 10px;border-radius:14px;border:1px solid var(--border-color);background:var(--card-bg);font-size:var(--text-sm);color:var(--text-muted);",
-	done: "border-color:var(--green-500);color:var(--green-700);cursor:pointer;",
-	now: "border-color:var(--primary);color:var(--primary);",
-	todo: "cursor:default;",
-};
-const AX_STEP_NUM = {
-	base:
-		"display:inline-flex;align-items:center;justify-content:center;inline-size:20px;block-size:20px;border-radius:50%;font-size:var(--text-xs);font-weight:700;",
-	done: "background:var(--green-500);color:var(--text-on-blue);",
-	now: "background:var(--primary);color:var(--text-on-blue);",
-	todo: "background:var(--gray-100);color:var(--gray-600);",
-};
-function ax_bed_style(color, opts) {
-	opts = opts || {};
-	return (
-		AX_STYLE.bed +
-		(AX_BED_PALETTE[color] || AX_BED_PALETTE.grey) +
-		(opts.temp ? AX_STYLE.bed_temp : "") +
-		(opts.busy ? AX_STYLE.bed_busy : "")
-	);
-}
-
 class ArrivalsDesk {
 	constructor(page) {
 		this.page = page;
@@ -210,24 +37,18 @@ class ArrivalsDesk {
 	}
 
 	_build_skeleton() {
-		this.$root = $('<div class="arrivals-desk"></div>').attr('style', AX_STYLE.root).appendTo(this.page.main);
+		this.$root = $('<div class="arrivals-desk"></div>').appendTo(this.page.main);
 		this._build_strip();
-		this.$body = $('<div class="ax-body"></div>').attr('style', AX_STYLE.body).appendTo(this.$root);
+		this.$body = $('<div class="ax-body"></div>').appendTo(this.$root);
 
-		this.$intake = $('<aside class="ax-zone ax-zone-intake"></aside>')
-			.attr('style', AX_STYLE.zone + AX_STYLE.zone_intake)
-			.appendTo(this.$body);
-		$('<div class="ax-zone-head"></div>').attr('style', AX_STYLE.zone_head).text(__('Who is arriving?')).appendTo(this.$intake);
+		this.$intake = $('<aside class="ax-zone ax-zone-intake"></aside>').appendTo(this.$body);
+		$('<div class="ax-zone-head"></div>').text(__('Who is arriving?')).appendTo(this.$intake);
 
-		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>')
-			.attr('style', AX_STYLE.zone + AX_STYLE.zone_floor)
-			.appendTo(this.$body);
-		this.$anchor = $('<div class="ax-anchor ax-zone-head"></div>')
-			.attr('style', AX_STYLE.zone_head + AX_STYLE.anchor)
-			.appendTo(this.$floorZone);
-		this.$capacity = $('<div class="ax-capacity"></div>').attr('style', AX_STYLE.capacity).appendTo(this.$anchor);
-		this.$stages = $('<div class="ax-stages"></div>').attr('style', AX_STYLE.stages).appendTo(this.$anchor);
-		this.$floor = $('<div class="ax-floor"></div>').attr('style', AX_STYLE.floor).appendTo(this.$floorZone);
+		this.$floorZone = $('<section class="ax-zone ax-zone-floor"></section>').appendTo(this.$body);
+		this.$anchor = $('<div class="ax-anchor ax-zone-head"></div>').appendTo(this.$floorZone);
+		this.$capacity = $('<div class="ax-capacity"></div>').appendTo(this.$anchor);
+		this.$stages = $('<div class="ax-stages"></div>').appendTo(this.$anchor);
+		this.$floor = $('<div class="ax-floor"></div>').appendTo(this.$floorZone);
 		this.$floor.on('click', '.ax-bed', (e) => this._on_bed_click(e));
 		this.$floor.on('click', '.ax-room-oc', (e) => {
 			e.stopPropagation();
@@ -240,20 +61,18 @@ class ArrivalsDesk {
 			}
 		});
 
-		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>')
-			.attr('style', AX_STYLE.zone + AX_STYLE.zone_actions)
-			.appendTo(this.$body);
-		$('<div class="ax-zone-head"></div>').attr('style', AX_STYLE.zone_head).text(__('This session')).appendTo(this.$actions);
+		this.$actions = $('<aside class="ax-zone ax-zone-actions"></aside>').appendTo(this.$body);
+		$('<div class="ax-zone-head"></div>').text(__('This session')).appendTo(this.$actions);
 
 		this._build_intake();
 	}
 
 	_build_strip() {
-		this.$strip = $('<div class="ax-strip" role="status" aria-live="polite"></div>').attr('style', AX_STYLE.strip).appendTo(this.$root);
+		this.$strip = $('<div class="ax-strip" role="status" aria-live="polite"></div>').appendTo(this.$root);
 		const stat = (key, label) => {
-			const $cell = $('<div class="ax-strip-stat"></div>').attr('style', AX_STYLE.strip_stat).appendTo(this.$strip);
-			$('<div class="ax-strip-num">—</div>').attr('style', AX_STYLE.strip_num).appendTo($cell).attr('data-stat', key);
-			$('<div class="ax-strip-label"></div>').attr('style', AX_STYLE.strip_label).text(label).appendTo($cell);
+			const $cell = $('<div class="ax-strip-stat"></div>').appendTo(this.$strip);
+			$('<div class="ax-strip-num">—</div>').appendTo($cell).attr('data-stat', key);
+			$('<div class="ax-strip-label"></div>').text(label).appendTo($cell);
 		};
 		stat('arrivals_today', __('Arrivals today'));
 		stat('pending_on_manifest', __('Pending on manifest'));
@@ -274,8 +93,8 @@ class ArrivalsDesk {
 	}
 
 	_setup_anchor() {
-		const $bWrap = $('<div class="ax-anchor-field"></div>').attr('style', AX_STYLE.anchor_field).prependTo(this.$anchor);
-		const $pWrap = $('<div class="ax-anchor-field"></div>').attr('style', AX_STYLE.anchor_field).insertAfter($bWrap);
+		const $bWrap = $('<div class="ax-anchor-field"></div>').prependTo(this.$anchor);
+		const $pWrap = $('<div class="ax-anchor-field"></div>').insertAfter($bWrap);
 
 		this.building_field = frappe.ui.form.make_control({
 			df: {
@@ -366,14 +185,14 @@ class ArrivalsDesk {
 	_build_intake() {
 		const $search = $('<div class="ax-search"></div>').appendTo(this.$intake);
 		this.$search_input = $(
-			`<input type="search" class="ax-search-input form-control form-control-sm" style="${AX_STYLE.search_input}" placeholder="${__(
+			`<input type="search" class="ax-search-input form-control form-control-sm" placeholder="${__(
 				'Search worker name or passport…'
 			)}" />`
 		).appendTo($search);
-		this.$results = $('<div class="ax-results"></div>').attr('style', AX_STYLE.results).appendTo($search);
-		this.$manifest = $('<div class="ax-manifest"></div>').attr('style', AX_STYLE.manifest).appendTo(this.$intake);
-		this.$active = $('<div class="ax-active"></div>').attr('style', AX_STYLE.active).appendTo(this.$intake);
-		this.$cart = $('<div class="ax-cart"></div>').attr('style', AX_STYLE.cart).appendTo(this.$actions);
+		this.$results = $('<div class="ax-results"></div>').appendTo($search);
+		this.$manifest = $('<div class="ax-manifest"></div>').appendTo(this.$intake);
+		this.$active = $('<div class="ax-active"></div>').appendTo(this.$intake);
+		this.$cart = $('<div class="ax-cart"></div>').appendTo(this.$actions);
 		this.$deck = $('<div class="ax-deck"></div>').appendTo(this.$actions);
 		this.$search_input.on('input', frappe.utils.debounce(() => this._search(), 250));
 		this._render_results(null);
@@ -397,29 +216,25 @@ class ArrivalsDesk {
 		const workers = (data && data.workers) || [];
 		if (!workers.length) return;
 		$('<div class="ax-manifest-title"></div>')
-			.attr('style', AX_STYLE.manifest_title)
 			.text(__("Today's expected arrivals ({0})", [data.total]))
 			.appendTo(this.$manifest);
 		$('<div class="ax-manifest-tally text-muted"></div>')
-			.attr('style', AX_STYLE.manifest_tally)
 			.text(__('{0} of {1} arrived, {2} pending', [data.arrived, data.total, data.pending]))
 			.appendTo(this.$manifest);
-		const $list = $('<div class="ax-manifest-list"></div>').attr('style', AX_STYLE.manifest_list).appendTo(this.$manifest);
+		const $list = $('<div class="ax-manifest-list"></div>').appendTo(this.$manifest);
 		workers.forEach((w) => this._manifest_row($list, w));
 	}
 
 	_manifest_row($list, w) {
-		const $row = $(`<div class="ax-manifest-row${w.arrived ? ' ax-manifest-row--done' : ''}" tabindex="0" role="button"></div>`)
-			.attr('style', AX_STYLE.manifest_row + (w.arrived ? AX_STYLE.manifest_row_done : ''))
-			.appendTo($list);
+		const $row = $(
+			`<div class="ax-manifest-row${w.arrived ? ' ax-manifest-row--done' : ''}" tabindex="0" role="button"></div>`
+		).appendTo($list);
 		$('<span class="ax-manifest-tick"></span>')
-			.attr('style', AX_STYLE.manifest_tick + (w.arrived ? 'color:var(--green-700);' : 'color:var(--text-muted);'))
 			.text(w.arrived ? '✓' : '○')
 			.appendTo($row);
-		$('<span class="ax-manifest-name"></span>').attr('style', AX_STYLE.manifest_name).text(w.worker_name || '').appendTo($row);
+		$('<span class="ax-manifest-name"></span>').text(w.worker_name || '').appendTo($row);
 		if (w.passport_number) {
 			$('<span class="ax-manifest-sub text-muted"></span>')
-				.attr('style', AX_STYLE.manifest_sub)
 				.html(`<bdi>${frappe.utils.escape_html(w.passport_number)}</bdi>`)
 				.appendTo($row);
 		}
@@ -467,17 +282,16 @@ class ArrivalsDesk {
 
 	_render_search_skeleton() {
 		this.$results.html(
-			`<div class="ax-results-skeleton" aria-hidden="true" style="${AX_STYLE.results_skeleton}">` +
-				`<div class="ax-result-ghost" style="${AX_STYLE.result_ghost}"></div>`.repeat(3) +
+			'<div class="ax-results-skeleton" aria-hidden="true">' +
+				'<div class="ax-result-ghost"></div>'.repeat(3) +
 				'</div>'
 		);
 	}
 
 	_render_search_error() {
 		this.$results.empty();
-		const $row = $('<div class="ax-results-error"></div>').attr('style', AX_STYLE.results_error).appendTo(this.$results);
+		const $row = $('<div class="ax-results-error"></div>').appendTo(this.$results);
 		$('<div class="ax-results-error-msg"></div>')
-			.attr('style', AX_STYLE.results_error_msg)
 			.text(__('Search failed. Please retry.'))
 			.appendTo($row);
 		$('<button class="btn btn-default btn-sm ax-results-retry"></button>')
@@ -495,15 +309,14 @@ class ArrivalsDesk {
 			const msg = this._searched
 				? __('No registered workers match. Register a new arrival below.')
 				: __('Search a name or passport, or register a new arrival');
-			$('<div class="ax-results-empty text-muted"></div>').attr('style', AX_STYLE.results_empty).text(msg).appendTo(this.$results);
+			$('<div class="ax-results-empty text-muted"></div>').text(msg).appendTo(this.$results);
 		}
 		this._append_register_row();
 	}
 
 	_append_register_row() {
 		$('<button class="btn btn-default btn-sm ax-register-row"></button>')
-			.attr('style', AX_STYLE.register_row)
-			.html(`<span class="ax-register-plus" style="${AX_STYLE.register_plus}">+</span> ${__('Register new arrival by passport')}`)
+			.html(`<span class="ax-register-plus">+</span> ${__('Register new arrival by passport')}`)
 			.on('click', () => this._open_register_modal())
 			.appendTo(this.$results);
 	}
@@ -511,17 +324,17 @@ class ArrivalsDesk {
 	_result_row(row) {
 		const is_tw = row.party_type === 'Temporary Worker';
 		const $row = $(
-			`<div class="ax-result" tabindex="0" role="button" style="${AX_STYLE.result}">` +
+			'<div class="ax-result" tabindex="0" role="button">' +
 				`<span class="indicator-pill no-indicator-dot ${is_tw ? 'orange' : 'green'}">${
 					is_tw ? __('Temp') : __('Emp')
 				}</span>` +
-				`<span class="ax-result-label" style="${AX_STYLE.result_label}">${frappe.utils.escape_html(row.label || '')}</span>` +
-				`<span class="ax-result-sub text-muted" style="${AX_STYLE.result_sub}"><bdi>${frappe.utils.escape_html(row.sub || '')}</bdi></span>` +
+				`<span class="ax-result-label">${frappe.utils.escape_html(row.label || '')}</span>` +
+				`<span class="ax-result-sub text-muted"><bdi>${frappe.utils.escape_html(row.sub || '')}</bdi></span>` +
 				`${this._expiry_chip(row)}</div>`
 		).appendTo(this.$results);
 		const pick = () => {
-			this.$results.find('.ax-result').removeClass('ax-result--active').attr('style', AX_STYLE.result);
-			$row.addClass('ax-result--active').attr('style', AX_STYLE.result + AX_STYLE.result_active);
+			this.$results.find('.ax-result').removeClass('ax-result--active');
+			$row.addClass('ax-result--active');
 			this._select_worker(row);
 		};
 		$row.on('click', pick);
@@ -536,9 +349,7 @@ class ArrivalsDesk {
 	_select_worker(row) {
 		this.active = { party_type: row.party_type, party: row.party, label: row.label };
 		this.$active.html(
-			`<div class="ax-active-card ax-active-card--load text-muted" style="${AX_STYLE.active_card + AX_STYLE.active_card_load}">${__(
-				'Loading…'
-			)}</div>`
+			`<div class="ax-active-card ax-active-card--load text-muted">${__('Loading…')}</div>`
 		);
 		frappe
 			.call({
@@ -550,9 +361,9 @@ class ArrivalsDesk {
 	}
 
 	_render_active_card_error(row) {
-		const $card = $('<div class="ax-active-card ax-active-card--err"></div>')
-			.attr('style', AX_STYLE.active_card)
-			.appendTo(this.$active.empty());
+		const $card = $('<div class="ax-active-card ax-active-card--err"></div>').appendTo(
+			this.$active.empty()
+		);
 		$('<div class="text-muted"></div>').text(__('Could not load the worker.')).appendTo($card);
 		$('<button class="btn btn-default btn-xs ax-active-retry"></button>')
 			.text(__('Retry'))
@@ -581,18 +392,18 @@ class ArrivalsDesk {
 		const is_tw = card.party_type === 'Temporary Worker';
 		const bed = card.current_bed_code || card.current_bed || '';
 		const foot = card.has_housing
-			? `<span class="ax-active-bed" style="${AX_STYLE.active_bed}">${__('Bed')}: <bdi>${frappe.utils.escape_html(bed)}</bdi></span>`
-			: `<span class="ax-active-hint" style="${AX_STYLE.active_hint}">${__('Click a free bed to house him.')}</span>`;
+			? `<span class="ax-active-bed">${__('Bed')}: <bdi>${frappe.utils.escape_html(bed)}</bdi></span>`
+			: `<span class="ax-active-hint">${__('Click a free bed to house him.')}</span>`;
 		this.$active.html(
-			`<div class="ax-active-card" style="${AX_STYLE.active_card}"><div class="ax-active-head" style="${AX_STYLE.active_head}">` +
-				`<span class="ax-active-name" style="${AX_STYLE.active_name}">${frappe.utils.escape_html(card.worker_name || card.party)}</span>` +
+			'<div class="ax-active-card"><div class="ax-active-head">' +
+				`<span class="ax-active-name">${frappe.utils.escape_html(card.worker_name || card.party)}</span>` +
 				`<span class="indicator-pill no-indicator-dot ${is_tw ? 'orange' : 'green'}">${
 					is_tw ? __('Temporary Worker') : __('Employee')
 				}</span>${this._expiry_chip(card)}</div>` +
-				`<div class="ax-active-sub text-muted" style="${AX_STYLE.active_sub}">${
+				`<div class="ax-active-sub text-muted">${
 					card.project ? frappe.utils.escape_html(card.project) : __('No project yet')
 				}</div>` +
-				`<div class="ax-active-foot" style="${AX_STYLE.active_foot}">${foot}</div></div>`
+				`<div class="ax-active-foot">${foot}</div></div>`
 		);
 	}
 
@@ -736,7 +547,7 @@ class ArrivalsDesk {
 			{ bed, employee_name: occupant.employee_name },
 			(state) => {
 				if ($bed && $bed.length) {
-					$bed.toggleClass('ax-bed--busy', state).attr('style', ax_bed_style('red', state ? { busy: true } : undefined));
+					$bed.toggleClass('ax-bed--busy', state);
 				}
 			},
 			() => this.refresh()
@@ -779,14 +590,12 @@ class ArrivalsDesk {
 		if ($bed && $bed.length) {
 			$bed.removeClass('ax-bed--green')
 				.addClass('ax-bed--red ax-bed--busy')
-				.attr('style', ax_bed_style('red', { busy: true }))
 				.removeAttr('tabindex role');
 		}
 		const rollback = () => {
 			if ($bed && $bed.length) {
 				$bed.removeClass('ax-bed--red ax-bed--busy')
 					.addClass('ax-bed--green')
-					.attr('style', ax_bed_style('green'))
 					.attr({ tabindex: 0, role: 'button' });
 			}
 		};
@@ -805,7 +614,7 @@ class ArrivalsDesk {
 					rollback();
 					return;
 				}
-				if ($bed && $bed.length) $bed.removeClass('ax-bed--busy').attr('style', ax_bed_style('red'));
+				if ($bed && $bed.length) $bed.removeClass('ax-bed--busy');
 				frappe.show_alert({ message: __('Housed {0}', [worker.label]), indicator: 'green' });
 				const dupe = this.cart.some(
 					(c) => c.party === worker.party && c.party_type === worker.party_type
@@ -832,7 +641,7 @@ class ArrivalsDesk {
 	_clear_active(clearPane) {
 		this.active = null;
 		if (this.$results) {
-			this.$results.find('.ax-result').removeClass('ax-result--active').attr('style', AX_STYLE.result);
+			this.$results.find('.ax-result').removeClass('ax-result--active');
 		}
 		if (clearPane && this.$active) this.$active.empty();
 	}
@@ -906,20 +715,18 @@ class ArrivalsDesk {
 		this.$cart.empty();
 		if (!this.cart.length) return;
 		$('<div class="ax-cart-title"></div>')
-			.attr('style', AX_STYLE.cart_title)
 			.text(__('Arrived this session ({0})', [this.cart.length]))
 			.appendTo(this.$cart);
-		const $list = $('<div class="ax-cart-list"></div>').attr('style', AX_STYLE.cart_list).appendTo(this.$cart);
+		const $list = $('<div class="ax-cart-list"></div>').appendTo(this.$cart);
 		this.cart.forEach((c) => {
 			const dots = this._cart_dots(c);
 			const $item = $(`<div class="ax-cart-item${dots.complete ? ' ax-cart-item--done' : ''}"></div>`)
-				.attr('style', AX_STYLE.cart_item + (dots.complete ? AX_STYLE.cart_item_done : ''))
 				.html(
-					`<span class="ax-cart-name" style="${AX_STYLE.cart_name}">${frappe.utils.escape_html(c.label || c.party)}</span>` +
-						`<span class="ax-cart-bed text-muted" style="${AX_STYLE.cart_bed}"><bdi>${frappe.utils.escape_html(c.bed || '')}</bdi></span>`
+					`<span class="ax-cart-name">${frappe.utils.escape_html(c.label || c.party)}</span>` +
+						`<span class="ax-cart-bed text-muted"><bdi>${frappe.utils.escape_html(c.bed || '')}</bdi></span>`
 				)
 				.appendTo($list);
-			$('<div class="ax-cart-dots"></div>').attr('style', AX_STYLE.cart_dots).html(dots.html).appendTo($item);
+			$('<div class="ax-cart-dots"></div>').html(dots.html).appendTo($item);
 			$('<button class="btn btn-xs btn-link ax-cart-checkin"></button>')
 				.text(__('Check-in slip'))
 				.on('click', () => this._print_checkin(c))
@@ -933,11 +740,10 @@ class ArrivalsDesk {
 		const custody = is_emp ? !!c._custody_issue : null;
 		const card = is_emp ? !!c._card_done : null;
 		const transport = !!this.transportStarted;
-		const DOT_STYLE = { on: AX_STYLE.cart_dot_on, off: AX_STYLE.cart_dot_off, na: AX_STYLE.cart_dot_na };
 		const dot = (label, state) => {
 			const mark = state === null ? '–' : state ? '✓' : '–';
 			const cls = state === null ? 'na' : state ? 'on' : 'off';
-			return `<span class="ax-cart-dot ax-cart-dot--${cls}" style="${DOT_STYLE[cls]}">${frappe.utils.escape_html(label)} ${mark}</span>`;
+			return `<span class="ax-cart-dot ax-cart-dot--${cls}">${frappe.utils.escape_html(label)} ${mark}</span>`;
 		};
 		const html =
 			dot(__('Housed'), housed) +
@@ -953,26 +759,25 @@ class ArrivalsDesk {
 		this._render_stages();
 		if (!this.cart.length) return;
 		if (this.catalog == null) this._load_catalog();
-		const $cust = $('<section class="ax-deck-sec" data-stage-target="custody"></section>').attr('style', AX_STYLE.deck_sec).appendTo(this.$deck);
-		$('<header class="ax-deck-head"></header>').attr('style', AX_STYLE.deck_head).text(__('Custody Handover')).appendTo($cust);
+		const $cust = $('<section class="ax-deck-sec" data-stage-target="custody"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Custody Handover')).appendTo($cust);
 		if (this.catalogError) {
-			const $err = $('<div class="ax-catalog-error"></div>').attr('style', AX_STYLE.catalog_error).appendTo($cust);
+			const $err = $('<div class="ax-catalog-error"></div>').appendTo($cust);
 			$('<span></span>').text(__("Couldn't load custody store — retry")).appendTo($err);
 			$('<button class="btn btn-xs btn-default ax-catalog-retry"></button>')
 				.text(__('Retry'))
 				.on('click', () => this._retry_catalog())
 				.appendTo($err);
 		}
-		const $list = $('<div class="ax-deck-list"></div>').attr('style', AX_STYLE.deck_list).appendTo($cust);
+		const $list = $('<div class="ax-deck-list"></div>').appendTo($cust);
 		this.cart.forEach((c) => this._custody_row($list, c));
-		const $card = $('<section class="ax-deck-sec" data-stage-target="card"></section>').attr('style', AX_STYLE.deck_sec).appendTo(this.$deck);
-		$('<header class="ax-deck-head"></header>').attr('style', AX_STYLE.deck_head).text(__('Arrival Card')).appendTo($card);
-		const $clist = $('<div class="ax-deck-list"></div>').attr('style', AX_STYLE.deck_list).appendTo($card);
+		const $card = $('<section class="ax-deck-sec" data-stage-target="card"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Arrival Card')).appendTo($card);
+		const $clist = $('<div class="ax-deck-list"></div>').appendTo($card);
 		this.cart.forEach((c) => this._card_row($clist, c));
 		const pendingQr = this.cart.filter((c) => c.party_type === 'Employee' && !c._card_done);
 		if (pendingQr.length) {
 			$('<button class="btn btn-sm btn-default ax-qr-all"></button>')
-				.attr('style', AX_STYLE.qr_all)
 				.text(__('Create QR for all ({0})', [pendingQr.length]))
 				.on('click', () => this._issue_group_qr())
 				.appendTo($card);
@@ -981,7 +786,7 @@ class ArrivalsDesk {
 			.text(__('Print arrival cards ({0})', [this.cart.length]))
 			.on('click', () => this._print_all_cards())
 			.appendTo($card);
-		this.$qrBlock = $('<div class="ax-qr-block"></div>').attr('style', AX_STYLE.qr_block).appendTo($card);
+		this.$qrBlock = $('<div class="ax-qr-block"></div>').appendTo($card);
 		this._render_qr_block();
 		this._transport_section();
 	}
@@ -1014,8 +819,8 @@ class ArrivalsDesk {
 	}
 
 	_custody_row($list, c) {
-		const $row = $('<div class="ax-deck-row"></div>').attr('style', AX_STYLE.deck_row).appendTo($list);
-		$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
+		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
+		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Temporary Worker') {
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Custody deferred'))
@@ -1040,13 +845,13 @@ class ArrivalsDesk {
 		if ($row.find('.ax-custody-cart').length) return;
 		$row.find('.ax-deck-btn').remove();
 		c._custody_lines = c._custody_lines || [];
-		const $panel = $('<div class="ax-custody-cart"></div>').attr('style', AX_STYLE.custody_cart).appendTo($row);
-		const $lines = $('<div class="ax-custody-lines"></div>').attr('style', AX_STYLE.custody_lines).appendTo($panel);
-		const $add = $('<div class="ax-custody-add"></div>').attr('style', AX_STYLE.custody_add).appendTo($panel);
-		const $foot = $('<div class="ax-custody-foot"></div>').attr('style', AX_STYLE.custody_foot).appendTo($panel);
-		const $issue = $('<button class="btn btn-sm btn-primary"></button>').attr('style', AX_STYLE.custody_issue_btn).appendTo($foot);
+		const $panel = $('<div class="ax-custody-cart"></div>').appendTo($row);
+		const $lines = $('<div class="ax-custody-lines"></div>').appendTo($panel);
+		const $add = $('<div class="ax-custody-add"></div>').appendTo($panel);
+		const $foot = $('<div class="ax-custody-foot"></div>').appendTo($panel);
+		const $issue = $('<button class="btn btn-sm btn-primary ax-custody-issue"></button>').appendTo($foot);
 
-		const $sel = $('<select class="form-control form-control-sm ax-custody-article"></select>').attr('style', AX_STYLE.custody_article).appendTo($add);
+		const $sel = $('<select class="form-control form-control-sm ax-custody-article"></select>').appendTo($add);
 		$('<option value=""></option>').text(__('Article…')).appendTo($sel);
 		(this.catalog || []).forEach((a) => {
 			const bal = a.store_balance != null ? ` (${a.store_balance} ${a.uom || ''})` : '';
@@ -1057,14 +862,12 @@ class ArrivalsDesk {
 		});
 		const $qty = $(
 			'<input type="number" class="form-control form-control-sm ax-custody-qty" min="1" value="1" />'
-		)
-			.attr('style', AX_STYLE.custody_qty)
-			.appendTo($add);
+		).appendTo($add);
 
 		const renderLines = () => {
 			$lines.empty();
 			c._custody_lines.forEach((l, i) => {
-				const $li = $('<div class="ax-custody-line"></div>').attr('style', AX_STYLE.custody_line).appendTo($lines);
+				const $li = $('<div class="ax-custody-line"></div>').appendTo($lines);
 				$('<span></span>').text(`${l.qty} × ${l.label || l.article}`).appendTo($li);
 				$('<button class="btn btn-xs btn-link text-danger"></button>')
 					.text('×')
@@ -1123,8 +926,8 @@ class ArrivalsDesk {
 	}
 
 	_card_row($list, c) {
-		const $row = $('<div class="ax-deck-row"></div>').attr('style', AX_STYLE.deck_row).appendTo($list);
-		$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
+		const $row = $('<div class="ax-deck-row"></div>').appendTo($list);
+		$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		if (c.party_type === 'Employee') {
 			if (c._card_done) {
 				$('<span class="indicator-pill no-indicator-dot green"></span>').text(__('QR issued')).appendTo($row);
@@ -1181,19 +984,18 @@ class ArrivalsDesk {
 		this.cart
 			.filter((c) => c._card_qr || c._card_pending)
 			.forEach((c) => {
-				const $item = $('<div class="ax-qr-item"></div>').attr('style', AX_STYLE.qr_item).appendTo(this.$qrBlock);
-				$('<div class="ax-qr-name"></div>').attr('style', AX_STYLE.qr_name).text(c.label || c.party).appendTo($item);
+				const $item = $('<div class="ax-qr-item"></div>').appendTo(this.$qrBlock);
+				$('<div class="ax-qr-name"></div>').text(c.label || c.party).appendTo($item);
 				if (c._card_pending) {
 					$('<div class="ax-qr-pending"></div>')
-						.attr('style', AX_STYLE.qr_pending)
-						.html(`<span class="ax-qr-spinner" aria-hidden="true" style="${AX_STYLE.qr_spinner}"></span>`)
+						.html('<span class="ax-qr-spinner" aria-hidden="true"></span>')
 						.append(document.createTextNode(__('Creating QR…')))
 						.appendTo($item);
 					return;
 				}
 				const m = c._card_qr;
-				if (m.qr) $('<img class="ax-qr-img" alt="QR" />').attr('style', AX_STYLE.qr_img).attr('src', m.qr).appendTo($item);
-				const $link = $('<a class="ax-qr-link" target="_blank" rel="noopener"></a>').attr('style', AX_STYLE.qr_link).attr('href', m.link);
+				if (m.qr) $('<img class="ax-qr-img" alt="QR" />').attr('src', m.qr).appendTo($item);
+				const $link = $('<a class="ax-qr-link" target="_blank" rel="noopener"></a>').attr('href', m.link);
 				$('<bdi></bdi>').text(m.link).appendTo($link);
 				$link.appendTo($item);
 				if (m.phone) {
@@ -1245,8 +1047,11 @@ class ArrivalsDesk {
 			frappe.show_alert({ message: __('Allow pop-ups to print the slip.'), indicator: 'orange' });
 			return null;
 		}
+		/* The print window is its own document — the Desk page stylesheet never reaches it,
+		   so the one rule it needs travels with it. */
 		w.document.write(
-			`<html><head><title>${frappe.utils.escape_html(title || '')}</title></head>` +
+			`<html><head><title>${frappe.utils.escape_html(title || '')}</title>` +
+				'<style>.ax-print-break{page-break-after:always}</style></head>' +
 				`<body onload="window.print()">${html}</body></html>`
 		);
 		w.document.close();
@@ -1304,7 +1109,7 @@ class ArrivalsDesk {
 				const html = (results || [])
 					.filter((r) => r && r.message && r.message.html)
 					.map((r) => r.message.html)
-					.join('<div style="page-break-after:always"></div>');
+					.join('<div class="ax-print-break"></div>');
 				if (html) this._open_print(__('Arrival Cards'), html);
 			})
 			.catch(() => {})
@@ -1312,32 +1117,30 @@ class ArrivalsDesk {
 	}
 
 	_transport_section() {
-		const $tr = $('<section class="ax-deck-sec" data-stage-target="transport"></section>').attr('style', AX_STYLE.deck_sec).appendTo(this.$deck);
-		$('<header class="ax-deck-head"></header>').attr('style', AX_STYLE.deck_head).text(__('Transport')).appendTo($tr);
-		const $tlist = $('<div class="ax-deck-list"></div>').attr('style', AX_STYLE.deck_list).appendTo($tr);
+		const $tr = $('<section class="ax-deck-sec" data-stage-target="transport"></section>').appendTo(this.$deck);
+		$('<header class="ax-deck-head"></header>').text(__('Transport')).appendTo($tr);
+		const $tlist = $('<div class="ax-deck-list"></div>').appendTo($tr);
 		const employees = this.cart.filter((c) => c.party_type === 'Employee');
 		const tws = this.cart.filter((c) => c.party_type === 'Temporary Worker');
 		employees.forEach((c) => {
-			const $row = $('<label class="ax-deck-row ax-tr-row"></label>').attr('style', AX_STYLE.tr_row).appendTo($tlist);
+			const $row = $('<label class="ax-deck-row ax-tr-row"></label>').appendTo($tlist);
 			$('<input type="checkbox" checked />').attr('data-party', c.party).appendTo($row);
-			$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
+			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 		});
 		tws.forEach((c) => {
-			const $row = $('<div class="ax-deck-row"></div>').attr('style', AX_STYLE.deck_row).appendTo($tlist);
-			$('<span class="ax-deck-name"></span>').attr('style', AX_STYLE.deck_name).text(c.label || c.party).appendTo($row);
+			const $row = $('<div class="ax-deck-row"></div>').appendTo($tlist);
+			$('<span class="ax-deck-name"></span>').text(c.label || c.party).appendTo($row);
 			$('<span class="indicator-pill no-indicator-dot orange"></span>')
 				.text(__('Unregistered manifest'))
 				.appendTo($row);
 		});
 		if (employees.length) {
 			$('<button class="btn btn-sm btn-default ax-tr-go"></button>')
-				.attr('style', AX_STYLE.tr_go)
 				.text(__('Create one transport request'))
 				.on('click', () => this._create_transport($tlist))
 				.appendTo($tr);
 		} else if (tws.length) {
 			$('<div class="ax-tr-note text-muted"></div>')
-				.attr('style', AX_STYLE.tr_note)
 				.text(__('Temporary workers board via the trip’s unregistered manifest.'))
 				.appendTo($tr);
 		}
@@ -1386,39 +1189,32 @@ class ArrivalsDesk {
 		const over = Math.max(0, occupied - total);
 		const physOcc = occupied - over;
 		const denom = total + over || 1;
-		const $cap = $('<div class="ax-cap-wrap"></div>').attr('style', AX_STYLE.cap_wrap);
-		$('<span class="ax-cap-title"></span>').attr('style', AX_STYLE.cap_title).text(grid.building_title || '').appendTo($cap);
+		const $cap = $('<div class="ax-cap-wrap"></div>');
+		$('<span class="ax-cap-title"></span>').text(grid.building_title || '').appendTo($cap);
 		const $meter = $(
 			`<div class="ax-cap-meter" role="img" ` +
 				`aria-label="${__('{0} free of {1} beds', [free, total])}" ` +
 				`title="${__('{0} free of {1} beds', [free, total])}"></div>`
-		)
-			.attr('style', AX_STYLE.cap_meter)
-			.appendTo($cap);
+		).appendTo($cap);
 		$('<div class="ax-cap-fill ax-cap-fill--free"></div>')
-			.attr('style', AX_STYLE.cap_fill + AX_STYLE.cap_fill_free)
 			.css('width', `${Math.round((free / denom) * 100)}%`)
 			.appendTo($meter);
 		$('<div class="ax-cap-fill ax-cap-fill--occ"></div>')
-			.attr('style', AX_STYLE.cap_fill + AX_STYLE.cap_fill_occ)
 			.css('width', `${Math.round((physOcc / denom) * 100)}%`)
 			.appendTo($meter);
 		if (over) {
 			$('<div class="ax-cap-fill ax-cap-fill--over"></div>')
-				.attr('style', AX_STYLE.cap_fill + AX_STYLE.cap_fill_over)
 				.css('width', `${Math.round((over / denom) * 100)}%`)
 				.appendTo($meter);
 		}
-		const legend = (variant, swatch, label) => {
-			const $l = $(`<div class="ax-cap-legend ax-cap-legend--${variant}"></div>`)
-				.attr('style', AX_STYLE.cap_legend)
-				.appendTo($cap);
-			$('<span></span>').attr('style', AX_STYLE.cap_swatch + `background:${swatch};`).appendTo($l);
+		const legend = (variant, label) => {
+			const $l = $(`<div class="ax-cap-legend ax-cap-legend--${variant}"></div>`).appendTo($cap);
+			$('<span class="ax-cap-swatch"></span>').appendTo($l);
 			$('<span></span>').text(label).appendTo($l);
 		};
-		legend('free', 'var(--green-500)', __('{0} free', [free]));
-		legend('occ', 'var(--red-500)', __('{0} occupied', [occupied]));
-		if (over) legend('over', 'var(--orange-500)', __('{0} over capacity', [over]));
+		legend('free', __('{0} free', [free]));
+		legend('occ', __('{0} occupied', [occupied]));
+		if (over) legend('over', __('{0} over capacity', [over]));
 		this.$capacity.empty().append($cap);
 	}
 
@@ -1437,9 +1233,8 @@ class ArrivalsDesk {
 			const state = done ? 'done' : i === firstTodo ? 'now' : 'todo';
 			const $step = $(
 				`<button type="button" class="ax-step ax-step--${state}" data-stage="${k}" role="listitem"></button>`
-			).attr('style', AX_STEP.base + AX_STEP[state]);
+			);
 			$('<span class="ax-step-num"></span>')
-				.attr('style', AX_STEP_NUM.base + AX_STEP_NUM[state])
 				.text(i + 1)
 				.appendTo($step);
 			$('<span class="ax-step-label"></span>').text(label).appendTo($step);
@@ -1474,16 +1269,15 @@ class ArrivalsDesk {
 				.map((floor) => {
 					const rooms = (floor.rooms || []).map((room) => this._room_html(room)).join('');
 					return (
-						`<section class="ax-floor-group" style="${AX_STYLE.floor_group}"><header class="ax-floor-header" style="${AX_STYLE.floor_header}">` +
+						'<section class="ax-floor-group"><header class="ax-floor-header">' +
 						`${frappe.utils.escape_html(floor.floor_label || '')}</header>` +
-						`<div class="ax-rooms" style="${AX_STYLE.rooms}">${rooms}</div></section>`
+						`<div class="ax-rooms">${rooms}</div></section>`
 					);
 				})
 				.join('')
 		);
 		if (summary.total_beds > 0 && !summary.available) {
 			$('<div class="ax-floor-banner"></div>')
-				.attr('style', AX_STYLE.floor_banner)
 				.text(__('This building has rooms but every bed is occupied — use Over-capacity'))
 				.prependTo(this.$floor);
 		}
@@ -1494,9 +1288,8 @@ class ArrivalsDesk {
 		const occ = `${room.current_occupancy || 0}/${room.bed_capacity || 0}`;
 		const sameProject = !!(this.project && room.dominant_project && room.dominant_project === this.project);
 		const projClass = sameProject ? ' ax-room--same-project' : '';
-		const roomStyle = AX_STYLE.room + (sameProject ? AX_STYLE.room_same_project : '');
 		const projBadge = sameProject
-			? `<span class="ax-room-proj" style="${AX_STYLE.room_proj}" title="${__('Same project as the selected worker')}">${__('Same project')}</span>`
+			? `<span class="ax-room-proj" title="${__('Same project as the selected worker')}">${__('Same project')}</span>`
 			: '';
 		const readiness =
 			room.readiness_status && room.readiness_status !== 'Ready' && room.readiness_status !== 'Unknown'
@@ -1505,13 +1298,13 @@ class ArrivalsDesk {
 		const has_free = (room.beds || []).some((b) => b.bed_color === 'green');
 		const oc = has_free
 			? ''
-			: `<button class="ax-room-oc" style="${AX_STYLE.room_oc}" data-room="${frappe.utils.escape_html(room.room || '')}" ` +
+			: `<button class="ax-room-oc" data-room="${frappe.utils.escape_html(room.room || '')}" ` +
 			  `title="${__('House over capacity in a temporary bed')}">+ ${__('Over-capacity')}</button>`;
 		return (
-			`<div class="ax-room${projClass}" style="${roomStyle}"><div class="ax-room-header" style="${AX_STYLE.room_header}">` +
-			`<span class="ax-room-number" style="${AX_STYLE.room_number}">${frappe.utils.escape_html(room.room_number || room.room || '')}${projBadge}</span>` +
-			`<span class="ax-room-meta" style="${AX_STYLE.room_meta}">${occ}${readiness}</span></div>` +
-			`<div class="ax-beds" style="${AX_STYLE.beds}">${beds}</div>${oc}</div>`
+			`<div class="ax-room${projClass}"><div class="ax-room-header">` +
+			`<span class="ax-room-number">${frappe.utils.escape_html(room.room_number || room.room || '')}${projBadge}</span>` +
+			`<span class="ax-room-meta">${occ}${readiness}</span></div>` +
+			`<div class="ax-beds">${beds}</div>${oc}</div>`
 		);
 	}
 
@@ -1521,45 +1314,42 @@ class ArrivalsDesk {
 		const a11y = color === 'green' || color === 'red' ? ' tabindex="0" role="button"' : '';
 		const name = bed.occupant ? bed.occupant.employee_name || bed.occupant.employee || '' : '';
 		const occupant = bed.occupant
-			? `<span class="ax-bed-occupant" style="${AX_STYLE.bed_occupant}" title="${frappe.utils.escape_html(name)}">${frappe.utils.escape_html(
+			? `<span class="ax-bed-occupant" title="${frappe.utils.escape_html(name)}">${frappe.utils.escape_html(
 					name
 			  )}</span>`
 			: '';
 		const custody =
 			bed.occupant && bed.occupant.has_custody
-				? `<span class="ax-bed-badge" style="${AX_STYLE.bed_badge}" title="${__('Has custody')}">●</span>`
+				? `<span class="ax-bed-badge" title="${__('Has custody')}">●</span>`
 				: '';
 		const blocker =
 			color === 'amber' && readiness_status && readiness_status !== 'Ready' && readiness_status !== 'Unknown'
-				? `<span class="ax-bed-blocker" style="${AX_STYLE.bed_blocker}">${frappe.utils.escape_html(__(readiness_status))}</span>`
+				? `<span class="ax-bed-blocker">${frappe.utils.escape_html(__(readiness_status))}</span>`
 				: '';
 		const tempChip = bed.is_temporary
-			? `<span class="ax-bed-chip ax-bed-chip--temp" style="${AX_STYLE.bed_chip + AX_STYLE.bed_chip_temp}">${__('Temp')}</span>`
+			? `<span class="ax-bed-chip ax-bed-chip--temp">${__('Temp')}</span>`
 			: '';
-		const bedStyle = ax_bed_style(color, { temp: !!bed.is_temporary });
 		return (
-			`<div class="ax-bed ax-bed--${color}${temp}" style="${bedStyle}" data-bed="${frappe.utils.escape_html(bed.bed || '')}"${a11y} ` +
+			`<div class="ax-bed ax-bed--${color}${temp}" data-bed="${frappe.utils.escape_html(bed.bed || '')}"${a11y} ` +
 			`title="${frappe.utils.escape_html(bed.bed_code || '')}">` +
-			`<span class="ax-bed-code" style="${AX_STYLE.bed_code}"><bdi>${frappe.utils.escape_html(bed.bed_code || '')}</bdi>${tempChip}</span>` +
+			`<span class="ax-bed-code"><bdi>${frappe.utils.escape_html(bed.bed_code || '')}</bdi>${tempChip}</span>` +
 			`${occupant}${blocker}${custody}</div>`
 		);
 	}
 
 	_render_empty(msg) {
-		this.$floor.html(`<div class="ax-empty" style="${AX_STYLE.empty}">${frappe.utils.escape_html(msg)}</div>`);
+		this.$floor.html(`<div class="ax-empty">${frappe.utils.escape_html(msg)}</div>`);
 	}
 
 	_render_loading() {
 		this.$floor.html(
-			`<div class="ax-skeleton" style="${AX_STYLE.skeleton}">${`<div class="ax-skeleton-room" style="${AX_STYLE.skeleton_room}"></div>`.repeat(
-				6
-			)}</div>`
+			`<div class="ax-skeleton">${'<div class="ax-skeleton-room"></div>'.repeat(6)}</div>`
 		);
 	}
 
 	_render_error() {
 		this.$floor.html(
-			`<div class="ax-error" style="${AX_STYLE.empty}"><div class="ax-error-msg" style="${AX_STYLE.error_msg}">` +
+			'<div class="ax-error"><div class="ax-error-msg">' +
 				`${__('Could not load the building. Please retry.')}</div>` +
 				`<button class="btn btn-default btn-sm ax-retry">${__('Retry')}</button></div>`
 		);
