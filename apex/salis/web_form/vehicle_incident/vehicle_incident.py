@@ -1,4 +1,10 @@
 # Copyright (c) 2026, afmcoltd
+"""Public Vehicle Incident web form.
+
+The insert passes ``ignore_permissions`` because the submitter is a Guest — a driver or passer-by
+reporting from the roadside, never a signed-in user — so there is no role to consult, and a
+DocPerm here would grant Guest create site-wide. The rate limit stands in for a permission.
+"""
 import frappe
 from frappe import _
 

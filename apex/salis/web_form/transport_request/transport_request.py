@@ -1,4 +1,10 @@
 # Copyright (c) 2026, afmcoltd
+"""Public Transport Request web form.
+
+The insert passes ``ignore_permissions`` because the submitter is a Guest — the form is public by
+design, so there is no user whose roles could authorise it, and a DocPerm here would grant Guest
+create on Transport Request site-wide. The rate limit is what stands in for a permission.
+"""
 import frappe
 from frappe import _
 

@@ -1,5 +1,11 @@
 # Copyright (c) 2026, afmcoltd
-"""Maintenance Work Order controller."""
+"""Maintenance Work Order controller.
+
+Both writes pass ``ignore_permissions`` for the subledger reason: they post and reverse
+Accommodation Ledger memo rows on completion and cancellation. That DocType is ``in_create`` with
+no role holding create or write, so the controller is the only path a row can take, and the
+permission that mattered was checked when the work order was completed.
+"""
 
 from __future__ import annotations
 

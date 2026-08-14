@@ -6,6 +6,12 @@ the whitelisted entry points for the room/bed and safety-setup generators. The
 generators themselves live in ``habitat.utils.room_generator`` and
 ``habitat.utils.safety_setup``; the derived-figure arithmetic in
 ``habitat.utils.building_rollup``.
+
+The two writes in ``on_update`` pass ``ignore_permissions`` because they maintain **User
+Permission** — the framework's own access records — to keep a supervisor scoped to the building
+they hold. Granting the Accommodation Manager role create and delete on User Permission to make
+these legal would let that role widen anyone's access, including its own. This is the one write
+where a DocPerm would be strictly more dangerous than the bypass.
 """
 
 from __future__ import annotations

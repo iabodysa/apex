@@ -4,6 +4,10 @@
 On submit: calculates variance from the Utility Account average, posts a
 summary row to the Accommodation Ledger (ledger_type = utility_type).
 
+Both posts pass ``ignore_permissions`` for the subledger reason: Accommodation Ledger is
+``in_create`` with no role holding create or write, so this controller is the only path a row can
+take, and the permission that mattered was checked when the bill was submitted.
+
 On cancel the work is split the way every other reversing voucher here splits
 it: before_cancel refuses (read-only, nothing written), on_cancel posts the
 offsetting mirror row.

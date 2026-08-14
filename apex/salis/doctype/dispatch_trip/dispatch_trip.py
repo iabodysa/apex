@@ -1,5 +1,11 @@
 # Copyright (c) 2026, afmcoltd
-"""Dispatch Trip lifecycle and atomic request assignment."""
+"""Dispatch Trip lifecycle and atomic request assignment.
+
+The ledger insert and its matching delete on cancel pass ``ignore_permissions`` for the subledger
+reason: Trip Fulfilment Ledger is an ``in_create`` DocType on which no role holds create or write,
+so the controller is the only path a row can take. Granting the dispatcher create would let a
+fulfilment row exist with no trip behind it.
+"""
 
 from __future__ import annotations
 

@@ -1,6 +1,10 @@
 # Copyright (c) 2026, afmcoltd
 """Public Arrival Manifest intake, and what bounds ONE call of it.
 
+The insert passes ``ignore_permissions`` because the submitter is a Guest — a supplier filling a
+public form, never a signed-in user — so there is no role to consult. A DocPerm here would grant
+Guest create site-wide. The rate limiting described below is what stands in for a permission.
+
 NO AGGREGATE DAILY CAP -- decided, not overlooked. Keyed on the address, a daily
 budget is spent by exactly the rotating proxy pool that already walks past the
 per-address ceiling: it costs the attacker nothing and costs an honest supplier a

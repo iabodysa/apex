@@ -1,4 +1,11 @@
 # Copyright (c) 2026, afmcoltd
+"""Public Resident Request web form: the QR a worker scans on a building wall.
+
+The insert passes ``ignore_permissions`` because the submitter is a Guest — the form is reached
+without signing in, by design, so there is no user whose roles could authorise it. A DocPerm that
+made this legal would grant Guest create on Resident Request site-wide. The rate limit above is
+what stands in for a permission here.
+"""
 import frappe
 from frappe import _
 
