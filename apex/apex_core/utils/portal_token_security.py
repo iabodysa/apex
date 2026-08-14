@@ -10,6 +10,7 @@ record of its own access, which is the one thing an audit trail must refuse.
 from __future__ import annotations
 
 import hashlib
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
@@ -19,6 +20,11 @@ from apex.apex_core.utils.rate_window import charge_window
 WORKER = "Worker"
 DRIVER = "Driver"
 TOKEN_COOKIES = {WORKER: "masar_wt", DRIVER: "masar_dt"}
+
+# One login-disabled user per capacity, seeded by portal_identity_seed. A token carries WHO; these
+# carry WHAT THAT CAPACITY MAY DO, so a portal write can be graded by a DocPerm instead of skipping
+# permissions entirely.
+CAPACITY_USERS = {WORKER: "worker@apex.internal", DRIVER: "driver@apex.internal"}
 
 ISSUER_ROLES = {
     WORKER: {
@@ -203,6 +209,29 @@ def _reject_invalid_token() -> None:
         _("This portal access token is invalid or inactive."),
         frappe.PermissionError,
     )
+
+
+@contextmanager
+def as_capacity(audience: str):
+    """Run a block as the capacity user, then hand the session back.
+
+    Only ever open this AFTER a token has been resolved: the token is the authentication and this
+    is the authorisation that follows it. The restore is in a ``finally`` because a scheduler or a
+    request worker is reused, and a session left elevated would carry into whatever ran next.
+    """
+    _require_audience(audience)
+    user = CAPACITY_USERS[audience]
+    if not frappe.db.exists("User", user):
+        frappe.throw(
+            _("The {0} portal identity is missing; run migrate to seed it.").format(audience),
+            frappe.ValidationError,
+        )
+    previous = frappe.session.user
+    frappe.set_user(user)
+    try:
+        yield user
+    finally:
+        frappe.set_user(previous)
 
 
 def resolve_portal_subject(audience: str, token=None, required=False):

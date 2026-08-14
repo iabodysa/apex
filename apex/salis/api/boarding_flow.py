@@ -43,6 +43,7 @@ from frappe.utils import add_to_date, cint, now_datetime, time_diff_in_seconds
 from apex.apex_core.utils.portal_token_security import (
     DRIVER,
     WORKER,
+    as_capacity,
     publish_to_portal_subject,
 )
 from apex.apex_core.utils.rate_limit_identity import rate_limit
@@ -665,7 +666,8 @@ def worker_claim_boarded(token=None):
 
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
-        trip.save(ignore_permissions=True)
+        with as_capacity(WORKER):
+            trip.save()
     mark_boarded(dispatch_trip, employee, source="Worker")
 
     _publish(
@@ -730,7 +732,8 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     target.confirm_source = None
     target.worker_claim_at = None
     target.reject_count = cint(target.reject_count) + 1
-    trip.save(ignore_permissions=True)
+    with as_capacity(DRIVER):
+        trip.save()
     _publish(
         "boarding_unmarked",
         dispatch_trip,

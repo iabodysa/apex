@@ -407,7 +407,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-14 16:23:00.000000",
+ "modified": "2026-08-14 16:25:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",
@@ -493,6 +493,11 @@
    "permlevel": 1,
    "read": 1,
    "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Worker",
    "write": 1
   }
  ],
