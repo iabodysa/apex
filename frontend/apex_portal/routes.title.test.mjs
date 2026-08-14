@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { routes } from "./routes.js";
+import { portalRoutes as routes } from "./routes.js";
 
 // A portal route's document title is built in main.js from `meta.label`, so a route without one
 // falls back to the context name and two screens become indistinguishable in history, in a
@@ -8,7 +8,10 @@ import { routes } from "./routes.js";
 const flatten = (list, prefix = "") =>
   (list || []).flatMap((route) => {
     const path = prefix + (route.path || "");
-    const self = { path, name: route.name, label: route.meta?.label, redirect: route.redirect };
+    const self = {
+      path, name: route.name, label: route.meta?.label,
+      feature: route.feature, redirect: route.redirect,
+    };
     return [self, ...flatten(route.children, path)];
   });
 
@@ -21,10 +24,15 @@ describe("portal route titles", () => {
     expect(missing).toEqual([]);
   });
 
-  it("no two page routes share a label", () => {
+  // A label repeats across personas on purpose — العهد is a worker destination and a housing one.
+  // What must not repeat is the TITLE, which main.js composes from the label and the feature.
+  it("no two page routes produce the same document title", () => {
     const counted = new Map();
-    for (const route of pages) counted.set(route.label, (counted.get(route.label) || 0) + 1);
-    const shared = [...counted].filter(([, times]) => times > 1).map(([label]) => label);
+    for (const route of pages) {
+      const title = `${route.label} · ${route.feature}`;
+      counted.set(title, (counted.get(title) || 0) + 1);
+    }
+    const shared = [...counted].filter(([, times]) => times > 1).map(([title]) => title);
     expect(shared).toEqual([]);
   });
 });

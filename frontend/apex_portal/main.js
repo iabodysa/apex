@@ -56,8 +56,11 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   });
   router.afterEach((to) => {
     if (!globalThis.document) return;
-    const page = to.meta?.label || CONTEXT_TITLES[context.id];
-    globalThis.document.title = `${page} | أبكس`;
+    // Six labels — العهد, السكن, اليوم among them — are destinations in more than one persona, so
+    // the label alone leaves three tabs reading "العهد | أبكس". The feature is what tells them apart.
+    const page = to.meta?.label;
+    const persona = CONTEXT_TITLES[to.feature] || CONTEXT_TITLES[context.id];
+    globalThis.document.title = page && page !== persona ? `${page} · ${persona} | أبكس` : `${persona} | أبكس`;
   });
   const application = createApp(App, {
     context,

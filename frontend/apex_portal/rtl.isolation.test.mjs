@@ -26,7 +26,17 @@ describe("bidirectional isolation", () => {
         total + (text.match(/<bdi\b/g)?.length || 0) + (text.match(/dir="auto"/g)?.length || 0),
       0,
     );
-    expect(isolated).toBeGreaterThanOrEqual(120);
+    // The floor sits just under the real count on purpose. A wide margin lets a whole page lose
+    // its isolation while the total still clears the bar — which is what a slack guard buys you.
+    expect(isolated).toBeGreaterThanOrEqual(134);
+  });
+
+  it("every component that prints a record reference isolates it", () => {
+    const bare = sources
+      .filter(({ text }) => text.includes("record-reference"))
+      .filter(({ text }) => !/<bdi\b|dir="auto"/.test(text))
+      .map(({ path }) => path.split("/").pop());
+    expect(bare).toEqual([]);
   });
 
   it("truncation is expressed in logical properties, so it clips at the visual end in either script", () => {

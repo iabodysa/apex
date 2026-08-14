@@ -66,6 +66,10 @@ describe("transport map state", () => {
     expect(coordinatePair({ lat: 46.7, lng: 24.7 })).toBeNull();
     expect(coordinatePair({ lat: 0, lng: 0 })).toBeNull();
     expect(coordinatePair({ lat: 90, lng: 181 })).toBeNull();
+    // Every rejection above also fails the longitude bound, so the latitude half was unexercised.
+    // 46.7 is a Riyadh longitude; 5.2 is a Somali latitude. Only the latitude bound refuses this.
+    expect(coordinatePair({ lat: 5.2, lng: 46.7 })).toBeNull();
+    expect(coordinatePair({ lat: 41.9, lng: 46.7 })).toBeNull();
 
     const mapState = createTransportMapState();
     await mapState.load(async () => ({
