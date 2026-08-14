@@ -19,6 +19,21 @@ vi.mock("frappe-ui", () => ({
   Badge: { props: ["label"], template: "<span>{{ label }}</span>" },
   Button: { template: "<button><slot /></button>" },
   ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
+  // Mirrors the real control: declared props stay props, every other attribute falls through
+  // to the inner field rather than to the wrapper.
+  FormControl: {
+    inheritAttrs: false,
+    props: ["modelValue", "label", "type", "rows"],
+    emits: ["update:modelValue"],
+    template: `
+      <label><span>{{ label }}</span><textarea
+        :value="modelValue"
+        :rows="rows"
+        v-bind="$attrs"
+        @input="$emit('update:modelValue', $event.target.value)"
+      /></label>
+    `,
+  },
   LoadingIndicator: { template: "<span />" },
   createResource: vi.fn((options) => {
     let url = options.url;

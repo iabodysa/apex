@@ -74,12 +74,6 @@
 .safety-checklist__progress { max-inline-size: 680px; color: var(--muted); }
 .safety-checklist__progress [role="progressbar"] > div { background: var(--brand-green); transition: width var(--motion-page) ease; }
 .safety-checklist__save { min-block-size: 44px; justify-self: start; }
-.safety-checklist__skeleton { display: grid; gap: var(--sp-3); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
-.safety-checklist__skeleton article { display: grid; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); }
-.safety-checklist__skeleton span { display: block; block-size: 14px; border-radius: var(--radius-sm); background: var(--skeleton); animation: safety-skeleton-pulse 900ms ease-in-out infinite alternate; }
-.safety-checklist__skeleton span:nth-child(2) { inline-size: 78%; }
-.safety-checklist__skeleton span:nth-child(3) { inline-size: 52%; }
-@keyframes safety-skeleton-pulse { from { opacity: .48; } to { opacity: 1; } }
 .safety-evidence { display: block; inline-size: min(100%, 320px); block-size: auto; border-radius: var(--radius-sm); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -87,10 +81,6 @@
   .safety-checklist__decision,
   .safety-checklist__progress [role="progressbar"] > div {
     transition: none;
-  }
-
-  .safety-checklist__skeleton span {
-    animation: none;
   }
 }
 

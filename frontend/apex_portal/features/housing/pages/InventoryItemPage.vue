@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Button, ErrorMessage, FormControl, createDocumentResource, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const route = useRoute();
 const form = reactive({ counted_quantity: 0, condition: "", notes: "" });
@@ -32,7 +33,7 @@ async function submit() {
     toast.create({ type: "success", message: "تم حفظ نتيجة الجرد" });
     await item.reload();
   } catch (exception) {
-    error.value = exception.message || "تعذر حفظ نتيجة الجرد.";
+    error.value = safeErrorMessage(exception, "تعذر حفظ نتيجة الجرد.");
   }
 }
 </script>

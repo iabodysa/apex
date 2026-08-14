@@ -17,7 +17,9 @@ const shell = computed(() => (
 <template>
   <component :is="shell" :title="title" :navigation="navigation">
     <RouterView v-slot="{ Component, route }">
-      <component :is="Component" :key="route.fullPath" />
+      <!-- Keyed on the path only: a filter submit changes the query, and the pages that read
+           it watch the query themselves rather than needing a fresh component and a page-0 refetch. -->
+      <component :is="Component" :key="route.path" />
     </RouterView>
   </component>
 </template>

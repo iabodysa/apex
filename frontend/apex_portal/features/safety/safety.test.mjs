@@ -36,10 +36,10 @@ describe("safety feature contract", () => {
       props: {
         task: {
           name: "STC-0001",
-          cadence: "Daily",
           task_title: "فحص طفايات الحريق",
           evidence_required: 1,
         },
+        cadence: "Daily",
       },
     });
 

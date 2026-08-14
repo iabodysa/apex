@@ -4,6 +4,7 @@ import { Button, ErrorMessage, FormControl, createListResource, toast } from "fr
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { maintenanceIssueOptions } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const form = reactive({
   room: "",
@@ -52,7 +53,7 @@ watch(
         if (building.value === value) loadedBuilding.value = value;
       } catch (exception) {
         if (building.value === value) {
-          roomError.value = exception?.message || "تعذّر تحميل غرف المبنى.";
+          roomError.value = safeErrorMessage(exception, "تعذّر تحميل غرف المبنى.");
         }
       }
     });
@@ -74,7 +75,7 @@ async function submit() {
       priority: "Medium",
     });
   } catch (exception) {
-    error.value = exception.message || "تعذر تسجيل الطلب.";
+    error.value = safeErrorMessage(exception, "تعذر تسجيل الطلب.");
   }
 }
 </script>

@@ -5,6 +5,7 @@ import { Button, ErrorMessage, FormControl, createDocumentResource, createListRe
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
 import { statusLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -42,7 +43,7 @@ async function arrive() {
     Object.assign(checkInForm, { party_type: "Employee", party: "", project: "" });
     await bed.reload();
     if (candidate.value) await router.push("/arrivals");
-  } catch (exception) { error.value = exception.message || "تعذر التسكين."; }
+  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر التسكين."); }
 }
 async function depart() {
   error.value = "";
@@ -54,7 +55,7 @@ async function depart() {
     }
     toast.create({ type: "success", message: "تم تسجيل المغادرة" });
     await bed.reload();
-  } catch (exception) { error.value = exception.message || "تعذر تسجيل المغادرة."; }
+  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر تسجيل المغادرة."); }
 }
 </script>
 

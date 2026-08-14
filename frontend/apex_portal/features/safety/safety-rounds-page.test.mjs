@@ -39,14 +39,14 @@ vi.mock("frappe-ui", () => ({
 }));
 
 const taskStub = {
-  props: ["task"],
+  props: ["task", "cadence"],
   emits: ["change"],
   template: `
     <button
       class="test-check-task"
       @click="$emit('change', {
         task: task.name,
-        cadence: task.cadence,
+        cadence,
         execution_status: 'Good',
         notes: '',
         evidence_photo: '',
@@ -72,14 +72,25 @@ describe("safety round checklist", () => {
     expect(dueResource.fetch).toHaveBeenCalledOnce();
   });
 
-  it("uses a shape skeleton instead of a spinner during initial loading", () => {
+  it("uses the shared shape skeleton instead of a spinner during initial loading", () => {
     dueResource.loading = true;
     const wrapper = mount(SafetyRoundsPage, {
       global: { stubs: { BuildingPicker: true, SafetyTaskRow: taskStub } },
     });
 
-    expect(wrapper.find(".safety-checklist__skeleton").exists()).toBe(true);
+    expect(wrapper.find(".portal-skeleton").exists()).toBe(true);
     expect(wrapper.text()).toContain("جارٍ تحميل جولات السلامة");
+  });
+
+  it("passes the cadence beside the task instead of rebuilding the task object per render", async () => {
+    const wrapper = mount(SafetyRoundsPage, {
+      global: { stubs: { BuildingPicker: true, SafetyTaskRow: taskStub } },
+    });
+    await nextTick();
+
+    const row = wrapper.findComponent(taskStub);
+    expect(row.props("cadence")).toBe("Daily");
+    expect(row.props("task")).toBe(dueResource.data.due[0].tasks[0]);
   });
 
   it("keeps save disabled until every due task has an explicit decision", async () => {

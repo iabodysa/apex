@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { Button, ErrorMessage, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { cadenceLabel, statusLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const route = useRoute();
 const error = ref("");
@@ -34,7 +35,7 @@ async function ratify() {
     toast.create({ type: "success", message: "تم اعتماد الجولة" });
     await Promise.all([round.reload(), executions.reload()]);
   } catch (exception) {
-    error.value = exception.message || "تعذر اعتماد الجولة.";
+    error.value = safeErrorMessage(exception, "تعذر اعتماد الجولة.");
   }
 }
 </script>

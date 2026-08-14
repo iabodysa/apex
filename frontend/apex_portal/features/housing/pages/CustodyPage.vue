@@ -4,6 +4,7 @@ import { Button, ErrorMessage, FormControl, createResource, toast } from "frappe
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { nextCustodySelection } from "../custodyState.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const state = reactive({ building: "", holder: null, cart: [] });
 const mode = ref("issue");
@@ -77,7 +78,7 @@ async function addScan() {
       throw new Error("لم نتعرف على الرمز في هذه العملية.");
     }
     scan.value = "";
-  } catch (exception) { error.value = exception.message || "تعذر قراءة الرمز."; }
+  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر قراءة الرمز."); }
 }
 async function submit() {
   error.value = "";
@@ -93,15 +94,15 @@ async function submit() {
     toast.create({ type: "success", message: mode.value === "issue" ? "تم تسليم العهدة" : "تم استلام العهدة" });
     replace({ holder: state.holder });
     await refreshBalances();
-  } catch (exception) { error.value = exception.message || "تعذر تسليم العهدة."; }
+  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر تسليم العهدة."); }
 }
 </script>
 <template>
   <section class="feature-page"><h2>عهد السكن</h2><BuildingPicker />
     <div class="feature-card feature-form">
       <div class="feature-actions" role="group" aria-label="نوع العملية">
-        <Button :variant="mode === 'issue' ? 'solid' : 'subtle'" @click="mode = 'issue'">تسليم</Button>
-        <Button :variant="mode === 'return' ? 'solid' : 'subtle'" @click="mode = 'return'">استلام مرتجع</Button>
+        <Button :variant="mode === 'issue' ? 'solid' : 'subtle'" :aria-pressed="mode === 'issue'" @click="mode = 'issue'">تسليم</Button>
+        <Button :variant="mode === 'return' ? 'solid' : 'subtle'" :aria-pressed="mode === 'return'" @click="mode = 'return'">استلام مرتجع</Button>
       </div>
       <FormControl v-model="holderType" type="select" label="نوع الحائز" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
       <FormControl v-model="holderId" label="رقم الحائز" />

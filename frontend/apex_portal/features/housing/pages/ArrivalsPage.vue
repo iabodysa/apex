@@ -5,6 +5,7 @@ import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { useRouter } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 import {
   arrivalRegistrationParams,
   normalizeWorkerLinkResult,
@@ -72,7 +73,7 @@ async function findWorker() {
   try {
     candidates.value = await search.fetch({ building: building.value, txt: query.value });
   } catch (reason) {
-    error.value = reason?.message || "تعذّر البحث عن العامل.";
+    error.value = safeErrorMessage(reason, "تعذّر البحث عن العامل.");
   }
 }
 
@@ -88,7 +89,7 @@ async function addTemporary() {
     toast.create({ type: "success", message: "تم تسجيل العامل" });
     await arrivals.fetch();
   } catch (reason) {
-    error.value = reason?.message || "تعذّر تسجيل العامل.";
+    error.value = safeErrorMessage(reason, "تعذّر تسجيل العامل.");
   }
 }
 
@@ -99,7 +100,7 @@ async function issueLink(row) {
     issuedLink.value = normalizeWorkerLinkResult(result);
     if (!issuedLink.value) throw new Error("لم يصدر رابط للعامل.");
   } catch (reason) {
-    error.value = reason?.message || "تعذّر إصدار رابط العامل.";
+    error.value = safeErrorMessage(reason, "تعذّر إصدار رابط العامل.");
   }
 }
 
@@ -117,7 +118,7 @@ async function printSlip(row) {
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (reason) {
     popup?.close();
-    error.value = reason?.message || "تعذّر تجهيز بطاقة الوصول.";
+    error.value = safeErrorMessage(reason, "تعذّر تجهيز بطاقة الوصول.");
   }
 }
 

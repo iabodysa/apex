@@ -1,10 +1,12 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
 import { building } from "../../housing/building.js";
 import SafetyTaskRow from "../components/SafetyTaskRow.vue";
 import { cadenceLabel, periodLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const error = ref("");
 const results = reactive({});
@@ -73,7 +75,7 @@ async function saveRound() {
     Object.keys(results).forEach((key) => delete results[key]);
     await due.fetch();
   } catch (exception) {
-    error.value = exception.message || "تعذر حفظ الجولة.";
+    error.value = safeErrorMessage(exception, "تعذر حفظ الجولة.");
   }
 }
 </script>
@@ -81,17 +83,7 @@ async function saveRound() {
 <template>
   <section class="feature-page safety-rounds-page">
     <header class="feature-page__header"><h2>جولات السلامة</h2><BuildingPicker /></header>
-    <section
-      v-if="due.loading"
-      class="safety-checklist__skeleton"
-      role="status"
-      aria-label="جارٍ تحميل جولات السلامة"
-    >
-      <strong>جارٍ تحميل جولات السلامة…</strong>
-      <article v-for="index in 3" :key="index" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </article>
-    </section>
+    <PortalSkeleton v-if="due.loading" :rows="3" label="جارٍ تحميل جولات السلامة" />
     <ErrorMessage v-else-if="due.error" message="تعذر تحميل جولات السلامة." />
     <template v-else-if="building">
       <section v-if="awaiting.length" class="feature-card">
@@ -106,7 +98,8 @@ async function saveRound() {
         <SafetyTaskRow
           v-for="task in group.tasks"
           :key="task.name"
-          :task="{ ...task, cadence: group.cadence }"
+          :task="task"
+          :cadence="group.cadence"
           @change="update(task.name, group.cadence, $event)"
         />
       </section>

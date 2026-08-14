@@ -12,8 +12,17 @@ const { resources } = vi.hoisted(() => ({ resources: new Map() }));
 vi.mock("frappe-ui", () => ({
   Badge: { template: "<span />" },
   Button: { props: ["label"], template: "<button><slot />{{ label }}</button>" },
-  Dialog: { template: "<div><slot name='body-content' /></div>" },
-  FormControl: { template: "<textarea />" },
+  // Dialog speaks a boolean and only renders while open, as the real one does.
+  Dialog: {
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
+    template: "<div v-if='modelValue'><slot name='body-header' /><slot name='body-content' /></div>",
+  },
+  FormControl: {
+    props: ["modelValue"],
+    emits: ["update:modelValue"],
+    template: "<textarea :value='modelValue' @input=\"$emit('update:modelValue', $event.target.value)\" />",
+  },
   createResource: vi.fn(
     ({ url }) =>
       resources.get(url) || {
@@ -73,6 +82,26 @@ describe("fleet operations async states", () => {
     expect(wrapper.text()).not.toContain("لا توجد طلبات بانتظار الاعتماد");
     await wrapper.get("[role='alert'] button").trigger("click");
     expect(fuel.fetch).toHaveBeenCalled();
+  });
+
+  it("drops an abandoned rejection reason instead of carrying it to the next request", async () => {
+    resources.set("apex.salis.api.fuel_console.get_pending_fuel_requests", readResource({
+      data: [
+        { name: "FR-1", vehicle_plate: "1234", capabilities: {} },
+        { name: "FR-2", vehicle_plate: "5678", capabilities: {} },
+      ],
+    }));
+    const wrapper = mount(FuelApprovalQueuePage);
+    await flushPromises();
+    const rejects = wrapper.findAll("button").filter((button) => button.text() === "رفض");
+
+    await rejects[0].trigger("click");
+    await wrapper.get("textarea").setValue("لا يوجد رصيد");
+    await wrapper.get(".portal-dialog__close").trigger("click");
+    expect(wrapper.find("textarea").exists()).toBe(false);
+
+    await rejects[1].trigger("click");
+    expect(wrapper.get("textarea").element.value).toBe("");
   });
 
   it("shows a vehicle request error instead of reporting the vehicle missing", async () => {

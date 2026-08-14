@@ -20,8 +20,13 @@ const action = createDraftAction(props.transport
   key: props.transport ? "transport-request" : "service-request",
 });
 
+// The gateway is injected, so a page that renders this form outside the worker app has none.
+// Say so in the page instead of failing on submit with an internal error.
+const method = props.transport ? gateway?.createTransportRequest : gateway?.createRequest;
+const unavailable = typeof method !== "function";
+
 function save() {
-  const method = props.transport ? gateway?.createTransportRequest : gateway?.createRequest;
+  if (unavailable) return;
   return action.submit((values) => method(values));
 }
 </script>
@@ -43,10 +48,11 @@ function save() {
         <FormControl v-model="action.draft.subject" label="الموضوع" required />
         <FormControl v-model="action.draft.description" type="textarea" label="التفاصيل" required />
       </template>
-      <p v-if="action.state.value === 'error'" class="feature-error" role="alert">{{ action.error.value }}</p>
+      <p v-if="unavailable" class="feature-error" role="alert">تعذّر تجهيز نموذج الطلب. أعد تحميل الصفحة، وإن تكرر الأمر راجع مشرفك.</p>
+      <p v-else-if="action.state.value === 'error'" class="feature-error" role="alert">{{ action.error.value }}</p>
       <p v-if="action.state.value === 'saved'" class="feature-success" role="status">تم إرسال الطلب.</p>
       <div class="feature-actions">
-        <Button type="submit" theme="green" variant="solid" :loading="action.state.value === 'saving'">إرسال</Button>
+        <Button type="submit" theme="green" variant="solid" :disabled="unavailable" :loading="action.state.value === 'saving'">إرسال</Button>
         <Button
           v-if="action.dirty.value"
           type="button"

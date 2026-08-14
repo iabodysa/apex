@@ -5,8 +5,8 @@ import AsyncPanel from "./AsyncPanel.vue";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 
 const props = defineProps({
-    title: String,
-    resource: Object,
+    title: { type: String, required: true },
+    resource: { type: Object, required: true },
     rowsKey: { type: String, default: "" },
     empty: String,
     createTo: String,

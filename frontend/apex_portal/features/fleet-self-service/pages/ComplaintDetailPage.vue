@@ -55,7 +55,7 @@ onMounted(load);
       </ul>
       <form class="salis-form" @submit.prevent="reply">
         <FormControl v-model="message" type="textarea" :rows="3" label="ردك" required />
-        <p v-if="notice" class="salis-notice">{{ notice }}</p>
+        <p v-if="notice" class="salis-notice" role="status">{{ notice }}</p>
         <Button type="submit" variant="solid" theme="green" label="إرسال الرد" :loading="replyResource.loading" />
       </form>
     </article>

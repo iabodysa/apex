@@ -1,7 +1,15 @@
 <script setup>
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
-defineProps({ state: { type: String, default: "ready" }, title: String, message: [String, Object] });
+defineProps({
+    state: {
+        type: String,
+        default: "ready",
+        validator: (value) => ["ready", "loading", "error", "empty"].includes(value),
+    },
+    title: String,
+    message: [String, Object],
+});
 defineEmits(["retry"]);
 </script>
 
@@ -13,10 +21,8 @@ defineEmits(["retry"]);
         :message="message"
         @retry="$emit('retry')"
     />
-    <section v-else-if="state !== 'ready'" class="salis-state" :data-state="state" role="status">
-        <span class="salis-state__mark" aria-hidden="true">{{
-            state === "loading" ? "•••" : state === "error" ? "!" : "—"
-        }}</span>
+    <section v-else-if="state === 'empty'" class="salis-state" :data-state="state" role="status">
+        <span class="salis-state__mark" aria-hidden="true">—</span>
         <h2>{{ title }}</h2>
         <p>{{ message }}</p>
     </section>

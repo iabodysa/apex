@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { Badge, Button, ErrorMessage, FormControl, createDocumentResource, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const route = useRoute();
 const code = ref("");
@@ -40,7 +41,7 @@ async function run(resource, params, message) {
     code.value = "";
     await delivery.reload();
   } catch (exception) {
-    error.value = exception.message || "تعذر تنفيذ الإجراء.";
+    error.value = safeErrorMessage(exception, "تعذر تنفيذ الإجراء.");
   }
 }
 </script>

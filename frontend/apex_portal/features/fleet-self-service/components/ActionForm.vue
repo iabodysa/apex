@@ -3,12 +3,13 @@ import { reactive, ref } from "vue";
 import { Button, FileUploader, FormControl } from "frappe-ui";
 import { createSingleFlight } from "../state.js";
 import { statusLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const props = defineProps({
-    title: String,
+    title: { type: String, required: true },
     intro: String,
     fields: Array,
-    resource: Object,
+    resource: { type: Object, required: true },
     actionKey: String,
 });
 const emit = defineEmits(["saved"]);
@@ -20,7 +21,7 @@ const error = ref("");
 const submitOnce = createSingleFlight();
 
 function onUploaded(field, result) {
-    form[field] = result?.file_url || result?.message?.file_url || "";
+    form[field] = result?.file_url || "";
 }
 async function submit() {
     notice.value = "";
@@ -30,7 +31,7 @@ async function submit() {
         notice.value = `تم الحفظ بالحالة: ${statusLabel(result?.status || "Pending")}`;
         emit("saved", result);
     } catch (caught) {
-        error.value = caught?.message || "تعذر الحفظ. بقيت البيانات كما أدخلتها.";
+        error.value = safeErrorMessage(caught, "تعذر الحفظ. بقيت البيانات كما أدخلتها.");
     }
 }
 </script>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { Badge, Button, Dialog, FormControl, createResource } from "frappe-ui";
 import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel } from "../../../core/displayLabels.js";
@@ -20,10 +20,23 @@ const fuelQueue = createResource({
     auto: false,
   }),
   rows = computed(() => fuelQueue.data || []),
+  // Dialog speaks a boolean, so the open flag and the row under review are kept apart.
+  rejectOpen = ref(false),
   selected = ref(null),
   reason = ref(""),
   once = createSingleFlight();
 onMounted(() => fuelQueue.fetch());
+function openReject(row) {
+  selected.value = row;
+  rejectOpen.value = true;
+}
+// Every close path lands here — the close button, Escape, and an outside click — so an
+// abandoned reason never reappears in the next request's dialog.
+watch(rejectOpen, (open) => {
+  if (open) return;
+  selected.value = null;
+  reason.value = "";
+});
 async function act(kind, row) {
   const availability = actionAvailability(row.capabilities?.[kind] || { allowed: true });
   if (availability.disabled) return;
@@ -34,8 +47,7 @@ async function act(kind, row) {
     }),
   );
   // TODO(A-532): the dialog clears unconditionally after await, so a refusal reads as success
-  selected.value = null;
-  reason.value = "";
+  rejectOpen.value = false;
   await fuelQueue.fetch();
 }
 </script>
@@ -70,15 +82,15 @@ async function act(kind, row) {
         <div class="ops-actions">
           <Badge theme="orange" :label="statusLabel(row.status)" />
           <Button variant="solid" theme="green" label="اعتماد" :disabled="row.capabilities?.approve?.allowed === false" :title="row.capabilities?.approve?.reason" @click="act('approve', row)" />
-          <Button variant="outline" theme="red" label="رفض" :disabled="row.capabilities?.reject?.allowed === false" :title="row.capabilities?.reject?.reason" @click="selected = row" />
+          <Button variant="outline" theme="red" label="رفض" :disabled="row.capabilities?.reject?.allowed === false" :title="row.capabilities?.reject?.reason" @click="openReject(row)" />
         </div>
       </article>
     </div>
-    <Dialog v-model="selected" :options="{ title: 'رفض طلب الوقود' }">
+    <Dialog v-model="rejectOpen" :options="{ title: 'رفض طلب الوقود' }">
       <template #body-header>
         <header class="portal-dialog__head">
           <h3>رفض طلب الوقود</h3>
-          <button type="button" class="portal-dialog__close" aria-label="إغلاق النافذة" @click="selected = null">×</button>
+          <button type="button" class="portal-dialog__close" aria-label="إغلاق النافذة" @click="rejectOpen = false">×</button>
         </header>
       </template>
       <template #body-content>

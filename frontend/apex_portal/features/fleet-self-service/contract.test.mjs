@@ -53,8 +53,10 @@ describe("Salis representative feature", () => {
     expect(component).toContain("apex.salis.api.fleet_employee_services.get_handover_checklist");
     expect(component).toContain("apex.salis.api.fleet_employee_services.receive_vehicle");
     expect(component).toContain("apex.salis.api.fleet_employee_services.return_vehicle");
-    expect(component).toContain("checklist_template");
-    expect(component).toContain("inspection_rows");
+    // checklist_template and inspection_rows are built in handoverState (covered by its own
+    // test) and submitted as the whole payload, so the form is checked for that route.
+    expect(component).toContain("buildHandoverPayload");
+    expect(component).toContain("action.submit(payload)");
     expect(component).toContain("FileUploader");
     expect(receipt).toContain('direction="Receipt"');
     expect(returned).toContain('direction="Return"');

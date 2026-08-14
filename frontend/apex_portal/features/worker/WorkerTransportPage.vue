@@ -1,6 +1,6 @@
 <script setup>
-import { computed, inject, onBeforeUnmount, onMounted, reactive, ref } from "vue";
-import { Badge, Button, ErrorMessage, createResource, toast } from "frappe-ui";
+import { computed, inject, onBeforeUnmount, onMounted, reactive, ref, watch } from "vue";
+import { Badge, Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, remainingSeconds, workerTransportStatusLabel } from "../../core/displayLabels.js";
 import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
@@ -59,16 +59,23 @@ const waitSeconds = computed(() => remainingSeconds(boarding.value?.wait_at, boa
 const notifySeconds = computed(() => remainingSeconds(boarding.value?.notify_at, boarding.value?.notify_window_seconds, now.value));
 
 const ratingKey = (trip) => `trip-rating-${trip.dispatch_trip}`;
+const blankRating = Object.freeze({ rating: 0, feedback: "" });
+
+// Drafts are restored once per past trip in a pre-flush watcher, so the template only reads them.
+function seedRatingDraft(trip) {
+  const id = trip.dispatch_trip;
+  if (!id || ratingDrafts[id]) return;
+  const saved = drafts?.read(ratingKey(trip));
+  ratingDrafts[id] = {
+    rating: [1, 2, 3, 4, 5].includes(Number(saved?.rating)) ? Number(saved.rating) : 0,
+    feedback: String(saved?.feedback || "").slice(0, 2000),
+  };
+}
+
+watch(pastTrips, (list) => list.forEach(seedRatingDraft), { immediate: true });
 
 function ratingDraft(trip) {
-  if (!ratingDrafts[trip.dispatch_trip]) {
-    const saved = drafts?.read(ratingKey(trip));
-    ratingDrafts[trip.dispatch_trip] = {
-      rating: [1, 2, 3, 4, 5].includes(Number(saved?.rating)) ? Number(saved.rating) : 0,
-      feedback: String(saved?.feedback || "").slice(0, 2000),
-    };
-  }
-  return ratingDrafts[trip.dispatch_trip];
+  return ratingDrafts[trip.dispatch_trip] || blankRating;
 }
 
 // portalDrafts is subject-scoped; only trip rating text is durable. QR and boarding tokens stay transient.
@@ -77,11 +84,13 @@ function persistRating(trip) {
 }
 
 function setRating(trip, rating) {
+  seedRatingDraft(trip);
   ratingDraft(trip).rating = rating;
   persistRating(trip);
 }
 
 function setRatingFeedback(trip, feedback) {
+  seedRatingDraft(trip);
   ratingDraft(trip).feedback = feedback;
   persistRating(trip);
 }
@@ -310,16 +319,15 @@ onBeforeUnmount(stopLive);
                 >★</button>
               </div>
             </fieldset>
-            <label>
-              ملاحظات اختيارية
-              <textarea
-                :value="ratingDraft(trip).feedback"
-                :data-rating-feedback="trip.dispatch_trip"
-                maxlength="2000"
-                rows="2"
-                @input="setRatingFeedback(trip, $event.target.value)"
-              />
-            </label>
+            <FormControl
+              type="textarea"
+              label="ملاحظات اختيارية"
+              :model-value="ratingDraft(trip).feedback"
+              :data-rating-feedback="trip.dispatch_trip"
+              maxlength="2000"
+              :rows="2"
+              @update:model-value="setRatingFeedback(trip, $event)"
+            />
             <Button
               type="button"
               variant="outline"

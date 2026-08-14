@@ -2,11 +2,14 @@
 import { computed, reactive, ref } from "vue";
 import { Button, FileUploader, FormControl } from "frappe-ui";
 
-const props = defineProps({ task: { type: Object, required: true } });
+const props = defineProps({
+  task: { type: Object, required: true },
+  cadence: { type: String, required: true },
+});
 const emit = defineEmits(["change"]);
 const result = reactive({
   task: props.task.name,
-  cadence: props.task.cadence,
+  cadence: props.cadence,
   execution_status: "",
   notes: "",
   evidence_photo: "",

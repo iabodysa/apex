@@ -7,6 +7,7 @@ import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { bedAssignmentTarget, housingCandidateFromQuery } from "../arrivalFlow.js";
 import { floorLabel, statusLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const route = useRoute();
 const grid = createResource({
@@ -25,7 +26,7 @@ async function setReady(room) {
     await readiness.submit({ room: room.room, status: "Ready" });
     toast.create({ type: "success", message: "الغرفة جاهزة" });
     await grid.fetch();
-  } catch (exception) { error.value = exception.message || "تعذر تحديث جاهزية الغرفة."; }
+  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر تحديث جاهزية الغرفة."); }
 }
 </script>
 

@@ -119,10 +119,10 @@ onMounted(loadRequests);
       <ul v-if="availableRequests.length" class="supervisor-request-assignment__list">
         <li v-for="request in availableRequests" :key="request.name">
           <label class="supervisor-request-assignment__choice">
-            <input
+            <FormControl
               type="checkbox"
-              :checked="Boolean(selections[request.name])"
-              @change="toggleRequest(request, $event.target.checked)"
+              :model-value="Boolean(selections[request.name])"
+              @update:model-value="toggleRequest(request, $event)"
             />
             <span class="record-identity">
               <strong dir="auto">{{ meaningfulRequestTitle(request) }}</strong>

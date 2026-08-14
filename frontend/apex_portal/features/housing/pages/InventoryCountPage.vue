@@ -5,6 +5,7 @@ import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { conditionLabel } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 
 const values = reactive({});
 const error = ref("");
@@ -13,7 +14,9 @@ const inventory = createResource({
   makeParams: () => ({ building: building.value }),
 });
 const save = createResource({ url: "apex.habitat.api.housing_count.submit_counts" });
-const rows = computed(() => inventory.data?.items || []);
+// Tied to the selected building so a cleared picker cannot leave the previous building's rows
+// on screen without their seeded draft entries.
+const rows = computed(() => (building.value && inventory.data?.items) || []);
 const conditions = computed(() => (
   inventory.data?.conditions || []
 ).map((value) => ({ label: conditionLabel(value), value })));
@@ -22,8 +25,11 @@ watch(building, async (value) => {
   Object.keys(values).forEach((key) => delete values[key]);
   if (value) await inventory.fetch();
 }, { immediate: true });
-function valueFor(row) {
-  if (!values[row.name]) {
+// The draft entry for a row is seeded here, never from the template: a pre-flush watcher runs
+// before the render that first shows the row, so rendering only ever reads.
+watch(rows, (list) => {
+  for (const row of list) {
+    if (values[row.name]) continue;
     values[row.name] = {
       name: row.name,
       counted_quantity: row.counted_quantity ?? row.expected_quantity ?? 0,
@@ -31,8 +37,7 @@ function valueFor(row) {
       notes: row.notes || "",
     };
   }
-  return values[row.name];
-}
+}, { immediate: true });
 async function submit() {
   error.value = "";
   try {
@@ -44,7 +49,7 @@ async function submit() {
     }
     await inventory.fetch();
   } catch (exception) {
-    error.value = exception.message || "تعذر حفظ الجرد.";
+    error.value = safeErrorMessage(exception, "تعذر حفظ الجرد.");
   }
 }
 </script>
@@ -58,9 +63,9 @@ async function submit() {
     <form v-else-if="rows.length" class="inventory-form" @submit.prevent="submit">
       <article v-for="row in rows" :key="row.name" class="feature-card inventory-row">
         <div><strong dir="auto">{{ row.item_label || row.item_name }}</strong><small>{{ row.room_label || 'المبنى' }} · المتوقع {{ row.expected_quantity }}</small></div>
-        <FormControl v-model="valueFor(row).counted_quantity" type="number" label="العدد الفعلي" min="0" required />
-        <FormControl v-model="valueFor(row).condition" type="select" label="الحالة" :options="conditions" />
-        <FormControl v-model="valueFor(row).notes" class="inventory-row__notes" type="textarea" label="ملاحظة" :rows="2" />
+        <FormControl v-model="values[row.name].counted_quantity" type="number" label="العدد الفعلي" min="0" required />
+        <FormControl v-model="values[row.name].condition" type="select" label="الحالة" :options="conditions" />
+        <FormControl v-model="values[row.name].notes" class="inventory-row__notes" type="textarea" label="ملاحظة" :rows="2" />
       </article>
       <ErrorMessage v-if="error" :message="error" />
       <Button type="submit" theme="green" variant="solid" :loading="save.loading">حفظ الجرد</Button>

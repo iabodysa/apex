@@ -49,6 +49,10 @@ const workers = computed(() =>
   })),
 );
 const pendingWorkers = computed(() => workers.value.filter((worker) => worker.status !== "Boarded"));
+// Counted here rather than in the template: the clock ticks every second, and a template
+// expression would re-scan both lists on every tick.
+const boardedCount = computed(() => workers.value.filter((worker) => worker.status === "Boarded").length);
+const completedStops = computed(() => (trip.value?.stops || []).filter((stop) => stop.done).length);
 // A driver reads this on a phone, where a tooltip never appears, so every blocked action says why
 // in the page itself. An empty string means the action is available.
 const blocked = computed(() => ({
@@ -171,7 +175,7 @@ onBeforeUnmount(stopLive);
       <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
       <section class="journey-command">
         <div class="journey-command__metric">
-          <strong>{{ workers.filter((worker) => worker.status === "Boarded").length }}</strong>
+          <strong>{{ boardedCount }}</strong>
           <span>صعد</span>
         </div>
         <div class="journey-command__metric">
@@ -179,7 +183,7 @@ onBeforeUnmount(stopLive);
           <span>بانتظارك</span>
         </div>
         <div class="journey-command__metric">
-          <strong>{{ trip.stops?.filter((stop) => stop.done).length || 0 }}</strong>
+          <strong>{{ completedStops }}</strong>
           <span>محطة مكتملة</span>
         </div>
         <div class="journey-actions journey-command__actions">

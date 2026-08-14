@@ -4,8 +4,8 @@ import { Badge, Button } from "frappe-ui";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 const props = defineProps({
-    title: String,
-    resource: Object,
+    title: { type: String, required: true },
+    resource: { type: Object, required: true },
     rowsKey: { type: String, default: "" },
     detailBase: { type: String, default: "" },
     empty: String,
@@ -44,7 +44,7 @@ onMounted(() => props.resource.fetch());
             @retry="resource.fetch()"
         />
         <div v-else-if="!rows.length" class="ops-state">{{ empty }}</div>
-        <div v-else class="ops-table" role="table">
+        <div v-else class="ops-table">
             <RouterLink
                 v-for="row in rows"
                 :key="row.name || row.vehicle || row.plate"

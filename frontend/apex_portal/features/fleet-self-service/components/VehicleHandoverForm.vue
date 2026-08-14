@@ -80,7 +80,7 @@ function decide(row, ok) {
 }
 
 function onUploaded(result) {
-  form.signed_evidence = result?.file_url || result?.message?.file_url || "";
+  form.signed_evidence = result?.file_url || "";
 }
 
 async function submit() {
@@ -90,12 +90,7 @@ async function submit() {
   saving.value = true;
   try {
     const payload = buildHandoverPayload(form, checklistData.value, rows.value);
-    const { checklist_template, inspection_rows, ...values } = payload;
-    const result = await submitOnce(actionKey.value, () => action.submit({
-      ...values,
-      checklist_template,
-      inspection_rows,
-    }));
+    const result = await submitOnce(actionKey.value, () => action.submit(payload));
     submitted.value = true;
     notice.value = props.direction === "Receipt"
       ? "تم تسجيل استلام المركبة والفحص الموقّع."
