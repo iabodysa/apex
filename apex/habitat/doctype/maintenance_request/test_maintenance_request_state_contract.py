@@ -326,7 +326,11 @@ class TestMaintenanceWorkOrderContract(TestCase):
             ("Closed", False),
         ):
             with self.subTest(status=status):
-                work_order = MagicMock(name="MWO-1", maintenance_request="MR-1")
+                work_order = MagicMock(
+                    name="MWO-1",
+                    status="Planned",
+                    maintenance_request="MR-1",
+                )
                 work_order.name = "MWO-1"
                 request = MagicMock(docstatus=1, status=status, name="MR-1")
                 self._cancel_for_request(work_order, request)
@@ -335,6 +339,19 @@ class TestMaintenanceWorkOrderContract(TestCase):
                     request.db_set.assert_called_once_with("status", "Open")
                 else:
                     request.db_set.assert_not_called()
+
+    def test_cancelling_completed_old_order_does_not_reopen_request_owned_by_new_order(self):
+        old_order = MagicMock(
+            name="MWO-A",
+            status="Completed",
+            maintenance_request="MR-1",
+        )
+        old_order.name = "MWO-A"
+        request = MagicMock(docstatus=1, status="In Progress", name="MR-1")
+
+        self._cancel_for_request(old_order, request)
+
+        request.db_set.assert_not_called()
 
 
 class TestMaintenanceMetadata(TestCase):

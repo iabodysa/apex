@@ -18,9 +18,9 @@ class MaintenanceWorkOrder(Document):
         Native class method (Frappe fires it on cancel; no hooks.py doc_event is
         needed). Mirrors the Dispatch Trip / Fuel Request cancel-reversal pattern:
         net out the operational memo this Work Order posted (keyed by
-        source_doctype/source_name) and release the linked request back to Open.
-        Open is the request's pre-Work-Order state; a request a human has since
-        moved to Resolved or Closed is left untouched."""
+        source_doctype/source_name). An active cancelled order releases its linked
+        request back to Open; a completed older order cannot reopen a request now
+        owned by newer work."""
         self._reverse_accommodation_memo()
 
         from apex.habitat.maintenance_engine import reverse_maintenance_cost
@@ -33,7 +33,11 @@ class MaintenanceWorkOrder(Document):
         request = frappe.get_doc(
             "Maintenance Request", self.maintenance_request, for_update=True
         )
-        if request.docstatus == 1 and request.status == "In Progress":
+        if (
+            self.status in ("Planned", "In Progress")
+            and request.docstatus == 1
+            and request.status == "In Progress"
+        ):
             request.db_set("status", "Open")
 
     def _reverse_accommodation_memo(self):
