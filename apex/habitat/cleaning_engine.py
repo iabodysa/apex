@@ -6,10 +6,12 @@ Posts the immutable Cleaning Compliance Ledger from each Cleaning Log: one row
 per Cleaning Log Room Detail child row, written on Cleaning Log submit and
 reversed on cancel.
 
-The insert passes ``ignore_permissions``, and that is the ledger idiom rather than a shortcut:
-the row is posted from the Cleaning Log's submit, where the operator's permission was already
-checked. A DocPerm granting operators insert here would let them write compliance rows with no
-cleaning log behind them, which an immutable subledger must refuse. Mirrors the no-GL, system-written ledger pattern of
+The insert passes ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
+subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
+``in_create``, which removes the New button but refuses nothing on the server
+(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: no role holds create or
+write on the ledger. So this bypass is the only path by which a row can exist, and it is the
+control rather than a hole in one. Mirrors the no-GL, system-written ledger pattern of
 ``apex.salis.fuel_engine`` and
 ``apex.habitat.doctype.accommodation_stock_ledger``:
 

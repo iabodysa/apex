@@ -1,11 +1,13 @@
 """Session-bound custody, incident, fuel top-up, and complaint services for /fleet.
 
-The five ``ignore_permissions`` inserts here are the removable kind, and they are marked so they
-are not mistaken for the token case elsewhere in this package. Nothing here is ``allow_guest``:
-the actor is a signed-in User resolved by ``base._session_driver``, so it has roles, and a
-``create`` DocPerm on Fuel Request, Vehicle Incident, Vehicle Handover and the complaint pair
-would make every one of these saves legal on its own. They stand only until that permission work
-lands — see the card on A-518.
+The five ``ignore_permissions`` inserts stand, and the reason is a product decision rather than a
+technical one: a driver holds NO role. He reaches Apex the way a worker does, by token, and is
+never meant to be a Frappe user with permissions of his own. So there is no role a ``create``
+DocPerm could be attached to, and adding one would contradict the identity model.
+
+What is wrong here is the identity, not the permission. These endpoints still resolve the actor
+through ``base._session_driver``, which reads ``frappe.session.user`` and expects a signed-in
+account linked to a Salis Driver. That path is the one to retire — see the card on A-518.
 """
 
 import frappe

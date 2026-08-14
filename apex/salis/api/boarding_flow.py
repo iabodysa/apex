@@ -26,11 +26,12 @@ driver and the affected worker, and never logged.
 
 Every ``trip.save`` here passes ``ignore_permissions``, and the reason is the same one in all
 thirteen places: the per-worker flow state is a child table on Dispatch Trip, so writing one
-rider's status needs write on the whole trip — which a worker and a driver must never have,
-because that is the route, the vehicle and the driver assignment. The elimination is a
-``permlevel`` on ``boarding_state`` with write granted to the worker and driver roles, leaving
-permlevel 0 read-only for them; then these saves run under real permissions. Until that lands,
-each call is already gated by the portal token identity and the boarding window above it.
+rider's status needs write on the whole trip — which is also the route, the vehicle and the driver
+assignment. The elimination is ``permlevel`` on those three, not on ``boarding_state``: a raised
+permlevel restricts a field, so the wall goes around what must not be touched and the flow state
+stays at level 0. Note that the framework RESETS an unauthorised field rather than refusing the
+save (``document.py:795``). Until that lands, each call is gated by the portal token identity and
+the boarding window above it.
 """
 
 from __future__ import annotations

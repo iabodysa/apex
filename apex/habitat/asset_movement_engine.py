@@ -7,10 +7,12 @@ Ledger row, mirroring the Habitat no-GL system-written ledger pattern
 (``accommodation_ledger``) and the idempotent reverse-not-delete idiom in
 ``salis.fuel_engine``.
 
-Both writes pass ``ignore_permissions``, and that is the ledger idiom rather than a shortcut: the
-row is posted from the movement document's submit and cancel, where the operator's permission was
-already checked. A DocPerm granting operators insert here would let them write movement rows with
-no movement behind them, which an immutable subledger must refuse.
+Both writes pass ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
+subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
+``in_create``, which removes the New button but refuses nothing on the server
+(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: no role holds create or
+write on the ledger. So this bypass is the only path by which a row can exist, and it is the
+control rather than a hole in one.
 
 The Facility Asset Movement controller already updates the asset's location
 in place (``building``/``location_in_building``) on submit, which leaves no

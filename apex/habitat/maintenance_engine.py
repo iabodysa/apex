@@ -6,10 +6,12 @@ Posts the immutable Maintenance Cost Ledger, mirroring the Salis fuel/rental
 engine pattern (``apex.salis.fuel_engine``) and the Habitat no-GL,
 system-written ledger idiom (``accommodation_ledger``).
 
-Both writes pass ``ignore_permissions``, and that is the ledger idiom rather than a shortcut: the
-row is posted from the Work Order's completion and cancellation, where the operator's permission
-was already checked on that document. A DocPerm granting operators insert here would let them
-write cost rows with no work order behind them, which an immutable subledger must refuse.
+Both writes pass ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
+subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
+``in_create``, which removes the New button but refuses nothing on the server
+(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: every role on Maintenance
+Cost Ledger has ``read`` and nothing else, System Manager included. So this bypass is the only
+path by which a row can exist, and it is the control rather than a hole in one.
 
 A completed Maintenance Work Order posts one Maintenance Cost Ledger row per
 procurement item (``Maintenance Procurement Item.estimated_cost``). Posting is

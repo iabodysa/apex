@@ -6,9 +6,11 @@ Background engine that mirrors the Habitat no-GL, system-written ledger pattern
 (``apex.habitat.doctype.accommodation_ledger``) and the batch/idempotent
 scheduled-job style in ``apex.habitat.tasks``.
 
-The inserts pass ``ignore_permissions`` for the same reason the rental engine's do: the scheduler
-runs with no session user, and the Fuel Consumption Ledger grants no human write role at all. A
-DocPerm that made these legal would also let an operator write accrual rows by hand.
+The inserts pass ``ignore_permissions``, which is ERPNext's own idiom for an immutable subledger —
+``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries ``in_create``, which
+removes the New button but refuses nothing on the server (``frappe/utils/user.py:112,172``). The
+refusal is in the DocPerm rows: every role on Fuel Consumption Ledger has ``read`` and nothing
+else, System Manager included. So this bypass is the only path by which a row can exist.
 
 Two scheduled jobs:
 

@@ -4,10 +4,12 @@
 Posts the Safety Finding Ledger: an immutable, system-written record of every
 finding observed on a Safety Round, captured at the moment the round is submitted.
 
-Both writes pass ``ignore_permissions``, and that is the ledger idiom rather than a shortcut: the
-row is posted from the source document's submit and cancel, where the operator's permission was
-already checked on that document. A DocPerm granting operators insert here would let them write
-ledger rows with no source behind them, which is the one thing an immutable subledger must refuse.
+Both writes pass ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
+subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
+``in_create``, which removes the New button but refuses nothing on the server
+(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: every role on Safety
+Finding Ledger has ``read`` and nothing else, System Manager included. So this bypass is the only
+path by which a row can exist, and it is the control rather than a hole in one.
 
 WHY: safety/audit findings otherwise live only on the mutable parent reports
 (Inspection Finding Item rows on each Safety Task Execution), so a closed finding
