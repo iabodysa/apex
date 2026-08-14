@@ -13,7 +13,7 @@ waits for a narrower answer.
 What remains wrong here is the identity, not the permission: these endpoints still resolve the
 actor through ``base._session_driver``, which reads ``frappe.session.user`` and expects a signed-in
 account linked to a Salis Driver. The owner has ruled the driver holds no role of his own and
-arrives by token, so that path is the one to retire — see A-518.3.
+arrives by token, so that path is the one to retire.
 """
 
 import frappe

@@ -6,8 +6,8 @@ Fuel Request grants the Driver role ``create``, because raising one against his 
 exactly the driver's job. The binding rule below is what keeps it to his own vehicle; the DocPerm
 is what makes the write legal.
 
-What remains wrong here is the identity, not the permission — ``_session_driver`` still reads
-``frappe.session.user`` — and that path is the one being retired on A-518.3.
+What remains wrong here is the identity, not the permission: ``_session_driver`` still reads
+``frappe.session.user`` rather than the capacity the portal token carries.
 
 Unlike the supervisor board (fleet_os) these endpoints are IDENTITY-SCOPED: every
 one resolves ``frappe.session.user`` to the caller's own Salis Driver and returns

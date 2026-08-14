@@ -25,11 +25,9 @@ Payroll configure the native recovery Salary Component. Raising the
 receivable is NOT policy-gated — an advance is a lawful receivable regardless; only
 its recovery from wages is capped by KSA Labor Law Art. 91.
 
-Recovery is predicated on the company having actually paid: outstanding is measured
-from ``paid_amount``, which only the native payment entry sets. Nothing is deducted
-from a wage for money the company never disbursed. The per-period headroom comes from
-an unsaved native HRMS Salary Slip preview, so structure deductions, tax, loans and
-payment-day proration remain HRMS-owned.
+Outstanding is measured from ``paid_amount``, which only the native payment entry sets, so
+nothing is deducted for money the company never disbursed. Per-period headroom comes from an
+unsaved native Salary Slip preview, leaving deductions, tax, loans and proration HRMS-owned.
 
 The two inserts and the slip preview pass ``ignore_permissions`` because the actor is the
 operator who recorded the loss — a custody or fleet supervisor — and Employee Advance and
