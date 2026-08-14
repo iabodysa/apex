@@ -19,7 +19,6 @@ vi.mock("frappe-ui", () => ({
     template: "<button :disabled='disabled'><slot /></button>",
   },
   ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
-  FeatherIcon: { template: "<i />" },
   FormControl: { template: "<input />" },
   LoadingIndicator: { template: "<span />" },
   createResource: vi.fn((options) => {

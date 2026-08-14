@@ -38,7 +38,7 @@ describe("Salis fleet operations feature", () => {
       path.join(path.dirname(fileURLToPath(import.meta.url)), "pages", "HandoverDetailPage.vue"),
       "utf8",
     );
-    expect(source).toMatch(/<Button[^>]*icon-left="refresh-cw"[^>]*>تحديث<\/Button>/);
-    expect(source).not.toMatch(/<Button[^>]*icon="refresh-cw"/);
+    expect(source).toMatch(/<Button[^>]*icon-left="lucide-refresh-cw"[^>]*>تحديث<\/Button>/);
+    expect(source).not.toMatch(/<Button[^>]*icon="lucide-refresh-cw"/);
   });
 });

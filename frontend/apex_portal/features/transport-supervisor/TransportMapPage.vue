@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
         <h2>الخريطة المباشرة</h2>
         <p>مواقع السائقين ومسارات الرحلات المسندة إليك.</p>
       </div>
-      <Button variant="outline" icon-left="refresh-cw" :loading="state === 'loading'" :disabled="state === 'loading'" @click="load">تحديث</Button>
+      <Button variant="outline" icon-left="lucide-refresh-cw" :loading="state === 'loading'" :disabled="state === 'loading'" @click="load">تحديث</Button>
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
     <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الخريطة" message="لا تملك صلاحية هذه الرحلات." @retry="load" />

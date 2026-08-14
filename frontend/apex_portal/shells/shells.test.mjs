@@ -18,8 +18,8 @@ async function mountShell(component, options = {}) {
     props: {
       title: "مهامي اليوم",
       navigation: [
-        { label: "الرئيسية", to: "/home", icon: "home" },
-        { label: "الطلبات", to: "/requests", icon: "file-text" },
+        { label: "الرئيسية", to: "/home", icon: "lucide-home" },
+        { label: "الطلبات", to: "/requests", icon: "lucide-file-text" },
         ...(options.navigation || []),
       ],
     },
@@ -46,10 +46,16 @@ describe.each([
     expect(wrapper.get("h1").text()).toBe("مهامي اليوم");
   });
 
-  it("renders only the server-filtered navigation supplied by its parent", async () => {
+  it("renders the server-filtered navigation with native lucide icons", async () => {
     const { wrapper } = await mountShell(component);
     expect(wrapper.findAll("nav a").map((link) => link.text())).toEqual(["الرئيسية", "الطلبات"]);
     expect(wrapper.text()).not.toContain("إدارة المستخدمين");
+    const icons = wrapper.findAll("nav a .portal-nav-icon");
+    expect(icons.map((icon) => icon.element.tagName)).toEqual(["SPAN", "SPAN"]);
+    expect(icons[0].classes()).toContain("lucide-home");
+    expect(icons[1].classes()).toContain("lucide-file-text");
+    expect(icons.every((icon) => icon.attributes("aria-hidden") === "true")).toBe(true);
+    expect(wrapper.find("nav svg").exists()).toBe(false);
   });
 
   it("marks the current route and keeps action and content slots separate", async () => {
@@ -65,11 +71,11 @@ describe.each([
 describe("mobile navigation", () => {
   it("keeps four primary destinations visible and places every remaining route under more", async () => {
     const navigation = [
-      { label: "التنقل", to: "/transport", icon: "navigation" },
-      { label: "السجل", to: "/history", icon: "clock" },
-      { label: "السكن", to: "/housing", icon: "map-pin" },
-      { label: "العهد", to: "/custody", icon: "briefcase" },
-      { label: "الملف", to: "/profile", icon: "user" },
+      { label: "التنقل", to: "/transport", icon: "lucide-navigation" },
+      { label: "السجل", to: "/history", icon: "lucide-clock" },
+      { label: "السكن", to: "/housing", icon: "lucide-map-pin" },
+      { label: "العهد", to: "/custody", icon: "lucide-briefcase" },
+      { label: "الملف", to: "/profile", icon: "lucide-user" },
     ];
     const { wrapper } = await mountShell(MobileShell, { navigation });
 
@@ -93,9 +99,9 @@ describe("operations identity", () => {
     const priorWidth = window.innerWidth;
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     const navigation = [
-      { label: "مهام اليوم", to: "/today", icon: "home", group: "اليوم" },
-      { label: "القادمون", to: "/arrivals", icon: "users", group: "السكن" },
-      { label: "العهد", to: "/custody", icon: "briefcase", group: "العهد والجرد" },
+      { label: "مهام اليوم", to: "/today", icon: "lucide-home", group: "اليوم" },
+      { label: "القادمون", to: "/arrivals", icon: "lucide-users", group: "السكن" },
+      { label: "العهد", to: "/custody", icon: "lucide-briefcase", group: "العهد والجرد" },
     ];
     const { wrapper } = await mountShell(OperationsShell, { navigation });
 

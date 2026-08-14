@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Badge, Button, FeatherIcon, createDocumentResource, createResource } from "frappe-ui";
+import { Badge, Button, createDocumentResource, createResource } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { dateTimeLabel, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import TripRequestAssignment from "./components/TripRequestAssignment.vue";
@@ -143,7 +143,7 @@ watch(doc, loadLinkLabels, { immediate: true });
         <h2 dir="auto">{{ title }}</h2>
         <bdi v-if="doc?.name" class="record-reference" dir="auto" translate="no">{{ doc.name }}</bdi>
       </div>
-      <FeatherIcon :name="spec.icon || 'activity'" aria-hidden="true" />
+      <span :class="spec.icon || 'lucide-activity'" aria-hidden="true" />
     </header>
 
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحميل السجل…</div>

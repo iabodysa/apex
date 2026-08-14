@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Badge, Button, FeatherIcon, createResource } from "frappe-ui";
+import { Badge, Button, createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import { errorStatus } from "../../core/errorMessage.js";
@@ -47,7 +47,7 @@ watch(() => route.fullPath, load, { immediate: true });
         <h2>{{ spec.title }}</h2>
         <p>{{ spec.description }}</p>
       </div>
-      <FeatherIcon :name="spec.icon || 'navigation'" />
+      <span :class="spec.icon || 'lucide-navigation'" aria-hidden="true" />
     </header>
     <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
     <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح القسم" :message="error" fallback="هذا القسم غير متاح لحسابك." @retry="load" />

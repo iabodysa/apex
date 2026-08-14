@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Button, FeatherIcon, createResource } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { fieldLabel, recordTitle, statusLabel } from "../../core/displayLabels.js";
 import { errorStatus } from "../../core/errorMessage.js";
@@ -53,7 +53,7 @@ watch(() => route.fullPath, load, { immediate: true });
         <h2>{{ spec.title }}</h2>
         <p>{{ spec.description }}</p>
       </div>
-      <FeatherIcon :name="spec.icon || 'circle'" aria-hidden="true" />
+      <span :class="spec.icon || 'lucide-circle'" aria-hidden="true" />
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />

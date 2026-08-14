@@ -18,7 +18,7 @@ onMounted(() => resource.fetch());
         <p class="salis-eyebrow">هذا الشهر</p>
         <h2>رصيد الوقود</h2>
       </div>
-      <Button variant="ghost" icon-left="refresh-cw" label="تحديث" @click="resource.fetch()" />
+      <Button variant="ghost" icon-left="lucide-refresh-cw" label="تحديث" @click="resource.fetch()" />
     </header>
     <AsyncPanel v-if="resource.loading" state="loading" title="جاري تحميل الرصيد" message="نراجع الحصة والاستهلاك." />
     <AsyncPanel v-else-if="resource.error" state="error" title="تعذّر تحميل الرصيد" :message="resource.error" @retry="resource.fetch()" />

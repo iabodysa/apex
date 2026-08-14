@@ -1,5 +1,5 @@
 <script setup>
-import { Badge, FeatherIcon, createListResource } from "frappe-ui";
+import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
@@ -37,7 +37,7 @@ const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected"
   <SupervisorCollection
     title="التشغيل المتكرر"
     description="الشفت والمسار والمشروع والإسناد الافتراضي في سجل واحد يعتمد قبل توليد الرحلات."
-    icon="repeat"
+    icon="lucide-repeat"
     :resource="assignments"
     date-field="starts_on"
     :status-options="assignmentStatusOptions"
@@ -67,7 +67,7 @@ const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected"
             <div><dt>يبدأ في</dt><dd>{{ dateTimeLabel(assignment.starts_on) || 'غير محدد' }}</dd></div>
             <div><dt>مولّد حتى</dt><dd>{{ dateTimeLabel(assignment.generated_through) || 'لم يبدأ' }}</dd></div>
           </dl>
-          <span class="supervisor-open-link">فتح التشغيل <FeatherIcon name="arrow-left" aria-hidden="true" /></span>
+          <span class="supervisor-open-link">فتح التشغيل <span class="lucide-arrow-left" aria-hidden="true" /></span>
         </RouterLink>
       </div>
     </template>

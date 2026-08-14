@@ -24,7 +24,7 @@ const titleId = computed(() => `resource-list-${props.title.replace(/\s+/g, "-")
       <h2 :id="titleId">{{ title }}</h2>
       <div class="feature-page__actions">
         <slot name="actions" />
-        <Button variant="subtle" icon-left="refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
+        <Button variant="subtle" icon-left="lucide-refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
       </div>
     </header>
     <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />

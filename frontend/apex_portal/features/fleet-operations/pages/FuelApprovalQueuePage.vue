@@ -45,7 +45,7 @@ async function act(kind, row) {
         <p>تشغيل سلس</p>
         <h2>اعتماد الوقود</h2>
       </div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
+      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
     </header>
     <div v-if="fuelQueue.loading" class="ops-state">جاري تحميل الطلبات…</div>
     <PortalErrorState

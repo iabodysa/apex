@@ -57,7 +57,7 @@ const requestStatusOptions = statusOptions([
   <SupervisorCollection
     title="طلبات النقل"
     description="طلبات العاملين مرتبة لتحديد الرحلة التالية ومتابعة حالتها."
-    icon="inbox"
+    icon="lucide-inbox"
     :resource="requests"
     date-field="pickup_datetime"
     :status-options="requestStatusOptions"

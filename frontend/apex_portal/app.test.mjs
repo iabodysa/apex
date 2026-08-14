@@ -16,7 +16,7 @@ async function mountApp(entry) {
     props: {
       context: getPortalContext(entry),
       title: "لوحة اليوم",
-      navigation: [{ label: "الرئيسية", to: "/", icon: "home" }],
+      navigation: [{ label: "الرئيسية", to: "/", icon: "lucide-home" }],
     },
     global: { plugins: [router] },
   });

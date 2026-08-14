@@ -79,10 +79,11 @@ h3 {
   min-inline-size: 0;
 }
 
-.feature-page__heading svg {
+.feature-page__heading > [class*="lucide-"] {
   inline-size: 28px;
   block-size: 28px;
   flex: 0 0 auto;
+  color: inherit;
 }
 
 .feature-page__heading p {
@@ -394,6 +395,7 @@ h3 {
 .portal-nav-icon {
   inline-size: 20px;
   block-size: 20px;
+  color: inherit;
 }
 
 .mobile-shell {
@@ -455,9 +457,10 @@ h3 {
   color: var(--surface-2);
 }
 
-.portal-push-prompt > svg {
+.portal-push-prompt > [class*="lucide-"] {
   inline-size: 24px;
   block-size: 24px;
+  color: inherit;
 }
 
 .portal-push-prompt p {
