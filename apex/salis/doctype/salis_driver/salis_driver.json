@@ -96,13 +96,14 @@
   },
   {
    "default": "Active",
-   "description": "Current employment and availability state of the driver, distinguishing an active driver from one temporarily stopped or on leave, or released from the fleet.",
+   "description": "Current fleet state of the driver. Approved HRMS Leave Applications are the source for leave availability.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nStopped\nOn Leave\nReleased",
+   "options": "Active\nStopped\nReleased",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -410,10 +411,6 @@
   {
    "color": "Orange",
    "title": "Stopped"
-  },
-  {
-   "color": "Blue",
-   "title": "On Leave"
   },
   {
    "color": "Gray",

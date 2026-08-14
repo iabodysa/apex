@@ -31,8 +31,8 @@ from frappe.utils import getdate, today
 
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.fleet_os_board import build_board, driver_pii_visible
+from apex.salis.doctype.vehicle_incident.vehicle_incident import close_incident_internal
 from apex.salis.utils import (
-    add_timeline_note,
     close_open_stop,
     lock_vehicle,
     normalize_plate,
@@ -499,7 +499,6 @@ def recover(plate):
     stop), recover simply returns the vehicle to Active.
     """
     vehicle = _resolve_plate(plate)
-    lock_vehicle(vehicle)
 
     incident = frappe.db.get_value(
         "Vehicle Incident",
@@ -509,6 +508,14 @@ def recover(plate):
         as_dict=True,
         order_by="creation desc",
     )
+    if incident:
+        close_incident_internal(
+            incident.name,
+            "Vehicle recovered through Fleet OS.",
+            check_permission=False,
+        )
+
+    lock_vehicle(vehicle)
     _close_open_suspension(vehicle)
 
     if not incident:
@@ -524,10 +531,6 @@ def recover(plate):
 
     frappe.db.set_value(
         "Salis Vehicle", vehicle, "status", incident.previous_status or "Active"
-    )
-    frappe.db.set_value("Vehicle Incident", incident.name, "status", "Closed")
-    add_timeline_note(
-        "Salis Vehicle", vehicle, _("Recovered; theft report {0} closed.").format(incident.name)
     )
     _publish_fleet_update(plate, "recover")
     return {"ok": True, "incident": incident.name}

@@ -3,12 +3,15 @@ import { computed, ref, watch } from "vue";
 import { Badge, Button, FeatherIcon, createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../core/displayLabels.js";
+import { errorStatus } from "../../core/errorMessage.js";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const route = useRoute();
 let resource;
 const state = ref("loading");
 const data = ref(null);
-const error = ref("");
+const error = ref(null);
 const spec = computed(() => route.meta.view || {});
 const rows = computed(() => {
   if (Array.isArray(data.value)) return data.value;
@@ -19,6 +22,7 @@ const hasCollectionPayload = computed(() => Array.isArray(data.value) || (spec.v
 
 async function load() {
   state.value = "loading";
+  error.value = null;
   try {
     if (!spec.value.endpoint) throw new Error("الخدمة غير متاحة حالياً.");
     if (resource?.url !== spec.value.endpoint) {
@@ -27,8 +31,8 @@ async function load() {
     data.value = await resource.fetch();
     state.value = hasCollectionPayload.value ? (rows.value.length ? "ready" : "empty") : data.value && Object.keys(data.value).length ? "ready" : "empty";
   } catch (reason) {
-    state.value = reason?.status === 403 ? "denied" : "error";
-    error.value = reason?.message || "تعذّر تحميل البيانات.";
+    state.value = [401, 403].includes(errorStatus(reason)) ? "denied" : "error";
+    error.value = reason;
   }
 }
 
@@ -45,12 +49,9 @@ watch(() => route.fullPath, load, { immediate: true });
       </div>
       <FeatherIcon :name="spec.icon || 'navigation'" />
     </header>
-    <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ التحميل…</div>
-    <div v-else-if="state === 'denied'" class="feature-state">هذا القسم غير متاح لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p>{{ error }}</p>
-      <Button variant="outline" @click="load">إعادة المحاولة</Button>
-    </div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح القسم" :message="error" fallback="هذا القسم غير متاح لحسابك." @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الصفحة" :message="error" fallback="تعذّر تحميل البيانات." @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">
       {{ spec.empty || "لا توجد بيانات حالياً." }}
     </div>

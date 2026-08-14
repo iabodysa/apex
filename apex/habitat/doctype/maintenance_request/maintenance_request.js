@@ -55,6 +55,42 @@ frappe.ui.form.on("Maintenance Request", {
 			});
 		}
 
+		if (frm.doc.docstatus === 1 && frm.doc.status === "Resolved") {
+			frm.add_custom_button(__("Close Request"), () => {
+				frappe.call({
+					method: "apex.habitat.doctype.maintenance_request.maintenance_request.close_request",
+					args: { name: frm.doc.name },
+					freeze: true,
+					callback: () => frm.reload_doc(),
+				});
+			});
+		}
+
+		if (frm.doc.docstatus === 1 && ["Resolved", "Closed"].includes(frm.doc.status)) {
+			frm.add_custom_button(__("Reopen Request"), () => {
+				frappe.prompt(
+					[
+						{
+							fieldname: "reason",
+							fieldtype: "Small Text",
+							label: __("Reason"),
+							reqd: 1,
+						},
+					],
+					(values) => {
+						frappe.call({
+							method: "apex.habitat.doctype.maintenance_request.maintenance_request.reopen_request",
+							args: { name: frm.doc.name, reason: values.reason },
+							freeze: true,
+							callback: () => frm.reload_doc(),
+						});
+					},
+					__("Reopen Maintenance Request"),
+					__("Reopen")
+				);
+			});
+		}
+
 		if (frm.doc.docstatus === 0 && frm.doc.issue_type) {
 			frm.add_custom_button(__("Load Material Template"), function() {
 				frappe.call({

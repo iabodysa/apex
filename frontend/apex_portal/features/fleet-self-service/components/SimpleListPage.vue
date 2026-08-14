@@ -47,7 +47,7 @@ onMounted(() => props.resource.fetch());
             v-else-if="resource.error"
             state="error"
             title="تعذر تحميل البيانات"
-            message="تحقق من الاتصال وحاول مرة ثانية."
+            :message="resource.error"
             @retry="resource.fetch()"
         />
         <AsyncPanel

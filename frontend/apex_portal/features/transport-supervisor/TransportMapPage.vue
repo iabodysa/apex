@@ -3,8 +3,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { statusLabel } from "../../core/displayLabels.js";
 import { createLeafletAdapter } from "./leafletAdapter.js";
-import { createTransportMapState } from "./transportMapState.js";
+import { createTransportMapState, positionStateLabel, selectedMapRows } from "./transportMapState.js";
 import "./styles.css";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const positions = createResource({
   url: "apex.salis.api.route_supervisor.get_active_driver_positions",
@@ -21,14 +22,15 @@ const selected = computed(() => visible.value.find((item) => item.dispatch_trip 
 async function draw() {
   if (!mapRoot.value || state.value !== "ready") return;
   try {
-    await mapAdapter.draw(mapRoot.value, visible.value);
+    await mapAdapter.draw(mapRoot.value, selectedMapRows(visible.value, selectedTrip.value));
   } catch (reason) {
     mapState.fail(reason);
   }
 }
 
 async function load() {
-  await mapState.load(() => positions.fetch());
+  const committed = await mapState.load(() => positions.fetch());
+  if (!committed) return;
   if (!visible.value.some((item) => item.dispatch_trip === selectedTrip.value)) {
     selectedTrip.value = visible.value[0]?.dispatch_trip || "";
   }
@@ -44,8 +46,27 @@ async function applyFilters() {
   await draw();
 }
 
+async function updateProject(value) {
+  project.value = value || "";
+  await applyFilters();
+}
+
+async function updateStatus(value) {
+  status.value = value || "";
+  await applyFilters();
+}
+
+async function selectTrip(name) {
+  selectedTrip.value = name;
+  await nextTick();
+  await draw();
+}
+
 onMounted(load);
-onBeforeUnmount(mapAdapter.destroy);
+onBeforeUnmount(() => {
+  mapState.cancel();
+  mapAdapter.destroy();
+});
 </script>
 
 <template>
@@ -56,24 +77,22 @@ onBeforeUnmount(mapAdapter.destroy);
         <h2>الخريطة المباشرة</h2>
         <p>مواقع السائقين ومسارات الرحلات المسندة إليك.</p>
       </div>
-      <Button variant="outline" icon-left="refresh-cw" @click="load">تحديث</Button>
+      <Button variant="outline" icon-left="refresh-cw" :loading="state === 'loading'" :disabled="state === 'loading'" @click="load">تحديث</Button>
     </header>
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
-    <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذه الرحلات.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p role="alert">{{ error }}</p>
-      <Button variant="outline" @click="load">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الخريطة" message="لا تملك صلاحية هذه الرحلات." @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الخريطة" :message="error" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد رحلات نشطة الآن.</div>
     <template v-else>
       <div class="transport-map-filters">
-        <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects.map((value) => ({ label: value, value }))]" @change="applyFilters" />
-        <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @change="applyFilters" />
+        <FormControl :model-value="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects]" @update:model-value="updateProject" />
+        <FormControl :model-value="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @update:model-value="updateStatus" />
       </div>
       <ul class="transport-map-legend" aria-label="دليل الخريطة">
         <li data-kind="route">مسار الرحلة</li>
         <li data-kind="live">موقع مباشر</li>
         <li data-kind="stale">موقع متأخر</li>
+        <li data-kind="unknown">حداثة غير معروفة</li>
         <li data-kind="stop">نقطة توقف</li>
       </ul>
       <div ref="mapRoot" class="transport-map" aria-label="خريطة حركة المركبات" />
@@ -86,17 +105,20 @@ onBeforeUnmount(mapAdapter.destroy);
         <dl>
           <div><dt>السائق</dt><dd>{{ selected.driver_name || "غير مسند" }}</dd></div>
           <div><dt>المركبة</dt><dd><bdi dir="auto" translate="no">{{ selected.plate || "غير مسندة" }}</bdi></dd></div>
-          <div><dt>المشروع</dt><dd dir="auto">{{ selected.project || "غير محدد" }}</dd></div>
+          <div><dt>المشروع</dt><dd dir="auto">{{ selected.project_label || selected.project || "غير محدد" }}</dd></div>
         </dl>
         <RouterLink class="transport-map-selection__action" :to="`/trips/${selected.dispatch_trip}`">فتح تشغيل الرحلة</RouterLink>
       </article>
       <div class="transport-map-list" aria-live="polite">
-        <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectedTrip = item.dispatch_trip">
+        <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectTrip(item.dispatch_trip)">
           <div>
             <strong>{{ item.route_name || item.route_plan }}</strong>
             <span>{{ item.driver_name || "لم يحدد السائق" }} · <bdi dir="auto" translate="no">{{ item.plate || "لم تحدد المركبة" }}</bdi></span>
           </div>
-          <span class="transport-map-status" :data-state="item.stale ? 'stale' : item.has_position ? 'live' : 'offline'">{{ item.stale ? "آخر موقع متأخر" : item.has_position ? "مباشر" : "لا يوجد موقع" }}</span>
+          <span
+            class="transport-map-status"
+            :data-state="item.position_state"
+          >{{ positionStateLabel(item.position_state) }}</span>
         </button>
       </div>
     </template>

@@ -1,3 +1,5 @@
+import { coordinatePair } from "./transportMapState.js";
+
 const LEAFLET_STYLE = "/assets/apex/vendor/leaflet-1.9.4/leaflet.css";
 const LEAFLET_SCRIPT = "/assets/apex/vendor/leaflet-1.9.4/leaflet.js";
 const DEFAULT_CENTER = Object.freeze([24.7136, 46.6753]);
@@ -21,13 +23,6 @@ export function mapTheme(documentSource, windowSource) {
     ring: token("--c-surface-2", TOKEN_FALLBACKS.ring),
     stale: token("--warn", TOKEN_FALLBACKS.stale),
   });
-}
-
-function coordinatePair(point) {
-  const pair = Array.isArray(point)
-    ? [Number(point[0]), Number(point[1])]
-    : [Number(point?.lat), Number(point?.lng)];
-  return pair.every(Number.isFinite) ? pair : null;
 }
 
 export function routeCoordinates(item) {

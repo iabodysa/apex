@@ -3,11 +3,19 @@ import {
   cadenceLabel,
   conditionLabel,
   dateTimeLabel,
+  fieldLabel,
   floorLabel,
+  humanLabel,
+  humanOptions,
+  maintenanceIssueLabel,
+  maintenanceIssueOptions,
   recordTitle,
+  requestCategoryLabel,
+  requestCategoryOptions,
   remainingSeconds,
   periodLabel,
   statusLabel,
+  statusOptions,
   statusTheme,
   vehicleCategoryLabel,
 } from "./displayLabels.js";
@@ -17,6 +25,8 @@ describe("portal display labels", () => {
     expect(statusLabel("New")).toBe("جديد");
     expect(statusLabel("Completed")).toBe("مكتملة");
     expect(statusLabel("Dispatched")).toBe("في الطريق");
+    expect(statusLabel("Boarded")).toBe("صعد");
+    expect(statusLabel("Validated")).toBe("تم التحقق");
     expect(statusLabel("Unassigned")).toBe("غير مسندة");
     expect(statusLabel("assigned")).toBe("مسندة");
     expect(statusLabel("Ready")).toBe("جاهزة");
@@ -34,7 +44,22 @@ describe("portal display labels", () => {
     expect(statusLabel("Under Maintenance")).toBe("تحت الصيانة");
     expect(statusLabel("Not Tracked")).toBe("غير متابع");
     expect(statusLabel("Standard")).toBe("عادي");
+    expect(statusLabel("scheduled")).toBe("الرحلة مجدولة");
+    expect(statusLabel("en_route")).toBe("الحافلة في الطريق");
     expect(statusLabel("Custom State")).toBe("Custom State");
+  });
+
+  it("builds shared status and Link options with human labels as the primary text", () => {
+    expect(statusOptions(["Planned", "Dispatched", "Completed"])).toEqual([
+      { value: "Planned", label: "مجدولة" },
+      { value: "Dispatched", label: "في الطريق" },
+      { value: "Completed", label: "مكتملة" },
+    ]);
+    const project = { project: "PROJ-001", project_label: "مشروع المطار" };
+    expect(humanLabel(project, "project", "project_label", "غير محدد")).toBe("مشروع المطار");
+    expect(humanOptions([project, project], "project", "project_label")).toEqual([
+      { value: "PROJ-001", label: "مشروع المطار" },
+    ]);
   });
 
   it("maps workflow meaning to native frappe-ui badge themes", () => {
@@ -95,5 +120,34 @@ describe("portal display labels", () => {
       "رحلة",
     )).toBe("رحلة الوردية الصباحية");
     expect(recordTitle({ name: "DT-2026-00007" }, ["route_name"], "رحلة")).toBe("رحلة");
+  });
+
+  it("gives every stored maintenance and resident-request enum key an Arabic label", () => {
+    expect(maintenanceIssueLabel("Air Conditioning")).toBe("تكييف");
+    expect(maintenanceIssueLabel("Fire Safety")).toBe("سلامة الحريق");
+    expect(maintenanceIssueOptions().map((option) => option.value)).toEqual([
+      "Electrical", "Plumbing", "Furniture", "Air Conditioning",
+      "Fire Safety", "Pest Control", "Structural", "Other",
+    ]);
+    expect(maintenanceIssueOptions().every((option) => !/[A-Za-z]/.test(option.label))).toBe(true);
+
+    expect(requestCategoryLabel("Facility Item")).toBe("أثاث ومرافق");
+    expect(requestCategoryLabel("Reimbursement")).toBe("مطالبة مالية");
+    expect(requestCategoryOptions().map((option) => option.value)).toEqual([
+      "Maintenance", "Safety", "Cleaning", "Pest Control", "Custody", "Facility Item",
+      "Water", "Electrical", "AC", "Plumbing", "Reimbursement", "Complaint",
+      "Suggestion", "Other",
+    ]);
+    expect(requestCategoryOptions().every((option) => !/[A-Za-z]/.test(option.label))).toBe(true);
+    expect(statusLabel("Critical")).toBe("حرجة");
+  });
+
+  it("labels an enum-bearing title field and leaves free text untouched", () => {
+    expect(recordTitle({ name: "MR-1", issue_type: "Structural" }, ["issue_type"])).toBe("إنشائي");
+    expect(recordTitle({ name: "RR-1", request_category: "Facility Item" }, ["request_category"])).toBe("أثاث ومرافق");
+    expect(recordTitle({ name: "RR-2", description: "المكيف لا يعمل" }, ["request_category", "description"]))
+      .toBe("المكيف لا يعمل");
+    expect(fieldLabel("issue_type", "")).toBe("");
+    expect(fieldLabel("subject", "شكوى ضوضاء")).toBe("شكوى ضوضاء");
   });
 });

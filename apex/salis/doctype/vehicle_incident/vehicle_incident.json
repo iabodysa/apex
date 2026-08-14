@@ -261,13 +261,14 @@
   },
   {
    "default": "Open",
-   "description": "Handling stage of the vehicle incident record, from open and under review to closed or cancelled.",
+   "description": "System-managed handling stage of the vehicle incident record.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nUnder Review\nClosed\nCancelled"
+   "options": "Open\nUnder Review\nClosed",
+   "read_only": 1
   },
   {
    "fieldname": "vi_disposition_col",
@@ -512,10 +513,6 @@
   {
    "color": "Green",
    "title": "Closed"
-  },
-  {
-   "color": "Gray",
-   "title": "Cancelled"
   }
  ],
  "title_field": "vehicle",

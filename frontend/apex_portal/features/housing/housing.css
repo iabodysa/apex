@@ -46,6 +46,14 @@
 .today-action-list a { display: grid; gap: var(--sp-1); padding: var(--sp-4); border-radius: var(--radius); background: var(--surface); }
 .today-action-list span { font-weight: 700; }
 .today-action-list small { color: var(--muted); }
+.today-portfolio { display: grid; gap: var(--sp-3); padding: var(--sp-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+.today-portfolio > header { display: flex; align-items: end; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap; }
+.today-portfolio > header > div { display: grid; gap: var(--sp-1); }
+.today-portfolio > header a { color: var(--accent-ink); font-weight: 700; }
+.today-portfolio__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--sp-2); padding: 0; margin: 0; list-style: none; }
+.today-portfolio__list button { display: grid; inline-size: 100%; min-block-size: 120px; gap: var(--sp-2); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--ink); text-align: start; }
+.today-portfolio__list button[aria-pressed="true"] { border-color: var(--brand-green); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-green) 18%, transparent); }
+.today-portfolio__list button > span:last-of-type, .today-portfolio__list small { color: var(--muted); }
 .inventory-form, .safety-group { display: grid; gap: var(--sp-3); }
 .inventory-row { grid-template-columns: minmax(0, 1fr) repeat(3, minmax(120px, .6fr)); align-items: end; min-inline-size: 0; }
 .inventory-row > * { min-inline-size: 0; }

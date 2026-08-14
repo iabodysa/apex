@@ -22,7 +22,7 @@ onMounted(() => resource.fetch());
       <Button variant="ghost" icon-left="refresh-cw" label="تحديث" @click="resource.fetch()" />
     </header>
     <AsyncPanel v-if="resource.loading" state="loading" title="جاري تحميل المركبة" message="لحظات وتظهر التفاصيل." />
-    <AsyncPanel v-else-if="resource.error" state="error" title="تعذر تحميل المركبة" message="حاول مرة ثانية." @retry="resource.fetch()" />
+    <AsyncPanel v-else-if="resource.error" state="error" title="تعذّر تحميل المركبة" :message="resource.error" @retry="resource.fetch()" />
     <AsyncPanel v-else-if="!vehicle" state="empty" title="لا توجد مركبة مسندة" message="ستظهر هنا بعد الإسناد من مشرف التشغيل." />
     <article v-else class="salis-card">
       <Badge :theme="statusTheme(vehicle.status || 'assigned')" :label="statusLabel(vehicle.status || 'assigned')" />

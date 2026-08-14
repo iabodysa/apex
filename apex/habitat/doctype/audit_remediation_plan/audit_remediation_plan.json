@@ -63,12 +63,14 @@
   },
   {
    "doctype": "DocField",
-   "description": "Rolled-up remediation state for the whole client audit plan, summarising progress across its findings and flagging plans that are overdue or closed by the client.",
+   "allow_on_submit": 1,
+   "description": "System-managed rollup of remediation progress and deadline.",
    "fieldname": "overall_status",
    "fieldtype": "Select",
    "label": "Overall Status",
    "options": "Open\nIn Progress\nEvidence Submitted\nClosed by Client\nOverdue",
-   "default": "Open"
+   "default": "Open",
+   "read_only": 1
   },
   {
    "doctype": "DocField",

@@ -22,16 +22,20 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
 from frappe.utils import flt
+
+_TRANSITION_SAVEPOINT = "maintenance_request_transition"
 
 
 class MaintenanceRequest(Document):
     pass
 
 
-def before_save(doc, method=None):
-    """Defaults reported_by and company on a new request, then enforces the status transition rules."""
+def validate(doc, method=None):
+    """Default request ownership and enforce lifecycle rules on save and submit."""
+    _guard_status(doc)
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 
@@ -44,11 +48,21 @@ def before_save(doc, method=None):
     _validate_status_rules(doc)
 
 
+def _guard_status(doc):
+    """Keep lifecycle status under server-owned work-order and action transitions."""
+    if doc.is_new():
+        doc.status = "Open"
+        return
+    if doc.has_value_changed("status"):
+        frappe.throw(
+            _("Use the Maintenance Request actions to change Status."),
+            frappe.PermissionError,
+        )
+
+
 def _validate_status_rules(doc):
-    """Blocks an Assigned status with no assignee, a closed request with no notes, or negative cost."""
+    """Blocks a resolved request with no notes or a negative repair cost."""
     status = doc.status or "Open"
-    if status == "Assigned" and not doc.assigned_to:
-        frappe.throw(_("Assigned To is required when status is Assigned."))
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
         frappe.throw(_("Resolution Notes are required to resolve or close a Maintenance Request."))
     if flt(doc.cost_of_repair) < 0:
@@ -90,3 +104,56 @@ def make_work_order(source_name, target_doc=None):
     )
 
     return doclist
+
+
+def _locked_request(name: str):
+    """Load one request under a row lock and enforce native write permission."""
+    doc = frappe.get_doc("Maintenance Request", name, for_update=True)
+    doc.check_permission("write")
+    return doc
+
+
+@frappe.whitelist(methods=["POST"])
+def close_request(name: str) -> dict:
+    """Close a resolved request and its native Frappe assignments atomically."""
+    doc = _locked_request(name)
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Maintenance Requests can be closed."))
+    if doc.status != "Resolved":
+        frappe.throw(_("Only a resolved Maintenance Request can be closed."))
+
+    frappe.db.savepoint(_TRANSITION_SAVEPOINT)
+    try:
+        doc.db_set("status", "Closed")
+        close_all_assignments("Maintenance Request", doc.name)
+        doc.add_comment("Comment", _("Maintenance Request closed."))
+    except Exception:
+        frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
+        raise
+    return {"name": doc.name, "status": "Closed"}
+
+
+@frappe.whitelist(methods=["POST"])
+def reopen_request(name: str, reason: str) -> dict:
+    """Return a resolved or closed request to Open with an auditable reason."""
+    reason = str(reason or "").strip()
+    if not reason:
+        frappe.throw(_("A reason is required to reopen a Maintenance Request."))
+
+    doc = _locked_request(name)
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Maintenance Requests can be reopened."))
+    if doc.status not in ("Resolved", "Closed"):
+        frappe.throw(_("Only a resolved or closed Maintenance Request can be reopened."))
+
+    frappe.db.savepoint(_TRANSITION_SAVEPOINT)
+    try:
+        doc.db_set("status", "Open")
+        doc.add_comment(
+            "Comment",
+            _("Maintenance Request reopened: {0}").format(reason),
+        )
+    except Exception:
+        frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
+        raise
+    return {"name": doc.name, "status": "Open"}

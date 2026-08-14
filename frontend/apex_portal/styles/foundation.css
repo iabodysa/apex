@@ -185,10 +185,16 @@ h3 {
 }
 
 .record-reference {
+  max-inline-size: 100%;
+  overflow: hidden;
   color: var(--muted);
+  direction: ltr;
   font-family: var(--font);
   font-size: .78rem;
   font-variant-numeric: tabular-nums;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .record-card__title,
@@ -254,6 +260,49 @@ h3 {
   border-radius: var(--radius);
   color: var(--muted);
   text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.portal-skeleton__visual {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.portal-skeleton__row {
+  display: grid;
+  min-block-size: 96px;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.portal-skeleton__row span {
+  display: block;
+  block-size: 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--skeleton), var(--surface), var(--skeleton));
+  background-size: 240% 100%;
+  animation: portal-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.portal-skeleton__row span:first-child { inline-size: 52%; block-size: 18px; }
+.portal-skeleton__row span:nth-child(2) { inline-size: 76%; }
+.portal-skeleton__row span:last-child { inline-size: 36%; }
+
+@keyframes portal-skeleton-pulse {
+  from { background-position: 100% 0; }
+  to { background-position: -140% 0; }
 }
 
 .apex-boot {
@@ -504,6 +553,10 @@ h3 {
   gap: var(--sp-2);
 }
 
+.operations-shell__mobile-nav {
+  display: none;
+}
+
 .operations-shell__nav .portal-nav-link {
   padding-inline: var(--sp-3);
   color: var(--muted);
@@ -552,7 +605,7 @@ h3 {
   padding: 0 var(--sp-6) var(--sp-8);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 834px) {
   .portal-push-prompt {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -581,15 +634,48 @@ h3 {
   }
 
   .operations-shell__nav {
-    display: flex;
+    display: none;
     min-inline-size: 0;
     max-inline-size: 100%;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
   }
 
-  .operations-shell__nav .portal-nav-link {
-    flex: 0 0 auto;
+  .operations-shell__mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-2);
+  }
+
+  .operations-shell__mobile-group {
+    position: relative;
+    min-inline-size: 0;
+  }
+
+  .operations-shell__mobile-group summary {
+    display: grid;
+    min-block-size: 44px;
+    cursor: pointer;
+    place-items: center;
+    padding: var(--sp-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    list-style: none;
+  }
+
+  .operations-shell__mobile-group[open] summary {
+    border-color: var(--brand-green);
+    color: var(--accent-ink);
+  }
+
+  .operations-shell__mobile-group .portal-nav-link {
+    padding: var(--sp-2);
+  }
+
+  .operations-shell__mobile-group[open] {
+    grid-column: 1 / -1;
+    padding: var(--sp-2);
+    border-radius: var(--radius);
+    background: var(--surface);
   }
 
   .operations-shell__body {
@@ -607,7 +693,8 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .apex-boot__track span {
+  .apex-boot__track span,
+  .portal-skeleton__row span {
     animation: none;
   }
 }

@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 const props = defineProps({
     title: String,
     resource: Object,
@@ -34,10 +35,14 @@ onMounted(() => props.resource.fetch());
         <div v-if="resource.loading && !rows.length" class="ops-state" role="status">
             جاري تحميل القائمة…
         </div>
-        <div v-else-if="resource.error" class="ops-state ops-state--error">
-            <strong>تعذر تحميل القائمة</strong
-            ><Button variant="outline" label="حاول مرة ثانية" @click="resource.fetch()" />
-        </div>
+        <PortalErrorState
+            v-else-if="resource.error"
+            class="ops-state ops-state--error"
+            title="تعذر تحميل القائمة"
+            :message="resource.error"
+            fallback="راجع صلاحيات القائمة أو الاتصال ثم حاول مرة أخرى."
+            @retry="resource.fetch()"
+        />
         <div v-else-if="!rows.length" class="ops-state">{{ empty }}</div>
         <div v-else class="ops-table" role="table">
             <RouterLink

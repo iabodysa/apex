@@ -28,6 +28,7 @@ describe("portal registry", () => {
     ]);
     expect(JSON.stringify(PORTAL_CONTEXTS)).not.toMatch(/role/i);
     expect(Object.isFrozen(getPortalContext("worker"))).toBe(true);
+    expect(getPortalContext("housing").landing).toBe("/today");
   });
 });
 

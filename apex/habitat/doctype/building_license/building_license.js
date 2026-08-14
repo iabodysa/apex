@@ -41,5 +41,28 @@ frappe.ui.form.on("Building License", {
 				d.show();
 			});
 		}
+		if (frm.doc.docstatus === 1 && frm.doc.status !== "Revoked") {
+			frm.add_custom_button(__("Revoke License"), () => {
+				frappe.prompt(
+					{
+						fieldname: "reason",
+						fieldtype: "Small Text",
+						label: __("Reason"),
+						reqd: 1,
+					},
+					({ reason }) => {
+						frappe.call({
+							method:
+								"apex.habitat.doctype.building_license.building_license.mark_revoked",
+							args: { name: frm.doc.name, reason },
+							freeze: true,
+							callback: () => frm.reload_doc(),
+						});
+					},
+					__("Revoke License"),
+					__("Revoke"),
+				);
+			});
+		}
 	}
 });

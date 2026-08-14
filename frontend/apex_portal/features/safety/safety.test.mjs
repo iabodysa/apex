@@ -6,6 +6,11 @@ import { safetyRoutes } from "./routes.js";
 import SafetyTaskRow from "./components/SafetyTaskRow.vue";
 
 describe("safety feature contract", () => {
+  it("groups the mobile safety destination with maintenance operations", () => {
+    const route = safetyRoutes.find((candidate) => candidate.path === "/rounds");
+    expect(route.meta.group).toBe("الصيانة والسلامة");
+  });
+
   it("ships the round list and review routes", () => {
     expect(safetyRoutes.map((route) => route.path)).toEqual(["/rounds", "/rounds/:name"]);
   });

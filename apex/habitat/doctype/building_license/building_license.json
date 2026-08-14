@@ -21,10 +21,6 @@
    "title": "Expired"
   },
   {
-   "color": "Blue",
-   "title": "Under Renewal"
-  },
-  {
    "color": "Gray",
    "title": "Revoked"
   }
@@ -162,12 +158,13 @@
   },
   {
    "doctype": "DocField",
-   "description": "Validity state of the license, flagging documents that are active, approaching expiry, already expired, in renewal, or revoked so compliance gaps are visible.",
+   "description": "System-managed validity state derived from expiry, unless the license is revoked.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Active\nExpiring Soon\nExpired\nUnder Renewal\nRevoked",
-   "default": "Active"
+   "options": "Active\nExpiring Soon\nExpired\nRevoked",
+   "default": "Active",
+   "read_only": 1
   },
   {
    "doctype": "DocField",

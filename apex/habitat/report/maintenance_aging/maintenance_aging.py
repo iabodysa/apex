@@ -10,6 +10,7 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 _PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 _SLA_DAYS = {"Critical": 1, "High": 3, "Medium": 7, "Low": 14}
+_OPEN_MAINTENANCE_STATUSES = ["Open", "In Progress", "Resolved"]
 
 
 def execute(filters=None):
@@ -30,11 +31,13 @@ def execute(filters=None):
         {"label": frappe._("Cost of Repair"), "fieldname": "cost_of_repair", "fieldtype": "Currency", "width": 140},
     ]
 
-    open_statuses = ["Open", "Assigned", "In Progress", "Reopened"]
     if filters.get("status"):
-        query_filters = {"status": filters["status"]}
+        query_filters = {"status": filters["status"], "docstatus": 1}
     else:
-        query_filters = {"status": ["in", open_statuses]}
+        query_filters = {
+            "status": ["in", _OPEN_MAINTENANCE_STATUSES],
+            "docstatus": 1,
+        }
     if filters.get("building"):
         query_filters["building"] = filters["building"]
     if filters.get("priority"):

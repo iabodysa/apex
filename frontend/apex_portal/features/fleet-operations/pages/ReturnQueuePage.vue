@@ -8,5 +8,5 @@ const resource = createResource({
 });
 </script>
 <template>
-  <QueuePage title="قائمة الإرجاع" :resource="resource" empty="لا توجد مركبات بانتظار الإرجاع." />
+  <QueuePage title="قائمة الإرجاع" :resource="resource" detail-base="/returns" empty="لا توجد مركبات بانتظار الإرجاع." />
 </template>
