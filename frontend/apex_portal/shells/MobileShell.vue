@@ -1,7 +1,6 @@
 <script setup>
 import { computed } from "vue";
 import { useRoute } from "vue-router";
-import { FeatherIcon } from "frappe-ui";
 import { ar } from "../i18n/ar.js";
 import PortalPushPrompt from "../components/PortalPushPrompt.vue";
 
@@ -54,13 +53,13 @@ const overflowActive = computed(() => (
           :aria-current="isActive ? 'page' : undefined"
           @click="navigate"
         >
-          <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+          <span v-if="item.icon" class="portal-nav-icon" :class="item.icon" aria-hidden="true" />
           <span>{{ item.label }}</span>
         </a>
       </RouterLink>
       <details v-if="overflowNavigation.length" class="mobile-shell__more">
         <summary class="portal-nav-link" :aria-current="overflowActive ? 'page' : undefined">
-          <FeatherIcon class="portal-nav-icon" name="more-horizontal" aria-hidden="true" />
+          <span class="portal-nav-icon lucide-more-horizontal" aria-hidden="true" />
           <span>المزيد</span>
         </summary>
         <div class="mobile-shell__more-menu">
@@ -77,7 +76,7 @@ const overflowActive = computed(() => (
               :aria-current="isActive ? 'page' : undefined"
               @click="navigate"
             >
-              <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+              <span v-if="item.icon" class="portal-nav-icon" :class="item.icon" aria-hidden="true" />
               <span>{{ item.label }}</span>
             </a>
           </RouterLink>

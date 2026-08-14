@@ -33,12 +33,12 @@ const page = (path, name, capability, label, icon, component, view = {}) => ({
 });
 
 export const supervisorRoutes = Object.freeze([
-  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "inbox", pages.requests, {
+  page("/requests", "transport-requests", "transport.request.read", "طلبات النقل", "lucide-inbox", pages.requests, {
     doctype: "Transport Request",
     titleFields: ["from_location", "to_location", "requester_name"],
     fallbackTitle: "طلب نقل",
   }),
-  page("/requests/:name", "transport-request-detail", "transport.request.read", "تفاصيل طلب النقل", "file-text", SupervisorPage, {
+  page("/requests/:name", "transport-request-detail", "transport.request.read", "تفاصيل طلب النقل", "lucide-file-text", SupervisorPage, {
     doctype: "Transport Request",
     fields: [
       { key: "requester_name", label: "مقدم الطلب" },
@@ -53,13 +53,13 @@ export const supervisorRoutes = Object.freeze([
       { key: "assigned_to_trip", label: "الرحلة المسندة", link: { doctype: "Dispatch Trip", fieldname: "trip_title", fallback: "رحلة تشغيل" } },
     ],
   }),
-  page("/assignments", "route-assignments", "transport.assignment.read", "التشغيل المتكرر", "repeat", pages.assignments, {
+  page("/assignments", "route-assignments", "transport.assignment.read", "التشغيل المتكرر", "lucide-repeat", pages.assignments, {
     doctype: "Route Assignment",
     titleFields: ["assignment_name", "shift_name"],
     fallbackTitle: "تشغيل متكرر",
     detail: "/assignments/:name",
   }),
-  page("/assignments/:name", "route-assignment-detail", "transport.assignment.read", "تفاصيل التشغيل المتكرر", "repeat", SupervisorPage, {
+  page("/assignments/:name", "route-assignment-detail", "transport.assignment.read", "تفاصيل التشغيل المتكرر", "lucide-repeat", SupervisorPage, {
     doctype: "Route Assignment",
     fields: [
       { key: "assignment_name", label: "التشغيل" },
@@ -73,13 +73,13 @@ export const supervisorRoutes = Object.freeze([
       { key: "generated_through", label: "وُلّدت الرحلات حتى" },
     ],
   }),
-  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "navigation", pages.trips, {
+  page("/trips", "dispatch-trips", "transport.trip.read", "الرحلات", "lucide-navigation", pages.trips, {
     doctype: "Dispatch Trip",
     titleFields: ["trip_title", "shift_name"],
     fallbackTitle: "رحلة تشغيل",
     detail: "/trips/:name",
   }),
-  page("/trips/:name", "dispatch-trip-control", "transport.trip.read", "تشغيل الرحلة", "play-circle", SupervisorPage, {
+  page("/trips/:name", "dispatch-trip-control", "transport.trip.read", "تشغيل الرحلة", "lucide-play-circle", SupervisorPage, {
     doctype: "Dispatch Trip",
     fields: [
       { key: "status", label: "الحالة" },
@@ -97,9 +97,9 @@ export const supervisorRoutes = Object.freeze([
     feature: "transport-supervisor",
     capability: "transport.trip.location.read",
     component: TransportMapPage,
-    meta: { navigation: true, label: "الخريطة", icon: "map-pin", group: navigationGroup("/map") },
+    meta: { navigation: true, label: "الخريطة", icon: "lucide-map-pin", group: navigationGroup("/map") },
   },
-  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "clock", pages.history, {
+  page("/history", "movement-history", "transport.history.read", "سجل الحركة", "lucide-clock", pages.history, {
     doctype: "Dispatch Trip",
     titleFields: ["trip_title", "shift_name"],
     fallbackTitle: "حركة سابقة",

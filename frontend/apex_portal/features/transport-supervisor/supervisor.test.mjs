@@ -17,7 +17,6 @@ const { resourceData } = vi.hoisted(() => ({
 vi.mock("frappe-ui", () => ({
   Badge: { template: "<span />" },
   Button: { template: "<button><slot /></button>" },
-  FeatherIcon: { template: "<i />" },
   FormControl: {
     name: "FormControl",
     props: ["modelValue", "label", "type", "options"],
@@ -80,7 +79,7 @@ describe("Masar transport supervisor feature", () => {
     expect(page).toContain("createResource");
     expect(page).toContain("apex.salis.api.route_supervisor.get_active_driver_positions");
     expect(page).not.toContain("transportSupervisorGateway");
-    expect(page).toMatch(/<Button[^>]*icon-left="refresh-cw"[^>]*>تحديث<\/Button>/);
+    expect(page).toMatch(/<Button[^>]*icon-left="lucide-refresh-cw"[^>]*>تحديث<\/Button>/);
     expect(page).not.toMatch(/window\.L|document\.createElement|L\.map|L\.tileLayer|<style/);
   });
 
@@ -232,7 +231,7 @@ describe("Masar transport supervisor feature", () => {
       props: {
         title: "الرحلات",
         description: "الوصف",
-        icon: "navigation",
+        icon: "lucide-navigation",
         resource,
         empty: "فارغ",
       },
@@ -282,7 +281,7 @@ describe("Masar transport supervisor feature", () => {
       props: {
         title: "طلبات النقل",
         description: "الوصف",
-        icon: "inbox",
+        icon: "lucide-inbox",
         resource,
         empty: "فارغ",
         statusOptions: [{ label: "معتمد", value: "Approved" }],
@@ -328,7 +327,7 @@ describe("Masar transport supervisor feature", () => {
       props: {
         title: "طلبات النقل",
         description: "الوصف",
-        icon: "inbox",
+        icon: "lucide-inbox",
         resource,
         empty: "فارغ",
         statusOptions: [{ label: "معتمد", value: "Approved" }],
@@ -378,7 +377,7 @@ describe("Masar transport supervisor feature", () => {
       props: {
         title: "الرحلات",
         description: "الوصف",
-        icon: "navigation",
+        icon: "lucide-navigation",
         resource,
         empty: "فارغ",
         baseFilters,

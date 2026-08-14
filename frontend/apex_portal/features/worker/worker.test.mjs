@@ -19,7 +19,6 @@ vi.mock("frappe-ui", () => ({
   Badge: { props: ["label"], template: "<span>{{ label }}</span>" },
   Button: { template: "<button><slot /></button>" },
   ErrorMessage: { props: ["message"], template: "<p>{{ message }}</p>" },
-  FeatherIcon: { template: "<i />" },
   LoadingIndicator: { template: "<span />" },
   createResource: vi.fn((options) => {
     let url = options.url;

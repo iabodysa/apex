@@ -1,6 +1,6 @@
 <script setup>
 import { computed, inject, reactive, watch } from "vue";
-import { Button, FeatherIcon, FormControl } from "frappe-ui";
+import { Button, FormControl } from "frappe-ui";
 import { Link } from "frappe-ui/frappe";
 import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
@@ -103,13 +103,13 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
         <slot name="action" />
         <Button
           variant="outline"
-          icon-left="refresh-cw"
+          icon-left="lucide-refresh-cw"
           :loading="loading"
           @click="refresh"
         >
           تحديث
         </Button>
-        <FeatherIcon :name="icon" aria-hidden="true" />
+        <span :class="icon" aria-hidden="true" />
       </div>
     </header>
 

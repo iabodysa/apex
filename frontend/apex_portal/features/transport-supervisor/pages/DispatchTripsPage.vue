@@ -1,5 +1,5 @@
 <script setup>
-import { Badge, FeatherIcon, createListResource } from "frappe-ui";
+import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
 
@@ -36,7 +36,7 @@ const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
   <SupervisorCollection
     title="الرحلات"
     description="رحلات التشغيل الحالية مع السائق والمركبة وحالة التنفيذ."
-    icon="navigation"
+    icon="lucide-navigation"
     :resource="trips"
     date-field="trip_date"
     :base-filters="{ status: ['not in', ['Completed', 'Cancelled']] }"
@@ -60,7 +60,7 @@ const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
               </small>
             </div>
             <Badge :theme="statusTheme(trip.status)" :label="statusLabel(trip.status)" />
-            <FeatherIcon class="supervisor-row-chevron" name="arrow-left" aria-hidden="true" />
+            <span class="supervisor-row-chevron lucide-arrow-left" aria-hidden="true" />
           </RouterLink>
         </li>
       </ol>

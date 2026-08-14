@@ -17,7 +17,7 @@ onMounted(() => r.fetch());
         <p>تشغيل سلس</p>
         <h2>نظرة عامة</h2>
       </div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" :loading="r.loading" @click="r.fetch()" />
+      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" :loading="r.loading" @click="r.fetch()" />
     </header>
     <div v-if="r.loading" class="ops-state">جاري تحميل مؤشرات التشغيل…</div>
     <PortalErrorState v-else-if="r.error" title="تعذّر تحميل المؤشرات" :message="r.error" @retry="r.fetch()" />

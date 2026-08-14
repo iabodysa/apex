@@ -1,6 +1,5 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
-import { FeatherIcon } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { ar } from "../i18n/ar.js";
 
@@ -60,7 +59,7 @@ function groupContainsActiveRoute(group) {
             :aria-current="isActive ? 'page' : undefined"
             @click="navigate"
           >
-            <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+            <span v-if="item.icon" class="portal-nav-icon" :class="item.icon" aria-hidden="true" />
             <span>{{ item.label }}</span>
           </a>
         </RouterLink>
@@ -79,7 +78,7 @@ function groupContainsActiveRoute(group) {
             class="portal-nav-link"
             :to="item.to"
           >
-            <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+            <span v-if="item.icon" class="portal-nav-icon" :class="item.icon" aria-hidden="true" />
             <span>{{ item.label }}</span>
           </RouterLink>
         </details>

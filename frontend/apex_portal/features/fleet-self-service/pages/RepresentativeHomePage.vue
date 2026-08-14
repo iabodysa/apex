@@ -52,7 +52,7 @@ onMounted(() => contextResource.fetch());
           <span>المتابعة والردود</span>
         </RouterLink>
       </div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" @click="contextResource.fetch()" />
+      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="contextResource.fetch()" />
     </template>
   </section>
 </template>

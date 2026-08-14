@@ -44,21 +44,21 @@ function uploaded(file) {
       <Button
         class="safety-checklist__decision safety-checklist__decision--good"
         variant="outline"
-        icon-left="check"
+        icon-left="lucide-check"
         :aria-pressed="result.execution_status === 'Good'"
         @click="choose('Good')"
       >سليم</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--poor"
         variant="outline"
-        icon-left="alert-triangle"
+        icon-left="lucide-alert-triangle"
         :aria-pressed="result.execution_status === 'Poor'"
         @click="choose('Poor')"
       >يحتاج معالجة</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--not-done"
         variant="outline"
-        icon-left="minus-circle"
+        icon-left="lucide-minus-circle"
         :aria-pressed="result.execution_status === 'Not Done'"
         @click="choose('Not Done')"
       >لم يُفحص</Button>

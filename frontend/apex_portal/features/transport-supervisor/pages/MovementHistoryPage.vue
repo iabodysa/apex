@@ -35,7 +35,7 @@ const historyStatusOptions = statusOptions(["Completed", "Cancelled"]);
   <SupervisorCollection
     title="سجل الحركة"
     description="سجل زمني للرحلات المكتملة والملغاة للرجوع السريع."
-    icon="clock"
+    icon="lucide-clock"
     :resource="history"
     date-field="trip_date"
     :base-filters="{ status: ['in', ['Completed', 'Cancelled']] }"

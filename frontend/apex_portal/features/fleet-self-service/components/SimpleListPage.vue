@@ -28,7 +28,7 @@ onMounted(() => props.resource.fetch());
             </div>
             <Button
                 variant="ghost"
-                icon="refresh-cw"
+                icon="lucide-refresh-cw"
                 label="تحديث"
                 :loading="resource.loading"
                 @click="resource.fetch()"

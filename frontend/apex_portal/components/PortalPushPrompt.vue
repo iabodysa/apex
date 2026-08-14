@@ -1,6 +1,6 @@
 <script setup>
 import { computed, inject } from "vue";
-import { Button, FeatherIcon } from "frappe-ui";
+import { Button } from "frappe-ui";
 
 const push = inject("portalPush", null);
 const visible = computed(() => Boolean(push?.canOffer?.value || push?.error?.value));
@@ -8,7 +8,7 @@ const visible = computed(() => Boolean(push?.canOffer?.value || push?.error?.val
 
 <template>
   <aside v-if="visible" class="portal-push-prompt" aria-live="polite">
-    <FeatherIcon name="bell" aria-hidden="true" />
+    <span class="lucide-bell" aria-hidden="true" />
     <div>
       <strong>تنبيهات الرحلة</strong>
       <p>{{ push.error.value || "خلّ تنبيه وصول الحافلة يوصلك حتى لو التطبيق مقفل." }}</p>

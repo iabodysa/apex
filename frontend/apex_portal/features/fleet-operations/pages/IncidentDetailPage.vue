@@ -20,7 +20,7 @@ onMounted(() => resource.fetch({ name: route.params.name }));
         <h2>{{ doc?.vehicle_plate || doc?.vehicle || doc?.incident_type || "تفاصيل الحادث" }}</h2>
         <bdi class="record-reference" dir="auto" translate="no">{{ route.params.name }}</bdi>
       </div>
-      <Button variant="outline" icon="refresh-cw" label="تحديث" @click="resource.fetch({ name: route.params.name })" />
+      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="resource.fetch({ name: route.params.name })" />
     </header>
     <div v-if="resource.loading" class="ops-state">جاري التحميل…</div>
     <article v-else-if="doc" class="ops-card">
