@@ -65,6 +65,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Trip Title",
+   "permlevel": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -74,6 +75,7 @@
    "fieldtype": "Select",
    "label": "Trip Type",
    "options": "Scheduled\nAd Hoc",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -81,6 +83,7 @@
    "fieldtype": "Link",
    "label": "Route Assignment",
    "options": "Route Assignment",
+   "permlevel": 1,
    "search_index": 1
   },
   {
@@ -88,6 +91,7 @@
    "fieldtype": "Link",
    "label": "Route Template",
    "options": "Route Template",
+   "permlevel": 1,
    "search_index": 1
   },
   {
@@ -96,6 +100,7 @@
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
+   "permlevel": 1,
    "search_index": 1
   },
   {
@@ -104,6 +109,7 @@
    "fieldname": "shift_name",
    "fieldtype": "Data",
    "label": "Shift Name",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -115,6 +121,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Trip Date",
+   "permlevel": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -128,18 +135,21 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Planned\nDispatched\nCompleted\nCancelled",
+   "permlevel": 1,
    "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "planned_start",
    "fieldtype": "Datetime",
-   "label": "Planned Start"
+   "label": "Planned Start",
+   "permlevel": 1
   },
   {
    "fieldname": "planned_end",
    "fieldtype": "Datetime",
-   "label": "Planned End"
+   "label": "Planned End",
+   "permlevel": 1
   },
   {
    "fieldname": "dispatch_trip_sec_route",
@@ -150,7 +160,8 @@
    "fieldname": "stops",
    "fieldtype": "Table",
    "label": "Stops",
-   "options": "Route Stop"
+   "options": "Route Stop",
+   "permlevel": 1
   },
   {
    "fieldname": "dispatch_trip_sec_assigned_requests",
@@ -164,6 +175,7 @@
    "fieldtype": "Table",
    "label": "Assigned Requests",
    "options": "Dispatch Trip Assigned Request",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -171,6 +183,7 @@
    "fieldtype": "Link",
    "label": "Legacy Route Plan",
    "options": "Route Plan",
+   "permlevel": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -179,6 +192,7 @@
    "fieldtype": "Link",
    "label": "Legacy Primary Request",
    "options": "Transport Request",
+   "permlevel": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -192,7 +206,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Vehicle",
-   "options": "Salis Vehicle"
+   "options": "Salis Vehicle",
+   "permlevel": 1
   },
   {
    "fieldname": "dispatch_trip_sec_assignment_col1",
@@ -203,13 +218,15 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Driver",
-   "options": "Salis Driver"
+   "options": "Salis Driver",
+   "permlevel": 1
   },
   {
    "fieldname": "generation_key",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Generation Key",
+   "permlevel": 1,
    "read_only": 1,
    "unique": 1
   },
@@ -221,12 +238,14 @@
   {
    "fieldname": "depart_time",
    "fieldtype": "Time",
-   "label": "Depart Time"
+   "label": "Depart Time",
+   "permlevel": 1
   },
   {
    "fieldname": "return_time",
    "fieldtype": "Time",
-   "label": "Return Time"
+   "label": "Return Time",
+   "permlevel": 1
   },
   {
    "fieldname": "dispatch_trip_sec_execution_col1",
@@ -235,24 +254,27 @@
   {
    "fieldname": "odometer_start",
    "fieldtype": "Int",
-   "label": "Odometer Start"
+   "label": "Odometer Start",
+   "permlevel": 1
   },
   {
    "fieldname": "odometer_end",
    "fieldtype": "Int",
-   "label": "Odometer End"
+   "label": "Odometer End",
+   "permlevel": 1
   },
   {
+   "depends_on": "eval:doc.status=='Completed'",
    "fieldname": "dispatch_trip_sec_completion",
    "fieldtype": "Section Break",
-   "label": "Completion Notes",
-   "depends_on": "eval:doc.status=='Completed'"
+   "label": "Completion Notes"
   },
   {
    "depends_on": "eval:doc.status=='Completed'",
    "fieldname": "completion_notes",
    "fieldtype": "Small Text",
-   "label": "Completion Notes"
+   "label": "Completion Notes",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -281,6 +303,7 @@
    "fieldname": "driver_lat",
    "fieldtype": "Float",
    "label": "Driver Latitude",
+   "permlevel": 1,
    "precision": "6",
    "read_only": 1
   },
@@ -290,6 +313,7 @@
    "fieldname": "driver_lng",
    "fieldtype": "Float",
    "label": "Driver Longitude",
+   "permlevel": 1,
    "precision": "6",
    "read_only": 1
   },
@@ -303,13 +327,14 @@
    "fieldname": "driver_position_updated_at",
    "fieldtype": "Datetime",
    "label": "Driver Position Updated At",
+   "permlevel": 1,
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "dispatch_trip_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
@@ -319,6 +344,7 @@
    "fieldtype": "Link",
    "label": "Driver User",
    "options": "User",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -328,6 +354,7 @@
    "hidden": 1,
    "label": "Series",
    "options": "DT-.######",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -336,6 +363,7 @@
    "label": "Amended From",
    "no_copy": 1,
    "options": "Dispatch Trip",
+   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -379,7 +407,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-13 20:43:00.000000",
+ "modified": "2026-08-14 16:23:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",
@@ -388,7 +416,8 @@
  "permissions": [
   {
    "read": 1,
-   "role": "Driver"
+   "role": "Driver",
+   "write": 1
   },
   {
    "cancel": 1,
@@ -441,6 +470,30 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",
