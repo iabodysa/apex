@@ -49,6 +49,15 @@ const workers = computed(() =>
   })),
 );
 const pendingWorkers = computed(() => workers.value.filter((worker) => worker.status !== "Boarded"));
+// A driver reads this on a phone, where a tooltip never appears, so every blocked action says why
+// in the page itself. An empty string means the action is available.
+const blocked = computed(() => ({
+  start: trip.value?.started ? "الرحلة بدأت بالفعل." : "",
+  finish: trip.value?.started ? "" : "ابدأ الرحلة أولاً.",
+  notify: pendingWorkers.value.length ? "" : "لا أحد بانتظارك الآن.",
+  depart: boarding.value?.grace_elapsed ? "" : "انتظر انتهاء مهلة الصعود قبل المغادرة.",
+  scan: scanToken.value ? "" : "امسح بطاقة الراكب أو اكتب رمزها أولاً.",
+}));
 const waitLimit = computed(() => boarding.value?.worker_wait_request_max || 0);
 
 function waitSeconds(worker) {
@@ -177,6 +186,7 @@ onBeforeUnmount(stopLive);
           <Button theme="green" variant="solid" :disabled="trip.started" :loading="busy === 'start'" @click="run('start', () => gateway.startTrip(dispatchTrip), 'بدأت الرحلة')">بدء الرحلة</Button>
           <Button variant="outline" :disabled="!trip.started" :loading="busy === 'finish'" @click="run('finish', () => gateway.finishTrip(dispatchTrip), 'انتهت الرحلة')">إنهاء الرحلة</Button>
         </div>
+        <p v-if="blocked.start || blocked.finish" class="journey-hint">{{ blocked.start || blocked.finish }}</p>
       </section>
 
       <section class="journey-section">
@@ -237,6 +247,7 @@ onBeforeUnmount(stopLive);
           <Button variant="outline" :disabled="!pendingWorkers.length" :loading="busy === 'notify'" @click="run('notify', () => gateway.notifyPassengers(dispatchTrip), 'تم تنبيه المتبقين')">نبه المتبقين</Button>
           <Button theme="green" variant="solid" :disabled="!boarding.grace_elapsed" :loading="busy === 'depart'" @click="run('depart', () => gateway.depart(dispatchTrip), 'أغلق الصعود وغادرت الحافلة')">أغلق الصعود وغادر</Button>
         </div>
+        <p v-if="blocked.depart || blocked.notify" class="journey-hint">{{ blocked.depart || blocked.notify }}</p>
       </section>
 
       <section class="journey-section scanner-panel">
@@ -250,6 +261,7 @@ onBeforeUnmount(stopLive);
           <Button variant="outline" @click="startCamera">افتح الكاميرا</Button>
           <Button theme="green" variant="solid" :disabled="!scanToken" :loading="busy === 'scan'" @click="submitScan()">سجل الصعود</Button>
         </div>
+        <p v-if="blocked.scan" class="journey-hint">{{ blocked.scan }}</p>
         <p v-if="scanResult" role="status">{{ scanResult }}</p>
       </section>
     </template>

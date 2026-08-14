@@ -102,6 +102,12 @@
   flex: 1 1 150px;
 }
 
+.journey-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
 .journey-section {
   display: grid;
   gap: var(--sp-3);
