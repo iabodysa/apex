@@ -160,10 +160,10 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.request_type=='Standard'",
    "fieldname": "fuel_request_sec_fuel_account",
    "fieldtype": "Section Break",
-   "label": "Fuel Account",
-   "depends_on": "eval:doc.request_type=='Standard'"
+   "label": "Fuel Account"
   },
   {
    "depends_on": "eval:doc.request_type=='Standard'",
@@ -194,10 +194,10 @@
    "options": "\nPetrol 91\nPetrol 95\nDiesel"
   },
   {
+   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'",
    "fieldname": "fuel_request_sec_amounts",
    "fieldtype": "Section Break",
-   "label": "Amounts",
-   "depends_on": "eval:doc.request_type=='Standard' || doc.request_type=='Top-up'"
+   "label": "Amounts"
   },
   {
    "depends_on": "eval:doc.request_type=='Standard'",
@@ -246,10 +246,10 @@
    "label": "Valid Until"
   },
   {
+   "depends_on": "eval:doc.request_type=='Top-up'",
    "fieldname": "fuel_request_sec_temporary",
    "fieldtype": "Section Break",
-   "label": "Temporary Top-up",
-   "depends_on": "eval:doc.request_type=='Top-up'"
+   "label": "Temporary Top-up"
   },
   {
    "default": "0",
@@ -282,10 +282,10 @@
    "label": "Reverted"
   },
   {
+   "depends_on": "eval:doc.request_type=='Chip'",
    "fieldname": "fuel_request_sec_chip_details",
    "fieldtype": "Section Break",
-   "label": "Chip",
-   "depends_on": "eval:doc.request_type=='Chip'"
+   "label": "Chip"
   },
   {
    "depends_on": "eval:doc.request_type=='Chip'",
@@ -307,11 +307,11 @@
    "options": "\nIssue\nReplace\nCancel"
   },
   {
+   "collapsible": 1,
+   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
    "fieldname": "fuel_request_sec_chip",
    "fieldtype": "Section Break",
-   "label": "Chip Cancellation",
-   "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
-   "collapsible": 1
+   "label": "Chip Cancellation"
   },
   {
    "depends_on": "eval:doc.request_type=='Chip' && doc.action=='Cancel'",
@@ -369,10 +369,10 @@
    "label": "System"
   },
   {
+   "collapsible": 1,
    "fieldname": "fuel_request_sec_actors",
    "fieldtype": "Section Break",
-   "label": "Actors",
-   "collapsible": 1
+   "label": "Actors"
   },
   {
    "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
@@ -397,10 +397,10 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "fuel_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "description": "The driver's login user, mirrored from the linked driver. Drives the driver-facing notification.",
@@ -486,7 +486,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-08-12 08:43:00.000000",
+ "modified": "2026-08-14 16:35:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",
@@ -537,9 +537,11 @@
    "write": 1
   },
   {
+   "create": 1,
    "if_owner": 1,
    "read": 1,
-   "role": "Driver"
+   "role": "Driver",
+   "write": 1
   },
   {
    "export": 1,

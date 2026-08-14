@@ -218,14 +218,14 @@ def as_capacity(audience: str):
     Only ever open this AFTER a token has been resolved: the token is the authentication and this
     is the authorisation that follows it. The restore is in a ``finally`` because a scheduler or a
     request worker is reused, and a session left elevated would carry into whatever ran next.
+
+    There is deliberately no existence check on the identity. ``portal_identity_seed`` creates it
+    on install and on every migrate, so a missing one is an installation fault, and the write
+    inside would fail with a permission error naming the DocType — which is the more useful
+    message anyway. A guard here would cost a query on every portal write to restate that.
     """
     _require_audience(audience)
     user = CAPACITY_USERS[audience]
-    if not frappe.db.exists("User", user):
-        frappe.throw(
-            _("The {0} portal identity is missing; run migrate to seed it.").format(audience),
-            frappe.ValidationError,
-        )
     previous = frappe.session.user
     frappe.set_user(user)
     try:

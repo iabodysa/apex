@@ -1,18 +1,25 @@
 """Session-bound custody, incident, fuel top-up, and complaint services for /fleet.
 
-The five ``ignore_permissions`` inserts stand, and the reason is a product decision rather than a
-technical one: a driver holds NO role. He reaches Apex the way a worker does, by token, and is
-never meant to be a Frappe user with permissions of his own. So there is no role a ``create``
-DocPerm could be attached to, and adding one would contradict the identity model.
+Three of the writes — the handover, the fuel top-up and the incident — now run inside
+``as_capacity(DRIVER)`` and insert under the Driver role's own ``create``, which the fleet
+DocTypes grant because raising these about his own vehicle is exactly the driver's job. The
+capacity user carries the role; the token carries who he is.
 
-What is wrong here is the identity, not the permission. These endpoints still resolve the actor
-through ``base._session_driver``, which reads ``frappe.session.user`` and expects a signed-in
-account linked to a Salis Driver. That path is the one to retire — see the card on A-518.
+Two still pass ``ignore_permissions``: a complaint is an **Issue** and its reply is a
+**Communication**, both framework DocTypes. Granting the Driver role create on Communication would
+hand it the whole email and comment surface — a wider hole than the one it closes — so that pair
+waits for a narrower answer.
+
+What remains wrong here is the identity, not the permission: these endpoints still resolve the
+actor through ``base._session_driver``, which reads ``frappe.session.user`` and expects a signed-in
+account linked to a Salis Driver. The owner has ruled the driver holds no role of his own and
+arrives by token, so that path is the one to retire — see A-518.3.
 """
 
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_token_security import DRIVER, as_capacity
 from apex.salis.api import fleet_employee as base
 from apex.salis.utils import add_timeline_note, lock_vehicle, period_quota
 
@@ -250,8 +257,9 @@ def _submit_session_handover(
             answers,
         )
     )
-    doc.insert(ignore_permissions=True)
-    doc.submit()
+    with as_capacity(DRIVER):
+        doc.insert()
+        doc.submit()
     frappe.db.set_value(
         "File",
         evidence.name,
@@ -391,7 +399,8 @@ def submit_additional_fuel_request(topup_litres, reason):
         "request_date": frappe.utils.today(),
         "status": "Pending",
     })
-    doc.insert(ignore_permissions=True)
+    with as_capacity(DRIVER):
+        doc.insert()
     add_timeline_note("Fuel Request", doc.name, _("Reason: {0}").format(reason))
     return {"name": doc.name, "status": doc.status}
 
@@ -431,7 +440,8 @@ def report_incident(incident_type, incident_date, description, incident_time=Non
         "reported_by": frappe.session.user,
         "status": "Open",
     })
-    doc.insert(ignore_permissions=True)
+    with as_capacity(DRIVER):
+        doc.insert()
     return {"name": doc.name, "status": doc.status}
 
 

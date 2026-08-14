@@ -47,3 +47,14 @@ class TestPortalCapacity(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             with as_capacity("Supervisor"):
                 pass
+
+    def test_the_capacity_holds_create_on_the_documents_a_driver_raises(self):
+        """The grant is what lets the /fleet writes drop ignore_permissions."""
+        for doctype in ("Fuel Request", "Vehicle Incident", "Vehicle Handover"):
+            self.assertTrue(
+                frappe.db.exists(
+                    "DocPerm",
+                    {"parent": doctype, "role": DRIVER, "permlevel": 0, "create": 1},
+                ),
+                f"Driver cannot create {doctype}",
+            )

@@ -238,7 +238,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-08-14 03:00:00.000000",
+ "modified": "2026-08-14 16:35:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",
@@ -292,9 +292,11 @@
    "write": 1
   },
   {
+   "create": 1,
    "if_owner": 1,
    "read": 1,
-   "role": "Driver"
+   "role": "Driver",
+   "write": 1
   },
   {
    "read": 1,

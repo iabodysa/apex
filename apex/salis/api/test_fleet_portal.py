@@ -256,7 +256,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
         self.assertIsNone(payload["from_driver"])
         self.assertEqual(payload["to_driver"], "DRV-1")
         self.assertEqual(payload["checklist_template"], "Daily Inspection")
-        doc.insert.assert_called_once_with(ignore_permissions=True)
+        doc.insert.assert_called_once_with()
         doc.submit.assert_called_once_with()
         attach_evidence.assert_called_once_with(
             "File",
@@ -394,7 +394,7 @@ class FleetEmployeePortalTest(FrappeTestCase):
                 {"check_item": "Lights", "ok": 0, "remark": "Left lamp cracked"},
             ],
         )
-        doc.insert.assert_called_once_with(ignore_permissions=True)
+        doc.insert.assert_called_once_with()
         doc.submit.assert_called_once_with()
 
     @patch.object(fleet_employee, "bound_vehicle", return_value="VEH-1")
