@@ -95,29 +95,28 @@ def run(csv_dir=None):
     for r in _read(csv_dir, "salis_driver.csv"):
         did = (r.get("driver_id") or "").strip()
         if not did:
-            continue
+            frappe.throw(frappe._("Driver ID is required in salis_driver.csv."))
+        imported_status = (r.get("status") or "").strip()
+        if imported_status and imported_status != "Active":
+            frappe.throw(
+                frappe._(
+                    "Imported Salis Driver {0} has status {1}. Only blank or Active is accepted. Use Driver Suspension or Driver Clearance for lifecycle changes."
+                ).format(did, imported_status)
+            )
         name = frappe.db.get_value("Salis Driver", {"driver_id": did}, "name")
         if name:
-            try:
-                doc = frappe.get_doc("Salis Driver", name)
-                doc.full_name = (r.get("full_name") or did).strip()
-                doc.phone = (r.get("phone") or "").strip() or None
-                doc.status = (r.get("status") or "Active").strip()
-                doc.project = proj.get((r.get("project") or "").strip())
-                doc.save(ignore_permissions=True)
-            except Exception:
-                continue
+            doc = frappe.get_doc("Salis Driver", name)
+            doc.full_name = (r.get("full_name") or did).strip()
+            doc.phone = (r.get("phone") or "").strip() or None
+            doc.project = proj.get((r.get("project") or "").strip())
+            doc.save(ignore_permissions=True)
         else:
-            try:
-                name = frappe.get_doc({
-                    "doctype": "Salis Driver", "driver_id": did,
-                    "full_name": (r.get("full_name") or did).strip(),
-                    "phone": (r.get("phone") or "").strip() or None,
-                    "status": (r.get("status") or "Active").strip(),
-                    "project": proj.get((r.get("project") or "").strip()),
-                }).insert(ignore_permissions=True).name
-            except Exception:
-                continue
+            name = frappe.get_doc({
+                "doctype": "Salis Driver", "driver_id": did,
+                "full_name": (r.get("full_name") or did).strip(),
+                "phone": (r.get("phone") or "").strip() or None,
+                "project": proj.get((r.get("project") or "").strip()),
+            }).insert(ignore_permissions=True).name
         drv[did] = name
     out["drivers"] = len(drv)
 

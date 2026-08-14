@@ -177,7 +177,7 @@ doc_events = {
     },
     "Safety Inspection Report": {},
     "Maintenance Request": {
-        "before_save": "apex.habitat.doctype.maintenance_request.maintenance_request.before_save",
+        "validate": "apex.habitat.doctype.maintenance_request.maintenance_request.validate",
     },
     "Custody Article": {},
     "Custody Asset Category": {},

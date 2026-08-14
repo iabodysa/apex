@@ -202,20 +202,19 @@ def _safety_inspections(building_names, date_from, date_to):
 def _maintenance(building_names):
     """Open and closed Maintenance Request counts per building.
 
-    Maintenance Request states are Open/Assigned/In Progress/Resolved/Closed/Reopened.
-    Assigned and Reopened are active work too and are counted as open — they previously
-    fell through both branches, undercounting ``open_maintenance``.
+    Native Frappe assignments own assignee state. Request lifecycle remains
+    Open/In Progress/Resolved/Closed.
     """
     result = defaultdict(lambda: {"open": 0, "closed": 0})
     rows = frappe.get_all(
         "Maintenance Request",
-        filters={"building": ["in", building_names]},
+        filters={"building": ["in", building_names], "docstatus": 1},
         fields=["building", "status"],
     )
     for r in rows:
-        if r.status in ("Open", "In Progress", "Assigned", "Reopened"):
+        if r.status in ("Open", "In Progress", "Resolved"):
             result[r.building]["open"] += 1
-        elif r.status in ("Resolved", "Closed"):
+        elif r.status == "Closed":
             result[r.building]["closed"] += 1
     return result
 

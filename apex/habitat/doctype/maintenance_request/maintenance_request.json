@@ -145,13 +145,14 @@
   },
   {
    "default": "Open",
-   "description": "Workflow stage of the maintenance request from open through assignment and active work to resolution and closure, including reopening when a fix does not hold.",
+   "description": "Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nAssigned\nIn Progress\nResolved\nClosed\nReopened"
+   "options": "Open\nIn Progress\nResolved\nClosed",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -174,7 +175,8 @@
    "fieldname": "assigned_to",
    "fieldtype": "Link",
    "label": "Assigned To",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "maintenance_request_sec_primary_large_text",
@@ -484,10 +486,6 @@
    "title": "Open"
   },
   {
-   "color": "Blue",
-   "title": "Assigned"
-  },
-  {
    "color": "Orange",
    "title": "In Progress"
   },
@@ -498,10 +496,6 @@
   {
    "color": "Gray",
    "title": "Closed"
-  },
-  {
-   "color": "Red",
-   "title": "Reopened"
   }
  ],
  "title_field": "issue_type",

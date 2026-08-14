@@ -6,6 +6,9 @@ from __future__ import annotations
 import frappe
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
+from apex.habitat.doctype.audit_remediation_plan.audit_remediation_plan import (
+    refresh_overall_status,
+)
 from apex.habitat.tasks.common import (
     _notify_operational,
     _notify_role_system,
@@ -207,12 +210,9 @@ def weekly_safety_coverage_gate() -> None:
 def audit_remediation_deadline_watch() -> None:
     """Daily — flag submitted Client Audit Remediation Plans whose deadline has passed.
 
-    A submitted plan whose ``overall_status`` is not yet closed (anything other than
-    "Closed by Client" / "Overdue") and whose ``remediation_deadline`` is before today
-    is set to "Overdue", and a system Notification is posted to the plan's AFMCO owner
-    and to the Accommodation Manager role, which holds the read and the write that
-    closes the plan. Mirrors daily_building_license_expiry_check: paginated 500/batch
-    with per-row error isolation.
+    The shared controller rollup decides whether a passed deadline means Overdue or
+    whether fully verified actions already close the plan. Newly overdue plans notify
+    the internal owner and Accommodation Manager.
     """
     from frappe.utils import today, getdate
 
@@ -241,9 +241,9 @@ def audit_remediation_deadline_watch() -> None:
         for plan in plans:
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
-                frappe.db.set_value(
-                    "Audit Remediation Plan", plan.name, "overall_status", "Overdue"
-                )
+                result = refresh_overall_status(plan.name, today_date)
+                if result["overall_status"] != "Overdue":
+                    continue
                 msg = (
                     f"audit_remediation_deadline_watch: remediation plan {plan.name} "
                     f"(project {plan.client_project}) passed its deadline {plan.remediation_deadline} "

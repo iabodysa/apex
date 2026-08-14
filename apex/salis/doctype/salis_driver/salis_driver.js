@@ -109,7 +109,6 @@ function _update_driver_indicator(frm) {
 	const colors = {
 		"Active": "green",
 		"Stopped": "red",
-		"On Leave": "orange",
 		"Released": "grey",
 	};
 	if (frm.doc.status) {

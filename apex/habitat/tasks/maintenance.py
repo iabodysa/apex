@@ -6,12 +6,13 @@ from __future__ import annotations
 import frappe
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
+from apex.habitat.doctype.building_license.building_license import derive_license_status
 
 _ROW_SAVEPOINT = "maintenance_row"
 
 
 def daily_building_license_expiry_check() -> None:
-    """Flip Building License status to Expired / Expiring Soon on the transition edge.
+    """Keep submitted Building License validity status aligned with its expiry date.
 
     Operator alerting is owned by the native Notifications ``Habitat - Building
     License Expiring Soon`` and ``Habitat - Building License Expired``. This
@@ -20,9 +21,9 @@ def daily_building_license_expiry_check() -> None:
     field is not ``allow_on_submit`` (Building License is submitted), and it cannot
     honour the per-record ``renewal_lead_days`` override. So the sweep is kept —
     stripped of the old notify/message boilerplate — purely to keep the persisted
-    status accurate (Active/Expiring Soon are swept; Expired/Revoked are left alone).
+    status accurate. Revoked is terminal and is never recalculated.
     """
-    from frappe.utils import date_diff, today
+    from frappe.utils import today
 
     today_str = today()
 
@@ -33,7 +34,7 @@ def daily_building_license_expiry_check() -> None:
             "Building License",
             filters={
                 "docstatus": 1,
-                "status": ["in", ["Active", "Expiring Soon"]],
+                "status": ["!=", "Revoked"],
                 "name": [">", cursor],
             },
             fields=["name", "expiry_date", "renewal_lead_days", "status"],
@@ -51,14 +52,9 @@ def daily_building_license_expiry_check() -> None:
             frappe.db.savepoint(_ROW_SAVEPOINT)
             try:
                 lead_days = lic.renewal_lead_days if lic.renewal_lead_days is not None else default_lead
-                days_to_expiry = date_diff(lic.expiry_date, today_str)
-
-                if days_to_expiry <= 0:
-                    if lic.status != "Expired":
-                        frappe.db.set_value("Building License", lic.name, "status", "Expired")
-                elif days_to_expiry <= lead_days:
-                    if lic.status != "Expiring Soon":
-                        frappe.db.set_value("Building License", lic.name, "status", "Expiring Soon")
+                status = derive_license_status(lic.expiry_date, lead_days, today_str)
+                if lic.status != status:
+                    frappe.db.set_value("Building License", lic.name, "status", status)
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -111,7 +107,7 @@ def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, i
 def open_maintenance_escalation() -> None:
     """Escalate overdue open Maintenance Requests.
 
-    Checks open requests (docstatus != 2, status in ('Open', 'Assigned', 'In Progress', 'Reopened'))
+    Checks open requests (docstatus != 2, status in ('Open', 'In Progress'))
     and logs escalations based on priority and elapsed time.
     Each overdue ticket is ASSIGNED to the role that can close it, and the queue is
     reconciled at the end of the pass, so a request that is no longer overdue has its
@@ -138,7 +134,7 @@ def open_maintenance_escalation() -> None:
             "Maintenance Request",
             filters={
                 "docstatus": ["!=", 2],
-                "status": ["in", ["Open", "Assigned", "In Progress", "Reopened"]]
+                "status": ["in", ["Open", "In Progress"]]
             },
             fields=["name", "priority", "creation", "status", "issue_type"],
             limit_start=start,

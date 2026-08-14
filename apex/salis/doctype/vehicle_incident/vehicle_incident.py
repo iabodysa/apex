@@ -36,11 +36,13 @@ _RECOVERY_INTAKE_RESET = {
     "signed_on": None,
     "recovery_advance": None,
 }
+_TRANSITION_SAVEPOINT = "vehicle_incident_transition"
 
 
 class VehicleIncident(Document):
     def validate(self):
         """Validates the incident date and cost, and enforces public-intake and cost-recovery guards."""
+        self._guard_status()
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
         if flt(self.estimated_cost) < 0:
@@ -48,6 +50,17 @@ class VehicleIncident(Document):
         self._guard_public_intake()
         self._guard_cost_recovery()
         self._sync_third_party()
+
+    def _guard_status(self):
+        """Keep lifecycle status under controller-owned transitions."""
+        if self.is_new():
+            self.status = "Open"
+            return
+        if self.has_value_changed("status"):
+            frappe.throw(
+                _("Use the incident actions to change Status."),
+                frappe.PermissionError,
+            )
 
     def _sync_third_party(self):
         """Keep the third-party block and its flag telling the same story.
@@ -126,6 +139,7 @@ class VehicleIncident(Document):
 
     def on_submit(self):
         """Raises the recovery advance and, for a theft, stops the vehicle and clears its driver."""
+        self.db_set("status", "Under Review")
         self._raise_recovery_advance()
         if self.incident_type != "Theft":
             return
@@ -244,6 +258,7 @@ class VehicleIncident(Document):
 
     def on_cancel(self):
         """Reverses the recovery advance and, for a theft, restores the vehicle's prior driver and status."""
+        self.db_set("status", "Closed")
         self._release_recovery_advance()
         if self.incident_type != "Theft":
             return
@@ -279,3 +294,46 @@ class VehicleIncident(Document):
             self.vehicle,
             _("Theft report {0} cancelled.").format(self.name),
         )
+
+
+def close_incident_internal(
+    name: str,
+    resolution: str,
+    *,
+    check_permission: bool = True,
+) -> dict:
+    """Close one submitted incident through the canonical transition."""
+    resolution = str(resolution or "").strip()
+    if not resolution:
+        frappe.throw(_("A resolution is required to close a Vehicle Incident."))
+
+    doc = frappe.get_doc("Vehicle Incident", name, for_update=True)
+    if check_permission:
+        doc.check_permission("write")
+    if doc.docstatus != 1:
+        frappe.throw(_("Only submitted Vehicle Incidents can be closed."))
+    if doc.status != "Under Review":
+        frappe.throw(_("Only an incident under review can be closed."))
+
+    frappe.db.savepoint(_TRANSITION_SAVEPOINT)
+    try:
+        doc.db_set("status", "Closed")
+        doc.add_comment(
+            "Comment",
+            _("Incident closed: {0}").format(resolution),
+        )
+        add_timeline_note(
+            "Salis Vehicle",
+            doc.vehicle,
+            _("Incident {0} closed: {1}").format(doc.name, resolution),
+        )
+    except Exception:
+        frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
+        raise
+    return {"name": doc.name, "status": "Closed"}
+
+
+@frappe.whitelist(methods=["POST"])
+def close_incident(name: str, resolution: str) -> dict:
+    """Permission-checked incident close action for Desk and portal clients."""
+    return close_incident_internal(name, resolution)
