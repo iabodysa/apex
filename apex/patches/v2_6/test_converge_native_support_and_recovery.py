@@ -1,8 +1,13 @@
+import importlib
+from pathlib import Path
 from unittest.mock import patch
 
 from frappe.tests.utils import FrappeTestCase
 
 from apex.patches.v2_6 import converge_native_support_and_recovery as convergence
+
+
+APP_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
@@ -56,3 +61,43 @@ class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
             retire()
 
         rename_doc.assert_not_called()
+
+    def test_renamed_legacy_utility_card_receives_canonical_values(self):
+        legacy = dict(convergence._LEGACY_UTILITY_CARD_VALUES)
+
+        with (
+            patch.object(convergence.frappe.db, "exists", side_effect=[True, False]),
+            patch.object(convergence.frappe.db, "get_value", return_value=legacy),
+            patch.object(convergence.frappe, "rename_doc") as rename_doc,
+            patch.object(convergence.frappe.db, "set_value") as set_value,
+        ):
+            convergence._retire_untouched_legacy_utility_card()
+
+        rename_doc.assert_called_once_with(
+            "Number Card",
+            "Disputed Utility Bills",
+            "Rejected Utility Bills",
+            force=True,
+            merge=False,
+            ignore_permissions=True,
+            show_alert=False,
+        )
+        set_value.assert_called_once_with(
+            "Number Card",
+            "Rejected Utility Bills",
+            {
+                "label": "Rejected Utility Bills",
+                "filters_json": '[["Utility Bill Entry", "status", "=", "Rejected"]]',
+            },
+            update_modified=False,
+        )
+
+    def test_legacy_utility_card_repair_has_its_own_registered_patch(self):
+        patch_path = "apex.patches.v2_6.repair_legacy_utility_number_card"
+        registered = (APP_ROOT / "patches.txt").read_text(encoding="utf-8")
+        self.assertIn(patch_path, registered.splitlines())
+
+        repair = importlib.import_module(patch_path)
+        with patch.object(repair, "_retire_untouched_legacy_utility_card") as retire:
+            repair.execute()
+        retire.assert_called_once_with()

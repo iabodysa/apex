@@ -17,3 +17,4 @@ apex.patches.v2_6.backfill_portal_push_subscription_holder
 apex.patches.v2_6.migrate_masar_route_model
 apex.patches.v2_6.converge_state_contracts
 apex.patches.v2_6.converge_native_support_and_recovery
+apex.patches.v2_6.repair_legacy_utility_number_card

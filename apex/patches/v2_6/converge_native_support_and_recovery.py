@@ -37,6 +37,10 @@ _LEGACY_UTILITY_CARD_VALUES = {
     "filters_json": '[["Utility Bill Entry", "status", "=", "Disputed"]]',
     "is_standard": 1,
 }
+_CANONICAL_UTILITY_CARD_VALUES = {
+    "label": _CANONICAL_UTILITY_CARD,
+    "filters_json": '[["Utility Bill Entry", "status", "=", "Rejected"]]',
+}
 
 
 def execute():
@@ -208,15 +212,25 @@ def _retire_untouched_legacy_utility_card():
         for field, expected in _LEGACY_UTILITY_CARD_VALUES.items()
     ):
         return
+    canonical_exists = bool(
+        frappe.db.exists("Number Card", _CANONICAL_UTILITY_CARD)
+    )
     frappe.rename_doc(
         "Number Card",
         _LEGACY_UTILITY_CARD,
         _CANONICAL_UTILITY_CARD,
         force=True,
-        merge=bool(frappe.db.exists("Number Card", _CANONICAL_UTILITY_CARD)),
+        merge=canonical_exists,
         ignore_permissions=True,
         show_alert=False,
     )
+    if not canonical_exists:
+        frappe.db.set_value(
+            "Number Card",
+            _CANONICAL_UTILITY_CARD,
+            _CANONICAL_UTILITY_CARD_VALUES,
+            update_modified=False,
+        )
 
 
 def _assert_select_consistency():
