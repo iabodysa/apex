@@ -46,6 +46,16 @@ async function applyFilters() {
   await draw();
 }
 
+async function updateProject(value) {
+  project.value = value || "";
+  await applyFilters();
+}
+
+async function updateStatus(value) {
+  status.value = value || "";
+  await applyFilters();
+}
+
 async function selectTrip(name) {
   selectedTrip.value = name;
   await nextTick();
@@ -75,8 +85,8 @@ onBeforeUnmount(() => {
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد رحلات نشطة الآن.</div>
     <template v-else>
       <div class="transport-map-filters">
-        <FormControl v-model="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects]" @change="applyFilters" />
-        <FormControl v-model="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @change="applyFilters" />
+        <FormControl :model-value="project" type="select" label="المشروع" :options="[{ label: 'كل المشاريع', value: '' }, ...projects]" @update:model-value="updateProject" />
+        <FormControl :model-value="status" type="select" label="الحالة" :options="[{ label: 'كل الحالات', value: '' }, ...statuses.map((value) => ({ label: statusLabel(value), value }))]" @update:model-value="updateStatus" />
       </div>
       <ul class="transport-map-legend" aria-label="دليل الخريطة">
         <li data-kind="route">مسار الرحلة</li>

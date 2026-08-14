@@ -41,6 +41,7 @@ describe("vehicle handover form", () => {
     checklistFetch.mockResolvedValue({
       direction: "Receipt",
       vehicle: "VEH-1",
+      assignment: "VA-0001",
       template: "VHC-1",
       items: [
         { check_item: "الإطارات", default_remark: "" },
@@ -69,6 +70,7 @@ describe("vehicle handover form", () => {
 
     expect(handoverSubmit).toHaveBeenCalledOnce();
     expect(handoverSubmit).toHaveBeenCalledWith(expect.objectContaining({
+      assignment: "VA-0001",
       odometer: 12345,
       signed_evidence: "/private/files/signed.pdf",
       checklist_template: "VHC-1",

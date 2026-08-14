@@ -19,9 +19,10 @@ describe("native vehicle handover state", () => {
 
     expect(buildHandoverPayload(
       { odometer: 12345, fuel_level: "Half", condition_notes: "", signed_evidence: "/private/files/signed.pdf" },
-      { template: "VHC-1", items: [{ check_item: "الإطارات" }, { check_item: "المصابيح" }] },
+      { assignment: "VA-0001", template: "VHC-1", items: [{ check_item: "الإطارات" }, { check_item: "المصابيح" }] },
       rows,
     )).toEqual({
+      assignment: "VA-0001",
       odometer: 12345,
       fuel_level: "Half",
       condition_notes: "",
@@ -42,8 +43,16 @@ describe("native vehicle handover state", () => {
     )).toThrow("قالب");
     expect(() => buildHandoverPayload(
       { odometer: 1, signed_evidence: "" },
-      { template: "VHC-1", items: [{ check_item: "الإطارات" }] },
+      { assignment: "VA-0001", template: "VHC-1", items: [{ check_item: "الإطارات" }] },
       [{ check_item: "الإطارات", ok: true, remark: "" }],
     )).toThrow("الإثبات");
+  });
+
+  it("fails closed when the server did not bind the checklist to an assignment", () => {
+    expect(() => buildHandoverPayload(
+      { odometer: 1, signed_evidence: "/signed.pdf" },
+      { template: "VHC-1", items: [{ check_item: "الإطارات" }] },
+      [{ check_item: "الإطارات", ok: true, remark: "" }],
+    )).toThrow("عهدة");
   });
 });

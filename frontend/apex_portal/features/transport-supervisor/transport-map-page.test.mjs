@@ -9,7 +9,19 @@ const { draw, destroy, fetch } = vi.hoisted(() => ({
 
 vi.mock("frappe-ui", () => ({
   Button: { template: "<button><slot /></button>" },
-  FormControl: { template: "<input />" },
+  FormControl: {
+    name: "FormControl",
+    props: ["modelValue", "label", "options"],
+    emits: ["update:modelValue", "change"],
+    template: `
+      <label>
+        {{ label }}
+        <select :value="modelValue" @change="$emit('update:modelValue', $event.target.value)">
+          <option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option>
+        </select>
+      </label>
+    `,
+  },
   createResource: vi.fn(() => ({ fetch })),
 }));
 
@@ -72,6 +84,25 @@ describe("transport map selection", () => {
     await flushPromises();
 
     expect(wrapper.findAll(".transport-map-selection dd")[2].text()).toBe("مشروع ألف");
+    wrapper.unmount();
+  });
+
+  it("redraws through the frappe-ui model event when a filter changes", async () => {
+    const wrapper = mount(TransportMapPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+    draw.mockClear();
+
+    const projectFilter = wrapper.findAllComponents({ name: "FormControl" })
+      .find((control) => control.props("label") === "المشروع");
+    await projectFilter.get("select").setValue("PROJ-A");
+    await flushPromises();
+
+    expect(draw).toHaveBeenCalledOnce();
+    expect(draw.mock.calls[0][1]).toEqual([
+      expect.objectContaining({ dispatch_trip: "TRIP-1", project: "PROJ-A" }),
+    ]);
     wrapper.unmount();
   });
 });

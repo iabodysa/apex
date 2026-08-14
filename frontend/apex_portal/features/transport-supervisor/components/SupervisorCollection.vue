@@ -1,9 +1,9 @@
 <script setup>
 import { computed, inject, reactive, watch } from "vue";
 import { Button, FeatherIcon, FormControl } from "frappe-ui";
+import { Link } from "frappe-ui/frappe";
 import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
-import { humanOptions } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 
 const props = defineProps({
@@ -32,29 +32,50 @@ const rows = computed(() => {
 });
 const loading = computed(() => props.resource.list?.loading ?? props.resource.loading);
 const error = computed(() => props.resource.list?.error ?? props.resource.error);
-const projectOptions = computed(() => humanOptions(rows.value, "project", "project_label"));
+let queryGeneration = 0;
+let queryQueue = Promise.resolve();
 
-function refresh() {
+function reloadResource() {
   return props.resource.reload?.() ?? props.resource.fetch?.();
 }
 
-async function applyQuery(query) {
-  Object.assign(filters, {
+function normalizedFilters(query) {
+  return {
     status: typeof query?.status === "string" && allowedStatuses.value.includes(query.status)
       ? query.status
       : "",
     project: typeof query?.project === "string" ? query.project : "",
     date: typeof query?.date === "string" ? query.date : "",
-  });
-  props.resource.update?.({
-    start: 0,
-    filters: filtersFromQuery(filters, {
-      base: props.baseFilters,
-      dateField: props.dateField,
-      allowedStatuses: allowedStatuses.value,
-    }),
-  });
-  await refresh();
+  };
+}
+
+function applyQuery(query) {
+  const generation = ++queryGeneration;
+  const nextFilters = normalizedFilters(query);
+  queryQueue = queryQueue
+    .catch(() => undefined)
+    .then(async () => {
+      if (generation !== queryGeneration) return;
+      Object.assign(filters, nextFilters);
+      props.resource.update?.({
+        start: 0,
+        filters: filtersFromQuery(filters, {
+          base: props.baseFilters,
+          dateField: props.dateField,
+          allowedStatuses: allowedStatuses.value,
+        }),
+      });
+      try {
+        await reloadResource();
+      } catch {
+        return;
+      }
+    });
+  return queryQueue;
+}
+
+function refresh() {
+  return applyQuery(route.query || queryFromFilters(filters));
 }
 
 function updateFilters() {
@@ -100,11 +121,11 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
         label="الحالة"
         :options="[{ label: 'كل الحالات', value: '' }, ...statusOptions]"
       />
-      <FormControl
+      <Link
         v-model="filters.project"
-        type="select"
+        doctype="Project"
         label="المشروع"
-        :options="[{ label: 'كل المشاريع', value: '' }, ...projectOptions]"
+        placeholder="ابحث عن مشروع"
       />
       <FormControl v-if="dateField" v-model="filters.date" type="date" label="التاريخ" />
       <Button type="submit" variant="outline">تطبيق</Button>

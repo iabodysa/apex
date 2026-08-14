@@ -17,6 +17,9 @@ export function buildHandoverPayload(form, checklist, rows) {
   if (!checklist?.template || !Array.isArray(checklist.items) || !checklist.items.length) {
     throw new Error("لا يوجد قالب فحص نشط لهذه العملية.");
   }
+  if (!checklist.assignment) {
+    throw new Error("تعذّر ربط الفحص بعهدة المركبة. أعد تحميل الصفحة.");
+  }
   if (!form?.signed_evidence) {
     throw new Error("أرفق الإثبات الموقّع قبل التأكيد.");
   }
@@ -40,6 +43,7 @@ export function buildHandoverPayload(form, checklist, rows) {
     };
   });
   return {
+    assignment: checklist.assignment,
     odometer,
     fuel_level: form.fuel_level || "",
     condition_notes: form.condition_notes || "",

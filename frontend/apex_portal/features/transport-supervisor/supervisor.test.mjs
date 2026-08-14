@@ -57,6 +57,15 @@ vi.mock("frappe-ui", () => ({
   })),
 }));
 
+vi.mock("frappe-ui/frappe", () => ({
+  Link: {
+    name: "FrappeLink",
+    props: ["modelValue", "doctype", "label", "placeholder"],
+    emits: ["update:modelValue"],
+    template: "<div />",
+  },
+}));
+
 describe("Masar transport supervisor feature", () => {
   it("keeps map view, Leaflet, state, styles, and server access in focused files", () => {
     const root = path.dirname(fileURLToPath(import.meta.url));
@@ -212,7 +221,7 @@ describe("Masar transport supervisor feature", () => {
     expect(routes).toContain('labelKey: "accommodation_building_label"');
   });
 
-  it("shows project labels in the shared project filter while retaining ids as values", async () => {
+  it("delegates project search beyond the current page to Frappe's native Link control", async () => {
     const resource = {
       data: [{ name: "DT-1", project: "PROJ-1", project_label: "مشروع المطار" }],
       list: { loading: false, error: null },
@@ -231,13 +240,12 @@ describe("Masar transport supervisor feature", () => {
     });
     await flushPromises();
 
-    const projectFilter = wrapper.findAllComponents({ name: "FormControl" })
-      .find((control) => control.props("label") === "المشروع");
-    expect(projectFilter.props("type")).toBe("select");
-    expect(projectFilter.props("options")).toContainEqual({
-      value: "PROJ-1",
-      label: "مشروع المطار",
-    });
+    const projectFilter = wrapper.getComponent({ name: "FrappeLink" });
+    expect(projectFilter.props("doctype")).toBe("Project");
+    await projectFilter.vm.$emit("update:modelValue", "PROJ-99");
+    await flushPromises();
+    expect(projectFilter.props("modelValue")).toBe("PROJ-99");
+    wrapper.unmount();
   });
 
   it("uses the exact status options declared by the current DocType metadata", () => {
@@ -297,6 +305,52 @@ describe("Masar transport supervisor feature", () => {
     }));
     expect(resource.start).toBe(0);
     expect(reload).toHaveBeenCalledOnce();
+    wrapper.unmount();
+  });
+
+  it("serializes route refreshes so the latest filter always wins", async () => {
+    let releaseFirst;
+    const update = vi.fn(function (options) { Object.assign(resource, options); });
+    const reload = vi.fn().mockResolvedValue(undefined);
+    const resource = {
+      data: [{ name: "ROW-1" }],
+      list: { loading: false, error: null },
+      update,
+      reload,
+    };
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: "/", component: { template: "<div />" } }],
+    });
+    await router.push("/");
+    await router.isReady();
+    const wrapper = mount(SupervisorCollection, {
+      props: {
+        title: "طلبات النقل",
+        description: "الوصف",
+        icon: "inbox",
+        resource,
+        empty: "فارغ",
+        statusOptions: [{ label: "معتمد", value: "Approved" }],
+      },
+      global: { plugins: [router] },
+    });
+    await flushPromises();
+
+    reload.mockReset();
+    reload
+      .mockImplementationOnce(() => new Promise((resolve) => { releaseFirst = resolve; }))
+      .mockResolvedValue(undefined);
+    await router.push("/?status=Approved");
+    await flushPromises();
+    await router.push("/?project=PROJ-2");
+    await flushPromises();
+
+    expect(reload).toHaveBeenCalledOnce();
+    releaseFirst();
+    await flushPromises();
+    expect(reload).toHaveBeenCalledTimes(2);
+    expect(resource.filters).toEqual({ project: "PROJ-2" });
     wrapper.unmount();
   });
 

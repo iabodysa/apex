@@ -61,6 +61,16 @@ describe("BuildingPicker", () => {
     expect(resource.fetch).toHaveBeenCalledOnce();
   });
 
+  it("loads the same server-scoped buildings for a maintenance-only route", async () => {
+    globalThis.window.apex_portal = { capabilities: ["maintenance_create"] };
+    const wrapper = mount(BuildingPicker);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("لا توجد مبانٍ متاحة");
+    expect(createResource).toHaveBeenCalledOnce();
+    expect(resource.fetch).toHaveBeenCalledOnce();
+  });
+
   it("reads a parent-owned resource without issuing its own request", async () => {
     const owned = {
       data: [{ building: "BLD-9", building_title: "سكن الجنوب" }],
