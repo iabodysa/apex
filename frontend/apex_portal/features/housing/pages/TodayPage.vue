@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { ErrorMessage, LoadingIndicator, createResource } from "frappe-ui";
+import { ErrorMessage, createResource } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { createSupervisorBuildingsResource } from "../data/buildings.js";
@@ -70,7 +71,7 @@ onMounted(() => {
         <div><p class="feature-kicker">نطاق الإشراف</p><h3 id="today-portfolio-title">جاهزية مباني السكن</h3></div>
         <RouterLink to="/beds">فتح لوحة الغرف</RouterLink>
       </header>
-      <LoadingIndicator v-if="buildings.loading && !buildings.data" aria-label="جارٍ تحميل مباني السكن" />
+      <PortalSkeleton v-if="buildings.loading && !buildings.data" :rows="3" label="جارٍ تحميل مباني السكن" />
       <PortalErrorState
         v-else-if="buildings.error"
         title="تعذّر تحميل نطاق السكن"
@@ -93,7 +94,7 @@ onMounted(() => {
     </section>
 
     <p v-if="!building" class="feature-page__empty">اختر المبنى لعرض أعمال اليوم.</p>
-    <LoadingIndicator v-else-if="loading && !grid.data" aria-label="جارٍ تحميل أعمال اليوم" />
+    <PortalSkeleton v-else-if="loading && !grid.data" :rows="3" label="جارٍ تحميل أعمال اليوم" />
     <template v-else>
       <ErrorMessage v-if="error" :message="error" />
       <div v-if="canSeeBeds || canSeeArrivals || canSeeMaintenance || canSeeSafety" class="today-metrics">

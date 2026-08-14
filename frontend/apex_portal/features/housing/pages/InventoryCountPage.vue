@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
-import { Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { conditionLabel } from "../../../core/displayLabels.js";
@@ -51,7 +52,7 @@ async function submit() {
 <template>
   <section class="feature-page">
     <header class="feature-page__header"><h2>جرد السكن</h2><BuildingPicker /></header>
-    <LoadingIndicator v-if="inventory.loading" aria-label="جارٍ تحميل الجرد" />
+    <PortalSkeleton v-if="inventory.loading" :rows="3" label="جارٍ تحميل الجرد" />
     <ErrorMessage v-else-if="inventory.error" message="تعذر تحميل الجرد." />
     <p v-else-if="!rows.length && building" class="feature-page__empty">لا توجد أصناف جرد لهذا المبنى.</p>
     <form v-else-if="rows.length" class="inventory-form" @submit.prevent="submit">

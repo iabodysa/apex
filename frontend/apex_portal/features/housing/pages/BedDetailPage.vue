@@ -1,7 +1,8 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, FormControl, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
 import { statusLabel } from "../../../core/displayLabels.js";
 
@@ -60,7 +61,7 @@ async function depart() {
 <template>
   <section class="feature-page">
     <h2>تفاصيل السرير</h2>
-    <LoadingIndicator v-if="bed.get.loading" aria-label="جارٍ التحميل" />
+    <PortalSkeleton v-if="bed.get.loading" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
     <template v-else-if="bed.doc">
       <article class="feature-card"><strong>{{ bed.doc.bed_code || bed.doc.name }}</strong><span>{{ bed.doc.room }}</span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>

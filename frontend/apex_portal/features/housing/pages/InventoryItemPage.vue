@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, FormControl, createDocumentResource, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 
 const route = useRoute();
 const form = reactive({ counted_quantity: 0, condition: "", notes: "" });
@@ -39,7 +40,7 @@ async function submit() {
 <template>
   <section class="feature-page">
     <h2>تفاصيل الجرد</h2>
-    <LoadingIndicator v-if="item.get.loading" aria-label="جارٍ التحميل" />
+    <PortalSkeleton v-if="item.get.loading" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="item.get.error" message="تعذر تحميل الصنف." />
     <form v-else-if="item.doc" class="feature-card feature-form" @submit.prevent="submit">
       <strong dir="auto">{{ item.doc.item_name }}</strong>

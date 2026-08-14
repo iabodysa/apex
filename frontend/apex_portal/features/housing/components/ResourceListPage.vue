@@ -1,8 +1,9 @@
 <script setup>
 import { computed } from "vue";
-import { Button, ErrorMessage, LoadingIndicator } from "frappe-ui";
+import { Button, ErrorMessage } from "frappe-ui";
 import { recordTitle, statusLabel } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -27,7 +28,7 @@ const titleId = computed(() => `resource-list-${props.title.replace(/\s+/g, "-")
         <Button variant="subtle" icon-left="lucide-refresh-cw" label="تحديث" :loading="loading" @click="refresh" />
       </div>
     </header>
-    <LoadingIndicator v-if="loading && !rows.length" aria-label="جارٍ التحميل" />
+    <PortalSkeleton v-if="loading && !rows.length" :rows="3" :label="`جارٍ تحميل ${title}`" />
     <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" fallback="تعذر تحميل البيانات." @retry="refresh" />
     <p v-else-if="!rows.length" class="feature-page__empty">{{ emptyText }}</p>
     <ul v-else class="feature-page__list">

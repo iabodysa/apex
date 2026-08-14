@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Button, ErrorMessage, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { RouterLink, useRoute } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
@@ -35,7 +36,7 @@ async function setReady(room) {
       <div><span>اختر سريراً</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
       <RouterLink to="/arrivals">تغيير العامل</RouterLink>
     </article>
-    <LoadingIndicator v-if="grid.loading" aria-label="جارٍ تحميل الأسرّة" />
+    <PortalSkeleton v-if="grid.loading" :rows="3" label="جارٍ تحميل الأسرّة" />
     <ErrorMessage v-else-if="grid.error" message="تعذر تحميل الأسرّة." />
     <p v-else-if="!rooms.length && building" class="feature-page__empty">لا توجد غرف في هذا المبنى.</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">

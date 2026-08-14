@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, Progress, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, Progress, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { useRouter } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
@@ -131,7 +132,7 @@ watch(building, load, { immediate: true });
     </header>
 
     <div v-if="!building" class="feature-page__empty">اختر المبنى لعرض قائمة الوصول.</div>
-    <LoadingIndicator v-else-if="arrivals.loading && !workers.length" aria-label="جارٍ تحميل القادمين" />
+    <PortalSkeleton v-else-if="arrivals.loading && !workers.length" :rows="3" label="جارٍ تحميل القادمين" />
     <ErrorMessage v-else-if="arrivals.error" message="تعذّر تحميل قائمة الوصول." />
 
     <template v-else-if="building">

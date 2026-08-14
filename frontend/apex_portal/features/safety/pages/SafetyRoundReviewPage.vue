@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
-import { Button, ErrorMessage, LoadingIndicator, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import { Button, ErrorMessage, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { cadenceLabel, statusLabel } from "../../../core/displayLabels.js";
 
 const route = useRoute();
@@ -40,7 +41,7 @@ async function ratify() {
 <template>
   <section class="feature-page">
     <h2>مراجعة جولة السلامة</h2>
-    <LoadingIndicator v-if="round.get.loading || executions.list.loading" aria-label="جارٍ التحميل" />
+    <PortalSkeleton v-if="round.get.loading || executions.list.loading" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="round.get.error || executions.list.error" message="تعذر تحميل الجولة." />
     <template v-else>
       <div class="feature-card">

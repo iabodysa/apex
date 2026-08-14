@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, createDocumentResource, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, createDocumentResource, createResource, toast } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 
 const route = useRoute();
@@ -47,7 +48,7 @@ async function run(resource, params, message) {
 <template>
   <section class="feature-page">
     <h2>تفاصيل تسليم الأصل</h2>
-    <LoadingIndicator v-if="delivery.get.loading" aria-label="جارٍ التحميل" />
+    <PortalSkeleton v-if="delivery.get.loading" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="delivery.get.error" message="تعذر تحميل عملية التسليم." />
     <template v-else-if="delivery.doc">
       <article class="feature-card">
