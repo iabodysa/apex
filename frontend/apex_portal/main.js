@@ -7,6 +7,7 @@ import { configurePortalApi } from "./core/api.js";
 import { createPortalSubscriber } from "./core/realtime.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
 import { createPortalPushController } from "./core/pushNotifications.js";
+import { createDraftStore } from "./core/offline.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
 import { createWorkerGateway } from "./features/worker/gateway.js";
 import { portalRoutes } from "./routes.js";
@@ -32,6 +33,7 @@ function navigationFrom(router) {
         label: route.meta.label,
         icon: route.meta.icon,
         to: route.path,
+        group: route.meta.group,
       }),
     );
 }
@@ -63,6 +65,15 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     navigation: navigationFrom(router),
   });
   const call = configurePortalApi();
+  const portalDrafts = globalThis.window?.localStorage
+    ? createDraftStore({
+        storage: globalThis.window.localStorage,
+        site: bootstrap.site_name,
+        entry: context.id,
+        subjectScope: bootstrap.subject_scope,
+      })
+    : null;
+  portalDrafts?.activate();
   const portalPush = ["worker", "driver"].includes(context.id)
     ? createPortalPushController({ entry: context.id, call })
     : null;
@@ -70,6 +81,7 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   application.provide("portalPush", portalPush);
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
+  application.provide("portalDrafts", portalDrafts);
   application.use(FrappeUI, { socketio: false });
   application.use(router);
 

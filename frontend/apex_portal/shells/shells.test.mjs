@@ -7,6 +7,7 @@ import OperationsShell from "./OperationsShell.vue";
 const routes = [
   { path: "/home", component: { template: "<p>home</p>" } },
   { path: "/requests", component: { template: "<p>requests</p>" } },
+  { path: "/arrivals", component: { template: "<p>arrivals</p>" } },
 ];
 
 async function mountShell(component, options = {}) {
@@ -86,5 +87,50 @@ describe("operations identity", () => {
     const { wrapper } = await mountShell(OperationsShell);
     expect(wrapper.get(".operations-shell__brand img").attributes("src"))
       .toBe("/assets/apex/icons/brand/apex-mark.svg");
+  });
+
+  it("offers grouped mobile navigation instead of a horizontally scrolling route strip", async () => {
+    const priorWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
+    const navigation = [
+      { label: "مهام اليوم", to: "/today", icon: "home", group: "اليوم" },
+      { label: "القادمون", to: "/arrivals", icon: "users", group: "السكن" },
+      { label: "العهد", to: "/custody", icon: "briefcase", group: "العهد والجرد" },
+    ];
+    const { wrapper } = await mountShell(OperationsShell, { navigation });
+
+    expect(wrapper.find(".operations-shell__mobile-nav").exists()).toBe(true);
+    expect(wrapper.findAll(".operations-shell__mobile-group")).toHaveLength(4);
+    expect(wrapper.find(".operations-shell__mobile-nav").text()).toContain("العهد والجرد");
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: priorWidth });
+  });
+
+  it.each([390, 834])("uses grouped navigation at %ipx and opens the active route group", async (width) => {
+    const priorWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+    const { wrapper } = await mountShell(OperationsShell, {
+      path: "/arrivals",
+      navigation: [
+        { label: "مهام اليوم", to: "/today", group: "اليوم" },
+        { label: "القادمون", to: "/arrivals", group: "السكن" },
+      ],
+    });
+
+    expect(wrapper.find(".operations-shell__mobile-nav").exists()).toBe(true);
+    const activeGroup = wrapper.findAll(".operations-shell__mobile-group")
+      .find((group) => group.text().includes("القادمون"));
+    expect(activeGroup.attributes()).toHaveProperty("open");
+    wrapper.unmount();
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: priorWidth });
+  });
+
+  it("returns to the full rail above the 834px tablet breakpoint", async () => {
+    const priorWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 835 });
+    const { wrapper } = await mountShell(OperationsShell);
+    expect(wrapper.find(".operations-shell__mobile-nav").exists()).toBe(false);
+    expect(wrapper.find(".operations-shell__nav").exists()).toBe(true);
+    wrapper.unmount();
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: priorWidth });
   });
 });

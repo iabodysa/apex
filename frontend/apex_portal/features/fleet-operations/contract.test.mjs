@@ -2,10 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createFleetOperationsRoutes } from "./routes.js";
 import { actionAvailability, createSingleFlight } from "./state.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 describe("Salis fleet operations feature", () => {
   it("publishes the complete iPad route contract", () => {
-    expect(createFleetOperationsRoutes().map(({ path }) => path)).toEqual(["/", "/vehicles", "/vehicles/:vehicle", "/assignments", "/handovers", "/returns", "/fuel-approvals", "/incidents", "/incidents/:name", "/problems", "/problems/:name"]);
+    expect(createFleetOperationsRoutes().map(({ path }) => path)).toEqual(["/", "/vehicles", "/vehicles/:vehicle", "/assignments", "/handovers", "/handovers/:name", "/returns", "/returns/:name", "/fuel-approvals", "/incidents", "/incidents/:name", "/problems", "/problems/:name"]);
     expect(createFleetOperationsRoutes().every((route) => route.feature === "fleet-operations")).toBe(true);
   });
 
@@ -28,5 +31,14 @@ describe("Salis fleet operations feature", () => {
     expect(action).toHaveBeenCalledOnce();
     finish({ status: "Approved" });
     await first;
+  });
+
+  it("keeps the handover refresh label visible beside the icon", () => {
+    const source = readFileSync(
+      path.join(path.dirname(fileURLToPath(import.meta.url)), "pages", "HandoverDetailPage.vue"),
+      "utf8",
+    );
+    expect(source).toMatch(/<Button[^>]*icon-left="refresh-cw"[^>]*>تحديث<\/Button>/);
+    expect(source).not.toMatch(/<Button[^>]*icon="refresh-cw"/);
   });
 });

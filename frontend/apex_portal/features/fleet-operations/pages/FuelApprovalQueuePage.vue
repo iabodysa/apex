@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { Badge, Button, Dialog, FormControl, createResource } from "frappe-ui";
 import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel } from "../../../core/displayLabels.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 const fuelQueue = createResource({
     url: "apex.salis.api.fuel_console.get_pending_fuel_requests",
     method: "GET",
@@ -47,10 +48,12 @@ async function act(kind, row) {
       <Button variant="outline" icon="refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
     </header>
     <div v-if="fuelQueue.loading" class="ops-state">جاري تحميل الطلبات…</div>
-    <div v-else-if="fuelQueue.error" class="ops-state ops-state--error">
-      <p>تعذر تحميل طلبات الوقود.</p>
-      <Button class="ops-retry" variant="outline" label="إعادة المحاولة" @click="fuelQueue.fetch()" />
-    </div>
+    <PortalErrorState
+      v-else-if="fuelQueue.error"
+      title="تعذّر تحميل طلبات الوقود"
+      :message="fuelQueue.error"
+      @retry="fuelQueue.fetch()"
+    />
     <div v-else-if="!rows.length" class="ops-state">لا توجد طلبات بانتظار الاعتماد.</div>
     <div v-else class="ops-table">
       <article v-for="row in rows" :key="row.name" class="ops-row">

@@ -1,9 +1,12 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, LoadingIndicator, createResource, toast } from "frappe-ui";
+import { Badge, Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
 import { createQrScanner } from "./scanner.js";
-import { dateTimeLabel, remainingSeconds, statusLabel } from "../../core/displayLabels.js";
+import { dateTimeLabel, remainingSeconds, statusLabel, workerTransportStatusLabel } from "../../core/displayLabels.js";
+import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -27,7 +30,7 @@ const scanner = createQrScanner();
 const state = ref("loading");
 const trip = ref(null);
 const boarding = ref({ workers: [] });
-const error = ref("");
+const error = ref(null);
 const busy = ref("");
 const scanToken = ref("");
 const scanResult = ref("");
@@ -52,12 +55,6 @@ function waitSeconds(worker) {
   return remainingSeconds(worker.wait_at, boarding.value?.worker_wait_request_seconds, now.value);
 }
 
-const statusLabels = Object.freeze({
-  Pending: "بانتظار الصعود",
-  Boarded: "صعد",
-  Absent: "لم يصعد",
-  "Worker Claimed": "أكد صعوده",
-});
 const scanMessages = Object.freeze({
   Valid: "تم تسجيل الصعود.",
   Duplicate: "تم تسجيل هذا الصعود من قبل.",
@@ -86,7 +83,7 @@ function startLive(room) {
 
 async function load(quiet = false) {
   if (!quiet) state.value = "loading";
-  error.value = "";
+  error.value = null;
   try {
     const [tripData, boardingData, today] = await Promise.all([tripResource.fetch({ dispatch_trip: dispatchTrip.value }), boardingResource.fetch({ dispatch_trip: dispatchTrip.value }), todayResource.fetch()]);
     trip.value = tripData;
@@ -95,20 +92,20 @@ async function load(quiet = false) {
     startLive(today?.realtime_room || "");
   } catch (reason) {
     if (quiet) return;
-    state.value = reason?.status === 403 ? "denied" : "error";
-    error.value = reason?.message || "تعذّر تحميل الرحلة.";
+    state.value = [401, 403].includes(errorStatus(reason)) ? "denied" : "error";
+    error.value = reason;
   }
 }
 
 async function run(key, action, message) {
   busy.value = key;
-  error.value = "";
+  error.value = null;
   try {
     await action();
     toast.create({ type: "success", message });
     await load(true);
   } catch (reason) {
-    error.value = reason?.message || "تعذّر تنفيذ الإجراء.";
+    error.value = reason;
   } finally {
     busy.value = "";
   }
@@ -122,7 +119,7 @@ async function submitScan(token = scanToken.value) {
     scanResult.value = scanMessages[result?.result] || "تعذّر قراءة البطاقة.";
     if (["Valid", "Duplicate"].includes(result?.result)) await load(true);
   } catch (reason) {
-    scanResult.value = reason?.message || "تعذّر تسجيل الصعود.";
+    scanResult.value = safeErrorMessage(reason, "تعذّر تسجيل الصعود.");
   } finally {
     busy.value = "";
   }
@@ -132,7 +129,7 @@ async function startCamera() {
   try {
     await scanner.start(scannerVideo.value, submitScan);
   } catch (reason) {
-    scanResult.value = reason?.message || "تعذّر تشغيل الكاميرا.";
+    scanResult.value = safeErrorMessage(reason, "تعذّر تشغيل الكاميرا.");
   }
 }
 
@@ -156,19 +153,13 @@ onBeforeUnmount(stopLive);
       <Badge v-if="trip" :label="statusLabel(trip.status)" />
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status">
-      <LoadingIndicator />
-      جارٍ تجهيز الرحلة…
-    </div>
-    <div v-else-if="state === 'denied'" class="feature-state">هذه الرحلة غير متاحة لحسابك.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <ErrorMessage :message="error" />
-      <Button variant="outline" @click="load()">إعادة المحاولة</Button>
-    </div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" label="جارٍ تجهيز الرحلة" />
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلة" :message="error" fallback="هذه الرحلة غير متاحة لحسابك." @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلة" :message="error" fallback="تعذّر تحميل الرحلة." @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد بيانات لهذه الرحلة.</div>
 
     <template v-else>
-      <ErrorMessage v-if="error" :message="error" />
+      <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
       <section class="journey-command">
         <div class="journey-command__metric">
           <strong>{{ workers.filter((worker) => worker.status === "Boarded").length }}</strong>
@@ -235,7 +226,7 @@ onBeforeUnmount(stopLive);
             طلب الانتظار {{ worker.wait_count }} من {{ waitLimit }}
             <template v-if="waitSeconds(worker) !== null">· {{ waitSeconds(worker) }} ث</template>
           </span>
-          <Badge :label="statusLabels[worker.status] || worker.status" />
+          <Badge :label="workerTransportStatusLabel(worker.status)" />
           <div class="journey-actions">
             <Button v-if="worker.status !== 'Boarded'" variant="outline" :loading="busy === `manual:${worker.employee}`" @click="run(`manual:${worker.employee}`, () => gateway.manualBoard(dispatchTrip, worker.employee), 'تم تسجيل الصعود يدوياً')">تسجيل يدوي</Button>
             <Button v-else variant="outline" :loading="busy === `unmark:${worker.employee}`" @click="run(`unmark:${worker.employee}`, () => gateway.markNotBoarded(dispatchTrip, worker.employee), 'أعيد العامل إلى قائمة الانتظار')">ليس في الحافلة</Button>

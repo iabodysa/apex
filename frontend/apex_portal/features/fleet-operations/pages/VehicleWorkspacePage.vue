@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 import { Badge, Button, FormControl, createResource } from "frappe-ui";
 import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 const route = useRoute(),
   vehicles = createResource({
     url: "apex.salis.api.fleet_os.get_fleet_os",
@@ -76,10 +77,7 @@ onMounted(load);
       <Badge v-if="vehicle" :theme="statusTheme(vehicle.vehicle_status || vehicle.status)" :label="statusLabel(vehicle.vehicle_status || vehicle.status)" />
     </header>
     <div v-if="vehicles.loading" class="ops-state">جاري تحميل المركبة…</div>
-    <div v-else-if="vehicles.error" class="ops-state ops-state--error">
-      <p>تعذر تحميل المركبة.</p>
-      <Button variant="outline" label="إعادة المحاولة" @click="load" />
-    </div>
+    <PortalErrorState v-else-if="vehicles.error" title="تعذّر تحميل المركبة" :message="vehicles.error" @retry="load" />
     <div v-else-if="!vehicle" class="ops-state ops-state--error">المركبة غير موجودة أو خارج نطاق مشروعك.</div>
     <div v-else class="ops-workspace">
       <main class="ops-panels">
@@ -110,10 +108,12 @@ onMounted(load);
       <aside class="ops-card">
         <h3>السجل الزمني</h3>
         <p v-if="vehicleTimeline.loading" class="ops-state" role="status">جاري تحميل السجل الزمني…</p>
-        <div v-else-if="vehicleTimeline.error" class="ops-state ops-state--error">
-          <p>تعذر تحميل السجل الزمني.</p>
-          <Button class="timeline-retry" variant="outline" label="إعادة المحاولة" @click="vehicleTimeline.fetch({ plate: route.params.vehicle })" />
-        </div>
+        <PortalErrorState
+          v-else-if="vehicleTimeline.error"
+          title="تعذّر تحميل السجل الزمني"
+          :message="vehicleTimeline.error"
+          @retry="vehicleTimeline.fetch({ plate: route.params.vehicle })"
+        />
         <p v-else-if="!timeline.length" class="ops-state">لا توجد أحداث مسجلة.</p>
         <ol v-else>
           <li v-for="event in timeline" :key="`${event.kind}:${event.ref_name}`">

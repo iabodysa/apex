@@ -8,5 +8,5 @@ const resource = createResource({
 });
 </script>
 <template>
-  <QueuePage title="قائمة الاستلام" :resource="resource" empty="لا توجد مستندات استلام معلقة." />
+  <QueuePage title="قائمة الاستلام" :resource="resource" detail-base="/handovers" empty="لا توجد مستندات استلام معلقة." />
 </template>

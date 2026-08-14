@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted } from "vue";
 import { Button, createResource } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 const r = createResource({
     url: "apex.salis.api.fleet_os.get_operations_overview",
     method: "GET",
@@ -19,7 +20,7 @@ onMounted(() => r.fetch());
       <Button variant="outline" icon="refresh-cw" label="تحديث" :loading="r.loading" @click="r.fetch()" />
     </header>
     <div v-if="r.loading" class="ops-state">جاري تحميل مؤشرات التشغيل…</div>
-    <div v-else-if="r.error" class="ops-state ops-state--error">تعذر تحميل المؤشرات.</div>
+    <PortalErrorState v-else-if="r.error" title="تعذّر تحميل المؤشرات" :message="r.error" @retry="r.fetch()" />
     <div v-else class="ops-metrics">
       <RouterLink
         v-for="item in [

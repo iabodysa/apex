@@ -1,13 +1,41 @@
 <script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { FeatherIcon } from "frappe-ui";
+import { useRoute } from "vue-router";
 import { ar } from "../i18n/ar.js";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
 
-defineProps({
+const props = defineProps({
   title: { type: String, required: true },
   navigation: { type: Array, default: () => [] },
 });
+const route = useRoute();
+const isMobile = ref(globalThis.window?.innerWidth <= 834);
+function updateViewport() {
+  isMobile.value = globalThis.window?.innerWidth <= 834;
+}
+onMounted(() => globalThis.window?.addEventListener("resize", updateViewport));
+onBeforeUnmount(() => globalThis.window?.removeEventListener("resize", updateViewport));
+
+const mobileGroups = computed(() => {
+  const groups = new Map();
+  for (const item of props.navigation) {
+    const name = item.group || props.title;
+    if (!groups.has(name)) groups.set(name, []);
+    groups.get(name).push(item);
+  }
+  return [...groups.entries()].map(([label, items]) => ({ label, items }));
+});
+
+function isActiveDestination(destination) {
+  if (destination === "/") return route.path === destination;
+  return route.path === destination || route.path.startsWith(`${destination}/`);
+}
+
+function groupContainsActiveRoute(group) {
+  return group.items.some((item) => isActiveDestination(item.to));
+}
 </script>
 
 <template>
@@ -18,7 +46,7 @@ defineProps({
         <img class="portal-brand-mark" :src="brandMark" alt="" />
         <span>{{ ar.brandName }}</span>
       </div>
-      <nav v-if="navigation.length" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
+      <nav v-if="navigation.length && !isMobile" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
         <RouterLink
           v-for="item in navigation"
           :key="item.to"
@@ -36,6 +64,25 @@ defineProps({
             <span>{{ item.label }}</span>
           </a>
         </RouterLink>
+      </nav>
+      <nav v-if="mobileGroups.length && isMobile" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
+        <details
+          v-for="group in mobileGroups"
+          :key="group.label"
+          class="operations-shell__mobile-group"
+          :open="groupContainsActiveRoute(group)"
+        >
+          <summary>{{ group.label }}</summary>
+          <RouterLink
+            v-for="item in group.items"
+            :key="item.to"
+            class="portal-nav-link"
+            :to="item.to"
+          >
+            <FeatherIcon v-if="item.icon" class="portal-nav-icon" :name="item.icon" aria-hidden="true" />
+            <span>{{ item.label }}</span>
+          </RouterLink>
+        </details>
       </nav>
     </aside>
     <div class="operations-shell__body">

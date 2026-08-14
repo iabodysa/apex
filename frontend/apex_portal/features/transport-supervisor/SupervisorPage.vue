@@ -4,6 +4,10 @@ import { Badge, Button, FeatherIcon, createDocumentResource, createResource } fr
 import { useRoute } from "vue-router";
 import { dateTimeLabel, statusLabel, statusTheme } from "../../core/displayLabels.js";
 import TripRequestAssignment from "./components/TripRequestAssignment.vue";
+import RequestTripPlanning from "./components/RequestTripPlanning.vue";
+import PortalErrorState from "../../components/PortalErrorState.vue";
+import { safeErrorMessage } from "../../core/errorMessage.js";
+import { meaningfulRequestTitle } from "./assignmentState.js";
 
 const route = useRoute();
 const spec = route.meta.view || {};
@@ -21,17 +25,27 @@ const workflow = createResource({
   method: "POST",
   auto: false,
 });
+const linkTitle = createResource({
+  url: "frappe.client.get_value",
+  method: "GET",
+  auto: false,
+});
 const actionError = ref("");
 const busyAction = ref("");
+const linkLabels = ref({});
+let linkLoadVersion = 0;
 const doc = computed(() => record?.doc || null);
 const state = computed(() => {
   if (record?.get.loading && !doc.value) return "loading";
   if (record?.get.error) return record.get.error?.status === 403 ? "denied" : "error";
   return doc.value ? "ready" : "empty";
 });
-const title = computed(() =>
-  doc.value?.assignment_name || doc.value?.trip_title || spec.title,
-);
+const title = computed(() => {
+  if (spec.doctype === "Transport Request") {
+    return meaningfulRequestTitle(doc.value, spec.title);
+  }
+  return doc.value?.assignment_name || doc.value?.trip_title || spec.title;
+});
 const workflowActions = computed(() => [
   ...new Map(
     (transitions.data || []).map((item) => [
@@ -50,13 +64,49 @@ const actionLabels = Object.freeze({
   Complete: "إكمال الرحلة",
 });
 
-function valueLabel(field) {
+function displayValue(field) {
   const value = doc.value?.[field.key];
-  if (value === null || value === undefined || value === "") return "—";
-  if (["starts_on", "ends_on", "generated_through", "trip_date", "planned_start", "planned_end"].includes(field.key)) {
-    return dateTimeLabel(value) || value;
+  if (value === null || value === undefined || value === "") {
+    return { label: "—", reference: "" };
   }
-  return value;
+  if (["starts_on", "ends_on", "generated_through", "trip_date", "planned_start", "planned_end", "pickup_datetime"].includes(field.key)) {
+    return { label: dateTimeLabel(value) || value, reference: "" };
+  }
+  if (field.key === "status") {
+    return { label: statusLabel(value), reference: "" };
+  }
+  if (field.link) {
+    return {
+      label: doc.value?.[field.labelKey] || linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
+      reference: value,
+    };
+  }
+  return { label: value, reference: "" };
+}
+
+async function loadLinkLabels(current) {
+  const version = ++linkLoadVersion;
+  const next = {};
+  if (!current) {
+    linkLabels.value = next;
+    return;
+  }
+  for (const field of spec.fields || []) {
+    const value = current[field.key];
+    if (!field.link || !value) continue;
+    try {
+      const result = await linkTitle.fetch({
+        doctype: field.link.doctype,
+        filters: { name: value },
+        fieldname: [field.link.fieldname],
+      });
+      const data = result?.message || result || {};
+      next[field.key] = data[field.link.fieldname] || field.link.fallback || "سجل مرتبط";
+    } catch {
+      next[field.key] = field.link.fallback || "تعذّر جلب الاسم";
+    }
+  }
+  if (version === linkLoadVersion) linkLabels.value = next;
 }
 
 async function loadTransitions(current) {
@@ -75,13 +125,14 @@ async function applyAction(action) {
     await workflow.submit({ doc: JSON.stringify(doc.value), action });
     await record.reload();
   } catch (reason) {
-    actionError.value = reason?.message || "تعذّر تنفيذ الإجراء.";
+    actionError.value = safeErrorMessage(reason, "تعذّر تنفيذ الإجراء.");
   } finally {
     busyAction.value = "";
   }
 }
 
 watch(doc, loadTransitions, { immediate: true });
+watch(doc, loadLinkLabels, { immediate: true });
 </script>
 
 <template>
@@ -96,11 +147,8 @@ watch(doc, loadTransitions, { immediate: true });
     </header>
 
     <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحميل السجل…</div>
-    <div v-else-if="state === 'denied'" class="feature-state">لا تملك صلاحية هذا السجل.</div>
-    <div v-else-if="state === 'error'" class="feature-state feature-state--error">
-      <p role="alert">تعذّر تحميل السجل.</p>
-      <Button variant="outline" @click="record.reload">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" message="لا تملك صلاحية هذا السجل." @retry="record.reload" />
+    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل السجل" :message="record.get.error" @retry="record.reload" />
     <div v-else-if="state === 'empty'" class="feature-state">السجل غير موجود.</div>
 
     <template v-else>
@@ -112,7 +160,15 @@ watch(doc, loadTransitions, { immediate: true });
       <dl class="feature-details supervisor-detail__facts">
         <template v-for="field in spec.fields || []" :key="field.key">
           <dt>{{ field.label }}</dt>
-          <dd dir="auto">{{ valueLabel(field) }}</dd>
+          <dd>
+            <span dir="auto">{{ displayValue(field).label }}</span>
+            <bdi
+              v-if="displayValue(field).reference"
+              class="record-reference"
+              dir="auto"
+              translate="no"
+            >{{ displayValue(field).reference }}</bdi>
+          </dd>
         </template>
       </dl>
 
@@ -122,7 +178,7 @@ watch(doc, loadTransitions, { immediate: true });
           <li v-for="stop in doc.stops" :key="stop.name || stop.stop_key">
             <bdi>{{ String(stop.idx || 0).padStart(2, '0') }}</bdi>
             <div><strong dir="auto">{{ stop.stop_name }}</strong><span dir="auto">{{ stop.location || stop.accommodation_building || 'الموقع غير محدد' }}</span></div>
-            <span>{{ stop.planned_time || '—' }}</span>
+            <span>{{ dateTimeLabel(stop.planned_time) || '—' }}</span>
           </li>
         </ol>
       </section>
@@ -147,11 +203,17 @@ watch(doc, loadTransitions, { immediate: true });
         @saved="record.reload"
       />
 
+      <RequestTripPlanning
+        v-if="spec.doctype === 'Transport Request' && !doc.assigned_to_trip && ['Validated', 'Approved', 'Scheduled'].includes(doc.status)"
+        :request="doc"
+        @saved="record.reload"
+      />
+
       <section v-if="doc.boarding_state?.length" class="supervisor-detail__section">
         <header><h3>قائمة الركاب</h3><span>{{ doc.boarding_state.length }}</span></header>
         <ol class="supervisor-passenger-list">
           <li v-for="passenger in doc.boarding_state" :key="passenger.passenger_key || passenger.name">
-            <div><strong dir="auto">{{ passenger.passenger_name }}</strong><span dir="auto">{{ passenger.pickup_stop }} ← {{ passenger.dropoff_stop }}</span></div>
+            <div><strong dir="auto">{{ passenger.passenger_name || 'راكب غير مسمى' }}</strong><span dir="auto">{{ passenger.pickup_stop }} ← {{ passenger.dropoff_stop }}</span></div>
             <Badge :theme="statusTheme(passenger.status)" :label="statusLabel(passenger.status)" />
           </li>
         </ol>

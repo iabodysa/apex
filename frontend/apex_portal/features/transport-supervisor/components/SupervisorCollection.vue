@@ -1,6 +1,10 @@
 <script setup>
-import { computed, onMounted } from "vue";
-import { Button, FeatherIcon } from "frappe-ui";
+import { computed, inject, reactive, watch } from "vue";
+import { Button, FeatherIcon, FormControl } from "frappe-ui";
+import { Link } from "frappe-ui/frappe";
+import { routeLocationKey, routerKey } from "vue-router";
+import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -9,7 +13,15 @@ const props = defineProps({
   resource: { type: Object, required: true },
   collections: { type: Array, default: () => [] },
   empty: { type: String, required: true },
+  baseFilters: { type: Object, default: () => ({}) },
+  dateField: { type: String, default: "" },
+  statusOptions: { type: Array, default: () => [] },
 });
+
+const route = inject(routeLocationKey, reactive({ query: {} }));
+const router = inject(routerKey, null);
+const filters = reactive({ status: "", project: "", date: "" });
+const allowedStatuses = computed(() => props.statusOptions.map((option) => option.value));
 
 const rows = computed(() => {
   if (Array.isArray(props.resource.data)) return props.resource.data;
@@ -20,12 +32,63 @@ const rows = computed(() => {
 });
 const loading = computed(() => props.resource.list?.loading ?? props.resource.loading);
 const error = computed(() => props.resource.list?.error ?? props.resource.error);
+let queryGeneration = 0;
+let queryQueue = Promise.resolve();
 
-function refresh() {
+function reloadResource() {
   return props.resource.reload?.() ?? props.resource.fetch?.();
 }
 
-onMounted(refresh);
+function normalizedFilters(query) {
+  return {
+    status: typeof query?.status === "string" && allowedStatuses.value.includes(query.status)
+      ? query.status
+      : "",
+    project: typeof query?.project === "string" ? query.project : "",
+    date: typeof query?.date === "string" ? query.date : "",
+  };
+}
+
+function applyQuery(query) {
+  const generation = ++queryGeneration;
+  const nextFilters = normalizedFilters(query);
+  queryQueue = queryQueue
+    .catch(() => undefined)
+    .then(async () => {
+      if (generation !== queryGeneration) return;
+      Object.assign(filters, nextFilters);
+      props.resource.update?.({
+        start: 0,
+        filters: filtersFromQuery(filters, {
+          base: props.baseFilters,
+          dateField: props.dateField,
+          allowedStatuses: allowedStatuses.value,
+        }),
+      });
+      try {
+        await reloadResource();
+      } catch {
+        return;
+      }
+    });
+  return queryQueue;
+}
+
+function refresh() {
+  return applyQuery(route.query || queryFromFilters(filters));
+}
+
+function updateFilters() {
+  const query = queryFromFilters(filters);
+  if (router) return router.replace({ query });
+  return applyQuery(query);
+}
+
+function loadMore() {
+  return props.resource.next?.();
+}
+
+watch(() => route.query, applyQuery, { immediate: true, deep: true });
 </script>
 
 <template>
@@ -50,14 +113,41 @@ onMounted(refresh);
       </div>
     </header>
 
+    <form class="supervisor-filters" aria-label="تصفية القائمة" @submit.prevent="updateFilters">
+      <FormControl
+        v-if="statusOptions.length"
+        v-model="filters.status"
+        type="select"
+        label="الحالة"
+        :options="[{ label: 'كل الحالات', value: '' }, ...statusOptions]"
+      />
+      <Link
+        v-model="filters.project"
+        doctype="Project"
+        label="المشروع"
+        placeholder="ابحث عن مشروع"
+      />
+      <FormControl v-if="dateField" v-model="filters.date" type="date" label="التاريخ" />
+      <Button type="submit" variant="outline">تطبيق</Button>
+    </form>
+
     <div v-if="loading && !resource.data" class="feature-state" role="status">
       جارٍ تحميل {{ title }}…
     </div>
-    <div v-else-if="error" class="feature-state feature-state--error">
-      <p role="alert">تعذّر تحميل {{ title }}.</p>
-      <Button variant="outline" @click="refresh">إعادة المحاولة</Button>
-    </div>
+    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" @retry="refresh" />
     <div v-else-if="!rows.length" class="feature-state">{{ empty }}</div>
-    <slot v-else :rows="rows" :data="resource.data" />
+    <template v-else>
+      <p class="supervisor-result-count" role="status">{{ resultCountLabel(rows.length, resource.hasNextPage) }}</p>
+      <slot :rows="rows" :data="resource.data" />
+      <Button
+        v-if="resource.hasNextPage"
+        class="supervisor-load-more"
+        variant="outline"
+        :loading="loading"
+        @click="loadMore"
+      >
+        تحميل المزيد
+      </Button>
+    </template>
   </section>
 </template>

@@ -13,7 +13,7 @@
   "background_color": "#F8F5EE",
   "theme_color": "#00844E",
   "icons": [
-    { "src": "/assets/apex/apex_portal/icons/driver-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/assets/apex/apex_portal/icons/driver-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "/assets/apex/apex_portal/icons/driver-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/apex/apex_portal/icons/driver-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

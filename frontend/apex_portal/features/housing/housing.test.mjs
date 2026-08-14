@@ -16,10 +16,26 @@ describe("housing feature contract", () => {
     expect(new Set(housingRoutes.map((route) => route.name)).size).toBe(housingRoutes.length);
   });
 
-  it("loads every housing page module", async () => {
-    const pages = await Promise.all(housingRoutes.map((route) => route.component()));
-    expect(pages).toHaveLength(housingRoutes.length);
+  it("redirects the legacy overview to Today and loads every housing page module", async () => {
+    const overview = housingRoutes.find((route) => route.path === "/overview");
+    expect(overview.redirect).toBe("/today");
+    expect(overview.component).toBeUndefined();
+    const pageRoutes = housingRoutes.filter((route) => route.component);
+    const pages = await Promise.all(pageRoutes.map((route) => route.component()));
+    expect(pages).toHaveLength(pageRoutes.length);
     expect(pages.every((page) => page.default)).toBe(true);
+  });
+
+  it("keeps overview and creation routes out of the primary navigation and groups operations by domain", () => {
+    const navigation = housingRoutes.filter((route) => route.meta.navigation);
+    expect(navigation.map((route) => route.path)).not.toContain("/overview");
+    expect(navigation.map((route) => route.path)).not.toContain("/maintenance/new");
+    expect(navigation.find((route) => route.path === "/count").meta.group).toBe("العهد والجرد");
+    expect(navigation.find((route) => route.path === "/custody").meta.group).toBe("العهد والجرد");
+    expect(navigation.find((route) => route.path === "/delivery").meta.group).toBe("العهد والجرد");
+    expect(navigation.every((route) => route.meta.group)).toBe(true);
+    expect(read("./pages/TodayPage.vue")).toContain("createSupervisorBuildingsResource");
+    expect(read("./pages/MaintenanceRequestsPage.vue")).toContain("طلب صيانة جديد");
   });
 
   it("clears holder and cart when building changes", () => {

@@ -1,10 +1,12 @@
 const statusLabels = Object.freeze({
   New: "جديد",
+  Validated: "تم التحقق",
   Pending: "قيد الانتظار",
   Approved: "معتمد",
   Rejected: "مرفوض",
   Planned: "مجدولة",
   Dispatched: "في الطريق",
+  Boarded: "صعد",
   Scheduled: "مجدولة",
   Fulfilled: "مكتملة",
   Unassigned: "غير مسندة",
@@ -26,6 +28,7 @@ const statusLabels = Object.freeze({
   Average: "متوسطة",
   Poor: "ضعيفة",
   "Not Done": "لم تُنفذ",
+  Critical: "حرجة",
   High: "عالية",
   Medium: "متوسطة",
   Low: "منخفضة",
@@ -70,6 +73,12 @@ const statusLabels = Object.freeze({
   Triaged: "مصنف",
   Assigned: "مسند",
   "Waiting Evidence": "بانتظار الإثبات",
+  Absent: "لم يصعد",
+  scheduled: "الرحلة مجدولة",
+  en_route: "الحافلة في الطريق",
+  at_stop: "الحافلة عند نقطة التجمع",
+  departed: "غادرت الحافلة النقطة",
+  finished: "انتهت الرحلة",
 });
 
 const frappeDateTime = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
@@ -115,12 +124,101 @@ const inventoryConditionLabels = Object.freeze({
   Missing: "مفقودة",
 });
 
+// Maintenance Request.issue_type options, verbatim from the DocType.
+const maintenanceIssueLabels = Object.freeze({
+  Electrical: "كهرباء",
+  Plumbing: "سباكة",
+  Furniture: "أثاث",
+  "Air Conditioning": "تكييف",
+  "Fire Safety": "سلامة الحريق",
+  "Pest Control": "مكافحة آفات",
+  Structural: "إنشائي",
+  Other: "أخرى",
+});
+
+// Resident Request.request_category options, verbatim from the DocType.
+const requestCategoryLabels = Object.freeze({
+  Maintenance: "صيانة",
+  Safety: "سلامة",
+  Cleaning: "نظافة",
+  "Pest Control": "مكافحة آفات",
+  Custody: "عهدة",
+  "Facility Item": "أثاث ومرافق",
+  Water: "مياه",
+  Electrical: "كهرباء",
+  AC: "تكييف",
+  Plumbing: "سباكة",
+  Reimbursement: "مطالبة مالية",
+  Complaint: "شكوى",
+  Suggestion: "اقتراح",
+  Other: "أخرى",
+});
+
+export function maintenanceIssueLabel(value) {
+  return maintenanceIssueLabels[value] || value || "";
+}
+
+export function requestCategoryLabel(value) {
+  return requestCategoryLabels[value] || value || "";
+}
+
+const fieldLabelReaders = Object.freeze({
+  issue_type: maintenanceIssueLabel,
+  request_category: requestCategoryLabel,
+  status: statusLabel,
+  priority: statusLabel,
+});
+
+export function fieldLabel(field, value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const reader = fieldLabelReaders[field];
+  return reader ? reader(text) : text;
+}
+
+export function maintenanceIssueOptions() {
+  return Object.entries(maintenanceIssueLabels).map(([value, label]) => ({ value, label }));
+}
+
+export function requestCategoryOptions() {
+  return Object.entries(requestCategoryLabels).map(([value, label]) => ({ value, label }));
+}
+
 export function statusLabel(value) {
   return statusLabels[value] || value || "جديد";
 }
 
+export function statusOptions(values = []) {
+  return values.map((value) => ({ value, label: statusLabel(value) }));
+}
+
+const workerTransportLabels = Object.freeze({
+  Pending: "بانتظار الصعود",
+  Boarded: "تم الصعود",
+  Absent: "لم يصعد",
+  "Worker Claimed": "أكد صعوده",
+});
+
+export function workerTransportStatusLabel(value) {
+  return workerTransportLabels[value] || statusLabel(value) || "بانتظار التحديث";
+}
+
+export function humanLabel(record, valueField, labelField, fallback = "") {
+  return String(record?.[labelField] || fallback || record?.[valueField] || "").trim();
+}
+
+export function humanOptions(rows = [], valueField, labelField) {
+  const options = new Map();
+  for (const row of rows) {
+    const value = String(row?.[valueField] || "").trim();
+    if (!value || options.has(value)) continue;
+    options.set(value, { value, label: humanLabel(row, valueField, labelField, value) });
+  }
+  return [...options.values()];
+}
+
 const greenStatuses = new Set([
-  "Approved", "Completed", "Fulfilled", "Ready", "Good", "Excellent",
+  "Validated", "Approved", "Completed", "Fulfilled", "Ready", "Good", "Excellent",
   "Active", "Closed", "Resolved", "Confirmed", "Received", "Delivered", "Done",
   "Available", "Valid", "Issued", "Returned", "assigned",
 ]);
@@ -191,7 +289,7 @@ export function conditionLabel(value) {
 export function recordTitle(record, fields = [], fallback = "سجل") {
   for (const field of fields) {
     const value = String(record?.[field] || "").trim();
-    if (value) return value;
+    if (value) return fieldLabel(field, value);
   }
   for (const field of ["title", "label"]) {
     const value = String(record?.[field] || "").trim();

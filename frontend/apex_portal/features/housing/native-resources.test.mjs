@@ -25,7 +25,7 @@ vi.mock("frappe-ui", () => ({
 
 const ResourceListPage = {
   props: ["rows", "loading", "error", "refresh"],
-  template: "<section />",
+  template: '<section><div v-for="row in rows" :key="row.name"><slot name="row" :row="row" /></div></section>',
 };
 
 describe("housing native DocType resources", () => {
@@ -57,6 +57,20 @@ describe("housing native DocType resources", () => {
     });
   });
 
+  it("localizes the maintenance workflow status through the shared label source", () => {
+    createDocumentResource.mockReturnValueOnce({
+      doc: { name: "MR-0001", issue_type: "تكييف", status: "In Progress" },
+      get: { loading: false, error: null },
+      reload: vi.fn(),
+    });
+    const wrapper = mount(MaintenanceRequestDetailPage, {
+      global: { stubs: { ResourceListPage } },
+    });
+
+    expect(wrapper.text()).toContain("قيد التنفيذ");
+    expect(wrapper.text()).not.toContain("In Progress");
+  });
+
   it("keeps project selection permission-aware and session resources uncached", () => {
     const root = join(process.cwd(), "features/housing");
     const bed = readFileSync(join(root, "pages/BedDetailPage.vue"), "utf8");
@@ -67,7 +81,10 @@ describe("housing native DocType resources", () => {
     expect(bed).toContain('v-model="checkInForm.project"');
     expect(bed).toContain('!checkInForm.project');
     expect(buildings).not.toContain("cache:");
-    expect(maintenance).toContain("await rooms.reload()");
+    expect(maintenance).toContain('doctype: "Room"');
+    expect(maintenance).toContain("while (rooms.hasNextPage)");
+    expect(maintenance).toContain("await rooms.list.fetch()");
+    expect(maintenance).not.toContain("pageLength: 500");
   });
 
   it("does not offer a second bed assignment to an already housed arrival", () => {

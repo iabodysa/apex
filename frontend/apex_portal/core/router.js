@@ -39,7 +39,7 @@ export const PORTAL_CONTEXTS = Object.freeze({
     id: "fleet-operations", publicPaths: ["/fleet-os"], features: ["fleet-operations"], shell: "operations", landing: "/",
   }),
   housing: context({
-    id: "housing", publicPaths: ["/housing", "/safety"], features: ["housing", "safety"], shell: "operations", landing: "/overview",
+    id: "housing", publicPaths: ["/housing", "/safety"], features: ["housing", "safety"], shell: "operations", landing: "/today",
   }),
 });
 

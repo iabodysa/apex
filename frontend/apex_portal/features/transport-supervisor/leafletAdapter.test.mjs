@@ -43,7 +43,7 @@ describe("Leaflet adapter", () => {
 
   it("normalizes route geometry and owns map drawing and disposal", async () => {
     const { createLeafletAdapter, routeCoordinates } = await loadModule();
-    expect(routeCoordinates({ path: [[24.7, 46.6], { lat: "24.8", lng: "46.7" }, ["bad", 1]] }))
+    expect(routeCoordinates({ path: [[24.7, 46.6], { lat: "24.8", lng: "46.7" }, ["bad", 1], [0, 0], [46.7, 24.7], [24.7, -14.4]] }))
       .toEqual([[24.7, 46.6], [24.8, 46.7]]);
 
     const { leaflet, map, layer } = leafletFixture();
