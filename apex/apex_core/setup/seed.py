@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Data-driven seed loader (Apex Habitat).
 
+The insert passes ``ignore_permissions`` because this is installer context: the loader runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 A single, minimal, create-only loader that replaces the hand-written
 ``*_seed.py`` modules for records whose DocType is **not** importable as
 ``is_standard`` module JSON — Email Template, Kanban Board, Assignment Rule,

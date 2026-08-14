@@ -1,4 +1,9 @@
 # Copyright (c) 2026, afmcoltd
+"""Attach the shipped Workspaces to the roles that should see them.
+
+The ``ignore_permissions`` flag is set because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+"""
 import frappe
 
 ALWAYS_PUBLIC = {"Home"}

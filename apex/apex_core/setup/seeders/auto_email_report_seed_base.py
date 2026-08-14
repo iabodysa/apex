@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Shared engine for the per-module Auto Email Report seeders.
 
+The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 Each module ships its own periodic-digest list (Habitat's accommodation/safety
 digests, Salis's movement/fleet digests) but the create-if-absent routine is one
 rule, so it lives here once and the module seeders keep only their report list.

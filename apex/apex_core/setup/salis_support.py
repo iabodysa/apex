@@ -1,3 +1,9 @@
+"""Native support desk wiring for Salis, applied at install and migrate.
+
+The holiday-list and SLA inserts pass ``ignore_permissions`` because this is installer context:
+it runs as Administrator with no session user, seeding the records the support flow later reads.
+"""
+
 from __future__ import annotations
 
 import json

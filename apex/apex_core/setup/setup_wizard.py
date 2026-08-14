@@ -1,6 +1,10 @@
 # Copyright (c) 2026, afmcoltd
 """Apex first-install Setup Wizard integration (native Frappe setup wizard).
 
+The settings saves pass ``ignore_permissions`` because this is installer context: the wizard runs
+as Administrator on a fresh site before any operator or role assignment exists. A DocPerm that
+made these legal would then let operators edit the same settings afterwards.
+
 On a fresh site, Frappe's setup wizard renders extra "Apex Configuration" slides
 (registered by public/js/apex_setup_wizard.js via the `setup_wizard_requires` hook).
 The operator's choices flow into the wizard args and land here at completion

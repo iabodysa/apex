@@ -1,6 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Setup-wizard demo data — one coherent accommodation scenario, and its removal.
 
+The writes and the delete pass ``ignore_permissions`` because this is installer context: the
+wizard runs as Administrator on a site that has no operator yet, and the demo user it creates
+does not exist until this module creates it. A DocPerm that made these legal would stay live for
+every real operator afterwards.
+
 The scenario is built by a DEDICATED DEMO USER, so ``owner`` is the removal key:
 every row the build creates is selected back by that one column and nothing else.
 No name pattern, no date window, no "everything in this DocType".

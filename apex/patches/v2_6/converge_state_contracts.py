@@ -1,3 +1,10 @@
+"""Bring existing records onto the v2.6 state contracts.
+
+The writes pass ``ignore_permissions`` because a patch is migrate context: it runs once as
+Administrator with no session user, over records that already exist and whose original author may
+no longer have a role. A DocPerm that made these legal would stay live afterwards for everyone.
+"""
+
 from __future__ import annotations
 
 import frappe

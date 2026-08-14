@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed the Maintenance Material catalogue and its default Templates, in that order.
 
+The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 ``TEMPLATE_SEEDS`` child rows are REQUIRED Links onto Maintenance Material, so a
 template can only be created after every material it names exists — Frappe's
 ``_validate_links`` walks child rows and rejects the whole document otherwise.

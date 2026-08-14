@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed Salis (movement/fleet) quick links into the desk navbar Help dropdown.
 
+The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 Mirrors the Habitat pattern (``patches/v0_8/add_navbar_help_links.py``): Navbar
 Settings is a global Single, so we must NOT ship it as a fixture (that would
 overwrite the customer's own navbar on every migrate). Instead this reads the

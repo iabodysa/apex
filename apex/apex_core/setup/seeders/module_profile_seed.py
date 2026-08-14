@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Named Module Profiles that keep the other apps' workspaces off an Apex desk.
 
+The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 Apex's nine Workspaces each declare a roles table. The ones frappe, erpnext and hrms
 ship declare none, so every desk user sees them: an accommodation supervisor holding
 Accommodation Manager, Resident Supervisor, Desk User and Employee opened a sidebar of

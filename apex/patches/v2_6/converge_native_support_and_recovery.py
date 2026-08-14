@@ -1,3 +1,10 @@
+"""Converge the support desk and the advance-recovery records onto the native path.
+
+The writes and the rename pass ``ignore_permissions`` because a patch is migrate context: it runs
+once as Administrator with no session user, over records that already exist. The top-level
+``frappe.rename_doc`` refuses the flag, which is why the model-level primitive is imported here.
+"""
+
 from __future__ import annotations
 
 import frappe

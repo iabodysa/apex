@@ -1,3 +1,10 @@
+"""Native Employee Advance recovery wiring, applied at install and migrate.
+
+The component insert and the settings saves pass ``ignore_permissions`` because this is installer
+context: it runs as Administrator with no session user, and it configures the payroll records an
+operator later works within rather than acting on their behalf.
+"""
+
 from __future__ import annotations
 
 import frappe

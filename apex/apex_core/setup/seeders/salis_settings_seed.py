@@ -1,6 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed Salis Settings defaults. Install-safe, idempotent, blank-fields-only.
 
+The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+
 This lived in ``patches/v1_0/seed_salis_settings.py``, which ``salis/setup.py`` imported
 to run at install time. A patch is a one-time migration for sites that already exist; the
 defaults every NEW site needs belong beside the other seeders, and hooks.py runs this on

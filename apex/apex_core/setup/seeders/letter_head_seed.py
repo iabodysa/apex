@@ -1,4 +1,9 @@
 # Copyright (c) 2026, afmcoltd
+"""Seed the Letter Head every print format renders through.
+
+The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install and migrate as Administrator, with no session user whose roles could be consulted.
+"""
 import frappe
 
 from apex.apex_core.utils.addresses import get_address_text
