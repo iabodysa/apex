@@ -168,28 +168,18 @@ def _validate_intercompany_gates(doc):
         )
 
 
-ACCOUNTING_ROLE = "Finance Manager"
-
-
 @frappe.whitelist(methods=["POST"])
 def acknowledge_intercompany_movement(movement: str) -> dict:
-    """Record Accounting's sign-off on a submitted intercompany movement.
-
-    The two fields sit at permlevel 1 with only Finance Manager holding write there, so
-    the desk cannot offer them to a preparer; this is the one path that sets them, and it
-    stamps WHO signed in the same call as the flag. Before this existed the flag had no
-    allow_on_submit, so a movement submitted without it could never acquire it and the
-    pending-acknowledgement card only ever counted up.
-
-    Two refusals are what make it a control rather than a checkbox: a caller without the
-    role, and the movement's own submitter. A sign-off the submitter can give themselves
-    records nothing.
-    """
+    """Record the permitted accounting sign-off on a submitted intercompany movement."""
     doc = frappe.get_doc("Facility Asset Movement", movement)
 
-    if ACCOUNTING_ROLE not in frappe.get_roles():
+    doc.check_permission("read")
+    if not doc.has_permlevel_access_to(
+        "accounting_acknowledged",
+        permission_type="write",
+    ):
         frappe.throw(
-            _("Only {0} can record the accounting acknowledgement.").format(_(ACCOUNTING_ROLE)),
+            _("You do not have permission to record the accounting acknowledgement."),
             frappe.PermissionError,
         )
     if doc.docstatus != 1:

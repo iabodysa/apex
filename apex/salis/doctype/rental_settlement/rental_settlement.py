@@ -76,9 +76,10 @@ class RentalSettlement(Document):
             self.company = get_default_company()
 
         accrued = 0.0
+        derive_line_amounts = self.docstatus == 0
         for row in self.vehicles:
             computed = flt(row.days) * flt(row.daily_rate)
-            if row.amount is None:
+            if derive_line_amounts:
                 row.amount = computed
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
                 frappe.throw(

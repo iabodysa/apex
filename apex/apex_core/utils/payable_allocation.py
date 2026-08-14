@@ -51,7 +51,7 @@ def list_payables(company: str, supplier: str, limit: int = 50) -> list:
     if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
         return []
     frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read", throw=True)
-    return frappe.get_all(
+    return frappe.get_list(
         PAYABLE_SOURCE_DOCTYPE,
         filters=payable_filters(company, supplier),
         fields=["name", "bill_no", "posting_date", "grand_total", "outstanding_amount", "currency"],
@@ -68,7 +68,13 @@ def payable_count(company: str, supplier: str):
         return 0
     if not frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read"):
         return None
-    return frappe.db.count(PAYABLE_SOURCE_DOCTYPE, payable_filters(company, supplier))
+    rows = frappe.get_list(
+        PAYABLE_SOURCE_DOCTYPE,
+        filters=payable_filters(company, supplier),
+        fields=["count(name) as count"],
+        limit_page_length=1,
+    )
+    return int(rows[0].get("count") or 0) if rows else 0
 
 
 def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | None):

@@ -25,7 +25,7 @@
    "label": "Pickup Point"
   },
   {
-   "columns": 4,
+   "columns": 2,
    "fieldname": "notes",
    "fieldtype": "Data",
    "in_list_view": 1,

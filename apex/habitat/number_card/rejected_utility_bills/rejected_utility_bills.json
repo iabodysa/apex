@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
- "name": "Disputed Utility Bills",
- "label": "Disputed Utility Bills",
+ "name": "Rejected Utility Bills",
+ "label": "Rejected Utility Bills",
  "document_type": "Utility Bill Entry",
  "function": "Count",
  "is_public": 1,
@@ -9,7 +9,7 @@
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Habitat",
- "filters_json": "[[\"Utility Bill Entry\", \"status\", \"=\", \"Disputed\"]]",
+ "filters_json": "[[\"Utility Bill Entry\", \"status\", \"=\", \"Rejected\"]]",
  "is_standard": 1,
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-14 00:00:00.000000"
 }

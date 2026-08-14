@@ -23,6 +23,20 @@ _LEGACY_DAYS = {
     "Saturday",
     "Sunday",
 }
+_LEGACY_UTILITY_CARD = "Disputed Utility Bills"
+_CANONICAL_UTILITY_CARD = "Rejected Utility Bills"
+_LEGACY_UTILITY_CARD_VALUES = {
+    "label": _LEGACY_UTILITY_CARD,
+    "document_type": "Utility Bill Entry",
+    "function": "Count",
+    "is_public": 1,
+    "show_percentage_stats": 1,
+    "stats_time_interval": "Daily",
+    "type": "Document Type",
+    "module": "Habitat",
+    "filters_json": '[["Utility Bill Entry", "status", "=", "Disputed"]]',
+    "is_standard": 1,
+}
 
 
 def execute():
@@ -32,6 +46,7 @@ def execute():
     seed_recovery_component()
     _migrate_deduction_policy()
     _repair_demo_import_residue()
+    _retire_untouched_legacy_utility_card()
     _assert_select_consistency()
 
 
@@ -176,6 +191,32 @@ def _repair_demo_import_residue():
             "Occupied" if occupied else "Available",
             update_modified=False,
         )
+
+
+def _retire_untouched_legacy_utility_card():
+    if not frappe.db.exists("Number Card", _LEGACY_UTILITY_CARD):
+        return
+    fields = list(_LEGACY_UTILITY_CARD_VALUES)
+    values = frappe.db.get_value(
+        "Number Card",
+        _LEGACY_UTILITY_CARD,
+        fields,
+        as_dict=True,
+    )
+    if not values or any(
+        values.get(field) != expected
+        for field, expected in _LEGACY_UTILITY_CARD_VALUES.items()
+    ):
+        return
+    frappe.rename_doc(
+        "Number Card",
+        _LEGACY_UTILITY_CARD,
+        _CANONICAL_UTILITY_CARD,
+        force=True,
+        merge=bool(frappe.db.exists("Number Card", _CANONICAL_UTILITY_CARD)),
+        ignore_permissions=True,
+        show_alert=False,
+    )
 
 
 def _assert_select_consistency():

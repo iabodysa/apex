@@ -27,7 +27,7 @@
    "label": "OK"
   },
   {
-   "columns": 5,
+   "columns": 4,
    "fieldname": "remark",
    "fieldtype": "Data",
    "in_list_view": 1,

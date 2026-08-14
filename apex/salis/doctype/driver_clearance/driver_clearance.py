@@ -27,7 +27,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 
-from apex.salis.utils import add_timeline_note, lock_driver
+from apex.salis.utils import add_timeline_note, lock_driver, lock_vehicle
 
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 
@@ -151,7 +151,7 @@ class DriverClearance(Document):
             )
 
     def _release_driver(self):
-        """Move the driver to Released and clear the current vehicle link.
+        """Move the driver to Released and clear both sides of the current vehicle link.
 
 		Guarded: only releases an existing driver, and only clears a vehicle
 		reference when one is set. Row-locks the driver to avoid races with
@@ -163,6 +163,12 @@ class DriverClearance(Document):
         updates = {"status": "Released"}
         current_vehicle = frappe.db.get_value("Salis Driver", self.driver, "current_vehicle")
         if current_vehicle:
+            lock_vehicle(current_vehicle)
+            if (
+                frappe.db.get_value("Salis Vehicle", current_vehicle, "current_driver")
+                == self.driver
+            ):
+                frappe.db.set_value("Salis Vehicle", current_vehicle, "current_driver", None)
             updates["current_vehicle"] = None
         frappe.db.set_value("Salis Driver", self.driver, updates)
 

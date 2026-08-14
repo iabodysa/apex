@@ -41,14 +41,14 @@
    "label": "Rental End Date"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "days",
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Days"
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "daily_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -59,7 +59,8 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount (SAR)"
+   "label": "Amount (SAR)",
+   "read_only": 1
   }
  ],
  "istable": 1,

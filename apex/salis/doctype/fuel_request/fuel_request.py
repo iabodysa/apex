@@ -69,8 +69,6 @@ class FuelRequest(Document):
 
     def validate(self):
         """Runs the per-type field checks and blocks a request from a rider who is inactive."""
-        if not self.request_type:
-            self.request_type = "Standard"
         if self.request_type not in REQUEST_TYPES:
             frappe.throw(_("Invalid Request Type: {0}").format(self.request_type))
 

@@ -10,7 +10,7 @@
  ],
  "fields": [
   {
-   "columns": 6,
+   "columns": 7,
    "fieldname": "check_item",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -18,7 +18,7 @@
    "reqd": 1
   },
   {
-   "columns": 6,
+   "columns": 3,
    "fieldname": "remark",
    "fieldtype": "Data",
    "in_list_view": 1,

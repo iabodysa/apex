@@ -14,7 +14,7 @@
  ],
  "fields": [
   {
-   "columns": 4,
+   "columns": 3,
    "fieldname": "transport_request",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -37,7 +37,7 @@
    "label": "Drop-off Stop"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "description": "Worker count fetched from the assigned request; feeds the trip capacity guard.",
    "fetch_from": "transport_request.worker_count",
    "fieldname": "requested_count",
@@ -47,7 +47,7 @@
    "read_only": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fetch_from": "transport_request.transport_purpose",
    "fieldname": "purpose",
    "fieldtype": "Data",
