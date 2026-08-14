@@ -1,6 +1,6 @@
 /* Copyright (c) 2026, afmcoltd */
 
-.fc-progress {
+.fc-root .fc-progress {
 	height: 3px;
 	margin-block-end: 8px;
 	border-radius: 3px;
@@ -8,11 +8,11 @@
 	background: transparent;
 }
 
-.fc-progress.fc-loading {
+.fc-root .fc-progress.fc-loading {
 	background: var(--gray-200);
 }
 
-.fc-since-banner {
+.fc-root .fc-since-banner {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -23,19 +23,19 @@
 	font-size: var(--text-sm, 13px);
 }
 
-.fc-since-banner[hidden] {
+.fc-root .fc-since-banner[hidden] {
 	display: none;
 }
 
-.fc-since-text {
+.fc-root .fc-since-text {
 	font-weight: 600;
 }
 
-.fc-since-dismiss {
+.fc-root .fc-since-dismiss {
 	margin-inline-start: auto;
 }
 
-.fc-summary {
+.fc-root .fc-summary {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;
@@ -43,7 +43,7 @@
 	align-items: stretch;
 }
 
-.fc-summary .skeleton-block {
+.fc-root .fc-summary .skeleton-block {
 	flex: 1 1 120px;
 	min-inline-size: 110px;
 	height: 62px;
@@ -51,7 +51,7 @@
 	background: var(--skeleton-bg);
 }
 
-.fc-chip {
+.fc-root .fc-chip {
 	flex: 1 1 120px;
 	min-inline-size: 110px;
 	background: var(--card-bg);
@@ -61,47 +61,47 @@
 	padding: 10px 14px;
 }
 
-.fc-chip[aria-pressed] {
+.fc-root .fc-chip[aria-pressed] {
 	cursor: pointer;
 }
 
-.fc-chip[aria-pressed="true"] {
+.fc-root .fc-chip[aria-pressed="true"] {
 	outline: 2px solid var(--primary);
 	outline-offset: -2px;
 }
 
-.fc-chip-val {
+.fc-root .fc-chip-val {
 	font-size: 22px;
 	font-weight: 700;
 	line-height: 1.1;
 }
 
-.fc-chip-lbl {
+.fc-root .fc-chip-lbl {
 	font-size: 11px;
 	color: var(--text-muted);
 }
 
-.fc-chip-total {
+.fc-root .fc-chip-total {
 	border-block-start-color: var(--gray-600);
 }
 
-.fc-chip-green {
+.fc-root .fc-chip-green {
 	border-block-start-color: var(--green-500);
 }
 
-.fc-chip-orange {
+.fc-root .fc-chip-orange {
 	border-block-start-color: var(--orange-500);
 }
 
-.fc-chip-red {
+.fc-root .fc-chip-red {
 	border-block-start-color: var(--red-500);
 }
 
-.fc-chip-gray {
+.fc-root .fc-chip-gray {
 	border-block-start-color: var(--gray-400);
 }
 
-.fc-controls {
+.fc-root .fc-controls {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: flex-end;
@@ -109,55 +109,55 @@
 	margin-block-end: 14px;
 }
 
-.fc-filter {
+.fc-root .fc-filter {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
 	font-size: var(--text-sm, 12px);
 }
 
-.fc-filter label {
+.fc-root .fc-filter label {
 	font-size: 11px;
 	color: var(--text-muted);
 	margin: 0;
 }
 
-.fc-search {
+.fc-root .fc-search {
 	min-inline-size: 180px;
 }
 
-.fc-result-count {
+.fc-root .fc-result-count {
 	font-size: 12px;
 	color: var(--text-muted);
 	margin-inline-start: auto;
 	align-self: center;
 }
 
-.fc-body {
+.fc-root .fc-body {
 	display: flex;
 	gap: 14px;
 	align-items: flex-start;
 }
 
-.fc-grid {
+.fc-root .fc-grid {
 	flex: 1 1 auto;
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
 	gap: 12px;
 }
 
-.fc-grid.fc-grid-table,
-.fc-grid.fc-grid-queue {
+.fc-root .fc-grid.fc-grid-table,
+.fc-root .fc-grid.fc-grid-queue {
 	display: block;
 }
 
-.fc-grid .skeleton-block {
+.fc-root .fc-grid .skeleton-block {
 	height: 120px;
 	border-radius: 8px;
 	background: var(--skeleton-bg);
 }
 
-.fc-card {
+.fc-root .fc-card {
 	position: relative;
 	background: var(--card-bg);
 	border: 1px solid var(--border-color);
@@ -167,7 +167,7 @@
 	cursor: pointer;
 }
 
-.fc-card-sev {
+.fc-root .fc-card-sev {
 	position: absolute;
 	inset-block-start: 8px;
 	inset-inline-end: 8px;
@@ -184,31 +184,31 @@
 	padding: 0 5px;
 }
 
-.fc-card-head {
+.fc-root .fc-card-head {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	gap: 8px;
 }
 
-.fc-plate {
+.fc-root .fc-plate {
 	font-size: 16px;
 	font-weight: 700;
 }
 
-.fc-card-meta {
+.fc-root .fc-card-meta {
 	margin-block: 6px;
 	font-size: var(--text-sm, 13px);
 }
 
-.fc-sep-dot {
+.fc-root .fc-sep-dot {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: 6px;
 }
 
-.fc-card-foot {
+.fc-root .fc-card-foot {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -218,59 +218,59 @@
 	flex-wrap: wrap;
 }
 
-.fc-driver {
+.fc-root .fc-driver {
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
 }
 
-.fc-driver-icon {
+.fc-root .fc-driver-icon {
 	display: inline-flex;
 	color: var(--text-muted);
 }
 
-.fc-empty {
+.fc-root .fc-empty {
 	padding: 40px;
 	text-align: center;
 	inline-size: 100%;
 }
 
-.fc-empty-scope {
+.fc-root .fc-empty-scope {
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius-md, 8px);
 	background: var(--control-bg);
 }
 
-.fc-empty-title {
+.fc-root .fc-empty-title {
 	font-weight: 600;
 	font-size: var(--text-md, 14px);
 	margin-block-end: 6px;
 }
 
-.fc-empty-hint {
+.fc-root .fc-empty-hint {
 	font-size: var(--text-sm, 13px);
 }
 
-.fc-clear-filters {
+.fc-root .fc-clear-filters {
 	margin-block-start: 12px;
 }
 
-.fc-error {
+.fc-root .fc-error {
 	padding: 24px;
 	text-align: center;
 	inline-size: 100%;
 }
 
-.fc-error-msg {
+.fc-root .fc-error-msg {
 	margin-block-end: 10px;
 }
 
-.fc-table {
+.fc-root .fc-table {
 	inline-size: 100%;
 	font-size: var(--text-sm, 13px);
 }
 
-button.fc-sev-counter {
+.fc-root button.fc-sev-counter {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -282,16 +282,16 @@ button.fc-sev-counter {
 	cursor: pointer;
 }
 
-button.fc-sev-counter[aria-pressed="true"] {
+.fc-root button.fc-sev-counter[aria-pressed="true"] {
 	border-color: var(--primary);
 	background: var(--bg-color);
 }
 
-.fc-own-counter {
+.fc-root .fc-own-counter {
 	margin-inline-start: 6px;
 }
 
-.fc-sev-dot {
+.fc-root .fc-sev-dot {
 	inline-size: 9px;
 	block-size: 9px;
 	border-radius: 50%;
@@ -299,11 +299,11 @@ button.fc-sev-counter[aria-pressed="true"] {
 	background: var(--gray-400);
 }
 
-.fc-sev-count {
+.fc-root .fc-sev-count {
 	font-weight: 700;
 }
 
-.fc-alert-clear {
+.fc-root .fc-alert-clear {
 	display: inline-flex;
 	align-items: center;
 	padding: 4px 10px;
@@ -311,7 +311,7 @@ button.fc-sev-counter[aria-pressed="true"] {
 	color: var(--text-muted);
 }
 
-.fc-queue-bulk {
+.fc-root .fc-queue-bulk {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -320,14 +320,14 @@ button.fc-sev-counter[aria-pressed="true"] {
 	inline-size: 100%;
 }
 
-.fc-queue {
+.fc-root .fc-queue {
 	inline-size: 100%;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 }
 
-.fc-queue-row {
+.fc-root .fc-queue-row {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -338,36 +338,36 @@ button.fc-sev-counter[aria-pressed="true"] {
 	background: var(--card-bg);
 }
 
-.fc-queue-row.fc-queue-aging {
+.fc-root .fc-queue-row.fc-queue-aging {
 	background: var(--yellow-50, var(--yellow-100));
 }
 
-.fc-queue-main {
+.fc-root .fc-queue-main {
 	flex: 1 1 auto;
 	min-inline-size: 0;
 }
 
-.fc-queue-msg {
+.fc-root .fc-queue-msg {
 	font-size: var(--text-sm, 13px);
 }
 
-.fc-queue-meta {
+.fc-root .fc-queue-meta {
 	font-size: 11.5px;
 	color: var(--text-muted);
 	margin-block-start: 2px;
 }
 
-.fc-queue-owner {
+.fc-root .fc-queue-owner {
 	font-weight: 500;
 }
 
-.fc-queue-owner.fc-unowned {
+.fc-root .fc-queue-owner.fc-unowned {
 	font-weight: 400;
 	color: var(--text-muted);
 	font-style: italic;
 }
 
-.fc-queue-aging-pill {
+.fc-root .fc-queue-aging-pill {
 	font-size: 10.5px;
 	font-weight: 700;
 	color: var(--orange-700);
@@ -376,14 +376,14 @@ button.fc-sev-counter[aria-pressed="true"] {
 	padding: 0 6px;
 }
 
-.fc-queue-actions {
+.fc-root .fc-queue-actions {
 	display: inline-flex;
 	gap: 6px;
 	flex: 0 0 auto;
 	flex-wrap: wrap;
 }
 
-.fc-drawer {
+.fc-root .fc-drawer {
 	flex: 0 0 320px;
 	inline-size: 320px;
 	background: var(--card-bg);
@@ -394,11 +394,11 @@ button.fc-sev-counter[aria-pressed="true"] {
 	overflow: auto;
 }
 
-.fc-drawer[hidden] {
+.fc-root .fc-drawer[hidden] {
 	display: none;
 }
 
-.fc-drawer-head {
+.fc-root .fc-drawer-head {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -406,119 +406,119 @@ button.fc-sev-counter[aria-pressed="true"] {
 	flex-wrap: wrap;
 }
 
-.fc-drawer-title {
+.fc-root .fc-drawer-title {
 	font-size: 17px;
 	font-weight: 700;
 	flex: 1 1 auto;
 }
 
-.fc-drawer-sub {
+.fc-root .fc-drawer-sub {
 	font-size: 11px;
 	color: var(--text-muted);
 	margin: 14px 0 6px;
 	font-weight: 600;
 }
 
-.fc-drawer-alerts {
+.fc-root .fc-drawer-alerts {
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 }
 
-.fc-drawer-alert {
+.fc-root .fc-drawer-alert {
 	border: 1px solid var(--border-color);
 	border-inline-start: 4px solid var(--gray-300);
 	border-radius: var(--border-radius-md, 8px);
 	padding: 8px;
 }
 
-.fc-drawer-alert-msg {
+.fc-root .fc-drawer-alert-msg {
 	margin-block: 4px;
 }
 
-.fc-drawer-alert-actions {
+.fc-root .fc-drawer-alert-actions {
 	display: flex;
 	gap: 6px;
 	flex-wrap: wrap;
 	margin-block-start: 4px;
 }
 
-.fc-dl {
+.fc-root .fc-dl {
 	display: flex;
 	flex-direction: column;
 }
 
-.fc-dl-row {
+.fc-root .fc-dl-row {
 	display: flex;
 	gap: 8px;
 	padding: 3px 0;
 	font-size: var(--text-sm, 13px);
 }
 
-.fc-dl-k {
+.fc-root .fc-dl-k {
 	flex: 0 0 110px;
 	color: var(--text-muted);
 }
 
-.fc-dl-v {
+.fc-root .fc-dl-v {
 	flex: 1 1 auto;
 	font-weight: 500;
 }
 
-.fc-list {
+.fc-root .fc-list {
 	margin: 0;
 	padding-inline-start: 0;
 	list-style: none;
 	font-size: 12.5px;
 }
 
-.fc-timeline li {
+.fc-root .fc-timeline li {
 	padding-block: 3px;
 }
 
-.fc-timeline-kind {
+.fc-root .fc-timeline-kind {
 	font-size: 10.5px;
 	font-weight: 700;
 	color: var(--text-muted);
 	text-transform: uppercase;
 }
 
-.fc-accent-green {
+.fc-root .fc-accent-green {
 	border-inline-start-color: var(--green-500);
 }
 
-.fc-accent-orange {
+.fc-root .fc-accent-orange {
 	border-inline-start-color: var(--orange-500);
 }
 
-.fc-accent-red {
+.fc-root .fc-accent-red {
 	border-inline-start-color: var(--red-500);
 }
 
-.fc-accent-gray {
+.fc-root .fc-accent-gray {
 	border-inline-start-color: var(--gray-400);
 }
 
-.fc-sev-Critical {
+.fc-root .fc-sev-Critical {
 	background: var(--red-500);
 }
 
-.fc-sev-Warning {
+.fc-root .fc-sev-Warning {
 	background: var(--orange-500);
 }
 
-.fc-sev-Info {
+.fc-root .fc-sev-Info {
 	background: var(--blue-500);
 }
 
-.fc-sev-row-Critical {
+.fc-root .fc-sev-row-Critical {
 	border-inline-start-color: var(--red-500);
 }
 
-.fc-sev-row-Warning {
+.fc-root .fc-sev-row-Warning {
 	border-inline-start-color: var(--orange-500);
 }
 
-.fc-sev-row-Info {
+.fc-root .fc-sev-row-Info {
 	border-inline-start-color: var(--blue-500);
 }
