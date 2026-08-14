@@ -1,5 +1,4 @@
 <script setup>
-import { Button } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 defineProps({ state: { type: String, default: "ready" }, title: String, message: [String, Object] });

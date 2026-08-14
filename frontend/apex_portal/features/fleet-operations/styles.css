@@ -92,9 +92,14 @@
     flex-wrap: wrap;
     gap: var(--sp-2);
 }
-.ops-reason {
+.ops-reason,
+.ops-hint {
     color: var(--muted);
     font-size: 0.875rem;
+}
+
+.ops-hint {
+    margin-block-start: calc(var(--sp-1) * -1);
 }
 @media (max-width: 900px) {
     .ops-metrics {

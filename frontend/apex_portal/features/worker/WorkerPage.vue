@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
 import { RouterLink, useRoute } from "vue-router";
 import { fieldLabel, recordTitle, statusLabel } from "../../core/displayLabels.js";
 import { errorStatus } from "../../core/errorMessage.js";

@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { Button, ErrorMessage } from "frappe-ui";
+import { Button } from "frappe-ui";
 import { recordTitle, statusLabel } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";

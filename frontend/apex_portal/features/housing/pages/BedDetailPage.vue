@@ -80,7 +80,8 @@ async function depart() {
       <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>
       <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>
       <p v-else class="feature-page__empty">السرير مشغول، وليس لديك صلاحية تسجيل المغادرة.</p>
-      // TODO(A-532): the custody link is guarded on text that never matches
+      <!-- TODO(A-532): the custody link is guarded on text that never matches -->
+
       <RouterLink v-if="error.includes('العهد')" to="/custody">الانتقال إلى العهد</RouterLink>
       <ErrorMessage v-if="error" :message="error" />
     </template>

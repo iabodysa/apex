@@ -4,7 +4,16 @@ import { useRoute } from "vue-router";
 import { Badge, Button, FormControl, createResource } from "frappe-ui";
 import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+
+// What each fleet_os action accepts for the operator's text, read from its signature.
+const NOTE_ARGUMENT = Object.freeze({
+  stop: (note) => ({ reason: note }),
+  workshopIn: (note) => ({ notes: note }),
+  workshopOut: () => ({}),
+  recover: () => ({}),
+});
 const route = useRoute(),
   vehicles = createResource({
     url: "apex.salis.api.fleet_os.get_fleet_os",
@@ -59,9 +68,17 @@ async function act(name) {
     notice.value = state.reason;
     return;
   }
-  // TODO(A-532): sends reason where the endpoint reads notes, so the operator's note is dropped
-  await once(`${name}:${route.params.vehicle}`, () => actions[name].submit({ plate: route.params.vehicle, reason: reason.value || undefined }));
-  // TODO(A-532): notice reports success unconditionally, so a refused action looks like it worked
+  // The four endpoints take different arguments on purpose: stop_vehicle reads a reason and maps
+  // it to the Vehicle Suspension Select, workshop_in stores a free note, and workshop_out and
+  // recover take neither. Sending one name to all four dropped the operator's text on three.
+  const note = reason.value || undefined;
+  const payload = { plate: route.params.vehicle, ...NOTE_ARGUMENT[name](note) };
+  try {
+    await once(`${name}:${route.params.vehicle}`, () => actions[name].submit(payload));
+  } catch (error) {
+    notice.value = safeErrorMessage(error, "تعذّر تنفيذ الإجراء. حاول مرة أخرى.");
+    return;
+  }
   notice.value = "تم تنفيذ الإجراء";
   await load();
 }
@@ -96,6 +113,7 @@ onMounted(load);
             <Button variant="solid" theme="green" label="إعادة للخدمة" :disabled="vehicle.capabilities?.recover?.allowed === false" :title="vehicle.capabilities?.recover?.reason" @click="act('recover')" />
           </div>
           <FormControl v-model="reason" type="textarea" :rows="2" label="ملاحظة الإجراء" />
+          <p class="ops-hint">تُحفظ الملاحظة مع الإيقاف وإدخال الورشة فقط.</p>
           <p v-if="notice" class="ops-reason">{{ notice }}</p>
         </article>
         <article class="ops-card">
