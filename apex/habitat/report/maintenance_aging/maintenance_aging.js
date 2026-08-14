@@ -12,7 +12,7 @@ frappe.query_reports["Maintenance Aging"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: ["", "Open", "In Progress"].join("\n"),
+			options: ["", "Open", "In Progress", "Resolved"].join("\n"),
 		},
 		apex.report_filters.company(),
 		apex.report_filters.cost_center(),

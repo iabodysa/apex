@@ -20,7 +20,7 @@ class MaintenanceWorkOrder(Document):
         net out the operational memo this Work Order posted (keyed by
         source_doctype/source_name) and release the linked request back to Open.
         Open is the request's pre-Work-Order state; a request a human has since
-        moved to a terminal Resolved/Cancelled is left untouched."""
+        moved to Resolved or Closed is left untouched."""
         self._reverse_accommodation_memo()
 
         from apex.habitat.maintenance_engine import reverse_maintenance_cost
@@ -30,11 +30,11 @@ class MaintenanceWorkOrder(Document):
             return
         if not frappe.db.exists("DocType", "Maintenance Request"):
             return
-        mr_status = frappe.db.get_value("Maintenance Request", self.maintenance_request, "status")
-        if mr_status in ("In Progress", "Resolved"):
-            frappe.db.set_value(
-                "Maintenance Request", self.maintenance_request, "status", "Open"
-            )
+        request = frappe.get_doc(
+            "Maintenance Request", self.maintenance_request, for_update=True
+        )
+        if request.docstatus == 1 and request.status == "In Progress":
+            request.db_set("status", "Open")
 
     def _reverse_accommodation_memo(self):
         """Post a negative mirror for the live completion memo this Work Order
@@ -100,11 +100,21 @@ def validate(doc, method=None):
 
 def on_submit(doc, method=None):
     """Marks the work order Planned and advances its linked Maintenance Request to In Progress."""
-    doc.db_set("status", "Planned")
+    request = None
     if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
-        mr = frappe.get_doc("Maintenance Request", doc.maintenance_request)
-        if mr.docstatus == 1:
-            frappe.db.set_value("Maintenance Request", doc.maintenance_request, "status", "In Progress")
+        request = frappe.get_doc(
+            "Maintenance Request", doc.maintenance_request, for_update=True
+        )
+        if request.docstatus != 1 or request.status != "Open":
+            frappe.throw(
+                _(
+                    "Only an open submitted Maintenance Request can be started by a Work Order."
+                )
+            )
+
+    doc.db_set("status", "Planned")
+    if request:
+        request.db_set("status", "In Progress")
 
 
 def before_cancel(doc, method=None):
@@ -185,6 +195,18 @@ def mark_completed(
     if not notes:
         frappe.throw(_("Completion Notes are required before closing a Maintenance Work Order."))
 
+    request = None
+    if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
+        request = frappe.get_doc(
+            "Maintenance Request", doc.maintenance_request, for_update=True
+        )
+        if request.docstatus != 1 or request.status != "In Progress":
+            frappe.throw(
+                _(
+                    "Only an in-progress submitted Maintenance Request can be resolved by a Work Order."
+                )
+            )
+
     ledger_posted = False
     cost = flt(doc.total_procurement_cost)
 
@@ -199,10 +221,8 @@ def mark_completed(
     }
     doc.db_set(evidence)
 
-    if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
-        frappe.db.set_value(
-            "Maintenance Request",
-            doc.maintenance_request,
+    if request:
+        request.db_set(
             {"status": "Resolved", "resolution_notes": notes},
         )
 

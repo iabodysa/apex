@@ -1522,6 +1522,7 @@ Driver Clearance Item,بند إخلاء طرف سائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
 Driver Clearances Pending,إخلاءات طرف السائقين المعلقة
 Driver ID,معرّف السائق
+Driver ID is required in salis_driver.csv.,معرّف السائق مطلوب في ملف salis_driver.csv.
 Driver Latitude,خط عرض السائق
 Driver Longitude,خط طول السائق
 Driver Portal,بوابة السائق
@@ -2170,6 +2171,7 @@ Immediate Action Taken,الإجراء الفوري المتّخذ
 Imminent Checkouts,مغادرات وشيكة
 Immutable Record,قيد غير قابل للتغيير
 Import trail in an operator-facing field,أثر استيراد في حقل يقرأه المشغّل
+Imported Salis Driver {0} has status {1}. Only blank or Active is accepted. Use Driver Suspension or Driver Clearance for lifecycle changes.,السائق المستورد {0} حالته {1}. لا يُقبل إلا حقل فارغ أو الحالة «نشط». استخدم إيقاف السائق أو إخلاء طرف السائق لتغيير حالة دورة العمل.
 In Progress,قيد التنفيذ
 In Storage,في المستودع
 In Transit,في الطريق
@@ -2973,6 +2975,8 @@ Only a dispatched trip can be executed.,لا يمكن تنفيذ الرحلة ق
 Only a handover Under Review can be approved.,لا يمكن اعتماد التسليم إلا إذا كان قيد المراجعة.
 Only a resolved Maintenance Request can be closed.,لا يمكن إغلاق طلب الصيانة إلا بعد معالجته.
 Only a resolved or closed Maintenance Request can be reopened.,لا يمكن إعادة فتح إلا طلب صيانة معالج أو مغلق.
+Only an in-progress submitted Maintenance Request can be resolved by a Work Order.,لا يمكن لأمر العمل معالجة إلا طلب صيانة معتمد قيد التنفيذ.
+Only an open submitted Maintenance Request can be started by a Work Order.,لا يمكن لأمر العمل بدء إلا طلب صيانة معتمد مفتوح.
 Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمَد.
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمد.
 Only a submitted movement can be acknowledged.,لا يمكن اعتماد الحركة إلا بعد اعتماد المستند.
