@@ -74,6 +74,12 @@ async function act(kind, row) {
       </article>
     </div>
     <Dialog v-model="selected" :options="{ title: 'رفض طلب الوقود' }">
+      <template #body-header>
+        <header class="portal-dialog__head">
+          <h3>رفض طلب الوقود</h3>
+          <button type="button" class="portal-dialog__close" aria-label="إغلاق النافذة" @click="selected = null">×</button>
+        </header>
+      </template>
       <template #body-content>
         <FormControl v-model="reason" type="textarea" :rows="3" label="سبب الرفض" required />
         <Button variant="solid" theme="red" label="تأكيد الرفض" :loading="rejectFuel.loading" @click="act('reject', selected)" />
