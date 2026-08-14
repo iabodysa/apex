@@ -31,6 +31,13 @@ from a wage for money the company never disbursed. The per-period headroom comes
 an unsaved native HRMS Salary Slip preview, so structure deductions, tax, loans and
 payment-day proration remain HRMS-owned.
 
+The two inserts and the slip preview pass ``ignore_permissions`` because the actor is the
+operator who recorded the loss — a custody or fleet supervisor — and Employee Advance and
+Additional Salary are HRMS payroll documents. Granting a supervisor create on those to satisfy
+this call would hand them the payroll surface, which is the opposite of what a recovery flow
+should cost. The preview is never saved. Both real documents land where HRMS's own submit path
+takes over, and the caller's authority was already checked on the damage or incident record.
+
 Source linkage is two-way and duplicate-safe: the source row is locked before the
 existing-link check and insert, and the source document keeps its own
 ``Employee Advance`` link, and the advance carries ``custom_source_doctype`` /

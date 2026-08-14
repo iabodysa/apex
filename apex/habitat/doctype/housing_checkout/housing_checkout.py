@@ -15,6 +15,13 @@ activates the moment one user holds both roles, with no DocPerm edit. No shipped
 profile bundles them today, so this overlay is dormant until an administrator does.
 Proof and the framework citations are in
 ``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+
+The three writes pass ``ignore_permissions`` because they are consequences of a submit, not
+actions the operator took. Submitting a checkout spawns the damage assessment, withdraws it again
+if it is left orphaned, and raises the departure transport request; the permission that mattered
+was checked when this document was submitted. Granting the checkout role create on Custody Damage
+Assessment and Transport Request would let it raise either with no checkout behind it, and delete
+on the assessment would be worse still.
 """
 
 from __future__ import annotations

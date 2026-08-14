@@ -5,6 +5,12 @@ The pass token is HMAC-signed (per-site key) so it cannot be forged client-side
 and is bound to (trip, worker); every scan attempt is recorded as an immutable
 Boarding Scan Log row. No GL/money. A driver may only act on their own trips
 (resolved server-side); the client never supplies a driver id.
+
+The three writes pass ``ignore_permissions`` because the driver holds no role — he reaches Apex by
+credential, not as a Frappe user with permissions of his own — and because Boarding Scan Log is an
+``in_create`` audit record that no role may write by hand. The HMAC signature and the server-side
+trip ownership check above are what authorise the write; there is no role for a DocPerm to attach
+to, and one on the scan log would make the audit trail forgeable from the Desk.
 """
 
 from __future__ import annotations

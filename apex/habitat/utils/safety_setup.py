@@ -9,6 +9,12 @@ keyed on the catalog, the assignment on (template, building), the scope on
 
 Frequency classification and the operator report take plain values and return
 values; only the four ``_ensure``/``_get_or_create`` helpers touch the database.
+
+Those four pass ``ignore_permissions`` because they write the SCHEDULE, not an operator's record:
+a scope row, the one reusable template, and the template-to-building assignment. The operator asks
+for a building to be wired up and the generator derives everything else from the catalog. Granting
+the role create on Scheduled Task Template would let a supervisor invent templates outside the
+catalog, which is what keeps the catalog the single source of the safety programme.
 """
 
 from __future__ import annotations

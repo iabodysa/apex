@@ -23,6 +23,13 @@ no reversal code and no field to drift out of step with the ledger. That reversa
 only reachable because ``allow_cancel_despite_billing_log`` stops the contract's own
 billing log from vetoing the cancellation; deleting a cited payment stays blocked.
 
+The three writes pass ``ignore_permissions`` because the telecom operator who raises the billing
+is not a finance user and must not become one. The Material Request and the Payment Entry are
+ERPNext documents whose create permission belongs to Purchase and Accounts roles; granting those
+to a telecom coordinator to satisfy this call would hand them the whole procurement and payment
+surface. The write is narrow and the documents land in Draft for finance to review — the eligible
+submitted contract, checked above, is what authorises it.
+
 Every action:
   * requires an eligible submitted contract the caller may read (company-scoped),
   * requires the caller's create permission on the target DocType,

@@ -1,4 +1,10 @@
-"""Driver fallback when a worker cannot present a scannable boarding pass."""
+"""Driver fallback when a worker cannot present a scannable boarding pass.
+
+Both writes pass ``ignore_permissions`` for the reason in ``boarding.py``: the driver holds no
+role, and Boarding Scan Log is an ``in_create`` audit record no role may write by hand. This is
+the fallback path, so every attempt is logged whether it succeeds or fails — a DocPerm that made
+the write legal would also let the log be edited afterwards, which is the one thing it must not.
+"""
 
 import frappe
 from frappe import _
