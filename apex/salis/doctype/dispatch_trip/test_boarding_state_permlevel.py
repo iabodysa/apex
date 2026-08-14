@@ -12,6 +12,10 @@ value rather than refusing the save (``base_document.py:1263``), so the assertio
 value afterwards, never on an exception. Second, ``Administrator`` is exempt and returns at
 ``document.py:788``, so every case here runs as a restricted user; a rehearsal as Administrator
 would pass against a DocType with no wall at all.
+
+The fixtures pass ``ignore_permissions`` on purpose: they are building the world the assertions
+then run against, as Administrator, before any restricted user is set. A fixture that had to
+satisfy the permission model would be testing the fixture rather than the wall.
 """
 
 import frappe

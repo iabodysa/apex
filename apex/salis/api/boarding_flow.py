@@ -24,14 +24,17 @@ delivery on read permission; the SPA treats the payload as advisory and refetche
 No GL, no money. The driver phone is operational — returned only to the scanning
 driver and the affected worker, and never logged.
 
-Every ``trip.save`` here passes ``ignore_permissions``, and the reason is the same one in all
-thirteen places: the per-worker flow state is a child table on Dispatch Trip, so writing one
-rider's status needs write on the whole trip — which is also the route, the vehicle and the driver
-assignment. The elimination is ``permlevel`` on those three, not on ``boarding_state``: a raised
-permlevel restricts a field, so the wall goes around what must not be touched and the flow state
-stays at level 0. Note that the framework RESETS an unauthorised field rather than refusing the
-save (``document.py:795``). Until that lands, each call is gated by the portal token identity and
-the boarding window above it.
+The flow-state writes here no longer bypass permissions. Each one runs inside ``as_capacity`` —
+the token authenticates, the capacity user carries the role — and Dispatch Trip holds the wall
+that makes that safe: every field except ``boarding_state`` sits at ``permlevel 1``, so a rider
+writes their own row and the route, vehicle and driver assignment stay out of reach. The framework
+RESETS an unauthorised field rather than refusing the save (``document.py:795``), which is why
+that guarantee is asserted on the value after the save rather than on an exception.
+
+``auto_confirm_claimed_boardings`` still passes ``ignore_permissions``, and that one is correct:
+it is a scheduled tick with no token and no actor, so there is no capacity to open. The
+``Trip Start Log`` writes keep the flag for the same reason they always had — the log is an
+``in_create`` audit record no role may write by hand.
 """
 
 from __future__ import annotations
@@ -202,7 +205,7 @@ def _manifest_employees_for_stop(dispatch_trip, route_stop):
     )
 
 
-def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
+def ensure_trip_boarding_state(dispatch_trip, transport_request=None, audience=DRIVER):
     """Populate Dispatch Trip's boarding_state from the manifest, once per trip.
 
     Called from the trip-start path (the first scan / self-confirm get-or-create
@@ -229,11 +232,12 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None):
         )
         added += 1
     if added:
-        trip.save(ignore_permissions=True)
+        with as_capacity(audience):
+            trip.save()
     return added
 
 
-def mark_boarded(dispatch_trip, employee, source="Scan"):
+def mark_boarded(dispatch_trip, employee, source="Scan", audience=DRIVER):
     """Flip a worker's boarding state to Boarded (idempotent). Called from the
     boarding paths when a worker's boarding event is recorded, so the flow state
     tracks the manifest. ``source`` records HOW (Scan for a QR scan, Manual for a
@@ -249,7 +253,8 @@ def mark_boarded(dispatch_trip, employee, source="Scan"):
             row.confirm_source = source
             changed = True
     if changed:
-        trip.save(ignore_permissions=True)
+        with as_capacity(audience):
+            trip.save()
         frappe.cache.delete_value(_MISBOARD_CACHE_PREFIX + employee)
 
 
@@ -472,7 +477,8 @@ def get_trip_boarding(dispatch_trip):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)
+        with as_capacity(DRIVER):
+            trip.save()
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -517,7 +523,8 @@ def notify_remaining_passengers(dispatch_trip):
             row.notify_count = cint(row.notify_count) + 1
         changed = True
     if changed:
-        trip.save(ignore_permissions=True)
+        with as_capacity(DRIVER):
+            trip.save()
 
     _publish(
         "boarding_update",
@@ -562,7 +569,7 @@ def worker_request_wait(token=None):
     max_count = get_boarding_setting("worker_wait_request_max")
     window = get_boarding_setting("worker_wait_request_seconds")
 
-    ensure_trip_boarding_state(dispatch_trip)
+    ensure_trip_boarding_state(dispatch_trip, audience=WORKER)
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
@@ -571,7 +578,8 @@ def worker_request_wait(token=None):
     if cint(target.wait_count) < max_count:
         target.wait_count = cint(target.wait_count) + 1
     target.wait_at = now_datetime()
-    trip.save(ignore_permissions=True)
+    with as_capacity(WORKER):
+        trip.save()
 
     wait_count = cint(target.wait_count)
     _publish(
@@ -644,7 +652,7 @@ def worker_claim_boarded(token=None):
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
-    ensure_trip_boarding_state(dispatch_trip)
+    ensure_trip_boarding_state(dispatch_trip, audience=WORKER)
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
@@ -668,7 +676,7 @@ def worker_claim_boarded(token=None):
         target.worker_claim_at = now_datetime()
         with as_capacity(WORKER):
             trip.save()
-    mark_boarded(dispatch_trip, employee, source="Worker")
+    mark_boarded(dispatch_trip, employee, source="Worker", audience=WORKER)
 
     _publish(
         "boarding_confirmed",
@@ -791,7 +799,8 @@ def worker_trip_boarding(token=None):
 
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip)
     if _apply_auto_confirm(trip):
-        trip.save(ignore_permissions=True)
+        with as_capacity(WORKER):
+            trip.save()
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
         _state_payload(row, notify_window_seconds)
@@ -859,7 +868,8 @@ def depart_and_finalize(dispatch_trip):
         else:
             pending += 1
     if changed:
-        trip.save(ignore_permissions=True)
+        with as_capacity(DRIVER):
+            trip.save()
 
     _close_trip_log(dispatch_trip)
 
