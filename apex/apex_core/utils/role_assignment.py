@@ -7,6 +7,11 @@ the notification without anything written here. A scheduled job that inserts its
 alert row instead builds a second inbox the user has to learn — and, the part that
 actually hurt, one that nothing ever empties.
 
+``close_all_assignments`` is called with ``ignore_permissions`` because the queue is cleared when
+the DOCUMENT settles, not when the assignee decides to close it: the person who resolves a request
+is rarely the person it was assigned to, and neither should need permission over the other's ToDo.
+Granting a role write on ToDo to satisfy this would let it close anyone's assignment on the site.
+
 What follows from that is :func:`reconcile_role_queue`'s contract: the caller passes the
 documents that still need attention FOR ANY REASON, not the ones its own pass flagged.
 A document is queued while any condition holds and settled only when none does.

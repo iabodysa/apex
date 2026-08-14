@@ -10,6 +10,11 @@ the rent being paid. This module routes the same button through
 already uses, so the amount and the allocation both come from ERPNext's own payable
 logic instead of from the rent schedule.
 
+The insert passes ``ignore_permissions`` because the accommodation operator who raises the rent is
+not a finance user. Payment Entry's create permission belongs to Accounts roles; granting it here
+would hand the whole payment surface to a building supervisor. The document lands in Draft for
+finance to review and submit, and this layer posts no GL.
+
 What is lease-specific and therefore lives here: which lease is eligible, which
 instalment a payment covers, and how an already-raised payment is found again.
 

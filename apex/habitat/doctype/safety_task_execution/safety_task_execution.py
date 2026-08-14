@@ -1,6 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Safety Task Execution controller.
 
+``_escalate_failed_execution`` inserts with ``ignore_permissions`` because the ticket is raised by
+the framework on submit, not filed by the inspector: the permission that mattered was checked when
+they submitted the round. An inspector able to create Maintenance Requests directly could raise
+them with no failed execution behind them.
+
 A live execution captures findings observed in the field. On submit it fans out
 each actionable finding to one Maintenance Request via the shared
 habitat.utils.finding_fanout helper, stamping source_execution on the ticket and

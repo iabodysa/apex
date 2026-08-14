@@ -1,5 +1,11 @@
 # Copyright (c) 2026, afmcoltd
-"""Worker and driver device opt-in endpoints for background notifications."""
+"""Worker and driver device opt-in endpoints for background notifications.
+
+The save passes ``ignore_permissions`` because the caller is a token subject with no user record —
+``resolve_portal_subject`` maps the bearer token to a worker or driver, and there are no roles to
+consult. The subscription is that subject's own device registration, and the token resolution
+above is what authorises writing it.
+"""
 
 import frappe
 from frappe import _

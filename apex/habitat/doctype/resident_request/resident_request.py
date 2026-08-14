@@ -1,4 +1,11 @@
 # Copyright (c) 2026, afmcoltd
+"""Resident Request controller.
+
+``_sync_assignment_todo`` inserts with ``ignore_permissions`` because it writes a **ToDo** — the
+framework's own assignment record — to put the request in a supervisor's queue. Granting the role
+create on ToDo to satisfy it would let that role assign work to anyone on the site.
+"""
+
 from __future__ import annotations
 
 import re

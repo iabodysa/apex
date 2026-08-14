@@ -1,5 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
+"""Scheduled tasks for the Salis fleet module (split by domain).
+
+The save passes ``ignore_permissions`` because the scheduler runs with no session user and the
+watch flags a top-up nobody reverted — the record it touches belongs to the operator who raised
+the request, not to the job, so there is no owner this could run as instead.
+"""
 
 from __future__ import annotations
 

@@ -1,5 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Client Audit Remediation Plan lifecycle."""
+"""Client Audit Remediation Plan lifecycle.
+
+``refresh_overall_status`` saves with ``ignore_permissions`` because the plan's status is DERIVED
+from its items closing, and the person who closes the last item is rarely the plan's owner. The
+field is machine-maintained; a role able to write it could report a plan complete by hand.
+"""
 
 from __future__ import annotations
 

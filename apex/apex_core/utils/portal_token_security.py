@@ -1,5 +1,11 @@
 # Copyright (c) 2026, afmcoltd
-"""Shared authorization boundary for worker and driver portal bearer tokens."""
+"""Shared authorization boundary for worker and driver portal bearer tokens.
+
+``log_credential_event`` inserts with ``ignore_permissions`` because it records credential
+issue, use and revocation — an audit trail written about the actor, never by them. The caller here
+is usually a token holder with no user at all, and a role able to write this log could rewrite the
+record of its own access, which is the one thing an audit trail must refuse.
+"""
 
 from __future__ import annotations
 

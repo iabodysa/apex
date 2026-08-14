@@ -1,5 +1,9 @@
 # Copyright (c) 2026, afmcoltd
-"""Seed the Maintenance Material catalog on fresh install."""
+"""Seed the Maintenance Material catalog on fresh install.
+
+The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
+install as Administrator, with no session user whose roles could be consulted.
+"""
 import frappe
 
 

@@ -1,6 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Safety Inspection Report controller.
 
+``_reverse_generated_request`` deletes with ``ignore_permissions`` because cancelling the report
+must withdraw the tickets the framework spawned from it, and the inspector who cancels holds no
+delete permission on Maintenance Request — nor should they, since that would let them remove
+tickets they never raised.
+
 On submit, the report fans out: each ACTIONABLE finding (one carrying an
 issue_type, a room, and not already resolved) spawns one Maintenance Request,
 the report's source_inspection back-link is stamped on the ticket, and the

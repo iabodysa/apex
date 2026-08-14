@@ -1,6 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """Fleet employee self-service API — backs the /fleet employee page.
 
+The fuel-request insert passes ``ignore_permissions``, and the reason is the same product decision
+recorded in ``fleet_employee_services``: a driver holds no role and is not meant to become a
+Frappe user with permissions of his own, so there is nothing a ``create`` DocPerm could attach to.
+What is wrong here is the identity — ``_session_driver`` still reads ``frappe.session.user`` — and
+that path is the one being retired.
+
 Unlike the supervisor board (fleet_os) these endpoints are IDENTITY-SCOPED: every
 one resolves ``frappe.session.user`` to the caller's own Salis Driver and returns
 ONLY that person's vehicle / trips / fuel requests. The client never supplies a

@@ -8,6 +8,11 @@ field access is resolved separately and unions every permlevel across the user's
 The permlevel-0 ``read`` beside it is a separate grant, so a Finance Manager holding no
 other role can open the record the ``Custody Damage Assessment Created`` notification
 emails them. It is unscoped, so it reaches every building.
+
+``on_cancel`` deletes the linked Additional Salary with ``ignore_permissions`` because cancelling
+the assessment must withdraw the deduction it raised, and the accommodation role that cancels it
+holds no payroll permission — nor should it. Granting delete on Additional Salary to satisfy this
+would let that role remove any deduction on the site, including ones it never raised.
 """
 
 from __future__ import annotations

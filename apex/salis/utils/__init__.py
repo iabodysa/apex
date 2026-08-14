@@ -1,4 +1,10 @@
 # Copyright (c) 2026, afmcoltd
+"""Shared Salis helpers: vehicle locking, quota lookup, timeline notes and task raising.
+
+``raise_rider_clearance_task`` inserts with ``ignore_permissions`` because it writes a **ToDo** —
+the framework's own assignment record — on behalf of the flow rather than the caller. Granting a
+role create on ToDo to satisfy it would let that role assign work to anyone on the site.
+"""
 
 import frappe
 from frappe import _

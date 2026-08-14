@@ -1,6 +1,10 @@
 # Copyright (c) 2026, afmcoltd
 """Accommodation Stock Ledger — read-only, system-written quantity ledger for the
 decentralized internal-store engine. Each Accommodation Building is its own store.
+
+``post_stock_entry`` inserts with ``ignore_permissions`` for the subledger reason: the DocType is
+``in_create`` with no role holding create or write, so this is the only path a row can take, and
+the permission that mattered was checked on the receipt or transfer that triggered it.
 Rows are posted only through the helpers below (never created manually); a blank
 holder means the stock sits unassigned in the building's store, a set holder means
 it is in that holder's custody. The holder is ``party_type``/``party`` so a
