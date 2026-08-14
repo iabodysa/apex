@@ -25,18 +25,24 @@ back to a linked signed-in driver when no credential was presented. The client
 never supplies a driver id. These route reads feed the worker view inside the
 existing /driver portal and have no GL or write side effects.
 
-The five writes here pass ``ignore_permissions`` because there is no user to authorize them.
-These endpoints are ``allow_guest=True`` and the actor is a QR token resolved through
-``_resolve_worker`` to an Employee; ``frappe.session.user`` is Guest throughout. A DocPerm that
-made these saves legal would have to grant Guest write on Resident Request and Trip Boarding
-Event, which is a wider hole than the one it closes. The token resolution IS the permission check,
-and it runs before every one of them.
+The three documents a worker raises about himself — his Resident Request, his Transport Request,
+his trip rating — are now written inside ``as_capacity(WORKER)`` under the Worker role's own
+``create``. The endpoints stay ``allow_guest=True`` and ``frappe.session.user`` is Guest for the
+request; the capacity is opened around the write only, after ``_resolve_worker`` has already
+turned the QR token into an Employee. Authentication is the token, authorisation is the role.
+
+The capacity is never a login: it exists for the duration of one write and is handed back in a
+``finally``, so the role it carries is unreachable from outside. That is what makes granting it
+read on those DocTypes safe — no request ever runs as it.
+
+The Trip Start Log write still passes ``ignore_permissions``: it is an ``in_create`` audit record
+that no role may write by hand, which is the control rather than a gap in one.
 """
 
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import WORKER, portal_room
+from apex.apex_core.utils.portal_token_security import WORKER, as_capacity, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api import boarding_window
@@ -833,7 +839,8 @@ def create_worker_request(
             "status": "New",
         }
     )
-    doc.insert(ignore_permissions=True)
+    with as_capacity(WORKER):
+        doc.insert()
     if photo:
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
@@ -1265,7 +1272,8 @@ def create_worker_transport_request(
             "adhoc_passengers": adhoc_rows,
         }
     )
-    doc.insert(ignore_permissions=True)
+    with as_capacity(WORKER):
+        doc.insert()
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
 
@@ -1369,7 +1377,8 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
         "feedback": (feedback or "").strip()[:2000]
     })
     try:
-        doc.insert(ignore_permissions=True)
+        with as_capacity(WORKER):
+            doc.insert()
     except frappe.exceptions.UniqueValidationError:
         frappe.throw(_("You have already rated this trip."))
     return {"status": "success", "name": doc.name}

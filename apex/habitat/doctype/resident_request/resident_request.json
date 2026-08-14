@@ -1,46 +1,8 @@
 {
- "doctype": "DocType",
- "name": "Resident Request",
- "module": "Habitat",
+ "autoname": "naming_series:",
  "custom": 0,
- "is_submittable": 0,
+ "doctype": "DocType",
  "engine": "InnoDB",
- "search_fields": "worker_name, mobile_number, anonymous_tracking_code",
- "states": [
-  {
-   "color": "Blue",
-   "title": "New"
-  },
-  {
-   "color": "Cyan",
-   "title": "Triaged"
-  },
-  {
-   "color": "Light Blue",
-   "title": "Assigned"
-  },
-  {
-   "color": "Orange",
-   "title": "In Progress"
-  },
-  {
-   "color": "Yellow",
-   "title": "Waiting Evidence"
-  },
-  {
-   "color": "Green",
-   "title": "Resolved"
-  },
-  {
-   "color": "Red",
-   "title": "Rejected"
-  },
-  {
-   "color": "Gray",
-   "title": "Closed"
-  }
- ],
- "track_changes": 1,
  "field_order": [
   "arr_tab_overview",
   "arr_sec_request_scope",
@@ -140,11 +102,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "QR Web Form",
    "fieldname": "source_channel",
    "fieldtype": "Select",
    "label": "Source Channel",
-   "options": "QR Web Form\nManual Entry",
-   "default": "QR Web Form"
+   "options": "QR Web Form\nManual Entry"
   },
   {
    "fieldname": "arr_sec_reporter",
@@ -158,19 +120,19 @@
    "options": "Worker\nSupervisor\nAnonymous"
   },
   {
+   "default": "Employee",
    "fieldname": "party_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Resident Type",
-   "options": "Employee\nTemporary Worker",
-   "default": "Employee",
-   "in_standard_filter": 1
+   "options": "Employee\nTemporary Worker"
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Resident",
    "options": "party_type",
-   "in_list_view": 1,
    "search_index": 1
   },
   {
@@ -217,12 +179,12 @@
    "reqd": 1
   },
   {
+   "default": "Low",
    "description": "Urgency assigned to the request, driving target response time and escalation, from routine low priority up to critical issues that need immediate action.",
    "fieldname": "priority",
    "fieldtype": "Select",
    "label": "Priority",
-   "options": "Low\nMedium\nHigh\nCritical",
-   "default": "Low"
+   "options": "Low\nMedium\nHigh\nCritical"
   },
   {
    "description": "Where inside or around the accommodation the reported issue is located, helping staff locate the problem and group recurring faults by area.",
@@ -248,12 +210,12 @@
    "label": "Resolution"
   },
   {
+   "default": "New",
    "description": "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "New\nTriaged\nAssigned\nIn Progress\nWaiting Evidence\nResolved\nRejected\nClosed",
-   "default": "New"
+   "options": "New\nTriaged\nAssigned\nIn Progress\nWaiting Evidence\nResolved\nRejected\nClosed"
   },
   {
    "fieldname": "assigned_to",
@@ -286,13 +248,13 @@
    "label": "Routing & Tracking"
   },
   {
+   "default": "REQ-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "options": "REQ-.YYYY.-.####",
-   "reqd": 1,
-   "default": "REQ-.YYYY.-.####",
-   "hidden": 1
+   "reqd": 1
   },
   {
    "fieldname": "location_token",
@@ -335,62 +297,106 @@
    "read_only": 1
   }
  ],
+ "is_submittable": 0,
+ "modified": "2026-08-14 16:56:00.000000",
+ "module": "Habitat",
+ "name": "Resident Request",
+ "naming_rule": "By \"Naming Series\" field",
  "permissions": [
   {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
    "role": "System Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "delete": 1
+   "write": 1
   },
   {
+   "create": 1,
+   "read": 1,
+   "report": 1,
    "role": "Accommodation Manager",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "report": 1
+   "write": 1
   },
   {
+   "create": 1,
+   "read": 1,
+   "report": 1,
    "role": "Resident Supervisor",
-   "read": 1,
-   "write": 1,
-   "create": 1,
-   "report": 1
+   "write": 1
   },
   {
+   "permlevel": 1,
+   "read": 1,
    "role": "System Manager",
-   "permlevel": 1,
-   "read": 1,
    "write": 1
   },
   {
+   "permlevel": 1,
+   "read": 1,
    "role": "Accommodation Manager",
-   "permlevel": 1,
-   "read": 1,
    "write": 1
   },
   {
+   "permlevel": 1,
+   "read": 1,
    "role": "Resident Supervisor",
-   "permlevel": 1,
-   "read": 1,
    "write": 1
   },
   {
-   "role": "Resident Request Coordinator",
+   "create": 1,
    "read": 1,
-   "write": 1,
-   "create": 1
+   "role": "Resident Request Coordinator",
+   "write": 1
   },
   {
-   "role": "Resident Request Coordinator",
    "permlevel": 1,
    "read": 1,
+   "role": "Resident Request Coordinator",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Worker",
    "write": 1
   }
  ],
- "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "search_fields": "worker_name, mobile_number, anonymous_tracking_code",
  "sort_field": "modified",
  "sort_order": "DESC",
- "modified": "2026-08-07 05:23:00.000000"
+ "states": [
+  {
+   "color": "Blue",
+   "title": "New"
+  },
+  {
+   "color": "Cyan",
+   "title": "Triaged"
+  },
+  {
+   "color": "Light Blue",
+   "title": "Assigned"
+  },
+  {
+   "color": "Orange",
+   "title": "In Progress"
+  },
+  {
+   "color": "Yellow",
+   "title": "Waiting Evidence"
+  },
+  {
+   "color": "Green",
+   "title": "Resolved"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Gray",
+   "title": "Closed"
+  }
+ ],
+ "track_changes": 1
 }

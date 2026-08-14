@@ -191,12 +191,12 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "description": "Server-derived Delegation-of-Authority flag: when set, only Operations-tier authorization is allowed. Read by workflow; cannot be hand-set.",
    "fieldname": "needs_operations",
    "fieldtype": "Check",
    "label": "Needs Operations Authorization",
-   "read_only": 1,
-   "allow_on_submit": 1
+   "read_only": 1
   },
   {
    "fieldname": "__tab_1",
@@ -253,11 +253,11 @@
    "options": "Transport Request Worker"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
    "fieldname": "transport_request_sec_adhoc",
    "fieldtype": "Section Break",
-   "label": "Additional (Unregistered) Passengers",
-   "collapsible": 1
+   "label": "Additional (Unregistered) Passengers"
   },
   {
    "depends_on": "eval:doc.service_line=='Site Transport' || doc.service_line=='Inter-City Relocation'",
@@ -325,9 +325,9 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "New\nValidated\nApproved\nScheduled\nFulfilled\nRejected\nCancelled",
    "read_only": 1,
-   "no_copy": 1,
    "search_index": 1
   },
   {
@@ -382,10 +382,10 @@
    "label": "System"
   },
   {
+   "collapsible": 1,
    "fieldname": "transport_request_sec_tracking",
    "fieldtype": "Section Break",
-   "label": "Source and Tracking",
-   "collapsible": 1
+   "label": "Source and Tracking"
   },
   {
    "default": "Desk",
@@ -413,10 +413,10 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "transport_request_sec_system",
    "fieldtype": "Section Break",
-   "label": "System",
-   "collapsible": 1
+   "label": "System"
   },
   {
    "default": "TR-.######",
@@ -476,7 +476,7 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-14 16:56:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -559,6 +559,12 @@
    "permlevel": 1,
    "read": 1,
    "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Worker",
    "write": 1
   }
  ],
