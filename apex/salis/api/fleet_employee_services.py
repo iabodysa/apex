@@ -1,4 +1,12 @@
-"""Session-bound custody, incident, fuel top-up, and complaint services for /fleet."""
+"""Session-bound custody, incident, fuel top-up, and complaint services for /fleet.
+
+The five ``ignore_permissions`` inserts here are the removable kind, and they are marked so they
+are not mistaken for the token case elsewhere in this package. Nothing here is ``allow_guest``:
+the actor is a signed-in User resolved by ``base._session_driver``, so it has roles, and a
+``create`` DocPerm on Fuel Request, Vehicle Incident, Vehicle Handover and the complaint pair
+would make every one of these saves legal on its own. They stand only until that permission work
+lands — see the card on A-518.
+"""
 
 import frappe
 from frappe import _

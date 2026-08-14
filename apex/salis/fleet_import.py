@@ -21,6 +21,10 @@ name), drivers/vehicles by driver_id / plate_normalized. Historical assignments
 are backfilled with ``ignore_validate`` because the live assignment gates
 (rider-active, overlap, compliance) are for new operations, not back-dated
 custody spells; rows that still fail are skipped and counted.
+
+The writes pass ``ignore_permissions`` for the same reason the ``ignore_validate`` above exists:
+this module is reached only by ``bench execute``, which runs as Administrator with no session
+user, and it is a one-time backfill rather than an operator path. Nothing in the app imports it.
 """
 
 from __future__ import annotations

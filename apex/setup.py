@@ -1,4 +1,12 @@
 # Copyright (c) 2026, afmcoltd
+"""Install-time and migrate-time setup for the app.
+
+Everything here runs from the ``after_install`` / ``after_migrate`` hooks, under Administrator,
+against a site that has no operator on it yet. That is why the writes pass ``ignore_permissions``:
+there is no session user whose roles could be consulted, and a DocPerm added to make these saves
+legal would then also be live for every real operator afterwards. This is the installer context —
+it is the rare case the rule allows, not a shortcut around a missing role.
+"""
 import json
 
 import frappe

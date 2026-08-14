@@ -24,6 +24,13 @@ Driver-route endpoints resolve a presented driver credential first, then fall
 back to a linked signed-in driver when no credential was presented. The client
 never supplies a driver id. These route reads feed the worker view inside the
 existing /driver portal and have no GL or write side effects.
+
+The five writes here pass ``ignore_permissions`` because there is no user to authorize them.
+These endpoints are ``allow_guest=True`` and the actor is a QR token resolved through
+``_resolve_worker`` to an Employee; ``frappe.session.user`` is Guest throughout. A DocPerm that
+made these saves legal would have to grant Guest write on Resident Request and Trip Boarding
+Event, which is a wider hole than the one it closes. The token resolution IS the permission check,
+and it runs before every one of them.
 """
 
 import frappe

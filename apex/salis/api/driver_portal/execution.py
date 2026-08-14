@@ -1,5 +1,11 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Driver Portal — execution endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
+"""Salis Driver Portal — execution endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged.
+
+All four endpoints are ``allow_guest`` and identify the driver by presented credential through
+``_resolve_driver``, so ``frappe.session.user`` is Guest and there are no roles to consult. The
+four ``ignore_permissions`` writes on Trip Start Log stand on that: the credential resolution is
+the permission check. Granting Guest write on the log to remove them would be the wider hole.
+"""
 
 import frappe
 from frappe import _

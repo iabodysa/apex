@@ -23,6 +23,14 @@ delivery on read permission; the SPA treats the payload as advisory and refetche
 
 No GL, no money. The driver phone is operational — returned only to the scanning
 driver and the affected worker, and never logged.
+
+Every ``trip.save`` here passes ``ignore_permissions``, and the reason is the same one in all
+thirteen places: the per-worker flow state is a child table on Dispatch Trip, so writing one
+rider's status needs write on the whole trip — which a worker and a driver must never have,
+because that is the route, the vehicle and the driver assignment. The elimination is a
+``permlevel`` on ``boarding_state`` with write granted to the worker and driver roles, leaving
+permlevel 0 read-only for them; then these saves run under real permissions. Until that lands,
+each call is already gated by the portal token identity and the boarding window above it.
 """
 
 from __future__ import annotations
