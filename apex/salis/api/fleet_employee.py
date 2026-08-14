@@ -1,11 +1,13 @@
 # Copyright (c) 2026, afmcoltd
 """Fleet employee self-service API — backs the /fleet employee page.
 
-The fuel-request insert passes ``ignore_permissions``, and the reason is the same product decision
-recorded in ``fleet_employee_services``: a driver holds no role and is not meant to become a
-Frappe user with permissions of his own, so there is nothing a ``create`` DocPerm could attach to.
-What is wrong here is the identity — ``_session_driver`` still reads ``frappe.session.user`` — and
-that path is the one being retired.
+The fuel-request insert runs inside ``as_capacity(DRIVER)`` and no longer bypasses permissions:
+Fuel Request grants the Driver role ``create``, because raising one against his own vehicle is
+exactly the driver's job. The binding rule below is what keeps it to his own vehicle; the DocPerm
+is what makes the write legal.
+
+What remains wrong here is the identity, not the permission — ``_session_driver`` still reads
+``frappe.session.user`` — and that path is the one being retired on A-518.3.
 
 Unlike the supervisor board (fleet_os) these endpoints are IDENTITY-SCOPED: every
 one resolves ``frappe.session.user`` to the caller's own Salis Driver and returns
@@ -27,6 +29,7 @@ docstatus 0, for supervisor approval) — no new DocType is invented.
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_token_security import DRIVER, as_capacity
 from apex.salis.utils import (
     add_timeline_note,
     bound_vehicle,
@@ -226,7 +229,8 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
         }
     )
     doc._guard_quota_allowance()
-    doc.insert(ignore_permissions=True)
+    with as_capacity(DRIVER):
+        doc.insert()
 
     extras = []
     if fuel_grade:
