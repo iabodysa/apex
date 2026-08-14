@@ -1,16 +1,14 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-import { Badge, Button, ErrorMessage, FormControl, Progress, createResource, toast } from "frappe-ui";
+import { computed, ref, watch } from "vue";
+import { Badge, Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { useRouter } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
+import ArrivalWorkerSearch from "../components/ArrivalWorkerSearch.vue";
+import ArrivalRegistrationForm from "../components/ArrivalRegistrationForm.vue";
 import { building } from "../building.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
-import {
-  arrivalRegistrationParams,
-  normalizeWorkerLinkResult,
-  summarizeArrivalSession,
-} from "../arrivalFlow.js";
+import { normalizeWorkerLinkResult, summarizeArrivalSession } from "../arrivalFlow.js";
 
 const router = useRouter();
 const capabilities = globalThis.window?.apex_portal?.capabilities || [];
@@ -19,21 +17,16 @@ const arrivals = createResource({
   url: "apex.habitat.api.arrivals_desk.get_expected_arrivals",
   makeParams: () => ({ building: building.value }),
 });
-const search = createResource({ url: "apex.habitat.api.arrivals_desk.search_arrivals_workers" });
-const register = createResource({ url: "apex.habitat.api.arrivals_desk.register_temporary_worker" });
 const slip = createResource({ url: "apex.habitat.api.arrivals_desk.get_arrival_slip" });
 const links = createResource({
   url: "apex.apex_core.doctype.masar_worker_token.masar_worker_token.batch_issue_worker_links",
 });
 const workers = computed(() => arrivals.data?.workers || []);
 const session = computed(() => summarizeArrivalSession(workers.value));
-const query = ref("");
-const candidates = ref([]);
 const selectedManifest = ref(null);
 const registered = ref(null);
 const issuedLink = ref(null);
 const error = ref("");
-const form = reactive({ worker_name: "", passport_number: "", nationality: "", cell_number: "" });
 
 function load() {
   if (building.value) arrivals.fetch();
@@ -54,11 +47,9 @@ function chooseBed(row) {
   router.push({ path: "/beds", query: candidate });
 }
 
+// A fresh object on every pick, so choosing the same row twice seeds the form again.
 function prepareManifest(row) {
-  selectedManifest.value = row;
-  form.worker_name = row.worker_name || "";
-  form.passport_number = row.passport_number || "";
-  form.nationality = row.nationality || "";
+  selectedManifest.value = { ...row };
 }
 
 function continueSession() {
@@ -68,29 +59,11 @@ function continueSession() {
   else prepareManifest(row);
 }
 
-async function findWorker() {
-  error.value = "";
-  try {
-    candidates.value = await search.fetch({ building: building.value, txt: query.value });
-  } catch (reason) {
-    error.value = safeErrorMessage(reason, "تعذّر البحث عن العامل.");
-  }
-}
-
-async function addTemporary() {
-  error.value = "";
-  try {
-    const result = await register.submit(
-      arrivalRegistrationParams(form, selectedManifest.value, building.value),
-    );
-    registered.value = { ...result, project: selectedManifest.value?.project || "" };
-    selectedManifest.value = null;
-    Object.assign(form, { worker_name: "", passport_number: "", nationality: "", cell_number: "" });
-    toast.create({ type: "success", message: "تم تسجيل العامل" });
-    await arrivals.fetch();
-  } catch (reason) {
-    error.value = safeErrorMessage(reason, "تعذّر تسجيل العامل.");
-  }
+async function onRegistered(result) {
+  registered.value = { ...result, project: selectedManifest.value?.project || "" };
+  selectedManifest.value = null;
+  toast.create({ type: "success", message: "تم تسجيل العامل" });
+  await arrivals.fetch();
 }
 
 async function issueLink(row) {
@@ -165,18 +138,12 @@ watch(building, load, { immediate: true });
         <img v-if="issuedLink.qr" :src="issuedLink.qr" alt="رمز دخول العامل" />
       </article>
 
-      <section class="arrival-panel">
-        <div class="arrival-panel__title"><h3>ابحث عن عامل مسجل</h3><span>بالاسم أو الرقم</span></div>
-        <div class="arrival-search"><FormControl v-model="query" label="العامل" /><Button icon-left="lucide-search" variant="outline" :loading="search.loading" @click="findWorker">بحث</Button></div>
-        <article v-for="row in candidates" :key="`${row.party_type}:${row.party}`" class="arrival-row">
-          <div><strong>{{ row.label }}</strong><small>{{ row.sub }}</small></div>
-          <Badge :label="row.party_type === 'Employee' ? 'موظف' : 'عامل مؤقت'" />
-          <div class="feature-actions">
-            <Button v-if="row.party_type === 'Employee'" variant="subtle" @click="issueLink(row)">رابط العامل</Button>
-            <Button theme="green" variant="solid" @click="chooseBed(row)">اختيار سرير</Button>
-          </div>
-        </article>
-      </section>
+      <ArrivalWorkerSearch
+        :building="building"
+        @choose-bed="chooseBed"
+        @issue-link="issueLink"
+        @error="error = $event"
+      />
 
       <section class="arrival-panel">
         <div class="arrival-panel__title"><h3>قائمة اليوم</h3><span>{{ workers.length }} عامل</span></div>
@@ -193,16 +160,14 @@ watch(building, load, { immediate: true });
         </article>
       </section>
 
-      <form v-if="canRegister" class="arrival-panel arrival-form" @submit.prevent="addTemporary">
-        <div class="arrival-panel__title"><h3>{{ selectedManifest ? `تسجيل ${selectedManifest.worker_name}` : 'إضافة عامل غير موجود في القائمة' }}</h3><Button v-if="selectedManifest" type="button" variant="ghost" @click="selectedManifest = null">إلغاء</Button></div>
-        <div class="arrival-form__grid">
-          <FormControl v-model="form.worker_name" label="اسم العامل" required />
-          <FormControl v-model="form.passport_number" label="رقم الجواز" required />
-          <FormControl v-model="form.nationality" label="الجنسية" />
-          <FormControl v-model="form.cell_number" label="رقم الجوال" />
-        </div>
-        <Button type="submit" theme="green" variant="solid" :loading="register.loading" :disabled="!form.worker_name || !form.passport_number">تسجيل العامل</Button>
-      </form>
+      <ArrivalRegistrationForm
+        v-if="canRegister"
+        :manifest="selectedManifest"
+        :building="building"
+        @cancel="selectedManifest = null"
+        @registered="onRegistered"
+        @error="error = $event"
+      />
     </template>
   </section>
 </template>

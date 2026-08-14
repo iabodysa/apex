@@ -2,15 +2,18 @@
 import { computed, ref, watch } from "vue";
 import { Badge, Button, createDocumentResource, createResource } from "frappe-ui";
 import { useRoute } from "vue-router";
-import { dateTimeLabel, statusLabel, statusTheme } from "../../core/displayLabels.js";
+import { statusLabel, statusTheme } from "../../core/displayLabels.js";
 import TripRequestAssignment from "./components/TripRequestAssignment.vue";
 import RequestTripPlanning from "./components/RequestTripPlanning.vue";
+import SupervisorRecordFacts from "./components/SupervisorRecordFacts.vue";
+import SupervisorRecordCollections from "./components/SupervisorRecordCollections.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
 import { safeErrorMessage } from "../../core/errorMessage.js";
 import { meaningfulRequestTitle } from "./assignmentState.js";
 
 const route = useRoute();
 const spec = route.meta.view || {};
+const fields = spec.fields || [];
 const record = createDocumentResource({
   doctype: spec.doctype,
   name: route.params.name,
@@ -25,15 +28,8 @@ const workflow = createResource({
   method: "POST",
   auto: false,
 });
-const linkTitle = createResource({
-  url: "frappe.client.get_value",
-  method: "GET",
-  auto: false,
-});
 const actionError = ref("");
 const busyAction = ref("");
-const linkLabels = ref({});
-let linkLoadVersion = 0;
 const doc = computed(() => record?.doc || null);
 const state = computed(() => {
   if (record?.get.loading && !doc.value) return "loading";
@@ -64,51 +60,6 @@ const actionLabels = Object.freeze({
   Complete: "إكمال الرحلة",
 });
 
-function displayValue(field) {
-  const value = doc.value?.[field.key];
-  if (value === null || value === undefined || value === "") {
-    return { label: "—", reference: "" };
-  }
-  if (["starts_on", "ends_on", "generated_through", "trip_date", "planned_start", "planned_end", "pickup_datetime"].includes(field.key)) {
-    return { label: dateTimeLabel(value) || value, reference: "" };
-  }
-  if (field.key === "status") {
-    return { label: statusLabel(value), reference: "" };
-  }
-  if (field.link) {
-    return {
-      label: doc.value?.[field.labelKey] || linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
-      reference: value,
-    };
-  }
-  return { label: value, reference: "" };
-}
-
-async function loadLinkLabels(current) {
-  const version = ++linkLoadVersion;
-  const next = {};
-  if (!current) {
-    linkLabels.value = next;
-    return;
-  }
-  for (const field of spec.fields || []) {
-    const value = current[field.key];
-    if (!field.link || !value) continue;
-    try {
-      const result = await linkTitle.fetch({
-        doctype: field.link.doctype,
-        filters: { name: value },
-        fieldname: [field.link.fieldname],
-      });
-      const data = result?.message || result || {};
-      next[field.key] = data[field.link.fieldname] || field.link.fallback || "سجل مرتبط";
-    } catch {
-      next[field.key] = field.link.fallback || "تعذّر جلب الاسم";
-    }
-  }
-  if (version === linkLoadVersion) linkLabels.value = next;
-}
-
 async function loadTransitions(current) {
   if (!current) return;
   try {
@@ -132,7 +83,6 @@ async function applyAction(action) {
 }
 
 watch(doc, loadTransitions, { immediate: true });
-watch(doc, loadLinkLabels, { immediate: true });
 </script>
 
 <template>
@@ -157,67 +107,25 @@ watch(doc, loadLinkLabels, { immediate: true });
         <span v-if="doc.enabled === 0">متوقف</span>
       </div>
 
-      <dl class="feature-details supervisor-detail__facts">
-        <template v-for="field in spec.fields || []" :key="field.key">
-          <dt>{{ field.label }}</dt>
-          <dd>
-            <span dir="auto">{{ displayValue(field).label }}</span>
-            <bdi
-              v-if="displayValue(field).reference"
-              class="record-reference"
-              dir="auto"
-              translate="no"
-            >{{ displayValue(field).reference }}</bdi>
-          </dd>
-        </template>
-      </dl>
+      <SupervisorRecordFacts :doc="doc" :fields="fields" />
 
-      <section v-if="doc.stops?.length" class="supervisor-detail__section">
-        <header><h3>توقفات الرحلة</h3><span>{{ doc.stops.length }}</span></header>
-        <ol class="supervisor-stop-list">
-          <li v-for="stop in doc.stops" :key="stop.name || stop.stop_key">
-            <bdi>{{ String(stop.idx || 0).padStart(2, '0') }}</bdi>
-            <div><strong dir="auto">{{ stop.stop_name }}</strong><span dir="auto">{{ stop.location || stop.accommodation_building || 'الموقع غير محدد' }}</span></div>
-            <span>{{ dateTimeLabel(stop.planned_time) || '—' }}</span>
-          </li>
-        </ol>
-      </section>
+      <SupervisorRecordCollections
+        :stops="doc.stops"
+        :assigned-requests="doc.assigned_requests"
+        :passengers="doc.boarding_state"
+      >
+        <TripRequestAssignment
+          v-if="spec.doctype === 'Dispatch Trip' && doc.status === 'Planned' && doc.stops?.length"
+          :trip="doc"
+          @saved="record.reload"
+        />
 
-      <section v-if="doc.assigned_requests?.length" class="supervisor-detail__section">
-        <header><h3>الطلبات المسندة</h3><span>{{ doc.assigned_requests.length }}</span></header>
-        <ol class="supervisor-assigned-list">
-          <li v-for="request in doc.assigned_requests" :key="request.name || request.transport_request">
-            <div class="record-identity">
-              <strong dir="auto">{{ request.purpose || 'طلب نقل' }}</strong>
-              <bdi class="record-reference" dir="auto" translate="no">{{ request.transport_request }}</bdi>
-            </div>
-            <span dir="auto">{{ request.pickup_stop }} ← {{ request.dropoff_stop }}</span>
-            <span><bdi>{{ request.requested_count || 0 }}</bdi> راكب</span>
-          </li>
-        </ol>
-      </section>
-
-      <TripRequestAssignment
-        v-if="spec.doctype === 'Dispatch Trip' && doc.status === 'Planned' && doc.stops?.length"
-        :trip="doc"
-        @saved="record.reload"
-      />
-
-      <RequestTripPlanning
-        v-if="spec.doctype === 'Transport Request' && !doc.assigned_to_trip && ['Validated', 'Approved', 'Scheduled'].includes(doc.status)"
-        :request="doc"
-        @saved="record.reload"
-      />
-
-      <section v-if="doc.boarding_state?.length" class="supervisor-detail__section">
-        <header><h3>قائمة الركاب</h3><span>{{ doc.boarding_state.length }}</span></header>
-        <ol class="supervisor-passenger-list">
-          <li v-for="passenger in doc.boarding_state" :key="passenger.passenger_key || passenger.name">
-            <div><strong dir="auto">{{ passenger.passenger_name || 'راكب غير مسمى' }}</strong><span dir="auto">{{ passenger.pickup_stop }} ← {{ passenger.dropoff_stop }}</span></div>
-            <Badge :theme="statusTheme(passenger.status)" :label="statusLabel(passenger.status)" />
-          </li>
-        </ol>
-      </section>
+        <RequestTripPlanning
+          v-if="spec.doctype === 'Transport Request' && !doc.assigned_to_trip && ['Validated', 'Approved', 'Scheduled'].includes(doc.status)"
+          :request="doc"
+          @saved="record.reload"
+        />
+      </SupervisorRecordCollections>
 
       <p v-if="actionError" class="feature-error" role="alert">{{ actionError }}</p>
       <div v-if="workflowActions.length" class="supervisor-detail__actions" aria-label="إجراءات السجل">

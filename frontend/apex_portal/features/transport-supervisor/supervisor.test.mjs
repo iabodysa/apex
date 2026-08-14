@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import { supervisorRedirects, supervisorRoutes } from "./routes.js";
 import SupervisorPage from "./SupervisorPage.vue";
 import SupervisorCollection from "./components/SupervisorCollection.vue";
+import SupervisorRecordCollections from "./components/SupervisorRecordCollections.vue";
 
 const { resourceData } = vi.hoisted(() => ({
   resourceData: new Map(),
@@ -193,10 +194,11 @@ describe("Masar transport supervisor feature", () => {
       expect(source, name).toMatch(/driver\.full_name as driver_label/);
       expect(source, name).toMatch(/vehicle\.plate_number as vehicle_label/);
     }
-    expect(readFileSync(path.join(root, "SupervisorPage.vue"), "utf8"))
+    expect(readFileSync(path.join(root, "components", "SupervisorRecordCollections.vue"), "utf8"))
       .toContain("passenger.passenger_name || 'راكب غير مسمى'");
     const detail = readFileSync(path.join(root, "SupervisorPage.vue"), "utf8");
-    expect(detail).toContain("frappe.client.get_value");
+    expect(readFileSync(path.join(root, "components", "SupervisorRecordFacts.vue"), "utf8"))
+      .toContain("frappe.client.get_value");
     expect(detail).toContain("meaningfulRequestTitle");
     for (const field of ["work_shift", "route_template", "project", "driver", "vehicle", "requested_by", "assigned_to_trip"]) {
       expect(readFileSync(path.join(root, "routes.js"), "utf8"), field).toContain(`key: "${field}"`);
@@ -418,6 +420,23 @@ describe("Masar transport supervisor feature", () => {
 
     expect(wrapper.text()).toContain("السجل غير موجود.");
     expect(wrapper.find(".feature-details").exists()).toBe(false);
+  });
+
+  it("keeps the record-type planning panel between the assigned requests and the passenger list", () => {
+    const wrapper = mount(SupervisorRecordCollections, {
+      props: {
+        stops: [{ name: "STOP-1", stop_name: "بوابة السكن" }],
+        assignedRequests: [{ name: "AR-1", transport_request: "TR-1" }],
+        passengers: [{ name: "PS-1", passenger_name: "عامل العرض" }],
+      },
+      slots: { default: '<section class="planning-panel" />' },
+    });
+    const html = wrapper.html();
+
+    expect(html.indexOf("supervisor-stop-list")).toBeLessThan(html.indexOf("supervisor-assigned-list"));
+    expect(html.indexOf("supervisor-assigned-list")).toBeLessThan(html.indexOf("planning-panel"));
+    expect(html.indexOf("planning-panel")).toBeLessThan(html.indexOf("supervisor-passenger-list"));
+    wrapper.unmount();
   });
 
   it("exposes request planning and atomic multi-request trip assignment on the detail surfaces", () => {
