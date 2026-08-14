@@ -19,8 +19,8 @@ const CONTEXT_TITLES = Object.freeze({
   worker: "مسار",
   driver: "رحلاتي",
   "transport-supervisor": "تشغيل مسار",
-  "fleet-self-service": "سلس",
-  "fleet-operations": "تشغيل سلس",
+  "fleet-self-service": "ساليس",
+  "fleet-operations": "تشغيل ساليس",
   housing: "إدارة السكن",
 });
 

@@ -21,7 +21,7 @@ onMounted(() => props.resource.fetch());
     <section class="ops-page">
         <header class="ops-heading">
             <div>
-                <p>تشغيل سلس</p>
+                <p>تشغيل ساليس</p>
                 <h2>{{ title }}</h2>
             </div>
             <Button

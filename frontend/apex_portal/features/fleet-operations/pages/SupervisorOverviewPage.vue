@@ -14,7 +14,7 @@ onMounted(() => r.fetch());
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>تشغيل سلس</p>
+        <p>تشغيل ساليس</p>
         <h2>نظرة عامة</h2>
       </div>
       <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" :loading="r.loading" @click="r.fetch()" />

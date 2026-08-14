@@ -17,7 +17,7 @@ onMounted(() => contextResource.fetch());
   <section class="salis-page">
     <header>
       <p class="salis-eyebrow">مرحباً بك</p>
-      <h2>خدمات سلس</h2>
+      <h2>خدمات ساليس</h2>
     </header>
     <AsyncPanel v-if="contextResource.loading" state="loading" title="جاري تجهيز حسابك" message="نتحقق من مركبتك وخدماتك." />
     <AsyncPanel v-else-if="contextResource.error" state="error" title="تعذر تجهيز الحساب" message="حاول مرة ثانية." @retry="contextResource.fetch()" />

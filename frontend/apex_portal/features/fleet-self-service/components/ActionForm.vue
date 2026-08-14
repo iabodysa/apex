@@ -39,7 +39,7 @@ async function submit() {
 <template>
     <section class="salis-page salis-form-page">
         <header>
-            <p class="salis-eyebrow">سلس</p>
+            <p class="salis-eyebrow">ساليس</p>
             <h2>{{ title }}</h2>
             <p>{{ intro }}</p>
         </header>

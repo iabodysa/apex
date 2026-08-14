@@ -109,7 +109,7 @@ onMounted(loadChecklist);
 <template>
   <section class="salis-page salis-form-page vehicle-handover" :aria-busy="loadingChecklist">
     <header>
-      <p class="salis-eyebrow">سلس</p>
+      <p class="salis-eyebrow">ساليس</p>
       <h2>{{ title }}</h2>
       <p>{{ intro }}</p>
     </header>

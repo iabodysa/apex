@@ -23,7 +23,7 @@ onMounted(() => props.resource.fetch());
     <section class="salis-page">
         <header class="salis-page__heading">
             <div>
-                <p class="salis-eyebrow">سلس</p>
+                <p class="salis-eyebrow">ساليس</p>
                 <h2>{{ title }}</h2>
             </div>
             <Button

@@ -55,7 +55,7 @@ async function act(kind, row) {
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>تشغيل سلس</p>
+        <p>تشغيل ساليس</p>
         <h2>اعتماد الوقود</h2>
       </div>
       <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
