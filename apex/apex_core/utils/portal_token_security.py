@@ -139,19 +139,6 @@ def publish_to_portal_subject(audience: str, subject: str, event: str, message=N
     return len(rooms)
 
 
-def publish_to_portal(audience: str, event: str, message=None, token=None) -> bool:
-    """Ring the doorbell on one portal subject's own room. Returns whether it was sent.
-
-    The payload is a SIGNAL, never a data path: the client refetches through its own
-    token-scoped endpoint, so nothing here can widen what a portal may read.
-    """
-    room = portal_room(audience, token)
-    if not room:
-        return False
-    frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
-    return True
-
-
 def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
     """Return the audience credential and whether the request presented one."""
     _require_audience(audience)
@@ -259,19 +246,6 @@ def resolve_portal_subject(audience: str, token=None, required=False):
     if frappe.db.get_value(subject_doctype, subject, "status") != "Active":
         _reject_invalid_token()
     return subject
-
-
-def throttle_entry_token(audience: str, raw: str) -> None:
-    """Route a link opened at a www entry (/masar?w=, /driver?d=) through the shared
-    bad-token throttle before it is parked in the cookie. A valid link resolves and is
-    never charged; a failed/unknown one is charged (see resolve_portal_subject). The
-    403 is swallowed so every well-formed link still redirects to the clean URL (the
-    secret always leaves the address bar); the (N+1)th bad link's 429 propagates."""
-    _require_audience(audience)
-    try:
-        resolve_portal_subject(audience, raw, required=True)
-    except frappe.PermissionError:
-        pass
 
 
 def _deny_issuance(audience: str) -> None:

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-import frappe
 from frappe.utils import flt
 
 DEFAULT_RATE = 15.0
@@ -20,14 +19,3 @@ def apply_vat(doc, base):
     rate = flt(doc.get("tax_rate"))
     doc.tax_amount = flt(base * rate / 100.0, doc.precision("tax_amount"))
     doc.grand_total = flt(base + doc.tax_amount, doc.precision("grand_total"))
-
-
-def party_tax_id(doctype, name):
-    """The counterparty's VAT registration number, read from the master that owns it.
-
-    ERPNext already carries ``tax_id`` on Company and Supplier, so a printed contract
-    reads it rather than storing a second copy that drifts.
-    """
-    if not (doctype and name):
-        return None
-    return frappe.db.get_value(doctype, name, "tax_id")

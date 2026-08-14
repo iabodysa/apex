@@ -263,7 +263,3 @@ def enqueue_boarding_event(
 
 def send_to_driver(driver: str, title: str, body: str, url: str | None = None) -> dict:
     return send_to_subject(DRIVER, driver, title, body, url)
-
-
-def enqueue_to_driver(driver: str, title: str, body: str, url: str | None = None) -> dict:
-    return enqueue_to_subject(DRIVER, driver, title, body, url)

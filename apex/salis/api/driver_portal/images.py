@@ -1,23 +1,21 @@
 # Copyright (c) 2026, afmcoltd
-"""Private image attachments accepted by the token-scoped portal write endpoints.
+"""Image payload validation for the token-scoped portal write endpoints.
 
-``verified_image_type`` is the content check both doors share — the driver one here
-and the Masar worker request in ``salis/api/masar.py``. Each keeps its own filename
-policy and size ceiling; neither restates what the bytes have to prove.
+``verified_image_type`` proves a base64 data URI carries the image type it declares
+and returns that type. A calling endpoint keeps its own filename policy and size
+ceiling; this module states only what the bytes have to prove.
 """
 
 from __future__ import annotations
 
 import base64
 import binascii
-import os
 import re
 import warnings
 from io import BytesIO
 
 import frappe
 from frappe import _
-from frappe.utils.file_manager import save_file
 from PIL import Image, UnidentifiedImageError
 
 
@@ -25,16 +23,9 @@ MAX_IMAGE_BYTES = 5 * 1024 * 1024
 MAX_IMAGE_WIDTH = 8192
 MAX_IMAGE_HEIGHT = 8192
 MAX_IMAGE_PIXELS = 20_000_000
-_IMAGE_TYPES = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".webp": "image/webp",
-}
 _DATA_URI = re.compile(
     r"^data:(image/(?:jpeg|png|webp));base64,([A-Za-z0-9+/]+={0,2})$"
 )
-_SAFE_FILENAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._ -]{0,127}$")
 _PIL_FORMATS = {
     "image/jpeg": "JPEG",
     "image/png": "PNG",
@@ -126,38 +117,3 @@ def verified_image_type(photo, expected_type=None, max_bytes=None):
         _invalid_photo(_("The photo data is invalid."))
 
     return content_type
-
-
-def save_driver_image(photo, filename, doctype, name):
-    """Validate and save one private native File on an authorized new record."""
-    if not photo and not filename:
-        return None
-    if not isinstance(photo, str) or not isinstance(filename, str):
-        _invalid_photo(_("A photo and filename are required together."))
-
-    if (
-        not filename
-        or filename != filename.strip()
-        or filename.startswith(".")
-        or filename != os.path.basename(filename)
-        or "/" in filename
-        or "\\" in filename
-        or any(ord(character) < 32 or ord(character) == 127 for character in filename)
-        or not _SAFE_FILENAME.fullmatch(filename)
-    ):
-        _invalid_photo(_("The photo filename is invalid."))
-    extension = os.path.splitext(filename)[1].lower()
-    expected_type = _IMAGE_TYPES.get(extension)
-    if not expected_type:
-        _invalid_photo(_("The photo must be a JPEG, PNG, or WebP image."))
-
-    verified_image_type(photo, expected_type)
-
-    return save_file(
-        filename,
-        photo,
-        doctype,
-        name,
-        decode=True,
-        is_private=1,
-    )

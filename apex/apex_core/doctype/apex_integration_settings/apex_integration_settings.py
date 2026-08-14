@@ -29,8 +29,3 @@ class ApexIntegrationSettings(Document):
             frappe.throw(
                 _("Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).")
             )
-
-
-def get_integration_settings() -> Document:
-    """Return the Apex Integration Settings single document."""
-    return frappe.get_single("Apex Integration Settings")
