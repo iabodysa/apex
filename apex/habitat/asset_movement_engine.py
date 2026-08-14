@@ -7,6 +7,11 @@ Ledger row, mirroring the Habitat no-GL system-written ledger pattern
 (``accommodation_ledger``) and the idempotent reverse-not-delete idiom in
 ``salis.fuel_engine``.
 
+Both writes pass ``ignore_permissions``, and that is the ledger idiom rather than a shortcut: the
+row is posted from the movement document's submit and cancel, where the operator's permission was
+already checked. A DocPerm granting operators insert here would let them write movement rows with
+no movement behind them, which an immutable subledger must refuse.
+
 The Facility Asset Movement controller already updates the asset's location
 in place (``building``/``location_in_building``) on submit, which leaves no
 history. This engine is additive: it posts one ledger row per submitted

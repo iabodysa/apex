@@ -4,6 +4,11 @@
 Posts the Safety Finding Ledger: an immutable, system-written record of every
 finding observed on a Safety Round, captured at the moment the round is submitted.
 
+Both writes pass ``ignore_permissions``, and that is the ledger idiom rather than a shortcut: the
+row is posted from the source document's submit and cancel, where the operator's permission was
+already checked on that document. A DocPerm granting operators insert here would let them write
+ledger rows with no source behind them, which is the one thing an immutable subledger must refuse.
+
 WHY: safety/audit findings otherwise live only on the mutable parent reports
 (Inspection Finding Item rows on each Safety Task Execution), so a closed finding
 can silently reopen or be edited and history is lost. Each finding is mirrored

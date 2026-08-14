@@ -1,5 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
+"""Scheduled tasks for the Habitat module (split by domain).
+
+The ledger insert passes ``ignore_permissions`` because the scheduler runs it with no session
+user, and an Accommodation Stock Ledger row is machine-written by definition: it records what the
+period cost, and no operator files it or may edit it afterwards.
+"""
 
 from __future__ import annotations
 

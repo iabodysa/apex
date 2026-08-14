@@ -20,6 +20,11 @@ implementation. The conversion pattern (frappe.new_doc + insert + back-link
 stamp) mirrors accommodation_resident_request.convert_request rather than
 get_mapped_doc, because one source spawns N tickets — a one-source-to-one-target
 mapper does not fit.
+
+The insert passes ``ignore_permissions`` because the ticket is spawned by the framework on the
+source document's submit, not filed by the inspector: the permission that mattered was checked
+when they submitted the round. An inspector able to create Maintenance Requests directly could
+raise them with no finding behind them.
 """
 
 from __future__ import annotations

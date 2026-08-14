@@ -4,7 +4,12 @@
 
 Posts the immutable Cleaning Compliance Ledger from each Cleaning Log: one row
 per Cleaning Log Room Detail child row, written on Cleaning Log submit and
-reversed on cancel. Mirrors the no-GL, system-written ledger pattern of
+reversed on cancel.
+
+The insert passes ``ignore_permissions``, and that is the ledger idiom rather than a shortcut:
+the row is posted from the Cleaning Log's submit, where the operator's permission was already
+checked. A DocPerm granting operators insert here would let them write compliance rows with no
+cleaning log behind them, which an immutable subledger must refuse. Mirrors the no-GL, system-written ledger pattern of
 ``apex.salis.fuel_engine`` and
 ``apex.habitat.doctype.accommodation_stock_ledger``:
 

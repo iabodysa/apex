@@ -6,6 +6,10 @@ Background engine that mirrors the Habitat no-GL, system-written ledger pattern
 (``apex.habitat.doctype.accommodation_ledger``) and the batch/idempotent
 scheduled-job style in ``apex.habitat.tasks``.
 
+The inserts pass ``ignore_permissions`` for the same reason the rental engine's do: the scheduler
+runs with no session user, and the Fuel Consumption Ledger grants no human write role at all. A
+DocPerm that made these legal would also let an operator write accrual rows by hand.
+
 Two scheduled jobs:
 
 * ``accrue_fuel_consumption`` (daily) — accrues a Fuel Consumption Ledger row for

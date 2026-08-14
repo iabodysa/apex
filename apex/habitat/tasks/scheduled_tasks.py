@@ -1,5 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
+"""Scheduled tasks for the Habitat module (split by domain).
+
+The insert passes ``ignore_permissions`` because the scheduler runs it with no session user and
+the Scheduled Task Instance it writes belongs to no operator — it is generated from the schedule
+for whoever is later assigned. There is no document owner this job could run as instead.
+"""
 
 from __future__ import annotations
 

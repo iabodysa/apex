@@ -7,6 +7,10 @@ daily occupancy snapshot pattern. Humans never enter these rows; the weekly
 scheduler writes one point-in-time utilisation row per active vehicle so that
 utilisation history/trends survive (the live fleet state keeps no history).
 Reports and KPIs derive from the snapshots.
+
+The insert passes ``ignore_permissions`` because the scheduler runs with no session user and the
+snapshot grants no human write role — "humans never enter these rows" is the DocType's design,
+not a description of current practice.
 """
 
 import frappe

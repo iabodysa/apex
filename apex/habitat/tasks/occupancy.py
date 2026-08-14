@@ -1,5 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
+"""Scheduled tasks for the Habitat module (split by domain).
+
+The snapshot insert passes ``ignore_permissions`` because the scheduler runs it with no session
+user, and an Accommodation Occupancy Snapshot holds values that cannot be recomputed once live
+data moves. It is a machine record of a moment, owned by nobody and edited by nobody.
+"""
 
 from __future__ import annotations
 
