@@ -54,13 +54,14 @@ async function selectHolder() {
 function addArticle(article) {
   const current = state.cart.find((line) => line.article === article.article);
   if (current) current.qty += 1;
-  else state.cart.push({ article: article.article, qty: 1 });
+  // Carry the catalogue's own label so the cart reads as an item, not as a record id.
+  else state.cart.push({ article: article.article, article_name: article.article_name, qty: 1 });
 }
 function addReturn(line) {
   const key = `${line.custody_issue}:${line.article}`;
   const current = state.cart.find((item) => item.key === key);
   if (current) current.qty = Math.min(current.qty + 1, line.qty);
-  else state.cart.push({ key, custody_issue: line.custody_issue, article: line.article, qty: 1, condition_on_return: "Good" });
+  else state.cart.push({ key, custody_issue: line.custody_issue, article: line.article, article_name: line.article_name, qty: 1, condition_on_return: "Good" });
 }
 async function addScan() {
   error.value = "";
@@ -117,7 +118,7 @@ async function submit() {
           {{ line.article_name }} · {{ line.qty }}
         </Button>
       </div>
-      <ul><li v-for="row in state.cart" :key="row.key || row.article" dir="auto">{{ row.article }} × {{ row.qty }}</li></ul>
+      <ul><li v-for="row in state.cart" :key="row.key || row.article" dir="auto">{{ row.article_name || row.article }} × {{ row.qty }}</li></ul>
       <p v-if="!allowed" class="feature-page__empty">يمكنك مشاهدة العهد، لكن صلاحية تنفيذ هذه العملية غير متاحة.</p>
       <ErrorMessage v-if="error" :message="error" />
       <Button theme="green" variant="solid" :disabled="!allowed || !state.holder || !state.cart.length" :loading="issue.loading || returnItems.loading" @click="submit">{{ actionLabel }}</Button>

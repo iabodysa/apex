@@ -20,8 +20,12 @@ const primaryNavigation = computed(() => (
 const overflowNavigation = computed(() => (
   hasOverflow.value ? props.navigation.slice(primaryLimit) : []
 ));
+// Prefix, not equality: a detail route under an overflow destination — /requests/REQ-1 under
+// طلباتي — is still inside it, and an exact match left المزيد unmarked while the user stood in it.
 const overflowActive = computed(() => (
-  overflowNavigation.value.some((item) => item.to === route.path)
+  overflowNavigation.value.some(
+    (item) => route.path === item.to || route.path.startsWith(`${item.to}/`),
+  )
 ));
 </script>
 

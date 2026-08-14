@@ -3,6 +3,8 @@ import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { Badge, Button, createResource } from "frappe-ui";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 const route = useRoute(),
   resource = createResource({
     url: "apex.salis.api.fleet_os.get_incident_detail",
@@ -22,7 +24,14 @@ onMounted(() => resource.fetch({ name: route.params.name }));
       </div>
       <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="resource.fetch({ name: route.params.name })" />
     </header>
-    <div v-if="resource.loading" class="ops-state">جاري التحميل…</div>
+    <PortalSkeleton v-if="resource.loading" :rows="3" label="جارٍ تحميل تفاصيل الحادث" />
+    <PortalErrorState
+      v-else-if="resource.error"
+      title="تعذّر فتح الحادث"
+      :message="resource.error"
+      fallback="تعذّر تحميل السجل. تحقق من الاتصال ثم حاول مرة أخرى."
+      @retry="resource.fetch({ name: route.params.name })"
+    />
     <article v-else-if="doc" class="ops-card">
       <Badge :theme="statusTheme(doc.status)" :label="statusLabel(doc.status)" />
       <h3>{{ doc.incident_type }}</h3>

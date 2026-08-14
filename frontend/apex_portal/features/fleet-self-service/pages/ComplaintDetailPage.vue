@@ -5,6 +5,7 @@ import { Badge, Button, FormControl, createResource } from "frappe-ui";
 import AsyncPanel from "../components/AsyncPanel.vue";
 import { createSingleFlight } from "../state.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 const route = useRoute(),
   complaint = createResource({
     url: "apex.salis.api.fleet_employee.get_complaint",
@@ -22,7 +23,14 @@ const route = useRoute(),
   once = createSingleFlight();
 const load = () => complaint.fetch({ name: route.params.name });
 async function reply() {
-  await once(`reply:${route.params.name}`, () => replyResource.submit({ name: route.params.name, message: message.value }));
+  try {
+    await once(`reply:${route.params.name}`, () => replyResource.submit({ name: route.params.name, message: message.value }));
+  } catch (error) {
+    // Without this the rejection was unhandled: the field kept the text, no message appeared, and
+    // the driver had no way to tell a sent reply from a refused one.
+    notice.value = safeErrorMessage(error, "تعذّر إرسال الرد. حاول مرة أخرى.");
+    return;
+  }
   message.value = "";
   notice.value = "تم إرسال الرد";
   await load();
