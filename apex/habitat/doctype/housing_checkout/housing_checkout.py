@@ -411,8 +411,8 @@ def _cancel_orphan_damage_assessment(doc):
     """Reverse the on_submit side-effect: the auto-created Custody Damage Assessment
     (linked back via source_checkout) is orphaned when the checkout is cancelled.
     Cancel a still-draft assessment so it does not linger. A submitted assessment is
-    left for the manager to handle (it may carry a posted deduction); the CDA's own
-    before_cancel still guards a live payroll posting."""
+    left for the manager to handle: it is an approved valuation served on the worker, and
+    withdrawing it is the manager's decision to record on the assessment itself."""
     for cda in frappe.get_all(
         "Custody Damage Assessment",
         filters={"source_checkout": doc.name, "docstatus": 0},

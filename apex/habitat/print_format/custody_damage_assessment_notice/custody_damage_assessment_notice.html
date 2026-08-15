@@ -16,8 +16,6 @@
 {%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
 {%- set ret = (frappe.db.get_value("Custody Return", doc.custody_return,
       ["return_date", "custody_issue"], as_dict=True) or {}) if doc.custody_return else {} -%}
-{%- set ded = (frappe.db.get_value("Additional Salary", doc.deduction_entry,
-      ["salary_component", "amount", "payroll_date", "currency", "docstatus"], as_dict=True) or {}) if doc.deduction_entry else {} -%}
 
 {%- set rows = [] -%}
 {%- for it in doc.items -%}
@@ -84,17 +82,6 @@
       empty_text=_("No damaged articles are listed on this assessment")) }}
 
   {{ ax.amount_words(total_cost, currency) }}
-
-  {%- if doc.deduction_entry %}
-  {{ ax.field_grid([
-      [{"ar": _("Payroll Deduction Entry"), "en": "Deduction entry", "value": doc.deduction_entry},
-       {"ar": _("Salary Component"), "en": "Salary component", "value": ded.get("salary_component")}],
-      [{"ar": _("Amount Deducted"), "en": "Amount deducted", "value": ded.get("amount"), "fmt": "Currency"},
-       {"ar": _("Payroll Date"), "en": "Payroll date", "value": ded.get("payroll_date"), "fmt": "Date"}],
-  ]) }}
-  {%- else %}
-  {{ ax.note_block(_("No payroll deduction has been raised against this assessment yet.")) }}
-  {%- endif %}
 
   {{ ax.note_block(doc.remarks) }}
 

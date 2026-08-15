@@ -2,7 +2,7 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2026-05-23 23:31:45.099192",
- "description": "Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.",
+ "description": "Records damage on returned custody articles and values the replacement cost. Recovering that cost from the worker is not raised here.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -36,7 +36,6 @@
   "approved_on",
   "custody_damage_assessment_sec_system",
   "naming_series",
-  "deduction_entry",
   "source_checkout",
   "amended_from"
  ],
@@ -235,14 +234,6 @@
    "options": "CUST-DMG-.YYYY.-.####"
   },
   {
-   "fieldname": "deduction_entry",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Additional Salary Deduction Entry",
-   "options": "Additional Salary",
-   "read_only": 1
-  },
-  {
    "fieldname": "source_checkout",
    "fieldtype": "Link",
    "label": "Source Checkout",
@@ -263,7 +254,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-08 01:40:00.000000",
+ "modified": "2026-08-15 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Damage Assessment",

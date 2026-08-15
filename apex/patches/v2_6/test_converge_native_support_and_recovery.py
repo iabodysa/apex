@@ -1,6 +1,7 @@
 import importlib
 import inspect
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from frappe.tests.utils import FrappeTestCase
@@ -97,6 +98,62 @@ class TestNativeSupportAndRecoveryConvergence(FrappeTestCase):
             },
             update_modified=False,
         )
+
+    def test_deduction_policy_migration_gates_on_the_doctype_not_a_table(self):
+        """The legacy policy is a Single, so it has no table to find.
+
+        Frappe syncs a `tab<DocType>` table only for non-Single DocTypes
+        (frappe/database/mariadb/database.py:460-468) and `table_exists` is a pure
+        table-name lookup (frappe/database/database.py:1220-1222). A `table_exists`
+        guard on a Single is therefore always False, and the whole migration — the
+        recovery switch, the operator-review throw, and the deletion of the two legacy
+        DocTypes — silently never runs on the sites that need it.
+        """
+        singles = {
+            "enable_salary_deductions": 1,
+            "global_max_percent_of_salary": 25,
+            "default_salary_component": "Legacy Damage Deduction",
+            "company": "_Test Company",
+        }
+        damage = SimpleNamespace(enabled=1, salary_component="Legacy Damage Deduction")
+
+        with (
+            patch.object(convergence.frappe.db, "table_exists", return_value=False),
+            patch.object(convergence.frappe.db, "exists", return_value=True),
+            patch.object(
+                convergence.frappe.db,
+                "get_single_value",
+                side_effect=lambda _dt, field: singles[field],
+            ),
+            patch.object(convergence.frappe.db, "get_value", return_value=damage),
+            patch.object(convergence, "configure_recovery") as configure_recovery,
+            patch.object(convergence.frappe, "delete_doc") as delete_doc,
+        ):
+            convergence._migrate_deduction_policy()
+
+        configure_recovery.assert_called_once_with(
+            enabled=True,
+            company="_Test Company",
+            salary_component="Legacy Damage Deduction",
+            max_percent=25,
+        )
+        self.assertEqual(
+            [call.args[1] for call in delete_doc.call_args_list],
+            ["Salary Deduction Type Rule", "Salary Deduction Policy"],
+            "the migration must also retire the two legacy DocTypes it read",
+        )
+
+    def test_deduction_policy_migration_skips_a_site_that_never_had_the_policy(self):
+        """No policy DocType, no migration — and nothing read off a DocType that is gone."""
+        with (
+            patch.object(convergence.frappe.db, "exists", return_value=False),
+            patch.object(convergence.frappe.db, "get_single_value") as get_single_value,
+            patch.object(convergence, "configure_recovery") as configure_recovery,
+        ):
+            convergence._migrate_deduction_policy()
+
+        get_single_value.assert_not_called()
+        configure_recovery.assert_not_called()
 
     def test_legacy_utility_card_repair_has_its_own_registered_patch(self):
         patch_path = "apex.patches.v2_6.repair_legacy_utility_number_card"

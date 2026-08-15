@@ -137,7 +137,12 @@ def _delete_unused_legacy_holiday_list():
 
 
 def _migrate_deduction_policy():
-    if not frappe.db.table_exists("Salary Deduction Policy"):
+    # The legacy policy is a Single, and Frappe never creates a `tab<DocType>` table for
+    # one (database/mariadb/database.py:460-468 syncs a table only when `issingle` is
+    # falsy), while table_exists is a pure table-name lookup (database/database.py:1220).
+    # So a table_exists guard here is unconditionally False and the whole migration is
+    # dead. Ask for the DocType record instead, exactly as line 176 below already does.
+    if not frappe.db.exists("DocType", "Salary Deduction Policy"):
         return
     enabled = frappe.db.get_single_value(
         "Salary Deduction Policy", "enable_salary_deductions"

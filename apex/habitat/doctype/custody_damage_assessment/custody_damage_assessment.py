@@ -9,10 +9,11 @@ The permlevel-0 ``read`` beside it is a separate grant, so a Finance Manager hol
 other role can open the record the ``Custody Damage Assessment Created`` notification
 emails them. It is unscoped, so it reaches every building.
 
-``on_cancel`` deletes the linked Additional Salary with ``ignore_permissions`` because cancelling
-the assessment must withdraw the deduction it raised, and the accommodation role that cancels it
-holds no payroll permission — nor should it. Granting delete on Additional Salary to satisfy this
-would let that role remove any deduction on the site, including ones it never raised.
+This DocType values the damage; it does not recover it. There is no payroll posting on
+this path — no submit hook, no cancel reversal and no ``Additional Salary`` link — because
+the app has exactly one employee-recovery chain and it is the native HRMS Employee Advance
+one in ``apex.apex_core.utils.employee_recovery``. A second, one-shot deduction raised from
+here would be a parallel path with no receivable behind it and nothing to reverse against.
 """
 
 from __future__ import annotations
@@ -29,31 +30,6 @@ class CustodyDamageAssessment(Document):
     pass
 
 
-@frappe.whitelist()
-def get_deduction_status(assessment):
-    """Live status of the deduction linked to a Custody Damage Assessment.
-
-    Read-only and computed on demand so the manager sees the current state of
-    the Additional Salary rather than a stale stored copy.
-    """
-    frappe.has_permission("Custody Damage Assessment", "read", doc=assessment, throw=True)
-    entry = frappe.db.get_value("Custody Damage Assessment", assessment, "deduction_entry")
-    if not entry:
-        return {"entry": None, "status": "Not Created"}
-
-    docstatus = frappe.db.get_value("Additional Salary", entry, "docstatus")
-    if docstatus == 2:
-        return {"entry": entry, "status": "Cancelled"}
-    if docstatus == 0:
-        return {"entry": entry, "status": "Draft"}
-
-    paid = frappe.db.exists(
-        "Salary Detail",
-        {"additional_salary": entry, "parenttype": "Salary Slip", "docstatus": 1},
-    )
-    return {"entry": entry, "status": "Paid" if paid else "Submitted"}
-
-
 def validate(doc, method=None):
     """Syncs the party-employee link, requires a damaged item, totals the cost, and stamps sign-off."""
     sync_party_employee(doc)
@@ -67,13 +43,13 @@ def validate(doc, method=None):
 
 
 def _stamp_signoff(doc):
-    """Name who valued the damage and who authorised the deduction, and unname each when
+    """Name who valued the damage and who approved that valuation, and unname each when
     the workflow leaves that state.
 
-    A payroll deduction whose notice names nobody as its approver cannot be defended, and a
-    rejected or revised assessment must never keep printing an approval it no longer holds.
-    The assessor is taken the moment the record leaves Draft, which is the act of putting a
-    valuation forward; the approver is taken at Approved, which the workflow bars the
+    A replacement-cost notice served on a worker that names nobody as its approver cannot be
+    defended, and a rejected or revised assessment must never keep printing an approval it no
+    longer holds. The assessor is taken the moment the record leaves Draft, which is the act of
+    putting a valuation forward; the approver is taken at Approved, which the workflow bars the
     assessor from reaching himself.
     """
     if (doc.status or "Draft") == "Draft":
@@ -102,50 +78,3 @@ def _stamp_acknowledgement(doc):
             doc.acknowledged_on = frappe.utils.now_datetime()
     else:
         doc.acknowledged_on = None
-
-
-def on_submit(doc, method=None):
-    """Record the assessment only; it does not create a parallel payroll deduction path."""
-    return None
-
-
-def before_cancel(doc, method=None):
-    """Blocks cancellation while the linked Additional Salary deduction is still submitted."""
-    if doc.deduction_entry:
-        deduction_docstatus = frappe.db.get_value(
-            "Additional Salary", doc.deduction_entry, "docstatus"
-        )
-        if deduction_docstatus == 1:
-            frappe.throw(
-                _("Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is submitted.").format(
-                    doc.name, doc.deduction_entry
-                )
-            )
-
-
-def on_cancel(doc, method=None):
-    """Undo what on_submit created: the draft deduction and the two fields it
-    wrote onto the source checkout.
-
-    before_cancel has already refused the submitted-deduction case, so anything
-    reaching here holds a deduction that was never paid. A draft Additional
-    Salary cannot be cancelled — docstatus 0 has no cancel — so it is deleted,
-    which is also what leaves the employee with no trace of a deduction that was
-    withdrawn before it ever ran."""
-    if not doc.deduction_entry:
-        return
-
-    if frappe.db.get_value("Additional Salary", doc.deduction_entry, "docstatus") == 0:
-        entry = doc.deduction_entry
-        frappe.delete_doc("Additional Salary", entry, force=True, ignore_permissions=True)
-
-    if doc.source_checkout:
-        frappe.db.set_value(
-            "Housing Checkout",
-            doc.source_checkout,
-            {"additional_salary_deduction": None, "damage_deduction_amount": 0},
-        )
-
-    frappe.db.set_value(
-        "Custody Damage Assessment", doc.name, "deduction_entry", None
-    )
