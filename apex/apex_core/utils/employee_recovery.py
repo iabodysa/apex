@@ -486,11 +486,6 @@ def validate_recovery_additional_salary(doc, method=None):
         return
     if not _source_link_available():
         return
-    source_doctype = frappe.db.get_value(
-        "Employee Advance", doc.ref_docname, SOURCE_DOCTYPE_FIELD
-    )
-    if not source_doctype:
-        return
     advance = frappe.get_doc("Employee Advance", doc.ref_docname, for_update=True)
     if not advance.get(SOURCE_DOCTYPE_FIELD):
         return
