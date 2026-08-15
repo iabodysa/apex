@@ -37,6 +37,15 @@ Every action:
     accounts, an eligible payable invoice) is missing,
   * is duplicate-safe: a second call for the same (contract, period, type) returns
     the existing draft rather than creating another, serialized by a row lock.
+
+The lock and the duplicate check have to be the SAME read, which is what
+``frappe.get_doc(..., for_update=True)`` gives: it locks the contract row AND reads
+the ``billing_documents`` children with ``FOR UPDATE``. A lock whose result is
+discarded, followed by a plain ``reload()``, does not work — under MariaDB's default
+REPEATABLE READ that reload still answers from the transaction's opening snapshot, so
+the loser of the race would miss the winner's freshly committed billing row, raise a
+second draft, and then delete the winner's row on ``save`` (a child table save drops
+every stored row absent from the in-memory document).
 """
 
 from __future__ import annotations
@@ -131,8 +140,7 @@ def create_purchase_request(contract: str, billing_period: str):
             _("Set a Service Item on the contract before raising a purchase request.")
         )
 
-    frappe.db.get_value("Telecom Contract", contract_doc.name, "name", for_update=True)
-    contract_doc.reload()
+    contract_doc = frappe.get_doc(CONTRACT_DOCTYPE, contract_doc.name, for_update=True)
 
     existing = _existing_link(contract_doc, billing_period, PURCHASE_REQUEST_DOCTYPE)
     if existing:
@@ -196,8 +204,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     payable_allocation.require_target(PAYMENT_ENTRY_DOCTYPE)
     billing_period = _normalize_period(billing_period)
 
-    frappe.db.get_value("Telecom Contract", contract_doc.name, "name", for_update=True)
-    contract_doc.reload()
+    contract_doc = frappe.get_doc(CONTRACT_DOCTYPE, contract_doc.name, for_update=True)
 
     existing = _existing_link(contract_doc, billing_period, PAYMENT_ENTRY_DOCTYPE)
     if existing:
