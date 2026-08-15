@@ -11,6 +11,8 @@ Request:
     both the resolver default and a real default-build that creates an actual
     Payment Request row from an approved request;
   * a not-yet-approved request throws and creates nothing;
+  * a CANCELLED request throws and creates nothing, even with auto-submit and GL
+    posting on and its finance stamp still standing;
   * auto_submit_target submits a submittable target only when GL posting is on;
   * the request is stamped with linked_payment_entry.
 
@@ -136,6 +138,25 @@ class TestPaymentRouter(FrappeTestCase):
         # state (docstatus 1) past the guard; stamp the approver the router reads.
         submit_via_workflow(doc)
         doc.db_set("finance_approved_by", "Administrator", update_modified=False)
+        doc.reload()
+        return doc
+
+    def _cancelled_request(self, **overrides):
+        """An approved request the business then CANCELLED (docstatus 2).
+
+        The shipped workflow carries ``Approved by Finance -> Cancelled`` (doc_status
+        1 -> 2, action "Cancel", Fleet Manager), and ``apply_workflow`` reaches it by
+        landing the persisted state on the cancel state and then calling
+        ``doc.cancel()`` (frappe/model/workflow.py:142-143). Reproduced the same way
+        ``submit_via_workflow`` reproduces the submit endpoint, so the router is
+        handed exactly the record a real cancellation leaves behind — stamp intact.
+        """
+        doc = self._approved_request(**overrides)
+        frappe.db.set_value(
+            SOURCE_DOCTYPE, doc.name, "status", "Cancelled", update_modified=False
+        )
+        doc.reload()
+        doc.cancel()
         doc.reload()
         return doc
 
@@ -311,6 +332,37 @@ class TestPaymentRouter(FrappeTestCase):
             route_payment(pr.name)
         self.assertIn("not finance-approved", str(cm.exception))
         self.assertEqual(frappe.db.count("Note"), notes_before)
+
+    def test_cancelled_request_does_not_route(self):
+        """Cancelling is how the business stops a payment, so a cancelled request
+        must not still raise one.
+
+        The finance stamp is deliberately immutable and survives the cancellation
+        untouched, so the approval gate alone still says yes on a voided request —
+        and with ``auto_submit_target`` the routed doc would post its own GL. The
+        stamp answers "was it approved"; docstatus answers "is it still live", and
+        the router needs both.
+        """
+        pr = self._cancelled_request(amount=500.00, remarks="Voided by the business")
+        self.assertEqual(pr.docstatus, 2)
+        self.assertEqual(
+            pr.finance_approved_by,
+            "Administrator",
+            "the immutable stamp survives cancellation — which is why docstatus must be read",
+        )
+
+        self._configure(
+            "Note", [{"target_fieldname": "title", "source_fieldname": "name"}], auto_submit=1
+        )
+        set_gl_posting(True)
+        notes_before = frappe.db.count("Note")
+        with self.assertRaises(frappe.ValidationError) as cm:
+            route_payment(pr.name)
+        self.assertIn("only a submitted, finance-approved request can be paid", str(cm.exception))
+        self.assertEqual(frappe.db.count("Note"), notes_before)
+
+        pr.reload()
+        self.assertFalse(pr.linked_payment_entry, "a voided request is never stamped as paid")
 
 
     def test_field_map_builds_target(self):

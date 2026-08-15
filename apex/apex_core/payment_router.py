@@ -263,7 +263,7 @@ def _apply_field_map(target, source, field_map) -> None:
 
 
 def route_payment(payment_request: str) -> str:
-    """Build (and optionally submit) the configured target payment from a
+    """Build (and optionally submit) the configured target payment from a submitted,
     finance-approved Salis Payment Request, then stamp the typed link back.
     Idempotent: returns the existing payment when already linked. Submit is gated on
     ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
@@ -287,6 +287,18 @@ def route_payment(payment_request: str) -> str:
     if not _is_finance_approved(source):
         frappe.throw(
             _("This payment request is not finance-approved yet; it cannot be paid.")
+        )
+
+    # The stamp says the request WAS approved; docstatus says it is still live. The two
+    # are independent: cancelling a finance-approved request leaves the stamp untouched
+    # (the controller's _guard_finance_stamp carries the stored value forward and the
+    # cancel path never clears it), so the stamp alone would still route - and
+    # auto-submit a real payment - off a request the business voided.
+    if not source.docstatus.is_submitted():
+        frappe.throw(
+            _("Payment request {0} is {1}; only a submitted, finance-approved request can be paid.").format(
+                source.name, _(source.get("status") or "not submitted")
+            )
         )
 
     if source.linked_payment_entry:
