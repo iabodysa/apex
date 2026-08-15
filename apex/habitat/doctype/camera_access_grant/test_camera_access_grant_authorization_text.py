@@ -1,11 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 """``approved_by`` records an out-of-system fact. It is not a control and never was.
 
-Owner decision, 2026-07-27. A Camera Access Grant is requested and submitted by the same
-role. That flow STAYS -- it is deliberate. What was not accepted was a field named and
-described as an approval while nothing in the app ever read it: the label said "Approved
-By" and the description said "Must be Admin Manager" beside a controller that runs no
-check at all and a hooks entry that registers none.
+A Camera Access Grant is requested and submitted by the same role, and that flow is
+deliberate. What is not allowed is a field named and described as an approval while nothing
+reads it: the label said "Approved By" and the description said "Must be Admin Manager"
+beside a controller that runs no check and a hooks entry that registers none.
 
 The field was KEPT and its text rewritten rather than dropped. Two reasons:
   1. Shipped rows carry real history -- who authorized past grants outside the system.

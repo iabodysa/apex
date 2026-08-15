@@ -1,10 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """The stored worker credential is readable by System Manager alone.
 
-Owner decision, 2026-07-27: the housing role's permlevel-1 read row on ``token`` /
-``token_enc`` was withdrawn. Its permlevel-0 row is untouched -- the housing role still
-keeps, creates and maintains the record, it just stops receiving the two credential
-columns.
+The housing role holds no permlevel-1 read on ``token`` / ``token_enc``, and that absence is
+deliberate rather than an oversight: its permlevel-0 row stands, so the role still keeps,
+creates and maintains the record — it simply never receives the two credential columns.
 
 WHAT IT DOES NOT BUY: the record, not the credential. ``reshare_worker_link`` hands the RAW
 token to every issuer role via ``authorize_issuance``, which reads role and scope and never
