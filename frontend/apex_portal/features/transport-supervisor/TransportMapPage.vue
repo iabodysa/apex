@@ -6,6 +6,7 @@ import { createLeafletAdapter } from "./leafletAdapter.js";
 import { createTransportMapState, positionStateLabel, selectedMapRows } from "./transportMapState.js";
 import "./styles.css";
 import PortalErrorState from "../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
 
 const positions = createResource({
   url: "apex.salis.api.route_supervisor.get_active_driver_positions",
@@ -15,7 +16,7 @@ const positions = createResource({
 const mapRoot = ref(null);
 const mapState = createTransportMapState();
 const mapAdapter = createLeafletAdapter();
-const { phase: state, error, project, status, projects, statuses, visible } = mapState;
+const { phase: state, error, positions: loaded, project, status, projects, statuses, visible } = mapState;
 const selectedTrip = ref("");
 const selected = computed(() => visible.value.find((item) => item.dispatch_trip === selectedTrip.value) || visible.value[0] || null);
 
@@ -79,7 +80,17 @@ onBeforeUnmount(() => {
       </div>
       <Button variant="outline" icon-left="lucide-refresh-cw" :loading="state === 'loading'" :disabled="state === 'loading'" @click="load">تحديث</Button>
     </header>
-    <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحديث الخريطة…</div>
+    <!-- `load` serves both the first paint (`onMounted`) and the refresh button, so the pending
+         phase means two different things. With nothing on screen yet it is a content load and
+         gets the skeleton the contract requires. With trips already drawn it is a refresh, and
+         replacing the map with a placeholder would take away what the supervisor is reading —
+         the Button's own LoadingIndicator (node_modules/frappe-ui/src/components/Button/Button.vue:23)
+         and this section's `aria-busy` already report it. -->
+    <PortalSkeleton
+      v-if="state === 'loading' && !loaded.length"
+      :rows="4"
+      label="جارٍ تحميل حركة المركبات"
+    />
     <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الخريطة" message="لا تملك صلاحية هذه الرحلات." @retry="load" />
     <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الخريطة" :message="error" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">لا توجد رحلات نشطة الآن.</div>
@@ -112,8 +123,8 @@ onBeforeUnmount(() => {
       <div class="transport-map-list" aria-live="polite">
         <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectTrip(item.dispatch_trip)">
           <div>
-            <strong>{{ item.route_name || item.route_plan }}</strong>
-            <span>{{ item.driver_name || "لم يحدد السائق" }} · <bdi dir="auto" translate="no">{{ item.plate || "لم تحدد المركبة" }}</bdi></span>
+            <strong dir="auto">{{ item.route_name || item.route_plan }}</strong>
+            <span><bdi dir="auto">{{ item.driver_name || "لم يحدد السائق" }}</bdi> · <bdi dir="auto" translate="no">{{ item.plate || "لم تحدد المركبة" }}</bdi></span>
           </div>
           <span
             class="transport-map-status"

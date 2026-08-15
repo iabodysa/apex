@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { Button, FormControl, createListResource, createResource } from "frappe-ui";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import { buildTripAssignments, meaningfulRequestTitle } from "../assignmentState.js";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 
 const props = defineProps({ trip: { type: Object, required: true } });
 const emit = defineEmits(["saved"]);
@@ -42,11 +43,21 @@ const stopOptions = computed(() => [
     label: stop.stop_name || stop.stop_key,
   })),
 ]);
-const canSubmit = computed(() => selectedNames.value.length > 0
-  && selectedNames.value.every((name) => {
-    const row = selections[name];
-    return row?.pickup_stop && row?.dropoff_stop && row.pickup_stop !== row.dropoff_stop;
-  }));
+// The count in the label moves while the button stays grey, so the supervisor reads the selection
+// as the blocker when the real one is an unset stop on one row out of six. `canSubmit` is the
+// reason's negation, so the button cannot be live while a reason is on screen.
+const submitReason = computed(() => {
+  if (!selectedNames.value.length) return "اختر طلباً واحداً على الأقل.";
+  const rows = selectedNames.value.map((name) => selections[name]);
+  if (rows.some((row) => !row?.pickup_stop || !row?.dropoff_stop)) {
+    return "حدد نقطة الصعود ونقطة النزول لكل طلب مختار.";
+  }
+  if (rows.some((row) => row.pickup_stop === row.dropoff_stop)) {
+    return "اختر نقطتين مختلفتين للصعود والنزول في كل طلب.";
+  }
+  return "";
+});
+const canSubmit = computed(() => !submitReason.value);
 
 function toggleRequest(request, checked) {
   if (checked) {
@@ -112,11 +123,20 @@ onMounted(loadRequests);
     <header><h3>إسناد طلبات إلى الرحلة</h3><span>{{ selectedNames.length }}</span></header>
     <p class="feature-state">اختر طلباً أو أكثر وحدد نقطة الصعود والنزول الفعلية لكل طلب.</p>
     <form class="supervisor-request-assignment__form" @submit.prevent="save">
-      <div v-if="loadError" class="feature-error" role="alert">
+      <!-- One chain, so the pending read cannot render beside the failure or beside the count.
+           `fetched` turns true only after a request resolves without throwing
+           (node_modules/frappe-ui/src/resources/resources.js:107), which is the difference
+           between "no approved requests exist" and "we have not been told yet". -->
+      <PortalSkeleton
+        v-if="!requests.list.fetched && !loadError"
+        :rows="3"
+        label="جارٍ تحميل الطلبات المعتمدة"
+      />
+      <div v-else-if="loadError" class="feature-error" role="alert">
         <p>{{ loadError }}</p>
         <Button type="button" variant="outline" @click="loadRequests">إعادة تحميل الطلبات</Button>
       </div>
-      <ul v-if="availableRequests.length" class="supervisor-request-assignment__list">
+      <ul v-else-if="availableRequests.length" class="supervisor-request-assignment__list">
         <li v-for="request in availableRequests" :key="request.name">
           <label class="supervisor-request-assignment__choice">
             <FormControl
@@ -137,6 +157,7 @@ onMounted(loadRequests);
         </li>
       </ul>
       <p v-else class="feature-state">لا توجد طلبات معتمدة جاهزة للإسناد.</p>
+      <p v-if="submitReason && availableRequests.length" class="feature-reason">{{ submitReason }}</p>
       <Button type="submit" theme="green" variant="solid" :loading="saving" :disabled="!canSubmit || saving">
         إسناد {{ selectedNames.length }} طلب
       </Button>

@@ -38,7 +38,7 @@ function navigationFrom(router) {
     );
 }
 
-export async function mountPortal({ source, shell, csrfToken, routes = portalRoutes, target = "#app" } = {}) {
+export async function mountPortal({ source, shell, csrfToken, routes = portalRoutes, target = "#app", history } = {}) {
   if (source === undefined && globalThis.document) {
     ({ portal: source, shell, csrfToken } = readPortalDocumentBootstrap(globalThis.document));
   }
@@ -53,13 +53,16 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     capabilities: bootstrap.capabilities,
     routes,
     initialRoute: bootstrap.initial_route,
+    history,
   });
   router.afterEach((to) => {
     if (!globalThis.document) return;
     // Six labels — العهد, السكن, اليوم among them — are destinations in more than one persona, so
-    // the label alone leaves three tabs reading "العهد | أبكس". The feature is what tells them apart.
+    // the label alone leaves three tabs reading "العهد | أبكس". The feature is what tells them
+    // apart, and it is read from `meta` because that is the only place vue-router carries a
+    // custom record key through to a resolved location; see routes.js.
     const page = to.meta?.label;
-    const persona = CONTEXT_TITLES[to.feature] || CONTEXT_TITLES[context.id];
+    const persona = CONTEXT_TITLES[to.meta?.feature] || CONTEXT_TITLES[context.id];
     globalThis.document.title = page && page !== persona ? `${page} · ${persona} | أبكس` : `${persona} | أبكس`;
   });
   const application = createApp(App, {

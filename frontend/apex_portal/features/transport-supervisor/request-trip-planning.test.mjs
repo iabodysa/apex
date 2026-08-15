@@ -14,7 +14,10 @@ vi.mock("frappe-ui", () => ({
     template: '<button :type="type || \'button\'" :disabled="disabled"><slot /></button>',
   },
   FormControl: {
-    props: ["modelValue", "label", "options"],
+    // `description` is the native note frappe-ui renders under a control
+    // (node_modules/frappe-ui/src/components/FormControl/FormControl.vue:61), so the stub declares
+    // it to let a test read what the disabled select tells the supervisor.
+    props: ["modelValue", "label", "options", "description"],
     emits: ["update:modelValue"],
     template: '<label>{{ label }}<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" /><output>{{ (options || []).map((item) => item.label).join("|") }}</output></label>',
   },
@@ -33,6 +36,7 @@ vi.mock("frappe-ui", () => ({
   })),
 }));
 
+import { FormControl as FormControlStub } from "frappe-ui";
 import RequestTripPlanning from "./components/RequestTripPlanning.vue";
 
 const approvedRequest = {
@@ -141,5 +145,40 @@ describe("request trip planning", () => {
     expect(wrapper.text()).toContain("توقف أ الحالي");
     expect(wrapper.text()).not.toContain("توقف أ القديم");
     expect(wrapper.text()).not.toContain("توقف ب");
+  });
+
+  it("says why the assign submit is dead and drops the reason once the trip and its stops are set", async () => {
+    tripRecordFetch.mockResolvedValue({
+      stops: [
+        { stop_key: "S1", stop_name: "توقف الصعود" },
+        { stop_key: "S2", stop_name: "توقف النزول" },
+      ],
+    });
+    const wrapper = mount(RequestTripPlanning, { props: { request: approvedRequest } });
+    await flushPromises();
+    const panel = wrapper.findAll("form")[0];
+    const submit = panel.findAll("button").find((button) => button.text() === "إسناد إلى الرحلة");
+    const stopHints = () => wrapper
+      .findAllComponents(FormControlStub)
+      .filter((control) => ["نقطة الصعود الفعلية", "نقطة النزول الفعلية"].includes(control.props("label")))
+      .map((control) => control.props("description"));
+
+    expect(panel.get(".feature-reason").text()).toBe("اختر الرحلة المخططة أولاً.");
+    expect(submit.attributes("disabled")).toBeDefined();
+    expect(stopHints()).toEqual([
+      "اختر الرحلة أولاً لتظهر نقاط توقفها.",
+      "اختر الرحلة أولاً لتظهر نقاط توقفها.",
+    ]);
+
+    const inputs = panel.findAll("input");
+    await inputs[0].setValue("TRIP-A");
+    await flushPromises();
+    await inputs[1].setValue("S1");
+    await inputs[2].setValue("S2");
+    await flushPromises();
+
+    expect(panel.find(".feature-reason").exists()).toBe(false);
+    expect(submit.attributes("disabled")).toBeUndefined();
+    expect(stopHints()).toEqual(["", ""]);
   });
 });

@@ -104,6 +104,36 @@ describe("fleet operations async states", () => {
     expect(wrapper.get("textarea").element.value).toBe("");
   });
 
+  it("names both refusals when approve and reject are refused for different reasons", async () => {
+    resources.set("apex.salis.api.fuel_console.get_pending_fuel_requests", readResource({
+      data: [
+        {
+          name: "FR-1",
+          vehicle_plate: "1234",
+          capabilities: {
+            approve: { allowed: false, reason: "تجاوز الطلب سقف الوقود الشهري." },
+            reject: { allowed: false, reason: "الطلب مقفل بانتظار مراجعة المشرف." },
+          },
+        },
+        {
+          name: "FR-2",
+          vehicle_plate: "5678",
+          capabilities: { approve: { allowed: true }, reject: { allowed: true } },
+        },
+      ],
+    }));
+    const wrapper = mount(FuelApprovalQueuePage);
+    await flushPromises();
+    const rows = wrapper.findAll(".ops-row");
+
+    expect(rows[0].findAll(".ops-row__reason").map((paragraph) => paragraph.text())).toEqual([
+      "اعتماد: تجاوز الطلب سقف الوقود الشهري.",
+      "رفض: الطلب مقفل بانتظار مراجعة المشرف.",
+    ]);
+    expect(rows[1].findAll(".ops-row__reason")).toHaveLength(0);
+    wrapper.unmount();
+  });
+
   it("shows a vehicle request error instead of reporting the vehicle missing", async () => {
     resources.set("apex.salis.api.fleet_os.get_fleet_os", readResource({ error: new Error("network") }));
     resources.set("apex.salis.api.fleet_os.get_vehicle_timeline", readResource());

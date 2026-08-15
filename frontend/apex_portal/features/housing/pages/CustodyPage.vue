@@ -37,6 +37,20 @@ const outOfStock = computed(() => articles.value
   .map((article) => article.article_name || article.article));
 const allowed = computed(() => mode.value === "issue" ? canIssue : canReturn);
 const actionLabel = computed(() => mode.value === "issue" ? "تسليم العهدة" : "استلام العهدة المرتجعة");
+// The kiosk greys three buttons in sequence — pick a holder, scan an article, submit — and the
+// permission notice below covers only the last of them. These name the step still missing.
+const holderReason = computed(() => (holderId.value ? "" : "اكتب رقم الحائز لتفعيل اختياره."));
+const scanReason = computed(() => {
+  if (!state.holder) return "اختر الحائز قبل إضافة الأصناف.";
+  if (!scan.value) return "امسح رمز الصنف أو اكتبه لإضافته.";
+  return "";
+});
+const submitReason = computed(() => {
+  if (!allowed.value) return "";
+  if (!state.holder) return "اختر الحائز لإتمام العملية.";
+  if (!state.cart.length) return "أضف صنفاً واحداً على الأقل لإتمام العملية.";
+  return "";
+});
 
 function replace(change) { Object.assign(state, nextCustodySelection(state, change)); }
 async function refreshBalances() {
@@ -110,8 +124,10 @@ async function submit() {
       </div>
       <FormControl v-model="holderType" type="select" label="نوع الحائز" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
       <FormControl v-model="holderId" label="رقم الحائز" />
+      <p v-if="holderReason" class="feature-reason">{{ holderReason }}</p>
       <Button variant="subtle" :disabled="!holderId" @click="selectHolder">اختيار الحائز</Button>
       <FormControl v-model="scan" label="رمز الصنف" />
+      <p v-if="scanReason" class="feature-reason">{{ scanReason }}</p>
       <Button variant="subtle" :disabled="!state.holder || !scan" :loading="resolver.loading" @click="addScan">إضافة الصنف</Button>
       <div v-if="state.holder && mode === 'issue'" class="feature-page__list">
         <!-- A greyed article is out of stock in this building's store; the number alone
@@ -129,6 +145,7 @@ async function submit() {
       <ul><li v-for="row in state.cart" :key="row.key || row.article" dir="auto">{{ row.article_name || row.article }} × {{ row.qty }}</li></ul>
       <p v-if="!allowed" class="feature-page__empty">يمكنك مشاهدة العهد، لكن صلاحية تنفيذ هذه العملية غير متاحة.</p>
       <ErrorMessage v-if="error" :message="error" />
+      <p v-if="submitReason" class="feature-reason">{{ submitReason }}</p>
       <Button theme="green" variant="solid" :disabled="!allowed || !state.holder || !state.cart.length" :loading="issue.loading || returnItems.loading" @click="submit">{{ actionLabel }}</Button>
     </div>
   </section>

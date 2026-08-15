@@ -104,4 +104,61 @@ describe("vehicle handover form", () => {
     expect(wrapper.find("form").exists()).toBe(false);
     expect(handoverSubmit).not.toHaveBeenCalled();
   });
+
+  it("names the unfinished checklist beside the disabled submit and stops naming it once answered", async () => {
+    checklistFetch.mockResolvedValue({
+      direction: "Receipt",
+      vehicle: "VEH-1",
+      assignment: "VA-0001",
+      template: "VHC-1",
+      items: [
+        { check_item: "الإطارات", default_remark: "" },
+        { check_item: "المصابيح", default_remark: "" },
+      ],
+    });
+    const wrapper = mount(VehicleHandoverForm, {
+      props: { direction: "Receipt", title: "استلام المركبة", intro: "افحص المركبة" },
+    });
+    await flushPromises();
+    await wrapper.get('input[type="number"]').setValue("12345");
+
+    // An unanswered item sits far up a long scrolled form, so the grey button has to say so.
+    expect(wrapper.get(".feature-reason").text())
+      .toBe("أجب على كل بنود الفحص، واكتب ملاحظة لكل بند غير سليم.");
+    expect(wrapper.get('button[type="submit"]').attributes("disabled")).toBeDefined();
+
+    const items = wrapper.findAll(".vehicle-handover__item");
+    await items[0].findAll("button")[0].trigger("click");
+    await items[1].findAll("button")[0].trigger("click");
+    expect(wrapper.text()).not.toContain("أجب على كل بنود الفحص");
+
+    await wrapper.get(".test-upload").trigger("click");
+    expect(wrapper.find(".feature-reason").exists()).toBe(false);
+    expect(wrapper.get('button[type="submit"]').attributes("disabled")).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it("names the genuine absence of a template, and only when that is what happened", async () => {
+    checklistFetch.mockResolvedValue({ template: "", items: [] });
+    const missing = mount(VehicleHandoverForm, {
+      props: { direction: "Receipt", title: "استلام المركبة", intro: "افحص المركبة" },
+    });
+    await flushPromises();
+    expect(missing.text()).toContain("اطلب من مسؤول الأسطول تفعيل قالب الاستلام");
+    missing.unmount();
+
+    // A dropped connection carries no user-safe text, so the fallback decides what the driver
+    // reads. Reusing the missing-template sentence there sent drivers to the fleet admin over a
+    // network failure neither of them could fix.
+    checklistFetch.mockRejectedValue(new Error('Traceback: File "/home/frappe/apps/apex/x.py", line 9'));
+    const offline = mount(VehicleHandoverForm, {
+      props: { direction: "Receipt", title: "استلام المركبة", intro: "افحص المركبة" },
+    });
+    await flushPromises();
+
+    expect(offline.text()).toContain("تحقق من الاتصال ثم حاول مرة أخرى.");
+    expect(offline.text()).not.toContain("اطلب من مسؤول الأسطول");
+    expect(offline.text()).not.toContain("Traceback");
+    offline.unmount();
+  });
 });

@@ -120,6 +120,9 @@ async function rateTrip(trip) {
           :rows="2"
           @update:model-value="setRatingFeedback(trip, $event)"
         />
+        <!-- The stars are a row of unlabelled buttons, so an untouched rating reads as an optional
+             flourish rather than the thing holding the submit shut. -->
+        <p v-if="!ratingDraft(trip).rating" class="journey-hint">اختر عدد النجوم أولاً لإرسال التقييم.</p>
         <Button
           type="button"
           variant="outline"

@@ -31,11 +31,18 @@ const missingEvidence = computed(() => groups.value.some((group) => group.tasks.
 const checklistComplete = computed(() => taskCount.value > 0
   && checkedCount.value === taskCount.value
   && !missingEvidence.value);
-const progressLabel = computed(() => {
+// Save greys on two different unmet conditions and the progress bar named only one of them; an
+// unanswered task read as the neutral word "تقدم الجولة" beside a dead button. Counting the
+// remaining tasks says which ones, not merely that some are left.
+const saveReason = computed(() => {
   if (missingEvidence.value) return "أكمل الصور المطلوبة قبل حفظ الجولة.";
-  if (checklistComplete.value) return "اكتملت بنود الجولة.";
-  return "تقدم الجولة";
+  if (!taskCount.value) return "لا توجد بنود في هذه الجولة.";
+  const remaining = taskCount.value - checkedCount.value;
+  if (remaining > 0) return `تبقّى ${remaining} من ${taskCount.value} بنداً بلا قرار.`;
+  return "";
 });
+const progressLabel = computed(() => saveReason.value
+  || (checklistComplete.value ? "اكتملت بنود الجولة." : "تقدم الجولة"));
 
 watch(building, async (value) => {
   Object.keys(results).forEach((key) => delete results[key]);
@@ -121,6 +128,7 @@ async function saveRound() {
       >
         <template #hint>{{ checkedCount }} من {{ taskCount }}</template>
       </Progress>
+      <p v-if="groups.length && saveReason" class="feature-reason">{{ saveReason }}</p>
       <Button
         v-if="groups.length"
         class="safety-checklist__save"

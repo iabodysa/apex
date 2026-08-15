@@ -60,9 +60,24 @@ const stopOptions = computed(() => [
   { label: "اختر نقطة توقف", value: "" },
   ...stops.value.map((stop) => ({ value: stop.stop_key, label: stop.stop_name || stop.stop_key })),
 ]);
-const canAssign = computed(() => selectedTrip.value && pickupStop.value && dropoffStop.value
-  && pickupStop.value !== dropoffStop.value);
-const canCreate = computed(() => adHoc.trip_date && adHoc.planned_start && adHoc.planned_end);
+// Both submits greyed on a compound condition and said nothing, so a supervisor who had filled
+// three of four fields could not tell which one was still missing. The reason is the single source
+// of truth: `can*` is its negation, so a live button and a rendered reason cannot both be true.
+const assignReason = computed(() => {
+  if (!selectedTrip.value) return "اختر الرحلة المخططة أولاً.";
+  if (!pickupStop.value) return "حدد نقطة الصعود الفعلية.";
+  if (!dropoffStop.value) return "حدد نقطة النزول الفعلية.";
+  if (pickupStop.value === dropoffStop.value) return "اختر نقطتين مختلفتين للصعود والنزول.";
+  return "";
+});
+const createReason = computed(() => {
+  if (!adHoc.trip_date) return "حدد تاريخ الرحلة.";
+  if (!adHoc.planned_start) return "حدد وقت البداية.";
+  if (!adHoc.planned_end) return "حدد وقت النهاية.";
+  return "";
+});
+const canAssign = computed(() => !assignReason.value);
+const canCreate = computed(() => !createReason.value);
 
 async function loadTrips() {
   tripListError.value = "";
@@ -173,9 +188,10 @@ watch(needsApproval, (waitingForApproval, wasWaitingForApproval) => {
             <Button type="button" variant="outline" @click="loadTrips">إعادة تحميل الرحلات</Button>
           </div>
           <FormControl v-model="selectedTrip" type="select" label="الرحلة" :options="tripOptions" required />
-          <FormControl v-model="pickupStop" type="select" label="نقطة الصعود الفعلية" :options="stopOptions" :disabled="!selectedTrip" required />
-          <FormControl v-model="dropoffStop" type="select" label="نقطة النزول الفعلية" :options="stopOptions" :disabled="!selectedTrip" required />
+          <FormControl v-model="pickupStop" type="select" label="نقطة الصعود الفعلية" :options="stopOptions" :disabled="!selectedTrip" :description="selectedTrip ? '' : 'اختر الرحلة أولاً لتظهر نقاط توقفها.'" required />
+          <FormControl v-model="dropoffStop" type="select" label="نقطة النزول الفعلية" :options="stopOptions" :disabled="!selectedTrip" :description="selectedTrip ? '' : 'اختر الرحلة أولاً لتظهر نقاط توقفها.'" required />
           <p v-if="existingError" class="feature-error" role="alert">{{ existingError }}</p>
+          <p v-if="assignReason" class="feature-reason">{{ assignReason }}</p>
           <Button type="submit" theme="green" variant="solid" :loading="savingExisting" :disabled="!canAssign || savingExisting">إسناد إلى الرحلة</Button>
           <Button v-if="trips.hasNextPage" type="button" variant="outline" :loading="trips.list.loading" @click="loadMoreTrips">تحميل رحلات أخرى</Button>
         </form>
@@ -187,6 +203,7 @@ watch(needsApproval, (waitingForApproval, wasWaitingForApproval) => {
           <FormControl v-model="adHoc.planned_start" type="datetime-local" label="وقت البداية" required />
           <FormControl v-model="adHoc.planned_end" type="datetime-local" label="وقت النهاية" required />
           <p v-if="adHocError" class="feature-error" role="alert">{{ adHocError }}</p>
+          <p v-if="createReason" class="feature-reason">{{ createReason }}</p>
           <Button type="submit" theme="green" variant="solid" :loading="savingAdHoc" :disabled="!canCreate || savingAdHoc">إنشاء وإسناد</Button>
         </form>
       </div>

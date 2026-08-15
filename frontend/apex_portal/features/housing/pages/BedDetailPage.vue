@@ -29,6 +29,13 @@ const checkIn = createResource({ url: "apex.habitat.api.front_desk.quick_check_i
 const checkOut = createResource({ url: "apex.habitat.api.front_desk.quick_check_out" });
 const occupied = computed(() => bed.doc?.status === "Occupied");
 const candidate = computed(() => housingCandidateFromQuery(route.query));
+// The two explanations further down belong to the no-permission branches, which do not render
+// while this form is on screen — so a greyed "تسكين" had nothing beside it.
+const checkInReason = computed(() => {
+  if (!checkInForm.party) return "اكتب رقم الساكن لتفعيل التسكين.";
+  if (!checkInForm.project) return "اختر المشروع لتفعيل التسكين.";
+  return "";
+});
 const projectOptions = computed(() => (projects.data || []).map((project) => ({
   label: project.project_name || project.name,
   value: project.name,
@@ -70,7 +77,7 @@ async function depart() {
     <PortalSkeleton v-if="bed.get.loading" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
     <template v-else-if="bed.doc">
-      <article class="feature-card"><strong>{{ bed.doc.bed_code || bed.doc.name }}</strong><span>{{ bed.doc.room }}</span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>
+      <article class="feature-card"><strong><bdi dir="auto" translate="no">{{ bed.doc.bed_code || bed.doc.name }}</bdi></strong><span><bdi dir="auto" translate="no">{{ bed.doc.room }}</bdi></span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>
       <form v-if="!occupied && canCheckIn" class="feature-form" @submit.prevent="arrive">
         <article v-if="candidate" class="selected-resident">
           <div><span>الساكن المحدد</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
@@ -81,6 +88,7 @@ async function depart() {
           <FormControl v-model="checkInForm.party" label="رقم الساكن" required />
         </template>
         <FormControl v-if="!candidate?.project" v-model="checkInForm.project" type="select" label="المشروع" :options="projectOptions" required />
+        <p v-if="checkInReason" class="feature-page__empty">{{ checkInReason }}</p>
         <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party || !checkInForm.project">{{ candidate ? `تسكين ${candidate.label}` : 'تسكين' }}</Button>
       </form>
       <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>

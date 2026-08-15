@@ -21,6 +21,13 @@ const waitReason = computed(() => {
   if (props.boarding.status === "Absent") return "سُجّل غيابك عن هذه الرحلة.";
   return "استهلكت طلبات الانتظار المتاحة لهذه الرحلة.";
 });
+// "أنا في الحافلة" also greys once boarding is already recorded, and that branch said nothing —
+// the worker read the grey button as the confirmation having failed.
+const confirmReason = computed(() => {
+  if (canConfirm.value) return "";
+  if (props.boarding.status === "Boarded") return "سجّلنا صعودك بالفعل.";
+  return "يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.";
+});
 const waitSeconds = computed(() => remainingSeconds(props.boarding.wait_at, props.boarding.wait_window_seconds, props.now));
 const notifySeconds = computed(() => remainingSeconds(props.boarding.notify_at, props.boarding.notify_window_seconds, props.now));
 </script>
@@ -50,6 +57,6 @@ const notifySeconds = computed(() => remainingSeconds(props.boarding.notify_at, 
       <template v-if="waitSeconds">· طلبك فعال لمدة {{ waitSeconds }} ثانية</template>
     </small>
     <small v-if="waitReason">{{ waitReason }}</small>
-    <small v-if="!canConfirm && boarding.status !== 'Boarded'">يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.</small>
+    <small v-if="confirmReason">{{ confirmReason }}</small>
   </article>
 </template>

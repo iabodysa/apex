@@ -22,7 +22,7 @@ const deliveries = createListResource({
           <bdi class="record-reference" dir="auto" translate="no">{{ row.asset_serial_number || row.facility_asset }}</bdi>
         </div>
       </RouterLink>
-      <span>{{ row.from_building }} ← {{ row.to_building }}</span>
+      <span><bdi dir="auto">{{ row.from_building }}</bdi> ← <bdi dir="auto">{{ row.to_building }}</bdi></span>
       <small>{{ statusLabel(row.status) }}</small>
     </template>
   </ResourceListPage>

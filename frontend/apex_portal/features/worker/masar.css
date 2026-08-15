@@ -105,7 +105,7 @@
 .journey-hint {
   margin: 0;
   color: var(--muted);
-  font-size: var(--fs-sm);
+  font-size: .8125rem;
 }
 
 .journey-section {
@@ -383,7 +383,7 @@
 
 .driver-stop-meta > * + *::before {
   margin-inline-end: var(--sp-2);
-  color: var(--border-strong);
+  color: var(--control-edge);
   content: "·";
 }
 

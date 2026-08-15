@@ -39,8 +39,8 @@ onMounted(() => resource.fetch({ name: route.params.name }));
       <h3>المحادثة</h3>
       <ol>
         <li v-for="item in doc.communications || []" :key="item.name">
-          <strong>{{ item.sender }}</strong>
-          <p>{{ item.content }}</p>
+          <strong><bdi dir="auto" translate="no">{{ item.sender }}</bdi></strong>
+          <p dir="auto">{{ item.content }}</p>
         </li>
       </ol>
     </article>

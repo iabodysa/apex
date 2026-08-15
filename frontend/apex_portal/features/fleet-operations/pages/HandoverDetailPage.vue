@@ -19,7 +19,7 @@ const directionLabel = (value) => ({ Receipt: "استلام", Return: "إرجا�
     <header class="ops-heading">
       <div>
         <p>{{ directionLabel(handover.doc?.direction) }}</p>
-        <h2>{{ handover.doc?.vehicle || "تفاصيل تسليم المركبة" }}</h2>
+        <h2 dir="auto">{{ handover.doc?.vehicle || "تفاصيل تسليم المركبة" }}</h2>
         <bdi class="record-reference" dir="auto" translate="no">{{ route.params.name }}</bdi>
       </div>
       <Button variant="outline" icon-left="lucide-refresh-cw" :loading="handover.get.loading" @click="handover.reload()">تحديث</Button>
@@ -36,12 +36,12 @@ const directionLabel = (value) => ({ Receipt: "استلام", Return: "إرجا�
       <article class="ops-card">
         <Badge :theme="statusTheme(handover.doc.discrepancy_status)" :label="statusLabel(handover.doc.discrepancy_status)" />
         <dl>
-          <div><dt>من السائق</dt><dd>{{ handover.doc.from_driver || "—" }}</dd></div>
-          <div><dt>إلى السائق</dt><dd>{{ handover.doc.to_driver || "—" }}</dd></div>
+          <div><dt>من السائق</dt><dd><bdi dir="auto" translate="no">{{ handover.doc.from_driver || "—" }}</bdi></dd></div>
+          <div><dt>إلى السائق</dt><dd><bdi dir="auto" translate="no">{{ handover.doc.to_driver || "—" }}</bdi></dd></div>
           <div><dt>التاريخ</dt><dd><bdi>{{ handover.doc.handover_date || "—" }}</bdi></dd></div>
           <div><dt>قراءة العداد</dt><dd><bdi>{{ handover.doc.odometer_reading ?? "—" }}</bdi></dd></div>
           <div><dt>مستوى الوقود</dt><dd>{{ handover.doc.fuel_level || "—" }}</dd></div>
-          <div><dt>الموقع</dt><dd>{{ handover.doc.handover_location || "—" }}</dd></div>
+          <div><dt>الموقع</dt><dd dir="auto">{{ handover.doc.handover_location || "—" }}</dd></div>
         </dl>
       </article>
 
@@ -51,8 +51,8 @@ const directionLabel = (value) => ({ Receipt: "استلام", Return: "إرجا�
         <div v-else class="ops-table" role="table" aria-label="قائمة فحص تسليم المركبة">
           <div v-for="item in handover.doc.handover_check_items" :key="item.name || item.idx" class="ops-row" role="row">
             <div>
-              <strong>{{ item.check_item }}</strong>
-              <span v-if="item.remark">{{ item.remark }}</span>
+              <strong dir="auto">{{ item.check_item }}</strong>
+              <span v-if="item.remark" dir="auto">{{ item.remark }}</span>
             </div>
             <Badge :theme="item.ok ? 'green' : 'orange'" :label="item.ok ? 'سليم' : 'يحتاج مراجعة'" />
           </div>

@@ -25,7 +25,7 @@ const request = createDocumentResource({
         <bdi class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
       </div>
       <p v-if="row.issue_description">{{ row.issue_description }}</p>
-      <span>{{ row.building }}<template v-if="row.room"> · {{ row.room }}</template></span>
+      <span><bdi dir="auto">{{ row.building }}</bdi><template v-if="row.room"> · <bdi dir="auto" translate="no">{{ row.room }}</bdi></template></span>
       <small>{{ statusLabel(row.status) }}</small>
     </template>
   </ResourceListPage>

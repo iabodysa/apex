@@ -100,8 +100,10 @@ async function act(kind, row) {
           <Button variant="solid" theme="green" label="اعتماد" :disabled="availability(row, 'approve').disabled" @click="act('approve', row)" />
           <Button variant="outline" theme="red" label="رفض" :disabled="availability(row, 'reject').disabled" @click="openReject(row)" />
         </div>
-        <p v-if="availability(row, 'approve').disabled" class="ops-row__reason">{{ availability(row, "approve").reason }}</p>
-        <p v-else-if="availability(row, 'reject').disabled" class="ops-row__reason">{{ availability(row, "reject").reason }}</p>
+        <!-- Approve and reject are refused independently by the server, so chaining them left the
+             second button grey and silent whenever the first was refused too. -->
+        <p v-if="availability(row, 'approve').disabled" class="ops-row__reason">اعتماد: {{ availability(row, "approve").reason }}</p>
+        <p v-if="availability(row, 'reject').disabled" class="ops-row__reason">رفض: {{ availability(row, "reject").reason }}</p>
       </article>
     </div>
     <Dialog v-model="rejectOpen" :options="{ title: 'رفض طلب الوقود' }">

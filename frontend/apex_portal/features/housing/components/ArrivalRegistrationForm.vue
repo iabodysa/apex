@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { arrivalRegistrationParams } from "../arrivalFlow.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
@@ -21,6 +21,14 @@ watch(() => props.manifest, (row) => {
   form.passport_number = row.passport_number || "";
   form.nationality = row.nationality || "";
 }, { immediate: true });
+
+// `required` on the fields never fires while the submit button is disabled, so the clerk gets no
+// native prompt either. This says which field is still holding the registration.
+const blockedReason = computed(() => {
+  if (!form.worker_name) return "اكتب اسم العامل لتفعيل التسجيل.";
+  if (!form.passport_number) return "اكتب رقم الجواز لتفعيل التسجيل.";
+  return "";
+});
 
 async function addTemporary() {
   emit("error", "");
@@ -45,6 +53,7 @@ async function addTemporary() {
       <FormControl v-model="form.nationality" label="الجنسية" />
       <FormControl v-model="form.cell_number" label="رقم الجوال" />
     </div>
+    <p v-if="blockedReason" class="feature-state">{{ blockedReason }}</p>
     <Button type="submit" theme="green" variant="solid" :loading="register.loading" :disabled="!form.worker_name || !form.passport_number">تسجيل العامل</Button>
   </form>
 </template>

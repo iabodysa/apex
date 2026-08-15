@@ -19,7 +19,7 @@ onMounted(() => resource.fetch({ name: route.params.name }));
     <header class="ops-heading">
       <div>
         <p>حادث</p>
-        <h2>{{ doc?.vehicle_plate || doc?.vehicle || doc?.incident_type || "تفاصيل الحادث" }}</h2>
+        <h2 dir="auto">{{ doc?.vehicle_plate || doc?.vehicle || doc?.incident_type || "تفاصيل الحادث" }}</h2>
         <bdi class="record-reference" dir="auto" translate="no">{{ route.params.name }}</bdi>
       </div>
       <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="resource.fetch({ name: route.params.name })" />

@@ -9,6 +9,13 @@ const error = ref("");
 const transfer = createResource({ url: "apex.habitat.api.transfer_board.transfer_occupant" });
 // Link marks its label required but enforces nothing, so both beds are checked here.
 const canSubmit = computed(() => Boolean(form.source_bed && form.target_bed));
+// `ErrorMessage` below only carries a rejected transfer, so without this the greyed button is the
+// clerk's only signal that a bed is still unpicked.
+const blockedReason = computed(() => {
+  if (!form.source_bed) return "اختر السرير الحالي لتفعيل النقل.";
+  if (!form.target_bed) return "اختر السرير الجديد لتفعيل النقل.";
+  return "";
+});
 async function submit() {
   error.value = "";
   if (!canSubmit.value) return;
@@ -27,6 +34,7 @@ async function submit() {
     <Link v-model="form.target_bed" doctype="Bed" label="السرير الجديد" placeholder="ابحث عن السرير الجديد" required />
     <FormControl v-model="form.reason" type="textarea" label="سبب النقل" />
     <ErrorMessage v-if="error" :message="error" />
+    <p v-if="blockedReason" class="feature-state">{{ blockedReason }}</p>
     <Button type="submit" theme="green" variant="solid" :disabled="!canSubmit" :loading="transfer.loading">تنفيذ النقل</Button>
   </form></section>
 </template>

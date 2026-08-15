@@ -14,11 +14,11 @@ const props = defineProps({
 });
 defineEmits(["manual-board", "unmark", "notify", "depart"]);
 
-// Departure is the harder block, so it is named first when both actions are unavailable.
-const hint = computed(() => {
-  if (!props.graceElapsed) return "انتظر انتهاء مهلة الصعود قبل المغادرة.";
-  return props.pendingCount ? "" : "لا أحد بانتظارك الآن.";
-});
+// Notify and depart are blocked by different things, and one shared line could only ever name one:
+// before the grace window closed, a driver with nobody left to notify still read the departure
+// sentence and no word about the button he had just pressed.
+const notifyReason = computed(() => (props.pendingCount ? "" : "لا أحد بانتظارك الآن، فلا يوجد من يُنبَّه."));
+const departReason = computed(() => (props.graceElapsed ? "" : "انتظر انتهاء مهلة الصعود قبل المغادرة."));
 
 function waitSeconds(worker) {
   return remainingSeconds(worker.wait_at, props.waitWindowSeconds, props.now);
@@ -33,8 +33,8 @@ function waitSeconds(worker) {
     </div>
     <article v-for="worker in workers" :key="worker.employee" class="passenger-row" :class="{ 'has-wait': worker.wait_count }">
       <div>
-        <strong>{{ worker.employee_name || worker.employee }}</strong>
-        <small>{{ worker.pickup_point || "نقطة التجمع" }}</small>
+        <strong dir="auto">{{ worker.employee_name || worker.employee }}</strong>
+        <small dir="auto">{{ worker.pickup_point || "نقطة التجمع" }}</small>
         <a v-if="worker.phone" class="passenger-call" :href="`tel:${worker.phone}`">اتصل بالعامل</a>
       </div>
       <span v-if="worker.wait_count" class="wait-signal">
@@ -52,6 +52,7 @@ function waitSeconds(worker) {
       <Button variant="outline" :disabled="!pendingCount" :loading="busy === 'notify'" @click="$emit('notify')">نبه المتبقين</Button>
       <Button theme="green" variant="solid" :disabled="!graceElapsed" :loading="busy === 'depart'" @click="$emit('depart')">أغلق الصعود وغادر</Button>
     </div>
-    <p v-if="hint" class="journey-hint">{{ hint }}</p>
+    <p v-if="notifyReason" class="journey-hint">نبه المتبقين: {{ notifyReason }}</p>
+    <p v-if="departReason" class="journey-hint">أغلق الصعود وغادر: {{ departReason }}</p>
   </section>
 </template>

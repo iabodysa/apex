@@ -22,6 +22,14 @@ const receipt = createResource({
 const assetTitle = createResource({ url: "frappe.client.get_value", method: "GET", auto: false });
 const busy = computed(() => exit1.loading || exit3.loading || receipt.loading);
 const assetName = computed(() => assetTitle.data?.asset_name || "أصل سكني");
+// A clearance button greys once its gate is already passed and again while a sibling call is in
+// flight. The two look identical, and only one of them is worth waiting for.
+const clearanceReason = (cleared, done) => {
+  if (cleared) return done;
+  return busy.value ? "جارٍ تنفيذ إجراء آخر على هذا السجل." : "";
+};
+const exit1Reason = computed(() => clearanceReason(delivery.doc?.exit1_security_cleared, "اعتُمدت بوابة التسليم مسبقاً."));
+const exit3Reason = computed(() => clearanceReason(delivery.doc?.exit3_receiving_cleared, "اعتُمد الاستلام مسبقاً."));
 
 watch(
   () => delivery.doc?.facility_asset,
@@ -57,15 +65,19 @@ async function run(resource, params, message) {
           <strong dir="auto">{{ assetName }}</strong>
           <bdi class="record-reference" dir="auto" translate="no">{{ delivery.doc.asset_serial_number || delivery.doc.facility_asset }}</bdi>
         </div>
-        <span>{{ delivery.doc.from_building }} ← {{ delivery.doc.to_building }}</span>
+        <span><bdi dir="auto">{{ delivery.doc.from_building }}</bdi> ← <bdi dir="auto">{{ delivery.doc.to_building }}</bdi></span>
         <Badge :theme="statusTheme(delivery.doc.status)" :label="statusLabel(delivery.doc.status)" />
       </article>
       <div class="feature-actions">
         <Button v-if="capabilities.includes('clear_exit_1')" theme="green" variant="solid" :loading="exit1.loading" :disabled="busy || delivery.doc.exit1_security_cleared" @click="run(exit1, { delivery: delivery.doc.name }, 'تم اعتماد بوابة التسليم')">اعتماد بوابة التسليم</Button>
         <Button v-if="capabilities.includes('clear_exit_3')" theme="green" variant="solid" :loading="exit3.loading" :disabled="busy || delivery.doc.exit3_receiving_cleared" @click="run(exit3, { delivery: delivery.doc.name }, 'تم اعتماد الاستلام')">اعتماد الاستلام</Button>
       </div>
+      <p v-if="capabilities.includes('clear_exit_1') && exit1Reason" class="feature-reason">اعتماد بوابة التسليم: {{ exit1Reason }}</p>
+      <p v-if="capabilities.includes('clear_exit_3') && exit3Reason" class="feature-reason">اعتماد الاستلام: {{ exit3Reason }}</p>
       <form v-if="capabilities.includes('confirm_delivery_receipt') && delivery.doc.status === 'Released'" class="feature-form" @submit.prevent="run(receipt, { delivery: delivery.doc.name, code }, 'تم تأكيد الاستلام')">
-        <FormControl v-model="code" label="رمز الاستلام" inputmode="numeric" required />
+        <!-- The six-digit rule lives only in the disabled expression, so a five-digit code left
+             the receiver with a dead button and no rule to read. -->
+        <FormControl v-model="code" label="رمز الاستلام" inputmode="numeric" description="رمز الاستلام مكوّن من ستة أرقام." required />
         <Button type="submit" theme="green" variant="solid" :loading="receipt.loading" :disabled="code.length !== 6">تأكيد الاستلام</Button>
       </form>
       <ErrorMessage v-if="error" :message="error" />

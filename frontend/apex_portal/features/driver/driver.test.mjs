@@ -5,6 +5,8 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { createDriverGateway } from "./gateway.js";
 import { driverRoutes } from "./routes.js";
 import DriverPage from "./DriverPage.vue";
+import DriverPassengerList from "./DriverPassengerList.vue";
+import DriverStopsTimeline from "./DriverStopsTimeline.vue";
 import DriverTripPage from "./DriverTripPage.vue";
 
 const { resourceData, resourceCalls } = vi.hoisted(() => ({
@@ -237,6 +239,54 @@ describe("Masar driver feature", () => {
     expect(wrapper.text()).toContain("طلب الانتظار 1 من 3");
     expect(wrapper.get('a[href="tel:0500000000"]').text()).toContain("اتصل بالعامل");
     wrapper.unmount();
+  });
+
+  it("names both blocked passenger actions, not only the departure one", () => {
+    // Notify and depart are shut by different things. One shared line could only ever name one, so
+    // a driver inside the grace window with nobody left to notify read the departure sentence and
+    // no word about the "نبه المتبقين" button he had just pressed.
+    const blocked = mount(DriverPassengerList, {
+      props: { workers: [], now: Date.now(), pendingCount: 0, graceElapsed: false },
+    });
+
+    expect(blocked.findAll(".journey-hint").map((hint) => hint.text())).toEqual([
+      "نبه المتبقين: لا أحد بانتظارك الآن، فلا يوجد من يُنبَّه.",
+      "أغلق الصعود وغادر: انتظر انتهاء مهلة الصعود قبل المغادرة.",
+    ]);
+    blocked.unmount();
+
+    const live = mount(DriverPassengerList, {
+      props: {
+        workers: [{ employee: "EMP-1", status: "Pending" }],
+        now: Date.now(),
+        pendingCount: 1,
+        graceElapsed: true,
+      },
+    });
+
+    expect(live.findAll(".journey-hint")).toHaveLength(0);
+    live.unmount();
+  });
+
+  it("explains the spent arrival button only for a stop already marked on a started trip", () => {
+    const stops = [
+      { route_stop: "STOP-1", stop_name: "بوابة السكن", arrived: true },
+      { route_stop: "STOP-2", stop_name: "المصنع", arrived: false },
+    ];
+    const started = mount(DriverStopsTimeline, { props: { stops, started: true } });
+
+    const rows = started.findAll("li");
+    expect(rows[0].get("small.journey-hint").text()).toBe("وصلت: سجّلت وصولك لهذه المحطة.");
+    expect(rows[1].find("small.journey-hint").exists()).toBe(false);
+    started.unmount();
+
+    // Before the trip starts both controls are dead for one shared reason, which the list-level
+    // sentence already carries; the per-stop line must not double it.
+    const idle = mount(DriverStopsTimeline, { props: { stops, started: false } });
+
+    expect(idle.findAll("small.journey-hint")).toHaveLength(0);
+    expect(idle.text()).toContain("ابدأ الرحلة أولاً");
+    idle.unmount();
   });
 
   it("subscribes to the trip room once, not again on every poll", async () => {

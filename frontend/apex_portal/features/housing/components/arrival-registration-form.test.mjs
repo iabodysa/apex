@@ -73,4 +73,18 @@ describe("ArrivalRegistrationForm", () => {
     expect(wrapper.get('[aria-label="اسم العامل"]').element.value).toBe("");
     wrapper.unmount();
   });
+
+  it("names the field holding the registration, and stops naming it once supplied", async () => {
+    const wrapper = mount(ArrivalRegistrationForm, {
+      props: { manifest: null, building: "BLD-1" },
+    });
+    expect(wrapper.text()).toContain("اكتب اسم العامل لتفعيل التسجيل.");
+
+    await wrapper.get('[aria-label="اسم العامل"]').setValue("سعيد");
+    expect(wrapper.text()).toContain("اكتب رقم الجواز لتفعيل التسجيل.");
+
+    await wrapper.get('[aria-label="رقم الجواز"]').setValue("P-9");
+    expect(wrapper.text()).not.toContain("لتفعيل التسجيل");
+    wrapper.unmount();
+  });
 });

@@ -28,6 +28,16 @@ const roomOptions = computed(() =>
     ? (rooms.data || []).map((row) => ({ label: row.room_number || row.name, value: row.name }))
     : [],
 );
+// The submit greys for four separate reasons and named none of them, so a form that looked filled
+// in ended at a dead button. The first unmet step wins, in the order the form asks for them, and
+// the button reads its disabled state from here so the two can never disagree.
+const submitReason = computed(() => {
+  if (rooms.list.loading) return "جارٍ تحميل غرف المبنى.";
+  if (!building.value) return "اختر المبنى أولاً.";
+  if (!form.room) return "اختر الغرفة.";
+  if (!form.issue_description) return "اكتب وصف المشكلة.";
+  return "";
+});
 let roomLoadQueue = Promise.resolve();
 
 async function loadAllRooms(value) {
@@ -106,7 +116,8 @@ async function submit() {
         ]"
       />
       <ErrorMessage v-if="error" :message="error" />
-      <Button type="submit" theme="green" variant="solid" :loading="requests.insert.loading" :disabled="rooms.list.loading || !building || !form.room || !form.issue_description">إرسال الطلب</Button>
+      <p v-if="submitReason" class="feature-reason">{{ submitReason }}</p>
+      <Button type="submit" theme="green" variant="solid" :loading="requests.insert.loading" :disabled="Boolean(submitReason)">إرسال الطلب</Button>
     </form>
   </section>
 </template>

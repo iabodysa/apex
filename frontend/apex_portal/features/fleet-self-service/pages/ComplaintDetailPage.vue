@@ -48,8 +48,8 @@ onMounted(load);
       <ul class="salis-list">
         <li v-for="item in issue.communications || []" :key="item.name">
           <div>
-            <strong>{{ item.sender }}</strong>
-            <p>{{ item.content }}</p>
+            <strong><bdi dir="auto" translate="no">{{ item.sender }}</bdi></strong>
+            <p dir="auto">{{ item.content }}</p>
           </div>
         </li>
       </ul>

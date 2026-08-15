@@ -64,7 +64,7 @@ async function ratify() {
           <a v-if="row.evidence_photo" :href="row.evidence_photo" target="_blank" rel="noopener">
             <img class="safety-evidence" :src="row.evidence_photo" alt="صورة الملاحظة" />
           </a>
-          <RouterLink v-if="row.linked_maintenance_request" :to="`/maintenance/${row.linked_maintenance_request}`">طلب الصيانة {{ row.linked_maintenance_request }}</RouterLink>
+          <RouterLink v-if="row.linked_maintenance_request" :to="`/maintenance/${row.linked_maintenance_request}`">طلب الصيانة <bdi dir="auto" translate="no">{{ row.linked_maintenance_request }}</bdi></RouterLink>
         </li>
       </ul>
       <ErrorMessage v-if="error" :message="error" />

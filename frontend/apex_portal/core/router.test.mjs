@@ -11,6 +11,7 @@ const component = { template: "<p>ready</p>" };
 const routes = [
   { path: "/home", name: "home", feature: "worker", capability: "worker.home", component },
   { path: "/requests", name: "requests", feature: "worker", capability: "worker.request.read", component },
+  { path: "/requests/:name", name: "request-detail", feature: "worker", capability: "worker.request.read", component },
 ];
 
 describe("portal registry", () => {
@@ -58,6 +59,17 @@ describe("portal router", () => {
     await router.push("/requests");
     await router.isReady();
     expect(router.currentRoute.value.name).toBe("access-denied");
+  });
+
+  // A record deep link is the one a shared tab and a pasted link actually carry. Matching it as a
+  // string against "/requests/:name" silently sent the reader to the landing list, which reads as
+  // "the record is not there" rather than "you may not open it".
+  it("refuses an unauthorized deep link into a record instead of dropping it on the landing list", async () => {
+    const router = makeRouter(["worker.home"]);
+    await router.push("/requests/REQ-0001");
+    await router.isReady();
+    expect(router.currentRoute.value.name).toBe("access-denied");
+    expect(router.currentRoute.value.query.from).toBe("/requests/REQ-0001");
   });
 
   it("redirects an unknown hash to the context landing", async () => {

@@ -119,8 +119,8 @@ onMounted(load);
         <article class="ops-card">
           <h3>الحالة والتشغيل</h3>
           <p>
-            {{ vehicle.project || "—" }} ·
-            {{ vehicle.current_driver?.name_en || "من دون مندوب" }}
+            <bdi dir="auto">{{ vehicle.project || "—" }}</bdi> ·
+            <bdi dir="auto">{{ vehicle.current_driver?.name_en || "من دون مندوب" }}</bdi>
           </p>
           <div class="ops-actions">
             <Button variant="outline" label="إيقاف" :disabled="isBlocked('stop')" @click="act('stop')" />

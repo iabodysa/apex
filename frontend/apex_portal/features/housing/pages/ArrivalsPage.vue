@@ -149,7 +149,7 @@ watch(building, load, { immediate: true });
         <div class="arrival-panel__title"><h3>قائمة اليوم</h3><span>{{ workers.length }} عامل</span></div>
         <p v-if="!workers.length" class="feature-page__empty">لا توجد دفعة وصول لهذا المبنى اليوم.</p>
         <article v-for="row in workers" :key="row.row" class="arrival-row">
-          <div><strong>{{ row.worker_name }}</strong><small>{{ row.passport_number || 'لا يوجد رقم جواز' }}، {{ row.labour_supplier || row.project || 'بدون جهة محددة' }}</small></div>
+          <div><strong dir="auto">{{ row.worker_name }}</strong><small><bdi dir="auto" translate="no">{{ row.passport_number || 'لا يوجد رقم جواز' }}</bdi>، <bdi dir="auto">{{ row.labour_supplier || row.project || 'بدون جهة محددة' }}</bdi></small></div>
           <Badge :theme="row.housed ? 'green' : row.arrived ? 'blue' : 'orange'" :label="row.housed ? 'تم تسكينه' : row.arrived ? 'مسجل' : 'منتظر'" />
           <div class="feature-actions">
             <Button v-if="row.arrived" variant="subtle" @click="printSlip(row)">بطاقة الوصول</Button>

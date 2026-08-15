@@ -168,7 +168,7 @@
 }
 .vehicle-handover__evidence {
     padding: var(--sp-4);
-    border: 1px dashed var(--border-strong);
+    border: 1px dashed var(--control-edge);
     border-radius: var(--radius);
 }
 @media (max-width: 640px) {

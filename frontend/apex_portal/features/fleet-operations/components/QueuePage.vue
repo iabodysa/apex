@@ -61,7 +61,7 @@ onMounted(() => props.resource.fetch());
                 ><div class="record-identity">
                     <strong dir="auto">{{ recordTitle(row, ["vehicle_plate", "plate", "subject", "driver_name", "project", "location"], title) }}</strong>
                     <bdi v-if="row.name" class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
-                    <span>{{
+                    <span dir="auto">{{
                         row.driver_name || row.driver || row.project || row.location || ""
                     }}</span>
                 </div>

@@ -56,7 +56,7 @@ async function showPass(request) {
         </div>
         <div>
           <dt>الحافلة</dt>
-          <dd>{{ trip.vehicle?.plate_number || "تحت الإسناد" }}</dd>
+          <dd><bdi dir="auto" translate="no">{{ trip.vehicle?.plate_number || "تحت الإسناد" }}</bdi></dd>
         </div>
         <div>
           <dt>السائق</dt>

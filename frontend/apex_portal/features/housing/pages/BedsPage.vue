@@ -43,7 +43,7 @@ async function setReady(room) {
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">
       <header>
         <div>
-          <strong>{{ room.room_number }}</strong>
+          <strong><bdi dir="auto" translate="no">{{ room.room_number }}</bdi></strong>
           <small>
             {{ floorLabel(room.floor_label) }} · {{ room.room_type || "غرفة" }} ·
             {{ room.current_occupancy || 0 }} من {{ room.bed_capacity || room.beds.length }} ·
@@ -62,9 +62,12 @@ async function setReady(room) {
           :aria-disabled="candidate && bed.occupant ? 'true' : undefined"
           :data-state="bed.bed_color"
         >
-          <strong>{{ bed.bed_code || bed.bed }}</strong>
+          <strong><bdi dir="auto" translate="no">{{ bed.bed_code || bed.bed }}</bdi></strong>
           <small v-if="bed.occupant" dir="auto">{{ bed.occupant.employee_name }}</small>
           <small v-else>{{ candidate ? 'اختر هذا السرير' : 'متاح' }}</small>
+          <!-- An occupant's name is who is here, not why the tile refuses the tap the assignment
+               flow just invited. With a candidate chosen the refusal has to say so itself. -->
+          <small v-if="candidate && bed.occupant" class="bed-meta">مشغول، لا يقبل إسناداً</small>
           <small class="bed-meta">{{ statusLabel(bed.condition) }}<template v-if="bed.is_temporary"> · مؤقت</template></small>
         </component>
       </div>

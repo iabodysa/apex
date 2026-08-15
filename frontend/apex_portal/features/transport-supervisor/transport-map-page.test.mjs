@@ -105,4 +105,45 @@ describe("transport map selection", () => {
     ]);
     wrapper.unmount();
   });
+
+  it("draws the shape of the map it is fetching on the first paint", async () => {
+    let arrive;
+    fetch.mockImplementation(() => new Promise((resolve) => { arrive = resolve; }));
+    const wrapper = mount(TransportMapPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+
+    expect(wrapper.get(".portal-skeleton").attributes("role")).toBe("status");
+    expect(wrapper.get(".transport-map-page").attributes("aria-busy")).toBe("true");
+    expect(wrapper.find(".transport-map").exists()).toBe(false);
+
+    arrive({ positions: [{ dispatch_trip: "TRIP-1", status: "Running" }] });
+    await flushPromises();
+    expect(wrapper.find(".portal-skeleton").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("keeps the drawn map on screen while a refresh is in flight", async () => {
+    const wrapper = mount(TransportMapPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } },
+    });
+    await flushPromises();
+    expect(wrapper.find(".transport-map").exists()).toBe(true);
+
+    let refreshed;
+    fetch.mockImplementation(() => new Promise((resolve) => { refreshed = resolve; }));
+    const refresh = wrapper.findAll("button").find((button) => button.text() === "تحديث");
+    await refresh.trigger("click");
+    await flushPromises();
+
+    // A refresh must not take the trips away to announce itself.
+    expect(wrapper.find(".transport-map").exists()).toBe(true);
+    expect(wrapper.find(".portal-skeleton").exists()).toBe(false);
+    expect(wrapper.get(".transport-map-page").attributes("aria-busy")).toBe("true");
+
+    refreshed({ positions: [] });
+    await flushPromises();
+    wrapper.unmount();
+  });
 });

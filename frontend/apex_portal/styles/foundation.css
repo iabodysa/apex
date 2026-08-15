@@ -263,6 +263,15 @@ h3 {
   text-align: center;
 }
 
+/* The sentence that says why a control is disabled. It sits against its control, so it must not
+   borrow .feature-state — that is a 220px centred panel for a whole screen's state, and a
+   one-line reason rendered in it stops reading as belonging to the button beside it. */
+.feature-reason {
+  margin: 0;
+  color: var(--muted);
+  font-size: .8125rem;
+}
+
 .sr-only {
   position: absolute;
   inline-size: 1px;

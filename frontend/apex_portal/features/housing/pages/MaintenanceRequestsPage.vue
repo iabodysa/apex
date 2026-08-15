@@ -23,7 +23,7 @@ const canCreate = capabilities.includes("maintenance_create");
       <RouterLink :to="`/maintenance/${row.name}`">
         <strong>{{ maintenanceIssueLabel(row.issue_type) || "طلب صيانة" }}</strong>
       </RouterLink>
-      <span>{{ row.building }} · {{ row.room }}</span>
+      <span><bdi dir="auto">{{ row.building }}</bdi> · <bdi dir="auto" translate="no">{{ row.room }}</bdi></span>
       <small>{{ statusLabel(row.status) }} · {{ statusLabel(row.priority) }}</small>
     </template>
   </ResourceListPage>

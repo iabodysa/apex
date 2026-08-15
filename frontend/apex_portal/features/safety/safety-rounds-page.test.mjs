@@ -118,4 +118,23 @@ describe("safety round checklist", () => {
     expect(save.attributes("disabled")).toBeUndefined();
     expect(wrapper.text()).toContain("اكتملت بنود الجولة");
   });
+
+  it("counts the undecided tasks beside the disabled save instead of a neutral progress word", async () => {
+    const wrapper = mount(SafetyRoundsPage, {
+      global: { stubs: { BuildingPicker: true, SafetyTaskRow: taskStub } },
+    });
+    await nextTick();
+
+    const save = wrapper.get(".safety-checklist__save");
+    expect(wrapper.get(".feature-reason").text()).toBe("تبقّى 2 من 2 بنداً بلا قرار.");
+    expect(save.attributes("disabled")).toBeDefined();
+
+    await wrapper.findAll(".test-check-task")[0].trigger("click");
+    expect(wrapper.get(".feature-reason").text()).toBe("تبقّى 1 من 2 بنداً بلا قرار.");
+    expect(save.attributes("disabled")).toBeDefined();
+
+    await wrapper.findAll(".test-check-task")[1].trigger("click");
+    expect(wrapper.find(".feature-reason").exists()).toBe(false);
+    expect(save.attributes("disabled")).toBeUndefined();
+  });
 });

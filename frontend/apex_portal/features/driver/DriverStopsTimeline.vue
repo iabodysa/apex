@@ -42,6 +42,10 @@ defineEmits(["arrive", "toggle"]);
           <Button variant="outline" :disabled="!started || stop.arrived" :loading="busy === `arrive:${stop.route_stop}`" @click="$emit('arrive', stop.route_stop)">وصلت</Button>
           <Button variant="outline" :disabled="!started" :loading="busy === `stop:${stop.route_stop}`" @click="$emit('toggle', stop.route_stop, Boolean(stop.done))">{{ stop.done ? "إلغاء اكتمال المحطة" : "غادرت المحطة" }}</Button>
         </div>
+        <!-- The list-level sentence above covers the un-started trip. Once started, "وصلت" greys on
+             its own for a second reason, and the status word beside it reads as a label, not a
+             refusal, so the row says which of the two buttons is spent. -->
+        <small v-if="started && stop.arrived" class="journey-hint">وصلت: سجّلت وصولك لهذه المحطة.</small>
       </li>
     </ol>
     <p v-if="!stops.length" class="feature-state">لا توجد محطات مخططة لهذه الرحلة.</p>

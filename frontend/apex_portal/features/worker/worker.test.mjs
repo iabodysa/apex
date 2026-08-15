@@ -6,7 +6,9 @@ import { createMemoryHistory, createRouter } from "vue-router";
 import { createWorkerGateway } from "./gateway.js";
 import { workerRoutes } from "./routes.js";
 import { createDraftAction } from "./asyncState.js";
+import WorkerBoardingPanel from "./WorkerBoardingPanel.vue";
 import WorkerPage from "./WorkerPage.vue";
+import WorkerPastTrips from "./WorkerPastTrips.vue";
 import WorkerTransportPage from "./WorkerTransportPage.vue";
 
 const { resourceData, resourceCalls, toastCreate } = vi.hoisted(() => ({
@@ -359,6 +361,66 @@ describe("Masar worker feature", () => {
       type: "success",
       message: "وصل طلب الانتظار إلى السائق",
     });
+    wrapper.unmount();
+  });
+
+  it("says why boarding confirmation is shut in both of its blocked states", () => {
+    const panel = (boarding) => mount(WorkerBoardingPanel, {
+      props: { boarding, now: Date.now() },
+    });
+
+    // Boarded greys the button too, and that branch used to render nothing: the worker read the
+    // grey button as his confirmation having failed.
+    const boarded = panel({
+      dispatch_trip: "DT-1",
+      status: "Boarded",
+      wait_max: 3,
+      boarding_window: { state: "boarded", can_confirm: false },
+    });
+    expect(boarded.text()).toContain("سجّلنا صعودك بالفعل.");
+    expect(boarded.text()).not.toContain("يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.");
+    boarded.unmount();
+
+    const waiting = panel({
+      dispatch_trip: "DT-1",
+      status: "Pending",
+      wait_max: 3,
+      boarding_window: { state: "en_route", can_confirm: false },
+    });
+    expect(waiting.text()).toContain("يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.");
+    expect(waiting.text()).not.toContain("سجّلنا صعودك بالفعل.");
+    waiting.unmount();
+
+    const ready = panel({
+      dispatch_trip: "DT-1",
+      status: "Pending",
+      wait_max: 3,
+      boarding_window: { state: "at_stop", can_confirm: true },
+    });
+    expect(ready.text()).not.toContain("سجّلنا صعودك بالفعل.");
+    expect(ready.text()).not.toContain("يتاح تأكيد الصعود");
+    ready.unmount();
+  });
+
+  it("names the missing star beside the disabled rating submit and drops it once one is set", async () => {
+    const wrapper = mount(WorkerPastTrips, {
+      props: {
+        trips: [{
+          transport_request: "TR-1",
+          dispatch_trip: "DT-1",
+          trip_status: "Completed",
+          has_rated: false,
+        }],
+      },
+    });
+
+    // The stars are unlabelled buttons, so an untouched rating reads as optional rather than as
+    // the thing holding the submit shut.
+    expect(wrapper.get(".journey-hint").text()).toBe("اختر عدد النجوم أولاً لإرسال التقييم.");
+
+    await wrapper.get('[aria-label="3 نجوم"]').trigger("click");
+
+    expect(wrapper.find(".journey-hint").exists()).toBe(false);
     wrapper.unmount();
   });
 

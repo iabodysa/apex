@@ -46,14 +46,21 @@ const saving = ref(false);
 const submitted = ref(false);
 const submitOnce = createSingleFlight();
 const actionKey = computed(() => `vehicle-handover-${props.direction.toLowerCase()}`);
-const canSubmit = computed(() => !submitted.value
-  && form.odometer !== ""
-  && form.signed_evidence
-  && checklistData.value?.template
-  && isInspectionComplete(rows.value));
 const missingTemplateHelp = computed(() => props.direction === "Receipt"
   ? "لا يوجد قالب فحص نشط للاستلام. اطلب من مسؤول الأسطول تفعيل قالب الاستلام ثم أعد المحاولة."
   : "لا يوجد قالب فحص نشط للإرجاع. اطلب من مسؤول الأسطول تفعيل قالب الإرجاع ثم أعد المحاولة.");
+// A driver standing at the vehicle reads five preconditions as one grey button. The checklist is
+// the one worth naming: an unanswered item sits far up a long scrolled form, and a "غير سليم" item
+// still owed its note looks answered. `canSubmit` is the reason's negation so they cannot drift.
+const submitReason = computed(() => {
+  if (submitted.value) return "سُجّل هذا الفحص بالفعل.";
+  if (!checklistData.value?.template) return missingTemplateHelp.value;
+  if (form.odometer === "") return "أدخل قراءة العداد.";
+  if (!isInspectionComplete(rows.value)) return "أجب على كل بنود الفحص، واكتب ملاحظة لكل بند غير سليم.";
+  if (!form.signed_evidence) return "أرفق الإثبات الموقّع.";
+  return "";
+});
+const canSubmit = computed(() => !submitReason.value);
 
 async function loadChecklist() {
   loadingChecklist.value = true;
@@ -69,7 +76,14 @@ async function loadChecklist() {
     checklistData.value = data;
     rows.value = inspectionRowsFromTemplate(data.items);
   } catch (reason) {
-    checklistError.value = safeErrorMessage(reason, missingTemplateHelp.value);
+    // The missing-template sentence is thrown above and travels as the reason's own message, so
+    // it still reaches the driver on that path. It must not double as the fallback: a dropped
+    // connection carries no user-safe text, and would otherwise be reported as a fleet-admin
+    // configuration problem the driver cannot act on.
+    checklistError.value = safeErrorMessage(
+      reason,
+      "تعذّر تحميل قالب الفحص. تحقق من الاتصال ثم حاول مرة أخرى.",
+    );
   } finally {
     loadingChecklist.value = false;
   }
@@ -120,7 +134,6 @@ onMounted(loadChecklist);
       v-else-if="checklistError"
       title="تعذّر بدء فحص المركبة"
       :message="checklistError"
-      :fallback="missingTemplateHelp"
       @retry="loadChecklist"
     />
     <form v-else class="salis-form" @submit.prevent="submit">
@@ -191,6 +204,7 @@ onMounted(loadChecklist);
 
       <p v-if="notice" class="salis-notice" role="status">{{ notice }}</p>
       <p v-if="submitError" class="salis-error" role="alert">{{ submitError }}</p>
+      <p v-if="submitReason" class="feature-reason">{{ submitReason }}</p>
       <Button type="submit" variant="solid" theme="green" size="lg" :loading="saving" :disabled="!canSubmit || saving">
         {{ direction === 'Receipt' ? 'تأكيد الاستلام' : 'تأكيد الإرجاع' }}
       </Button>

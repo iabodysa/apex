@@ -45,7 +45,7 @@ async function submit() {
     <ErrorMessage v-else-if="item.get.error" message="تعذر تحميل الصنف." />
     <form v-else-if="item.doc" class="feature-card feature-form" @submit.prevent="submit">
       <strong dir="auto">{{ item.doc.item_name }}</strong>
-      <span>{{ item.doc.room }} · المتوقع {{ item.doc.expected_quantity }}</span>
+      <span><bdi dir="auto" translate="no">{{ item.doc.room }}</bdi> · المتوقع {{ item.doc.expected_quantity }}</span>
       <FormControl v-model="form.counted_quantity" type="number" min="0" label="العدد الفعلي" required />
       <FormControl v-model="form.condition" label="الحالة" />
       <FormControl v-model="form.notes" label="ملاحظة" />

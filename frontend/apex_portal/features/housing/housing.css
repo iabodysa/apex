@@ -16,7 +16,10 @@
 .arrivals-heading p:last-child { color: var(--muted); }
 .arrival-metrics, .today-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--sp-3); }
 .arrival-metrics article, .today-metrics a { display: grid; gap: var(--sp-1); padding: var(--sp-4); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); box-shadow: var(--shadow-sm); }
-.arrival-metrics strong, .today-metrics strong { color: var(--accent-ink); font-family: var(--font-display); font-size: 2rem; line-height: 1; }
+/* The identity fixes the family by role: figures are Thmanyah Sans with lining/tabular digits.
+   The display serif ships oldstyle figures, so a bed count set in it dances on the baseline and
+   loses column alignment beside the next metric. */
+.arrival-metrics strong, .today-metrics strong { color: var(--accent-ink); font-family: var(--font); font-size: 2rem; font-variant-numeric: lining-nums tabular-nums; line-height: 1; }
 .arrival-metrics span, .today-metrics span { font-weight: 700; }
 .arrival-metrics small, .today-metrics small { color: var(--muted); }
 .arrival-session { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, .45fr) auto; align-items: center; gap: var(--sp-4); padding: var(--sp-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); box-shadow: var(--shadow-sm); }
