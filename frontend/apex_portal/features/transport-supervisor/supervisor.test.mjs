@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
-import { createListResource } from "frappe-ui";
+import { createDocumentResource, createListResource } from "frappe-ui";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -420,6 +420,35 @@ describe("Masar transport supervisor feature", () => {
 
     expect(wrapper.text()).toContain("السجل غير موجود.");
     expect(wrapper.find(".feature-details").exists()).toBe(false);
+  });
+
+  it("refuses a request the supervisor may not read, and offers no retry for the refusal", async () => {
+    createDocumentResource.mockReturnValueOnce({
+      doc: null,
+      get: { loading: false, error: { status: 403 } },
+      reload: vi.fn(),
+    });
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: "/requests/:name",
+          component: SupervisorPage,
+          meta: { view: { doctype: "Transport Request", title: "تفاصيل طلب النقل" } },
+        },
+      ],
+    });
+    await router.push("/requests/TR-DENIED");
+    await router.isReady();
+    const wrapper = mount(SupervisorPage, { global: { plugins: [router] } });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("تعذّر فتح السجل");
+    expect(wrapper.text()).toContain("لا تملك صلاحية هذا السجل.");
+    expect(wrapper.text()).not.toContain("إعادة المحاولة");
+    expect(wrapper.find(".supervisor-request-assignment").exists()).toBe(false);
+    expect(wrapper.find(".request-trip-planning").exists()).toBe(false);
+    wrapper.unmount();
   });
 
   it("keeps the record-type planning panel between the assigned requests and the passenger list", () => {

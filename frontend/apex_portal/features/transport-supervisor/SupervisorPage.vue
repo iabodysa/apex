@@ -98,7 +98,10 @@ watch(doc, loadTransitions, { immediate: true });
     </header>
 
     <PortalSkeleton v-if="state === 'loading'" :rows="4" label="جارٍ تحميل السجل" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" message="لا تملك صلاحية هذا السجل." @retry="record.reload" />
+    <!-- The raw error, not a sentence about it: PortalErrorState reads the 403 off the error to
+         withhold the retry, and a hardcoded string carries no status, so the refusal offered a
+         button that re-issues the same denied read. Every other portal denial passes it this way. -->
+    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" :message="record.get.error" fallback="لا تملك صلاحية هذا السجل." @retry="record.reload" />
     <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل السجل" :message="record.get.error" @retry="record.reload" />
     <div v-else-if="state === 'empty'" class="feature-state">السجل غير موجود.</div>
 
