@@ -51,10 +51,6 @@ def _validate_page(start, page_length):
     return start, page_length
 
 
-def _validate_position_page(start, page_length):
-    return _validate_page(start, page_length)
-
-
 def _label_map(doctype, label_field, names):
     names = sorted({name for name in names if name})
     if not names:
