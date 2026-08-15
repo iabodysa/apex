@@ -5,9 +5,14 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestFuelPlatform(FrappeTestCase):
-    def test_missing_platform_name_rejected(self):
-        """validate() guards the mandatory Platform Name: a blank/absent name must
-        be rejected rather than producing an unnamed master row."""
-        doc = frappe.get_doc({"doctype": "Fuel Platform"})
-        with self.assertRaises(frappe.ValidationError):
-            doc.insert(ignore_permissions=True)
+    def test_platform_name_is_trimmed(self):
+        """validate() trims the platform name so the stored value matches the name
+        Frappe derives from it via ``autoname: field:platform_name``. The blank/absent
+        rejection is stock Frappe ``reqd: 1`` on the field, not app logic to re-test."""
+        doc = frappe.get_doc({"doctype": "Fuel Platform", "platform_name": " Shell "})
+        doc.insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.delete_doc, "Fuel Platform", doc.name, force=True, ignore_permissions=True
+        )
+        self.assertEqual(doc.platform_name, "Shell")
+        self.assertEqual(doc.name, "Shell")
