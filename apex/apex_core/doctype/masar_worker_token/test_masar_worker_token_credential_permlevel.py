@@ -50,7 +50,7 @@ from frappe.tests.utils import FrappeTestCase
 
 import apex
 from apex.apex_core.doctype.masar_worker_token import masar_worker_token
-from apex.apex_core.utils.portal_token_security import hash_token
+from apex.apex_core.utils.portal_identity import hash_token
 from apex.tests._helpers import _user
 
 test_dependencies = ["Employee"]

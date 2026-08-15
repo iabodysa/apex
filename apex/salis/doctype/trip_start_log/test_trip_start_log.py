@@ -19,7 +19,7 @@ from frappe.tests.utils import FrappeTestCase
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     issue_driver_link,
 )
-from apex.apex_core.utils import portal_token_security as token_security
+from apex.apex_core.utils import portal_identity as token_security
 
 BAD_TOKEN_SUBNET = "2001:db8:751c::"
 

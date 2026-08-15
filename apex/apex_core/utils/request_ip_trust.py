@@ -2,7 +2,7 @@
 """The trust boundary under every per-address limit in this app, made checkable.
 
 ``frappe.local.request_ip`` is the bucket key for the portal bad-token throttle
-(portal_token_security), the boarding scan limiter (salis/api/boarding.py) and frappe's
+(portal_identity), the boarding scan limiter (salis/api/boarding.py) and frappe's
 own ``@rate_limit(ip_based=True)``. frappe fills it from the FIRST ``X-Forwarded-For``
 entry with no trusted-proxy check at all.
 

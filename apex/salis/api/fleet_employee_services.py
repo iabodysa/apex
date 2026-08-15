@@ -19,7 +19,7 @@ arrives by token, so that path is the one to retire.
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import DRIVER, as_capacity
+from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.salis.api import fleet_employee as base
 from apex.salis.utils import add_timeline_note, lock_vehicle, period_quota
 

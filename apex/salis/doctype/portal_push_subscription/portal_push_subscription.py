@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex.apex_core.utils.portal_token_security import DRIVER, WORKER
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER
 from apex.salis.api.web_push import is_allowed_push_endpoint
 
 

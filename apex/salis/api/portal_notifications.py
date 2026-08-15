@@ -10,7 +10,7 @@ above is what authorises writing it.
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import DRIVER, WORKER, resolve_portal_subject
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER, resolve_portal_subject
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api import web_push
 

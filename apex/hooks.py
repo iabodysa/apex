@@ -117,13 +117,13 @@ doc_events = {
         "validate": "apex.apex_core.utils.report_role_guard.validate",
     },
     "Employee": {
-        "on_change": "apex.apex_core.utils.portal_token_security.on_employee_change",
+        "on_change": "apex.apex_core.utils.portal_identity.on_employee_change",
     },
     "Additional Salary": {
         "before_submit": "apex.apex_core.utils.employee_recovery.validate_recovery_additional_salary",
     },
     "Salis Driver": {
-        "on_change": "apex.apex_core.utils.portal_token_security.on_salis_driver_change",
+        "on_change": "apex.apex_core.utils.portal_identity.on_salis_driver_change",
     },
     "Address": {
         "validate": "apex.habitat.address_customizations.validate",
@@ -246,7 +246,7 @@ doc_events = {
         "on_submit": "apex.apex_core.doctype.masar_worker_token.masar_worker_token.on_driver_clearance_submit",
     },
     "Driver Suspension": {
-        "on_submit": "apex.apex_core.utils.portal_token_security.on_driver_suspension_submit",
+        "on_submit": "apex.apex_core.utils.portal_identity.on_driver_suspension_submit",
     },
     "Payment Entry": {
         "on_cancel": "apex.logistay.api.contract_billing.allow_cancel_despite_billing_log",

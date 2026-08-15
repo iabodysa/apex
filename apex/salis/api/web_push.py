@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import DRIVER, WORKER
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER
 
 _SETTINGS = "Salis Settings"
 _SUBSCRIPTION_DOCTYPE = "Portal Push Subscription"

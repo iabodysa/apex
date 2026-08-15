@@ -25,7 +25,7 @@ from frappe import _
 from frappe.utils import cint, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.password import get_encryption_key
 
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     DRIVER,
     presented_token,
     resolve_portal_subject,
@@ -179,7 +179,7 @@ def _enforce_scan_unresolved_ip_rate_limit() -> None:
     """Bound rejected scan credentials without charging authenticated NAT peers.
 
     Guarded like the bad-token limiter it shares a counter with
-    (portal_token_security._throttle_bad_token_attempt), because here the bucket IS
+    (portal_identity._throttle_bad_token_attempt), because here the bucket IS
     the address, so a request carrying none must decline to count. Reading it bare
     raised AttributeError where the attribute is unset, and where it is merely None
     (``frappe.init``'s value until ``frappe.app`` fills it) pooled every addressless

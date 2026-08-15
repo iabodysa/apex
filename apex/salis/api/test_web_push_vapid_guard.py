@@ -18,7 +18,7 @@ guard that can only be exercised against a live bench is a guard that does not g
 import unittest
 from unittest import mock
 
-from apex.apex_core.utils.portal_token_security import DRIVER
+from apex.apex_core.utils.portal_identity import DRIVER
 from apex.salis.api import web_push
 
 _TEST_PUBLIC = "BNtest_public_key_value_for_unit_tests_only_00000000000000000000000000000000000"

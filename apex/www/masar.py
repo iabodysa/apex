@@ -23,7 +23,7 @@ import re
 import frappe
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     TOKEN_COOKIES,
     WORKER,
     resolve_portal_subject,

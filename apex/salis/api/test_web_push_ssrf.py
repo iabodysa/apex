@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.utils.portal_token_security import DRIVER
+from apex.apex_core.utils.portal_identity import DRIVER
 from apex.salis.api import portal_notifications, web_push
 
 _REAL_FCM = "https://fcm.googleapis.com/fcm/send/abc123:DEF456"

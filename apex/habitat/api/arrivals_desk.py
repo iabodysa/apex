@@ -31,7 +31,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     reshare_worker_link,
 )
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     WORKER,
     credential_delivery_destination,
 )

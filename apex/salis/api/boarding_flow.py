@@ -41,7 +41,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, now_datetime, time_diff_in_seconds
 
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     DRIVER,
     WORKER,
     as_capacity,
@@ -68,7 +68,7 @@ def _publish(event, dispatch_trip, payload, driver=None, employee=None, employee
     token, and frappe's socket server gates a doctype room on read permission, so a
     publish routed only there is emitted and never delivered. The portal subjects are
     therefore rung on their own rooms as well — see
-    ``portal_token_security.portal_room``.
+    ``portal_identity.portal_room``.
 
     after_commit so subscribers read committed state; best-effort so a publish
     failure can never abort the calling write."""

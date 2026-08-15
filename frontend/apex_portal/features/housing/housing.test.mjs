@@ -9,7 +9,7 @@ const read = (name) => readFileSync(fileURLToPath(new URL(name, import.meta.url)
 describe("housing feature contract", () => {
   it("ships every approved housing route exactly once", () => {
     expect(housingRoutes.map((route) => route.path)).toEqual([
-      "/overview", "/today", "/count", "/count/:item", "/beds", "/beds/:bed",
+      "/overview", "/today", "/count", "/beds", "/beds/:bed",
       "/arrivals", "/transfer", "/custody", "/delivery", "/delivery/:name",
       "/maintenance", "/maintenance/new", "/maintenance/:name",
     ]);

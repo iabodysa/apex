@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import frappe
 
-from apex.apex_core.utils.portal_token_security import DRIVER
+from apex.apex_core.utils.portal_identity import DRIVER
 from apex.salis.api import driver_portal, masar_routes
 from apex.salis.api.driver_portal import execution, personal, trips
 
@@ -198,7 +198,7 @@ class TestMasarDriverExecution(TestCase):
             employees=["EMP-1", "EMP-2"],
         )
 
-    @patch("apex.apex_core.utils.portal_token_security.portal_room", return_value="driver:opaque")
+    @patch("apex.apex_core.utils.portal_identity.portal_room", return_value="driver:opaque")
     @patch.object(personal, "_resolve_linked_employee", return_value="EMP-1")
     @patch.object(personal, "_resolve_driver", return_value="DRV-1")
     @patch.object(personal, "_require_enabled")

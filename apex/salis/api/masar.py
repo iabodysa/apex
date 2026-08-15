@@ -42,7 +42,7 @@ that no role may write by hand, which is the control rather than a gap in one.
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import WORKER, as_capacity, portal_room
+from apex.apex_core.utils.portal_identity import WORKER, as_capacity, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api import boarding_window

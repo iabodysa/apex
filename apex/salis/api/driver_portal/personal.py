@@ -34,7 +34,7 @@ def get_masar_today():
     driver = _resolve_driver()
     employee = _resolve_linked_employee()
     from apex.salis.api.driver_portal.trips import my_trips_today
-    from apex.apex_core.utils.portal_token_security import DRIVER, portal_room
+    from apex.apex_core.utils.portal_identity import DRIVER, portal_room
 
     return {
         "driver": driver,

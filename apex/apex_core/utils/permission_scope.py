@@ -27,7 +27,7 @@ and all three modules have to answer it the same way.
 import frappe
 from frappe import permissions as frappe_permissions
 
-from apex.apex_core.utils.portal_token_security import CAPACITY_USERS
+from apex.apex_core.utils.portal_identity import CAPACITY_USERS
 
 PORTAL_CAPACITY_USERS = frozenset(CAPACITY_USERS.values())
 
@@ -56,7 +56,7 @@ def is_unscoped(user, unscoped_roles):
 def is_portal_capacity(user):
     """True when ``user`` is a seeded portal capacity identity rather than a person.
 
-    Read from ``portal_token_security.CAPACITY_USERS`` — the very mapping
+    Read from ``portal_identity.CAPACITY_USERS`` — the very mapping
     ``as_capacity`` switches the session to — so the permission layer and the session
     switch can never disagree about who a capacity is.
 

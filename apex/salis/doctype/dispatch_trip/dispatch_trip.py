@@ -93,7 +93,7 @@ class DispatchTrip(Document):
         except Exception:
             pass
         try:
-            from apex.apex_core.utils.portal_token_security import (
+            from apex.apex_core.utils.portal_identity import (
                 DRIVER,
                 publish_to_portal_subject,
             )

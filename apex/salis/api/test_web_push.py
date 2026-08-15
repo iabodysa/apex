@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import frappe
 
-from apex.apex_core.utils.portal_token_security import DRIVER, WORKER
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER
 from apex.salis.api import boarding_flow, web_push
 
 

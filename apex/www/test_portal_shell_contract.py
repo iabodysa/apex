@@ -2,14 +2,14 @@ from pathlib import Path
 from unittest import TestCase
 
 from apex.apex_core.utils.portal_bootstrap import PORTAL_PUBLIC_PATHS
-from apex.apex_core.utils.portal_token_security import DRIVER, TOKEN_COOKIES, WORKER
+from apex.apex_core.utils.portal_identity import DRIVER, TOKEN_COOKIES, WORKER
 
 
 class TestPortalShellContract(TestCase):
     def test_the_token_adapters_name_their_cookie_from_the_shared_table(self):
         """The page that WRITES the cookie and the endpoint that READS it must agree.
 
-        ``TOKEN_COOKIES`` in ``portal_token_security`` is the one table both halves
+        ``TOKEN_COOKIES`` in ``portal_identity`` is the one table both halves
         answer from: ``masar_worker._token_from_request`` reads through it, and the
         www adapter must write through it too. A literal in the adapter survives a
         rename of the table entry, and the divergence is silent — the page keeps

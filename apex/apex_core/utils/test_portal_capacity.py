@@ -14,7 +14,7 @@ fields still do not move.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.utils.portal_token_security import CAPACITY_USERS, DRIVER, WORKER, as_capacity
+from apex.apex_core.utils.portal_identity import CAPACITY_USERS, DRIVER, WORKER, as_capacity
 
 
 class TestPortalCapacity(FrappeTestCase):

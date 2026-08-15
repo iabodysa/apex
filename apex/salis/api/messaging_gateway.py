@@ -19,7 +19,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     WORKER,
     credential_delivery_destination,
 )

@@ -6,7 +6,7 @@ import frappe
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
 )
-from apex.apex_core.utils import portal_token_security as security
+from apex.apex_core.utils import portal_identity as security
 
 
 class TestMasarIdentityContract(TestCase):

@@ -25,7 +25,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.password import decrypt, encrypt
 
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     DRIVER,
     ISSUED,
     REISSUED,

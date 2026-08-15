@@ -3,7 +3,6 @@ import "./housing.css";
 const pages = Object.freeze({
   today: () => import("./pages/TodayPage.vue"),
   count: () => import("./pages/InventoryCountPage.vue"),
-  countItem: () => import("./pages/InventoryItemPage.vue"),
   beds: () => import("./pages/BedsPage.vue"),
   bedDetail: () => import("./pages/BedDetailPage.vue"),
   arrivals: () => import("./pages/ArrivalsPage.vue"),
@@ -41,7 +40,6 @@ export const housingRoutes = Object.freeze([
   },
   route("/today", "housing-today", "مهام اليوم", "today", pages.today, "اليوم"),
   route("/count", "housing-count", "الجرد", "count", pages.count, "العهد والجرد"),
-  route("/count/:item", "housing-count-item", "تفاصيل الجرد", "count", pages.countItem),
   route("/beds", "housing-beds", "الغرف والأسرّة", "estate_read", pages.beds, "السكن"),
   route("/beds/:bed", "housing-bed-detail", "تفاصيل السرير", "estate_read", pages.bedDetail),
   route("/arrivals", "housing-arrivals", "القادمون", "check_in", pages.arrivals, "السكن"),

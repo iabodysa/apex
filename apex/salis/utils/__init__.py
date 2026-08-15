@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, today
 
-from apex.apex_core.utils.portal_token_security import (
+from apex.apex_core.utils.portal_identity import (
     DRIVER,
     presented_token,
     resolve_portal_subject,

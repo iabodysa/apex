@@ -19,7 +19,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.utils import permission_scope
-from apex.apex_core.utils.portal_token_security import DRIVER, WORKER, as_capacity
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER, as_capacity
 from apex.habitat.permissions import building_scope_query
 from apex.salis.api import boarding_flow
 from apex.salis.permissions import SALIS_SCOPE, project_scope_query

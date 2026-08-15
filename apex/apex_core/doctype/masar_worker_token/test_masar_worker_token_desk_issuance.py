@@ -51,7 +51,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
     revoke_driver_link,
 )
-from apex.apex_core.utils.portal_token_security import DRIVER
+from apex.apex_core.utils.portal_identity import DRIVER
 from apex.tests._helpers import _grant_project, _user, as_user
 from apex.tests.factories import make_project
 
