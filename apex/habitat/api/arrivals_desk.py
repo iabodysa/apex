@@ -819,6 +819,19 @@ def get_arrival_summary(date=None, building=None) -> dict:
     }
 
 
+def _empty_manifest(date, building=None):
+    """The manifest with nothing on it: no Arrival Batch DocType, or no building in scope."""
+    return {
+        "date": date,
+        "building": building,
+        "workers": [],
+        "total": 0,
+        "arrived": 0,
+        "housed": 0,
+        "pending": 0,
+    }
+
+
 @frappe.whitelist()
 def get_expected_arrivals(date=None, building=None) -> dict:
     """Today's pre-arrival manifest (Arrival Batch) for the Intake zone.
@@ -828,24 +841,35 @@ def get_expected_arrivals(date=None, building=None) -> dict:
     registered Temporary Worker (the batch row's ``temporary_worker`` link), and
     ``housed`` once that worker has an active Housing Assignment. Includes running
     registration and housing tallies. Read-only; bounded queries; the
-    Arrival Batch DocType may not exist yet (returns an empty manifest then)."""
+    Arrival Batch DocType may not exist yet (returns an empty manifest then).
+
+    ``building`` is OPTIONAL, and omitting it used to mean "the whole estate" — so a
+    building-scoped supervisor received every building's manifest for the date, each
+    row carrying the expected worker's name, passport number and nationality. Neither
+    registered scope primitive can reach this read: ``frappe.get_all`` hardcodes
+    ``ignore_permissions=True`` (frappe/__init__.py:2050), so the
+    ``permission_query_conditions`` fragment never runs, and the ``has_permission``
+    hook is dispatched only from ``get_doc_permissions`` (frappe/permissions.py:206),
+    which ``frappe.has_permission`` reaches only when it is given a doc — the
+    type-level gate below passes none. The scope is therefore spliced into the filter
+    explicitly, exactly as ``get_arrival_summary`` above does it."""
+    date = date or frappe.utils.today()
     if not frappe.db.exists("DocType", "Arrival Batch"):
-        return {
-            "date": date or frappe.utils.today(),
-            "workers": [],
-            "total": 0,
-            "arrived": 0,
-            "housed": 0,
-            "pending": 0,
-        }
+        return _empty_manifest(date, building)
     frappe.has_permission("Arrival Batch", "read", throw=True)
     if building:
         frappe.has_permission("Building", "read", doc=building, throw=True)
-    date = date or frappe.utils.today()
 
+    restrict, allowed = permissions.report_building_scope(
+        frappe.session.user, doctype="Arrival Batch"
+    )
     filters = {"expected_date": date}
     if building:
         filters["building"] = building
+    elif restrict:
+        if not allowed:
+            return _empty_manifest(date, building)
+        filters["building"] = ["in", allowed]
     batches = frappe.get_all(
         "Arrival Batch", filters=filters, fields=["name", "building", "labour_supplier", "project"]
     )

@@ -236,13 +236,31 @@ def _enforce_pass_read_rate_limit() -> None:
         )
 
 
-def _resolve_trip(dispatch_trip: str) -> dict:
+def _resolve_trip(dispatch_trip: str, ptype: str = "read") -> dict:
     """Authorize the actor before loading the trip, then enforce trip scope.
 
     Salis staff may act on any trip only without a driver credential; a
     presented credential is confined to its own driver's trips. A non-staff
     session must be linked to a driver before the trip lookup, so missing trip
     names cannot become an existence oracle for unauthenticated callers.
+
+    ``STAFF_ROLES`` is a role-set intersection, and two of its members — Fleet
+    Project Manager and Fleet Supervisor — are absent from
+    ``permissions.UNSCOPED_ROLES``, i.e. they are precisely the scoped roles the
+    Dispatch Trip row-scope exists for. Holding one of them says the actor may act
+    on THEIR project's trips, never on any trip named. The row read below cannot
+    make that distinction: ``frappe.db.get_value`` runs no permission layer, so
+    neither the ``permission_query_conditions`` fragment nor the ``has_permission``
+    hook registered for Dispatch Trip (hooks.py) is consulted. The staff branch
+    therefore asks the document gate explicitly, which dispatches
+    ``permissions.project_scoped_has_permission`` ->
+    ``_dispatch_trip_has_permission`` — the assigned driver and the named route
+    supervisor pass, an out-of-project trip is refused.
+
+    ``ptype`` is the right the CALLER is about to exercise: the manifest reads ask
+    for "read", the endpoints that mark workers Absent, drop a boarding event or
+    insert one ask for "write". The credential and linked-driver paths are already
+    confined by the ``driver`` key in the lookup itself and are not re-checked.
     """
     credential_driver = _presented_driver()
     staff_actor = False
@@ -278,7 +296,7 @@ def _resolve_trip(dispatch_trip: str) -> dict:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
 
     if staff_actor:
-        return trip
+        frappe.has_permission("Dispatch Trip", ptype, doc=dispatch_trip, throw=True)
     return trip
 
 
@@ -428,7 +446,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
 
     dispatch_trip = payload.get("dt")
     worker = payload.get("w")
-    trip = _resolve_trip(dispatch_trip)
+    trip = _resolve_trip(dispatch_trip, "write")
 
     issued = get_datetime(payload.get("iat"))
     age_hours = time_diff_in_seconds(now_datetime(), issued) / 3600.0 if issued else None

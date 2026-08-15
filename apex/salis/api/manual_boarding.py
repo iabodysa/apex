@@ -40,7 +40,7 @@ def board_worker(dispatch_trip, employee):
     from apex.salis.api.driver_portal import _require_enabled
 
     _require_enabled()
-    trip = boarding._resolve_trip(dispatch_trip)
+    trip = boarding._resolve_trip(dispatch_trip, "write")
     employee = (employee or "").strip()
     if not employee:
         frappe.throw(_("Select a worker to board."))

@@ -143,7 +143,7 @@ class TestManualBoardingAuthorization(TestCase):
         run = _call(resolve_raises=_Refused("not your trip"))
 
         self.assertIsInstance(run.error, _Refused)
-        run.gates["resolve_trip"].assert_called_once_with(TRIP)
+        run.gates["resolve_trip"].assert_called_once_with(TRIP, "write")
         self.assertFalse(run.wrote_a_boarding)
         self.assertFalse(run.gates["manifest"].called, "the manifest was read anyway")
 

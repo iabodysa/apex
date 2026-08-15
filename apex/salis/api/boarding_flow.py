@@ -374,15 +374,20 @@ def _locked_trip(dispatch_trip):
     return frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
 
 
-def _resolve_trip_for_driver(dispatch_trip):
+def _resolve_trip_for_driver(dispatch_trip, ptype="read"):
     """Resolve credential-first caller scope before reading the trip.
 
     A presented driver credential is confined to its own trip. Staff and linked
     driver session fallbacks are considered only without a driver credential.
+
+    ``ptype`` names the right the endpoint below is about to exercise, and is what
+    confines a project-scoped staff caller to their own project's trips — see
+    ``boarding._resolve_trip``. An endpoint that mutates the trip MUST pass
+    "write"; the default suits the manifest reads only.
     """
     from apex.salis.api import boarding
 
-    return boarding._resolve_trip(dispatch_trip)
+    return boarding._resolve_trip(dispatch_trip, ptype)
 
 
 def _state_payload(row, window_seconds):
@@ -447,7 +452,7 @@ def notify_remaining_passengers(dispatch_trip):
     early tap cannot burn a worker's quota). Returns the per-worker state.
 
     Caller scope is resolved credential-first before any trip access."""
-    _resolve_trip_for_driver(dispatch_trip)
+    _resolve_trip_for_driver(dispatch_trip, "write")
 
     max_count = get_boarding_setting("boarding_notify_max_count")
     window = get_boarding_setting("boarding_notify_window_seconds")
@@ -670,7 +675,7 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     re-confirm if they do board), bumping reject_count for the audit. Publishes
     ``boarding_unmarked`` so the worker's poll surfaces it. Caller scope is
     resolved credential-first before any trip access."""
-    _resolve_trip_for_driver(dispatch_trip)
+    _resolve_trip_for_driver(dispatch_trip, "write")
 
     trip = _locked_trip(dispatch_trip)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
@@ -783,7 +788,7 @@ def depart_and_finalize(dispatch_trip):
     counts.
 
     Caller scope is resolved credential-first before any trip access."""
-    _resolve_trip_for_driver(dispatch_trip)
+    _resolve_trip_for_driver(dispatch_trip, "write")
 
     max_count = get_boarding_setting("boarding_notify_max_count")
     grace_ok = _grace_elapsed(dispatch_trip)
