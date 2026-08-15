@@ -29,6 +29,8 @@ open ToDo for the rider so re-runs never spam duplicates.
 these tests build exactly the records they need with ``ignore_permissions``.
 """
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
@@ -198,6 +200,16 @@ class TestRiderLeaveGuard(FrappeTestCase):
 
 
     def test_fuel_request_rejected_for_onleave_rider(self):
+        """The rejection, and the clearance task that must OUTLIVE it.
+
+        This case used to assert the ToDo existed after the refused insert, and it passed
+        — but only because a test has no request around it. In production the controller
+        throws, and ``app.py`` rolls the whole request transaction back with it, so a ToDo
+        inserted inline was created and discarded in the same breath: the follow-up task
+        the docstring promises never reached a supervisor. The task is therefore enqueued,
+        which puts it outside the transaction, and this case now grades the hand-off
+        rather than a row that only a test can see.
+        """
         emp = self._employee_on_leave("T119 Fuel OnLeave Emp")
         driver = _driver(
             "T119 Fuel OnLeave", status="Active", employee=emp, supervisor=self.supervisor
@@ -214,21 +226,35 @@ class TestRiderLeaveGuard(FrappeTestCase):
                 "status": "Pending",
             }
         )
-        with self.assertRaises(frappe.ValidationError):
-            fr.insert(ignore_permissions=True)
+        with patch.object(frappe, "enqueue") as enqueue:
+            with self.assertRaises(frappe.ValidationError):
+                fr.insert(ignore_permissions=True)
 
-        todos = _open_clearance_todos(driver)
-        self.assertTrue(
-            todos, "An on-leave rider's fuel request must open a clearance ToDo."
+        enqueue.assert_called_once()
+        self.assertEqual(
+            enqueue.call_args.args[0], "apex.salis.utils.raise_rider_clearance_task"
         )
+        self.assertEqual(enqueue.call_args.kwargs["driver"], driver)
+        self.assertFalse(
+            _open_clearance_todos(driver),
+            "the task was written inside the transaction the throw discards",
+        )
+        self.addCleanup(lambda: self._purge_todos(driver))
+
+    def test_the_enqueued_task_still_reaches_the_supervisor(self):
+        """The other half: the job the endpoint hands off must do what it promises."""
+        driver = _driver(
+            "T119 Fuel Handoff", status="Stopped", supervisor=self.supervisor
+        )
+
+        raise_rider_clearance_task(driver, vehicle=None)
+
         allocated = frappe.get_all(
             "ToDo",
             filters={"reference_type": "Salis Driver", "reference_name": driver, "status": "Open"},
             pluck="allocated_to",
         )
-        self.assertIn(
-            self.supervisor, allocated, "Clearance task must go to the supervisor."
-        )
+        self.assertIn(self.supervisor, allocated)
         self.addCleanup(lambda: self._purge_todos(driver))
 
     def test_vehicle_assignment_rejected_for_inactive_rider(self):

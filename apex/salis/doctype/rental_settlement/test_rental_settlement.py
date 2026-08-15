@@ -25,7 +25,6 @@ class TestRentalSettlement(FrappeTestCase):
                         "vehicle": "VEH-1",
                         "days": 2,
                         "daily_rate": 100,
-                        "amount": 1,
                     }
                 ],
             }

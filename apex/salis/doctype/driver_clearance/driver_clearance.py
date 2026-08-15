@@ -27,7 +27,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 
-from apex.salis.utils import add_timeline_note, lock_driver, lock_vehicle
+from apex.salis.utils import add_timeline_note, lock_driver, lock_vehicle, set_current_driver
 
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 
@@ -168,7 +168,7 @@ class DriverClearance(Document):
                 frappe.db.get_value("Salis Vehicle", current_vehicle, "current_driver")
                 == self.driver
             ):
-                frappe.db.set_value("Salis Vehicle", current_vehicle, "current_driver", None)
+                set_current_driver(current_vehicle, None)
             updates["current_vehicle"] = None
         frappe.db.set_value("Salis Driver", self.driver, updates)
 

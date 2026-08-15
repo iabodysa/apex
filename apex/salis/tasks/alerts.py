@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import frappe
-from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.salis.tasks.common import (
     _reconcile_queue,
@@ -18,13 +17,21 @@ def reconcile_operations_alerts() -> None:
     """Drain the Fleet Supervisor assignment queues whose underlying condition no
     longer holds, so queued work does not accumulate forever.
 
-    This is the single reconcile point for the three DocTypes that more than one
-    job (or none of its own) can queue — Salis Vehicle (idle watches + compliance
-    watch), Salis Driver (attendance watch) and Fuel Quota (the monthly fuel
-    reconciliation) — because reconcile_role_queue's contract needs the UNION of
+    This is the single reconcile point for the two DocTypes more than one job can
+    queue — Salis Vehicle (idle watches + compliance watch) and Salis Driver
+    (attendance watch) — because reconcile_role_queue's contract needs the UNION of
     every condition per DocType, and a per-writer reconcile would close the other
-    writers' work. Vehicle Suspension and Rental Office reconcile inside their
-    sole writer jobs.
+    writers' work. Vehicle Suspension, Rental Office and Fuel Quota each have a single
+    writer and reconcile inside it.
+
+    Fuel Quota used to drain here, and that is what made the fuel overage alert
+    unreachable. This job is DAILY and read "the current month"; its only queuer,
+    ``fuel_engine.monthly_fuel_reconciliation``, is MONTHLY and fires at 00:00 on the
+    1st. The two agreed on the calendar and both therefore looked at a month with no
+    ledger rows in it. Anchoring the queuer on the closed month without moving the
+    drain would have been worse — this job would have closed every breach it found the
+    following morning — so the drain moved to the queuer, where the period is decided
+    once.
 
     A document stays queued while ANY of its writers' conditions holds:
 
@@ -32,8 +39,6 @@ def reconcile_operations_alerts() -> None:
       (Dispatched/Completed) within ``idle_vehicle_days``, OR Active with a
       compliance row expired or expiring within ``alert_lead_days``.
     * **Salis Driver** — Active with no submitted Driver Attendance today.
-    * **Fuel Quota** — the current-month Active quota is still breached
-      (ledgered consumption above the quota plus margin).
 
     Idempotent and never aborts: each DocType's drain runs in its own
     try/except with rollback-before-log.
@@ -74,33 +79,6 @@ def reconcile_operations_alerts() -> None:
         ).run(as_dict=True)
     }
 
-    from apex.salis.fuel_engine import _period_month, get_overage_margin
-
-    breached_quotas: set[str] = set()
-    overage_margin = get_overage_margin()
-    period_month = _period_month(today_str)
-    Q = frappe.qb.DocType("Fuel Quota")
-    L = frappe.qb.DocType("Fuel Consumption Ledger")
-    for r in (
-        frappe.qb.from_(Q)
-        .left_join(L)
-        .on((L.vehicle == Q.vehicle) & (L.period_month == Q.period_month))
-        .select(
-            Q.name.as_("quota_name"),
-            Q.monthly_litres.as_("quota"),
-            Coalesce(Sum(L.litres), 0).as_("consumed"),
-        )
-        .where(Q.docstatus == 1)
-        .where(Q.status == "Active")
-        .where(Q.period_month == period_month)
-        .where(Q.vehicle.isnotnull())
-        .groupby(Q.name, Q.monthly_litres)
-    ).run(as_dict=True):
-        quota = float(r["quota"] or 0)
-        consumed = float(r["consumed"] or 0)
-        if quota > 0 and consumed > quota * (1 + overage_margin):
-            breached_quotas.add(r["quota_name"])
-
     active_vehicles = set(
         frappe.get_all("Salis Vehicle", filters={"status": "Active"}, pluck="name")
     )
@@ -126,7 +104,6 @@ def reconcile_operations_alerts() -> None:
     for doctype, keep in (
         ("Salis Vehicle", vehicle_keep),
         ("Salis Driver", driver_keep),
-        ("Fuel Quota", breached_quotas),
     ):
         frappe.db.savepoint(_ROW_SAVEPOINT)
         try:

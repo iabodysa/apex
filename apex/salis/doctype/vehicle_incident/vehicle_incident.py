@@ -25,7 +25,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
 from apex.apex_core.utils.employee_recovery import raise_recovery_advance
-from apex.salis.utils import add_timeline_note, lock_vehicle
+from apex.salis.utils import add_timeline_note, lock_vehicle, set_current_driver
 
 _RECOVERY_INTAKE_RESET = {
     "recover_from_driver": 0,
@@ -152,11 +152,7 @@ class VehicleIncident(Document):
         self.db_set("previous_status", prev_status)
         self.db_set("previous_driver", prev_driver)
 
-        frappe.db.set_value(
-            "Salis Vehicle",
-            self.vehicle,
-            {"status": "Stopped", "current_driver": None},
-        )
+        set_current_driver(self.vehicle, None, status="Stopped")
         if prev_driver:
             frappe.db.set_value("Salis Driver", prev_driver, "current_vehicle", None)
 
@@ -268,9 +264,7 @@ class VehicleIncident(Document):
         if self.previous_driver and not frappe.db.get_value(
             "Salis Vehicle", self.vehicle, "current_driver"
         ):
-            frappe.db.set_value(
-                "Salis Vehicle", self.vehicle, "current_driver", self.previous_driver
-            )
+            set_current_driver(self.vehicle, self.previous_driver)
             frappe.db.set_value(
                 "Salis Driver", self.previous_driver, "current_vehicle", self.vehicle
             )

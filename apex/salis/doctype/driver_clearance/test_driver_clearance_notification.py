@@ -4,16 +4,14 @@
 Proves that the Blocked Driver Clearance notification resolves to the affected driver's
 own User and drops a Notification Log row for that driver.
 
-The companion case for "Vehicle Compliance Expiring Soon" is NOT asserted here, and the
-absence is the finding rather than an omission. That notification addresses
-``Salis Vehicle.current_driver_user``, a fetch_from mirror of ``current_driver.driver_user``.
-``current_driver`` may only be written by the sanctioned path — Vehicle Assignment's
-on_submit, which uses ``frappe.db.set_value`` and therefore runs no controller and no
-fetch — so on a vehicle paired the correct way the mirror stays NULL until somebody
-happens to re-save the vehicle. Measured on ci.localhost: NULL after the assignment,
-filled after a plain save. Writing a test that saves the vehicle first would manufacture
-the state the alert needs instead of proving the alert reaches anyone, so the gap is
-recorded here and left for the owner to decide.
+The companion case for "Vehicle Compliance Expiring Soon" lives beside the writer that
+fills its recipient, in
+``salis/doctype/vehicle_assignment/test_vehicle_assignment_driver_mirror.py``. That
+notification addresses ``Salis Vehicle.current_driver_user``, a fetch_from mirror of
+``current_driver.driver_user``, and the sanctioned writers of the pairing all use
+``frappe.db.set_value``, which runs no controller and no fetch — so the mirror is
+stamped explicitly by ``salis.utils.set_current_driver`` rather than left to the
+framework.
 
 The driver's User is reached through a denormalised single-hop fetch chain
 (Salis Driver.driver_user <- employee.user_id; the source docs mirror it),

@@ -24,37 +24,7 @@ from apex.salis.api import boarding_window
 
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
-_EARTH_RADIUS_KM = 6371.0088
-_DEFAULT_FLEET_SPEED_KMPH = 40.0
-
 _FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
-
-
-def _haversine_km(lat1, lng1, lat2, lng2):
-    """Great-circle distance in km between two WGS-84 points. Pure math, no I/O."""
-    import math
-
-    rlat1, rlat2 = math.radians(lat1), math.radians(lat2)
-    dlat = math.radians(lat2 - lat1)
-    dlng = math.radians(lng2 - lng1)
-    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlng / 2) ** 2
-    return _EARTH_RADIUS_KM * 2 * math.asin(math.sqrt(a))
-
-
-def _assumed_fleet_speed_kmph():
-    """Assumed average fleet speed (km/h) for the ETA, from Salis Settings via the
-    zero-trap reader (a blank/0 Single value falls back to the built-in default)."""
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
-
-    return get_salis_float("assumed_fleet_speed_kmph", _DEFAULT_FLEET_SPEED_KMPH)
-
-
-def _pickup_building_of(trip):
-    """The Accommodation Building id the ETA targets for a worker's ride: the
-    worker's OWN pickup stop's building. None when the ride has no housing pickup
-    resolved (the ETA is then simply omitted)."""
-    my_pickup = trip.get("my_pickup") or {}
-    return my_pickup.get("accommodation_building")
 
 
 def _live_dispatch_trip(transport_request):
@@ -68,39 +38,6 @@ def _live_dispatch_trip(transport_request):
         {"transport_request": transport_request, "status": "Dispatched", "docstatus": ["<", 2]},
         "name",
     )
-
-
-def compute_ride_eta_minutes(dispatch_trip, pickup_building):
-    """Minutes until the driver reaches ``pickup_building``, from the trip's last
-    stored driver GPS position — or None when the ETA cannot be computed.
-
-    Self-contained: haversine(driver → pickup) / assumed fleet speed. Returns None
-    (never raises) when the trip has no live position, the pickup building has no
-    coordinates, or the speed is non-positive — the caller omits the ETA cleanly.
-    Rounds to whole minutes; a driver already at the pickup yields 0."""
-    if not dispatch_trip or not pickup_building:
-        return None
-    pos = frappe.db.get_value(
-        "Dispatch Trip", dispatch_trip, ["driver_lat", "driver_lng"], as_dict=True
-    )
-    if not pos or pos.get("driver_lat") is None or pos.get("driver_lng") is None:
-        return None
-    dest = frappe.db.get_value(
-        "Building", pickup_building, ["pickup_lat", "pickup_lng"], as_dict=True
-    )
-    if not dest or dest.get("pickup_lat") is None or dest.get("pickup_lng") is None:
-        return None
-    if not (pos.get("driver_lat") or pos.get("driver_lng")):
-        return None
-    if not (dest.get("pickup_lat") or dest.get("pickup_lng")):
-        return None
-    speed = _assumed_fleet_speed_kmph()
-    if speed <= 0:
-        return None
-    distance_km = _haversine_km(
-        pos["driver_lat"], pos["driver_lng"], dest["pickup_lat"], dest["pickup_lng"]
-    )
-    return int(round((distance_km / speed) * 60))
 
 
 def _fmt_time(value):
@@ -422,8 +359,15 @@ def _route_destination_stop(stops, my_pickup):
 
 
 def _worker_transport_requests(employee):
-    """Transport Requests whose worker manifest includes ``employee`` and that are
-    still live (not Rejected/Cancelled/Fulfilled). Scoped via the child table."""
+    """Transport Requests whose worker manifest includes ``employee``, scoped via the
+    child table.
+
+    Rejected and Cancelled are excluded; Fulfilled is NOT, and the docstring used to
+    claim otherwise. It is the caller that partitions these rows into the worker's
+    upcoming and past rides, so dropping Fulfilled would empty the past half of his
+    screen. The list is unbounded and has no date floor, which is a real cost on a
+    long-tenured worker's 10-second poll — recorded here rather than silently narrowed,
+    because paging it changes what the screen shows."""
     parents = frappe.get_all(
         "Transport Request Worker",
         filters={"employee": employee, "parenttype": "Transport Request"},

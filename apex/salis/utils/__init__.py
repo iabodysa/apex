@@ -67,6 +67,54 @@ def bound_vehicle(driver):
     )
 
 
+def vehicle_is_held_out_of_service(vehicle):
+    """The name of the record holding ``vehicle`` off the road, or None.
+
+    ``SalisVehicle`` already refuses an operator's own status edit while a stop or an
+    open incident owns the vehicle; this answers the same question for the machine
+    writers, which reach the row through ``frappe.db.set_value`` and never run that
+    controller. The two must agree, so the conditions here are the ones
+    ``_refuse_a_status_edit_while_a_stop_owns_the_vehicle`` reads."""
+    if not vehicle:
+        return None
+    return frappe.db.exists(
+        "Vehicle Suspension",
+        {"vehicle": vehicle, "docstatus": 1, "return_date": ["is", "not set"]},
+    ) or frappe.db.exists(
+        "Vehicle Incident",
+        {"vehicle": vehicle, "docstatus": 1, "status": ["in", ("Open", "Under Review")]},
+    )
+
+
+def set_current_driver(vehicle, driver, update_modified=True, **extra_values):
+    """Stamp the vehicle's driver pairing together with the login-user mirror beside it.
+
+	``Salis Vehicle.current_driver_user`` is a ``fetch_from`` mirror of
+	``current_driver.driver_user``, and the framework resolves ``fetch_from`` only inside
+	``BaseDocument._validate_links`` (frappe/model/base_document.py:849-851), which runs
+	on the ORM save path. Every sanctioned writer of this pairing is a
+	``frappe.db.set_value`` — deliberately, because ``SalisVehicle`` refuses a
+	hand-written ``current_driver`` — and ``set_value`` runs no controller and no fetch
+	(frappe/database/database.py:942-945). Left to the framework the mirror therefore
+	moves only when something unrelated happens to save the vehicle, so it is written
+	here instead. The driver-facing compliance Notification addresses that mirror, and a
+	STALE one is worse than an empty one: it mails the vehicle's previous driver.
+
+	``vehicle`` is required; ``driver`` may be None to clear the pairing. Extra vehicle
+	fields for the same write are passed through as keyword arguments.
+	"""
+    if not vehicle:
+        return
+    values = {
+        "current_driver": driver,
+        "current_driver_user": (
+            frappe.db.get_value("Salis Driver", driver, "driver_user") if driver else None
+        ),
+    }
+    values.update(extra_values)
+    frappe.db.set_value("Salis Vehicle", vehicle, values, update_modified=update_modified)
+
+
 def lock_vehicle(name):
     """Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
     if name:
@@ -211,19 +259,27 @@ def close_open_stop(stop_name, return_date=None):
     frappe.get_doc("Vehicle Suspension", stop_name).cancel()
 
 
-_TR_STATE_DOCSTATUS = {
-    "New": 0,
-    "Validated": 0,
-    "Approved": 1,
-    "Scheduled": 1,
-    "Fulfilled": 1,
-    "Rejected": 0,
-    "Cancelled": 2,
-}
-
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
 _CLEARANCE_SAVEPOINT = "apex_salis_rider_clearance"
+
+
+def _workflow_source_states(action):
+    """The states the native Transport Request Workflow lists as sources for ``action``.
+
+    Read off the Workflow record rather than copied into this module. The copy that
+    used to live here was a verbatim duplicate of the workflow's own state -> doc_status
+    map, and a duplicate of a governance table is the one that drifts."""
+    from frappe.model.workflow import get_workflow_name
+
+    workflow = get_workflow_name("Transport Request")
+    if not workflow:
+        return set()
+    return {
+        row.state
+        for row in frappe.get_doc("Workflow", workflow).transitions
+        if row.action == action
+    }
 
 
 def drive_transport_request(tr_name, action, target_state, extra_fields=None):
@@ -238,14 +294,24 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
 	   acting user on the Transport Request, apply it via
 	   ``frappe.model.workflow.apply_workflow`` (the framework-owned path —
 	   bumps docstatus, writes the Workflow comment, runs conditions).
-	2. Otherwise fall back to a guarded direct write of ``target_state`` (and
-	   ``extra_fields``) that is consistent with the workflow's state ->
-	   docstatus map. This covers the case where the Movement user who submits
-	   the Route Plan / Dispatch Trip does not personally hold the transition
-	   role, so the operational chain never deadlocks on a permission gap.
+	2. Otherwise fall back to a direct write of ``target_state`` (and
+	   ``extra_fields``) — but ONLY from a state the Workflow itself lists as a
+	   source for ``action``. This covers the case where the Movement user who
+	   submits the Route Plan / Dispatch Trip does not personally hold the
+	   transition role, so the operational chain never deadlocks on a permission
+	   gap. It does not cover skipping the transition's own place in the chain.
+
+	The fallback writes ``status`` and nothing else. It used to carry a private
+	copy of the Workflow's state -> doc_status map and write ``docstatus`` with it,
+	which turned a permission gap into a submit: a Fleet Manager who cannot
+	authorize their own request could submit a Route Plan naming it and land it at
+	Scheduled / docstatus 1 with no Authorize transition, no Workflow Action row and
+	no ``before_submit``. Every transition this helper is used for moves between two
+	states of the SAME doc_status, so there is nothing legitimate for it to write; a
+	docstatus change belongs on the native path.
 
 	Terminal requests (Fulfilled / Cancelled) are left untouched. Returns the
-	state the request now holds (or None when skipped).
+	state the request now holds (or None when skipped or refused).
 	"""
     if not tr_name:
         return None
@@ -272,13 +338,16 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
             frappe.get_traceback(), "Salis: workflow drive fell back to direct write"
         )
 
+    if current not in _workflow_source_states(action):
+        frappe.logger("salis").warning(
+            f"drive_transport_request refused {tr_name}: {action} has no source state "
+            f"{current} in the Transport Request Workflow"
+        )
+        return None
+
     values = {"status": target_state}
     if extra_fields:
         values.update(extra_fields)
-
-    target_docstatus = _TR_STATE_DOCSTATUS.get(target_state)
-    if target_docstatus is not None:
-        values["docstatus"] = target_docstatus
 
     frappe.db.set_value("Transport Request", tr_name, values)
     add_timeline_note(
@@ -305,6 +374,11 @@ def revert_transport_request(
 	``clear_fields`` nulls a field; ``reset_fields`` sets one to an explicit value.
 	A Check field needs the second — NULL is not 0 to a filter, so a request whose
 	``is_assigned`` is nulled rather than zeroed still reads as assigned.
+
+	``docstatus`` is not written here either. Both reversal states are doc_status 1
+	(Scheduled <- Fulfilled), so there was never anything for it to change; the
+	private state -> doc_status map it used to read from is gone with the forward
+	helper's.
 	"""
     if not tr_name:
         return None
@@ -320,9 +394,6 @@ def revert_transport_request(
     for fieldname in (clear_fields or []):
         values[fieldname] = None
     values.update(reset_fields or {})
-    target_docstatus = _TR_STATE_DOCSTATUS.get(to_state)
-    if target_docstatus is not None:
-        values["docstatus"] = target_docstatus
 
     frappe.db.set_value("Transport Request", tr_name, values)
     add_timeline_note(

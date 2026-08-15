@@ -290,23 +290,33 @@ def accrue_fuel_consumption() -> None:
 def monthly_fuel_reconciliation() -> None:
     """Reconcile each active Fuel Quota's allocation against ledgered consumption.
 
-    For the current period (this month, YYYY-MM), every active Fuel Quota is
-    compared with the summed Fuel Consumption Ledger litres for the same
-    vehicle+period. If consumption exceeds ``monthly_litres`` by more than the
-    ``OVERAGE_MARGIN`` tolerance, the breached Fuel Quota — the document whose
-    allocation the supervisor must revisit — is ASSIGNED to the Fleet Supervisor
-    queue. Idempotent by the framework's assignment dedupe; the queue drains in
-    ``reconcile_operations_alerts`` once the breach clears.
+    For the period that has CLOSED, every active Fuel Quota is compared with the
+    summed Fuel Consumption Ledger litres for the same vehicle+period. If consumption
+    exceeds ``monthly_litres`` by more than the ``OVERAGE_MARGIN`` tolerance, the
+    breached Fuel Quota — the document whose allocation the supervisor must revisit —
+    is ASSIGNED to the Fleet Supervisor queue.
+
+    The period is the closed month, not the current one, because this job's only firing
+    instant is 00:00 on the 1st: at that moment the month that has just begun holds no
+    ledger rows at all (``accrue_fuel_consumption`` is daily), so a current-month
+    anchor compared every allocation against ~0 litres and no breach could ever be
+    found. This mirrors ``rental_engine.monthly_rental_reconciliation``.
+
+    Idempotent by the framework's assignment dedupe. This job is the only queuer of
+    Fuel Quota, so its own findings ARE the reconcile union and it drains its own queue
+    in the same pass — which is also why the calendar month cannot drift between the
+    two halves the way it did while a daily job owned the drain.
 
     Per-row try/except isolates failures; no commit inside the loop.
     """
-    from frappe.utils import flt, today
+    from frappe.utils import add_months, flt, getdate, today
 
-    from apex.salis.tasks.common import _queue_document
+    from apex.salis.tasks.common import _queue_document, _reconcile_queue
 
-    period_month = _period_month(today())
+    period_month = _period_month(add_months(getdate(today()), -1))
     logger = frappe.logger()
 
+    breached: list[str] = []
     start = 0
     while True:
         quotas = frappe.get_all(
@@ -360,6 +370,7 @@ def monthly_fuel_reconciliation() -> None:
                 _queue_document(
                     "Fuel Quota", quota.name, "Critical", message, vehicle=quota.vehicle,
                 )
+                breached.append(quota.name)
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(
@@ -368,5 +379,7 @@ def monthly_fuel_reconciliation() -> None:
                 )
 
         start += BATCH_SIZE
+
+    _reconcile_queue("Fuel Quota", breached)
 
     logger.info("monthly_fuel_reconciliation: quota reconciliation complete.")

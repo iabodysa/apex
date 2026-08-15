@@ -37,6 +37,7 @@ from apex.salis.utils import (
     lock_vehicle,
     normalize_plate,
     reassign_vehicle_driver,
+    set_current_driver,
 )
 
 
@@ -397,7 +398,7 @@ def stop_vehicle(plate, reason=None):
             fields=["name"],
         ):
             frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": getdate(today())})
-        frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", None)
+        set_current_driver(vehicle, None)
         frappe.db.set_value("Salis Driver", current_driver, "current_vehicle", None)
     _publish_fleet_update(plate, "stop")
     return {"ok": True, "stop": doc.name}
@@ -526,7 +527,7 @@ def recover(plate):
     if incident.previous_driver and not frappe.db.get_value(
         "Salis Vehicle", vehicle, "current_driver"
     ):
-        frappe.db.set_value("Salis Vehicle", vehicle, "current_driver", incident.previous_driver)
+        set_current_driver(vehicle, incident.previous_driver)
         frappe.db.set_value("Salis Driver", incident.previous_driver, "current_vehicle", vehicle)
 
     frappe.db.set_value(

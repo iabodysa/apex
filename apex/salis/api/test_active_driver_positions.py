@@ -36,9 +36,12 @@ from apex.salis.api.route_supervisor import (
 # renders undefined.
 ROW_FIELDS = {
     "dispatch_trip", "route_assignment", "route_name", "project", "project_label",
-    "status", "driver", "driver_name", "vehicle", "plate", "has_position", "lat",
-    "lng", "updated_at", "age_seconds", "stale", "stops", "path",
+    "status", "driver", "driver_name", "vehicle", "plate", "stops", "path",
 }
+# The six keys the row carried while it claimed to know where the driver was. Named so
+# the absence is graded rather than merely unmentioned: ROW_FIELDS is an exact set, but
+# an exact set that grew a typo would stop noticing these coming back.
+RETIRED_POSITION_FIELDS = {"has_position", "lat", "lng", "updated_at", "age_seconds", "stale"}
 ENVELOPE_FIELDS = {"positions", "start", "page_length", "returned", "has_more"}
 
 
@@ -112,42 +115,42 @@ class TestActiveDriverPositions(FrappeTestCase):
         }
         self.assertIn(name, listed)
 
-    def test_a_driver_with_no_fix_is_listed_and_pins_the_null_island_defect(self):
-        """A driver with no fix must stay on the list — and today the map draws him at
-        latitude 0, longitude 0.
+    def test_a_driver_with_no_fix_is_listed_without_a_position(self):
+        """A trip stays on the list; it just does not claim to know where its driver is.
 
-        PINNED, not endorsed. Two live application defects meet in this row:
-
-        1. ``has_position`` is derived as ``trip.driver_lat is not None and
-           trip.driver_lng is not None`` (route_supervisor.py:174-176) from two **Float**
-           fields. Frappe stores Float as NOT NULL DEFAULT 0, so driver_lat is 0.0 and
-           never None — the predicate is TRUE for every trip that has never reported a
-           position, and the map plots those drivers at Null Island. The sibling reader
-           in masar_routes.py:93 gets this right with a truthiness check, so the app is
-           inconsistent with itself rather than uniformly wrong.
-        2. Nothing in the app writes driver_lat/driver_lng at all any more. The only
-           writer was driver_portal.push_driver_position, removed with the rest of the
-           retired portal surface, so 0.0 is now the ONLY value these columns ever hold.
-
-        The assertions below state what the code does today. When either defect is
-        fixed this case goes red, which is the point: it is the thing that tells you the
-        other branch finally became reachable.
+        Nothing in the app writes ``driver_lat`` / ``driver_lng`` any more — the only
+        writer, ``driver_portal.push_driver_position``, went with the retired portal and
+        ``apex/www/test_portal_shell_contract.py`` asserts it stays gone. They are Float
+        columns, which Frappe emits NOT NULL DEFAULT 0, so every trip reads 0.0 back and
+        the old ``is not None`` derivation answered True for all of them: the map put
+        every driver at latitude 0, longitude 0. Reporting nothing is the honest answer,
+        and the client already renders its own "position unavailable" state for a row
+        that carries no coordinates.
         """
         name = self._trip()
         row = next(
             r for r in get_active_driver_positions()["positions"]
             if r["dispatch_trip"] == name
         )
-        self.assertEqual(row["lat"], 0.0, "Float columns are NOT NULL; a missing fix reads 0.0")
-        self.assertEqual(row["lng"], 0.0)
-        self.assertTrue(
-            row["has_position"],
-            "DEFECT PINNED: an `is not None` test on a Float can never be False",
+        self.assertEqual(
+            set(row) & RETIRED_POSITION_FIELDS,
+            set(),
+            "the row still reports a position no writer ever set",
         )
-        self.assertIsNone(
-            row["updated_at"], "the Datetime beside them IS nullable and stays empty"
+
+    def test_the_columns_behind_the_retired_position_can_never_answer_no(self):
+        """The positive control for the case above, measured rather than asserted.
+
+        If these columns could be NULL, dropping the keys would be over-reaction rather
+        than a fix. They cannot: the row a trip is stored as reads 0.0 for both, so any
+        ``is not None`` test on them is true forever and no fix short of removal works.
+        """
+        name = self._trip()
+        lat, lng, updated_at = frappe.db.get_value(
+            "Dispatch Trip", name, ["driver_lat", "driver_lng", "driver_position_updated_at"]
         )
-        self.assertIsNone(row["stale"], "no timestamp means no staleness verdict")
+        self.assertEqual((lat, lng), (0.0, 0.0), "a Float column that could be NULL changes this")
+        self.assertIsNone(updated_at, "the Datetime beside them IS nullable and stays empty")
 
     def test_page_bounds_are_refused_rather_than_clamped(self):
         """A caller cannot ask for page zero, a negative offset, or a page wider than

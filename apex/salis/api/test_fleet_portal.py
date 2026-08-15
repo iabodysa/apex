@@ -685,27 +685,38 @@ class FuelTopupLifecycleTest(FrappeTestCase):
     @patch("apex.salis.doctype.fuel_request.fuel_request.frappe.db.set_value")
     @patch("apex.salis.doctype.fuel_request.fuel_request.frappe.db.get_value")
     def test_topup_is_applied_once_and_reversed_once(self, get_value, set_value, _lock, _timeline):
+        """The idempotence flag is the controller's to write, so the flag write is what
+        is graded. The test used to set ``topup_applied`` by hand between the two calls,
+        which left the one line that makes the guard work — ``db_set("topup_applied", 1)``
+        — covered by nothing: deleting it kept the test green. Here the mock writes the
+        attribute back the way ``db_set`` does, so a controller that stopped setting the
+        flag would top the quota up twice and fail on the second call."""
         get_value.return_value = SimpleNamespace(monthly_litres=100.0, status="Active")
         doc = SimpleNamespace(
             name="FR-1",
             fuel_quota="FQ-1",
             topup_litres=20.0,
             topup_applied=0,
-            db_set=MagicMock(),
+        )
+        doc.db_set = MagicMock(
+            side_effect=lambda fieldname, value: setattr(doc, fieldname, value)
         )
 
         FuelRequest._apply_topup(doc)
         self.assertEqual(set_value.call_args.args[2]["monthly_litres"], 120.0)
-        doc.topup_applied = 1
+        doc.db_set.assert_called_once_with("topup_applied", 1)
+        self.assertEqual(doc.topup_applied, 1, "the controller did not record the top-up")
+
         FuelRequest._apply_topup(doc)
-        self.assertEqual(set_value.call_count, 1)
+        self.assertEqual(set_value.call_count, 1, "the quota was topped up twice")
 
         get_value.return_value = SimpleNamespace(monthly_litres=120.0, status="Active")
         FuelRequest._reverse_topup(doc)
         self.assertEqual(set_value.call_args.args[2]["monthly_litres"], 100.0)
-        doc.topup_applied = 0
+        self.assertEqual(doc.topup_applied, 0, "the controller did not clear the flag")
+
         FuelRequest._reverse_topup(doc)
-        self.assertEqual(set_value.call_count, 2)
+        self.assertEqual(set_value.call_count, 2, "the reversal ran twice")
 
 
 class VehicleAssignmentLifecycleTest(FrappeTestCase):

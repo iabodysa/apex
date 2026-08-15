@@ -18,6 +18,8 @@ from apex.salis.utils import (
     lock_vehicle,
     lock_driver,
     rider_block_reason,
+    set_current_driver,
+    vehicle_is_held_out_of_service,
 )
 
 
@@ -91,7 +93,14 @@ class VehicleAssignment(Document):
             )
 
     def on_submit(self):
-        """Links the vehicle and driver as each other's current pairing and rechecks for a race overlap."""
+        """Links the vehicle and driver as each other's current pairing and rechecks for a race overlap.
+
+        The vehicle is promoted to Active as part of that pairing, but only when nothing
+        is holding it off the road. This write is a ``frappe.db.set_value``, so it runs no
+        controller and the guard that refuses an operator's own status edit during an open
+        stop or incident never sees it — a stolen or suspended vehicle was silently
+        returned to the dispatch board by assigning a driver to it.
+        """
         lock_vehicle(self.vehicle)
         lock_driver(self.driver)
 
@@ -106,11 +115,10 @@ class VehicleAssignment(Document):
                 _("Driver {0} was just assigned by {1}. Please review.").format(self.driver, clash)
             )
 
-        frappe.db.set_value(
-            "Salis Vehicle",
-            self.vehicle,
-            {"current_driver": self.driver, "status": "Active"},
-        )
+        if vehicle_is_held_out_of_service(self.vehicle):
+            set_current_driver(self.vehicle, self.driver)
+        else:
+            set_current_driver(self.vehicle, self.driver, status="Active")
         frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", self.vehicle)
 
         self.add_comment(
@@ -125,7 +133,7 @@ class VehicleAssignment(Document):
     def on_cancel(self):
         """Clears the vehicle-driver pairing this assignment set, if it is still in place."""
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.driver:
-            frappe.db.set_value("Salis Vehicle", self.vehicle, "current_driver", None)
+            set_current_driver(self.vehicle, None)
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:
             frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", None)
 

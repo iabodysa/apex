@@ -57,7 +57,6 @@ from apex.salis.api.masar_routes import (
     _is_upcoming_pickup,
     _ordered_stops,
     _ordered_trip_stops,
-    _pickup_building_of,
     _registered_trip_workers,
     _registered_workers,  # noqa: F401
     _route_destination_stop,
@@ -65,7 +64,6 @@ from apex.salis.api.masar_routes import (
     _worker_pickup_stop,
     _worker_today_dispatch_trip,
     _worker_transport_requests,
-    compute_ride_eta_minutes,
 )
 from apex.salis.api.masar_worker import (
     MASAR_TOKEN_COOKIE,  # noqa: F401
@@ -894,13 +892,6 @@ def get_worker_home(token=None):
     transport = get_worker_transport(token)
     upcoming = transport.get("upcoming") or []
     next_ride = upcoming[0] if upcoming else None
-    if next_ride:
-        next_ride = {
-            **next_ride,
-            "eta_minutes": compute_ride_eta_minutes(
-                next_ride.get("dispatch_trip"), _pickup_building_of(next_ride)
-            ),
-        }
 
     acc = get_worker_accommodation(token)
     bed = acc.get("bed")

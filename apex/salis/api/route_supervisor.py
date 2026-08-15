@@ -1,11 +1,21 @@
 # Copyright (c) 2026, afmcoltd
-"""Masar supervisor API for recurring assignments and actual trips."""
+"""Masar supervisor API for recurring assignments and actual trips.
+
+No live driver position is served. ``Dispatch Trip.driver_lat`` / ``driver_lng`` /
+``driver_position_updated_at`` still exist as columns, but their only writer —
+``driver_portal.push_driver_position`` — was removed with the legacy portal, and
+``apex/www/test_portal_shell_contract.py`` now asserts it stays removed. They are Float
+columns, which Frappe emits NOT NULL DEFAULT 0, so a trip that has never reported a fix
+reads back 0.0 and any ``is not None`` test on them answers True forever. Reporting a
+position nobody wrote is worse than reporting none: the supervisor map states the driver
+is at 0,0 off the coast of Africa. The keys are therefore gone from the response, and
+the client renders its own "position unavailable" state for a row that carries none."""
 
 from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, now_datetime, time_diff_in_seconds, today
+from frappe.utils import cint, today
 
 from apex.salis.utils.road_route import is_cached, road_path
 
@@ -17,7 +27,6 @@ PORTAL_ROLES = (
 )
 
 PLAN_PAGE_LENGTH = 50
-POSITION_STALE_SECONDS = 120
 ROUTER_CALLS_PER_REQUEST = 3
 
 
@@ -44,12 +53,6 @@ def _validate_page(start, page_length):
 
 def _validate_position_page(start, page_length):
     return _validate_page(start, page_length)
-
-
-def _permission_checked_trip(name):
-    trip = frappe.get_doc("Dispatch Trip", name)
-    trip.check_permission("read")
-    return trip.as_dict(no_nulls=True)
 
 
 def _label_map(doctype, label_field, names):
@@ -83,13 +86,6 @@ def _trip_stops(trip_names):
     return stops
 
 
-def _position_age(updated_at):
-    if not updated_at:
-        return None, None
-    age = int(time_diff_in_seconds(now_datetime(), updated_at))
-    return age, age > POSITION_STALE_SECONDS
-
-
 def _map_stop(row):
     return {
         "stop_key": row.get("stop_key"),
@@ -120,9 +116,6 @@ def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
             "status",
             "driver",
             "vehicle",
-            "driver_lat",
-            "driver_lng",
-            "driver_position_updated_at",
             "planned_start",
         ],
         order_by="planned_start asc, name asc",
@@ -156,7 +149,6 @@ def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
             )
             if not warm:
                 router_budget -= 1
-        age_seconds, stale = _position_age(trip.driver_position_updated_at)
         positions.append(
             {
                 "dispatch_trip": trip.name,
@@ -171,16 +163,6 @@ def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
                 "driver_name": driver_labels.get(trip.driver, trip.driver),
                 "vehicle": trip.vehicle,
                 "plate": vehicle_labels.get(trip.vehicle, trip.vehicle),
-                "has_position": (
-                    trip.driver_lat is not None and trip.driver_lng is not None
-                ),
-                "lat": trip.driver_lat,
-                "lng": trip.driver_lng,
-                "updated_at": cstr(trip.driver_position_updated_at)
-                if trip.driver_position_updated_at
-                else None,
-                "age_seconds": age_seconds,
-                "stale": stale,
             }
         )
 
@@ -192,19 +174,3 @@ def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
         "has_more": has_more,
     }
 
-
-@frappe.whitelist()
-def get_trip_driver_position(dispatch_trip):
-    _require_portal_role()
-    trip = _permission_checked_trip(dispatch_trip)
-    age_seconds, stale = _position_age(trip.get("driver_position_updated_at"))
-    return {
-        "dispatch_trip": trip["name"],
-        "lat": trip.get("driver_lat"),
-        "lng": trip.get("driver_lng"),
-        "updated_at": cstr(trip.get("driver_position_updated_at"))
-        if trip.get("driver_position_updated_at")
-        else None,
-        "age_seconds": age_seconds,
-        "stale": stale,
-    }

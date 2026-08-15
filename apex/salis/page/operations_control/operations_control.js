@@ -176,7 +176,10 @@ class FleetControl {
 		$sel.empty();
 		$('<option value=""></option>').text(__("All")).appendTo($sel);
 		(values || []).forEach((v) => {
-			const $o = $("<option></option>").attr("value", v).text(v);
+			// The value attribute stays raw — the server matches it against the stored
+			// Select value — while the text a supervisor reads is translated, the same
+			// way the cards beside this dropdown already render it.
+			const $o = $("<option></option>").attr("value", v).text(__(v));
 			if (v === current) $o.attr("selected", "selected");
 			$o.appendTo($sel);
 		});

@@ -105,16 +105,40 @@ def _seconds_of_day(value):
     return parsed.hour * 3600 + parsed.minute * 60 + parsed.second
 
 
+_OWN_STOP_FIELDS = ["name", "idx", "stop_name", "planned_time"]
+
+
 def _own_stop(dispatch_trip, transport_request, building):
     """The worker's OWN Route Stop on this trip: its stable row name (the key the
     driver's Trip Stop Progress rows are written against), its position on the route
     and its planned time.
 
-    None when the trip has no route plan, the worker has no pickup building, or the
-    plan carries no stop for that building — every one of which leaves the caller
-    unable to identify his stop, and therefore unable to refuse him."""
+    Read from the trip's OWN copy of the route first, and from the Route Plan only for a
+    legacy trip that has none — the same order ``masar_routes._ordered_trip_stops`` uses.
+    Every trip since ``copy_route_stops`` carries its own stops, and the driver's Trip
+    Stop Progress rows key on THOSE row names. Resolving the worker's stop off the Route
+    Plan instead produced a name from a different parent, so the join in ``resolve``
+    never matched: the per-stop half of the window never closed when the driver marked
+    the stop done, and the worker's arrival signal never reached his own window.
+
+    None when the worker has no pickup building, or no stop on either parent carries it —
+    each of which leaves the caller unable to identify his stop, and therefore unable to
+    refuse him."""
     if not (dispatch_trip and building):
         return None
+    stop = frappe.db.get_value(
+        "Route Stop",
+        {
+            "parent": dispatch_trip,
+            "parenttype": "Dispatch Trip",
+            "accommodation_building": building,
+        },
+        _OWN_STOP_FIELDS,
+        as_dict=True,
+    )
+    if stop:
+        return stop
+
     route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
     if not route_plan and transport_request:
         route_plan = frappe.db.get_value("Transport Request", transport_request, "route_plan")
@@ -127,7 +151,7 @@ def _own_stop(dispatch_trip, transport_request, building):
             "parenttype": "Route Plan",
             "accommodation_building": building,
         },
-        ["name", "idx", "stop_name", "planned_time"],
+        _OWN_STOP_FIELDS,
         as_dict=True,
     )
 
@@ -256,12 +280,7 @@ def resolve(dispatch_trip, transport_request=None, building=None, now=None):
         "arrived": bool(mine and mine.get("arrived")),
         "arrived_at": cstr(mine.get("arrived_at")) if mine and mine.get("arrived_at") else None,
         "done_at": cstr(mine.get("done_at")) if mine and mine.get("done_at") else None,
-        "eta_minutes": None,
     }
-    if state == EN_ROUTE:
-        from apex.salis.api.masar import compute_ride_eta_minutes
-
-        window["eta_minutes"] = compute_ride_eta_minutes(dispatch_trip, building)
     return window
 
 

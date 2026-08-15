@@ -11,7 +11,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver
+from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver, set_current_driver
 
 
 class DriverSuspension(Document):
@@ -42,11 +42,7 @@ class DriverSuspension(Document):
 
         if self.release_vehicle and self.related_vehicle:
             lock_vehicle(self.related_vehicle)
-            frappe.db.set_value(
-                "Salis Vehicle",
-                self.related_vehicle,
-                {"status": "Released", "current_driver": None},
-            )
+            set_current_driver(self.related_vehicle, None, status="Released")
             if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.related_vehicle:
                 frappe.db.set_value("Salis Driver", self.driver, "current_vehicle", None)
 
@@ -79,11 +75,7 @@ class DriverSuspension(Document):
                 frappe.db.get_value("Salis Vehicle", self.related_vehicle, "status") == "Released"
                 and not current_driver
             ):
-                frappe.db.set_value(
-                    "Salis Vehicle",
-                    self.related_vehicle,
-                    {"status": "Active", "current_driver": self.driver},
-                )
+                set_current_driver(self.related_vehicle, self.driver, status="Active")
                 frappe.db.set_value(
                     "Salis Driver", self.driver, "current_vehicle", self.related_vehicle
                 )

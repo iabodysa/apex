@@ -12,12 +12,11 @@ class TestMasarDriverExecution(TestCase):
     @patch.object(trips, "_attach_boarding_counts")
     @patch.object(trips, "_attach_trip_log_state")
     @patch.object(trips, "_label_trips")
-    @patch.object(trips, "_attach_trip_maps")
     @patch.object(trips, "_resolve_driver", return_value="DRV-1")
     @patch.object(trips, "_require_enabled")
     @patch.object(trips.frappe, "get_all", return_value=[])
     def test_today_lists_only_assigned_dispatched_trips(
-        self, get_all, _enabled, _driver, _maps, _labels, _logs, _boarding
+        self, get_all, _enabled, _driver, _labels, _logs, _boarding
     ):
         trips.my_trips_today()
 

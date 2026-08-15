@@ -63,6 +63,7 @@ class RentalSettlement(Document):
 
     def validate(self):
         """Recomputes accrued and variance totals against the linked rental accrual ledger."""
+        self._guard_duplicate()
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -77,9 +78,10 @@ class RentalSettlement(Document):
 
         accrued = 0.0
         derive_line_amounts = self.docstatus == 0
+        stored_rows = self._stored_vehicle_rows()
         for row in self.vehicles:
             computed = flt(row.days) * flt(row.daily_rate)
-            if derive_line_amounts:
+            if derive_line_amounts and self._amount_was_derived(row, stored_rows):
                 row.amount = computed
             if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
                 frappe.throw(
@@ -109,6 +111,57 @@ class RentalSettlement(Document):
 
         apply_vat(self, self.claimed_total)
         self._stamp_approval()
+
+    def _guard_duplicate(self):
+        """One live settlement per office per period.
+
+        The ledger cross-check below reconciles this settlement against the SAME
+        unsettled Rental Accrual Ledger rows a sibling settlement for the same office and
+        month reconciles against, so two of them each read as fully supported and the
+        office is paid twice for one month's accrual. Scoped to ``docstatus < 2``, so a
+        cancelled settlement can be re-raised and an amendment of this one passes —
+        the same scope ``FuelQuota._guard_duplicate`` uses for the same reason.
+        """
+        if not (self.rental_office and self.period_month):
+            return
+        duplicate = frappe.db.exists(
+            "Rental Settlement",
+            {
+                "rental_office": self.rental_office,
+                "period_month": self.period_month,
+                "docstatus": ["<", 2],
+                "name": ["!=", self.name or ""],
+            },
+        )
+        if duplicate:
+            frappe.throw(
+                _("Rental Settlement {0} already covers office {1} for period {2}.").format(
+                    duplicate, self.rental_office, self.period_month
+                )
+            )
+
+    def _stored_vehicle_rows(self):
+        """Index the vehicle rows as the database still holds them, by child row name."""
+        before = self.get_doc_before_save()
+        return {row.name: row for row in (before.vehicles if before else [])}
+
+    @staticmethod
+    def _amount_was_derived(row, stored_rows):
+        """Say whether this line's amount is ours to recompute or the operator's to keep.
+
+        A Currency child column is NOT NULL DEFAULT 0, so the row as stored cannot tell a
+        typed 0 from a blank. Only the incoming request can: a field the caller omitted
+        arrives as None, a typed 0 arrives as 0. On a re-save the form posts the stored
+        number back, so the previously stored line answers instead - an amount that still
+        equals its own days x daily_rate was ours and follows an edit to either input,
+        one that differs was asserted by hand and stands.
+        """
+        if row.amount is None:
+            return True
+        stored = stored_rows.get(row.name)
+        if stored is None:
+            return False
+        return flt(stored.amount) == flt(stored.days) * flt(stored.daily_rate)
 
     def _stamp_approval(self, persist=False):
         """Record who approved the settlement and the moment they did, and clear both when it is withdrawn.

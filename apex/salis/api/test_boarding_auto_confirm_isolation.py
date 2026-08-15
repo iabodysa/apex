@@ -62,11 +62,17 @@ class _StubFrappe:
         self._fail_save = fail_save
         self.saved = []
         self.errors = []
+        self.locked = []
 
     def get_all(self, *_args, **_kwargs):
         return list(self._trips)
 
-    def get_doc(self, _doctype, name):
+    def get_doc(self, _doctype, name, **kwargs):
+        # The tick loads through boarding_flow._locked_trip, which passes for_update so
+        # both the trip row and its boarding rows are read under lock. Recorded rather
+        # than swallowed, so a load that quietly stopped locking shows up here.
+        if kwargs.get("for_update"):
+            self.locked.append(name)
         if name in self._fail_get:
             raise ValueError(f"trip {name} could not be loaded")
         return _Trip(name, name in self._fail_save)
@@ -133,6 +139,13 @@ class TestOneBadTripDoesNotDiscardTheRun(unittest.TestCase):
         confirmed, stub, _ = _run(["T-OK-1", "T-BAD-SAVE"], fail_save=["T-BAD-SAVE"])
         self.assertEqual(confirmed, 1)
         self.assertEqual(stub.db.commits, 1, "the surviving work must still be committed")
+
+    def test_every_trip_is_loaded_under_the_row_lock(self):
+        """The tick writes boarding_state like every other door, so it serialises like
+        every other door — a plain load here would race a worker's self-confirm."""
+        _, stub, _ = _run(["T-OK-1", "T-OK-2"])
+        # A set, because the loop walks set(trips) and its order rides PYTHONHASHSEED.
+        self.assertEqual(set(stub.locked), {"T-OK-1", "T-OK-2"})
 
     def test_a_clean_run_is_unchanged(self):
         confirmed, stub, _ = _run(["T-OK-1", "T-OK-2"])

@@ -51,7 +51,6 @@ from apex.salis.utils import (
     add_timeline_note,
     lock_fuel_quota,
     lock_vehicle,
-    raise_rider_clearance_task,
     rider_block_reason,
 )
 
@@ -94,16 +93,23 @@ class FuelRequest(Document):
 		Fuel is dispensed to the rider who holds the vehicle, so an offboarded /
 		on-leave rider must not draw new fuel. When such a rider still holds a
 		vehicle, also open a supervisor clearance task to recover it (idempotent;
-		best-effort so it never blocks the rejection)."""
+		best-effort so it never blocks the rejection).
+
+		The task is ENQUEUED, not called. ``frappe.throw`` on the next line aborts this
+		request and the framework rolls the whole transaction back with it, so a ToDo
+		inserted inline was discarded again the moment it was made — the follow-up this
+		docstring promises never existed. The job runs in its own transaction. Its source
+		document is deliberately not passed: this Fuel Request is about to cease to exist,
+		and a timeline note on it would land on nothing. The ToDo references the Salis
+		Driver, which survives."""
         if not self.driver:
             return
         reason = rider_block_reason(self.driver, self.request_date)
         if reason:
-            raise_rider_clearance_task(
-                self.driver,
+            frappe.enqueue(
+                "apex.salis.utils.raise_rider_clearance_task",
+                driver=self.driver,
                 vehicle=self.vehicle,
-                source_doctype=self.doctype,
-                source_name=self.name,
             )
             frappe.throw(reason)
 

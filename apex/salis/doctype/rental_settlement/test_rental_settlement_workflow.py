@@ -89,10 +89,17 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
 
         Carries one vehicle line so accrued_total reconciles to the claimed_total;
         a payment request is now capped at the reconciled accrued amount, so a
-        settlement with no accrual basis would cap the payable to zero."""
+        settlement with no accrual basis would cap the payable to zero.
+
+        Its own office per call, not the class's: one live settlement is allowed per
+        (office, period_month), because two of them reconcile against the same accrual
+        rows and each reads as fully supported. These cases are about the workflow, so
+        they take a fresh office rather than a fresh calendar."""
         data = {
             "doctype": "Rental Settlement",
-            "rental_office": self.office,
+            "rental_office": self._office(
+                "RS Workflow Office " + frappe.generate_hash(length=8).upper()
+            ),
             "period_month": "2026-05",
             "claimed_total": 1000,
             "requested_by": requested_by or self.requester,

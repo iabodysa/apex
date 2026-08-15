@@ -34,7 +34,7 @@ import os
 
 import frappe
 
-from apex.salis.utils import normalize_plate
+from apex.salis.utils import normalize_plate, set_current_driver
 
 
 def _read(csv_dir, name):
@@ -163,7 +163,7 @@ def run(csv_dir=None):
         vn = veh.get((r.get("plate_number") or "").strip())
         dn = drv.get((r.get("current_driver_id") or "").strip())
         if vn and dn:
-            frappe.db.set_value("Salis Vehicle", vn, "current_driver", dn, update_modified=False)
+            set_current_driver(vn, dn, update_modified=False)
             frappe.db.set_value("Salis Driver", dn, "current_vehicle", vn, update_modified=False)
             mirrored += 1
     out["mirrored"] = mirrored

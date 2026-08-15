@@ -81,27 +81,6 @@ def _trip_route_maps_url(dispatch_trip, route_plan=None):
 
     return _chain_route_maps_url(masar._ordered_trip_stops(dispatch_trip, route_plan))
 
-def _trip_first_stop_maps_url(dispatch_trip, route_plan=None):
-    """Return the first navigable actual-trip stop."""
-    if not dispatch_trip:
-        return None
-    from apex.salis.api import masar
-
-    for stop in masar._ordered_trip_stops(dispatch_trip, route_plan):
-        pickup = stop.get("pickup") or {}
-        if pickup.get("google_maps_url") or stop.get("location"):
-            return pickup.get("google_maps_url") or stop.get("location")
-    return None
-
-def _attach_trip_maps(trips):
-    """Attach the first navigable stop URL to each trip card."""
-    cache = {}
-    for t in trips:
-        name = t.get("name")
-        if name and name not in cache:
-            cache[name] = _trip_first_stop_maps_url(name, t.get("route_plan"))
-        t["google_maps_url"] = cache.get(name)
-
 def _attach_trip_log_state(trips, driver):
     """Stamp each trip card with its Trip Start Log state (started / log status) so the
 	driver's Trips list can show start/complete without a per-card round-trip. One query

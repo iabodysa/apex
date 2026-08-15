@@ -122,11 +122,16 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
 
     @patch.object(vehicle_handover, "lock_vehicle")
     @patch.object(vehicle_handover, "add_timeline_note")
+    @patch.object(vehicle_handover, "set_current_driver")
     @patch.object(vehicle_handover, "frappe")
     @patch.object(vehicle_handover, "_", side_effect=lambda message: message)
     def test_receipt_submit_then_cancel_preserves_authoritative_active_assignment(
-        self, _translate, frappe, _timeline, _lock_vehicle
+        self, _translate, frappe, set_current_driver, _timeline, _lock_vehicle
     ):
+        """The vehicle half of the pairing goes through ``salis.utils.set_current_driver``,
+        which stamps ``current_driver_user`` beside ``current_driver``. It is patched by
+        name rather than reached through this module's mocked ``frappe``, because it holds
+        its own import and would otherwise write to the real database."""
         state = {"vehicle_driver": None, "driver_vehicle": None}
         assignment = SimpleNamespace(
             name="VA-1",
@@ -151,8 +156,12 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
             if doctype == "Salis Driver" and "current_vehicle" in updates:
                 state["driver_vehicle"] = updates["current_vehicle"]
 
+        def pair(vehicle, driver, **extra):
+            state["vehicle_driver"] = driver
+
         frappe.db.get_value.side_effect = get_value
         frappe.db.set_value.side_effect = set_value
+        set_current_driver.side_effect = pair
         doc = self._doc(
             name="GV-1",
             direction="Receipt",
@@ -175,10 +184,7 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
 
         self.assertEqual(state["vehicle_driver"], "DRV-1")
         self.assertEqual(state["driver_vehicle"], "VEH-1")
-        self.assertIn(
-            call("Salis Vehicle", "VEH-1", "current_driver", "DRV-1"),
-            frappe.db.set_value.call_args_list,
-        )
+        self.assertIn(call("VEH-1", "DRV-1"), set_current_driver.call_args_list)
         self.assertIn(
             call("Salis Driver", "DRV-1", "current_vehicle", "VEH-1"),
             frappe.db.set_value.call_args_list,
@@ -283,17 +289,23 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
     def test_inactive_checklist_cannot_be_used(
         self, get_doc, _category, _throw, _translate
     ):
+        """The template's rows MATCH the document's, so the row-parity throw further down
+        cannot fire and only the is_active gate can raise. The message is asserted for the
+        same reason: every gate in this method raises the one patched exception, so
+        ``assertRaises`` alone cannot tell which one answered."""
         get_doc.return_value = SimpleNamespace(
             name="Retired Inspection",
             is_active=0,
             vehicle_category="Bus",
-            items=[SimpleNamespace(check_item="Tyres")],
+            items=[SimpleNamespace(check_item="Tyres"), SimpleNamespace(check_item="Lights")],
         )
 
         with self.assertRaises(frappe.ValidationError):
             vehicle_handover.VehicleHandover._validate_native_checklist(
                 self._doc()
             )
+
+        self.assertIn("is not active", _throw.call_args.args[0])
 
     @patch.object(vehicle_handover, "_", side_effect=lambda message: message)
     @patch.object(
@@ -304,17 +316,20 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
     def test_checklist_for_another_vehicle_category_cannot_be_used(
         self, get_doc, _category, _throw, _translate
     ):
+        """Rows match, so only the vehicle-category gate can be the one that raised."""
         get_doc.return_value = SimpleNamespace(
             name="Sedan Inspection",
             is_active=1,
             vehicle_category="Sedan",
-            items=[SimpleNamespace(check_item="Tyres")],
+            items=[SimpleNamespace(check_item="Tyres"), SimpleNamespace(check_item="Lights")],
         )
 
         with self.assertRaises(frappe.ValidationError):
             vehicle_handover.VehicleHandover._validate_native_checklist(
                 self._doc()
             )
+
+        self.assertIn("does not apply to this vehicle", _throw.call_args.args[0])
 
     @patch.object(vehicle_handover.frappe.db, "get_value", return_value="Bus")
     @patch.object(vehicle_handover.frappe, "get_doc")

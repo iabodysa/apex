@@ -18,6 +18,7 @@ from apex.salis.utils import (
     lock_vehicle,
     raise_rider_clearance_task,
     rider_block_reason,
+    set_current_driver,
 )
 
 
@@ -201,11 +202,7 @@ class VehicleHandover(Document):
         """Moves the vehicle's current driver and odometer to the new driver and reading."""
         lock_vehicle(self.vehicle)
 
-        frappe.db.set_value(
-            "Salis Vehicle",
-            self.vehicle,
-            {"current_driver": self.to_driver, "odometer": self.odometer_reading},
-        )
+        set_current_driver(self.vehicle, self.to_driver, odometer=self.odometer_reading)
 
         if self.from_driver and (
             frappe.db.get_value("Salis Driver", self.from_driver, "current_vehicle")
@@ -274,12 +271,7 @@ class VehicleHandover(Document):
                 active_receipt_assignment = assignment
 
         if active_receipt_assignment:
-            frappe.db.set_value(
-                "Salis Vehicle",
-                self.vehicle,
-                "current_driver",
-                active_receipt_assignment.driver,
-            )
+            set_current_driver(self.vehicle, active_receipt_assignment.driver)
             frappe.db.set_value(
                 "Salis Driver",
                 active_receipt_assignment.driver,
@@ -290,9 +282,7 @@ class VehicleHandover(Document):
             frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver")
             == self.to_driver
         ):
-            frappe.db.set_value(
-                "Salis Vehicle", self.vehicle, "current_driver", self.from_driver
-            )
+            set_current_driver(self.vehicle, self.from_driver)
 
             if self.to_driver and (
                 frappe.db.get_value("Salis Driver", self.to_driver, "current_vehicle")

@@ -23,18 +23,20 @@ class TestRouteSupervisorScope(FrappeTestCase):
                 with self.assertRaises(frappe.ValidationError):
                     route_supervisor._validate_page(start, size)
 
-    @patch.object(route_supervisor, "_require_portal_role")
-    @patch.object(route_supervisor.frappe, "get_doc")
-    def test_trip_reader_uses_native_document_permission(self, get_doc, _role):
-        trip = MagicMock()
-        trip.as_dict.return_value = {"name": "DT-1", "project": "PROJ-1"}
-        get_doc.return_value = trip
-
-        result = route_supervisor._permission_checked_trip("DT-1")
-
-        get_doc.assert_called_once_with("Dispatch Trip", "DT-1")
-        trip.check_permission.assert_called_once_with("read")
-        self.assertEqual(result, {"name": "DT-1", "project": "PROJ-1"})
+    def test_the_module_serves_no_driver_position(self):
+        """``get_trip_driver_position`` and the helpers under it are gone with the
+        feature: nothing writes ``Dispatch Trip.driver_lat`` / ``driver_lng`` any more,
+        and a Float column Frappe emits NOT NULL DEFAULT 0 reports 0,0 as a real fix."""
+        for name in (
+            "get_trip_driver_position",
+            "_permission_checked_trip",
+            "_position_age",
+        ):
+            with self.subTest(name=name):
+                self.assertFalse(
+                    hasattr(route_supervisor, name),
+                    f"{name} reads a position column no writer fills",
+                )
 
 
 class TestActiveTripMap(FrappeTestCase):
@@ -57,9 +59,6 @@ class TestActiveTripMap(FrappeTestCase):
                 status="Dispatched",
                 driver="DRV-1",
                 vehicle="VEH-1",
-                driver_lat=24.2,
-                driver_lng=46.2,
-                driver_position_updated_at=None,
             )
         ]
         get_all.return_value = [
@@ -114,9 +113,6 @@ class TestActiveTripMap(FrappeTestCase):
                 status="Planned",
                 driver=None,
                 vehicle=None,
-                driver_lat=None,
-                driver_lng=None,
-                driver_position_updated_at=None,
             )
             for index in range(3)
         ]

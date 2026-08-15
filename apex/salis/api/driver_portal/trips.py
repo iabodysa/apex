@@ -10,7 +10,6 @@ from apex.salis.api.driver_portal import (
     _require_enabled,
     _label_trips,
     _trip_route_maps_url,
-    _attach_trip_maps,
     _attach_trip_log_state,
     _attach_boarding_counts,
     _attach_stop_progress,
@@ -59,7 +58,6 @@ def my_trips_today():
         ],
         order_by="depart_time asc",
     )
-    _attach_trip_maps(trips)
     _label_trips(trips)
     _attach_trip_log_state(trips, driver)
     _attach_boarding_counts(trips, driver)
@@ -106,7 +104,6 @@ def my_trips_recent(days=30, limit=50):
         order_by="trip_date desc, depart_time desc",
         limit=limit,
     )
-    _attach_trip_maps(trips)
     _label_trips(trips)
     for t in trips:
         t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
