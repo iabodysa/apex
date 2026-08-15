@@ -49,7 +49,11 @@ def unreverted_topup_watch() -> None:
                 "request_type": "Top-up",
                 "is_temporary": 1,
                 "reverted": 0,
-                "status": ["in", ["Approved", "Done"]],
+                # Done is the only state the workflow can leave for Reverted. Selecting Approved
+                # as well raised WorkflowPermissionError on every such row, and the per-row
+                # savepoint swallowed it into the Error Log, so an approved-but-undispensed
+                # top-up was reported as handled on every run and never was.
+                "status": "Done",
                 "revert_due_date": ["<", today_str],
                 "name": [">", cursor],
             },
@@ -92,3 +96,38 @@ def unreverted_topup_watch() -> None:
                 )
 
         cursor = topups[-1].name
+
+    _flag_overdue_approved_topups(today_str, logger)
+
+
+def _flag_overdue_approved_topups(today_str: str, logger) -> None:
+    """Tell the fleet about overdue temporary top-ups still sitting at Approved.
+
+    These cannot be auto-reverted: nothing was dispensed yet, and the workflow offers no
+    Approved-to-Reverted transition. Someone has to Complete or Cancel them, so they are
+    surfaced rather than left for a reader who would have to know to look.
+    """
+    stranded = frappe.get_all(
+        "Fuel Request",
+        filters={
+            "request_type": "Top-up",
+            "is_temporary": 1,
+            "reverted": 0,
+            "status": "Approved",
+            "revert_due_date": ["<", today_str],
+        },
+        fields=["name", "revert_due_date", "topup_litres"],
+        order_by="revert_due_date asc",
+        limit_page_length=BATCH_SIZE,
+    )
+    for row in stranded:
+        msg = (f"unreverted_topup_watch: temporary top-up {row.name} "
+               f"({row.topup_litres} L) passed its revert date {row.revert_due_date} "
+               f"while still Approved; it was never dispensed, so complete it or cancel it.")
+        logger.warning(msg)
+        _notify_fleet_role(
+            _("Overdue temporary top-up {0} is still awaiting completion").format(row.name),
+            msg,
+            document_type="Fuel Request",
+            document_name=row.name,
+        )

@@ -53,7 +53,6 @@ A new resident request has been received and awaits triage,تم استلام ط�
 A payment request can only be raised on an Approved settlement (current status: {0}).,لا يمكن إنشاء طلب دفع إلا على تسوية معتمدة (الحالة الحالية: {0}).
 A payment request has been raised for this statement,صدر طلب دفع لهذا الكشف
 "A periodic safety round over a building for a given cadence. Groups the building's Safety Task Execution rows for that round and, on submit, derives an overall result from their statuses. Supersedes the legacy Safety Inspection Report.",جولة سلامة دورية على مبنى وفق تكرار الجولة المحدد. تجمع سجلات تنفيذ مهام السلامة للمبنى في تلك الجولة، وتستخرج النتيجة العامة من حالاتها عند الاعتماد. وتحل محل تقرير فحص السلامة السابق.
-A photo and filename are required together.,يجب إرفاق الصورة واسم ملفها معاً.
 A portal access token is required.,يلزم وجود رمز وصول إلى البوابة.
 A posting cannot be dated before {0}. Ask a {1} to post it.,لا يمكن تأريخ الحركة قبل {0}. اطلب من {1} تسجيلها.
 A posting cannot be dated in the future.,لا يمكن تأريخ الحركة في المستقبل.
@@ -151,9 +150,6 @@ Actions,الإجراءات
 Activate,تفعيل
 Activate Bed,تفعيل السرير
 Activate Room,تفعيل الغرفة
-Activated By,فُعِّل بواسطة
-Activation,التفعيل
-Activation Date,تاريخ التفعيل
 Active,نشط
 Active CCTV Cameras,كاميرات المراقبة المفعّلة
 Active Contracts,العقود النشطة
@@ -323,7 +319,6 @@ Apex messaging gateway test message.,رسالة اختبار بوابة مراس
 Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
 Apex — Recovery and Support,أبكس: الاسترداد والدعم
-Apex — Salary Deductions,أبكس — الخصومات من الراتب
 App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
 Appearance,المظهر
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
@@ -360,7 +355,6 @@ Approved by,اعتمدها
 Approved by Finance,معتمد من المالية
 Approved by Supervisor,معتمد من المشرف
 Approved: {0},مُعتمَد: {0}
-Approver Role,دور المعتمد
 Approving creates the rooms and beds and saves the floor plan on the building.,الاعتماد يُنشئ الغرف والأسرّة ويحفظ مخطط الطوابق في المبنى.
 Approving…,جارٍ الاعتماد…
 April,أبريل
@@ -478,8 +472,6 @@ Attach photographic evidence,أرفق صورة كدليل
 Attach photographic evidence of the round,أرفق صور الجولة
 Attach photographic evidence of the scene,أرفق صور موقع الحادثة
 Attach photographic evidence of the work before and after,أرفق صور العمل قبل وبعد
-Attach the internal authorization (management sign-off) approving this deduction type.,أرفق التفويض الداخلي (اعتماد الإدارة) الذي يقر نوع الحسم هذا.
-Attach the signed legal opinion / policy approving these deductions under KSA Labor Law.,أرفق الرأي القانوني / السياسة الموقّعة التي تعتمد هذه الخصومات بموجب نظام العمل السعودي.
 Attachment,مرفق
 Attendance,الحضور
 Attendance Check-In,وقت الحضور
@@ -508,15 +500,10 @@ Authorising Officer,المسؤول المعتمد
 Authorising Request,الطلب المخوِّل
 Authority,الصلاحية
 Authority Gate,بوابة الاعتماد
-Authorization,التفويض
 Authorization & Delivery,التفويض والتسليم
-Authorization Document,مستند التفويض
-Authorization Document is required to enable the Rent / Housing deduction rule.,مستند التفويض مطلوب لتفعيل قاعدة حسم الإيجار / السكن.
 Authorize (Operations),تفويض (العمليات)
 Authorize (Regional),تفويض (الإقليم)
-Authorized By,مفوض من قبل
 Authorized By (Record Only),المُخوِّل (للسجل فقط)
-Authorized By is required to enable the Rent / Housing deduction rule.,يلزم حقل «المعتمد من» لتفعيل قاعدة خصم الإيجار أو السكن.
 Auto,تلقائي
 Auto-Generate Beds,توليد الأسرّة تلقائياً
 "Auto-assign new maintenance requests across the maintenance team. DISABLED by default: replace the placeholder user with your real team, then enable.",وزّع طلبات الصيانة الجديدة تلقائيًا على فريق الصيانة. الخيار معطّل افتراضيًا: استبدل المستخدم المؤقت بأعضاء فريقك الفعليين ثم فعّله.
@@ -731,7 +718,6 @@ Cannot reverse {0} unit(s) of {1} in {2}: only {3} left in the building store. R
 Cannot reverse {0} unit(s) of {1} in {2}: {3} now holds only {4}. Reverse the later movements first.,لا يمكن عكس {0} وحدة من {1} في {2}: {3} يحوز الآن {4} فقط. اعكس الحركات اللاحقة أولاً.
 Cannot transfer {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن نقل {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
 "Cannot {0} SIM {1}: its status is {2}, expected {3}.",تعذّر تنفيذ {0} على الشريحة {1}: حالتها {2}، والمتوقع {3}.
-Cap Amount per Event (SAR),الحد الأقصى للمبلغ لكل واقعة (ريال سعودي)
 Capacity,السعة
 Capacity & Status,السعة والحالة
 Capacity Denominator,أساس احتساب السعة
@@ -739,7 +725,6 @@ Capacity Policies,سياسات السعة
 Capacity and Occupancy,السعة والإشغال
 Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعذر خفض السعة لأن {0} غرفة تضم أسرّة زائدة مشغولة:
 Capital Item,أصل رأسمالي
-Caps (KSA Labor Law),الحدود القصوى (نظام العمل السعودي)
 Caption,التعليق
 "Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتسييرها.
 Capture an incident with the guided Safety Incident form and save it for manager review.,سجّل حادثًا باستخدام نموذج حادث السلامة الإرشادي واحفظه لمراجعة المدير.
@@ -920,7 +905,6 @@ Code Expires At,انتهاء صلاحية الرمز
 Code Hash,بصمة الرمز
 Code Locked Until,الرمز مقفل حتى
 Code Verified On,تاريخ التحقق من الرمز
-Combined ceiling for all deduction types per pay period; KSA Labor Law Art. 91 caps this at 50%.,السقف المجمّع لجميع أنواع الخصومات في كل فترة رواتب؛ يحدّده نظام العمل السعودي المادة 91 بحد أقصى 50%.
 Commercial Terms,الشروط التجارية
 Common Area,منطقة مشتركة
 Common area,منطقة مشتركة
@@ -929,7 +913,6 @@ Company & Currency,الشركة والعملة
 Company VAT Registration Number,الرقم الضريبي للشركة
 Company custody items have been returned,سلّم عهدة الشركة
 Company is required to enable Employee Advance recovery.,الشركة مطلوبة لتفعيل استرداد سلفة الموظف.
-Company whose payroll these deductions post against. Falls back to Habitat Settings company when blank.,الشركة التي تُرحّل هذه الخصومات على مسير رواتبها. تعود افتراضيًا إلى الشركة المحددة في إعدادات هابيتات عند تركها فارغة.
 Company's share (%) of shared utility bills for this building. Agreed with the property management office. Does not affect rent.,حصة الشركة (٪) من فواتير المرافق المشتركة لهذا المبنى. متفق عليها مع مكتب إدارة العقار. لا تؤثر على الإيجار.
 Complaint,شكوى
 Complaint not found.,الشكوى غير موجودة.
@@ -1004,7 +987,6 @@ Confirmed Receipt,تأكيد الاستلام
 Confirmed Receipt is the primary path. Choose Signature when the holder cannot type-confirm and signs instead.,الأصل تأكيد الاستلام. استخدم التوقيع إذا تعذّر على المستلم تأكيده كتابةً.
 Confirmed by the facility supervisor,مؤكَّد من مشرف المنشأة
 Consent,الموافقة
-Consent & Approval Gate,الموافقة وبوابة الاعتماد
 Consent Signed On,تاريخ توقيع الموافقة
 Constant value written to the target field when Static is checked (for example a fixed payment_type or party_type).,قيمة ثابتة تُكتب في الحقل المستهدف عند تفعيل خيار ثابت (مثل نوع دفع أو نوع طرف محدد).
 Consumable,مادة مستهلكة
@@ -1323,7 +1305,6 @@ Data,بيانات
 Data Error,خطأ في البيانات
 Data Retention,الاحتفاظ بالبيانات
 Date,التاريخ
-Date from which this rule takes effect. A source event dated before this is not deducted. Used by recurring deductions such as Rent / Housing.,التاريخ الذي يبدأ منه تطبيق القاعدة. لا يُطبق الخصم على أي حدث مصدر يسبق هذا التاريخ. يُستخدم للخصومات المتكررة مثل الإيجار أو السكن.
 Date of the first payment. Subsequent payments are calculated from this date based on Billing Cycle.,تاريخ الدفعة الأولى. تُحسب الدفعات اللاحقة من هذا التاريخ بناءً على دورة الفوترة.
 Date of the most recent inspection of this asset. Stamped on submit of a Maintenance Inspection Report that links this asset.,تاريخ آخر فحص لهذا الأصل. يُسجّل عند اعتماد تقرير فحص صيانة مرتبط به.
 Date this item was last physically counted.,تاريخ آخر جرد فعلي لهذا الصنف.
@@ -1359,14 +1340,8 @@ December,ديسمبر
 Decision By,صاحب القرار
 Decision On,تاريخ القرار
 Declining Balance,الرصيد المتناقص
-Deduct housing allowance from salary?,خصم بدل السكن من الراتب؟
 Deduction,الخصم
 Deduction Amount (SAR),مبلغ الخصم (ريال)
-Deduction Type,نوع الخصم
-Deduction Type Rules,قواعد نوع الخصم
-Deduction Types,أنواع الخصم
-Deduction type {0} is enabled but has no Salary Component (and no default is set).,نوع الخصم {0} مفعّل لكن دون مكون راتب (ولا يوجد إعداد افتراضي).
-Deduction type {0}: Max % of Salary ({1}%) cannot exceed the global ceiling ({2}%).,نوع الخصم {0}: لا يمكن أن تتجاوز النسبة القصوى من الراتب ({1}٪) السقف العام ({2}٪).
 Deduction: {0},الخصم: {0}
 Deep Cleaning,نظافة عميقة
 Default Assignee (Employee),المكلف الافتراضي (الموظف)
@@ -1379,12 +1354,10 @@ Default Custody Days,أيام العهدة الافتراضية
 Default Depreciation Policy,سياسة الإهلاك الافتراضية
 Default Driver,السائق الافتراضي
 Default Fuel Type,نوع الوقود الافتراضي
-Default HRMS Salary Component (Type = Deduction) used by any type rule that does not name its own. Defaults to the shipped 'Operational Deduction' component.,مكون الراتب الافتراضي في نظام الموارد البشرية (النوع = خصم) الذي تستخدمه أي قاعدة نوع لا تحدد مكونها الخاص. الافتراضي هو مكون 'الخصم التشغيلي' المرفق.
 Default Payment Method,طريقة الدفع الافتراضية
 Default Posting,الترحيل الافتراضي
 Default Remark,الملاحظة الافتراضية
 Default Room Type,نوع الغرفة الافتراضي
-Default Salary Component,مكوّن الراتب الافتراضي
 Default UOM,وحدة القياس الافتراضية
 Default Vehicle,المركبة الافتراضية
 Default company applied to Salis transactions when not set explicitly.,الشركة الافتراضية لمعاملات ساليس عند عدم تحديد شركة.
@@ -1643,7 +1616,6 @@ Enable GL Entry Posting,تفعيل ترحيل قيود دفتر الأستاذ �
 Enable Messaging Gateway,تفعيل بوابة المراسلة
 Enable Operational Notifications,تفعيل الإشعارات التشغيلية
 Enable Passport MRZ OCR Autofill,تفعيل التعبئة الآلية لبيانات الجواز عبر OCR لمنطقة MRZ
-Enable Salary Deductions,تفعيل الخصومات من الراتب
 Enable Stock Engine,تشغيل محرّك المخزون
 Enable Stock Entry Posting,تفعيل ترحيل حركة المخزون
 Enable Supplier Markup,تفعيل هامش المورد
@@ -1832,7 +1804,6 @@ Finance,المالية
 Finance Approved By,مَن اعتمده من المالية
 Finance Approved On,تاريخ اعتماد المالية
 Finance Decision,قرار المالية
-Finance Manager,المدير المالي
 Finance Manager Dashboard,لوحة معلومات المدير المالي
 Finance Notification Email,بريد إشعار المالية
 Finance-boundary payment request. Routes any payable item through a Finance-exclusive approval gate. Posts NO GL: linked_payment_entry is a reference set externally; the controller never writes accounting.,طلب دفع يخضع حصريًا لاعتماد المالية. يمرّر أي مبلغ مستحق عبر بوابة اعتماد خاصة بالمالية. لا يُنشئ قيودًا محاسبية؛ الحقل linked_payment_entry مرجع يُحدّد خارجيًا، ولا يكتب هذا المستند أي قيد.
@@ -1863,7 +1834,6 @@ First Payment Date cannot be before Lease Start Date.,لا يمكن أن يكو�
 Fixed Asset (Capex),أصل ثابت (مصروفات رأسمالية)
 Fixed monthly salary in SAR. No car and no allowances. Paid via a native ERPNext Payment Entry against this freelance as a party. Pay is personal so only Finance and System Manager can see this column.,أجر شهري ثابت بالريال السعودي، بلا سيارة أو بدلات. يُدفع عبر مستند Payment Entry القياسي في ERPNext لهذا المستقل بصفته طرفًا. الأجر بيانات شخصية، لذلك لا يظهر هذا العمود إلا لمدير المالية ومدير النظام.
 Flags a building that receives externally-purchased goods before they are handed over into custody.,يحدّد المبنى الذي يستلم البضائع المشتراة خارجيًا قبل تسليمها إلى العهدة.
-Flags that this policy must be reviewed by Legal/HR against KSA Labor Law (wage-deduction articles) before activation. Kept ON by design as a standing reminder.,يشير إلى وجوب مراجعة هذه السياسة من قبل الشؤون القانونية/الموارد البشرية وفق نظام العمل السعودي (مواد خصم الأجور) قبل التفعيل. يبقى مفعّلًا بالتصميم كتذكير دائم.
 Flat call-off rate against the contract; this order carries no priced lines.,سعر مقطوع للزيارة بموجب العقد؛ هذا الأمر لا يحمل بنودًا مسعّرة.
 Fleet,الأسطول
 Fleet (Salis),الأسطول (ساليس)
@@ -2008,10 +1978,6 @@ Generation Key,مفتاح التوليد
 Generator,مولد كهربائي
 Generator Service,صيانة المولد الكهربائي
 Getting Started,البدء
-Global Caps (KSA Labor Law),الحدود القصوى العامة (نظام العمل السعودي)
-Global Max % of Salary (all types),النسبة القصوى العامة من الراتب (لجميع الأنواع)
-Global Max % of Salary cannot exceed {0}% (KSA Labor Law Art. 91 ceiling on combined wage deductions).,لا يمكن أن تتجاوز النسبة القصوى العامة من الراتب {0}٪ (سقف المادة 91 من نظام العمل السعودي على مجموع خصومات الأجر).
-Global master switch for all salary deductions; off until legal review is recorded.,مفتاح رئيسي عام لجميع خصومات الرواتب؛ يبقى متوقفاً حتى تسجيل المراجعة القانونية.
 Good,جيد
 Goods Receipt,سند استلام بضائع
 Goods Receipt Note,إشعار استلام بضاعة
@@ -2027,7 +1993,6 @@ Guards,الحرّاس
 Guest,راكب إضافي
 HR,الموارد البشرية
 HR Case,قضية موارد بشرية
-HRMS Salary Component (Type = Deduction) posted to Additional Salary for this type. Must exist and be of type Deduction before the rule is enabled. Defaults to the shipped 'Operational Deduction' component.,مكوّن الراتب في HRMS (النوع = خصم) الذي يُرحّل إلى «راتب إضافي» لهذا النوع. يجب أن يكون موجودًا ومن نوع «خصم» قبل تفعيل القاعدة. القيمة الافتراضية هي مكوّن «الخصم التشغيلي» المثبت مع التطبيق.
 "HTTPS endpoint of the generic message-send gateway, for example https://gateway.example.com/v1/messages. The app POSTs a JSON body { to, message, channel, sender_id } to this URL with the API key as a Bearer token. Provider-agnostic; the operator points this at their own WhatsApp/SMS provider or middleware.","عنوان HTTPS لبوابة إرسال الرسائل العامة، مثل https://gateway.example.com/v1/messages. يرسل التطبيق طلب POST بمحتوى JSON { to, message, channel, sender_id } إلى هذا العنوان مع مفتاح الواجهة البرمجية كرمز Bearer. البوابة غير مرتبطة بمزود محدد؛ يوجّهها المشغّل إلى مزود واتساب أو الرسائل النصية الخاص به أو إلى وسيط."
 Habitat,السكن والمرافق
 Habitat Internal / No Financial Posting,داخلي في هابيتات ومن دون ترحيل مالي
@@ -2060,7 +2025,6 @@ Handover {0} cancelled.,أُلغي التسليم {0}.
 Handover {0} is closed; a new code cannot be issued.,التسليم {0} مغلق؛ لا يمكن إصدار رمز جديد.
 Handovers,التسليمات
 Hard Disk,القرص الصلب
-"Hard ceiling on the SAR amount deducted for a single triggering event of this type, regardless of the assessed value. 0 = no per-event cap (not recommended).",سقف صارم على المبلغ المخصوم بالريال السعودي لواقعة واحدة من هذا النوع، بغض النظر عن القيمة المقدّرة. القيمة 0 = لا يوجد حد لكل واقعة (غير موصى به).
 Has Timestamps,يحتوي طوابع زمنية
 Has custody,لديه عهدة
 Health and Hygiene,الصحة والنظافة العامة
@@ -2138,7 +2102,6 @@ How many 'remaining passengers' notifications the driver has sent this worker.,"
 How many days back a posting may be dated. Zero means today only.,كم يوماً يجوز تأريخ الحركة إلى الوراء. الصفر يعني اليوم فقط.
 How many times the driver has rejected this worker's boarding claim.,عدد المرات التي رفض فيها السائق تأكيد العامل لصعوده.
 How often (seconds) the worker portal polls its boarding state during an active trip. A blank or zero value falls back to the built-in default.,الفاصل بالثواني بين مرات تحقق بوابة العامل من حالة الصعود أثناء الرحلة النشطة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
-How often a deduction of this type may recur for the same source until the balance is cleared.,تكرار هذا النوع من الخصم للمصدر نفسه حتى تسوية الرصيد.
 How often rent payments are scheduled. Amount per installment is calculated automatically.,معدّل جدولة دفعات الإيجار. يُحسب مبلغ كل قسط تلقائياً.
 "How often the catalog task must be performed, from daily to annual, or triggered as needed or on a resident entry rather than on a fixed cycle.",تكرار تنفيذ مهمة الدليل، من يومي إلى سنوي، أو تشغيلها عند الحاجة أو عند دخول ساكن بدلًا من جدول ثابت.
 "How often the subcontractor is scheduled to visit under the contract, from weekly to quarterly, or on-call only when visits are requested as needed.",تكرار زيارات المقاول المجدولة في العقد، من أسبوعي إلى ربع سنوي، أو عند الطلب فقط.
@@ -2238,7 +2201,6 @@ Inspection logged: {0},سُجِّل الفحص: {0}
 Inspector,المفتّش
 Inspector (Employee),الفاحص (الموظف)
 Installation Date,تاريخ التركيب
-Installments,أقساط
 Instalment Amount,قيمة الدفعة
 Instalment Due Date,تاريخ استحقاق القسط
 Instalment per Pay Period,القسط في كل دورة رواتب
@@ -2274,7 +2236,6 @@ Internal Employee,موظف داخلي
 Internal Owner,المسؤول الداخلي
 Internal Store,المستودع الداخلي
 Internal Transfer,نقل داخلي
-Internal authorization (management sign-off) to switch the layer on.,تفويض داخلي من الإدارة لتفعيل هذه الميزة.
 Internal cost-allocation ledger. Maintained automatically by the system and not edited manually.,سجل توزيع التكاليف الداخلي. يُدار آلياً بواسطة النظام ولا يُحرَّر يدوياً.
 "Internal fuel consumption ledger. Maintained automatically by the system from Fuel Daily Log and Done Fuel Request records, and not edited manually.",سجل داخلي لاستهلاك الوقود. يحدّثه النظام تلقائيًا من السجل اليومي للوقود وطلبات الوقود المنجزة، ولا يُعدل يدويًا.
 Internet,إنترنت
@@ -2367,7 +2328,6 @@ January,يناير
 Joined,باشر العمل
 July,يوليو
 June,يونيو
-KSA Labor Law Note,ملاحظة نظام العمل السعودي
 Keep the accommodation and shared areas clean and tidy.,المحافظة على نظافة السكن والمناطق المشتركة وترتيبها.
 Kept for Parts,يُحتفظ به قطع غيار
 Key Metrics,المؤشرات الرئيسية
@@ -2453,12 +2413,6 @@ Legacy Route Plan,خطة المسار السابقة
 Legacy Supervision,الإشراف السابق
 Legal,الشؤون القانونية
 Legal Case,قضية قانونية
-Legal Reference Document,المستند القانوني المرجعي
-Legal Review,المراجعة القانونية
-Legal Review Completed,اكتملت المراجعة القانونية
-Legal Review Date,تاريخ المراجعة القانونية
-Legal Review Required,المراجعة القانونية مطلوبة
-Legal Reviewed By,راجعه قانونيًا
 Lessee (Tenant),المستأجر
 Lessor (Landlord),المؤجر (المالك)
 Licence Expiry,انتهاء الرخصة
@@ -2610,11 +2564,9 @@ Masar Worker,عامل مسار
 Masar Worker Link,رابط عامل مسار
 Masar Worker Token,رمز دخول مسار
 Master Data,البيانات الأساسية
-Master Switch,التفعيل العام
 "Master agreement with an external subcontractor (pest control, sewage suction, deep cleaning, generator service, fire equipment service).",اتفاقية رئيسية مع مقاول خارجي لخدمات مكافحة الآفات، وشفط الصرف الصحي، والتنظيف العميق، وصيانة المولدات ومعدات الحريق.
 Master categories for issuable custody articles.,فئات أساسية لأصناف العهدة القابلة للصرف.
 "Master kill-switch for all outgoing email from this app. When OFF (default), the app sends no email even if individual Notifications or Auto Email Reports are enabled. Turn ON only after the site's outgoing email (SMTP) is configured.",مفتاح إيقاف رئيسي لكل البريد الصادر من هذا التطبيق. عند الإيقاف، وهو الوضع الافتراضي، لا يرسل التطبيق أي بريد حتى لو كانت الإشعارات أو تقارير البريد التلقائية مفعّلة. فعّله بعد ضبط البريد الصادر SMTP للموقع فقط.
-"Master switch for THIS type. Default OFF: while off, no deduction of this type is ever raised. Turn on only after the Salary Component exists, the caps below are reviewed, and legal sign-off is recorded on the policy.",المفتاح الرئيسي لهذا النوع تحديداً. الافتراضي هو الإيقاف، وأثناء الإيقاف لا يُنشأ أي خصم من هذا النوع. فعّله بعد وجود مكون الراتب ومراجعة الحدود أدناه وتسجيل الموافقة القانونية على السياسة.
 "Master switch for outbound WhatsApp/SMS messages (worker Masar links, ride and request status). When OFF (default), every send is a logged no-op. Turn ON only after the gateway URL and API key below are set.",المفتاح الرئيسي لرسائل واتساب والرسائل النصية الصادرة (روابط مسار للعمال، وحالة الرحلات والطلبات). عند الإيقاف، وهو الوضع الافتراضي، يُسجَّل الإرسال دون تنفيذ. فعّله بعد ضبط عنوان البوابة ومفتاح الواجهة البرمجية أدناه فقط.
 Master switch indicating that an external frontend is integrated with this backend. This is a documentation/coordination flag; it does not start or stop the API.,مفتاح رئيسي يشير إلى تكامل واجهة أمامية خارجية مع هذا الخادم الخلفي. وهو مؤشر توثيقي/تنسيقي فقط؛ لا يشغّل الواجهة البرمجية ولا يوقفها.
 Master switch to enable approval routing across Salis transactions.,المفتاح الرئيسي لتفعيل مسارات الاعتماد في معاملات ساليس.
@@ -2631,12 +2583,10 @@ Material Transfer Note,سند نقل مواد
 Material Transfer {0} moved stock from {1} (cost center {2}) to {3} (cost center {4}). This is a memo only — no GL Entry was posted. Please record the cross-charge if required.,نقل المواد {0} حرّك المخزون من {1} (مركز التكلفة {2}) إلى {3} (مركز التكلفة {4}). هذا قيد مذكرة فقط — لم يُرحّل أي قيد دفتر أستاذ عام. يُرجى تسجيل التحميل المتبادل عند الحاجة.
 Material or Part,المادة أو القطعة
 Materials required for the repair.,المواد المطلوبة للإصلاح.
-Max % of Salary,الحد الأقصى للخصم من الراتب (%)
 Maximum 'please wait' requests a worker may send the driver per trip. A blank or zero value falls back to the built-in default.,"الحد الأقصى لطلبات ""يرجى الانتظار"" التي يمكن للعامل إرسالها إلى السائق في كل رحلة. القيمة الفارغة أو الصفرية تعود إلى الافتراضي المدمج."
 Maximum 'remaining passengers' notifications the driver may send a worker before that worker can be marked Absent at departure; blank or zero uses the default.,الحد الأقصى لإشعارات «الركاب المتبقون» التي يرسلها السائق إلى العامل قبل تسجيله غائبًا عند المغادرة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Maximum Recovery Percent,الحد الأقصى لنسبة الاسترداد
 Maximum Recovery Percent must be greater than 0 and no more than {0}.,يجب أن تكون نسبة الاسترداد القصوى أكبر من صفر ولا تتجاوز {0}.
-Maximum share of the worker's wage this type may take in any single pay period. KSA Labor Law Art. 91 caps total wage deductions at 50% of wage; this conservative per-type default (10%) keeps the aggregate well under the lawful ceiling. Do not raise without legal review.,أعلى نسبة يمكن خصمها من أجر العامل لهذا النوع خلال فترة رواتب واحدة. تحدد المادة 91 من نظام العمل السعودي إجمالي الخصومات بحد أقصى 50% من الأجر، وتبقي النسبة الافتراضية المتحفظة لكل نوع (10%) الإجمالي دون هذا الحد. لا ترفعها دون مراجعة قانونية.
 May,مايو
 Medium,متوسطة
 Messaging Gateway,بوابة المراسلة
@@ -2959,31 +2909,25 @@ Odometer {0} is lower than the last reading for this vehicle ({1}).,قراءة �
 "Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن تجريبيًا يضم غرفًا وأسرّة وساكنًا وطلب صيانة مفتوحًا. يمكنك إزالة هذه البيانات لاحقًا من إعدادات أبكس.
 Off by default — creates the native ERPNext Issue SLA only with a complete operating schedule.,معطّلة افتراضيًا. لا تنشئ اتفاقية مستوى الخدمة للبلاغات في ERPNext إلا بعد اكتمال جدول العمل.
 Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
-Off by default — no automatic housing-allowance deduction. Requires legal/HR review.,معطّل افتراضيًا — لا خصم تلقائي لبدل السكن. يتطلّب مراجعة قانونية وموارد بشرية.
 "Off by default — operational memo only, no GL entries until you enable it.",معطّل افتراضيًا — مذكّرة تشغيلية فقط، بلا قيود في دفتر الأستاذ العام حتى تفعّله.
 Off by default — post expiry and overdue reminders as timeline comments on the source document.,معطّل افتراضيًا — ينشر تذكيرات الانتهاء والتأخّر كتعليقات في مسار المستند المصدر.
 Off by default — schedules draft HRMS Additional Salary installments only after native accounts and payroll are configured.,معطّل افتراضيًا. لا ينشئ مسودات أقساط «راتب إضافي» في HRMS إلا بعد إعداد حسابات السلف والرواتب.
 Off by default — turn on only after the site's outgoing email (SMTP) is configured.,معطّل افتراضيًا — فعّله بعد ضبط البريد الصادر (SMTP) للموقع فقط.
-Off by default. Requires legal/HR review.,معطّل افتراضيًا. يتطلّب مراجعة قانونية وموارد بشرية.
 "Off, a posting that would drive a store or a holder below zero is refused.",عند الإيقاف تُرفض أي حركة تُنزل المخزن أو الحائز تحت الصفر.
 Office,مكتب
 Office Details,تفاصيل المكتب
 Office Name,اسم المكتب
 Offline,غير متصل
-On Acknowledgment,عند الإقرار
 On Entry,عند الدخول
 On Leave,في إجازة
-On Submit,عند الاعتماد
 "On by default — route Salis assignments, transfers, and fuel requests through approval gates.",مفعّل افتراضيًا — يمرّر إسنادات ساليس والتحويلات وطلبات الوقود عبر بوابات الاعتماد.
 On-Site Code,رمز الموقع
 On-call Only,عند الطلب فقط
-One Time,مرة واحدة
 "One company item a departing driver held, and the state it came back in.",صنف واحد للشركة كان بيد سائق مغادر، والحال التي عاد بها.
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
 "One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
 "One mapping row for the Payment Router. Sets target[target_fieldname] = static_value when Static is checked, otherwise to the value of source_fieldname on the Salis Payment Request.",صف تعيين واحد لموجّه الدفع. يضبط target[target_fieldname] = static_value عند تحديد «ثابت»، وإلا يستخدم قيمة source_fieldname من طلب دفع ساليس.
 One row per scheduled rent payment on an Accommodation Lease. Status tracks payment state; rent is paid externally (no GL).,صف واحد لكل دفعة إيجار مجدولة في عقد إيجار سكن. تتتبع الحالة وضع الدفع، ويُسدّد الإيجار خارجيًا دون قيود محاسبية.
-"One rule row per operational deduction type (damage / rent / fuel / custody). Holds the cap, the maximum percentage of salary, the approval gate, the schedule, and the triggering event for that type. Every rule is inactive by default so no deduction is ever raised until the type is explicitly enabled.",قاعدة واحدة لكل نوع خصم تشغيلي (تلف أو إيجار أو وقود أو عهدة). تضم السقف، وأعلى نسبة من الراتب، وبوابة الاعتماد، والجدولة، والحدث المُطلِق لذلك النوع. وكل قاعدة معطّلة افتراضياً فلا يُنشأ أي خصم حتى يُفعَّل النوع صراحة.
 One-Time Password,رمز التحقق لمرة واحدة
 Only Finance can approve or mark a payment as paid. This step cannot be bypassed.,المالية فقط تعتمد أو تؤكّد الدفع. لا يمكن تجاوز هذه الخطوة.
 Only Open or In Progress Task Instances can be marked Completed.,لا يمكن إكمال إلا المهام المفتوحة أو قيد التنفيذ.
@@ -3027,7 +2971,6 @@ Only the procurement supervisor or an Accommodation Manager may regenerate the c
 Only the receiving supervisor or an Accommodation Manager may action this handover.,لا يجوز اتخاذ إجراء على هذا التسليم إلا للمشرف المستلم أو مدير السكن.
 Only the receiving supervisor or an Accommodation Manager may confirm receipt.,يحق فقط للمشرف المستلِم أو مدير الإسكان تأكيد الاستلام.
 Only the selected remediation action may change.,لا يمكن تغيير إلا إجراء المعالجة المحدد.
-Only {0} can record the accounting acknowledgement.,لا يمكن تسجيل الاعتماد المحاسبي إلا بواسطة {0}.
 Open,مفتوح
 Open Action Inbox,فتح صندوق الإجراءات
 Open Assigned Work,افتح العمل المسند
@@ -3109,7 +3052,6 @@ Operational Source,المصدر التشغيلي
 Operational Status,الحالة التشغيلية
 Operational currency for Habitat cost fields. Fetched from Company if left blank.,العملة التشغيلية لحقول التكلفة في هابيتات. تُجلب من الشركة إذا تُرك الحقل فارغًا.
 "Operational document that caused this recovery, such as a Vehicle Incident. Set by the system; one source document raises at most one advance.",المستند التشغيلي الذي نشأ عنه هذا الاسترداد، مثل حادثة مركبة. يضبطه النظام؛ وينشئ المستند المصدر سلفة واحدة على الأكثر.
-Operational source of the deduction. Damage = custody damage assessment; Rent = accommodation rent / housing; Fuel = fleet fuel over-consumption; Custody (Uhda) = unreturned custody / advance.,المصدر التشغيلي للخصم. التلف = تقييم تلفيات العهدة؛ الإيجار = إيجار السكن؛ الوقود = استهلاك وقود زائد في الأسطول؛ العهدة = عهدة أو سلفة لم تُرجَع.
 "Operational state of the facility asset, distinguishing working units from faulty or in-repair ones and from assets that were replaced, scrapped, or put into storage.",الحالة التشغيلية لأصل المرفق، تميّز الوحدات العاملة عن المعطلة أو تحت الإصلاح وعن الأصول التي استُبدلت أو أُتلفت أو أُودعت في المخزن.
 "Operational state of the vehicle, distinguishing an active vehicle from one stopped or under maintenance, or released from the fleet.",الحالة التشغيلية للمركبة، وتميز المركبة النشطة عن المتوقفة أو الخاضعة للصيانة أو المستبعدة من الأسطول.
 Operations,العمليات
@@ -3170,6 +3112,7 @@ Overdue Returns,المرتجعات المتأخرة
 Overdue Safety Tasks,مهام السلامة المتأخرة
 Overdue Scheduled Tasks,المهام المجدولة المتأخرة
 Overdue Temporary Topups,التعبئات المؤقتة المتأخرة
+Overdue temporary top-up {0} is still awaiting completion,شحنة الوقود المؤقتة {0} تجاوزت موعدها وما زالت بانتظار الإتمام
 Overdue temporary top-up {0} was auto-reverted,التزويد المؤقت المتأخر {0} عُكس تلقائياً
 Overhead Absorption,تحميل المصاريف غير المباشرة
 Overview,نظرة عامة
@@ -3240,7 +3183,6 @@ Payment Routing Settings,إعدادات توجيه الدفع
 Payment Schedule,جدول الدفع
 Payment Target Mismatch,نوع مستند الدفع لا يطابق الإعداد
 Payment Terms (Days),مهلة السداد (أيام)
-"Payment method saved. To enable salary deductions, set the authorizer and salary components on the Salary Deduction Policy first, then turn the rules on there.",حُفظت طريقة الدفع. لتفعيل خصومات الراتب، حدد المفوّض ومكوّنات الراتب في سياسة خصم الراتب أولًا، ثم فعّل القواعد فيها.
 Payment schedule can only be regenerated on a Draft lease.,لا يمكن إعادة إنشاء جدول الدفع إلا لعقد إيجار في حالة «مسودة».
 Payment schedule will be generated automatically on first save.,سيُنشأ جدول الدفعات تلقائيًا عند الحفظ لأول مرة.
 "Payment target {0} is a Single settings record, so creating a payment would overwrite it instead of adding one. Choose a normal payment DocType.",هدف الدفع {0} سجل إعدادات مفرد، لذلك سيؤدي إنشاء الدفع إلى استبداله بدل إضافة مستند جديد. اختر نوع مستند دفع عادي.
@@ -3266,14 +3208,10 @@ Pending Transport Requests,طلبات نقل معلّقة
 Pending Utility Bills,فواتير الخدمات المعلّقة
 Pending Vehicle Write-Offs,طلبات شطب المركبات المعلّقة
 Pending on manifest,المتبقّون في كشف الوصول
-Per Pay Period,لكل فترة دفع
 "Per-installment scheduling limit, capped at 50% of actual pay-period gross pay from the native Salary Slip preview.",حد القسط الواحد، بحد أقصى ٥٠٪ من إجمالي أجر فترة الرواتب الفعلي حسب معاينة مسيّر الرواتب.
-"Per-installment scheduling limit, capped at 50% of monthly base salary. Native payroll remains responsible for the final salary calculation.",حد جدولة القسط الواحد، وبحد أقصى ٥٠٪ من الراتب الأساسي الشهري. يظل نظام الرواتب في HRMS مسؤولًا عن الحساب النهائي للراتب.
 Per-installment scheduling limit. It cannot exceed 50% of actual pay-period gross pay from the native Salary Slip preview.,حد القسط الواحد. ما يتجاوز ٥٠٪ من إجمالي أجر فترة الرواتب الفعلي حسب معاينة مسيّر الرواتب.
-Per-installment scheduling limit. It cannot exceed 50% of monthly base salary.,حد جدولة القسط الواحد. لا يمكن أن يتجاوز ٥٠٪ من الراتب الأساسي الشهري.
 "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",حالة صعود ومغادرة كل عامل في كشف الركاب. تُعبأ من الكشف عند بدء الرحلة بأول مسح أو تأكيد ذاتي، ويحدّثها النظام ضمن إجراءات الصعود.
 Per-stop completion the driver marks as the trip runs; persisted so it survives a reload.,حالة إكمال كل محطة، ويحددها السائق أثناء الرحلة وتُحفظ لتبقى بعد إعادة تحميل الصفحة.
-Per-type rules sourced from operations. Each row is disabled by default. Damage / Rent / Fuel / Custody.,قواعد لكل نوع مصدرها العمليات. كل صف معطّل افتراضيًا. الضرر / الإيجار / الوقود / العهدة.
 Percent a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised; blank or zero uses the built-in default.,النسبة التي يمكن أن يتجاوز بها استهلاك المركبة الفعلي حصتها الشهرية قبل إصدار تنبيه تجاوز أو زيادة مفرطة في الحصة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Percentage of the total invoice borne by this building/unit,النسبة المئوية من إجمالي الفاتورة التي يتحمّلها هذا المبنى/الوحدة
 Performed By,نُفّذ بواسطة
@@ -3374,7 +3312,6 @@ Please start renewal.,يُرجى بدء التجديد.
 Plumbing,سباكة
 Police Report Number,رقم بلاغ الشرطة
 Police report PDF or a photo of the scene.,ملف بلاغ الشرطة أو صورة لموقع الحادث.
-Policy,السياسة
 Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,مهام سلامة بنتائج ضعيفة
@@ -3396,7 +3333,6 @@ Position of the Quota,وضع الحصة
 Positions,المواضع
 Post (memo),قيد (مذكرة)
 Post accommodation and fleet costs to the General Ledger?,ترحيل تكاليف السكن والأسطول إلى دفتر الأستاذ العام؟
-Post custody-damage deductions to salary?,ترحيل خصومات تلف العهدة على الراتب؟
 Post-Work,بعد العمل
 Posted (memo),مُرحّل (مذكرة)
 Poster,الملصق
@@ -3642,7 +3578,6 @@ Recover,استرداد
 Recover Cost from Driver,استرداد التكلفة من السائق
 Recover From Employee,الاسترداد من الموظف
 Recover from Driver,استرداد من السائق
-Recover the repair cost from the driver. On submit this raises one Employee Advance (the receivable); the wage installments are then governed by the Salary Deduction Policy and are OFF until it is activated.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد تُنشأ سلفة موظف واحدة (المديونية)؛ وتخضع أقساط الخصم من الأجر بعدها لسياسة خصومات الرواتب وتظل موقوفة حتى تفعيلها.
 Recover the repair cost from the driver. On submit this raises one native Employee Advance; payroll installments remain off until Employee Advance Recovery is enabled in Salis Settings.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد، تُنشأ سلفة موظف واحدة في HRMS. تظل أقساط الرواتب معطّلة حتى تفعيل استرداد سلفة الموظف في إعدادات ساليس.
 Recovered,مُسترد
 Recovered Share,نسبة المسترد
@@ -3832,15 +3767,10 @@ Requester Type,نوع مقدّم الطلب
 Requests,الطلبات
 Requests can only be assigned to a Planned trip.,لا يمكن إسناد الطلبات إلا إلى رحلة مخططة.
 Requests in category {0} are resolved directly and have no target document to create.,الطلبات في الفئة {0} تُحلّ مباشرةً ولا يوجد لها مستند مستهدف لإنشائه.
-Require Acknowledgment for All Deductions,اشتراط الإقرار لجميع الخصومات
 Require An Active Store,اشتراط مخزن مفتوح
-Require Employee Acknowledgment,اشتراط إقرار الموظف
 Require Handover OTP,اشتراط رمز تحقق للتسليم
-Require Internal Approval,اشتراط الاعتماد الداخلي
 Require Weekly All-Building Coverage,اشتراط تغطية جميع المباني أسبوعيًا
 Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
-Require the worker's recorded consent (the signed acknowledgment on the source operational document) before any deduction posts.,اشتراط موافقة العامل المسجلة (الإقرار الموقع على المستند التشغيلي المصدر) قبل ترحيل أي خصم.
-Require the worker's recorded consent (the signed acknowledgment on the source operational document) before this type posts; KSA Labor Law requires consent for wage deductions.,اشتراط موافقة العامل المسجلة (الإقرار الموقع على المستند التشغيلي المصدر) قبل ترحيل هذا النوع؛ يوجب نظام العمل السعودي موافقة العامل على خصومات الأجر.
 Required Issue Priorities are missing: {0}.,أولويات البلاغات المطلوبة ناقصة: {0}.
 Required before the case can move beyond Open.,"مطلوب قبل أن تتجاوز الحالة وضع ""مفتوحة""."
 "Required common-area evidence. Bathrooms, Kitchen, and Corridors must each have a Cleaned photo or be marked Not Cleaned / N/A with a note before submit.",إثبات مطلوب للمناطق المشتركة. يجب أن تتضمن كل من دورات المياه والمطبخ والممرات صورة بحالة «تم التنظيف»، أو تُحدد بحالة «لم يُنظف» أو «لا ينطبق» مع ملاحظة قبل الاعتماد.
@@ -3959,7 +3889,6 @@ Risk (default),الخطورة (افتراضي)
 Road Legality of the Vehicle,نظامية المركبة على الطريق
 Role,الدور
 Role Profile,ملف الأدوار
-Role that may approve a deduction of this type. Recorded for reference; nothing enforces it.,الدور الذي يجوز له اعتماد خصم من هذا النوع. مسجَّل للعلم فقط، ولا شيء يفرضه.
 "Rolled-up regulatory compliance state of the vehicle across its documents, flagging vehicles that are compliant, approaching expiry, expired, or not tracked.",حالة الامتثال التنظيمي المجمّعة للمركبة عبر وثائقها، تشير إلى المركبات الممتثلة أو المقتربة من انتهاء الصلاحية أو المنتهية أو غير المتتبَّعة.
 Roof,سطح
 Room,الغرفة
@@ -4098,14 +4027,7 @@ Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلا
 "Safety setup complete. Assignments created: {0}, skipped (existing): {1}. Templates created: {2}, reused: {3}.",اكتمل إعداد السلامة. الإسنادات المُنشأة: {0}، المتخطاة (موجودة مسبقاً): {1}. القوالب المُنشأة: {2}، المُعاد استخدامها: {3}.
 Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
 Salary Component,مكوّن الراتب
-Salary Component {0} must be of type Deduction (deduction type {1}).,يجب أن يكون مكون الراتب {0} من نوع خصم (نوع الخصم {1}).
-"Salary Component {0} posts to {1} for company {2}, but employee advances are paid from {3}. Damage recovery would clear the deduction without clearing the advance. Point both at one account.",مكوّن الراتب {0} يُقيَّد على {1} في شركة {2}، بينما تُصرف سلف الموظفين من {3}. استرداد الضرر سيُغلق الخصم دون إغلاق السلفة. وحِّد الحسابين.
 Salary Deduction,خصم من الراتب
-Salary Deduction Policy,سياسة الخصم من الراتب
-Salary Deduction Type Rule,قاعدة خصم الراتب
-Salary Deductions,الخصومات من الراتب
-Salary component {0} must be of type Deduction for damage assessments.,مكوّن الراتب {0} يجب أن يكون من نوع خصم لتقييمات التلفيات.
-Salary deductions are OFF by default and require legal/HR review before activation. You can configure them later in the Salary Deduction Policy.,خصومات الراتب معطلة افتراضيًا، ولا تُفعّل إلا بعد مراجعة الشؤون القانونية والموارد البشرية. يمكنك إعدادها لاحقًا في سياسة الخصم من الراتب.
 Sales Taxes and Charges Template,قالب ضرائب ورسوم المبيعات
 Salis,ساليس
 Salis Active Trips,رحلات ساليس النشطة
@@ -4278,7 +4200,6 @@ Service Type,نوع الخدمة
 Service and Objection,التبليغ والاعتراض
 "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",مدة استخدام المستهلكات المصروفة، مثل المفروشات والمراتب. القيمة 0 تعني بلا انتهاء، وتنبّه مهمة يومية على الأصناف المحتفظ بها بعد تجاوز هذه المدة.
 Service of Work,الخدمة المطلوبة
-"Set ON only after Legal/HR has reviewed the caps, the consent flow, and the per-type rules against current KSA Labor Law.",فعّل هذا فقط بعد أن تراجع الإدارة القانونية/الموارد البشرية الحدود القصوى ومسار الموافقة وقواعد كل نوع وفقًا لنظام العمل السعودي الحالي.
 Set a Landlord on lease {0} before raising a rent payment — a payment needs a party to settle with.,حدّد المؤجّر في العقد {0} قبل إصدار دفعة إيجار — الدفعة تحتاج طرفًا تُسدَّد له.
 Set a Service Item on the contract before raising a purchase request.,عيّن صنف خدمة على العقد قبل إصدار طلب شراء.
 Set an Issue Type to make this finding actionable: on report submit it spawns a Maintenance Request of this type.,حدد نوع المشكلة لتصبح هذه الملاحظة قابلة للمعالجة؛ فعند اعتماد التقرير يُنشأ طلب صيانة من هذا النوع.
@@ -4397,7 +4318,6 @@ Signed handover evidence is required before submitting.,إثبات تسليم م
 Signed on paper below,التوقيع على الورق أدناه
 "Signing records that the notice was served and read, not that its value is agreed.",التوقيع يثبت أن الإشعار سُلِّم وقُرئ، ولا يعني الموافقة على المبلغ.
 Single Bed Frame,هيكل سرير فردي
-"Single config that governs whether, and how, operational events (damage, rent, fuel, custody) may be deducted from a worker's salary. Default = NO deduction: the global switch is OFF and every per-type rule is disabled until explicitly activated after legal review.",إعداد واحد يحكم هل يمكن خصم الأحداث التشغيلية (تلف أو إيجار أو وقود أو عهدة) من راتب العامل وكيف. الافتراضي هو عدم الخصم: المفتاح العام موقوف وكل قاعدة نوع معطّلة حتى تُفعَّل صراحة بعد المراجعة القانونية.
 "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
 Single configuration record for optional Masar portal brand overrides.,سجل إعدادات واحد لتخصيص علامة بوابة مسار اختيارياً.
 Single configuration record for the Salis Fleet Management module.,سجل إعدادات واحد لوحدة إدارة أسطول ساليس.
@@ -4616,7 +4536,6 @@ Supplier VAT Registration Number,الرقم الضريبي للمورّد
 Supplier-Billed Cost This Month,التكلفة المفوترة من المورّد هذا الشهر
 Suppliers,الموردون
 Support End Time,وقت انتهاء الدعم
-Support Holiday List,قائمة عطلات الدعم
 Support Holiday List Name,اسم قائمة إجازات الدعم
 Support Start Time,وقت بدء الدعم
 Support Workdays,أيام عمل الدعم
@@ -4803,7 +4722,6 @@ The number listed fits the seats in the vehicle,عدد المذكورين ينا
 The on-site code has expired. Ask the initiator to regenerate it.,انتهت صلاحية رمز الموقع. اطلب من المُبادر إعادة توليده.
 The one role allowed to post further back than the window above.,الدور الوحيد الذي يجوز له التسجيل أبعد من النافذة أعلاه.
 The one-time password has expired. Ask the procurement supervisor to regenerate it.,انتهت صلاحية رمز التحقق لمرة واحدة. اطلب من مشرف المشتريات إعادة توليده.
-"The operational source DocType whose submission may raise this deduction (for example Custody Damage Assessment, Accommodation Checkout). Recorded for reference; no controller reads it.",نوع المستند التشغيلي الذي قد يرفع هذا الخصم عند اعتماده (مثل تقييم تلفيات العهدة، أو إخلاء السكن). مسجَّل للعلم فقط، ولا يقرأه أي متحكّم.
 The operator's own contract or account agreement number.,رقم عقد مشغل الاتصالات أو اتفاقية حسابه.
 The originating child row index (Inspection Finding Item idx) within the source execution. Part of the idempotency key so each finding row posts at most once.,ترتيب الصف الفرعي المصدر (ترتيب بند ملاحظة الفحص) ضمن التنفيذ المصدر. جزء من مفتاح منع التكرار بحيث يُرحَّل كل صف ملاحظة مرة واحدة على الأكثر.
 The originating operational document this advance recovers.,المستند التشغيلي الأصلي الذي أُنشئت هذه السلفة لاسترداد قيمته.
@@ -4812,9 +4730,7 @@ The payment document the Pay action builds (sets the Payment Routing target). Le
 "The person who signs for the landlord; the Supplier is an entity, not a signature.",الشخص الذي يوقّع نيابة عن المالك؛ فالمورّد جهة لا توقيع.
 The photo data is invalid.,بيانات الصورة غير صالحة.
 The photo dimensions are too large.,أبعاد الصورة كبيرة جداً.
-The photo filename is invalid.,اسم ملف الصورة غير صالح.
 The photo is too large.,حجم الصورة كبير جداً.
-"The photo must be a JPEG, PNG, or WebP image.",يجب أن تكون الصورة بصيغة JPEG أو PNG أو WebP.
 The pickup date and time is not valid.,تاريخ ووقت الصعود غير صالحين.
 The policy in force on our vehicle on the day of the incident.,وثيقة التأمين السارية على مركبتنا يوم الحادث.
 "The pre-arrival manifest this worker was expected on, if any.",كشف الوصول المتوقع إدراج هذا العامل فيه، إن وجد.
@@ -5066,7 +4982,6 @@ Triage Notes,ملاحظات الفرز
 Triaged,تم الفرز
 Triaging requests...,جارٍ فرز الطلبات...
 Triaging {0} requests in the background...,جارٍ فرز {0} طلبًا في الخلفية…
-Trigger Event,الحدث المُشغِّل
 Trigger alert if monthly bill deviates from average by more than this percentage.,أطلق تنبيهاً إذا انحرفت الفاتورة الشهرية عن المتوسط بأكثر من هذه النسبة.
 Trip,الرحلة
 Trip Boarding Event,حدث صعود الرحلة
@@ -5169,7 +5084,6 @@ Useful Life (Years),العمر الإنتاجي (سنوات)
 Useful Life (Years) must be greater than zero.,العمر الإنتاجي (بالسنوات) يجب أن يكون أكبر من صفر.
 User,المستخدم
 User Agent,بيانات المتصفح والجهاز
-User who authorized activating this deduction type (management sign-off).,المستخدم الذي اعتمد تفعيل نوع الخصم هذا (اعتماد الإدارة).
 Usually blank on arrival; populated when the Iqama is issued before the worker is linked to a permanent Employee.,يكون فارغًا عادةً عند الوصول؛ يُملأ عند إصدار الإقامة قبل ربط العامل بموظف دائم.
 Utilisation,الاستخدام
 Utilisation %,نسبة الاستخدام (%)
@@ -5357,7 +5271,6 @@ What was really spent; total_procurement_cost is the estimate.,ما صُرف ف�
 WhatsApp,واتساب
 WhatsApp / SMS Gateway,بوابة واتساب / الرسائل النصية
 "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",عند الإيقاف، تكون صفوف سجل تكاليف السكن معلومات تشغيلية فقط ولا تنشئ قيودًا محاسبية.
-"When ON (default), the deduction also needs internal approval (beyond the employee's consent) before it is posted.",عند التفعيل (الافتراضي)، يحتاج الخصم أيضًا إلى اعتماد داخلي (إضافة إلى موافقة الموظف) قبل ترحيله.
 "When ON, expiry/overdue scheduler jobs post a timeline comment on the source document. Email is controlled by the Notification DocType. When OFF, jobs run silently.",عند التفعيل، تضيف مهام الانتهاء والتأخر تعليقًا في المخطط الزمني للمستند الأصلي. يتحكم مستند الإشعار في البريد الإلكتروني. وعند الإيقاف، تعمل المهام دون تنبيه.
 "When ON, the Arrivals Desk register sheet offers a camera capture that reads a passport's machine-readable zone (MRZ) and pre-fills the name, passport number, nationality, and expiry. Requires an OCR engine to be available on the bench (see docs). When OFF (default) or when OCR is unavailable, manual entry is used.",عند التفعيل، تتيح صفحة تسجيل مكتب الوصول التقاطاً بالكاميرا يقرأ المنطقة المقروءة آلياً في الجواز ويعبّئ الاسم ورقم الجواز والجنسية وتاريخ الانتهاء. ويتطلب توفر محرك التعرّف الضوئي على الخادم. وعند الإيقاف، وهو الوضع الافتراضي، أو عند عدم توفر المحرك، يُستخدم الإدخال اليدوي.
 "When ON, the weekly coverage gate requires every building to be covered by a safety round.",عند التفعيل، يشترط ضابط التغطية الأسبوعية شمول كل مبنى بجولة سلامة.
@@ -5380,7 +5293,6 @@ Where the Damage Came From,مصدر التلف
 Where the vehicle physically changed hands.,المكان الذي سُلّمت فيه المركبة فعلاً.
 Where the written-off vehicle or part goes once it leaves service.,إلى أين تذهب المركبة أو القطعة المشطوبة بعد خروجها من الخدمة.
 Whether anybody was hurt. An insurer treats a bodily-injury accident under a different cover.,هل أُصيب أحد. تعامل شركة التأمين حادث الإصابات تحت تغطية أخرى.
-Which lifecycle event on the source document raises the deduction.,أي حدث في دورة حياة المستند المصدر يُنشئ الخصم.
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
 "Which physical unit came back, for a serialised article.",أي قطعة رجعت، للصنف ذي الرقم التسلسلي.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
