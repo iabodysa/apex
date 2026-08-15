@@ -149,15 +149,10 @@ class TestFreelancer(FrappeTestCase):
         with self.assertRaises(frappe.PermissionError):
             refused.insert()
 
-    # REMOVED 2026-08-15: test_the_housing_role_can_still_maintain_an_existing_freelance.
-    #
-    # Test Code Duplication. It built the same Freelancer, made the same Accommodation
-    # Manager, made the same `status = "Terminated"` edit and the same save, and read
-    # back the same restore-on-update path as
-    # test_freelancer_salary_permlevel.py::test_the_housing_role_can_still_save_with_every_level1_field_intact
-    # — differing only in which permlevel-1 field it checked survived. That case now
-    # carries BOTH fields as subTests, so the national_id_or_iqama verdict this one owned
-    # is still asserted, beside the fuller mechanism note (document.py:412 before :414,
+    # The housing role's restore-on-update path for national_id_or_iqama is not asserted
+    # here: it is a subTest of test_freelancer_salary_permlevel.py::
+    # test_the_housing_role_can_still_save_with_every_level1_field_intact, which carries
+    # both permlevel-1 fields beside the mechanism note (document.py:412 before :414,
     # base_document.py:1288,1291).
 
     def test_freelance_is_an_accounting_party(self):

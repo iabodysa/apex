@@ -17,15 +17,9 @@ BOARDING = ROOT / "apex" / "salis" / "api" / "boarding.py"
 BOARDING_FLOW = ROOT / "apex" / "salis" / "api" / "boarding_flow.py"
 MASAR = ROOT / "apex" / "salis" / "api" / "masar.py"
 
-# The driver portal's whitelisted surface, endpoint -> per-minute ceiling.
-#
-# ONE map, where this guard used to carry four overlapping sets. The sets encoded a
-# three-tier model (10 / 30 / 120) that the package outgrew: the personal reads land on
-# 60, and a tier the model cannot express is a tier nobody grades. They also still named
-# attendance.py, boarding.py, clearance.py, fuel.py, home.py, notifications.py and
-# support.py inside this package, seven modules that no longer exist — so the inventory
-# assertion, the allow_guest sweep and the POST-only sweep had been red since the portal
-# was refactored down to the six modules below.
+# The driver portal's whitelisted surface, endpoint -> per-minute ceiling. ONE map with a
+# ceiling per endpoint rather than shared tiers: the personal reads land on 60, and a tier
+# the model cannot express is a tier nobody grades.
 DRIVER_PORTAL_LIMITS = {
     ("execution.py", "start_my_trip"): 10,
     ("execution.py", "complete_my_trip"): 30,
@@ -435,25 +429,13 @@ class TestDriverPortalGuestInventory(unittest.TestCase):
         self.assertLess(session_driver_line, trip_read_line)
 
 
-# REMOVED: TestDriverPortalBootstrapAndPhotoFlow.
-#
-# Six cases whose subjects are no longer in this repository, or never were mine:
-#
-#   * the photo-upload trio graded ``frontend/driver/src`` and
-#     ``apex/public/worker_portal/assets``. Both were retired by the portal clean
-#     cutover. ``test_frontend_never_calls_the_generic_upload_endpoint`` was the worst
-#     of them: it rglob'd a directory that does not exist, joined the empty result, and
-#     asserted a substring was absent from an empty string — a pass over a population of
-#     zero, green forever and grading nothing.
-#   * ``test_support_and_attendance_do_not_accept_uploaded_file_urls`` and the
-#     notifications half of the docstring probe read driver_portal/support.py,
-#     attendance.py and notifications.py, none of which exist.
-#   * ``test_page_context_uses_the_native_csrf_token`` searched apex/www/driver.py for a
-#     literal assignment. The contract is intact but the line moved to
-#     apex/apex_core/utils/portal_bootstrap.py:143, which driver.py calls via
-#     publish_portal_context — so this was a stale string probe, not a finding. It is
-#     covered where the code now lives: apex/apex_core/utils/test_portal_bootstrap.py
-#     (shipped) and .claude/tests/apex/www/test_portal_csrf_bootstrap.py.
+# The page-context CSRF token is NOT graded here. The contract lives at
+# apex/apex_core/utils/portal_bootstrap.py:143, which apex/www/driver.py reaches through
+# publish_portal_context, and is covered by apex/apex_core/utils/test_portal_bootstrap.py
+# (shipped) and .claude/tests/apex/www/test_portal_csrf_bootstrap.py. Do not re-add an
+# rglob probe over frontend/driver/src or public/worker_portal/assets: both were retired by
+# the portal clean cutover, so the sweep would assert over an empty population and pass
+# forever while grading nothing.
 
 
 if __name__ == "__main__":

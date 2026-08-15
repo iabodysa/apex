@@ -1,17 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 """a workspace grant plus a DocPerm still leaves a persona on an empty page.
 
-SUBJECT: the shipped Workspace RECORDS — apex/salis/workspace/salis/salis.json (506
-lines) and fleet/fleet.json (422), 928 together — not the 1-line ``__init__.py`` beside
-this file. Measured against the package directory this reads 467x, which is a grouping
-artifact and nothing else; against what it actually grades it is 0.50x, well inside the
-2x rule and claiming no exception. A workspace's subject is a JSON record, so any tool
-that counts only ``.py`` in the directory will mis-measure every test in here. gave ``Government Relations Officer`` read DocPerms so it would stop landing on a
-blank ``Compliance and Rentals``. then granted it the ``Salis`` ROOT as well,
-because the desk sidebar nests a child only under an already-rendered parent
-(``workspace.js`` ``make_sidebar``), so without the root grant the child was unreachable.
-Both were right, and together they produced a third shape: the persona now reaches the
-Salis root and the root holds nothing it can open.
+The subject is the shipped Workspace RECORDS — apex/salis/workspace/salis/salis.json and
+fleet/fleet.json — not the ``__init__.py`` beside this file. Granting a persona read DocPerms on a
+child workspace is not enough on its own: the desk sidebar nests a child only under an
+already-rendered parent (``workspace.js`` ``make_sidebar``), so the root has to be granted too, and a
+root that holds nothing the persona can open is the third shape this guard exists to catch.
 
 ``Workspace.is_item_allowed`` (frappe/desk/desktop.py:143-166) decides that per item:
 
@@ -23,40 +17,27 @@ Salis root and the root holds nothing it can open.
   rule test_report_role_coverage.py guards on the report side;
 - ``dashboard``, ``url`` and ``help`` -> ``True`` unconditionally.
 
-That last line is why "the page is not literally blank" was never the right test. The
-Salis root's Dashboards card rendered for the persona while every DocType and Report link
-on the page was filtered away, so it could navigate to two dashboards whose charts read
-records it has no permission on. This guard therefore counts only the OPENABLE items and
-requires each granted role to have at least one.
+That last line is why "the page is not literally blank" was never the right test. The Salis root's
+Dashboards card rendered for a persona while every DocType and Report link on the page was filtered
+away, so it could navigate to two dashboards whose charts read records it has no permission on. This
+guard therefore counts only the OPENABLE items and requires each granted role to have at least one.
 
-SHORTCUTS ARE OPENABLE ITEMS TOO, which this guard missed until 2026-08-08. `get_shortcuts`
-(frappe/desk/desktop.py:299) runs each one through the same `is_item_allowed`, so a page
-whose links are all filtered away still renders its shortcut cards — and the roots have
-since been redesigned into landing pages that carry their work as shortcuts, not links.
-Reading links alone reported TEN workspace/role pairs as empty pages a persona actually
-opens with cards on them. Dashboard and URL shortcuts stay excluded for the reason above.
+SHORTCUTS ARE OPENABLE ITEMS TOO. ``get_shortcuts`` (frappe/desk/desktop.py:299) runs each one
+through the same ``is_item_allowed``, so a page whose links are all filtered away still renders its
+shortcut cards — and the roots are landing pages that carry their work as shortcuts, not links.
+Reading links alone reported TEN workspace/role pairs as empty pages a persona actually opens with
+cards on them. Dashboard and URL shortcuts stay excluded for the reason above.
 
-The fix shipped is on the root's own terms, not the persona's: the Master Data card
-is documented as "Reference data: durable records you set up once", it listed the routing
-masters, and it omitted ``Salis Vehicle`` and ``Salis Driver`` -- the two registries every
-other Salis record links to, and the only Salis DocTypes whose reader set matches the
-root's grant list exactly. Adding them fills the card for all seven granted roles.
+The Master Data card carries ``Salis Vehicle`` and ``Salis Driver`` deliberately: they are the two
+registries every other Salis record links to, and the only Salis DocTypes whose reader set matches
+the root's grant list exactly, so they fill the card for all seven granted roles.
 
-An earlier change then drained both ratchets this file carried, on the workspace shape of the time. The
-``Compliance and Rentals`` workspace it also guarded no longer ships — the app is nine
-workspaces and that is not one of them — so its test class was removed rather than left
-raising KeyError. The Habitat root's three stranded personas still get the operational
-record their own child workspace leads with, Cleaning Log, Safety Round and SIM Custody
-Assignment, now as shortcuts on Quick Actions rather than links on an Operations card.
-
-Nothing here widens access. ``is_item_allowed`` filters every link per user, so a link is
-only ever a shortcut to a list the user could already open by URL; the guards below assert
-that each added or retargeted link was already covered by an existing read DocPerm.
+Nothing here widens access. ``is_item_allowed`` filters every link per user, so a link is only ever a
+shortcut to a list the user could already open by URL; the guards below assert that each added or
+retargeted link was already covered by an existing read DocPerm.
 
 Lives beside the workspace package it fixes: ``apex/tests/`` is closed to new modules
 (test_colocation_ratchet.py) and a cross-workspace invariant owns no single record dir.
-
-Run standalone:  python3 -m unittest apex.salis.workspace.test_salis_root_persona_content -v
 """
 
 import glob

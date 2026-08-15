@@ -55,14 +55,11 @@ def capabilities_of(context):
 
 
 # (label, controller module, route, refused role, admitted roles, capability that must be
-# granted or None for "any capability at all").
-#
-# "Internal Auditor" is the refused role throughout: it is a real shipped role that holds
-# none of the portal role sets, so a gate that admitted it would be admitting everyone.
-#
-# Safety Officer is listed as ADMITTED on /safety on purpose. Refusing it asserted the very
-# defect fixed — a role that reaches a portal it cannot use. A maker who cannot submit
-# records a round for a supervisor to close rather than being turned away at the door.
+# granted or None for "any capability at all"). "Internal Auditor" is the refused role
+# throughout: a real shipped role that holds none of the portal role sets, so a gate that
+# admitted it would be admitting everyone. Safety Officer is ADMITTED on /safety on purpose
+# — a maker who cannot submit still records a round for a supervisor to close, so refusing
+# it would turn a role away from a portal it can use.
 GATED_SURFACES = (
     ("housing", housing, "/housing", "Internal Auditor", ("Accommodation Manager",), None),
     (

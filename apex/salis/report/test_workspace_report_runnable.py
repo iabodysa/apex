@@ -1,71 +1,46 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""a workspace Report link renders for a role whose ref_doctype forbids running it.
+"""A workspace Report link renders for a role whose ref_doctype forbids running it.
 
-SUBJECT: the 19 report PACKAGES under apex/salis/report/ (2,153 lines) crossed with the
-Salis and Fleet workspace records, not the 1-line ``__init__.py`` beside this file. The
-258x a per-directory count reports is a grouping artifact; with test_report_row_scope.py,
-which sweeps the same population, this comes to 0.33x — inside the 2x rule, no exception
-claimed.
+``Workspace.is_item_allowed`` clears a Report link on the report's ``roles`` child table ALONE
+(``frappe/desk/desktop.py:155-158`` -> ``boot.get_allowed_reports`` -> ``get_user_pages_or_reports``,
+boot.py:249-268, which joins only ``Has Role``); it never looks at ``ref_doctype``. Opening the report
+then goes through ``frappe/desk/query_report.py:47``, which throws PermissionError unless
+``frappe.has_permission(ref_doctype, "report")``. So the link renders live and dies on click, with no
+clue on the workspace that it would.
 
-``Workspace.is_item_allowed`` clears a Report link on the report's ``roles`` child table
-ALONE (``frappe/desk/desktop.py:155-158`` -> ``boot.get_allowed_reports`` ->
-``get_user_pages_or_reports``, boot.py:249-268, which joins only ``Has Role``). It never
-looks at ``ref_doctype``. Opening the report then goes through
-``frappe/desk/query_report.py:47``, which throws PermissionError unless
-``frappe.has_permission(ref_doctype, "report")``. So the link renders live and dies on
-click, with no clue on the workspace that it would.
-
-Three shapes make ``has_permission(ref, "report")`` False for a role:
-
-1. ``ref_doctype`` is a child table — ``frappe/permissions.py:120`` routes to
-   ``has_child_permission``, which returns False at :785 when no ``parent_doctype`` is
-   supplied, and query_report supplies none. The known instance is the Vehicle
-   Compliance Register; the whole-app clause for it lives in
-   ``test_report_role_coverage.TestReportRefDoctypeIsRunnable``, which covers reports
-   with no workspace link too, so neither guard subsumes the other.
-2. The role holds no permlevel-0 DocPerm on the ref at all.
-3. The role holds one, but the row does not set ``report``.
+Three shapes make ``has_permission(ref, "report")`` False for a role. (1) ``ref_doctype`` is a child
+table — ``frappe/permissions.py:120`` routes to ``has_child_permission``, which returns False at :785
+when no ``parent_doctype`` is supplied, and query_report supplies none; the known instance is the
+Vehicle Compliance Register, whose whole-app clause lives in
+``test_report_role_coverage.TestReportRefDoctypeIsRunnable`` — that one covers reports with no
+workspace link too, so neither guard subsumes the other. (2) The role holds no permlevel-0 DocPerm on
+the ref at all. (3) The role holds one, but the row does not set ``report``.
 
 Shape 3 is the common one and is NOT cosmetic. ``DocPerm.report`` has ``default: 1`` in
-``frappe/core/doctype/docperm/docperm.json``, so it is easy to assume an omitted flag
-becomes 1 on import. It does not: ``frappe/modules/import_file.py:212`` puts the
-framework into import mode, which makes ``Document._set_defaults`` return at
-document.py:834 before any field default is applied, and ``BaseDocument.get_valid_dict``
-then coerces the unset Check field to 0 at base_document.py:394. The row lands with
-``report=0`` and the column default never fires. Verified read-only against the live
-bench DB: ``Accommodation Ledger`` / ``System Manager`` ships ``{"read": 1, "role":
-"System Manager"}`` and stores ``report=0``.
+``frappe/core/doctype/docperm/docperm.json``, so it is easy to assume an omitted flag becomes 1 on
+import. It does not: ``frappe/modules/import_file.py:212`` puts the framework into import mode, which
+makes ``Document._set_defaults`` return at document.py:834 before any field default is applied, and
+``BaseDocument.get_valid_dict`` then coerces the unset Check field to 0 at base_document.py:394. The
+row lands with ``report=0`` and the column default never fires. Verified read-only against the live
+bench DB: ``Accommodation Ledger`` / ``System Manager`` ships ``{"read": 1, "role": "System Manager"}``
+and stores ``report=0``. ``if_owner`` is a fourth way to lose the right even with ``report: 1`` on the
+row: ``get_role_permissions`` (permissions.py:297-307) zeroes every ptype outside
+``("select", "read")`` when the only rows granting it are if_owner rows, so an if_owner-only
+``report`` grant still denies. ``permlevel`` above 0 never counts at all (permissions.py:284).
 
-``if_owner`` is a fourth way to lose the right even with ``report: 1`` on the row:
-``get_role_permissions`` (permissions.py:297-307) zeroes every ptype outside
-``("select", "read")`` when the only rows granting it are if_owner rows, so an
-if_owner-only ``report`` grant still denies. ``permlevel`` above 0 never counts at all
-(permissions.py:284).
-
-The audience of a link is ``workspace roles INTERSECT report roles`` — a report with an
-empty roles table is open to everyone, so it inherits the workspace's grant list
-(boot.py:275-285). Roles are evaluated one at a time, modelling a persona user who holds
-exactly that role; that is the population a workspace grant is written for.
+The audience of a link is ``workspace roles INTERSECT report roles`` — a report with an empty roles
+table is open to everyone, so it inherits the workspace's grant list (boot.py:275-285). Roles are
+evaluated one at a time, modelling a persona user who holds exactly that role; that is the population
+a workspace grant is written for.
 
 Scope: every module's workspace tree, ``links`` and ``shortcuts`` alike — ``get_shortcuts``
-(desktop.py:299) runs the same ``is_item_allowed`` check. No Report shortcut ships today;
-covering it costs nothing and stops the next one arriving unguarded. drained the baseline to empty. All 34 (ref_doctype, role) pairs behind the original
-27 links were resolved as access decisions, not flag flips: 30 rows that already held a
-permlevel-0 read gained an explicit ``"report": 1``; ``Internal Auditor`` gained the
-app's standard read/report/export oversight row on ``Audit Remediation Plan`` and
-``Operational Depreciation Snapshot``; and two roles were dropped from six reports whose
-source DocPerms never admitted them (``Accommodation Manager`` off the four Accommodation
-Ledger reports, ``Resident Supervisor`` off the two Accommodation Stock Ledger reports).
-Every grant on a row-scoped source was checked against that source's
-``permission_query_conditions`` scope: each report self-scopes before it queries, so no
-role gained rows outside the estate or project it is held inside.
+(desktop.py:299) runs the same ``is_item_allowed`` check. No Report shortcut ships today; covering it
+costs nothing and stops the next one arriving unguarded. Every grant on a row-scoped source was
+checked against that source's ``permission_query_conditions`` scope: each report self-scopes before it
+queries, so no role gained rows outside the estate or project it is held inside.
 
-This module sits beside ``test_report_role_coverage.py`` for the reason that file records:
-the invariant spans the workspace, report and doctype trees of every module, so it owns no
-single home, and the central ``apex/tests/`` directory is shrink-only
-(``test_colocation_ratchet.py``).
-
-Run standalone:  python3 -m unittest apex.salis.report.test_workspace_report_runnable -v
+It sits beside ``test_report_role_coverage.py``: the invariant spans every module's workspace, report
+and doctype trees so it owns no single home, and ``apex/tests/`` is shrink-only (test_colocation_ratchet.py).
 """
 
 import glob

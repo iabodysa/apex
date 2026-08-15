@@ -172,14 +172,9 @@ SALIS_SCOPE = {
     "Fuel Daily Log": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Rental Vehicle Movement": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Movement Cost Recovery": _hop("vehicle", "Salis Vehicle", "scoped"),
-    # Transport Trip Rating is deliberately absent, and it is the one project-anchored
-    # Salis DocType that is. Scoping it closes a real cross-project read — the Worker
-    # role holds read and write on it — but it also closes the write, because
-    # _owner_or_project_has_permission skips the ownership branch on an UNSAVED row and
-    # the row must then anchor itself. The portal Worker capacity carries no Project User
-    # Permission and no Salis Driver link, so it can anchor to nothing and every rating
-    # would fail closed on create. Scope it in the same change that gives the portal
-    # capacities a project, never before.
+    # Transport Trip Rating is absent on purpose: the ownership branch is skipped on an
+    # UNSAVED row, and the portal Worker capacity has no project to anchor to instead, so
+    # scoping it would refuse every rating on create. Scope it with that project, not before.
 }
 
 INDIRECT_PROJECT_SCOPED = frozenset(

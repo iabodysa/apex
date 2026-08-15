@@ -1,12 +1,10 @@
 # Copyright (c) 2026, afmcoltd
 """The stored worker credential is readable by System Manager alone.
 
-Owner decision, 2026-07-27. Of the seven roles holding this DocType, the housing role was
-the ONLY peer carrying a permlevel-1 read row on ``token`` / ``token_enc``. No written
-reason for that row was ever found -- not in a controller docstring, not in a colocated
-test, not in the field descriptions -- so it was withdrawn. Its permlevel-0 row is
-untouched: the housing role still keeps, creates and maintains the record, it just stops
-receiving the two credential columns.
+Owner decision, 2026-07-27: the housing role's permlevel-1 read row on ``token`` /
+``token_enc`` was withdrawn. Its permlevel-0 row is untouched -- the housing role still
+keeps, creates and maintains the record, it just stops receiving the two credential
+columns.
 
 WHAT IT DOES NOT BUY: the record, not the credential. ``reshare_worker_link`` hands the RAW
 token to every issuer role via ``authorize_issuance``, which reads role and scope and never
@@ -18,32 +16,27 @@ A permlevel-1 row is NOT a duplicate of the permlevel-0 row for the same role.
 questions and removing one must not disturb the other. ``test_the_level_zero_row_survived``
 proves that off the shipped JSON.
 
-WHERE THE STRIP ACTUALLY LIVES, because it is not where people look
-------------------------------------------------------------------
-``frappe.get_doc`` does NOT conceal anything. The concealment is
-``apply_fieldlevel_read_permissions`` (frappe/model/document.py), called only on the API
-paths -- ``frappe.client.get``, ``frappe/desk/form/load.py`` and the REST handlers.
-Asserting on a raw in-process document would therefore prove nothing at all, so every read
-verdict below goes through ``frappe.client.get``.
+WHERE THE STRIP ACTUALLY LIVES, because it is not where people look. ``frappe.get_doc``
+does NOT conceal anything. The concealment is ``apply_fieldlevel_read_permissions``
+(frappe/model/document.py), called only on the API paths -- ``frappe.client.get``,
+``frappe/desk/form/load.py`` and the REST handlers. Asserting on a raw in-process document
+would therefore prove nothing at all, so every read verdict below goes through
+``frappe.client.get``.
 
-WHY ``assertIsNone`` IS CORRECT HERE AND WOULD BE WRONG ELSEWHERE
------------------------------------------------------------------
-The strip ``delattr``s the attribute, but ``as_dict`` then rebuilds EVERY column from the
-meta and coerces the missing value by FIELDTYPE. ``token`` is Data and ``token_enc`` is
-Small Text, so both survive as ``None`` -- and ``token`` additionally lands in the
-unique-and-empty branch that sets ``None`` explicitly.
-
-Had either field been Currency or Float it would arrive as ``0.0`` via ``flt()``, and an Int
-as ``0`` via ``cint()`` -- never ``None``. ``assertIsNone`` would then pass vacuously never,
-and fail on a perfectly concealed field. Anyone changing the fieldtype of these two columns
-must change the assertion with it.
+WHY ``assertIsNone`` IS CORRECT HERE AND WOULD BE WRONG ELSEWHERE. The strip ``delattr``s
+the attribute, but ``as_dict`` then rebuilds EVERY column from the meta and coerces the
+missing value by FIELDTYPE. ``token`` is Data and ``token_enc`` is Small Text, so both
+survive as ``None`` -- and ``token`` additionally lands in the unique-and-empty branch that
+sets ``None`` explicitly. Had either field been Currency or Float it would arrive as
+``0.0`` via ``flt()``, and an Int as ``0`` via ``cint()`` -- never ``None``.
+``assertIsNone`` would then pass vacuously never, and fail on a perfectly concealed field.
+Anyone changing the fieldtype of these two columns must change the assertion with it.
 
 FIXTURES. The credential subject is ERPNext's ``_Test Employee``, named by
-``test_dependencies`` -- the previous form of this file minted an Employee (and looked a
-Company up for it) per method. The two identities come from the shared ``_user``
-get-or-create. What is still built here is the credential row itself, which IS the subject:
-``employee`` is unique on this DocType and the rollback is per CLASS, so each method deletes
-the row it minted rather than waiting for a rollback that has not happened yet.
+``test_dependencies``, and the two identities come from the shared ``_user`` get-or-create.
+What is built here is the credential row itself, which IS the subject: ``employee`` is
+unique on this DocType and the rollback is per CLASS, so each method deletes the row it
+minted rather than waiting for a rollback that has not happened yet.
 """
 
 from __future__ import annotations

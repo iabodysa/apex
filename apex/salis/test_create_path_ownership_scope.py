@@ -1,48 +1,43 @@
 # Copyright (c) 2026, AFMCO and contributors
 """ownership is not an access basis on an UNSAVED row.
 
-``Document.insert`` stamps ``owner`` with the acting user (frappe/model/document.py:298)
-two statements before ``check_permission("create")`` (:300). The creator is therefore
-ALWAYS the owner at the create check, so the five rules that tested ownership first
-returned None — defer — for every create and never reached their scope test. A scoped
-user could create a record under another scope's parent: a Trip Start Log on another
-project's Dispatch Trip, a Driver Attendance or Driver Suspension on another project's
-driver, a Boarding Scan Log on another project's trip. (Salis Driver was masked by
-Frappe's native User Permission match on its direct ``project`` Link; the other four
-carry no link a Project User Permission matches, so nothing caught them.)
+``Document.insert`` stamps ``owner`` with the acting user (frappe/model/document.py:298) two
+statements before ``check_permission("create")`` (:300). The creator is therefore ALWAYS the owner at
+the create check, so the five rules that tested ownership first returned None — defer — for every
+create and never reached their scope test. A scoped user could create a record under another scope's
+parent: a Trip Start Log on another project's Dispatch Trip, a Driver Attendance or Driver Suspension
+on another project's driver, a Boarding Scan Log on another project's trip. (Salis Driver was masked
+by Frappe's native User Permission match on its direct ``project`` Link; the other four carry no link
+a Project User Permission matches, so nothing caught them.)
 
-THE RULE THESE TESTS PIN: ownership is an access basis only for a row that already
-exists. On an unsaved row ``owner == user`` states who is asking, not anything about the
-row, so the row must anchor itself — its project must be in scope, or its driver link
-(or its parent trip's driver) must be the acting user's own Salis Driver. Once stored,
-ownership is a durable fact and is sufficient again. The rules stay deny-only and
-ptype-agnostic: the discriminator is ``__islocal``, the document's storage state, never
-``ptype``. ``test_no_ptype_changes_any_verdict`` holds that contract.
+THE RULE THESE TESTS PIN: ownership is an access basis only for a row that already exists. On an
+unsaved row ``owner == user`` states who is asking, not anything about the row, so the row must anchor
+itself — its project must be in scope, or its driver link (or its parent trip's driver) must be the
+acting user's own Salis Driver. Once stored, ownership is a durable fact and is sufficient again. The
+rules stay deny-only and ptype-agnostic: the discriminator is ``__islocal``, the document's storage
+state, never ``ptype``. ``test_no_ptype_changes_any_verdict`` holds that contract.
 
-THE ENTRY POINT IS ONE FUNCTION. ``hooks.py`` registers
-``project_scoped_has_permission`` for every scoped Salis DocType; it reads
-``doc.doctype``, looks the DocType up in ``SALIS_SCOPE`` and calls that DocType's rule
-from ``DOCUMENT_RULES``. The five DocTypes below reach two rules that way — Trip Start
-Log and Salis Driver land on ``_owner_or_project_has_permission``, the three
-driver-linked ones on ``_driver_chain_has_permission`` with ``with_owner=True`` — so
-every verdict here is taken through the same call the framework makes.
+THE ENTRY POINT IS ONE FUNCTION. ``hooks.py`` registers ``project_scoped_has_permission`` for every
+scoped Salis DocType; it reads ``doc.doctype``, looks the DocType up in ``SALIS_SCOPE`` and calls that
+DocType's rule from ``DOCUMENT_RULES``. The five DocTypes below reach two rules that way — Trip Start
+Log and Salis Driver land on ``_owner_or_project_has_permission``, the three driver-linked ones on
+``_driver_chain_has_permission`` with ``with_owner=True`` — so every verdict here is taken through the
+same call the framework makes.
 
-EVERY VERDICT BELOW IS TAKEN WITH THE CREATOR AS OWNER, so ownership cannot mask the
-result, and the allow and the refuse are asserted as a PAIR — a rule that let every
-create through would pass the allow half alone, and one that blocked every create would
-pass the refuse half alone. ``test_the_two_verdicts_are_never_the_same_verdict`` fails on
-either collapse.
+EVERY VERDICT BELOW IS TAKEN WITH THE CREATOR AS OWNER, so ownership cannot mask the result, and the
+allow and the refuse are asserted as a PAIR — a rule that let every create through would pass the
+allow half alone, and one that blocked every create would pass the refuse half alone.
+``test_the_two_verdicts_are_never_the_same_verdict`` fails on either collapse.
 
-WHY THESE TESTS ARE SITELESS. The bench is shared, so nothing here touches a site: the
-module-level scope resolvers and the driver resolver are stubbed (the documented stub
-points) and ``frappe.db.get_value`` is a constructed lookup over the tables below.
+WHY THESE TESTS ARE SITELESS. The bench is shared, so nothing here touches a site: the module-level
+scope resolvers and the driver resolver are stubbed (the documented stub points) and
+``frappe.db.get_value`` is a constructed lookup over the tables below.
 
-A RUNTIME LOGIN DEMONSTRATION IS THEREFORE STILL OWED and is NOT provided here: log in
-as a Fleet Supervisor holding a User Permission for one project, create a Driver
-Attendance against a driver in that project and confirm it saves, then repeat against
-another project's driver and confirm it raises PermissionError — and confirm a Driver
-still records their own attendance from the desk while holding no Project User
-Permission.
+A RUNTIME LOGIN DEMONSTRATION IS THEREFORE STILL OWED and is NOT provided here: log in as a Fleet
+Supervisor holding a User Permission for one project, create a Driver Attendance against a driver in
+that project and confirm it saves, then repeat against another project's driver and confirm it raises
+PermissionError — and confirm a Driver still records their own attendance from the desk while holding
+no Project User Permission.
 """
 
 from __future__ import annotations

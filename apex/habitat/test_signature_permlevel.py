@@ -11,29 +11,15 @@ sensitive wherever it appears and whoever it belongs to. Four Habitat records ca
   Facility Asset Custody Assignment  `supervisor_signature`  the supervisor accepting assets
   Housing Assignment                 `terms_signature`       the resident's, at the desk
 
-This module replaces four near-identical suites (one per DocType, ~1,290 lines, 17 methods)
-that differed only in the DocType name, the fieldname, the level-0 witness field and the
-fixture. They asserted the SAME four clauses in the same order with the same comments, so a
-change to the policy had to be made in four places and a DocType added to the policy was
-covered by nobody. The subjects are a TABLE here and every clause runs against all four under
-`subTest`, so each subject is still graded and reported independently — adding the fifth
-signature is one row.
+The subjects are a TABLE and every clause runs against all four under `subTest`, so each is
+graded independently and a fifth signature is one row. Where the per-DocType rules disagreed
+the STRICTER now applies to all four: `reqd` must be false, because a `reqd` field at level 1
+breaks CREATE for any role without a level-1 write row — the value is blanked at
+document.py:306 and the mandatory check then fails on the empty field at :417. Two per-subject
+values survive as values: Housing Assignment ships no `export` on the auditor row, and the
+level-0 witness is a Date on two subjects (needing `getdate`) and a Link on two.
 
-Each distinct value the four files carried is kept, and where they disagreed the STRICTER of
-the two is now applied to all four:
-
-* `reqd` was asserted false only by the Custody Acknowledgment and Facility Asset suites.
-  The hazard is general — a `reqd` field raised to level 1 breaks CREATE outright for any
-  role without a level-1 write row: the value is blanked at document.py:306 and the mandatory
-  check then fails on the empty field at :417 — so it is now asserted for all four.
-* the auditor's `export` was asserted by three of the four. Housing Assignment genuinely
-  ships no `export` on that row, so it stays a per-subject value rather than being levelled
-  up into a false assertion.
-* the level-0 witness differs in KIND. Two subjects witness with a Date, which needs the
-  `getdate` handling below; two witness with a Link, which does not. Both kinds are kept.
-
-WHY THE ROWS CARRY WRITE AND NOT ONLY READ
-------------------------------------------
+WHY THE ROWS CARRY WRITE AND NOT ONLY READ.
 Every one of these signatures is set on the CREATE path — `issue_custody`
 (habitat/api/custody_kiosk.py:350,352), `quick_check_in` (habitat/api/front_desk.py:660,664),
 or the Desk form — and on a NEW document `reset_values_if_no_permlevel_access` takes its
@@ -44,16 +30,10 @@ the signature silently EMPTIED on insert: no exception, and the `*_accepted_on` 
 privacy fix into a data-loss bug, which is what
 `test_the_create_path_keeps_the_signature_only_for_a_role_holding_the_write_row` is for.
 
-WHAT THIS DOES NOT PROTECT
---------------------------
-`permlevel` is not enforced under `frappe.get_all`, which returns early on
-`ignore_permissions` (frappe/model/db_query.py:683-684) — how every Script Report here reads.
-Checked across all four subjects: no report tree in the app selects any signature fieldname.
-So the level is the whole control today, and a future report adding the column would bypass
-it silently.
-
-Run under bench:
-  bench --site <site> run-tests --module apex.habitat.test_signature_permlevel
+WHAT THIS DOES NOT PROTECT. `permlevel` is not enforced under `frappe.get_all`, which returns
+early on `ignore_permissions` (frappe/model/db_query.py:683-684) — how every Script Report
+here reads. No report tree in the app selects any signature fieldname today, so the level is
+the whole control, and a future report adding the column would bypass it silently.
 """
 
 from __future__ import annotations
@@ -132,9 +112,6 @@ class Subject:
 
     def shipped(self):
         return json.loads(self.json_path.read_text(encoding="utf-8"))
-
-
-# ---------------------------------------------------------------- fixture builders
 
 
 def _custody_issue_context(test):

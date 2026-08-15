@@ -1,63 +1,45 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""WHY THIS FILE IS 2.3x ITS SUBJECT (463 lines against the 201-line
-``facility_asset_movement.py``). The subject is not the controller's line count but the
-REACHABILITY of the record through the shipped surfaces, and that surface is made of things
-the controller does not contain: the DocType's own DocPerm rows, the two workspaces that
-link it, the maker/checker split between the role that creates and the role that submits,
-the building-scope permission hook, and the ledger the submission posts. Five of those live
-outside the 201 lines, so a ratio measured against the controller alone understates the
-subject by design. Roughly a third of the file is the fixture chain — two estates, four
-rooms, three role-holding users, an asset minted per method — which exists because a
-permission verdict is only meaningful against a document that is valid on every OTHER axis;
-a shorter fixture would let a link or mandatory failure stand in for the refusal being
-asserted. The five methods are five different contracts, not five shapes of one.
+"""Facility Asset Movement is EXECUTABLE: a real housing user can actually create one.
 
-Facility Asset Movement is EXECUTABLE: a real housing user can actually create one.
+The subject is the record's REACHABILITY through surfaces the controller does not contain: DocPerm
+rows, the two workspaces that link it, the maker/checker split between the role that creates and the
+role that submits, the building-scope permission hook, and the ledger the submission posts. The
+fixture chain is long because a permission verdict is only meaningful against a document valid on
+every OTHER axis — a shorter one would let a link or mandatory failure stand in for the refusal.
 
-Every pre-existing test for this DocType inserts with ``ignore_permissions=True``
-(``test_facility_asset_movement.py``, ``test_facility_asset_movement_effects.py``,
-``test_facility_asset_movement_acknowledgement.py``), and the tenant-scope suite drives
-``permissions.dual_building_scoped_has_permission`` as a pure function. So the whole
-suite was green while NO shipped surface could produce the record: the DocType JSON
-granted ``write`` to System Manager / Accommodation Manager / Resident Supervisor but
-omitted ``create`` for every role. An omitted DocPerm flag is NOT its DocPerm default —
-``frappe.modules.import_file.import_doc`` raises the framework's fixture-import flag
-(import_file.py:212) and ``Document._set_defaults`` returns early under it
-(document.py:833-835), so the
-DocPerm child row never receives ``create``'s default of 1 and ``BaseDocument.get_valid_dict``
-writes the Check field as 0 (base_document.py:394-395). Only the Administrator USER could
-create a movement (permissions.py:107), which no operator logs in as.
+Sibling tests insert with ``ignore_permissions=True`` and the tenant-scope suite drives
+``permissions.dual_building_scoped_has_permission`` as a pure function, so a green suite proves
+nothing about reachability: the DocType JSON granted ``write`` to System Manager / Accommodation
+Manager / Resident Supervisor and omitted ``create`` for every one of them. An omitted DocPerm
+flag is NOT its DocPerm default — ``frappe.modules.import_file.import_doc`` raises the framework's
+fixture-import flag (import_file.py:212) and ``Document._set_defaults`` returns early under it
+(document.py:833-835), so the DocPerm child row never receives ``create``'s default of 1 and
+``BaseDocument.get_valid_dict`` writes the Check field as 0 (base_document.py:394-395). Only the
+Administrator USER could then create a movement (permissions.py:107), which no operator logs in as.
 
-That made two shipped workspace links dead ends: Custody and Safety both link to this
-DocType, but the list view's primary "Add" action is gated on ``create``, and there is no
-other route — ``facility_asset.js`` adds no custom button, and no whitelisted API builds
-one (Facility Asset Delivery writes the shared ledger directly, it does not create a
-Movement). This module binds the surface to the permission so the pairing cannot rot:
-
-* ``test_workspace_link_is_backed_by_a_role_that_can_create`` — a workspace that links the
-  DocType must grant at least one role that can really create it.
-* ``test_in_scope_create_allowed_and_out_of_scope_refused`` — both verdicts in ONE method,
-  asserted to DIFFER, so they can never collapse to "everyone is refused" (the state
-  before this change) and still pass.
-* ``test_unauthorized_role_refused`` — a second, INDEPENDENT refusal mechanism (a
-  read-only DocPerm rather than the building-scope hook).
-* ``test_submit_posts_exactly_one_ledger_effect`` — counts the ledger before and after,
-  globally and per source; "a row exists" would also be true of a double post.
-* ``test_cancel_preserves_the_audit_trail`` — asserts what SURVIVES cancellation (the
-  original ledger row field-for-field, the cancelled document, its creator attribution),
-  not merely that ``cancel()`` returned.
+Two shipped workspace links were therefore dead ends: Custody and Safety both link to this
+DocType, the list view's primary "Add" action is gated on ``create``, and no other route exists —
+``facility_asset.js`` adds no custom button and no whitelisted API builds one (Facility Asset
+Delivery writes the shared ledger directly). The five methods below bind the surface to the
+permission so the pairing cannot rot: a workspace that links the DocType must grant at least one
+role that can really create it; the in-scope allow and the out-of-scope refusal are asserted in ONE
+method and required to DIFFER, so they cannot collapse to "everyone is refused" and still pass; a
+read-only DocPerm supplies a second, INDEPENDENT refusal mechanism beside the building-scope hook;
+the submit case counts the ledger before and after, globally and per source, because "a row exists"
+would also be true of a double post; and the cancel case asserts what SURVIVES cancellation — the
+original ledger row field-for-field, the cancelled document, its creator attribution — not merely
+that ``cancel()`` returned.
 
 Isolation note: ``FrappeTestCase`` registers its rollback with ``addClassCleanup``
-(frappe/tests/utils.py:46), so it fires ONCE PER CLASS and sibling methods see each
-other's rows. ``on_submit`` mutates the Facility Asset in place, so the asset is minted
-per METHOD; only the immutable fixtures (buildings, rooms, users) are shared.
+(frappe/tests/utils.py:46), so it fires ONCE PER CLASS and sibling methods see each other's rows.
+``on_submit`` mutates the Facility Asset in place, so the asset is minted per METHOD; only the
+immutable fixtures (buildings, rooms, users) are shared.
 
-Field facts verified against the shipped JSON before writing (do NOT guess):
-Facility Asset — asset_name/asset_category/naming_series/building/responsible_supervisor
-reqd, ``location_in_building`` is a Data field holding a Room name. Room — autoname
-``field:room_number``, building + room_number reqd. Facility Asset Movement —
-movement_date/facility_asset/movement_category/to_building reqd; ``cancellation_reason``
-is ``allow_on_submit``.
+Field facts verified against the shipped JSON before writing (do NOT guess): Facility Asset —
+asset_name/asset_category/naming_series/building/responsible_supervisor reqd, ``location_in_building``
+is a Data field holding a Room name. Room — autoname ``field:room_number``, building + room_number
+reqd. Facility Asset Movement — movement_date/facility_asset/movement_category/to_building reqd;
+``cancellation_reason`` is ``allow_on_submit``.
 """
 
 from __future__ import annotations

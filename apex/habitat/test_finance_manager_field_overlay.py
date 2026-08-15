@@ -24,25 +24,21 @@ row is never a duplicate of a permlevel-0 row and dedupe must key on the
 (role, permlevel) PAIR.
 
 THE 2026-07-27 DECISION -- Custody Damage Assessment now ALSO carries a permlevel-0
-``read`` row for Finance Manager. The omission used to be recorded here as deliberate;
-it was then argued on its own evidence and the owner granted it anyway, over three
-stated costs: the shipped role profile already pairs Finance Manager with Internal
-Auditor, who holds the read, so only a hand-assembled solo finance user lacked it; the
-permlevel-1 row unlocks exactly one field while a level-0 read is the WHOLE record,
-resident identity included; and Finance Manager is unscoped, so the read spans every
-building. ``TestTheGrantedReadIsWhatWasDecided`` keeps that cost visible in the test
-instead of only in a decision note. The other four keep the overlay-only shape. The
-row also carries ``report``; the register it was granted for, ``Custody Damage
-Register``, was retired by ``apex/patches/v2_3/retire_replaced_reports.py``, so the
-flag now opens no shipped report and nothing here grades it.
+``read`` row for Finance Manager, granted over three stated costs: the shipped role
+profile already pairs Finance Manager with Internal Auditor, who holds the read, so only
+a hand-assembled solo finance user lacked it; the permlevel-1 row unlocks exactly one
+field while a level-0 read is the WHOLE record, resident identity included; and Finance
+Manager is unscoped, so the read spans every building. ``TestTheGrantedReadIsWhatWasDecided``
+keeps that cost visible in the test instead of only in a decision note. The other four keep
+the overlay-only shape. The row also carries ``report``; the register it was granted for,
+``Custody Damage Register``, was retired by ``apex/patches/v2_3/retire_replaced_reports.py``,
+so the flag now opens no shipped report and nothing here grades it.
 
 MAINTENANCE REQUEST IS A SECOND EXCEPTION and is asserted separately below: it ships an
 ``All`` permlevel-0 row (read+create, if_owner), and every logged-in user holds ``All``
 (``frappe/permissions.py:520``). A Finance-Manager-only user therefore CAN create one and
 populate the financial fields on it. On that DocType the flat "inert" reading is false
 outright, with no layering involved.
-
-Run standalone:  python3 -m unittest apex.habitat.test_finance_manager_field_overlay -v
 """
 
 from __future__ import annotations
