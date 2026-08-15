@@ -18,11 +18,30 @@ from apex.apex_core.utils import employee_recovery
 from apex.salis.doctype.vehicle_incident import vehicle_incident
 from apex.salis.doctype.vehicle_incident.vehicle_incident import VehicleIncident
 
+_UNSET = object()
+
 
 class TestEmployeeRecovery(unittest.TestCase):
     def setUp(self):
+        # frappe.flags is a LocalProxy over frappe.local, so assigning here replaces
+        # it for the entire process. Restore it or every later test loses the keys
+        # frappe.init seeded, starting with currently_saving, which document.insert
+        # appends to on every save.
+        saved = {
+            name: getattr(frappe.local, name, _UNSET)
+            for name in ("flags", "request")
+        }
+        self.addCleanup(self._restore_frappe_local, saved)
         frappe.local.flags = frappe._dict(in_test=False)
         frappe.local.request = None
+
+    @staticmethod
+    def _restore_frappe_local(saved):
+        for name, value in saved.items():
+            if value is _UNSET:
+                delattr(frappe.local, name)
+            else:
+                setattr(frappe.local, name, value)
 
     @patch.object(employee_recovery, "_draft_deductions", return_value=100, create=True)
     @patch.object(employee_recovery, "_pending_installments", return_value=0)
