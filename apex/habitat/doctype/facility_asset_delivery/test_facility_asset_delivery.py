@@ -11,12 +11,18 @@ Asserts the lock cannot be released until BOTH exits pass (and that they must
 pass IN ORDER), that the on-site code confirm actually moves the tracked asset
 into the destination only after Released, and that separation of duties and a
 wrong code both block the move.
+
+The lockout is graded on ORDER, not on existence: a counter charged after the
+comparison counts guesses and stops none, so the case that grades it presents the
+RIGHT code during the lockout and requires the asset to stay where it was.
 """
 
 import frappe
 
+from apex.apex_core.utils.otp_lockout import is_locked_out
 from apex.apex_core.utils.rate_window import peek_window
 from apex.habitat.api.facility_asset_delivery import (
+    MAX_OTP_ATTEMPTS,
     confirm_receipt,
     pass_exit_1,
     pass_exit_3,
@@ -386,3 +392,39 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
             "the wrong code was not counted against this delivery",
         )
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
+
+    def test_the_right_code_is_refused_while_the_delivery_is_locked_out(self):
+        """The lockout has to be consulted BEFORE the code is compared.
+
+        Charged only on the miss path, the counter records guesses and stops none: every
+        request still evaluates its guess, and the guess that finally lands moves the
+        tracked asset because the counter is never read on the path that returns. A fourth
+        WRONG code is refused under either ordering, so only a correct one presented during
+        the lockout separates them.
+        """
+        d = self._delivery()
+        code = self._release(d)
+        self.addCleanup(frappe.cache.delete_value, f"otp-miss:{d.doctype}:{d.name}")
+        frappe.set_user(self.receiver)
+        try:
+            for _n in range(MAX_OTP_ATTEMPTS):
+                with self.assertRaises(frappe.ValidationError):
+                    confirm_receipt(d.name, "000000")
+            self.assertTrue(
+                is_locked_out(d.doctype, d.name, attempts=MAX_OTP_ATTEMPTS),
+                "the lockout was never reached, so this case is not testing one",
+            )
+            with self.assertRaises(frappe.RateLimitExceededError):
+                confirm_receipt(d.name, code)
+        finally:
+            frappe.set_user("Administrator")
+
+        d.reload()
+        self.assertNotEqual(
+            d.status, "Delivered",
+            "a code accepted during the lockout delivers an asset nobody handed over",
+        )
+        self.assertEqual(
+            frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake,
+            "the asset must not move on a code accepted during the lockout",
+        )

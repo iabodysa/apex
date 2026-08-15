@@ -17,6 +17,9 @@ once. These tests pin the invariants that lock buys:
   document: ``otp_attempts`` would be written and rolled back by the same request that
   reports the miss (``apex_core/utils/otp_lockout.py``), so the counter is a Redis
   window keyed on the document, and the lockout is asserted through ``is_locked_out``.
+- A CORRECT code presented during the lockout is refused. The lockout is only a lockout
+  if it is consulted before the comparison; charged after it, it counts guesses and stops
+  none, and the guess that finally lands still confirms the handover.
 """
 
 import frappe
@@ -198,3 +201,40 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
 
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
         self.assertFalse(_receive_leg_posted(handover))
+
+    def test_the_right_code_is_refused_while_the_handover_is_locked_out(self):
+        """The lockout has to be consulted BEFORE the code is compared.
+
+        Counting misses after the comparison counts guesses without ever stopping one:
+        every request still evaluates its guess, and the guess that finally lands is
+        accepted because the counter is only read on the miss path it never takes. This
+        is the case the wrong-code test above cannot see — a fourth WRONG code is refused
+        by the charger either way, so only a correct one presented during the lockout
+        tells the two orderings apart.
+        """
+        make_goods_receipt(self.intake, self.article, self.proc_user, 2)
+        handover, code = self._approved_handover(2)
+        self.addCleanup(
+            frappe.cache.delete_value, f"otp-miss:{handover.doctype}:{handover.name}"
+        )
+        frappe.set_user(self.recv_user)
+        try:
+            for _n in range(MAX_OTP_ATTEMPTS):
+                with self.assertRaises(frappe.ValidationError):
+                    confirm_handover(handover.name, "000000")
+            self.assertTrue(
+                is_locked_out(handover.doctype, handover.name, attempts=MAX_OTP_ATTEMPTS),
+                "the lockout was never reached, so this case is not testing one",
+            )
+            with self.assertRaises(frappe.RateLimitExceededError):
+                confirm_handover(handover.name, code)
+        finally:
+            frappe.set_user("Administrator")
+
+        handover.reload()
+        self.assertNotEqual(
+            handover.status, "Confirmed",
+            "a code accepted during the lockout confirms goods that were never delivered",
+        )
+        self.assertFalse(_receive_leg_posted(handover))
+        self.assertEqual(_store_bal(self.article, self.dest), 0.0)
