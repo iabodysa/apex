@@ -205,7 +205,6 @@ Additional Information,معلومات إضافية
 Additional Passengers,ركاب إضافيون
 Additional Salary,راتب إضافي
 Additional Salary Deduction,خصم إضافي من الراتب
-Additional Salary Deduction Entry,قيد خصم إضافي من الراتب
 Address,العنوان
 Administrative / document-signing requests with more than this many trips this month require Operations-tier authority. A blank or zero value falls back to the built-in default.,الطلبات الإدارية أو طلبات توقيع المستندات التي تتجاوز هذا العدد من الرحلات خلال الشهر تتطلب صلاحية على مستوى العمليات. إذا تُركت القيمة فارغة أو كانت صفرًا، تُستخدم القيمة الافتراضية للنظام.
 Administrative Details,تفاصيل إدارية
@@ -262,7 +261,6 @@ Amended From,مُعدّل من
 Amount,المبلغ
 Amount (SAR),المبلغ (ريال)
 Amount Before VAT,المبلغ قبل الضريبة
-Amount Deducted,المبلغ المخصوم
 Amount Payable,المبلغ المستحق
 Amount Payable Including VAT,المبلغ المستحق شامل الضريبة
 Amount Recovered,المبلغ المُسترد
@@ -377,6 +375,7 @@ Arrival Date plus Window Days. Computed by the controller.,تاريخ الوصو
 Arrival Manifest,كشف الوصول
 Arrival Slip,قسيمة الوصول
 Arrivals Desk,استقبال القادمين
+Arrivals Expected Today,الوافدون المتوقعون اليوم
 Arrivals Intake,استقبال الوافدين
 Arrivals Today,الوافدون اليوم
 Arrivals today,الوافدون اليوم
@@ -543,7 +542,7 @@ Awaiting confirmation by the receiving supervisor,بانتظار تأكيد ال
 Awareness and Training,التوعية والتدريب
 Back,رجوع
 Back Engines,المحركات الخلفية
-Back-Dated Retirement,إخراج من الخدمة بتاريخ سابق
+Back-Dated Custody Event,حركة عهدة بتاريخ سابق
 Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.,رابط لطلب الصيانة الذي أُنشئ من هذه الملاحظة. وجوده يمنع إنشاء طلب مكرر، فالملاحظة المرتبطة لا يُعاد توليد طلب لها. والحقل قابل للنسخ عمداً لينتقل الرابط إلى التقرير المعدّل ويمنع تكرار التذاكر عند التعديل.
 Backdating Days,أيام التأريخ الرجعي
 Backdating Role,دور التأريخ الرجعي
@@ -660,7 +659,11 @@ Building A,المبنى أ
 Building Address,عنوان المبنى
 Building B,المبنى ب
 Building Code Locked,رمز المبنى مقفل
+Building Lease EXPIRED,عقد إيجار المبنى منتهٍ
+Building Lease Expiring,عقد إيجار المبنى قارب على الانتهاء
 Building License,رخصة المبنى
+Building License EXPIRED,رخصة المبنى منتهية
+Building License Expiring Soon,رخصة المبنى قاربت على الانتهاء
 Building License revoked: {0},سُحبت رخصة المبنى: {0}
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
@@ -703,7 +706,6 @@ Cancellation Reason is required before cancelling a Scheduled Task Instance.,ي�
 Cancellation Reason is required before cancelling a delivery.,سبب الإلغاء مطلوب قبل إلغاء التسليم.
 Cancelled,مُلغى
 Cannot advance {0} from {1} to {2} here. Open the request to set the required fields.,لا يمكن نقل {0} من {1} إلى {2} هنا. افتح الطلب وأكمل الحقول المطلوبة.
-Cannot cancel Custody Damage Assessment {0} because Additional Salary Deduction Entry {1} is submitted.,تعذر إلغاء تقييم تلفيات العهدة {0} لأن قيد حسم الراتب الإضافي {1} معتمد.
 Cannot cancel Custody Issue {0} because it is referenced by active Custody Return {1}.,لا يمكن إلغاء صرف العهدة {0} لارتباطه بإرجاع العهدة النشط {1}.
 Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,لا يمكن إلغاء إرجاع العهدة {0} لارتباطه بتقييم تلفيات العهدة النشط {1}.
 Cannot cancel incident {0}: Employee Advance {1} already carries a paid or recovered amount. Reverse it in Accounts first.,لا يمكن إلغاء الحادث {0}: تتضمن سلفة الموظف {1} مبلغًا مدفوعًا أو مستردًا. اعكسها في الحسابات أولًا.
@@ -969,6 +971,7 @@ Confirm Habitat Settings,اعتماد إعدادات هابيتات
 Confirm Handover,تأكيد التسليم
 Confirm On-Site Receipt,تأكيد الاستلام في الموقع
 Confirm Receipt,تأكيد الاستلام
+Confirm Receipt of Custody Items,تأكيد استلام العهدة
 Confirm Salis Settings,تأكيد إعدادات ساليس
 Confirm Source,مصدر التأكيد
 Confirm Transfer,تأكيد النقل
@@ -1225,6 +1228,7 @@ Custody Asset Category,تصنيف أصول العهدة
 Custody Cleared,تم إخلاء طرف العهدة
 Custody Cleared Only,إخلاء العهدة فقط
 Custody Damage Assessment,تقييم تلفيات العهدة
+Custody Damage Assessment Submitted,تم رفع تقييم تلف العهدة
 Custody Damage Assessments,تقييمات تلفيات العهدة
 Custody Damage Item,صنف العهدة التالف
 Custody Damage and Deduction Notice,إشعار تلف عهدة وخصم
@@ -1251,6 +1255,7 @@ Custody Not Cleared,عهدة غير مُخلاة
 Custody Return,إرجاع العهدة
 Custody Return Item,بند إرجاع العهدة
 Custody Return Items,بنود إرجاع العهدة
+Custody Return Overdue,إرجاع العهدة متأخر
 Custody Return Receipt,إيصال إرجاع عهدة
 Custody Return Register,سجل إرجاع العهد
 Custody Returned,تم إرجاع العهدة
@@ -1342,7 +1347,6 @@ Decision On,تاريخ القرار
 Declining Balance,الرصيد المتناقص
 Deduction,الخصم
 Deduction Amount (SAR),مبلغ الخصم (ريال)
-Deduction: {0},الخصم: {0}
 Deep Cleaning,نظافة عميقة
 Default Assignee (Employee),المكلف الافتراضي (الموظف)
 Default Beds,عدد الأسرّة الافتراضي
@@ -1711,6 +1715,7 @@ Exit {0} must be cleared before exit {1}.,يجب اجتياز نقطة الخر�
 Expected,المتوقَّعة
 Expected Arrival Date,تاريخ الوصول المتوقع
 Expected Check-out Date,تاريخ المغادرة المتوقع
+Expected Checkout Approaching,موعد المغادرة المتوقع اقترب
 Expected Count,العدد المتوقع
 Expected Date,التاريخ المتوقع
 Expected Quantity,الكمية المتوقعة
@@ -2138,6 +2143,7 @@ Idle Report Status,حالة تقرير الخمول
 Idle Resident Detection,رصد الساكنين غير المشغّلين
 Idle Resident Housing Cost by Building,تكلفة سكن الساكنين غير المشغّلين حسب المبنى
 Idle Resident Report,تقرير ساكن غير مُشغَّل
+Idle Resident Reported,تم الإبلاغ عن ساكن غير مُشغَّل
 Idle Residents,الساكنون غير المشغّلين
 Idle Share,نسبة التعطّل
 Idle Vehicle Days,أيام خمول المركبة
@@ -2513,6 +2519,7 @@ Maintenance Cost Ledger rows are immutable and cannot be edited.,صفوف سجل
 Maintenance Count,عدد مرات الصيانة
 Maintenance Dispatch,إرسال للصيانة
 Maintenance Findings,ملاحظات الصيانة
+Maintenance From Safety Finding,صيانة ناتجة عن ملاحظة سلامة
 Maintenance Inspection Report,تقرير فحص الصيانة
 Maintenance Material,مادة الصيانة
 Maintenance Material Lines,بنود مواد الصيانة
@@ -2534,6 +2541,7 @@ Maintenance Work Orders by Status,أوامر عمل الصيانة حسب الح
 Maintenance cost ledger. Maintained automatically by the system when a Maintenance Work Order is completed and not edited manually. One immutable row per procurement item.,سجل تكاليف الصيانة. يُحدَّث تلقائياً بواسطة النظام عند اكتمال أمر عمل صيانة، ولا يُحرَّر يدوياً. صف واحد غير قابل للتغيير لكل بند مشتريات.
 Maintenance: {0},الصيانة: {0}
 Manifest,كشف الركاب
+Manifest Not Reconciled,كشف الركاب غير مطابق
 Manifests,كشوف الركاب
 Manpower,القوى العاملة
 Manual,يدوي
@@ -2710,8 +2718,10 @@ New Assignment,تخصيص جديد
 New Contract,عقد جديد
 New Expiry Date,تاريخ الانتهاء الجديد
 New Hire,موظف جديد
+New Maintenance Request,طلب صيانة جديد
 New On-Site Code,رمز جديد في الموقع
 New One-Time Password,رمز تحقق جديد لمرة واحدة
+New Resident Request,طلب ساكن جديد
 New Salis Driver,سائق ساليس جديد
 New driver,السائق الجديد
 Next,التالي
@@ -2788,7 +2798,6 @@ No passenger is listed on this manifest,ما في ركاب في هذا الكش�
 No payment raised for this instalment yet.,لم تُنشأ دفعة لهذا القسط بعد.
 No payment raised for this period yet.,لم تُنشأ دفعة لهذه الفترة بعد.
 "No payment target is set and no default could be resolved, so no payment can be created.",لم يُحدَّد هدف للدفع ولم يتوفّر بديل افتراضي، لذلك لا يمكن إنشاء أي دفع.
-No payroll deduction has been raised against this assessment yet.,لم يُسجَّل خصم على الراتب مقابل هذا التقييم حتى الآن.
 No payroll entry raised,لم يُسجَّل خصم على الراتب
 No pending fuel requests for this project.,لا توجد طلبات وقود معلّقة لهذا المشروع.
 No pending fuel requests. The queue is clear.,لا توجد طلبات وقود معلّقة. القائمة خالية.
@@ -3097,6 +3106,7 @@ Over 90 Days,أكثر من 90 يوماً
 Over Budget,تجاوز الميزانية
 Over Threshold,تجاوز الحد
 Over-Capacity Alert Threshold (%),حد تنبيه تجاوز الطاقة الاستيعابية (%)
+Over-Capacity Bed Created,أُنشئ سرير خارج السعة
 Over-Consumption,استهلاك زائد
 Over-capacity,تجاوز السعة
 Overall Result,النتيجة الإجمالية
@@ -3190,8 +3200,6 @@ Payment schedule will be generated automatically on first save.,سيُنشأ ج�
 "Payment target {0} is not installed on this site. Choose a payment DocType that exists here, or clear the Target Payment DocType to use the native {1}.",هدف الدفع {0} غير مثبّت في هذا الموقع. اختر نوع مستند دفع موجود هنا، أو امسح نوع مستند الدفع المستهدف لاستخدام {1} الأصلي.
 Payment {0} created.,أُنشئت الدفعة {0}.
 Payments,المدفوعات
-Payroll Date,تاريخ مسير الرواتب
-Payroll Deduction Entry,قيد الخصم على الراتب
 Payroll deduction raised,تسجيل الخصم على الراتب
 Penalty and Termination,الغرامة والإنهاء
 Pending,قيد الانتظار
@@ -3569,7 +3577,7 @@ Recorder State on the Building File,حالة المسجّل في ملف المب
 Recording,التسجيل
 Records,السجلات
 Records a vehicle stop event with reason and ownership context.,يسجّل حدث إيقاف مركبة مع السبب وسياق الملكية.
-Records damage on returned custody articles. A salary deduction is applied only when damage deduction is enabled in Habitat Settings.,يسجّل التلف في أصناف العهدة المرتجعة. ولا يُطبّق خصم من الراتب إلا عند تفعيل خصم التلف في إعدادات هابيتات.
+Records damage on returned custody articles and values the replacement cost. Recovering that cost from the worker is not raised here.,يسجّل تلف العهد المرتجعة ويقدّر تكلفة الاستبدال. تحصيل التكلفة من العامل لا يُنشأ من هنا.
 Records execution of a single safety task on a specific date for a specific building.,يسجّل تنفيذ مهمة سلامة واحدة في تاريخ محدد لمبنى محدد.
 Records that belong to no screen yet.,سجلات لا تتبع أي شاشة بعد.
 Records the app writes for itself. Read them to see what a job did; never type into one.,سجلات يكتبها التطبيق لنفسه. اقرأها لتعرف ماذا فعلت المهمة، ولا تكتب فيها.
@@ -3682,6 +3690,7 @@ Renews Automatically,يتجدد تلقائيًا
 Rent,الإيجار
 Rent & Billing,الإيجار والفوترة
 Rent (SAR),الإيجار (ريال)
+Rent Payment Due (Unpaid),دفعة إيجار مستحقة (غير مسددة)
 Rent Payment Schedule,جدول سداد الإيجارات
 "Rent for {0} — instalment due {1} ({2}), settling {3}.",إيجار {0} — قسط مستحق في {1} ({2})، تسديد {3}.
 Rent payment generated for building: {0} under lease {1},أُنشئت دفعة الإيجار للمبنى: {0} ضمن عقد الإيجار {1}
@@ -3705,6 +3714,7 @@ Rental Settlement,تسوية الإيجار
 Rental Settlement Item,بند تسوية الإيجار
 Rental Settlement Register,سجل تسويات الإيجار
 Rental Settlement Statement,كشف تسوية الإيجار
+Rental Settlement {0} already covers office {1} for period {2}.,تسوية الإيجار {0} تغطي مكتب {1} لفترة {2} أصلاً.
 Rental Settlements This Month,تسويات الإيجار هذا الشهر
 Rental Start,بداية التأجير
 Rental Start Date,تاريخ بداية التأجير
@@ -3787,6 +3797,8 @@ Resident & Building,الساكن والمبنى
 Resident / worker is required.,يلزم تحديد الساكن أو العامل.
 Resident Request,طلب ساكن
 Resident Request Register,سجل طلبات الساكنين
+Resident Request Resolved,تم حل طلب الساكن
+Resident Request Waiting for Evidence,طلب الساكن بانتظار إثبات
 Resident Supervisor,مشرف الساكنين
 Resident Supervisor Dashboard,لوحة معلومات مشرف الساكنين
 Resident Type,نوع الساكن
@@ -3971,6 +3983,7 @@ SIM Custody Assignment,إسناد عهدة شريحة اتصال
 SIM Exceptions,استثناءات الشرائح
 SIM Lines Covered,عدد الشرائح المشمولة
 SIM Lines Held Under This Contract,الشرائح المسجّلة على هذا العقد
+SIM Suspended,شريحة موقوفة
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
 SIM details,تفاصيل الشريحة
 SIMs,الشرائح
@@ -4273,6 +4286,7 @@ Setup,الإعداد
 Setup Rooms,إعداد الغرف
 Setup Status,حالة الإعداد
 Severe,شديدة
+Severe Safety Incident Reported,تم الإبلاغ عن حادث سلامة جسيم
 Severity,الخطورة
 Severity Rating,درجة الخطورة
 Sewage Tank Suction,نزح خزان الصرف الصحي
@@ -4601,6 +4615,7 @@ Technician Notes,ملاحظات الفني
 Telecom,اتصالات
 Telecom Billing Document,مستند فوترة اتصالات
 Telecom Contract,عقد اتصالات
+Telecom Contract Expiring,عقد الاتصالات قارب على الانتهاء
 Telecom Contract Expiry,انتهاء عقود الاتصالات
 Telecom Contract {0} does not exist.,عقد الاتصالات {0} غير موجود.
 Telecom Control,عمليات الاتصالات
@@ -4620,7 +4635,9 @@ Template for catalog {0}: {1},قالب الدليل {0}: {1}
 Template loading is only supported for Maintenance Request and Maintenance Work Order.,تحميل القالب مدعوم فقط لـ 'طلب صيانة' و'أمر عمل صيانة'.
 Temporary,مؤقت
 Temporary (Over-Capacity) Bed,سرير مؤقت (فوق الطاقة الاستيعابية)
+Temporary Stay Ending,الإقامة المؤقتة تقارب الانتهاء
 Temporary Stay Lead Days,أيام التنبيه قبل المغادرة المؤقتة
+Temporary Stay Overdue,الإقامة المؤقتة تجاوزت موعدها
 Temporary Top-up,تعبئة مؤقتة
 Temporary Top-up Not Reverted,تعبئة إضافية مؤقتة لم تُعد إلى وضعها السابق
 Temporary Window,المهلة المؤقتة
@@ -4793,7 +4810,7 @@ The worker's consent signature is required before a cost recovery can be approve
 The worker's signed consent to the recovery. Required before the incident can be approved; KSA Labor Law requires the worker's consent for a wage deduction.,موافقة العامل الموقعة على الاسترداد. مطلوبة قبل اعتماد الحادثة؛ يوجب نظام العمل السعودي موافقة العامل على أي خصم من الأجر.
 The workshop quotation the estimated cost was taken from.,عرض سعر الورشة الذي أُخذت منه التكلفة المقدّرة.
 The {0} DocType is not available on this site.,نوع المستند {0} غير متاح على هذا الموقع.
-The {0} date {1} is before SIM {2}'s last custody event on {3}. Record the retirement on or after that date.,تاريخ {0} وهو {1} أسبق من آخر حدث عهدة للشريحة {2} بتاريخ {3}. سجّل الإخراج من الخدمة في ذلك التاريخ أو بعده.
+The {0} date {1} is before SIM {2}'s last custody event on {3}. Record it on or after that date.,تاريخ {0} في {1} أسبق من آخر حركة عهدة للشريحة {2} بتاريخ {3}. سجّله في ذلك التاريخ أو بعده.
 Theft,سرقة
 Theft report {0} cancelled.,أُلغي بلاغ السرقة {0}.
 There is no submitted Purchase Invoice outstanding for {0} under this company. Raise and submit the landlord invoice first — a payment with no invoice behind it settles nothing.,لا توجد فاتورة شراء معتمدة ومستحقة لـ {0} في هذه الشركة. أنشئ فاتورة المؤجر واعتمدها أولًا؛ فلا يمكن تسوية دفعة دون فاتورة مرتبطة بها.
