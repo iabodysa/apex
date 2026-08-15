@@ -47,6 +47,7 @@ from apex.salis.doctype.fuel_consumption_ledger import fuel_consumption_ledger
 from apex.salis.doctype.fuel_quota import fuel_quota
 from apex.salis.doctype.rental_accrual_ledger import rental_accrual_ledger
 from apex.salis.doctype.transport_trip_rating import transport_trip_rating
+from apex.salis.doctype.trip_boarding_ledger import trip_boarding_ledger
 from apex.salis.doctype.vehicle_utilisation_snapshot import vehicle_utilisation_snapshot
 
 # (controller module, DocType, constraint columns, constraint name)
@@ -74,6 +75,12 @@ GUARDED = [
         "Transport Trip Rating",
         ["employee", "dispatch_trip"],
         "unique_ttr_employee_trip",
+    ),
+    (
+        trip_boarding_ledger,
+        "Trip Boarding Ledger",
+        ["dispatch_trip", "employee", "reversal_of"],
+        "unique_tbl_trip_employee",
     ),
     (
         vehicle_utilisation_snapshot,

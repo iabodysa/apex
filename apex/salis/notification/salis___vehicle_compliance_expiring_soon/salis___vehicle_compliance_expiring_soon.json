@@ -31,6 +31,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Vehicle Compliance Expiring Soon: {{ doc.name }}",
- "modified": "2026-06-25 15:31:22.728275"
+ "subject": "{{ _(\"Vehicle Compliance Expiring Soon\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 12:00:00.000000"
 }

@@ -21,7 +21,7 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Fuel Request Decision: {{ doc.name }}",
+ "subject": "{{ _(\"Fuel Request Decision\") }}: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-06-26 12:00:00.000000"
+ "modified": "2026-08-15 12:00:00.000000"
 }

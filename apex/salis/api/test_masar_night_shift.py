@@ -44,9 +44,21 @@ class TestMasarNightShiftWindow(FrappeTestCase):
         self.assertIn(add_days(today(), -1), td[1])
 
     def test_worker_today_dispatch_trip_window_and_excludes_finished(self):
+        """The resolver lives in ``masar_routes`` and reads the worker's own requests first.
+
+        It is patched there, not on ``masar`` which merely re-exports it, and the first
+        query is fed one Transport Request Worker row: the resolver returns before it ever
+        reaches Dispatch Trip when the worker is on no request, so an all-empty patch
+        would assert the window against a query that never ran.
+        """
         from frappe.utils import add_days, today
 
-        with patch("apex.salis.api.masar.frappe.get_all", return_value=[]) as g:
+        def _rows(doctype, *a, **kw):
+            if doctype == "Transport Request Worker":
+                return [{"parent": "TR-NIGHT", "pickup_point": "STOP-1"}]
+            return []
+
+        with patch("apex.salis.api.masar_routes.frappe.get_all", side_effect=_rows) as g:
             masar._worker_today_dispatch_trip("EMP-TEST")
         filters = _captured_filters(g.mock_calls, "Dispatch Trip")
         self.assertIsNotNone(filters)

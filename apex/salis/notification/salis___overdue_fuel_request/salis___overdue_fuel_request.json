@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Fuel Request Awaiting Approval: {{ doc.name }}",
- "modified": "2026-08-07 08:07:00.000000"
+ "subject": "{{ _(\"Fuel Request Awaiting Approval\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 12:00:00.000000"
 }

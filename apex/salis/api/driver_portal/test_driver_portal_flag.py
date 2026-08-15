@@ -35,6 +35,14 @@ class TestDriverPortalDisabledFlag(FrappeTestCase):
             "Employee", frappe.db.get_value("Salis Driver", cls.driver, "employee"), "user_id"
         )
 
+    def setUp(self):
+        # This file is the one that does NOT patch _require_enabled, so it is also the
+        # one that runs its render_in_arabic() for real. That writes frappe.local.lang
+        # for the rest of the render; in a request the local dies with the request, in
+        # a test run it does not, so it is handed back rather than left for whatever
+        # runs next. Same handling as www/test_portal_page_access_gates.py.
+        self.addCleanup(setattr, frappe.local, "lang", frappe.local.lang)
+
     def tearDown(self):
         frappe.set_user("Administrator")
         frappe.db.set_single_value("Salis Settings", "enable_driver_portal", 1)

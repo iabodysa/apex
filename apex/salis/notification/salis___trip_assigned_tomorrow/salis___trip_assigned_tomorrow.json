@@ -22,6 +22,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Trip Tomorrow: {{ doc.name }}",
- "modified": "2026-06-26 12:00:00.000000"
+ "subject": "{{ _(\"Trip Tomorrow\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 12:00:00.000000"
 }

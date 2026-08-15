@@ -409,12 +409,25 @@ def _dispatch_trip_project(dispatch_trip):
 
 
 def _doc_project(doc):
-    """Resolve direct project first, then one historical parent."""
+    """Resolve direct project first, then one historical parent.
+
+    Dispatch Trip gets its OWN branch rather than a row in ``INDIRECT_PROJECT_SCOPED``,
+    because the generic chain below would go on to read the trip's ``vehicle`` and hand
+    back that vehicle's project — a project ``_render_trip`` never grants, so the
+    document check would allow a row the list fragment hides. The branch resolves
+    exactly what the fragment resolves: the trip's own project, else its historical
+    Route Plan's. Without it a project-less legacy trip listed by the fragment could
+    not be opened.
+    """
     project = getattr(doc, PROJECT, None)
     if project:
         return project
 
     doctype = getattr(doc, "doctype", None)
+    if doctype == "Dispatch Trip":
+        route_plan = getattr(doc, "route_plan", None)
+        return frappe.db.get_value("Route Plan", route_plan, PROJECT) if route_plan else None
+
     if doctype not in INDIRECT_PROJECT_SCOPED:
         return None
 

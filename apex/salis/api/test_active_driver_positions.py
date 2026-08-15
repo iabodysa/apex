@@ -85,17 +85,33 @@ class TestActiveDriverPositions(FrappeTestCase):
 
     def test_the_read_returns_a_paginated_envelope_around_the_rows(self):
         """The shape the map unpacks. Graded on a trip THIS test created, so the
-        assertions below cannot pass by looping over an empty list."""
+        assertions below cannot pass by looping over an empty list.
+
+        The row is found by walking ``has_more`` rather than by reading page one. The
+        endpoint orders ``planned_start asc, name asc`` and caps a page at
+        PLAN_PAGE_LENGTH, so a freshly named trip sorts last and falls off the first
+        page as soon as the site holds a page of live trips — which asserts the site's
+        row count rather than the envelope this test is named for.
+        """
+        first = get_active_driver_positions()
+        self.assertEqual(set(first), ENVELOPE_FIELDS)
+        self.assertEqual(first["page_length"], PLAN_PAGE_LENGTH)
+        self.assertEqual(first["returned"], len(first["positions"]))
+
         name = self._trip()
-        payload = get_active_driver_positions()
+        row, start = None, 0
+        while True:
+            payload = get_active_driver_positions(start=start)
+            rows = {r["dispatch_trip"]: r for r in payload["positions"]}
+            if name in rows:
+                row = rows[name]
+                break
+            if not payload["has_more"]:
+                break
+            start += PLAN_PAGE_LENGTH
 
-        self.assertEqual(set(payload), ENVELOPE_FIELDS)
-        self.assertEqual(payload["page_length"], PLAN_PAGE_LENGTH)
-        self.assertEqual(payload["returned"], len(payload["positions"]))
-
-        rows = {row["dispatch_trip"]: row for row in payload["positions"]}
-        self.assertIn(name, rows, "a Planned trip today must reach the map")
-        self.assertEqual(set(rows[name]), ROW_FIELDS)
+        self.assertIsNotNone(row, "a Planned trip today must reach the map")
+        self.assertEqual(set(row), ROW_FIELDS)
 
     def test_a_dispatched_trip_is_listed_whatever_its_date(self):
         """Planned is scoped to today; Dispatched is not, because a trip that is still

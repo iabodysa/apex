@@ -20,7 +20,8 @@
   "fuel_daily_log_consumption_col2",
   "amount",
   "fuel_daily_log_sec_system",
-  "naming_series"
+  "naming_series",
+  "ledgered"
  ],
  "fields": [
   {
@@ -115,11 +116,21 @@
    "label": "Series",
    "options": "FDL-.######",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.",
+   "fieldname": "ledgered",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Ledgered",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-15 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Daily Log",

@@ -15,7 +15,7 @@ else, System Manager included. So this bypass is the only path by which a row ca
 Two scheduled jobs:
 
 * ``accrue_fuel_consumption`` (daily) — accrues a Fuel Consumption Ledger row for
-  each recent Fuel Daily Log and each Done Fuel Request not yet ledgered.
+  each Fuel Daily Log and each Done Fuel Request not yet ledgered, however old.
   Idempotent on ``(source_type, source_name)``.
 * ``monthly_fuel_reconciliation`` (monthly) — for each active Fuel Quota of the
   period, sums ledgered consumption for that vehicle+period against the quota's
@@ -172,56 +172,72 @@ def accrue_fuel_consumption() -> None:
 
     Sources:
 
-    * Fuel Daily Log rows logged yesterday or today.
-    * Fuel Requests in ``Done`` status (submitted) logged yesterday or today.
+    * Fuel Daily Log rows not yet ledgered.
+    * Fuel Requests in ``Done`` status (submitted) not yet ledgered.
 
-    Idempotent on ``(source_type, source_name)``: a source already ledgered is
-    skipped. Per-row try/except isolates failures; no commit inside the loops.
+    BOTH halves select on the ``ledgered`` flag, not on a date window. A fixed
+    two-day ``log_date`` window silently dropped work rather than deferring it: a log
+    backdated past yesterday was never in scope on any run, and one missed scheduler
+    day put every log of that day permanently out of reach. The flag turns the job
+    into a backlog drain — anything unledgered is picked up on the next run, however
+    old — and it is what makes catching up possible at all.
+
+    Idempotent on ``(source_type, source_name)`` as well: a source already carrying a
+    ledger row is flagged and skipped rather than double-posted, which is what makes
+    the flag safe to introduce on a site whose rows all start at 0. Per-row
+    try/except isolates failures; no commit inside the loops.
     """
-    from frappe.utils import add_days, flt, now_datetime, today
+    from frappe.utils import flt, now_datetime
 
-    today_str = today()
-    yesterday_str = add_days(today_str, -1)
     logger = frappe.logger()
 
-    start = 0
+    failed_logs: set[str] = set()
     while True:
+        log_filters = {"ledgered": 0}
+        if failed_logs:
+            log_filters["name"] = ["not in", list(failed_logs)]
         logs = frappe.get_all(
             "Fuel Daily Log",
-            filters={"log_date": ["between", [yesterday_str, today_str]]},
+            filters=log_filters,
             fields=["name", "vehicle", "driver", "log_date", "litres", "amount"],
-            limit_start=start,
+            order_by="modified asc",
             limit_page_length=BATCH_SIZE,
         )
         if not logs:
             break
 
+        progressed = False
         for log in logs:
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
-                if not log.vehicle:
-                    continue
-                if _ledger_exists("Fuel Daily Log", log.name):
-                    continue
-                _insert_ledger_row(
-                    vehicle=log.vehicle,
-                    driver=log.driver,
-                    period_month=_period_month(log.log_date),
-                    litres=flt(log.litres),
-                    amount=flt(log.amount),
-                    source_type="Fuel Daily Log",
-                    source_name=log.name,
-                    logged_at=now_datetime(),
+                if log.vehicle and not _ledger_exists("Fuel Daily Log", log.name):
+                    _insert_ledger_row(
+                        vehicle=log.vehicle,
+                        driver=log.driver,
+                        period_month=_period_month(log.log_date),
+                        litres=flt(log.litres),
+                        amount=flt(log.amount),
+                        source_type="Fuel Daily Log",
+                        source_name=log.name,
+                        logged_at=now_datetime(),
+                    )
+                frappe.db.set_value(
+                    "Fuel Daily Log", log.name, "ledgered", 1, update_modified=False
                 )
+                progressed = True
             except Exception:
                 frappe.db.rollback(save_point=sp)
+                failed_logs.add(log.name)
                 frappe.log_error(
                     message=frappe.get_traceback(),
                     title=f"Fuel accrual failed for Daily Log {log.name}"[:140],
                 )
 
-        start += BATCH_SIZE
+        # A page that moved nothing would be re-read forever: the flag is what
+        # advances the cursor, so a page of only failures ends the pass.
+        if not progressed:
+            break
 
     failed_names: set[str] = set()
     while True:

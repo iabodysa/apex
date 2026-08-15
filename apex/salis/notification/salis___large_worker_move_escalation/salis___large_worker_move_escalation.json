@@ -21,7 +21,7 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "Large Worker Move Needs Escalation: {{ doc.name }}",
+ "subject": "{{ _(\"Large Worker Move Needs Escalation\") }}: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-15 12:00:00.000000"
 }

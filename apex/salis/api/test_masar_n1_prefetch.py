@@ -104,6 +104,9 @@ class TestMasarWorkerRoutePrefetch(_WorkerTripMixin, FrappeTestCase):
 
     def setUp(self):
         frappe.set_user("Administrator")
+        # The endpoint's _require_enabled() preamble pins the request language; in a
+        # request that local dies with the request, in a test run it does not.
+        self.addCleanup(setattr, frappe.local, "lang", frappe.local.lang)
 
     def tearDown(self):
         frappe.set_user("Administrator")

@@ -417,43 +417,14 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     worker is not on. A client-supplied ``transport_request`` only NARROWS that
     own-set; an id the worker is not registered on simply does not match. Returns
     ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
-    None when the worker has no boardable trip today."""
-    trips = frappe.get_all(
-        "Dispatch Trip",
-        filters={
-            "trip_date": _trip_date_window(),
-            "docstatus": ["<", 2],
-            "status": ["not in", list(_FINISHED_TRIP_STATUSES)],
-        },
-        fields=["name", "route_plan", "transport_request"],
-        order_by="depart_time asc",
-    )
-    if not trips:
-        return None
+    None when the worker has no boardable trip today.
 
-    trip_names = [t["name"] for t in trips]
-
-    assigned_by_trip = {}
-    for arow in frappe.get_all(
-        "Dispatch Trip Assigned Request",
-        filters={"parent": ["in", trip_names], "parenttype": "Dispatch Trip"},
-        fields=["parent", "transport_request"],
-        order_by="idx asc",
-    ):
-        assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
-
-    route_plan_names = [
-        t["route_plan"] for t in trips if not t.get("transport_request") and t.get("route_plan")
-    ]
-    route_plan_req = {}
-    if route_plan_names:
-        for rp in frappe.get_all(
-            "Route Plan",
-            filters={"name": ["in", route_plan_names]},
-            fields=["name", "transport_request"],
-        ):
-            route_plan_req[rp["name"]] = rp["transport_request"]
-
+    THE WORKER IS RESOLVED FIRST, and every read after it is keyed on that worker's
+    own requests. Reading today's Dispatch Trips before narrowing meant a fleet-wide
+    scan on a screen that polls every ten seconds, and the three later reads then
+    fanned out over trips this worker was never on. The three links are unchanged —
+    the trip's own ``transport_request``, an assigned-request child row, or the
+    historical Route Plan's request — they are just resolved from the worker's side."""
     worker_pickup = {}
     for wrow in frappe.get_all(
         "Transport Request Worker",
@@ -462,6 +433,52 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         order_by="modified asc",
     ):
         worker_pickup.setdefault(wrow["parent"], wrow.get("pickup_point"))
+    if not worker_pickup:
+        return None
+
+    own_requests = list(worker_pickup)
+
+    assigned_by_trip = {}
+    for arow in frappe.get_all(
+        "Dispatch Trip Assigned Request",
+        filters={
+            "parenttype": "Dispatch Trip",
+            "transport_request": ["in", own_requests],
+        },
+        fields=["parent", "transport_request"],
+        order_by="idx asc",
+    ):
+        assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
+
+    route_plan_req = {
+        rp["name"]: rp["transport_request"]
+        for rp in frappe.get_all(
+            "Route Plan",
+            filters={"transport_request": ["in", own_requests]},
+            fields=["name", "transport_request"],
+        )
+    }
+
+    # Each clause is added only when it has values: frappe renders an empty ``in``
+    # list as ``ifnull(col, '') in ('')`` (frappe/model/db_query.py:842-862), which
+    # would match every trip whose column is NULL — the opposite of narrowing.
+    reachable = [["transport_request", "in", own_requests]]
+    if assigned_by_trip:
+        reachable.append(["name", "in", list(assigned_by_trip)])
+    if route_plan_req:
+        reachable.append(["route_plan", "in", list(route_plan_req)])
+
+    trips = frappe.get_all(
+        "Dispatch Trip",
+        filters={
+            "trip_date": _trip_date_window(),
+            "docstatus": ["<", 2],
+            "status": ["not in", list(_FINISHED_TRIP_STATUSES)],
+        },
+        or_filters=reachable,
+        fields=["name", "route_plan", "transport_request"],
+        order_by="depart_time asc",
+    )
 
     for t in trips:
         req = t.get("transport_request")

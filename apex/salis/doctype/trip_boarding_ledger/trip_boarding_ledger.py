@@ -37,3 +37,28 @@ class TripBoardingLedger(Document):
                 _("Trip Boarding Ledger is a posted audit record and cannot be edited."),
                 frappe.PermissionError,
             )
+
+
+def on_doctype_update():
+    """Hard idempotency backstop, the one its three sibling ledgers already carry.
+
+    ``boarding_engine`` guards both writes with a check-then-insert and no row lock,
+    so a double-tapped depart post can interleave two reads before either insert and
+    board the same worker twice. ``reversal_of`` is part of the key rather than a
+    separate constraint because it separates the two guards without blocking either:
+    an original row carries '' (a Link column is NOT NULL DEFAULT ''), so two
+    originals for one trip+worker collide — which is what ``_ledger_exists``
+    checks — while a reversal carries the original's name, so one trip+worker may
+    still hold its mirror and only a SECOND reversal of the same original collides —
+    which is what ``reverse_trip_boarding`` checks. A plain (dispatch_trip, employee)
+    key would have made every reversal a duplicate entry.
+
+    Created/kept in sync on migrate via Frappe's on_doctype_update hook. Guarded so
+    pre-existing duplicate data logs rather than aborting migrate."""
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
+        "Trip Boarding Ledger",
+        ["dispatch_trip", "employee", "reversal_of"],
+        constraint_name="unique_tbl_trip_employee",
+    )

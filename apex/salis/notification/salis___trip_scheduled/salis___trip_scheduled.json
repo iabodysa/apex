@@ -24,7 +24,7 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Trip Scheduled: {{ doc.name }}",
+ "subject": "{{ _(\"Trip Scheduled\") }}: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-06-25 12:00:00.000000"
+ "modified": "2026-08-15 12:00:00.000000"
 }

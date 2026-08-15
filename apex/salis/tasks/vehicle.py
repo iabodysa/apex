@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe import _
 from frappe.query_builder.functions import Count, Sum
 from pypika import Case
 
@@ -70,10 +71,18 @@ def idle_vehicle_watch() -> None:
             try:
                 if v.name in vehicles_with_recent_trip:
                     continue
-                msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
-                       f"trip in the last {idle_days} days.")
-                logger.warning(msg)
-                _queue_document("Salis Vehicle", v.name, "Info", msg, vehicle=v.name)
+                log_msg = (f"idle_vehicle_watch: vehicle {v.name} has had no dispatch "
+                           f"trip in the last {idle_days} days.")
+                logger.warning(log_msg)
+                _queue_document(
+                    "Salis Vehicle",
+                    v.name,
+                    "Info",
+                    _("Vehicle {0} has had no dispatch trip in the last {1} days.").format(
+                        v.name, idle_days
+                    ),
+                    vehicle=v.name,
+                )
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -121,10 +130,26 @@ def vehicle_compliance_expiry_watch() -> None:
                 expired = bool(c.expiry_date) and getdate(c.expiry_date) < today_date
                 severity = "Critical" if expired else "Warning"
                 state = "expired on" if expired else "expires on"
-                msg = (f"vehicle_compliance_expiry_watch: vehicle {c.parent} "
-                       f"{c.compliance_type} compliance {state} {c.expiry_date}.")
-                logger.warning(msg)
-                _queue_document("Salis Vehicle", c.parent, severity, msg, vehicle=c.parent)
+                log_msg = (f"vehicle_compliance_expiry_watch: vehicle {c.parent} "
+                           f"{c.compliance_type} compliance {state} {c.expiry_date}.")
+                logger.warning(log_msg)
+                # Two whole sentences rather than one with a spliced "expired on" /
+                # "expires on": a translator receives a fragment with no tense, no
+                # subject and no way to know where it lands in the target word order.
+                template = (
+                    _("Vehicle {0}: {1} compliance expired on {2}.")
+                    if expired
+                    else _("Vehicle {0}: {1} compliance expires on {2}.")
+                )
+                _queue_document(
+                    "Salis Vehicle",
+                    c.parent,
+                    severity,
+                    template.format(
+                        c.parent, _(c.compliance_type) if c.compliance_type else "", c.expiry_date
+                    ),
+                    vehicle=c.parent,
+                )
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
@@ -206,9 +231,15 @@ def vehicle_utilization_summary() -> None:
                 )
 
                 if trip_count == 0:
-                    msg = (f"vehicle_utilization_summary: vehicle {v.name} logged no "
-                           f"dispatch trips in the last 7 days.")
-                    _queue_document("Salis Vehicle", v.name, "Info", msg, vehicle=v.name)
+                    _queue_document(
+                        "Salis Vehicle",
+                        v.name,
+                        "Info",
+                        _("Vehicle {0} logged no dispatch trips in the last 7 days.").format(
+                            v.name
+                        ),
+                        vehicle=v.name,
+                    )
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(
