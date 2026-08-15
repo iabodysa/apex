@@ -5,7 +5,8 @@
   "room": "_T-101",
   "bed_code": "_T-101-A",
   "status": "Available",
-  "condition": "Good"
+  "condition": "Good",
+  "building": "_Test Building"
  },
  {
   "doctype": "Bed",
@@ -13,6 +14,7 @@
   "room": "_T-101",
   "bed_code": "_T-101-B",
   "status": "Available",
-  "condition": "Good"
+  "condition": "Good",
+  "building": "_Test Building"
  }
 ]

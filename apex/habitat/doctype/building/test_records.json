@@ -9,7 +9,10 @@
     "floor_number": 1,
     "room_count": 2
    }
-  ]
+  ],
+  "site": "_Test Site",
+  "company": "_Test Company",
+  "total_capacity": 4
  },
  {
   "doctype": "Building",
