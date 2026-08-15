@@ -12,6 +12,7 @@
   ],
   "site": "_Test Site",
   "company": "_Test Company",
+  "default_cost_center": "Main - _TC",
   "total_capacity": 4
  },
  {
@@ -21,9 +22,14 @@
   "status": "Active",
   "floor_plan": [
    {
-    "floor_number": 1,
+    "floor_number": 2,
     "room_count": 1
    }
-  ]
+  ],
+  "site": "_Test Site",
+  "company": "_Test Company",
+  "default_cost_center": "_Test Cost Center - _TC",
+  "is_procurement_store": 1,
+  "total_capacity": 2
  }
 ]

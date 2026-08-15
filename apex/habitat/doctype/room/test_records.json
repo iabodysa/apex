@@ -6,7 +6,8 @@
   "room_number": "_T-101",
   "room_type": "Worker",
   "status": "Available",
-  "readiness_status": "Ready"
+  "readiness_status": "Ready",
+  "bed_capacity": 2
  },
  {
   "doctype": "Room",
@@ -15,6 +16,17 @@
   "room_number": "_T-102",
   "room_type": "Worker",
   "status": "Available",
-  "readiness_status": "Ready"
+  "readiness_status": "Ready",
+  "bed_capacity": 2
+ },
+ {
+  "doctype": "Room",
+  "naming_series": "ROOM-.####",
+  "building": "_Test Building 2",
+  "room_number": "_T-201",
+  "room_type": "Worker",
+  "status": "Available",
+  "readiness_status": "Ready",
+  "bed_capacity": 2
  }
 ]
