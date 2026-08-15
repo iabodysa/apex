@@ -3,6 +3,7 @@ import frappeui from "frappe-ui/vite";
 import { defineConfig } from "vite";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { sealPublicIndex } from "./tooling/seal-public-index.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const repositoryRoot = path.resolve(root, "../..");
@@ -35,6 +36,7 @@ export default defineConfig({
       jinjaBootData: false,
     }),
     vue(),
+    sealPublicIndex({ outDir }),
   ],
   resolve: {
     alias: {

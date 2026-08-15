@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { SEALED_INDEX_HTML } from "./seal-public-index.js";
 
 const portalRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(portalRoot, "../..");
@@ -70,6 +71,11 @@ export function verifyGeneratedShell({ outDir = outputRoot, indexPath = shellPat
     }
   }
   assertNonExecutableBootstrap(shell);
+  // The published copy must stay the inert stub: apex/public/ is served with no session.
+  const publishedIndex = path.join(outDir, "index.html");
+  if (readFileSync(publishedIndex, "utf8") !== SEALED_INDEX_HTML) {
+    throw new Error(`Published portal index is not the inert stub: ${publishedIndex}`);
+  }
   return { manifestPath, indexPath, entry: entry.file };
 }
 
@@ -86,8 +92,6 @@ export function normalizeGeneratedShell(html) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(shellPath, normalizeGeneratedShell(readFileSync(shellPath, "utf8")));
-  const builtIndexPath = path.join(outputRoot, "index.html");
-  writeFileSync(builtIndexPath, normalizeGeneratedShell(readFileSync(builtIndexPath, "utf8")));
   const result = verifyGeneratedShell();
   console.log(`Verified generated portal shell: ${result.entry}`);
 }
