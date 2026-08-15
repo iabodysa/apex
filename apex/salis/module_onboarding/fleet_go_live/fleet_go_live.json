@@ -6,11 +6,15 @@
  "subtitle": "Hand a vehicle over, set its fuel quota, and reconcile the first claim.",
  "success_message": "Fleet is live. Fleet Control shows every vehicle's state, and fuel claims reconcile against the quota you set.",
  "is_complete": 0,
- "modified": "2026-08-02 00:00:00.000000",
+ "modified": "2026-08-16 04:05:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
    "role": "Fleet Manager"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Fleet Supervisor"
   }
  ],
  "steps": [

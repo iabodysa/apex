@@ -6,7 +6,7 @@
  "subtitle": "Build the article catalog, issue your first custody, and see what it costs.",
  "success_message": "Custody and Costs is live. The kiosk issues and returns articles; the reports show what each worker still holds and what the damage cost.",
  "is_complete": 0,
- "modified": "2026-08-02 00:00:00.000000",
+ "modified": "2026-08-16 04:05:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
@@ -15,6 +15,10 @@
   {
    "doctype": "Onboarding Permission",
    "role": "Finance Manager"
+  },
+  {
+   "doctype": "Onboarding Permission",
+   "role": "Resident Supervisor"
   }
  ],
  "steps": [
