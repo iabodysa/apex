@@ -8,9 +8,17 @@ Company would otherwise fail with:
 
     LinkValidationError: Could not find Warehouse Type: Transit
 
-Frappe invokes this ``before_tests`` hook once, before the suite runs. We reuse
-ERPNext's own setup-wizard bootstrap (idempotent — it no-ops when a Company
-already exists) so every test inherits a fully provisioned site.
+It reuses ERPNext's own setup-wizard bootstrap (idempotent — it no-ops when a
+Company already exists) so every test inherits a fully provisioned site.
+
+NOT WIRED, and measured rather than assumed: ``apex/hooks.py`` declares no
+``before_tests`` key, so ``frappe.get_hooks("before_tests")`` on this bench answers
+frappe, erpnext and hrms and never apex — this function has never run. The site is
+provisioned anyway, because ``erpnext.setup.utils.before_tests`` is in that answer
+already and does the same work. Registering apex's key would make it the third
+caller of an idempotent bootstrap; leaving it unregistered leaves this module dead.
+Either is defensible, and the choice belongs with whoever owns hooks.py — what is
+not defensible is a docstring claiming a hook runs when nothing calls it.
 """
 
 import frappe
@@ -21,9 +29,4 @@ def before_tests():
 
     erpnext_before_tests()
     frappe.db.commit()
-
-    # [#9ov3i5]
-    from apex.tests import factories
-
-    factories.snapshot_building_baseline()
 

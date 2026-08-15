@@ -116,6 +116,7 @@ def make_building(name=None, company=None, **kwargs):
         **kwargs,
     })
     doc.insert(ignore_permissions=True)
+    _register_building(doc.name)
     return doc
 
 
@@ -324,15 +325,17 @@ def make_masar_building(name):
     carrying a ``google_maps_url``; return its name."""
     b = frappe.db.get_value("Building", {"building_name": name}, "name")
     if not b:
-        b = frappe.get_doc(
-            {
-                "doctype": "Building",
-                "building_name": name,
-                "site": make_site("Masar Test Site"),
-                "total_capacity": 50,
-                "google_maps_url": "https://maps.example/masar-building",
-            }
-        ).insert(ignore_permissions=True).name
+        b = _register_building(
+            frappe.get_doc(
+                {
+                    "doctype": "Building",
+                    "building_name": name,
+                    "site": make_site("Masar Test Site"),
+                    "total_capacity": 50,
+                    "google_maps_url": "https://maps.example/masar-building",
+                }
+            ).insert(ignore_permissions=True).name
+        )
     return b
 
 
@@ -344,7 +347,7 @@ def make_building_with_coords(name, lat, lng):
             "Building", existing, {"pickup_lat": lat, "pickup_lng": lng}
         )
         return existing
-    return (
+    return _register_building(
         frappe.get_doc(
             {
                 "doctype": "Building",
@@ -822,42 +825,53 @@ class WorkerTripMixin:
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
 
 
-# [#446tat]
-
-_BUILDING_BASELINE: set[str] = set()
+_CREATED_BUILDINGS: set[str] = set()
 
 
-def snapshot_building_baseline():
-    """Record the Accommodation Building names that exist before the suite runs.
-    Called from ``tests/before_tests.py`` (the ``before_tests`` hook)."""
-    _BUILDING_BASELINE.clear()
-    _BUILDING_BASELINE.update(
-        frappe.get_all("Building", pluck="name")
-    )
+def _register_building(name):
+    """Note that a builder above INSERTED ``name``, and hand it straight back.
+
+    The teardown reads this set and nothing else, so a building the suite did not
+    create is out of its reach by construction. Only the create branch of a
+    get-or-create builder calls this: a building that was already on the site is
+    borrowed, not made, and borrowing it must not license deleting it.
+    """
+    _CREATED_BUILDINGS.add(name)
+    return name
 
 
 def purge_test_buildings():
-    """Force-delete every Accommodation Building created after the pre-suite
-    baseline snapshot; return the number removed. Idempotent, best-effort per row
-    (as Administrator). Invoked from a ``tearDownModule`` in building-creating test
-    modules so the post-suite building count returns to the pre-suite baseline.
+    """Force-delete the Accommodation Buildings THIS suite inserted; return the
+    number removed. Idempotent, best-effort per row (as Administrator). Invoked from
+    a ``tearDownModule`` in building-creating test modules.
 
-    ``force=True`` bypasses the link-validation check, so a building with dependent
-    rooms/beds/assignments is removed regardless (test site only; those children
-    are themselves suite pollution)."""
+    It walks the registry above, never ``get_all("Building")``. The previous version
+    walked the table and subtracted a baseline snapshot that only a ``before_tests``
+    hook filled, which made the blast radius depend on a caller — and this app
+    registers no such hook, so the subtracted set was empty under every runner and
+    this emptied the site's Building table. Registering one would not have saved the
+    fixtures either: ``frappe/test_runner.py:83-87`` runs ``before_tests`` before any
+    ``make_test_records``, so a fixture Building is outside the snapshot by
+    construction.
+
+    ``force=True`` bypasses the link-validation check, so a registered building with
+    dependent rooms/beds/assignments is removed regardless (test site only; those
+    children are themselves suite pollution).
+    """
     frappe.set_user("Administrator")
     removed = 0
-    for name in frappe.get_all("Building", pluck="name"):
-        if name in _BUILDING_BASELINE:
+    for name in sorted(_CREATED_BUILDINGS):
+        if not frappe.db.exists("Building", name):
+            _CREATED_BUILDINGS.discard(name)
             continue
         try:
-            frappe.delete_doc(
-                "Building", name, ignore_permissions=True, force=True
-            )
-            removed += 1
+            frappe.delete_doc("Building", name, ignore_permissions=True, force=True)
         except Exception:
-            # [#kgd2nu]
-            pass
+            # Best-effort teardown: a row still held by something stays, and the
+            # next call retries it rather than failing the module that called us.
+            continue
+        _CREATED_BUILDINGS.discard(name)
+        removed += 1
     if removed:
         frappe.db.commit()
     return removed

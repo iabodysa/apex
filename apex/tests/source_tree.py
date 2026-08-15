@@ -26,12 +26,14 @@ APP_ROOT = str(Path(apex.__file__).resolve().parent)
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
 
-# The suite itself is no longer under APP_ROOT, so the two readers that enumerate TEST
-# files have to be rooted on where the suite now lives. Rooting them on APP_ROOT would
-# make every test-coverage guard grade zero test files and pass.
-SUITE_ROOT = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-)
+# The maintainer mirror, named from the repo and NEVER from this file's own
+# neighbourhood. This module was written at `.claude/tests/apex/tests/`, where
+# `dirname(__file__)/../..` did name the mirror; it now ships at `apex/tests/`, where the
+# same expression names the repo root and SUITE_PACKAGE comes out equal to APP_ROOT. Both
+# readers below then answer about the app alone, which is the empty-mirror half of the
+# failure the comment above describes. Absent on a fresh clone, and that is fine: the
+# readers fall back to the shipped corpus rather than to nothing.
+SUITE_ROOT = os.path.join(REPO_ROOT, ".claude", "tests")
 SUITE_PACKAGE = os.path.join(SUITE_ROOT, "apex")
 
 # Package/script CDNs, then font CDNs; a page or bundle needing one needs a vendored copy.
@@ -64,12 +66,17 @@ def rel(path):
 
 
 def suite_rel(path):
-    """``path`` relative to the suite's mirror package, for naming a TEST module.
+    """``path`` named against whichever root holds it, for naming a TEST module.
 
-    A test module is no longer under the app root, so ``rel`` on one yields a
-    ``../.claude/...`` string that no reader recognises and no allowlist matches.
+    The corpus spans two roots: a module beside its unit under the app, and a module
+    in the maintainer mirror. ``rel`` on a mirror module yields a ``../.claude/...``
+    string that no reader recognises and no allowlist matches, so the innermost
+    containing root wins and the name comes out the way its own runner spells it.
     """
-    return os.path.relpath(path, SUITE_PACKAGE)
+    for root in (APP_ROOT, SUITE_PACKAGE, SUITE_ROOT):
+        if path.startswith(root + os.sep):
+            return os.path.relpath(path, root)
+    return os.path.relpath(path, REPO_ROOT)
 
 
 def parse(path):
@@ -133,14 +140,21 @@ def production_py_files():
 
 
 def test_py_files():
-    """Every test_*.py in the maintainer suite — the mirror tree AND its root."""
-    return [
+    """Every test_*.py in the corpus — the shipped modules beside their unit AND the
+    maintainer mirror (its tree and its root).
+
+    Both roots, because the corpus is split across both and a guard that scans test
+    modules for a defect has to see all of them. Reading only one root is how the
+    same floor keeps passing over a population that changed underneath it.
+    """
+    paths = set()
+    for root in (APP_ROOT, SUITE_ROOT):
+        paths.update(glob.glob(os.path.join(root, "**", "test_*.py"), recursive=True))
+    return sorted(
         path
-        for path in sorted(
-            glob.glob(os.path.join(SUITE_ROOT, "**", "test_*.py"), recursive=True)
-        )
+        for path in paths
         if "node_modules" not in path and "__pycache__" not in path
-    ]
+    )
 
 
 def test_support_files():
@@ -154,7 +168,7 @@ def test_support_files():
     """
     return [
         path
-        for path in sorted(glob.glob(os.path.join(SUITE_PACKAGE, "tests", "*.py")))
+        for path in sorted(glob.glob(os.path.join(APP_ROOT, "tests", "*.py")))
         if not os.path.basename(path).startswith("test_")
         and os.path.basename(path) != "__init__.py"
     ]

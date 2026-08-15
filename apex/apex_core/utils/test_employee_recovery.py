@@ -604,8 +604,19 @@ class TestEmployeeRecovery(unittest.TestCase):
     def test_before_submit_leaves_native_employee_advance_rows_untouched(
         self, frappe_mock, _translate, _links
     ):
-        frappe_mock.db.get_value.return_value = None
+        """A native Employee Advance — one no Apex source ever raised — is read and
+        then left alone.
+
+        The guard cannot know an advance is native without opening it, so the
+        assertion is that nothing is CHANGED, not that nothing is read: the row is
+        fetched under its own lock (employee_recovery.py:489, the ordering the lock
+        guard pins) and the source-field check at :490 returns before any throw,
+        set_value or installment computation.
+        """
         frappe_mock.throw.side_effect = frappe.ValidationError
+        advance = MagicMock(name="advance")
+        advance.get.return_value = None
+        frappe_mock.get_doc.return_value = advance
         row = SimpleNamespace(
             name="AS-NATIVE",
             ref_doctype="Employee Advance",
@@ -616,7 +627,12 @@ class TestEmployeeRecovery(unittest.TestCase):
 
         employee_recovery.validate_recovery_additional_salary(row)
 
-        frappe_mock.get_doc.assert_not_called()
+        frappe_mock.get_doc.assert_called_once_with(
+            "Employee Advance", "ADV-NATIVE", for_update=True
+        )
+        advance.get.assert_called_once_with(employee_recovery.SOURCE_DOCTYPE_FIELD)
+        frappe_mock.throw.assert_not_called()
+        frappe_mock.db.set_value.assert_not_called()
 
     @patch.object(vehicle_incident, "frappe")
     def test_incident_cancel_disables_and_retains_linked_draft_installments(
