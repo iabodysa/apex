@@ -1,0 +1,26 @@
+[
+ {
+  "doctype": "Building",
+  "building_name": "_Test Building",
+  "accommodation_type": "Building",
+  "status": "Active",
+  "floor_plan": [
+   {
+    "floor_number": 1,
+    "room_count": 2
+   }
+  ]
+ },
+ {
+  "doctype": "Building",
+  "building_name": "_Test Building 2",
+  "accommodation_type": "Building",
+  "status": "Active",
+  "floor_plan": [
+   {
+    "floor_number": 1,
+    "room_count": 1
+   }
+  ]
+ }
+]

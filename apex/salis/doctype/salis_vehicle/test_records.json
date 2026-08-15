@@ -1,0 +1,30 @@
+[
+ {
+  "doctype": "Salis Vehicle",
+  "naming_series": "VEH-.######",
+  "plate_number": "_T ABC 1001",
+  "status": "Active",
+  "ownership": "Owned",
+  "compliance_status": "Not Tracked",
+  "compliance_documents": [
+   {
+    "compliance_type": "Registration",
+    "expiry_date": "2030-12-31"
+   }
+  ]
+ },
+ {
+  "doctype": "Salis Vehicle",
+  "naming_series": "VEH-.######",
+  "plate_number": "_T ABC 1002",
+  "status": "Active",
+  "ownership": "Rented",
+  "compliance_status": "Not Tracked",
+  "compliance_documents": [
+   {
+    "compliance_type": "Registration",
+    "expiry_date": "2030-12-31"
+   }
+  ]
+ }
+]

@@ -1,0 +1,18 @@
+[
+ {
+  "doctype": "Bed",
+  "naming_series": "BED-.####",
+  "room": "_T-101",
+  "bed_code": "_T-101-A",
+  "status": "Available",
+  "condition": "Good"
+ },
+ {
+  "doctype": "Bed",
+  "naming_series": "BED-.####",
+  "room": "_T-101",
+  "bed_code": "_T-101-B",
+  "status": "Available",
+  "condition": "Good"
+ }
+]

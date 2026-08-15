@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Room",
+  "naming_series": "ROOM-.####",
+  "building": "_Test Building",
+  "room_number": "_T-101",
+  "room_type": "Worker",
+  "status": "Available",
+  "readiness_status": "Ready"
+ },
+ {
+  "doctype": "Room",
+  "naming_series": "ROOM-.####",
+  "building": "_Test Building",
+  "room_number": "_T-102",
+  "room_type": "Worker",
+  "status": "Available",
+  "readiness_status": "Ready"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "doctype": "Custody Article",
+  "article_name": "_Test Blanket",
+  "category": "_Test Custody Category"
+ },
+ {
+  "doctype": "Custody Article",
+  "article_name": "_Test Pillow",
+  "category": "_Test Custody Category"
+ }
+]
