@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Arrivals Expected Today: {{ doc.building }} ({{ doc.expected_count }})",
- "modified": "2026-06-25 13:01:33.269538"
+ "subject": "{{ _(\"Arrivals Expected Today\") }}: {{ doc.building }} ({{ doc.expected_count }})",
+ "modified": "2026-08-15 09:00:00.000000"
 }

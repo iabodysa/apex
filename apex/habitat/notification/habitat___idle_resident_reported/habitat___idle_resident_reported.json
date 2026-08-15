@@ -24,6 +24,6 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "Idle Resident Reported: {{ doc.name }}",
- "modified": "2026-06-07 18:38:24.058196"
+ "subject": "{{ _(\"Idle Resident Reported\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }

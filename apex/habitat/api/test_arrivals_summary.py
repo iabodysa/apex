@@ -66,7 +66,7 @@ class TestArrivalsSummary(FrappeTestCase):
     def _employee(self, first_name):
         return frappe.db.get_value("Employee", {"first_name": first_name})
 
-    def _arrival(self, check_in_date, party_type, party, bed):
+    def _arrival(self, check_in_date, party_type, party, bed, building=BUILDING):
         """The docstatus and check-in date are stamped straight onto the row on purpose: the
         endpoint under test reads submitted arrivals, and running the assignment's own submit would
         drag the bed-lock and occupancy gates into a telemetry test that is not about them."""
@@ -77,7 +77,7 @@ class TestArrivalsSummary(FrappeTestCase):
             "party": party,
             "employee": party if party_type == "Employee" else None,
             "project": self.project,
-            "building": BUILDING,
+            "building": building,
             "bed": bed,
         })
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
@@ -114,3 +114,61 @@ class TestArrivalsSummary(FrappeTestCase):
         second = get_arrival_summary(date=DATE, building=BUILDING)
 
         self.assertEqual(first["housed_count"], second["housed_count"])
+
+    def _arrival_in_another_building(self):
+        other = "_Test Building"
+        bed = frappe.get_doc({
+            "doctype": "Bed",
+            "naming_series": "BED-.####",
+            "room": "_T-101",
+            "building": other,
+            "bed_code": "_T-101-XB-" + frappe.generate_hash(length=6).upper(),
+            "status": "Available",
+        }).insert(ignore_permissions=True).name
+        self._arrival(DATE, "Employee", self._employee("_Test Employee 2"), bed, building=other)
+        return other
+
+    def _scope(self, restrict, allowed):
+        """Stub the building scope at the resolver the endpoint calls."""
+        from unittest.mock import patch
+
+        from apex.habitat import permissions
+
+        patcher = patch.object(
+            permissions, "report_building_scope", return_value=(restrict, allowed)
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_omitting_the_building_no_longer_means_the_whole_estate(self):
+        """The optional-argument hole: no ``building`` used to mean every building.
+
+        A supervisor scoped to one building asked for "today" and was told the estate's
+        housed count, its supplier split, its over-capacity placements and its manifest
+        expectation — none of which they may see one document at a time.
+        """
+        self._arrival_in_another_building()
+        self.assertEqual(
+            get_arrival_summary(date=DATE)["housed_count"], 3,
+            "both buildings' arrivals are on the site, or the next assertion proves nothing",
+        )
+
+        self._scope(True, [BUILDING])
+        self.assertEqual(
+            get_arrival_summary(date=DATE)["housed_count"], 2,
+            "the estate-wide summary was not narrowed to the supervisor's building",
+        )
+
+    def test_a_supervisor_with_no_building_gets_zeroes_not_the_estate(self):
+        self._arrival_in_another_building()
+        self._scope(True, [])
+        summary = get_arrival_summary(date=DATE)
+
+        self.assertEqual(summary["housed_count"], 0)
+        self.assertEqual(summary["by_supplier"], [])
+        self.assertEqual(summary["over_capacity_count"], 0)
+
+    def test_an_explicit_building_is_still_answered_on_its_own_merits(self):
+        """Scoping must not break the in-scope question it was added to protect."""
+        self._scope(True, [BUILDING])
+        self.assertEqual(get_arrival_summary(date=DATE, building=BUILDING)["housed_count"], 2)

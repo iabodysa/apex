@@ -714,15 +714,31 @@ def _over_capacity_count(bed_ids) -> int:
     return frappe.db.count("Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1})
 
 
-def _manifest_progress(date, building, housed_count):
+def _empty_arrival_summary(date, building):
+    """The summary a scoped supervisor holding no building sees: zeroes, not the estate."""
+    return {
+        "date": date,
+        "building": building,
+        "housed_count": 0,
+        "by_supplier": [],
+        "over_capacity_count": 0,
+        "manifest_expected": None,
+        "manifest_completion_pct": None,
+    }
+
+
+def _manifest_progress(date, building_filter, housed_count):
     """``(expected, completion_pct)`` against the day's Arrival Batch manifests.
     Both are None when no manifest DocType is installed; the percentage is None when
-    nothing was expected, since 0/0 is not 0%."""
+    nothing was expected, since 0/0 is not 0%.
+
+    ``building_filter`` is a filter VALUE, not a building name: one building, or the
+    ``["in", [...]]`` the caller's building scope resolved to, or None for unscoped."""
     if not frappe.db.exists("DocType", "Arrival Batch"):
         return None, None
     batch_filters = {"expected_date": date}
-    if building:
-        batch_filters["building"] = building
+    if building_filter:
+        batch_filters["building"] = building_filter
     expected = 0
     for b in frappe.get_all("Arrival Batch", filters=batch_filters, fields=["expected_count"]):
         expected += int(b.get("expected_count") or 0)
@@ -739,15 +755,32 @@ def get_arrival_summary(date=None, building=None) -> dict:
     today's housed count, a by-supplier breakdown, manifest-completion %, and the
     over-capacity placement count. Built from a BOUNDED set of bulk queries (no
     per-row round trips), mirroring get_building_grid. Creates and locks nothing.
+
+    ``building`` is OPTIONAL, and omitting it used to mean "the whole estate" for every
+    caller — so a building-scoped supervisor was told the estate's housed count, its
+    per-supplier split, its over-capacity placements and its manifest expectation. The
+    scope is spliced in explicitly, the same way dashboard.py does it: ``frappe.get_all``
+    hardcodes ``ignore_permissions=True`` (frappe/__init__.py:2050), so the registered
+    permission_query_conditions never runs here.
     """
     frappe.has_permission("Housing Assignment", "read", throw=True)
     if building:
         frappe.has_permission("Building", "read", doc=building, throw=True)
     date = date or frappe.utils.today()
 
-    filters = {"check_in_date": date, "docstatus": 1}
+    restrict, allowed = permissions.report_building_scope(frappe.session.user)
     if building:
-        filters["building"] = building
+        building_filter = building
+    elif restrict:
+        if not allowed:
+            return _empty_arrival_summary(date, building)
+        building_filter = ["in", allowed]
+    else:
+        building_filter = None
+
+    filters = {"check_in_date": date, "docstatus": 1}
+    if building_filter:
+        filters["building"] = building_filter
     arrivals = frappe.get_all(
         "Housing Assignment",
         filters=filters,
@@ -757,7 +790,9 @@ def get_arrival_summary(date=None, building=None) -> dict:
 
     by_supplier = _supplier_breakdown(arrivals)
     over_capacity_count = _over_capacity_count([a.bed for a in arrivals if a.bed])
-    manifest_expected, manifest_completion_pct = _manifest_progress(date, building, housed_count)
+    manifest_expected, manifest_completion_pct = _manifest_progress(
+        date, building_filter, housed_count
+    )
 
     return {
         "date": date,

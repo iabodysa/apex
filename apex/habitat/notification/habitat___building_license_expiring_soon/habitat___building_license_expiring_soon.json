@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Building License Expiring Soon: {{ doc.name }}",
- "modified": "2026-08-02 10:51:00.000000"
+ "subject": "{{ _(\"Building License Expiring Soon\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }

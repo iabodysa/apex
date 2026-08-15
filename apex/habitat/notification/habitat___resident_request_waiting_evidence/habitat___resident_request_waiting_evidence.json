@@ -24,7 +24,7 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "Resident Request Waiting for Evidence: {{ doc.name }}",
+ "subject": "{{ _(\"Resident Request Waiting for Evidence\") }}: {{ doc.name }}",
  "value_changed": "status",
- "modified": "2026-07-10 06:05:34.129545"
+ "modified": "2026-08-15 09:00:00.000000"
 }

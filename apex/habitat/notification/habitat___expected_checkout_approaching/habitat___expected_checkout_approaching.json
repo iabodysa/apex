@@ -28,6 +28,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Expected Checkout Approaching: {{ doc.name }}",
- "modified": "2026-07-10 07:15:17.110258"
+ "subject": "{{ _(\"Expected Checkout Approaching\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }

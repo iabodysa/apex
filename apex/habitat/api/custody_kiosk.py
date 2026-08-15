@@ -92,7 +92,11 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             .where(Ledger.item_type == "Custody Article")
             .where(Ledger.building == building)
             .where(Ledger.is_cancelled == 0)
-            .where(Ledger.employee.isnull())
+            # The store leg is the row with NO party, which is how get_store_balance
+            # identifies it. Filtering on `employee` instead counts a Temporary Worker's
+            # custody as shelf stock — his rows carry `party` with `employee` left NULL —
+            # so the kiosk offers articles that are already in somebody's hands.
+            .where(Ledger.party.isnull())
             .run(as_dict=True)
         )
         for row in rows:
@@ -246,7 +250,7 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
         .where(Ledger.item == article)
         .where(Ledger.building == building)
         .where(Ledger.is_cancelled == 0)
-        .where(Ledger.employee.isnull())
+        .where(Ledger.party.isnull())
         .run(as_dict=True)
     )
     return flt(sum(flt(r.signed_qty) for r in rows))

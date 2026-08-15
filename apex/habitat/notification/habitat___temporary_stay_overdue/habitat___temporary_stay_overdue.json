@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Temporary Stay Overdue: {{ doc.name }}",
- "modified": "2026-07-11 01:59:46.491117"
+ "subject": "{{ _(\"Temporary Stay Overdue\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }

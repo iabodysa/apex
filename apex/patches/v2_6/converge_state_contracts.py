@@ -166,14 +166,14 @@ def _converge_maintenance_requests():
 
 def _converge_maintenance_assignment(name, status, docstatus, assigned_to):
     if status == "Closed" or docstatus == 2:
+        # Retire the live ToDo and nothing else. Frappe's own set_status already clears
+        # assigned_to for any DocType carrying the field once the ToDo goes Closed
+        # (frappe/desk/form/assign_to.py:228-230), so a second erase here changes exactly
+        # one population: legacy rows that carry an assignee with no ToDo behind them. For
+        # those it deletes the only record of who worked the ticket — db.set_value runs no
+        # ORM trigger (frappe/database/database.py:942-945) so no Version is written, and
+        # with no ToDo there is nothing left to read the name back from.
         close_all_assignments("Maintenance Request", name, ignore_permissions=True)
-        _set_status(
-            "Maintenance Request",
-            name,
-            assigned_to,
-            None,
-            fieldname="assigned_to",
-        )
         return
     if not assigned_to:
         return

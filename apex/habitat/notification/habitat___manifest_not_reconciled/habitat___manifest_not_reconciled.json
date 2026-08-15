@@ -22,6 +22,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Manifest Not Reconciled: {{ doc.building }} ({{ doc.pending_arrival_count }} pending)",
- "modified": "2026-06-25 13:01:33.269538"
+ "subject": "{{ _(\"Manifest Not Reconciled\") }}: {{ doc.building }} ({{ doc.pending_arrival_count }} {{ _(\"pending\") }})",
+ "modified": "2026-08-15 09:00:00.000000"
 }

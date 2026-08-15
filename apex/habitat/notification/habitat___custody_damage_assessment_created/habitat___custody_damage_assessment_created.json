@@ -24,6 +24,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Custody Damage Assessment Submitted: {{ doc.name }}",
- "modified": "2026-06-25 00:00:00.000000"
+ "subject": "{{ _(\"Custody Damage Assessment Submitted\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }

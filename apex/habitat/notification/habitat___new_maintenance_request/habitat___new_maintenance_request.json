@@ -24,6 +24,6 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "New Maintenance Request: {{ doc.name }}",
- "modified": "2026-06-02 13:30:00.000000"
+ "subject": "{{ _(\"New Maintenance Request\") }}: {{ doc.name }}",
+ "modified": "2026-08-15 09:00:00.000000"
 }
