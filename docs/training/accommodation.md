@@ -32,10 +32,16 @@ Never practise with an occupied production Bed or a real resident record.
 
 1. Open **Front Desk** or create a `Housing Assignment`. Select the resident, Building,
    Room, Bed, assignment and stay types, check-in date, Project, and Cost Center.
+
+   ![Bed selection on a Housing Assignment](../assets/training/accommodation/housing-assignment-bed-selection-en.png)
+
 2. Submit the assignment. Confirm that the Bed is **Occupied** and that Room and
    Building occupancy have been recalculated.
 3. Create a Maintenance-category `Resident Request` for the same Room. Move it from
    **New** to **Triaged**, then choose **Convert to Document**.
+
+   ![Resident Request intake, Arabic interface](../assets/training/accommodation/resident-request-intake-ar.png)
+
 4. Confirm that the request is **In Progress** and links to a draft
    `Maintenance Request`. Repeating the conversion must reopen the same target, not
    create another one.
