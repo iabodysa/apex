@@ -23,11 +23,19 @@ import re
 import frappe
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 from apex.apex_core.utils.portal_language import render_in_arabic
-from apex.apex_core.utils.portal_token_security import WORKER, resolve_portal_subject
+from apex.apex_core.utils.portal_token_security import (
+    TOKEN_COOKIES,
+    WORKER,
+    resolve_portal_subject,
+)
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
-MASAR_TOKEN_COOKIE = "masar_wt"
+# Read from the same table the reader answers from — ``masar_worker._token_from_request``
+# resolves the cookie name through ``TOKEN_COOKIES[WORKER]``. A literal here would let a
+# rename of that entry pass silently, leaving this page writing one cookie name and the
+# endpoint reading another. ``www/driver.py`` already derives its own the same way.
+MASAR_TOKEN_COOKIE = TOKEN_COOKIES[WORKER]
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 WORKER_CAPABILITIES = (
     "worker.home",

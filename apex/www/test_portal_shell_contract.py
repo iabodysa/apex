@@ -2,9 +2,39 @@ from pathlib import Path
 from unittest import TestCase
 
 from apex.apex_core.utils.portal_bootstrap import PORTAL_PUBLIC_PATHS
+from apex.apex_core.utils.portal_token_security import DRIVER, TOKEN_COOKIES, WORKER
 
 
 class TestPortalShellContract(TestCase):
+    def test_the_token_adapters_name_their_cookie_from_the_shared_table(self):
+        """The page that WRITES the cookie and the endpoint that READS it must agree.
+
+        ``TOKEN_COOKIES`` in ``portal_token_security`` is the one table both halves
+        answer from: ``masar_worker._token_from_request`` reads through it, and the
+        www adapter must write through it too. A literal in the adapter survives a
+        rename of the table entry, and the divergence is silent — the page keeps
+        setting the old cookie name, the endpoint keeps looking for the new one, and
+        every returning worker is simply logged out with no error to notice.
+        """
+        from apex.www import driver, masar
+
+        self.assertEqual(masar.MASAR_TOKEN_COOKIE, TOKEN_COOKIES[WORKER])
+        self.assertEqual(driver.DRIVER_TOKEN_COOKIE, TOKEN_COOKIES[DRIVER])
+
+        www = Path(__file__).parent
+        for filename in ("masar.py", "driver.py"):
+            spelled = [
+                line.strip()
+                for line in (www / filename).read_text().splitlines()
+                if any(f'"{literal}"' in line for literal in TOKEN_COOKIES.values())
+            ]
+            self.assertEqual(
+                spelled,
+                [],
+                f"{filename}: cookie name spelled as a literal instead of "
+                "read from TOKEN_COOKIES",
+            )
+
     def test_retired_driver_portal_api_surface_is_absent(self):
         app = Path(__file__).parents[1]
         driver_api = app / "salis" / "api" / "driver_portal"

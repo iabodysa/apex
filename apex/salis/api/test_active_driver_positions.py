@@ -45,6 +45,26 @@ RETIRED_POSITION_FIELDS = {"has_position", "lat", "lng", "updated_at", "age_seco
 ENVELOPE_FIELDS = {"positions", "start", "page_length", "returned", "has_more"}
 
 
+def _row_in_any_page(name):
+    """The row for ``name`` from whichever page it lands on, or None.
+
+    The endpoint orders ``planned_start asc, name asc`` and caps a page at
+    PLAN_PAGE_LENGTH, so a freshly named trip sorts last and falls off page one the
+    moment the site holds a page of live trips. Reading page one alone asserts the
+    site's row count rather than the behaviour under test, and it fails only once the
+    data grows — long after the change that made it wrong.
+    """
+    start = 0
+    while True:
+        payload = get_active_driver_positions(start=start)
+        for row in payload["positions"]:
+            if row["dispatch_trip"] == name:
+                return row
+        if not payload["has_more"]:
+            return None
+        start += PLAN_PAGE_LENGTH
+
+
 class TestActiveDriverPositions(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -99,17 +119,7 @@ class TestActiveDriverPositions(FrappeTestCase):
         self.assertEqual(first["returned"], len(first["positions"]))
 
         name = self._trip()
-        row, start = None, 0
-        while True:
-            payload = get_active_driver_positions(start=start)
-            rows = {r["dispatch_trip"]: r for r in payload["positions"]}
-            if name in rows:
-                row = rows[name]
-                break
-            if not payload["has_more"]:
-                break
-            start += PLAN_PAGE_LENGTH
-
+        row = _row_in_any_page(name)
         self.assertIsNotNone(row, "a Planned trip today must reach the map")
         self.assertEqual(set(row), ROW_FIELDS)
 
@@ -126,10 +136,7 @@ class TestActiveDriverPositions(FrappeTestCase):
         frappe.db.set_value(
             "Dispatch Trip", name, "trip_date", frappe.utils.add_days(frappe.utils.today(), -3)
         )
-        listed = {
-            row["dispatch_trip"] for row in get_active_driver_positions()["positions"]
-        }
-        self.assertIn(name, listed)
+        self.assertIsNotNone(_row_in_any_page(name))
 
     def test_a_driver_with_no_fix_is_listed_without_a_position(self):
         """A trip stays on the list; it just does not claim to know where its driver is.
@@ -144,10 +151,8 @@ class TestActiveDriverPositions(FrappeTestCase):
         that carries no coordinates.
         """
         name = self._trip()
-        row = next(
-            r for r in get_active_driver_positions()["positions"]
-            if r["dispatch_trip"] == name
-        )
+        row = _row_in_any_page(name)
+        self.assertIsNotNone(row, "the trip must be on the list before its keys are graded")
         self.assertEqual(
             set(row) & RETIRED_POSITION_FIELDS,
             set(),
