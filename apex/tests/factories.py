@@ -502,7 +502,7 @@ def make_driver_without_vehicle(email):
 
 def make_worker_token(employee):
     """Create a Masar Worker Token for an Employee; return the RAW token string. The
-    token is stored hashed at rest (P-104), so the raw value is read from the freshly
+    token is stored hashed at rest, so the raw value is read from the freshly
     minted doc's transient ``_plaintext_token`` (never re-readable from the row)."""
     return (
         frappe.get_doc(
@@ -794,7 +794,7 @@ class WorkerTripMixin:
     handle records, registering cleanup. Record creation is delegated to
     ``make_worker_trip``; everything is created as Administrator.
 
-    Promoted from salis/api/test_masar_worker_movement.py (P-135) so the Masar test
+    Promoted from salis/api/test_masar_worker_movement.py so the Masar test
     modules share one mixin without a cross-test-module import."""
 
     def _worker_trip(self, driver, project, building, workers, route_name, **kwargs):

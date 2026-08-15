@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared workspace parent-chain reachability scan (A-122 / A-127).
+"""Shared workspace parent-chain reachability scan.
 
 Frappe draws the desk sidebar in two stages. ``get_workspace_sidebar_items``
 (frappe/desk/desktop.py) drops any workspace the session user is not permitted on,
@@ -16,7 +16,7 @@ regressions fell through.
 This module is the single home of that scan. It is a non-``test_`` module on
 purpose: ``tests/test_no_cross_test_imports.py`` forbids a ``test_*`` module from
 importing a sibling ``test_*`` module, so shared logic is promoted into a plain
-module (the P-135 pattern that produced ``tests/factories.py``) instead of being
+module (the pattern that produced ``tests/factories.py``) instead of being
 copied into each caller.
 
 Stdlib-only and file-level on purpose: the invariant is a property of the shipped

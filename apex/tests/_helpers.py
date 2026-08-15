@@ -70,7 +70,7 @@ def approve_rental_settlement(rs, manager):
 
 def cancel_submitted_for_cleanup(doc):
     """Cancel a submitted doc during teardown so it can be deleted, respecting the
-    A-083 workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).
+    workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).
 
     A bare ``doc.cancel()`` on a workflow-governed doctype whose workflow has a cancel
     (docstatus-2) state is now blocked by the guard. Mirror what ``apply_workflow`` does
@@ -96,7 +96,7 @@ def cancel_submitted_for_cleanup(doc):
 
 
 def submit_via_workflow(doc):
-    """Submit a workflow-governed doc in a test the A-083-guard-compliant way.
+    """Submit a workflow-governed doc the way the workflow guard requires.
 
     A bare ``doc.submit()`` on a workflow-governed doctype is now refused by
     ``apex.apex_core.utils.workflow_guard`` unless the current user holds an authorized
@@ -152,7 +152,7 @@ def _project(project_name="QA Scope Project"):
 
     A thin default-carrying alias over ``factories.make_project``: it was a fourth
     hand-written copy of that get-or-create, written in a shape the copy-paste
-    detector could not group with the other three (A-176).
+    detector could not group with the other three.
     """
     from apex.tests.factories import make_project
 
