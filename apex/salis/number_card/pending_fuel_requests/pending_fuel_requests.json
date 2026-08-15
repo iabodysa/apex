@@ -10,6 +10,6 @@
  "stats_time_interval": "Daily",
  "type": "Document Type",
  "module": "Salis",
- "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Pending\"], [\"Fuel Request\", \"docstatus\", \"=\", 1]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Pending\"], [\"Fuel Request\", \"docstatus\", \"=\", 0]]",
+ "modified": "2026-08-15 12:00:00.000000"
 }

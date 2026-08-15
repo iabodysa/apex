@@ -153,7 +153,7 @@ class TestBackendBoardContract(unittest.TestCase):
     def test_failed_recovery_conversion_preserves_legacy_policy(
         self, frappe, configure_recovery
     ):
-        frappe.db.table_exists.return_value = True
+        frappe.db.exists.return_value = True
         frappe.db.get_single_value.side_effect = [1, 40, None, "Company A"]
         frappe.db.get_value.return_value = SimpleNamespace(
             enabled=1, salary_component="Recovery"
