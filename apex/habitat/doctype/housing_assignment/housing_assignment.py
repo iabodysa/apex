@@ -247,14 +247,13 @@ def validate(doc, method=None):
 
 def on_submit(doc, method=None):
     """Occupies the bed and refreshes occupancy without creating a payroll deduction."""
-    Bed = frappe.qb.DocType("Bed")
-    (
-        frappe.qb.from_(Bed)
-        .select(Bed.status)
-        .where(Bed.name == doc.bed)
-        .for_update()
-    ).run()
-    current_status = frappe.db.get_value("Bed", doc.bed, "status")
+    # The lock and the decision have to be the SAME statement. A FOR UPDATE whose
+    # result is discarded takes the row lock, but the plain read that follows still
+    # answers from this transaction's REPEATABLE READ snapshot — so the row the
+    # winner committed while we waited is invisible, and both assignments take the
+    # bed. Reading with for_update=True is a locking read: it returns the latest
+    # committed value, which is the one being decided on.
+    current_status = frappe.db.get_value("Bed", doc.bed, "status", for_update=True)
     if current_status == "Occupied":
         occupying_asg = frappe.db.get_value(
             "Housing Assignment",
@@ -265,6 +264,7 @@ def on_submit(doc, method=None):
                 "name": ["!=", doc.name],
             },
             "name",
+            for_update=True,
         )
         if occupying_asg:
             frappe.throw(
