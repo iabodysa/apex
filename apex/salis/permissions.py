@@ -167,6 +167,19 @@ SALIS_SCOPE = {
     "Driver Clearance": _driver(),
     "Vehicle Suspension": _driver(field="related_driver"),
     "Movement Cost Transfer": _dual(),
+    "Vehicle Handover": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Wash Request": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Fuel Daily Log": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Rental Vehicle Movement": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Movement Cost Recovery": _hop("vehicle", "Salis Vehicle", "scoped"),
+    # Transport Trip Rating is deliberately absent, and it is the one project-anchored
+    # Salis DocType that is. Scoping it closes a real cross-project read — the Worker
+    # role holds read and write on it — but it also closes the write, because
+    # _owner_or_project_has_permission skips the ownership branch on an UNSAVED row and
+    # the row must then anchor itself. The portal Worker capacity carries no Project User
+    # Permission and no Salis Driver link, so it can anchor to nothing and every rating
+    # would fail closed on create. Scope it in the same change that gives the portal
+    # capacities a project, never before.
 }
 
 INDIRECT_PROJECT_SCOPED = frozenset(
@@ -394,6 +407,10 @@ def _doc_project(doc):
     route_plan = getattr(doc, "route_plan", None)
     if route_plan:
         return frappe.db.get_value("Route Plan", route_plan, PROJECT)
+
+    vehicle = getattr(doc, "vehicle", None)
+    if vehicle:
+        return frappe.db.get_value("Salis Vehicle", vehicle, PROJECT)
 
     return None
 
