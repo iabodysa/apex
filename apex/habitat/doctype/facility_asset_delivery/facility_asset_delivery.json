@@ -132,7 +132,8 @@
    "in_list_view": 1,
    "label": "To Building",
    "options": "Building",
-   "reqd": 1
+   "reqd": 1,
+   "link_filters": "[[\"Building\", \"name\", \"!=\", \"eval:doc.from_building\"]]"
   },
   {
    "description": "Physical location in the receiving building (e.g. Laundry Room).",
@@ -353,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-11 00:14:00.000000",
+ "modified": "2026-08-15 07:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Delivery",
