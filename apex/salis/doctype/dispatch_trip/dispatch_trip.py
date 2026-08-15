@@ -263,6 +263,23 @@ class DispatchTrip(Document):
 
         reverse_trip_boarding(self.name)
 
+    def on_trash(self):
+        """Release the requests a draft trip claimed.
+
+        ``assign_requests_to_trip`` stamps ``is_assigned``/``assigned_to_trip``
+        while the trip is still a draft, and the re-assignment guard then refuses
+        the request to any other trip. Cancellation clears them, but a draft is
+        deleted rather than cancelled, so without this the request is locked to a
+        trip that no longer exists and no desk field can free it.
+        """
+        for request in self._request_names():
+            frappe.db.set_value(
+                "Transport Request",
+                request,
+                {"is_assigned": 0, "assigned_to_trip": None},
+                update_modified=False,
+            )
+
     def _revert_transport_requests(self):
         """Reverse every request still fulfilled by this trip."""
         for request in self._request_names():
@@ -276,7 +293,9 @@ class DispatchTrip(Document):
                     "assigned_vehicle",
                     "assigned_driver",
                     "dispatch_trip",
+                    "assigned_to_trip",
                 ],
+                reset_fields={"is_assigned": 0},
             )
 
 

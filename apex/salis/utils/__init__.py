@@ -289,7 +289,9 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
     return target_state
 
 
-def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, clear_fields=None):
+def revert_transport_request(
+    tr_name, from_state, to_state, dispatch_trip=None, clear_fields=None, reset_fields=None
+):
     """System reversal of a Transport Request state (e.g. when the Dispatch Trip
 	that fulfilled it is cancelled).
 
@@ -299,6 +301,10 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
 	``from_state`` and (optionally) still tied to ``dispatch_trip``, keeping the
 	docstatus consistent with the workflow's state map. Both reversal states are
 	docstatus 1 (Scheduled <- Fulfilled), so the document stays submitted.
+
+	``clear_fields`` nulls a field; ``reset_fields`` sets one to an explicit value.
+	A Check field needs the second — NULL is not 0 to a filter, so a request whose
+	``is_assigned`` is nulled rather than zeroed still reads as assigned.
 	"""
     if not tr_name:
         return None
@@ -313,6 +319,7 @@ def revert_transport_request(tr_name, from_state, to_state, dispatch_trip=None, 
     values = {"status": to_state}
     for fieldname in (clear_fields or []):
         values[fieldname] = None
+    values.update(reset_fields or {})
     target_docstatus = _TR_STATE_DOCSTATUS.get(to_state)
     if target_docstatus is not None:
         values["docstatus"] = target_docstatus
