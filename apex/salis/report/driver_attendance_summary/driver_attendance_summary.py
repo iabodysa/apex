@@ -4,7 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
+from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
@@ -28,7 +28,7 @@ def execute(filters=None):
     or_filters = None
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Driver Attendance")
     if restrict:
-        in_scope_drivers = scoped_names("Salis Driver", allowed) if allowed else []
+        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
         if in_scope_drivers:
             or_filters = {"driver": ["in", in_scope_drivers], "owner": frappe.session.user}
         else:

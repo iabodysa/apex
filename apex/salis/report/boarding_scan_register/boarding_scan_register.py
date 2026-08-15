@@ -3,7 +3,7 @@
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
+from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card
 
@@ -32,7 +32,7 @@ def execute(filters=None):
 
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Boarding Scan Log")
     if restrict:
-        in_scope_drivers = scoped_names("Salis Driver", allowed) if allowed else []
+        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
         if not in_scope_drivers:
             return columns, []
         scan_filters["driver"] = ["in", in_scope_drivers]

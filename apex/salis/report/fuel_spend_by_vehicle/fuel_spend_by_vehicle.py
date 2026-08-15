@@ -16,7 +16,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
 from apex.apex_core.utils.report_summary import card, count_card, total_card
 
@@ -49,7 +48,7 @@ def execute(filters=None):
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_vehicles = scoped_names("Salis Vehicle", allowed)
+        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
         if not in_scope_vehicles:
             return columns, []
         query_filters["vehicle"] = ["in", in_scope_vehicles]

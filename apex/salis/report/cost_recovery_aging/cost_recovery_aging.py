@@ -17,7 +17,6 @@ as_on_date (the reference date for aging; defaults to today).
 import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, nowdate
-from apex.apex_core.utils.report_helpers import scoped_names
 from apex.apex_core.utils.report_summary import count_card, total_card
 from apex.salis import permissions
 
@@ -76,7 +75,7 @@ def execute(filters=None):
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_vehicles = scoped_names("Salis Vehicle", allowed)
+        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
         if not in_scope_vehicles:
             return columns, []
         query_filters["vehicle"] = ["in", in_scope_vehicles]

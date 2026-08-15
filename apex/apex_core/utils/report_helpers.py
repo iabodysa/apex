@@ -11,8 +11,6 @@ Use date_range_condition() from apex_core/utils/report_helpers.py instead of
 re-implementing the from/to filter block.
 """
 
-import frappe
-
 
 def date_range_condition(filters, field, from_key="from_date", to_key="to_date"):
     """Return the frappe.get_all filter fragment for a from/to date range.
@@ -35,14 +33,3 @@ def date_range_condition(filters, field, from_key="from_date", to_key="to_date")
     if to_value:
         return ["<=", to_value]
     return None
-
-
-def scoped_names(doctype, allowed, filter_field="project", pluck="name"):
-    """Resolve the in-scope master names for a permission-restricted report.
-
-    Wraps the `frappe.get_all(doctype, filters={<field>: ["in", allowed]},
-    pluck=...)` lookup that every scoped report repeated. The caller keeps its own
-    result variable and its own "empty → return columns, []" short-circuit; only
-    this lookup moves here.
-    """
-    return frappe.get_all(doctype, filters={filter_field: ["in", allowed]}, pluck=pluck)

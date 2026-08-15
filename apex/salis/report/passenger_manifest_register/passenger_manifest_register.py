@@ -14,7 +14,7 @@ so a scope correction reaches this report and the desk list together.
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
+from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import count_card, percent_card
 from apex.salis import permissions
 
@@ -34,7 +34,7 @@ def execute(filters=None):
 
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Passenger Manifest")
     if restrict:
-        in_scope = scoped_names("Route Plan", allowed) if allowed else []
+        in_scope = frappe.get_all("Route Plan", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
         chosen = query_filters.get("route_plan")
         if not in_scope or (chosen and chosen not in in_scope):
             return columns, [], None, None, _summary([])

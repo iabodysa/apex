@@ -15,7 +15,7 @@ reaches this report and the desk list together.
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.report_helpers import date_range_condition, scoped_names
+from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import count_card
 from apex.habitat import permissions
 
@@ -41,7 +41,7 @@ def execute(filters=None):
         if not chosen:
             scope_buildings = allowed
     if scope_buildings is not None:
-        assignments = scoped_names("Housing Assignment", scope_buildings, filter_field="building")
+        assignments = frappe.get_all("Housing Assignment", filters={"building": ["in", scope_buildings]}, pluck="name")
         if not assignments:
             return columns, [], None, None, _summary([])
         query_filters["assignment"] = ["in", assignments]

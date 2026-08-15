@@ -3,7 +3,6 @@
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.report_helpers import scoped_names
 from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card
 
@@ -38,7 +37,7 @@ def execute(filters=None):
     if restrict:
         if not allowed:
             return columns, []
-        in_scope_drivers = scoped_names("Salis Driver", allowed)
+        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name")
         if not in_scope_drivers:
             return columns, []
         query_filters["driver"] = ["in", in_scope_drivers]
