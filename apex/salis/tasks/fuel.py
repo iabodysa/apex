@@ -70,7 +70,20 @@ def unreverted_topup_watch() -> None:
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
-                doc.save(ignore_permissions=True)
+                # ``ignore_permissions`` does not reach validate_workflow
+                # (frappe/model/document.py:693), and get_transitions filters on
+                # frappe.get_roles() of the SESSION user (frappe/model/workflow.py:64),
+                # so Done -> Reverted is refused unless the session holds Fleet Manager.
+                # The job must not inherit whoever happens to be signed in, and it cannot
+                # run as the document owner either — the owner raised the request and has
+                # no Revert transition. So the actor is stated for this one write and
+                # handed back in the finally, which the per-row savepoint does not do.
+                actor = frappe.session.user
+                frappe.set_user("Administrator")
+                try:
+                    doc.save(ignore_permissions=True)
+                finally:
+                    frappe.set_user(actor)
                 doc.add_comment(
                     "Info",
                     _("Auto-reverted: overdue temporary top-up (was due {0}).").format(
