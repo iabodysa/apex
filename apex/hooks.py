@@ -204,9 +204,6 @@ doc_events = {
     },
     "Custody Damage Assessment": {
         "validate": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.validate",
-        "on_submit": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_submit",
-        "before_cancel": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.before_cancel",
-        "on_cancel": "apex.habitat.doctype.custody_damage_assessment.custody_damage_assessment.on_cancel",
     },
     "Operational Depreciation Snapshot": {
         "validate": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.validate",
@@ -385,6 +382,7 @@ permission_query_conditions = {
     "Fuel Daily Log": _SALIS_SCOPE_QUERY,
     "Rental Vehicle Movement": _SALIS_SCOPE_QUERY,
     "Movement Cost Recovery": _SALIS_SCOPE_QUERY,
+    "Transport Trip Rating": _SALIS_SCOPE_QUERY,
     "Telecom Contract": _LOGISTAY_SCOPE_QUERY,
     "SIM Card": _LOGISTAY_SCOPE_QUERY,
     "SIM Custody Assignment": _LOGISTAY_SCOPE_QUERY,
@@ -456,6 +454,7 @@ has_permission = {
     "Fuel Daily Log": _SALIS_SCOPE_CHECK,
     "Rental Vehicle Movement": _SALIS_SCOPE_CHECK,
     "Movement Cost Recovery": _SALIS_SCOPE_CHECK,
+    "Transport Trip Rating": _SALIS_SCOPE_CHECK,
     "Telecom Contract": _LOGISTAY_SCOPE_CHECK,
     "SIM Card": _LOGISTAY_SCOPE_CHECK,
     "SIM Custody Assignment": _LOGISTAY_SCOPE_CHECK,

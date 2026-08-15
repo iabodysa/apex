@@ -11,6 +11,7 @@ WHICH WAY IS A PROPERTY OF THE DOCTYPE rather than of a function:
     hop       the project is one link away
     trip      Dispatch Trip.project, then historical Route Plan.project
     trip_child  project through Dispatch Trip, then historical Route Plan
+    trip_link   project through Dispatch Trip alone, for a row with no Route Plan column
     manifest  the project is reachable by EITHER of two links (Passenger Manifest)
     driver    the project hangs off a Salis Driver link (``driver``/``related_driver``)
 
@@ -29,8 +30,9 @@ a new function per hook.
 
 Three invariants hold on every path and are why the edge cases look asymmetric:
 
-The document rules NEVER return True and never branch on ``ptype`` (one exception, named
-on ``payment_sod_has_permission``): deny-only, so they narrow and never widen.
+The document rules NEVER return True and never branch on ``ptype`` (two exceptions, named
+on ``payment_sod_has_permission`` and on the portal-capacity branch that precedes the
+dispatch table): deny-only, so they narrow and never widen.
 
 The block at the foot of this file is COMPATIBILITY ONLY: wrappers holding no rule, each
 forwarding to a dispatcher with its own ``scope_for``, which ``hooks.py`` does not route
@@ -126,6 +128,17 @@ def _trip_child(rule="owner_or_project", own="owner"):
     return ("trip_child", {"own": own, "rule": rule})
 
 
+def _trip_link(rule="scoped"):
+    """Project through a ``dispatch_trip`` link ALONE — no ``route_plan`` column.
+
+    Distinct from ``trip_child``, whose fragment names ``route_plan`` as the historical
+    fallback. Transport Trip Rating has no such column, so that fragment would be
+    invalid SQL against its table; the trip's own fallback still applies, inside the
+    subquery.
+    """
+    return ("trip_link", {"own": None, "rule": rule})
+
+
 def _manifest():
     """Project through the actual trip, with a historical Route Plan fallback."""
     return ("manifest", {"own": None, "rule": "scoped"})
@@ -172,15 +185,13 @@ SALIS_SCOPE = {
     "Fuel Daily Log": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Rental Vehicle Movement": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Movement Cost Recovery": _hop("vehicle", "Salis Vehicle", "scoped"),
-    # Transport Trip Rating is absent on purpose: the ownership branch is skipped on an
-    # UNSAVED row, and the portal Worker capacity has no project to anchor to instead, so
-    # scoping it would refuse every rating on create. Scope it with that project, not before.
+    "Transport Trip Rating": _trip_link(),
 }
 
 INDIRECT_PROJECT_SCOPED = frozenset(
     doctype
     for doctype, (kind, spec) in SALIS_SCOPE.items()
-    if kind in {"manifest", "trip_child"} or kind == "hop"
+    if kind in {"manifest", "trip_child", "trip_link"} or kind == "hop"
 )
 
 PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
@@ -284,6 +295,12 @@ def _render_trip_child(spec, escaped):
     ).format(trips=trips, route_plans=route_plans)
 
 
+def _render_trip_link(spec, escaped):
+    """The project through the row's Dispatch Trip, historical fallback included."""
+    del spec
+    return "`dispatch_trip` in ({0})".format(_trip_scope(escaped))
+
+
 def _render_driver(spec, escaped):
     """The project hanging off the row's Salis Driver link."""
     return (
@@ -310,6 +327,7 @@ FRAGMENTS = {
     "hop": _render_hop,
     "trip": _render_trip,
     "trip_child": _render_trip_child,
+    "trip_link": _render_trip_link,
     "driver": _render_driver,
     "manifest": _render_manifest,
 }
@@ -355,6 +373,11 @@ def project_scope_query(user=None, doctype=None, scope_for=None):
     user = _resolve_user(user)
     if _is_unscoped(user):
         return ""
+
+    # A portal capacity enumerates nothing. Its own-row clauses would resolve to
+    # ``owner = <the capacity>``, i.e. every row the portal ever wrote in every project.
+    if permission_scope.is_portal_capacity(user):
+        return "1=0"
 
     kind, spec = SALIS_SCOPE.get(scope_for or doctype) or _column()
     own = _own_clause(spec, user)
@@ -751,7 +774,15 @@ def project_scoped_has_permission(doc, ptype, user=None):
     the plain project rule, which is what the hand-written wrappers defaulted to.
 
     Every rule returns False to block or None to defer, never True.
+
+    A portal capacity is answered before the table is consulted, because none of these
+    rules can answer it: every one of them ends at a project the capacity cannot hold.
+    See ``permission_scope.portal_capacity_verdict``.
     """
+    user = _resolve_user(user)
+    if permission_scope.is_portal_capacity(user):
+        return permission_scope.portal_capacity_verdict(ptype)
+
     kind, spec = SALIS_SCOPE.get(getattr(doc, "doctype", None)) or _column()
     del kind
     return DOCUMENT_RULES[spec["rule"]](doc, ptype, user, spec)

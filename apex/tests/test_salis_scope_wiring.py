@@ -76,14 +76,13 @@ class TestSalisScopeWiring(unittest.TestCase):
                 self.assertEqual(hooks.permission_query_conditions.get(doctype), QUERY)
                 self.assertEqual(hooks.has_permission.get(doctype), CHECK)
 
-    def test_transport_trip_rating_stays_unscoped_until_the_worker_has_a_project(self):
-        # The sixth project-anchored DocType, held out on purpose and pinned here so the
-        # omission reads as a decision rather than an oversight. Scoping it closes a real
-        # cross-project read, and also closes the WRITE: the ownership branch of
-        # _owner_or_project_has_permission is skipped on an unsaved row, and the portal
-        # Worker capacity carries no Project User Permission to anchor to instead, so
-        # every rating would fail closed on create. This case flips the day that capacity
-        # gains a project — which is the signal to scope the DocType in the same change.
-        self.assertNotIn("Transport Trip Rating", SALIS_SCOPE)
-        self.assertIsNone(hooks.permission_query_conditions.get("Transport Trip Rating"))
-        self.assertIsNone(hooks.has_permission.get("Transport Trip Rating"))
+    def test_transport_trip_rating_is_scoped_through_its_dispatch_trip(self):
+        # The sixth project-anchored DocType, held out until the portal Worker capacity
+        # had an answer of its own: the rating's create runs as that capacity, which
+        # holds no Project User Permission and so failed closed the moment the DocType
+        # was scoped. permission_scope.portal_capacity_verdict is that answer, and this
+        # case is what proves the hold-out ended rather than being forgotten. The
+        # strategy is trip_link, not trip_child — the table carries no route_plan column.
+        self.assertEqual(SALIS_SCOPE["Transport Trip Rating"][0], "trip_link")
+        self.assertEqual(hooks.permission_query_conditions.get("Transport Trip Rating"), QUERY)
+        self.assertEqual(hooks.has_permission.get("Transport Trip Rating"), CHECK)

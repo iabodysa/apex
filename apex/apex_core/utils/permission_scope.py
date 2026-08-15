@@ -18,10 +18,20 @@ local to each module.
 
 Use ``allowed_for()`` / ``scope_condition()`` / ``report_scope()`` here instead of
 re-implementing the pluck / fragment / tuple logic in a third scoping module.
+
+``is_portal_capacity()`` / ``portal_capacity_verdict()`` are here for the same reason:
+the portal capacity identity is an app-wide fact, not a Building/Project/Company one,
+and all three modules have to answer it the same way.
 """
 
 import frappe
 from frappe import permissions as frappe_permissions
+
+from apex.apex_core.utils.portal_token_security import CAPACITY_USERS
+
+PORTAL_CAPACITY_USERS = frozenset(CAPACITY_USERS.values())
+
+PORTAL_CAPACITY_PTYPES = frozenset({"create", "write", "submit"})
 
 
 def resolve_user(user=None):
@@ -41,6 +51,40 @@ def is_unscoped(user, unscoped_roles):
     if user in ("Administrator", "Guest"):
         return user == "Administrator"
     return bool(set(frappe.get_roles(user)) & unscoped_roles)
+
+
+def is_portal_capacity(user):
+    """True when ``user`` is a seeded portal capacity identity rather than a person.
+
+    Read from ``portal_token_security.CAPACITY_USERS`` — the very mapping
+    ``as_capacity`` switches the session to — so the permission layer and the session
+    switch can never disagree about who a capacity is.
+
+    Keyed on the IDENTITY and never on the Driver or Worker role, because real people
+    hold the Driver role and a role-keyed answer would apply to every one of them. The
+    identity itself has no door: ``portal_identity_seed`` sets no password and leaves
+    ``simultaneous_sessions`` at 0, so the only way to become it is ``frappe.set_user``
+    inside ``as_capacity``, which runs after a token has already been verified.
+    """
+    return user in PORTAL_CAPACITY_USERS
+
+
+def portal_capacity_verdict(ptype):
+    """The document verdict for a portal capacity: defer on a write, deny anything else.
+
+    One capacity user stands in for EVERY worker or driver in the estate, so it can hold
+    no tenant User Permission — there is no single Building, Project or Company to name
+    — and the tenant axis therefore cannot decide it. What decides it instead is the
+    capacity role's own DocPerm, which is the wall the capacity was created to carry, on
+    a document the endpoint already bound to the token holder before opening
+    ``as_capacity``. Deferring says exactly that: the acting tenant is the document's.
+
+    Everything outside ``PORTAL_CAPACITY_PTYPES`` — read above all — is still DENIED, so
+    the deferral cannot widen into a cross-tenant read. The portal never needs it: it
+    reads with ``frappe.get_doc`` and ``frappe.get_all``, neither of which consults this
+    layer, and the list fragment stays shut for a capacity on both axes.
+    """
+    return None if ptype in PORTAL_CAPACITY_PTYPES else False
 
 
 def allowed_for(user, allow, cache_key):

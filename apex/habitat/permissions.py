@@ -405,14 +405,22 @@ def building_scoped_has_permission(doc, ptype, user=None):
     docs, so the DocPerms govern unwidened — or False to block. It NEVER returns True,
     so it can only narrow.
 
-    Deny-only and ptype-agnostic: it never branches on ``ptype``, so an out-of-estate
-    doc is blocked for every action including ``submit``. A doc whose estate cannot be
-    resolved at all is DENIED rather than deferred — fail closed, matching the
-    fragment, which hides the same row from the list.
+    Deny-only, and ptype-agnostic on the estate path: an out-of-estate doc is blocked
+    for every action including ``submit``. A doc whose estate cannot be resolved at all
+    is DENIED rather than deferred — fail closed, matching the fragment, which hides the
+    same row from the list. The portal-capacity branch below is the one ptype branch.
+
+    A portal capacity is answered first: it holds no Building User Permission and can
+    hold none, standing in as it does for every worker at once, so its write is left to
+    the capacity role's DocPerm. See ``permission_scope.portal_capacity_verdict``; the
+    fragment above already returns "1=0" for it, so no estate opens on the list side.
     """
     user = _resolve_user(user)
     if _building_is_unscoped(user):
         return None
+
+    if permission_scope.is_portal_capacity(user):
+        return permission_scope.portal_capacity_verdict(ptype)
 
     estates = _doc_estates(doc)
     if not estates:
