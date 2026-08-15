@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-390 — the worker transport read must not query a trip's status per row.
+"""the worker transport read must not query a trip's status per row.
 
 ``get_worker_transport`` already batch-fetches every Dispatch Trip the caller's
 requests point at, then used to issue one ``frappe.db.get_value`` per row for that

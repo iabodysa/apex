@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-384 — a router outage must not be remembered forever.
+"""a router outage must not be remembered forever.
 
 ``road_path`` calls a PUBLIC routing service over the internet. When that call failed
 it cached the empty answer so the next request would not wait again — but it cached it

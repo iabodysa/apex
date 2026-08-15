@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """get_site_address honours the form's current Site over the building's stored one.
 
-Regression for T-138: switching the Site dropdown before saving used to show the
+Regression for: switching the Site dropdown before saving used to show the
 OLD site's address, because the server read the building's saved `site` instead of
 the form's value. The endpoint now accepts the current `site` and prefers it.
 """
@@ -49,7 +49,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
         self.assertEqual(get_site_address(bldg, site=site_b), "")
 
     def test_building_address_overrides_site(self):
-        """T-144: the building's own selected Address wins over the Site's; clearing it
+        """the building's own selected Address wins over the Site's; clearing it
         falls back to the Site."""
         frappe.set_user("Administrator")
         site_a = _ensure_site("T144 Site")

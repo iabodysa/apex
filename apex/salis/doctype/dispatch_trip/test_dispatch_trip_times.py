@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for the Dispatch Trip return/depart time-order guard (T-706).
+"""Tests for the Dispatch Trip return/depart time-order guard.
 
 The guard only fires on a Completed trip with BOTH times set; a return earlier
 than the depart is rejected, equal/later is accepted. Planned trips are exempt

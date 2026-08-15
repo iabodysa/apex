@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-412 — cancelling a safety task execution must retract the tickets it raised.
+"""cancelling a safety task execution must retract the tickets it raised.
 
 Submitting an execution with a Poor / Not Done result raises Maintenance Requests: one
 per actionable finding through `finding_fanout`, plus one building-scoped summary ticket.
@@ -86,7 +86,7 @@ class TestCancellingAnExecutionRetractsItsTickets(FrappeTestCase):
                         "room": self.room,
                         "issue_type": "Other",
                         "priority": "Medium",
-                        "description": "A-412 fixture finding",
+                        "description": "_T fixture finding",
                         "status": "Open",
                     }
                 ],

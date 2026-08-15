@@ -23,7 +23,7 @@ WORKFLOW = "Movement Cost Recovery Workflow"
 
 
 def setUpModule():
-    """A-077: this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
+    """this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
     install and migrate. Its absence is a regression — FAIL, never skip.
 
     All three classes below used to carry ``@unittest.skipUnless(get_workflow_name(...))``,

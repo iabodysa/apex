@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-229 — the create-path ordering hazard in ``building_scoped_has_permission``.
+"""the create-path ordering hazard in ``building_scoped_has_permission``.
 
 ``Document.insert`` runs ``check_permission("create")`` (frappe/model/document.py:300)
 BEFORE ``_validate_links()`` (:302) applies ``fetch_from``. Nine Habitat DocTypes carry a

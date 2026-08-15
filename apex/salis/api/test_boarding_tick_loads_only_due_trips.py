@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-404 — the five-minute boarding tick must load only the trips that have work.
+"""the five-minute boarding tick must load only the trips that have work.
 
 `auto_confirm_claimed_boardings` asked Trip Boarding State for every row at status
 `Worker Claimed`, then `frappe.get_doc`'d the whole Dispatch Trip behind each one — child

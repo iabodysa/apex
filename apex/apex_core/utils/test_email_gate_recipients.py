@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""A-366 — the recipient filter must honour the person's own email choice.
+"""the recipient filter must honour the person's own email choice.
 
 Every explicit ``frappe.sendmail`` site in the app guarded on the Habitat Settings
 kill-switch, which answers whether the APP may send. None of them asked whether the PERSON

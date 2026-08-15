@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Bed-occupancy indexes are DECLARED, not only patched (A-113).
+"""Bed-occupancy indexes are DECLARED, not only patched.
 
 A Frappe patch never reaches a freshly installed site: a fresh install marks
 every registered patch complete WITHOUT running it. Any index delivered by a
@@ -60,7 +60,7 @@ def _indexes_covering(doctype, columns):
     Assert on THIS, not on an index name, wherever the framework may already
     have built an equivalent index of its own. ``bed`` is a Link carrying
     ``search_index: 1``, so Frappe creates its own single-column index (named
-    ``bed`` at table creation, ``bed_index`` on a later alter). Since A-129 the
+    ``bed`` at table creation, ``bed_index`` on a later alter). Since that change the
     guarded helper recognises that equivalence and declines to add a duplicate
     under our name, so ``idx_asgn_bed`` is present on some sites and absent on
     others while the invariant the query planner needs — bed is indexed — holds
@@ -126,11 +126,11 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
 
         This is what makes the test causal: without the drop, a green would only
         show that SOME earlier migrate had created the index, which is exactly the
-        upgraded-site case A-113 is NOT about.
+        upgraded-site case is NOT about.
 
         Every equivalent index goes, not just ours — leaving the framework's own
         ``bed`` search index in place would make the declaration a legitimate
-        no-op (A-129) and the test would prove nothing. The rebuild registered
+        no-op and the test would prove nothing. The rebuild registered
         first restores coverage under our name, which is the same invariant, not
         necessarily the same index name the site started with.
         """

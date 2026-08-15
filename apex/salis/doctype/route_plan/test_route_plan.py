@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Route Plan regression tests — P-035.
+"""Route Plan regression tests —.
 
 Covers:
 - sequence field removed from Route Stop (child table uses idx for order).
@@ -97,7 +97,7 @@ class TestRoutePlanP035(FrappeTestCase):
 
 
 class TestRoutePlanFulfilmentStamp(FrappeTestCase):
-    """P-034: on_submit must PERSIST movement_planner.
+    """on_submit must PERSIST movement_planner.
 
     on_submit fires after the document row is already written, so a plain
     ``self.movement_planner = ...`` is never flushed back — only db_set
@@ -109,11 +109,11 @@ class TestRoutePlanFulfilmentStamp(FrappeTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Route Plan",
-                "route_name": "P-034 Persist Check",
+                "route_name": "_T Persist Check",
                 # RoutePlan._require_project_on_a_new_plan refuses a NEW plan with
                 # no project, so the trips it carries stay visible to a
                 # project-scoped supervisor.
-                "project": make_project("P-034 Persist Project"),
+                "project": make_project("_T Persist Project"),
                 "stops": [{"stop_name": "Alpha Gate"}],
             }
         )

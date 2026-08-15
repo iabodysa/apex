@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Guard tests for the native-submit / native-cancel workflow bypass (A-083).
+"""Guard tests for the native-submit / native-cancel workflow bypass.
 
 The guard (``apex.apex_core.utils.workflow_guard``) re-validates authorization on a
 bare ``doc.submit()`` / ``frappe.client.submit`` (or ``doc.cancel()``) of a

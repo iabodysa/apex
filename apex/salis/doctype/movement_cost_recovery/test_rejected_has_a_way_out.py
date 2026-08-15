@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-410 — a rejected cost recovery must be resolvable from the desk.
+"""a rejected cost recovery must be resolvable from the desk.
 
 `Rejected` on the Movement Cost Recovery Workflow carries `doc_status` 1, so rejecting a
 recovery SUBMITS it. Every transition out of the workflow leaves from some other state, so

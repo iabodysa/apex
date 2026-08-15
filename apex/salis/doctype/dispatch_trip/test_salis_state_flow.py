@@ -67,7 +67,7 @@ class TestDispatchTripStateFlow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # A-077/A-160: mandatory Salis workflow (salis_workflow_seed, every install/
+        # mandatory Salis workflow (salis_workflow_seed, every install/
         # migrate); absence is a regression - FAIL, never skip. Resolved lazily here
         # rather than in a class decorator, which would hit frappe.cache at IMPORT.
         if get_workflow_name("Dispatch Trip") != WORKFLOW:

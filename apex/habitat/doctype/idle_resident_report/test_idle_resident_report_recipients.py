@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Idle Resident Report notifies each role holder ONCE, via the framework (O-008.1 #4).
+"""Idle Resident Report notifies each role holder ONCE, via the framework ( #4).
 
 ``after_insert`` resolved the responsible department's role holders by hand: a
 ``frappe.get_all("Has Role", ...)`` followed by one ``frappe.db.get_value("User", ...)``

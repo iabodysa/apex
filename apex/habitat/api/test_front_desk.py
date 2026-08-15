@@ -12,7 +12,6 @@ from apex.habitat.api.front_desk import (
     get_building_grid,
     get_buildings_scope_state,
     list_supervisor_buildings,
-    quick_check_in,
     set_room_readiness,
 )
 
@@ -47,7 +46,7 @@ def _make_bed(building, status="Available", readiness="Ready"):
 
 
 class TestSupervisorBuildings(ApexHabitatTestCase):
-    """T-448: list_supervisor_buildings — scope contract + server-computed bed mix."""
+    """list_supervisor_buildings — scope contract + server-computed bed mix."""
 
     def setUp(self):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
@@ -124,7 +123,7 @@ class TestSupervisorBuildings(ApexHabitatTestCase):
 
 
 class TestSetRoomReadiness(ApexHabitatTestCase):
-    """T-453: set_room_readiness flips Accommodation Room.readiness_status, the
+    """set_room_readiness flips Accommodation Room.readiness_status, the
     board reflects it, and a read-only role is refused the write."""
 
     def setUp(self):

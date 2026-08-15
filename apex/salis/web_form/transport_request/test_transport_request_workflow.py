@@ -66,7 +66,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # A-077: mandatory Salis workflow (salis_workflow_seed, every install/migrate);
+        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
         # absence is a regression - FAIL, never skip.
         if get_workflow_name("Transport Request") != WORKFLOW:
             raise AssertionError(
@@ -431,7 +431,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
 
 
     def test_rejected_request_can_be_reopened_to_new(self):
-        # A-085 finding 4: a rejected request is reopened back to New for rework
+        # An earlier finding: a rejected request is reopened back to New for rework
         # instead of dead-ending in Rejected.
         tr = self._new_tr()
         frappe.set_user(self.supervisor)

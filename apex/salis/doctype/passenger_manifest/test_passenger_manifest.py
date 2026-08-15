@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Tests for the Passenger Manifest duplicate-passenger guard (T-709).
+"""Tests for the Passenger Manifest duplicate-passenger guard.
 
 A duplicate employee row inflates passenger_count and the seat headcount, so a
 repeated employee is rejected; distinct rows pass and passenger_count mirrors the

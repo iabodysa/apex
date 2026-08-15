@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""A User Permission carrying ``applicable_for`` must scope ONE doctype (O-008.1 #2).
+"""A User Permission carrying ``applicable_for`` must scope ONE doctype ( #2).
 
 ``applicable_for`` restricts a User Permission to a single DocType. Frappe applies it that
 way when it builds its own match conditions (``frappe/model/db_query.py``): a row with no

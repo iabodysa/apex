@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-416 — the two read-only logs must be reachable from somewhere.
+"""the two read-only logs must be reachable from somewhere.
 
 `Boarding Scan Log` and `Trip Start Log` both carry `read_only=1`. Frappe reads that flag as
 "User Cannot Search" (`frappe/utils/user.py:139-140`), so neither DocType is added to
@@ -37,7 +37,7 @@ class TestTheReadOnlyLogsAreReachable(FrappeTestCase):
             / "salis.json"
         )
         links = json.loads(path.read_text())["links"]
-        return {l.get("link_to") for l in links if l.get("link_type") == "Report"}
+        return {row.get("link_to") for row in links if row.get("link_type") == "Report"}
 
     def test_each_gated_log_is_still_read_only(self):
         """If this ever flips, the rule below stops being load-bearing — but it must be

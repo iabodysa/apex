@@ -1,6 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
 """The building's responsible_supervisor is the single source of truth for
-the building-scoped User Permission — on_update keeps the permission in sync (T-254).
+the building-scoped User Permission — on_update keeps the permission in sync.
 """
 
 import frappe

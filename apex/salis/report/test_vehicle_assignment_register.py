@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-372 — the register that answers "who has vehicle X today".
+"""the register that answers "who has vehicle X today".
 
 Vehicle Assignment had no report at all, so the current holder could only be read off the
 vehicle one at a time and the history could only be reached by filtering a list view by

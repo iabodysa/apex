@@ -298,14 +298,14 @@ class TestMasarWorkerTokenAuth(_TokenCase):
 
 
 class TestMasarWorkerTokenSecurityHardening(_TokenCase):
-    """The 2026 token-hardening contract (T-628/629/660/662/672/685/705).
+    """The 2026 token-hardening contract.
 
     Guards the invariants that must hold after the security pass:
-      * T-629 — an EXPIRED token is refused (fail-closed), while a currently-valid
+      * an EXPIRED token is refused (fail-closed), while a currently-valid
         (pre-existing) link still resolves, including after the expiry backfill.
-      * T-628 — every guest token-resolution endpoint carries an @rate_limit, so a personal
+      * every guest token-resolution endpoint carries an @rate_limit, so a personal
         link cannot be driven as a brute-force / enumeration oracle.
-      * T-662 — the ``token`` Data field is at permlevel 1, so the low roles that only need
+      * the ``token`` Data field is at permlevel 1, so the low roles that only need
         the row (not the secret) cannot read the token.
     """
 
@@ -402,7 +402,7 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
 
 
 class TestMasarTokenTransport(_TokenCase):
-    """The httpOnly-cookie transport (T-685/T-705).
+    """The httpOnly-cookie transport.
 
     The SPA no longer carries the raw token in the query string or in the page HTML; it
     rides in the httpOnly ``masar_wt`` cookie and the endpoints read it server-side via

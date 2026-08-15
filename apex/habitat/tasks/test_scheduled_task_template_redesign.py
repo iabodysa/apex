@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Regression tests for T-552 Phase B: Scheduled Task Template redesign.
+"""Regression tests for Phase B: Scheduled Task Template redesign.
 
 Covers the Salary-Structure analogy:
   Scheduled Task Template   (holds child table of task catalog rows)

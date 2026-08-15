@@ -1,15 +1,13 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-172 — a workspace grant plus a DocPerm still leaves a persona on an empty page.
+"""a workspace grant plus a DocPerm still leaves a persona on an empty page.
 
 SUBJECT: the shipped Workspace RECORDS — apex/salis/workspace/salis/salis.json (506
 lines) and fleet/fleet.json (422), 928 together — not the 1-line ``__init__.py`` beside
 this file. Measured against the package directory this reads 467x, which is a grouping
 artifact and nothing else; against what it actually grades it is 0.50x, well inside the
 2x rule and claiming no exception. A workspace's subject is a JSON record, so any tool
-that counts only ``.py`` in the directory will mis-measure every test in here.
-
-A-162 gave ``Government Relations Officer`` read DocPerms so it would stop landing on a
-blank ``Compliance and Rentals``. A-125 then granted it the ``Salis`` ROOT as well,
+that counts only ``.py`` in the directory will mis-measure every test in here. gave ``Government Relations Officer`` read DocPerms so it would stop landing on a
+blank ``Compliance and Rentals``. then granted it the ``Salis`` ROOT as well,
 because the desk sidebar nests a child only under an already-rendered parent
 (``workspace.js`` ``make_sidebar``), so without the root grant the child was unreachable.
 Both were right, and together they produced a third shape: the persona now reaches the
@@ -38,13 +36,13 @@ since been redesigned into landing pages that carry their work as shortcuts, not
 Reading links alone reported TEN workspace/role pairs as empty pages a persona actually
 opens with cards on them. Dashboard and URL shortcuts stay excluded for the reason above.
 
-The fix A-172 shipped is on the root's own terms, not the persona's: the Master Data card
+The fix shipped is on the root's own terms, not the persona's: the Master Data card
 is documented as "Reference data: durable records you set up once", it listed the routing
 masters, and it omitted ``Salis Vehicle`` and ``Salis Driver`` -- the two registries every
 other Salis record links to, and the only Salis DocTypes whose reader set matches the
 root's grant list exactly. Adding them fills the card for all seven granted roles.
 
-A-178 then drained both ratchets this file carried, on the workspace shape of the time. The
+An earlier change then drained both ratchets this file carried, on the workspace shape of the time. The
 ``Compliance and Rentals`` workspace it also guarded no longer ships — the app is nine
 workspaces and that is not one of them — so its test class was removed rather than left
 raising KeyError. The Habitat root's three stranded personas still get the operational
@@ -82,7 +80,7 @@ SALIS_ROOT = "Salis"
 # from a page is never the bug this guard hunts.
 _ALWAYS_PERMITTED = {"System Manager", "Administrator"}
 
-# A-172 added these two to the Salis root's Master Data card. The root has since been
+# An earlier change added these two to the Salis root's Master Data card. The root has since been
 # redesigned and the card is gone, so THE LINKS ARE NO LONGER ASSERTED — what survives is the
 # invariant they were added to satisfy, which the root still meets by other means. The names
 # stay because the two DocPerm guards below still hold: whatever the layout, the persona must
@@ -91,7 +89,7 @@ ADDED_TO_SALIS_ROOT = ("Salis Vehicle", "Salis Driver")
 
 HABITAT_ROOT = "Habitat"
 
-# A-178 drained both ratchets below to empty. The Habitat root's Operations card gained
+# drained both ratchets below to empty. The Habitat root's Operations card gained
 # one operational record per stranded persona, and the Compliance card was retargeted off
 # the child table onto its embedding parent. Each entry left as it was fixed, which is what
 # keeps the exact-equality assertions honest.
@@ -103,13 +101,13 @@ ADDED_TO_HABITAT_ROOT = {
 
 KNOWN_EMPTY_WORKSPACE_ROLES = {
     # Frozen baseline of (workspace, role) -> reason. Exact equality: a NEW pair fails the
-    # build and a CLOSED pair fails until it is pruned from here. Empty since A-178.
+    # build and a CLOSED pair fails until it is pruned from here. Empty since that change.
 }
 
 KNOWN_CHILD_TABLE_LINKS = {
     # A DocType link at an istable target is dead for everyone but Administrator, because
     # build_permissions never puts a child table into can_read. Not permissionable — the
-    # link has to point at the embedding parent instead. Empty since A-178.
+    # link has to point at the embedding parent instead. Empty since that change.
 }
 
 
@@ -238,7 +236,7 @@ def _child_table_links(workspaces, doctypes):
 
 
 class TestNoGrantedRoleLandsOnAnEmptyPage(unittest.TestCase):
-    """The general invariant behind the A-172 regression."""
+    """The general invariant behind the regression."""
 
     def setUp(self):
         self.workspaces = _workspaces()
@@ -362,7 +360,7 @@ class TestNoGrantedRoleLandsOnAnEmptyPage(unittest.TestCase):
 
 
 class TestGovernmentRelationsOfficerReachesTheSalisRoot(unittest.TestCase):
-    """A-172's own outcome, asserted by name so it cannot be ratcheted away."""
+    """'s own outcome, asserted by name so it cannot be ratcheted away."""
 
     def setUp(self):
         self.workspaces = _workspaces()
@@ -423,7 +421,7 @@ class TestGovernmentRelationsOfficerReachesTheSalisRoot(unittest.TestCase):
 
 
 class TestHabitatRootPersonasCanOpenSomething(unittest.TestCase):
-    """A-178's second half: three roles were granted the Habitat root while every link on
+    """'s second half: three roles were granted the Habitat root while every link on
     it was System-Manager-only framework metadata. The root is their gateway — the desk
     sidebar nests a child workspace only under an already-rendered parent — so each needs
     something openable there."""

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-372 — the register for the resident request queue.
+"""the register for the resident request queue.
 
 Resident Request had no report. A coordinator saw the queue only as a list view, which
 shows rows but not the two things that decide what to do next: how long each has waited,

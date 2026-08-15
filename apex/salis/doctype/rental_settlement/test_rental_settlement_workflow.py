@@ -44,7 +44,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # A-077: mandatory Salis workflow (salis_workflow_seed, every install/migrate);
+        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
         # absence is a regression - FAIL, never skip.
         if get_workflow_name("Rental Settlement") != WORKFLOW:
             raise AssertionError(

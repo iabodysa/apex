@@ -1,7 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Access gates of every www portal door: who is redirected, who is refused, who is let in.
-
-A-538 consolidated four files that had drifted into copies of one another —
+"""Access gates of every www portal door: who is redirected, who is refused, who is let in. consolidated four files that had drifted into copies of one another —
 test_housing_count_page_access_gate.py, test_safety_page_access_gate.py,
 test_fleet_page_access_gate.py and test_masar_supervisor_page_access_gate.py. Each carried
 its own ``capabilities_of`` helper, its own identical ``setUp``, and its own copy of the
@@ -63,7 +61,7 @@ def capabilities_of(context):
 # none of the portal role sets, so a gate that admitted it would be admitting everyone.
 #
 # Safety Officer is listed as ADMITTED on /safety on purpose. Refusing it asserted the very
-# defect A-464 fixed — a role that reaches a portal it cannot use. A maker who cannot submit
+# defect fixed — a role that reaches a portal it cannot use. A maker who cannot submit
 # records a round for a supervisor to close rather than being turned away at the door.
 GATED_SURFACES = (
     ("housing", housing, "/housing", "Internal Auditor", ("Accommodation Manager",), None),

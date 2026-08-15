@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Generate Safety Setup on the assignment-based model (T-552 / A-076).
+"""Generate Safety Setup on the assignment-based model.
 
 ``generate_safety_setup`` was rebuilt to stop writing the dropped
 ``Scheduled Task Template.building`` field. It now get-or-creates ONE reusable
@@ -242,9 +242,9 @@ class TestGenerateSafetySetup(FrappeTestCase):
         self.assertGreaterEqual(summary["reused_templates"], 1)
 
     def test_no_scheduled_task_template_building_field_or_usage(self):
-        """The T-552 redesign dropped ``Scheduled Task Template.building``. Prove the
+        """The redesign dropped ``Scheduled Task Template.building``. Prove the
         field is gone from the DocType AND that no product code constructs or queries a
-        Scheduled Task Template with a ``building`` key (the A-076 breakage)."""
+        Scheduled Task Template with a ``building`` key (the breakage)."""
         # structural: the field is truly absent from the doctype
         self.assertIsNone(
             frappe.get_meta("Scheduled Task Template").get_field("building"),

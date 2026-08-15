@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-416 — a cancelled cleaning log is not a missed cleaning task.
+"""a cancelled cleaning log is not a missed cleaning task.
 
 Missed Cleaning Tasks queried Cleaning Log with NO docstatus filter, so a log someone
 cancelled was still reported as missed — sending a supervisor after a record that had been

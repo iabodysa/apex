@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-405 — the fleet board's CAR / MOTORCYCLE bucket must match words, not substrings.
+"""the fleet board's CAR / MOTORCYCLE bucket must match words, not substrings.
 
 `_sheet_for` decides which chip a vehicle sits under by looking for MOTOR, BIKE, SCOOTER
 or two Arabic tokens in Vehicle Category.category_name — a free Data field an admin types.

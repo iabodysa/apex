@@ -20,7 +20,7 @@ class TestFleetImportUpdates(FrappeTestCase):
     def setUp(self):
         super().setUp()
         self.temp_dir = tempfile.mkdtemp()
-        
+
         self.created_drivers = []
         self.created_vehicles = []
         self.created_projects = []
@@ -44,7 +44,7 @@ class TestFleetImportUpdates(FrappeTestCase):
         for o in self.created_offices:
             if frappe.db.exists("Rental Office", o):
                 frappe.delete_doc("Rental Office", o, ignore_permissions=True, force=True)
-        
+
         frappe.db.commit()
         shutil.rmtree(self.temp_dir)
         super().tearDown()
@@ -60,22 +60,22 @@ class TestFleetImportUpdates(FrappeTestCase):
         self.write_csv("project.csv", ["project_name"], [["Import Test Project"]])
         self.write_csv("vehicle_category.csv", ["category_name", "default_fuel_type"], [["Import Test Category", "Petrol"]])
         self.write_csv("rental_office.csv", ["office_name", "status"], [["Import Test Office", "Active"]])
-        
-        self.write_csv("salis_driver.csv", 
+
+        self.write_csv("salis_driver.csv",
             ["driver_id", "full_name", "phone", "status", "project"],
             [["D-109", "Initial Driver Name", "+123456789", "Active", "Import Test Project"]]
         )
-        self.write_csv("salis_vehicle.csv", 
+        self.write_csv("salis_vehicle.csv",
             ["plate_number", "vehicle_category", "ownership", "rental_office", "project", "status"],
             [["ABC 123", "Import Test Category", "Owned", "Import Test Office", "Import Test Project", "Active"]]
         )
 
         run(self.temp_dir)
-        
+
         driver_name = frappe.db.get_value("Salis Driver", {"driver_id": "D-109"}, "name")
         vehicle_name = frappe.db.get_value("Salis Vehicle", {"plate_normalized": "ABC123"}, "name")
         project_name = frappe.db.get_value("Project", {"project_name": "Import Test Project"}, "name")
-        
+
         self.assertTrue(bool(driver_name))
         self.assertTrue(bool(vehicle_name))
         self.assertTrue(bool(project_name))

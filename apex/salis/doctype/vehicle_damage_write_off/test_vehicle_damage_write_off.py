@@ -28,7 +28,7 @@ def _make_vehicle(prefix):
     escapes FrappeTestCase's savepoint rollback and persists on the test_ignore
     Salis Vehicle table. A deterministic plate therefore trips the
     ``plate_normalized`` unique index against a prior run's residual row
-    (the fixed-name variant of the P-216 collision class). A wide random suffix
+    (the fixed-name variant of the collision class). A wide random suffix
     keeps every run's fixture distinct from any residual row; ``_purge_fixtures``
     clears them at class teardown so the table does not accumulate.
     """
@@ -170,7 +170,7 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
 
 
 def setUpModule():
-    """A-077: this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
+    """this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
     install and migrate. Its absence is a regression — FAIL, never skip.
 
     The DoA class below carried ``@unittest.skipUnless(get_workflow_name(...))``, which

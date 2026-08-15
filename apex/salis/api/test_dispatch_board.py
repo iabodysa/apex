@@ -1,13 +1,13 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Dispatch Board API gate tests — P-042 (permission gate) + P-043 (PII gate).
+"""Dispatch Board API gate tests — (permission gate) + (PII gate).
 
 The board is a read-only glance reader over the Salis fleet DocTypes. Two gates
 are locked down here:
 
-* P-042 — the entry point must gate on Dispatch Trip read, not only Salis
+* the entry point must gate on Dispatch Trip read, not only Salis
   Vehicle read; a caller who can read vehicles but not trips must get a
   PermissionError (the trips pane uses get_all, which skips row-level checks).
-* P-043 — the driver phone is permlevel-1 PII. It must be fetched ONLY when the
+* the driver phone is permlevel-1 PII. It must be fetched ONLY when the
   caller holds permlevel-1 read on Salis Driver. The fix gates at the QUERY (the
   fields list), never load-then-blank, so the PII never leaves the DB for an
   unauthorised role.
@@ -31,7 +31,7 @@ _MOD = "apex.salis.api.dispatch_board"
 
 
 class TestDispatchBoardPermissionGate(FrappeTestCase):
-    """P-042: Dispatch Trip read is gated, not only Salis Vehicle read."""
+    """Dispatch Trip read is gated, not only Salis Vehicle read."""
 
     def test_vehicle_read_without_trip_read_is_denied(self):
         def _fake_has_permission(doctype, ptype, throw=False):
@@ -61,7 +61,7 @@ class TestDispatchBoardPermissionGate(FrappeTestCase):
 
 
 class TestDispatchBoardDriverPiiGate(FrappeTestCase):
-    """P-043: driver phone is fetched only when the caller may read permlevel 1."""
+    """driver phone is fetched only when the caller may read permlevel 1."""
 
     def _meta_with_permlevels(self, permlevels):
         meta = MagicMock()

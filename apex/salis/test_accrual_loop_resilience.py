@@ -3,7 +3,7 @@
 
 Covers two regressions in the per-row accrual loops:
 
-* T-670 — ``accrue_fuel_consumption``'s Done-Fuel-Request loop re-queries the
+* ``accrue_fuel_consumption``'s Done-Fuel-Request loop re-queries the
   ``ledgered=0`` set in a ``while True``. A request that deterministically fails
   to ledger stays ``ledgered=0``; combined with the old whole-transaction
   ``frappe.db.rollback()`` (which also discarded the good rows' ``ledgered=1``
@@ -11,7 +11,7 @@ Covers two regressions in the per-row accrual loops:
   must now RETURN: good rows are ledgered and stay ledgered, the bad row is
   attempted once, logged, and skipped.
 
-* T-671 — a single per-row failure in a daily/weekly accrual loop used a bare
+* a single per-row failure in a daily/weekly accrual loop used a bare
   ``frappe.db.rollback()``, which in one request transaction discarded every
   sibling row already inserted in the same job. A failing row must now roll back
   ONLY itself (savepoint isolation); its siblings persist.
@@ -45,7 +45,7 @@ SECOND_PLATE = "_T ABC 1002"
 def _run_bounded(fn, seconds=30):
     """Run ``fn`` with a hard wall-clock deadline and fail if it overruns.
 
-    A non-terminating loop (the T-670 bug) would otherwise hang the whole test
+    A non-terminating loop (the bug) would otherwise hang the whole test
     run; a SIGALRM deadline turns that hang into a fast, deterministic failure.
     The call runs on the *main* thread on purpose: ``frappe.local`` is a
     thread-local, so a worker thread would have no bound site/DB connection and
@@ -57,7 +57,7 @@ def _run_bounded(fn, seconds=30):
     def _on_timeout(signum, frame):
         raise AssertionError(
             f"{getattr(fn, '__name__', fn)} did not terminate within {seconds}s "
-            "- the accrual loop is not provably terminating (T-670)."
+            "- the accrual loop is not provably terminating."
         )
 
     previous = signal.signal(signal.SIGALRM, _on_timeout)
@@ -71,7 +71,7 @@ def _run_bounded(fn, seconds=30):
 
 
 class TestFuelAccrualLoopResilience(FrappeTestCase):
-    """T-670 + T-671 for ``accrue_fuel_consumption``'s Done-Fuel-Request loop."""
+    """ + for ``accrue_fuel_consumption``'s Done-Fuel-Request loop."""
 
     @classmethod
     def setUpClass(cls):
@@ -204,7 +204,7 @@ class TestFuelAccrualLoopResilience(FrappeTestCase):
 
 
 class TestRentalAccrualLoopResilience(FrappeTestCase):
-    """T-671 for ``daily_rental_accrual``: a failing vehicle must not discard the
+    """ for ``daily_rental_accrual``: a failing vehicle must not discard the
     accrual memos already written for its siblings in the same run."""
 
     @classmethod

@@ -133,7 +133,7 @@ class TestPaymentRouter(FrappeTestCase):
         doc = frappe.get_doc(data)
         doc.insert(ignore_permissions=True)
         # submit_via_workflow lands the sanctioned finance-approved submit
-        # state (docstatus 1) past the A-083 guard; stamp the approver the router reads.
+        # state (docstatus 1) past the guard; stamp the approver the router reads.
         submit_via_workflow(doc)
         doc.db_set("finance_approved_by", "Administrator", update_modified=False)
         doc.reload()
@@ -249,7 +249,7 @@ class TestPaymentRouter(FrappeTestCase):
 
     def test_paid_status_without_finance_stamp_does_not_route(self):
         """A request whose STATUS is finance-gated but that carries NO
-        ``finance_approved_by`` stamp must NOT route a payment (T-150).
+        ``finance_approved_by`` stamp must NOT route a payment.
 
         The stamp is the controller's durable proof the finance gate (role + SoD)
         actually ran. ``status`` is the mutable workflow_state field; a write that
@@ -348,7 +348,7 @@ class TestPaymentRouter(FrappeTestCase):
 
     def test_chokepoint_rejects_caller_without_source_permission(self):
         """A DIRECT route_payment call by a caller lacking write/submit on the source
-        request is rejected AT THE CHOKEPOINT (T-148) -- not only via the whitelisted
+        request is rejected AT THE CHOKEPOINT -- not only via the whitelisted
         entry -- so a future direct caller can never reach the ignore_permissions
         insert/submit unchecked. A runtime check, unlike the static presence assertion
         in test_http_enforcement."""

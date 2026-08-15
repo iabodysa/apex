@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-218: the acknowledgement gate and the label above it must name the same people.
+"""the acknowledgement gate and the label above it must name the same people.
 
 THE DEFECT. ``accounting_acknowledged_by`` shipped labelled "Acknowledged By (Finance)"
 while ``Finance Manager`` held no write on the DocType, and ``_validate_intercompany_gates``

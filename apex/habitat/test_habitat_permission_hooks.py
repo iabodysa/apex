@@ -20,10 +20,10 @@ What they lock in:
      scoping wiring is additive, never a replacement). That hook is `validate`, not
      `before_save`: the controller ships `validate` and no `before_save` at all.
 
-Role provisioning is intentionally NOT a fixture (A-101): it moved to the
+Role provisioning is intentionally NOT a fixture: it moved to the
 idempotent Python provisioners, so there is no Role-fixture guard here.
 
-Standalone stub (A-205)
+Standalone stub
 -----------------------
 `apex.hooks` needs nothing, but guards 3 and 4 import the real
 `apex.habitat.permissions`, which — with `apex.apex_core.utils.permission_scope`

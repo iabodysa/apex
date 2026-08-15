@@ -55,7 +55,7 @@ class TestScheduledTaskInstance(FrappeTestCase):
             validate(doc)
 
     def test_mark_completed_stamps_completed_date(self):
-        """mark_completed() must set completed_date to today (P-080)."""
+        """mark_completed() must set completed_date to today."""
         from apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance import mark_completed
 
         doc = frappe.get_doc({

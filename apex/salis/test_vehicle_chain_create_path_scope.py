@@ -1,12 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-229 — the create-path ordering hazard in the Salis driver-chain rule.
+"""the create-path ordering hazard in the Salis driver-chain rule.
 
 ``Document.insert`` runs ``check_permission("create")`` (frappe/model/document.py:300)
 BEFORE ``_validate_links()`` (:302) applies ``fetch_from``. On Vehicle Incident, Vehicle
 Damage Write-Off and Vehicle Suspension the driver link the rule scopes on is fetched
 from ``vehicle.current_driver``, so at the create check it is EMPTY and the chain resolved
 no project. Nothing else could rescue the row — ownership is not an access basis on an
-unsaved row (A-233), and the driver-own basis needs exactly the link that is still empty —
+unsaved row, and the driver-own basis needs exactly the link that is still empty —
 so the create was denied outright, and a project-scoped Fleet Supervisor could not raise an
 incident on their own project's vehicle. The mandatory, never-fetched ``vehicle`` link IS
 set at that moment and carries the project directly.
@@ -265,9 +265,7 @@ class TestTheDriverOwnedDocTypesAreUnchanged(_ScopeCase):
     DOCTYPES = ["Driver Attendance", "Driver Suspension", "Boarding Scan Log"]
 
     def test_the_owner_still_decides_before_the_chain_on_a_stored_row(self):
-        """These docs carry no ``__islocal``, so they are STORED rows.
-
-        A-233 later made ownership insufficient on an UNSAVED row, which is a different
+        """These docs carry no ``__islocal``, so they are STORED rows. later made ownership insufficient on an UNSAVED row, which is a different
         document state, not a different action — the create-side counterpart of this
         assertion lives in ``test_create_path_ownership_scope``. Kept here as the stored
         half, which is what shows the vehicle fallback did not disturb these three.

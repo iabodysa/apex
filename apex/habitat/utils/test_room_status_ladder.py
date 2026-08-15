@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-401 — one function computes Room status, and it answers the zero-capacity case.
+"""one function computes Room status, and it answers the zero-capacity case.
 
 Two writers held their own ladder and disagreed on exactly one input. The live handler in
 `housing_assignment.py` used `active >= (capacity or 0)`, so a room with no declared

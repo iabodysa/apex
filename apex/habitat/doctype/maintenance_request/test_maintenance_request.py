@@ -131,7 +131,7 @@ class TestMaintenanceRequest(FrappeTestCase):
     def _get_perms_by_role(self):
         """Return a dict mapping role name -> document-level (permlevel 0) perm row.
 
-        Only permlevel-0 rows are indexed. T-093 (owner-approved) added permlevel-1
+        Only permlevel-0 rows are indexed. An owner-approved change added permlevel-1
         DocPerm grants (System Manager, Finance Manager, Accommodation Manager) to gate the
         sensitive cost fields; those rows share a role name with the base rows, so a
         flat ``{p.role: p}`` map would let a permlevel-1 row clobber the permlevel-0
@@ -140,7 +140,7 @@ class TestMaintenanceRequest(FrappeTestCase):
         ``test_field_level_cost_grants`` for the permlevel-1 assertions).
 
         Accommodation Manager holds BOTH a permlevel-0 row (document access) and a
-        permlevel-1 row (T-093 cost-field grant); filtering to permlevel 0 here keeps
+        permlevel-1 row ( cost-field grant); filtering to permlevel 0 here keeps
         the document-level assertions reading the correct row."""
         meta = frappe.get_meta("Maintenance Request")
         return {p.role: p for p in meta.permissions if (p.permlevel or 0) == 0}
@@ -206,7 +206,7 @@ class TestMaintenanceRequest(FrappeTestCase):
         self.assertEqual(rs.delete, 0)
 
     def test_field_level_cost_grants(self):
-        """T-093: the sensitive cost fields (Financial section: cost_of_repair,
+        """the sensitive cost fields (Financial section: cost_of_repair,
         cost_center) are gated at permlevel 1, readable/writable only by the
         approved field-level roles — System Manager, Finance Manager, and
         Accommodation Manager — and by no one else. These are the owner-approved

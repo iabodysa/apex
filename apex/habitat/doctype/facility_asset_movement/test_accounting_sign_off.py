@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-403 — the accounting sign-off on an intercompany movement must be givable.
+"""the accounting sign-off on an intercompany movement must be givable.
 
 `accounting_acknowledged` had no `allow_on_submit`, so once a movement was submitted the
 flag could never change — not by Accounting, not by anyone. The throw in
@@ -62,7 +62,7 @@ class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
             {
                 "doctype": "User",
                 "email": f"fam-{_h()}@example.com".lower(),
-                "first_name": "A-403 Fixture",
+                "first_name": "_T Fixture",
                 "send_welcome_email": 0,
                 "roles": [{"role": r} for r in roles],
             }

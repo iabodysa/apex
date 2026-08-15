@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""P-040 regression: Trip Fulfilment Ledger single-write immutability.
+""" regression: Trip Fulfilment Ledger single-write immutability.
 
 The ledger is a machine-written audit memo: one row is inserted per completed
 Dispatch Trip and never re-saved (reversal deletes the row, it does not edit it).

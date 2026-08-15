@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-372 — the register for what was issued, to whom, and whether it came back.
+"""the register for what was issued, to whom, and whether it came back.
 
 Custody Issue had no report. `Custody Outstanding by Worker` answers a different question
 from a different source — a net BALANCE per (item, worker) out of the stock ledger — and a

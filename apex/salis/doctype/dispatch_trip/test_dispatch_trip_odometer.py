@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""P-039 regression: Dispatch Trip odometer mutual-presence guard.
+""" regression: Dispatch Trip odometer mutual-presence guard.
 
 Frappe stores an empty Int field as 0, so an ``odometer_end`` set while
 ``odometer_start`` is left at its 0 default would pass a naive ``if not start``

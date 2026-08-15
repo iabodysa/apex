@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Facility Asset Delivery (T-673): the transfer lock + on-site code receipt.
+"""Facility Asset Delivery: the transfer lock + on-site code receipt.
 
 The lock has TWO checkpoints, not three. ``api/facility_asset_delivery.py:51``
 declares ``EXIT_ROLES = {1: "Procurement Supervisor", 3: "Resident Supervisor"}``,

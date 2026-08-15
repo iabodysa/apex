@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""P-104 — the Masar Worker Token is hashed AT REST.
+"""the Masar Worker Token is hashed AT REST.
 
 The raw personal token must never be stored in clear: a direct read of the
 ``tabMasar Worker Token`` row must expose ZERO usable secret. The row keeps only a SHA-256

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-384 — the columns the board filters and sorts on must be reachable by an index.
+"""the columns the board filters and sorts on must be reachable by an index.
 
 Two framework facts make this necessary rather than obvious, and both were measured in
 installed source rather than remembered:

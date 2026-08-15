@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""P-038 regression: Dispatch Trip driver-own row scoping.
+""" regression: Dispatch Trip driver-own row scoping.
 
 Dispatch Trip is registered in ``permission_query_conditions``
 (``project_scope_query``) and ``has_permission``

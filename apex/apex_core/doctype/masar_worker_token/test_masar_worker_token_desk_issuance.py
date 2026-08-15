@@ -185,7 +185,7 @@ class TestDriverLinkDeskRevocation(_DeskIssuanceCase):
         The refusal is proved to be REAL by re-resolving the link afterwards: a
         revocation that threw but still disabled the row would satisfy an
         assertRaises on its own."""
-        mine = self._project(PROJECT_MINE)
+        self._project(PROJECT_MINE)
         theirs = self._project(PROJECT_THEIRS)
         outsider = self._issuer("Fleet Supervisor", project=PROJECT_MINE)
         owner = self._issuer("Fleet Supervisor", project=PROJECT_THEIRS)

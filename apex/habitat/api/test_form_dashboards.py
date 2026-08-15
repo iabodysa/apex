@@ -10,7 +10,6 @@ Building inside the metrics test to read five dictionary keys back.
 
 from __future__ import annotations
 
-import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat.api import employee_links, supplier_links

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Regression test for the get_fleet_os Damages/Accidents/Stolen panels (T-416).
+"""Regression test for the get_fleet_os Damages/Accidents/Stolen panels.
 
 The /fleet board tabs read ``vehicle.damages`` (Vehicle Damage Write-Off rows),
 ``vehicle.accidents`` (Accident Vehicle Incident rows) and the card stripe reads

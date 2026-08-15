@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""P-204 — the Habitat expiry-watcher notify boilerplate was replaced by native
+"""the Habitat expiry-watcher notify boilerplate was replaced by native
 ``is_standard`` Notifications. This locks in that the six records ship enabled and
 correctly wired (document type, event, date field), so migrate exports + imports them
 and the daily notification scheduler picks them up.

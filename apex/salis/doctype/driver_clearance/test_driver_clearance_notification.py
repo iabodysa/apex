@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Driver-facing Salis notification wiring (T-562).
+"""Driver-facing Salis notification wiring.
 
 Proves that the Blocked Driver Clearance notification resolves to the affected driver's
 own User and drops a Notification Log row for that driver.

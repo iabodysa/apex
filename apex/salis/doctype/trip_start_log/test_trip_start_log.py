@@ -281,7 +281,7 @@ class TestTripStartLogOwnership(FrappeTestCase):
 
 
 class TestTripStartLogBoardingDedup(unittest.TestCase):
-    """P-037: the same passenger must not board twice on one Trip Start Log.
+    """the same passenger must not board twice on one Trip Start Log.
 
     A duplicate boarding row inflates ``boarded_count`` and corrupts the
     expected-vs-boarded headcount reconciliation. ``_validate_boarding_rows``
@@ -323,7 +323,7 @@ class TestTripStartLogBoardingDedup(unittest.TestCase):
 
 
 class TestTripStartLogTripContext(unittest.TestCase):
-    """P-041: _resolve_trip_context backfills both fields from the SAME Dispatch
+    """_resolve_trip_context backfills both fields from the SAME Dispatch
     Trip row in exactly ONE db.get_value call (no N+1 of two sequential reads)."""
 
     def _make_log(self, **fields):

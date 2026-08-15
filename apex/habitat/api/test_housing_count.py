@@ -14,8 +14,7 @@ existing count fields. These tests pin the contract the portal relies on:
 - A read-only role (Internal Auditor: read but no write on Housing Inventory) is
   rejected by submit_counts' write gate.
 
-The Resident Supervisor write grant is the recommended decision recorded for
-T-684 (a building-scoped write so field-counting works). The test ensures that
+The Resident Supervisor write grant is the recommended decision recorded for (a building-scoped write so field-counting works). The test ensures that
 grant is present (adding a Custom DocPerm if the JSON has not yet migrated) so it
 is self-contained on any test bench.
 """

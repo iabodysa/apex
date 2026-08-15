@@ -6,9 +6,7 @@ drives the SHIPPED ``occupancy.weekly_occupancy_sync`` with only its database ed
 stubbed, and ``TestDeadBeforeSaveGuardsRemoved`` imports the real controller modules.
 The latter used to swallow an ImportError into a ``skipTest``, which turned "the
 controllers no longer import" — a genuine breakage — into a green run, so the import
-is now allowed to fail loudly.
-
-A-234: the occupancy class used to REIMPLEMENT the building pass it claimed to cover —
+is now allowed to fail loudly.: the occupancy class used to REIMPLEMENT the building pass it claimed to cover —
 a local copy of production's loop, asserted against itself — so
 ``weekly_occupancy_sync`` was deletable with every test in this file still green. That
 is worse than no coverage, because it looks like coverage. It now calls the real
@@ -312,7 +310,7 @@ class TestLedgerTypeOptions(unittest.TestCase):
     utility_type value — read off the shipped JSON, never a copy kept here.
 
     Both sets used to be hand-maintained constants in this file compared with each
-    other, so dropping Gas from either DocType left the class green: the A-234 defect
+    other, so dropping Gas from either DocType left the class green: the defect
     one layer over, a test asserting against its own copy of production.
     """
 

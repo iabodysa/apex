@@ -148,7 +148,7 @@ class TestAccommodationBuilding(FrappeTestCase):
             frappe.delete_doc("Building", b.name, force=True, ignore_permissions=True)
 
     def test_no_bed_room_does_not_inflate_capacity(self):
-        """The core T-136 fix: a room with generate_beds=0 has a planned bed_capacity but
+        """The core fix: a room with generate_beds=0 has a planned bed_capacity but
         NO physical beds. Deriving from sum(bed_capacity) over-counted it; deriving from
         the actual beds must NOT — total_capacity counts only the beds that truly exist."""
         from apex.habitat.doctype.building.building import (

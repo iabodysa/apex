@@ -1,9 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
 """get_site_address resolves the building's address from the SAVED record.
 
-Regression for T-143: the building-address-over-site fallback is live in the
+Regression for: the building-address-over-site fallback is live in the
 controller (building.get_site_address) but the existing suite only
-drives it through the unsaved-form path (T-138/T-144), passing `site` /
+drives it through the unsaved-form path, passing `site` /
 `building_address` explicitly as keyword args. The persistence path — where BOTH
 args are omitted (None) and the endpoint reads the STORED `building_address` and
 `site` off the record — was never asserted.

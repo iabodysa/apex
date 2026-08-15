@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-407 — the badge must count the queue, not the page it fetched.
+"""the badge must count the queue, not the page it fetched.
 
 The delivery screen fetched 50 rows ordered `modified desc` and put
 `deliveries.length` on the badge. Two things followed from that, and both only appear

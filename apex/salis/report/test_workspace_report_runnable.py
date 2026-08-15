@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-189 — a workspace Report link renders for a role whose ref_doctype forbids running it.
+"""a workspace Report link renders for a role whose ref_doctype forbids running it.
 
 SUBJECT: the 19 report PACKAGES under apex/salis/report/ (2,153 lines) crossed with the
 Salis and Fleet workspace records, not the 1-line ``__init__.py`` beside this file. The
@@ -19,8 +19,8 @@ Three shapes make ``has_permission(ref, "report")`` False for a role:
 
 1. ``ref_doctype`` is a child table — ``frappe/permissions.py:120`` routes to
    ``has_child_permission``, which returns False at :785 when no ``parent_doctype`` is
-   supplied, and query_report supplies none. This is the A-178b instance (Vehicle
-   Compliance Register); the whole-app clause for it lives in
+   supplied, and query_report supplies none. The known instance is the Vehicle
+   Compliance Register; the whole-app clause for it lives in
    ``test_report_role_coverage.TestReportRefDoctypeIsRunnable``, which covers reports
    with no workspace link too, so neither guard subsumes the other.
 2. The role holds no permlevel-0 DocPerm on the ref at all.
@@ -49,9 +49,7 @@ exactly that role; that is the population a workspace grant is written for.
 
 Scope: every module's workspace tree, ``links`` and ``shortcuts`` alike — ``get_shortcuts``
 (desktop.py:299) runs the same ``is_item_allowed`` check. No Report shortcut ships today;
-covering it costs nothing and stops the next one arriving unguarded.
-
-A-200 drained the baseline to empty. All 34 (ref_doctype, role) pairs behind the original
+covering it costs nothing and stops the next one arriving unguarded. drained the baseline to empty. All 34 (ref_doctype, role) pairs behind the original
 27 links were resolved as access decisions, not flag flips: 30 rows that already held a
 permlevel-0 read gained an explicit ``"report": 1``; ``Internal Auditor`` gained the
 app's standard read/report/export oversight row on ``Audit Remediation Plan`` and
@@ -87,7 +85,7 @@ _REPORT_GLOB = os.path.join(_APP, "*", "report", "*", "*.json")
 # is_item_allowed returns True for it before any lookup), so it is never the bug.
 _ALWAYS_PERMITTED = frozenset({"Administrator"})
 
-# A-200 emptied this. Every workspace Report link is now runnable by every role it is
+# An earlier change emptied this. Every workspace Report link is now runnable by every role it is
 # shown to, so the baseline is exact-equality against {} — one new offender fails the build.
 # An entry added here needs a written reason (test_every_frozen_pair_carries_a_reason).
 KNOWN_UNRUNNABLE_REPORT_LINKS = {}
@@ -197,7 +195,7 @@ def _flatten(mapping):
 
 
 class TestEveryVisibleReportLinkIsRunnable(unittest.TestCase):
-    """The A-189 invariant: seeing a Report link must imply being able to run it."""
+    """The invariant: seeing a Report link must imply being able to run it."""
 
     def setUp(self):
         self.workspaces = _shipped_workspaces()

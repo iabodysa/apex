@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-368 — a field an operator must fill AFTER submit is reachable after submit.
+"""a field an operator must fill AFTER submit is reachable after submit.
 
 Five fields were filled at a moment the form had already locked them:
 ``Custody Handover.all_items_verified``, and ``supervisor_confirmed``,

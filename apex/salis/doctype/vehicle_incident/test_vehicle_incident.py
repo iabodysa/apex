@@ -3,7 +3,7 @@
 
 Proves the theft side effects and their reversal, that an accident records the
 event without touching vehicle state, that a future-dated incident is rejected,
-and (A-102) that driver cost recovery is consent-gated and maps to exactly one
+and that driver cost recovery is consent-gated and maps to exactly one
 native HRMS Employee Advance.
 
 The vehicle and its rider are the shipped fixtures rather than a fresh pair per case —

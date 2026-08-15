@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-411 — the scheduler must not write a status the Workflow cannot validate.
+"""the scheduler must not write a status the Workflow cannot validate.
 
 `status` on Lease is the Workflow's state field, and the Lease Workflow knows four
 states: Draft, Pending Approval, Approved, Rejected. The Select allows three more —

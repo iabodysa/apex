@@ -1,10 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Pinning tests for the batched _worker_today_dispatch_trip resolver (P-210 N+1).
+"""Pinning tests for the batched _worker_today_dispatch_trip resolver ( N+1).
 
 The resolver used to make O(trips x requests) DB round-trips on the worker
 boarding poll (a hot, guest-facing path): one Route Plan lookup per trip, one
 assigned-request read per trip, and one Transport Request Worker + Transport
-Request read per candidate. P-210 collapses those into three bulk reads joined in
+Request read per candidate. collapses those into three bulk reads joined in
 memory. Behaviour is byte-identical, so these tests pin the resolver OUTPUT
 against a real multi-trip x multi-request fixture:
 

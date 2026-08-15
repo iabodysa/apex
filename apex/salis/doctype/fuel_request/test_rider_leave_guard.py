@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""T-119 — rider leave / inactive guard.
+"""rider leave / inactive guard.
 
 A vehicle delivery (Vehicle Handover / Vehicle Assignment) and a Fuel Request
 must be REJECTED when the rider (mandub) who would receive the company vehicle or

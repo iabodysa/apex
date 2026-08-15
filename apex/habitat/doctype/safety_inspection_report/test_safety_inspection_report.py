@@ -264,7 +264,7 @@ class TestSafetyInspectionReport(FrappeTestCase):
 
 
 class TestSafetyInspectionReportDeprecation(FrappeTestCase):
-    """[T-281] Safety Inspection Report is deprecated in place (not renamed or
+    """Safety Inspection Report is deprecated in place (not renamed or
     deleted) in favour of Safety Round + the Safety Task Compliance Summary report.
     These are pure-file assertions on the DocType JSON, so they hold whether or
     not the running site has migrated the schema."""

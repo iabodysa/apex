@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-225 — the cross-building disclosure in Checkout Pending Clearance, and its close.
+"""the cross-building disclosure in Checkout Pending Clearance, and its close.
 
 WHAT LEAKED. Every query in the report is ``frappe.get_all``, which forces
 ``ignore_permissions=True``, so the ``Housing Checkout`` row boundary now registered in

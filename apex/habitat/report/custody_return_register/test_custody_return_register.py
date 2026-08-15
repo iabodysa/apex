@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-372 — the register for what came back, and in what condition.
+"""the register for what came back, and in what condition.
 
 Custody Return had no report, so the condition an article returned in was visible only by
 opening one return at a time. That condition is the field with money behind it: a line

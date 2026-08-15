@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Rent Payment Schedule: the lease's rent grid, and the rent-reminder scaffolding.
 
-The reminder is DELIBERATELY INERT and is not a gap to close (A-184). Three pieces
+The reminder is DELIBERATELY INERT and is not a gap to close. Three pieces
 of it ship: this child table, the ``Habitat - Rent Payment Due`` Notification, and
 the Lease ``supplier`` field whose description names it as the payee for rent due
 reminders. The Notification is complete — Days Before on ``due_date``, condition

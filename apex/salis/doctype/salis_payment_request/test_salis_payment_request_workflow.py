@@ -52,7 +52,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # A-077: mandatory Salis workflow (salis_workflow_seed, every install/migrate);
+        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
         # absence is a regression - FAIL, never skip.
         if get_workflow_name("Salis Payment Request") != WORKFLOW:
             raise AssertionError(
@@ -245,7 +245,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
 
 
     def test_rejected_request_can_be_revised_to_draft(self):
-        # A-085 finding 4: a Finance rejection is not a dead end - the maker
+        # An earlier finding: a Finance rejection is not a dead end - the maker
         # revises the request back to Draft to correct and resubmit.
         pr = self._pending()
         frappe.set_user(self.finance)

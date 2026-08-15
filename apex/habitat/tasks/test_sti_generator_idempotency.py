@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Idempotency of the daily Scheduled Task Instance generator (Phase B, T-552).
+"""Idempotency of the daily Scheduled Task Instance generator (Phase B,).
 
 The generator's contract is ONE instance per (assignment, task_catalog, period),
 enforced by a check-then-insert guard plus the composite UNIQUE backstop

@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Source-store TOCTOU lock guard (T-631).
+"""Source-store TOCTOU lock guard.
 
 Draining the same source store + item from two concurrent Material Transfers or
 Custody Handovers must not both pass the availability check on a stale balance and

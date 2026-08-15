@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A Driver with no Project permission must still see their own attendance (O-008.1 #3).
+"""A Driver with no Project permission must still see their own attendance ( #3).
 
 The wired list scope for Driver Attendance is project-OR-owner
 (``salis.permissions.driver_attendance_query`` -> ``_driver_chain_condition(with_owner=True)``)

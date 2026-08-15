@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-233 — ownership is not an access basis on an UNSAVED row.
+"""ownership is not an access basis on an UNSAVED row.
 
 ``Document.insert`` stamps ``owner`` with the acting user (frappe/model/document.py:298)
 two statements before ``check_permission("create")`` (:300). The creator is therefore
@@ -242,7 +242,7 @@ class TestAnUnsavedRowIsDecidedByItsParentNotItsOwner(_ScopeCase):
                 )
 
     def test_an_out_of_scope_parent_refuses_the_create(self):
-        """The leak A-233 names: the creator owns the row, so ownership must not decide."""
+        """The leak named here: the creator owns the row, so ownership must not decide."""
         self.scoped()
         for label, _in, out_of_scope, _none in CREATE_CASES:
             with self.subTest(doctype=label):
@@ -403,7 +403,7 @@ class TestTheGuardIsLoadBearing(_ScopeCase):
     """Proof 5 — neutralise the discriminator and the leak must come back.
 
     A regression test that cannot fail is worthless. Forcing ``_is_unsaved`` to False
-    reproduces the pre-A-233 rules exactly — ownership tested first, unconditionally —
+    reproduces the earlier rules exactly — ownership tested first, unconditionally —
     so every out-of-scope create must be admitted again. If this class ever passes while
     ``TestAnUnsavedRowIsDecidedByItsParentNotItsOwner`` also passes, the fix is real; if
     this one starts failing, the proofs above have stopped proving anything.

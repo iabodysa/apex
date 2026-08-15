@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""P-091 Apex Settings re-architecture guards.
+""" Apex Settings re-architecture guards.
 
 Three independent pieces, each verified in isolation:
 
