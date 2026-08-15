@@ -56,7 +56,14 @@ LEDGER_SOURCE = "Facility Asset Delivery"
 
 class FacilityAssetDelivery(Document):
     def validate(self):
-        """Blocks a delivery that shares its source and destination, or its initiator and receiver."""
+        """Blocks a delivery that shares its source and destination, or its initiator and receiver.
+
+        The origin is reconciled FIRST — the same order Facility Asset Movement.validate
+        uses — because ``from_building`` is fetch_if_empty: a server-side insert arrives
+        with it blank, and a same-building guard that runs before the fill sees a falsy
+        origin, skips, and lets a delivery whose source and destination are the SAME
+        building through."""
+        self._reconcile_origin()
         if self.from_building and self.to_building and self.from_building == self.to_building:
             frappe.throw(_("Source and destination buildings must be different."))
         if (
@@ -67,7 +74,6 @@ class FacilityAssetDelivery(Document):
             frappe.throw(
                 _("The initiator and the receiving supervisor must be different people.")
             )
-        self._reconcile_origin()
 
     def _reconcile_origin(self):
         """Default a blank from_building from the asset's current location, and
