@@ -1,7 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
+import unittest
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.logistay.doctype.sim_card import sim_card as sim_card_module
+from apex.logistay.doctype.sim_card.sim_card import SIMCard
 from apex.tests import factories
 
 test_ignore = [
@@ -36,6 +41,7 @@ class TestSIMCard(FrappeTestCase):
             }
         )
         cls.contract.insert(ignore_permissions=True, ignore_links=True)
+        cls.contract.submit()
 
     def _sim(self, mobile, **kw):
         doc = frappe.get_doc(
@@ -127,3 +133,40 @@ class TestSIMCard(FrappeTestCase):
             frappe.db.get_value("Telecom Contract", self.contract.name, "sim_count"), 1,
             "the contract still counts a SIM that no longer exists",
         )
+
+
+class TestSIMCardContractBinding(unittest.TestCase):
+    """The contract a SIM hangs off must be IN FORCE, checked on the server.
+
+    Only the one contract read is mocked, so ``frappe.throw`` stays real and the test
+    proves the refusal rather than a call signature.
+    """
+
+    @staticmethod
+    def _sim(company=None):
+        return frappe._dict(telecom_contract="TEL-CTR-1", company=company)
+
+    @patch.object(sim_card_module.frappe.db, "get_value")
+    def test_a_draft_contract_is_refused(self, get_value):
+        get_value.return_value = frappe._dict(company="CO-A", docstatus=0)
+        with self.assertRaises(frappe.ValidationError):
+            SIMCard._enforce_contract_binding(self._sim())
+
+    @patch.object(sim_card_module.frappe.db, "get_value")
+    def test_a_cancelled_contract_is_refused(self, get_value):
+        get_value.return_value = frappe._dict(company="CO-A", docstatus=2)
+        with self.assertRaises(frappe.ValidationError):
+            SIMCard._enforce_contract_binding(self._sim())
+
+    @patch.object(sim_card_module.frappe.db, "get_value")
+    def test_a_submitted_contract_is_accepted_and_lends_its_company(self, get_value):
+        get_value.return_value = frappe._dict(company="CO-A", docstatus=1)
+        sim = self._sim()
+        SIMCard._enforce_contract_binding(sim)
+        self.assertEqual(sim.company, "CO-A")
+
+    @patch.object(sim_card_module.frappe.db, "get_value")
+    def test_a_mismatched_company_is_still_refused(self, get_value):
+        get_value.return_value = frappe._dict(company="CO-A", docstatus=1)
+        with self.assertRaises(frappe.ValidationError):
+            SIMCard._enforce_contract_binding(self._sim(company="CO-B"))

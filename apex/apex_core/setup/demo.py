@@ -676,8 +676,12 @@ def _build_vehicle(context):
 
 
 def _build_telecom_contract(context):
-    """Creates the demo Telecom Contract for the demo supplier."""
-    context["telecom_contract"] = _create(
+    """Creates and submits the demo Telecom Contract for the demo supplier.
+
+    Submitted, because SIM Card refuses a contract that is not in force and the demo
+    SIMs that follow read as Assigned and Suspended — states only a live contract has.
+    """
+    contract = _create(
         "Telecom Contract",
         {
             "company": context["company"],
@@ -688,7 +692,9 @@ def _build_telecom_contract(context):
             "recurring_amount": 500,
             "currency": context["currency"],
         },
-    ).name
+    )
+    contract.submit()
+    context["telecom_contract"] = contract.name
 
 
 def _build_sim_cards(context):

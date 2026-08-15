@@ -22,15 +22,26 @@ import frappe
 from frappe.model.workflow import get_workflow_name, get_workflow_state_field
 
 
+_PAGE_WORKFLOW_ACTIONS = 200
+
+_PAGE_TODOS = 100
+
+
 @frappe.whitelist()
 def get_pending_actions() -> dict:
-    """Return ``{workflow_actions, todos}`` awaiting the current user's action."""
+    """Return ``{workflow_actions, todos}`` awaiting the current user's action,
+    capped at the page's render budget."""
+    return _pending(_PAGE_WORKFLOW_ACTIONS, _PAGE_TODOS)
+
+
+def _pending(workflow_limit: int, todo_limit: int) -> dict:
+    """The two queues, each read to the given cap (0 meaning no cap)."""
     workflow_actions = frappe.get_list(
         "Workflow Action",
         filters={"status": "Open"},
         fields=["name", "reference_doctype", "reference_name", "workflow_state", "creation"],
         order_by="creation asc",
-        limit_page_length=200,
+        limit_page_length=workflow_limit,
     )
     workflow_actions = _drop_stale(workflow_actions)
     for wa in workflow_actions:
@@ -53,7 +64,7 @@ def get_pending_actions() -> dict:
             "creation",
         ],
         order_by="date asc",
-        limit_page_length=100,
+        limit_page_length=todo_limit,
     )
     for td in todos:
         td["source"] = "todo"
@@ -64,10 +75,15 @@ def get_pending_actions() -> dict:
 @frappe.whitelist()
 def get_pending_action_count(filters=None) -> dict:
     """Number-card value: how many documents await the current user's action
-    (workflow approvals + assigned ToDos). Reuses :func:`get_pending_actions`, so
-    the same native scoping and staleness guard apply. ``filters`` is accepted and
-    ignored — the native Custom Number Card widget always passes it."""
-    pending = get_pending_actions()
+    (workflow approvals + assigned ToDos). Same native scoping and staleness guard as
+    the page. ``filters`` is accepted and ignored — the native Custom Number Card widget
+    always passes it.
+
+    Read WITHOUT the page's caps: those are a render budget, and counting through them
+    froze the card at 300 no matter how much was actually waiting. The staleness guard
+    needs the rows, so this cannot become a plain SQL count.
+    """
+    pending = _pending(0, 0)
     return {"value": len(pending["workflow_actions"]) + len(pending["todos"])}
 
 

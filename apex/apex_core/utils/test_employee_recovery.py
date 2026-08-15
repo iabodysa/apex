@@ -372,6 +372,14 @@ class TestEmployeeRecovery(unittest.TestCase):
         frappe_mock.get_doc.assert_called_once_with(
             "Employee Advance", "ADV-1", for_update=True
         )
+        # The whole frappe module is mocked here, so neither gate can throw and both
+        # could be deleted without reddening a single case. Assert the calls themselves.
+        frappe_mock.has_permission.assert_any_call(
+            "Employee Advance", "read", doc=advance, throw=True
+        )
+        frappe_mock.has_permission.assert_any_call(
+            "Additional Salary", "create", throw=True
+        )
         native_factory.assert_called_once_with(advance)
         self.assertEqual(installment.salary_component, "Recovery")
         self.assertEqual(installment.amount, 100)
@@ -379,6 +387,28 @@ class TestEmployeeRecovery(unittest.TestCase):
         installment.insert.assert_called_once_with(ignore_permissions=True)
         frappe_mock.db.set_value.assert_not_called()
         self.assertEqual(result, "AS-1")
+
+    @patch.object(employee_recovery, "_salary_preview")
+    @patch.object(native_advance, "create_return_through_additional_salary")
+    @patch.object(employee_recovery, "frappe")
+    def test_a_denied_caller_queues_no_installment(
+        self, frappe_mock, native_factory, salary_preview
+    ):
+        """The gate must stop the endpoint, not merely be called.
+
+        ``schedule_recovery_deduction`` is whitelisted POST, so the two
+        ``has_permission(..., throw=True)`` calls are its only authorization — and a
+        MagicMock frappe cannot throw. Making the mock raise proves nothing downstream
+        runs when the caller is refused.
+        """
+        frappe_mock.get_doc.return_value = SimpleNamespace(name="ADV-1", employee="EMP-1")
+        frappe_mock.has_permission.side_effect = frappe.PermissionError
+
+        with self.assertRaises(frappe.PermissionError):
+            employee_recovery.schedule_recovery_deduction("ADV-1", "2026-08-31")
+
+        salary_preview.assert_not_called()
+        native_factory.assert_not_called()
 
     @patch.object(
         employee_recovery,

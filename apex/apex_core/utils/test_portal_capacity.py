@@ -25,9 +25,23 @@ class TestPortalCapacity(FrappeTestCase):
             self.assertIn(audience, roles, f"{email} does not hold the {audience} role")
 
     def test_no_capacity_user_can_authenticate(self):
-        """The identity has no door: no password is ever set on it."""
+        """The identity has no door: no password is ever set on it.
+
+        Asserted against ``__Auth``, where frappe stores the credential
+        (frappe/utils/password.py), because that is the claim. The field this used to
+        read, ``simultaneous_sessions``, gates no login at all: frappe reads it as
+        ``... or 1`` (frappe/sessions.py:66) and only to cap concurrent sessions, so a
+        zero there proved nothing.
+        """
         for email in CAPACITY_USERS.values():
-            self.assertFalse(frappe.db.get_value("User", email, "simultaneous_sessions"))
+            self.assertFalse(
+                frappe.db.sql(
+                    "select 1 from `__Auth` where doctype = 'User' and name = %s"
+                    " and fieldname = 'password'",
+                    email,
+                ),
+                f"{email} holds a password",
+            )
 
     def test_the_session_is_handed_back(self):
         before = frappe.session.user

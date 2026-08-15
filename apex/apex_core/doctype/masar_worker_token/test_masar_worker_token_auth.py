@@ -36,6 +36,7 @@ from unittest.mock import patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.apex_core.doctype.masar_worker_token import masar_worker_token as token_module
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     _disable_legacy_driver_user,
     _hash_token,
@@ -169,6 +170,31 @@ class TestDriverBarcodeCutover(_TokenCase):
 
         self.assertFalse(_disable_legacy_driver_user(self.subject))
         self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
+
+    def test_retiring_the_legacy_login_goes_through_the_user_document(self):
+        """The column write left the driver's LIVE session working.
+
+        Only ``User.check_enable_disable`` (frappe/core/doctype/user/user.py:273-280)
+        logs an account out, and ``frappe.db.set_value`` never reaches a controller — so
+        a driver already signed in on the old portal kept it until the session aged out.
+        Mocked rather than run against the site, because the property under test is which
+        WRITE PATH is taken, and both paths leave the same ``enabled`` column behind.
+        """
+        with patch.object(token_module, "frappe") as frappe_mock:
+            frappe_mock.db.get_value.side_effect = [
+                frappe._dict(token="hashed", expires_on=None),
+                "legacy@example.com",
+                frappe._dict(enabled=1, user_type="Website User"),
+            ]
+            frappe_mock.get_roles.return_value = []
+
+            self.assertTrue(_disable_legacy_driver_user("DRV-1"))
+
+            frappe_mock.get_doc.assert_called_once_with("User", "legacy@example.com")
+            user_doc = frappe_mock.get_doc.return_value
+            self.assertEqual(user_doc.enabled, 0)
+            user_doc.save.assert_called_once_with(ignore_permissions=True)
+            frappe_mock.db.set_value.assert_not_called()
 
     def test_reissue_rotates_and_reenables_a_revoked_driver_token(self):
         first = issue_driver_link(self.subject)

@@ -37,14 +37,28 @@ def role_holders(role: str) -> list[str]:
 
 
 def assign_role(doctype: str, name: str, role: str, description: str, priority: str = "Medium") -> int:
-    """Assign one document to every holder of ``role``. Returns how many were assigned.
+    """Assign one document to every holder of ``role`` WHO MAY ALREADY READ IT.
+
+    Returns how many were assigned.
+
+    Row scope is not advisory on this path. ``assign_to.add`` reacts to an assignee who
+    cannot read the document by SHARING it with them — a DocShare, or a hard throw when
+    document sharing is switched off (frappe/desk/form/assign_to.py:98-110). So fanning a
+    building- or project-scoped document out to every site-wide holder of a role does not
+    merely queue a ToDo naming a record they cannot open: it grants the read their row
+    scope had denied. Making the framework's own ``has_permission`` call first — same
+    check, same default ptype — leaves the assignment to the holders already entitled to
+    the document and takes the share away as a side effect.
 
     Idempotent by the framework's own rule: a holder who already has an open ToDo for
     this document is skipped, so a daily job never stacks a second copy.
     """
     from frappe.desk.form import assign_to as _assign_to
 
-    assignees = role_holders(role)
+    doc = frappe.get_doc(doctype, name)
+    assignees = [
+        user for user in role_holders(role) if frappe.has_permission(doc=doc, user=user)
+    ]
     if not assignees:
         return 0
     _assign_to.add(

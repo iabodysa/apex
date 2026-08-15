@@ -43,19 +43,39 @@ class TestMasarIdentityContract(TestCase):
                 row, security.WORKER, exception=frappe.PermissionError
             )
 
-    @patch.object(security, "_throttle_bad_token_attempt")
-    @patch.object(security.frappe.db, "get_value")
-    def test_expired_token_fails_closed(self, get_value, _throttle):
-        get_value.return_value = frappe._dict(
+    @staticmethod
+    def _worker_row(expires_on):
+        return frappe._dict(
             holder_type="Worker",
             party_type="Employee",
             party="EMP-1",
             employee="EMP-1",
             driver=None,
-            expires_on="2000-01-01 00:00:00",
+            expires_on=expires_on,
         )
+
+    @patch.object(security, "_throttle_bad_token_attempt")
+    @patch.object(security.frappe.db, "get_value")
+    def test_expired_token_fails_closed(self, get_value, _throttle):
+        """The two reads answer differently on purpose.
+
+        One ``return_value`` for both made the Employee-status read return the token row,
+        which is not "Active" — so the refusal came from the status gate whatever the
+        expiry said, and the case passed identically for a token expiring in 2099.
+        """
+        get_value.side_effect = [self._worker_row("2000-01-01 00:00:00"), "Active"]
         with self.assertRaises(frappe.PermissionError):
             security.resolve_portal_subject(security.WORKER, "expired", required=True)
+
+    @patch.object(security, "_throttle_bad_token_attempt")
+    @patch.object(security.frappe.db, "get_value")
+    def test_an_unexpired_token_resolves_its_subject(self, get_value, _throttle):
+        """The mirror the expiry case needs: same mocks, expiry the only difference."""
+        get_value.side_effect = [self._worker_row("2099-01-01 00:00:00"), "Active"]
+        self.assertEqual(
+            security.resolve_portal_subject(security.WORKER, "live", required=True),
+            "EMP-1",
+        )
 
     def test_revocation_disables_the_subjects_notification_devices(self):
         with (

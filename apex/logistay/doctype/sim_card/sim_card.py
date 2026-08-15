@@ -29,9 +29,9 @@ _PROJECTION_FIELDS = (
 
 class SIMCard(Document):
     def validate(self):
-        """Normalizes identifiers, matches company to the contract, and enforces unique mobile and ICCID."""
+        """Normalizes identifiers, binds the SIM to an in-force contract of its own company, and enforces unique mobile and ICCID."""
         self._normalize_identifiers()
-        self._enforce_company_matches_contract()
+        self._enforce_contract_binding()
         self._enforce_unique_mobile()
         self._enforce_unique_iccid()
 
@@ -42,21 +42,33 @@ class SIMCard(Document):
             frappe.throw(_("Mobile Number must contain at least one digit."))
         self.iccid_normalized = normalize_iccid(self.iccid)
 
-    def _enforce_company_matches_contract(self):
-        """The SIM's company must equal its contract's company, so the
-        company-scoped permission on the SIM can never diverge from the contract
-        it belongs to. Fails closed on mismatch."""
+    def _enforce_contract_binding(self):
+        """A SIM may only hang off an IN-FORCE contract, and must share its company.
+
+        The company rule keeps the company-scoped permission on the SIM from ever
+        diverging from the contract it belongs to. The docstatus rule is the same
+        fail-closed idea in time rather than scope: ``status`` is derived, not a gate,
+        so nothing else on the server stops a REST insert naming a Draft contract or a
+        save that leaves the SIM hanging off one already cancelled. Both read from the
+        one row fetch.
+        """
         if not self.telecom_contract:
             return
-        contract_company = frappe.db.get_value(
-            "Telecom Contract", self.telecom_contract, "company"
+        contract = frappe.db.get_value(
+            "Telecom Contract", self.telecom_contract, ["company", "docstatus"], as_dict=True
         )
+        if not contract or contract.docstatus != 1:
+            frappe.throw(
+                _("Telecom Contract {0} is not submitted, so no SIM can be attached to it.").format(
+                    self.telecom_contract
+                )
+            )
         if not self.company:
-            self.company = contract_company
-        elif contract_company and self.company != contract_company:
+            self.company = contract.company
+        elif contract.company and self.company != contract.company:
             frappe.throw(
                 _("SIM company {0} must match its contract's company {1}.").format(
-                    self.company, contract_company
+                    self.company, contract.company
                 )
             )
 

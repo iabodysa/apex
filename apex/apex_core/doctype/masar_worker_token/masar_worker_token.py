@@ -490,6 +490,18 @@ def _disable_legacy_driver_user(driver: str) -> bool:
 
     System users and Website Users with elevated operational roles stay enabled.
     The operation is reversible and idempotent; it never deletes an account.
+
+    Through the User document, not the ``enabled`` column: retiring the login is the
+    whole point, and only ``User.check_enable_disable``
+    (frappe/core/doctype/user/user.py:273-280) ends the account's LIVE sessions. A raw
+    write left a driver already signed in on the old portal working until the session
+    aged out, which is exactly the window the barcode replaces.
+
+    That save carries ``ignore_permissions`` because the caller is the Fleet role
+    ``issue_driver_link`` already gated on write over Masar Worker Token. Removing the
+    flag would mean granting a Fleet role write on User — site-wide account control, to
+    retire one driver login — so the narrower bypass is the safer of the two. Without it
+    the desk action raises and the legacy login outlives the barcode replacing it.
     """
     if not driver:
         return False
@@ -515,7 +527,9 @@ def _disable_legacy_driver_user(driver: str) -> bool:
     if set(frappe.get_roles(user)) & _ELEVATED_DRIVER_USER_ROLES:
         return False
 
-    frappe.db.set_value("User", user, "enabled", 0, update_modified=False)
+    user_doc = frappe.get_doc("User", user)
+    user_doc.enabled = 0
+    user_doc.save(ignore_permissions=True)
     return True
 
 

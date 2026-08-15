@@ -81,6 +81,17 @@ _RECENT_HOURS = 48
 _RAISED_ACTIVITY_HOURS = 24
 
 
+def _mine_filters(doctype: str, states: list[str], *, recent: bool) -> dict:
+    """The filter set shared by the row read and the Number Card count, so the two can
+    never drift into answering different questions."""
+    filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
+    if "docstatus" in WORKLIST_REGISTRY[doctype]:
+        filters["docstatus"] = WORKLIST_REGISTRY[doctype]["docstatus"]
+    if recent:
+        filters["modified"] = [">=", add_to_date(now_datetime(), hours=-_RECENT_HOURS)]
+    return filters
+
+
 def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict]:
     """Permission-safe rows of ``doctype`` owned by the current user whose status is
     in ``states``. ``get_list`` (never ``get_all``) enforces DocPerms +
@@ -91,15 +102,10 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
         return []
     if not frappe.has_permission(doctype, "read"):
         return []
-    filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
-    if "docstatus" in WORKLIST_REGISTRY[doctype]:
-        filters["docstatus"] = WORKLIST_REGISTRY[doctype]["docstatus"]
-    if recent:
-        filters["modified"] = [">=", add_to_date(now_datetime(), hours=-_RECENT_HOURS)]
     try:
         rows = frappe.get_list(
             doctype,
-            filters=filters,
+            filters=_mine_filters(doctype, states, recent=recent),
             fields=["name", "status", "modified"],
             order_by="modified desc",
             limit_page_length=50,
@@ -111,6 +117,32 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
     return rows
 
 
+def _mine_count(doctype: str, states: list[str], *, recent: bool = False) -> int:
+    """How many rows :func:`_mine` describes — counted in SQL, not by len() over a page.
+
+    ``get_list`` with a ``count()`` field rather than ``frappe.db.count``, because the
+    count still has to pass through DatabaseQuery for DocPerms and
+    permission_query_conditions to narrow it; ``frappe.db.count`` applies neither and
+    would report a scoped user rows they cannot see. Counting the rows ``_mine``
+    returns cannot serve a Number Card at all: that read stops at its own
+    ``limit_page_length``, so past 50 documents per DocType the card simply stopped
+    rising.
+    """
+    if not frappe.db.exists("DocType", doctype):
+        return 0
+    if not frappe.has_permission(doctype, "read"):
+        return 0
+    try:
+        rows = frappe.get_list(
+            doctype,
+            filters=_mine_filters(doctype, states, recent=recent),
+            fields=["count(name) as total"],
+        )
+    except frappe.PermissionError:
+        return 0
+    return rows[0].get("total") or 0 if rows else 0
+
+
 def _collect(kind: str) -> list[dict]:
     """Union one surface ("active" or "terminal") across the WORKLIST_REGISTRY.
     Used ONLY for the Number Card helpers — NOT for workflow action sourcing."""
@@ -120,6 +152,15 @@ def _collect(kind: str) -> list[dict]:
         out.extend(_mine(doctype, spec[kind], recent=recent))
     out.sort(key=lambda r: r.get("modified") or "", reverse=True)
     return out
+
+
+def _count(kind: str) -> int:
+    """Total of one surface across the WORKLIST_REGISTRY, counted per DocType in SQL."""
+    recent = kind == "terminal"
+    return sum(
+        _mine_count(doctype, spec[kind], recent=recent)
+        for doctype, spec in WORKLIST_REGISTRY.items()
+    )
 
 
 @frappe.whitelist()
@@ -243,10 +284,10 @@ def get_activity_on_my_documents_count(filters=None) -> dict:
 def get_submitted_by_me_count(filters=None) -> dict:
     """Custom Number Card: count of my still-open submitted documents. ``filters`` is
     accepted and ignored (the native Custom Number Card widget always passes it)."""
-    return {"value": len(_collect("active"))}
+    return {"value": _count("active")}
 
 
 @frappe.whitelist()
 def get_approved_last_48h_count(filters=None) -> dict:
     """Custom Number Card: count of my documents closed/approved in the last 48h."""
-    return {"value": len(_collect("terminal"))}
+    return {"value": _count("terminal")}

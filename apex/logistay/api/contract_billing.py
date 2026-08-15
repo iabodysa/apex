@@ -38,14 +38,10 @@ Every action:
   * is duplicate-safe: a second call for the same (contract, period, type) returns
     the existing draft rather than creating another, serialized by a row lock.
 
-The lock and the duplicate check have to be the SAME read, which is what
-``frappe.get_doc(..., for_update=True)`` gives: it locks the contract row AND reads
-the ``billing_documents`` children with ``FOR UPDATE``. A lock whose result is
-discarded, followed by a plain ``reload()``, does not work — under MariaDB's default
-REPEATABLE READ that reload still answers from the transaction's opening snapshot, so
-the loser of the race would miss the winner's freshly committed billing row, raise a
-second draft, and then delete the winner's row on ``save`` (a child table save drops
-every stored row absent from the in-memory document).
+The lock and the duplicate check must be the SAME read: ``get_doc(..., for_update=True)``
+locks the contract row and reads its ``billing_documents`` children under that lock. A
+discarded lock followed by a plain ``reload()`` still answers from the opening snapshot
+under REPEATABLE READ, so the loser raises a second draft and deletes the winner's row.
 """
 
 from __future__ import annotations

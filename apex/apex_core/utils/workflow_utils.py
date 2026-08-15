@@ -33,10 +33,14 @@ def cleanup_orphaned_workflow_actions():
     try whose success path commits first, so the rollback can only discard the current
     doctype's own deletes. A loop that continues past a failure without that commit needs
     a row savepoint instead — see ``habitat/tasks/common.py``.
+
+    EVERY Workflow row is enumerated, not only the active ones. Deactivating a workflow
+    is itself one of the ways Case B arises, and a hard-deleted document (Case A) leaves
+    its Open rows behind whether or not the workflow is still switched on — so filtering
+    on ``is_active`` skipped exactly the doctypes that most need the sweep, and their
+    rows stayed in every permitted user's Action Inbox forever.
     """
-    for wf in frappe.get_all(
-        "Workflow", filters={"is_active": 1}, fields=["document_type", "workflow_state_field"]
-    ):
+    for wf in frappe.get_all("Workflow", fields=["document_type", "workflow_state_field"]):
         dt, sf = wf.document_type, wf.workflow_state_field
         if not (dt and sf) or not _IDENT.match(sf) or not frappe.db.table_exists(dt):
             continue

@@ -18,11 +18,13 @@ from __future__ import annotations
 import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
 import apex
+from apex.apex_core.utils import workflow_utils
 
 # Two levels up, not one: this test sits in apex/apex_core/worklist/, so APP_ROOT is the
 # apex package. A relocation that leaves this at ".." silently builds
@@ -72,6 +74,43 @@ class TestOrphanCleanup(unittest.TestCase):
         self.assertIn('frappe.db.exists("DocType"', _src())
 
 
+class TestOrphanCleanupEnumeratesEveryWorkflow(unittest.TestCase):
+    """A DEACTIVATED workflow's doctype must still be swept.
+
+    Deactivating a workflow is one of the ways Case B arises and a hard-deleted
+    document (Case A) orphans its Open rows regardless, so an ``is_active`` filter
+    excluded precisely the doctypes the sweep exists for.
+    """
+
+    def _run_with_one_workflow(self, workflow_row):
+        with patch.object(workflow_utils, "frappe") as frappe_mock, patch.object(
+            workflow_utils, "clear_doctype_notifications"
+        ):
+            frappe_mock.get_all.side_effect = [[frappe._dict(workflow_row)], []]
+            frappe_mock.db.table_exists.return_value = True
+            workflow_utils.cleanup_orphaned_workflow_actions()
+        return frappe_mock
+
+    def test_the_workflow_enumeration_is_not_narrowed_to_active_rows(self):
+        frappe_mock = self._run_with_one_workflow(
+            {"document_type": "Leave Application", "workflow_state_field": "workflow_state"}
+        )
+        enumeration = frappe_mock.get_all.call_args_list[0]
+        self.assertEqual(enumeration.args[0], "Workflow")
+        self.assertNotIn("is_active", enumeration.kwargs.get("filters") or {})
+
+    def test_a_deactivated_workflows_doctype_is_still_swept(self):
+        frappe_mock = self._run_with_one_workflow(
+            {"document_type": "Leave Application", "workflow_state_field": "workflow_state"}
+        )
+        self.assertIn(
+            "Leave Application",
+            frappe_mock.db.sql.call_args.args[0],
+            "the stale-state delete never ran for the workflow's doctype",
+        )
+        frappe_mock.db.commit.assert_called()
+
+
 class TestActionInboxPage(unittest.TestCase):
     PAGE = os.path.join(APP_ROOT, "apex_core", "page", "action_inbox")
 
@@ -91,6 +130,35 @@ class TestActionInboxPage(unittest.TestCase):
         assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
         used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
         self.assertEqual((used - assigned) - {"$x"}, set(), "this.$ used but never created")
+
+    # Stored English Select values and DocType names, each of which already has an Arabic
+    # string on disk. Painted raw they produce a half-Arabic card ("الحالة: Pending Finance").
+    TRANSLATED_FIELDS = (
+        "reference_doctype",
+        "doctype",
+        "document_type",
+        "workflow_state",
+        "priority",
+        "status",
+        "type",
+    )
+
+    def test_every_rendered_value_goes_through_the_translator(self):
+        with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
+            rendering = [line.strip() for line in fh if ".text(" in line]
+        self.assertGreater(len(rendering), 20, "the .text() scan found almost nothing")
+        checked = 0
+        for line in rendering:
+            for field in self.TRANSLATED_FIELDS:
+                if f"row.{field}" not in line:
+                    continue
+                checked += 1
+                self.assertIn(
+                    f"__(row.{field}",
+                    line,
+                    f"row.{field} is painted untranslated: {line}",
+                )
+        self.assertGreaterEqual(checked, 7, "no rendered value was actually inspected")
 
     def test_page_json_standard_no_all_role(self):
         import json

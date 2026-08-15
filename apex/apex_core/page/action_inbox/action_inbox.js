@@ -139,7 +139,7 @@ class ActionInbox {
 	_workflow_card(row) {
 		const $card = $('<div class="ai-card ai-card--workflow"></div>').attr('style', AI_STYLE.card).appendTo(this.$approvals);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
-		$('<span class="indicator-pill no-indicator-dot blue"></span>').text(row.reference_doctype || '').appendTo($head);
+		$('<span class="indicator-pill no-indicator-dot blue"></span>').text(__(row.reference_doctype || '')).appendTo($head);
 		$('<a class="ai-card-link" href="#"></a>')
 			.attr('style', AI_STYLE.card_link)
 			.text(row.reference_name || '')
@@ -150,7 +150,7 @@ class ActionInbox {
 			.appendTo($head);
 
 		const $meta = $('<div class="ai-card-meta text-muted"></div>').attr('style', AI_STYLE.card_meta).appendTo($card);
-		$('<span class="ai-card-state"></span>').text(__('State: {0}', [row.workflow_state || ''])).appendTo($meta);
+		$('<span class="ai-card-state"></span>').text(__('State: {0}', [__(row.workflow_state || '')])).appendTo($meta);
 
 		const $actions = $('<div class="ai-card-actions"></div>').attr('style', AI_STYLE.card_actions).appendTo($card);
 		$('<span class="ai-actions-load text-muted"></span>').text(__('Loading actions…')).appendTo($actions);
@@ -212,7 +212,7 @@ class ActionInbox {
 		$('<span class="indicator-pill no-indicator-dot orange"></span>').text(__('Task')).appendTo($head);
 		$('<a class="ai-card-link" href="#"></a>')
 			.attr('style', AI_STYLE.card_link)
-			.text(`${row.reference_doctype || ''}: ${row.reference_name || ''}`)
+			.text(`${__(row.reference_doctype || '')}: ${row.reference_name || ''}`)
 			.on('click', (e) => {
 				e.preventDefault();
 				frappe.set_route('Form', row.reference_doctype, row.reference_name);
@@ -224,7 +224,7 @@ class ActionInbox {
 		}
 		const $meta = $('<div class="ai-card-meta text-muted"></div>').attr('style', AI_STYLE.card_meta).appendTo($card);
 		if (row.priority) {
-			$('<span class="ai-card-priority"></span>').text(__('Priority: {0}', [row.priority])).appendTo($meta);
+			$('<span class="ai-card-priority"></span>').text(__('Priority: {0}', [__(row.priority)])).appendTo($meta);
 		}
 		if (row.date) {
 			$('<span class="ai-card-date"></span>').text(__('Due: {0}', [row.date])).appendTo($meta);
@@ -258,7 +258,7 @@ class ActionInbox {
 	_doc_card($list, row, color) {
 		const $card = $('<div class="ai-card ai-card--doc"></div>').attr('style', AI_STYLE.card).appendTo($list);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
-		$(`<span class="indicator-pill no-indicator-dot ${color}"></span>`).text(row.doctype || '').appendTo($head);
+		$(`<span class="indicator-pill no-indicator-dot ${color}"></span>`).text(__(row.doctype || '')).appendTo($head);
 		$('<a class="ai-card-link" href="#"></a>')
 			.attr('style', AI_STYLE.card_link)
 			.text(row.name || '')
@@ -268,7 +268,7 @@ class ActionInbox {
 			})
 			.appendTo($head);
 		const $meta = $('<div class="ai-card-meta text-muted"></div>').attr('style', AI_STYLE.card_meta).appendTo($card);
-		$('<span class="ai-card-state"></span>').text(__('Status: {0}', [row.status || ''])).appendTo($meta);
+		$('<span class="ai-card-state"></span>').text(__('Status: {0}', [__(row.status || '')])).appendTo($meta);
 	}
 
 	_acted_card(row) {
@@ -298,13 +298,13 @@ class ActionInbox {
 		const $card = $('<div class="ai-card ai-card--notif"></div>').attr('style', AI_STYLE.card).appendTo(this.$notifs);
 		const $head = $('<div class="ai-card-head"></div>').attr('style', AI_STYLE.card_head).appendTo($card);
 		$(`<span class="indicator-pill no-indicator-dot ${row.read ? 'gray' : 'blue'}"></span>`)
-			.text(row.type || __('Notification'))
+			.text(row.type ? __(row.type) : __('Notification'))
 			.appendTo($head);
 		$('<span class="ai-card-subject"></span>').css('font-weight', '600').text(row.subject || '').appendTo($head);
 		if (row.document_type && row.document_name) {
 			$('<a class="ai-card-link" href="#"></a>')
 				.attr('style', AI_STYLE.card_link)
-				.text(`${row.document_type}: ${row.document_name}`)
+				.text(`${__(row.document_type || '')}: ${row.document_name || ''}`)
 				.on('click', (e) => {
 					e.preventDefault();
 					frappe.set_route('Form', row.document_type, row.document_name);

@@ -25,11 +25,19 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         cls.employee = factories.make_employee("Custody Holder One", company=cls.company).name
         if cls.cost_center:
             frappe.db.set_value("Employee", cls.employee, "payroll_cost_center", cls.cost_center)
-        cls.contract = frappe.get_doc(
+    def setUp(self):
+        """Build the submitted contract per test, not per class.
+
+        ``tearDown`` rolls back, and the contract is written inside that transaction, so
+        a class-level one exists for the first test and is gone for every later one —
+        which SIM Card's contract-binding gate reports as "not submitted", the same
+        message it gives a draft.
+        """
+        self.contract = frappe.get_doc(
             {
                 "doctype": "Telecom Contract",
                 "naming_series": "TEL-CTR-.YYYY.-.#####",
-                "company": cls.company,
+                "company": self.company,
                 "supplier": "QA-TELECOM-SUPPLIER",
                 "contract_start_date": "2026-01-01",
                 "contract_end_date": "2026-12-31",
@@ -38,7 +46,8 @@ class TestSIMCustodyAssignment(FrappeTestCase):
                 "currency": "SAR",
             }
         )
-        cls.contract.insert(ignore_permissions=True, ignore_links=True)
+        self.contract.insert(ignore_permissions=True, ignore_links=True)
+        self.contract.submit()
 
     def tearDown(self):
         frappe.db.rollback()
