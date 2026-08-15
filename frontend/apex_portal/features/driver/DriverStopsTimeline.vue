@@ -17,6 +17,9 @@ defineEmits(["arrive", "toggle"]);
       <h3>المحطات</h3>
       <a v-if="mapsRouteUrl" class="journey-link" :href="mapsRouteUrl" target="_blank" rel="noopener">افتح الخريطة</a>
     </div>
+    <!-- Both stop controls are disabled until the trip is started, so the list says why
+         once rather than leaving every stop's greyed-out pair unexplained. -->
+    <p v-if="!started && stops.length" class="feature-state">ابدأ الرحلة أولاً حتى تتمكن من تسجيل وصولك ومغادرتك للمحطات.</p>
     <ol class="driver-timeline">
       <li v-for="(stop, index) in stops" :key="stop.route_stop || index" :class="{ 'is-done': stop.done }">
         <span class="driver-timeline__number">{{ index + 1 }}</span>

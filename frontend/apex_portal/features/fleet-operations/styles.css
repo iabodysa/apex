@@ -40,11 +40,28 @@
 .ops-row {
     display: flex;
     min-block-size: 72px;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--sp-3);
     padding: var(--sp-3) var(--sp-4);
     border-block-end: 1px solid var(--border);
+}
+/* Why each refused action is refused, listed under the buttons it belongs to. */
+.ops-blocked-actions {
+    display: grid;
+    gap: var(--sp-1);
+    margin-block-start: var(--sp-2);
+    padding-inline-start: var(--sp-4);
+    color: var(--muted);
+    font-size: 0.8125rem;
+}
+
+/* The reason a control is disabled sits on its own line under the row's actions. */
+.ops-row__reason {
+    flex-basis: 100%;
+    color: var(--muted);
+    font-size: 0.8125rem;
 }
 .ops-row:last-child {
     border-block-end: 0;

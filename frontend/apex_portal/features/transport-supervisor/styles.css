@@ -141,6 +141,13 @@
   gap: var(--sp-3);
 }
 
+.supervisor-assignment-flags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+
 .supervisor-assignment-card dt,
 .supervisor-trip-date span,
 .supervisor-history__copy span,

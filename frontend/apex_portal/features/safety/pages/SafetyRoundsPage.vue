@@ -64,14 +64,21 @@ async function saveRound() {
     const response = await submit.submit({
       building: building.value,
       round_date: today(),
-      // TODO(A-532): reports full success while response.failed is non-empty
       results: JSON.stringify(Object.values(results)),
     });
     if (!response?.ok) throw new Error(response?.failed?.[0]?.message || "لم تُحفظ الجولة.");
-    toast.create({
-      type: "success",
-      message: response.ratified ? "تم اعتماد الجولة" : "حُفظت الجولة وتنتظر المراجعة",
-    });
+    // ok is true as long as ONE cadence was recorded, so a partial refusal has to be
+    // named here or the supervisor walks away believing the whole round was saved.
+    const failed = response.failed || [];
+    if (failed.length) {
+      const names = failed.map((row) => cadenceLabel(row.cadence)).join("، ");
+      error.value = `حُفظ جزء من الجولة فقط. لم تُحفظ: ${names}. راجعها وأعد الإرسال.`;
+    } else {
+      toast.create({
+        type: "success",
+        message: response.ratified ? "تم اعتماد الجولة" : "حُفظت الجولة وتنتظر المراجعة",
+      });
+    }
     Object.keys(results).forEach((key) => delete results[key]);
     await due.fetch();
   } catch (exception) {

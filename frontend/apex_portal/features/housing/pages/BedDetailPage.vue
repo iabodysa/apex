@@ -10,6 +10,9 @@ import { safeErrorMessage } from "../../../core/errorMessage.js";
 const route = useRoute();
 const router = useRouter();
 const error = ref("");
+// The server signals the custody block structurally; matching its Arabic sentence for a
+// substring made the shortcut unreachable and would have fired on unrelated errors too.
+const custodyBlocked = ref(false);
 const checkInForm = reactive({ party_type: "Employee", party: "", project: "" });
 const capabilities = globalThis.window?.apex_portal?.capabilities || [];
 const canCheckIn = capabilities.includes("check_in");
@@ -47,10 +50,12 @@ async function arrive() {
 }
 async function depart() {
   error.value = "";
+  custodyBlocked.value = false;
   try {
     const response = await checkOut.submit({ bed: route.params.bed, checkout_reason: "End of Contract" });
     if (response?.requires_full_form) {
       error.value = "يجب استلام عهد العامل قبل إتمام المغادرة.";
+      custodyBlocked.value = true;
       return;
     }
     toast.create({ type: "success", message: "تم تسجيل المغادرة" });
@@ -81,10 +86,8 @@ async function depart() {
       <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>
       <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>
       <p v-else class="feature-page__empty">السرير مشغول، وليس لديك صلاحية تسجيل المغادرة.</p>
-      <!-- TODO(A-532): the custody link is guarded on text that never matches -->
-
-      <RouterLink v-if="error.includes('العهد')" to="/custody">الانتقال إلى العهد</RouterLink>
       <ErrorMessage v-if="error" :message="error" />
+      <RouterLink v-if="custodyBlocked" to="/custody">الانتقال إلى العهد</RouterLink>
     </template>
   </section>
 </template>

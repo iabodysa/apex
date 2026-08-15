@@ -4,6 +4,8 @@ import { Badge, Button, Dialog, FormControl, createResource } from "frappe-ui";
 import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { safeErrorMessage } from "../../../core/errorMessage.js";
 const fuelQueue = createResource({
     url: "apex.salis.api.fuel_console.get_pending_fuel_requests",
     method: "GET",
@@ -24,8 +26,13 @@ const fuelQueue = createResource({
   rejectOpen = ref(false),
   selected = ref(null),
   reason = ref(""),
+  actionError = ref(""),
   once = createSingleFlight();
 onMounted(() => fuelQueue.fetch());
+// A title attribute is invisible on a touch screen, so the refusal reason is rendered.
+function availability(row, kind) {
+  return actionAvailability(row.capabilities?.[kind] || { allowed: true });
+}
 function openReject(row) {
   selected.value = row;
   rejectOpen.value = true;
@@ -36,17 +43,25 @@ watch(rejectOpen, (open) => {
   if (open) return;
   selected.value = null;
   reason.value = "";
+  actionError.value = "";
 });
 async function act(kind, row) {
   const availability = actionAvailability(row.capabilities?.[kind] || { allowed: true });
   if (availability.disabled) return;
-  await once(`${kind}:${row.name}`, () =>
-    (kind === "approve" ? approveFuel : rejectFuel).submit({
-      name: row.name,
-      reason: reason.value || undefined,
-    }),
-  );
-  // TODO(A-532): the dialog clears unconditionally after await, so a refusal reads as success
+  actionError.value = "";
+  try {
+    await once(`${kind}:${row.name}`, () =>
+      (kind === "approve" ? approveFuel : rejectFuel).submit({
+        name: row.name,
+        reason: reason.value || undefined,
+      }),
+    );
+  } catch (caught) {
+    // A refused decision must stay on screen with its reason; closing the dialog here
+    // would read as success and invite a second press on the same request.
+    actionError.value = safeErrorMessage(caught, "تعذّر تنفيذ القرار. حاول مرة أخرى.");
+    return;
+  }
   rejectOpen.value = false;
   await fuelQueue.fetch();
 }
@@ -60,7 +75,8 @@ async function act(kind, row) {
       </div>
       <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
     </header>
-    <div v-if="fuelQueue.loading" class="ops-state">جاري تحميل الطلبات…</div>
+    <p v-if="actionError && !rejectOpen" class="ops-state ops-state--error" role="alert">{{ actionError }}</p>
+    <PortalSkeleton v-if="fuelQueue.loading" :rows="3" label="جارٍ تحميل طلبات الوقود" />
     <PortalErrorState
       v-else-if="fuelQueue.error"
       title="تعذّر تحميل طلبات الوقود"
@@ -81,9 +97,11 @@ async function act(kind, row) {
         </div>
         <div class="ops-actions">
           <Badge theme="orange" :label="statusLabel(row.status)" />
-          <Button variant="solid" theme="green" label="اعتماد" :disabled="row.capabilities?.approve?.allowed === false" :title="row.capabilities?.approve?.reason" @click="act('approve', row)" />
-          <Button variant="outline" theme="red" label="رفض" :disabled="row.capabilities?.reject?.allowed === false" :title="row.capabilities?.reject?.reason" @click="openReject(row)" />
+          <Button variant="solid" theme="green" label="اعتماد" :disabled="availability(row, 'approve').disabled" @click="act('approve', row)" />
+          <Button variant="outline" theme="red" label="رفض" :disabled="availability(row, 'reject').disabled" @click="openReject(row)" />
         </div>
+        <p v-if="availability(row, 'approve').disabled" class="ops-row__reason">{{ availability(row, "approve").reason }}</p>
+        <p v-else-if="availability(row, 'reject').disabled" class="ops-row__reason">{{ availability(row, "reject").reason }}</p>
       </article>
     </div>
     <Dialog v-model="rejectOpen" :options="{ title: 'رفض طلب الوقود' }">
@@ -95,6 +113,7 @@ async function act(kind, row) {
       </template>
       <template #body-content>
         <FormControl v-model="reason" type="textarea" :rows="3" label="سبب الرفض" required />
+        <p v-if="actionError" class="ops-state ops-state--error" role="alert">{{ actionError }}</p>
         <Button variant="solid" theme="red" label="تأكيد الرفض" :loading="rejectFuel.loading" @click="act('reject', selected)" />
       </template>
     </Dialog>

@@ -56,8 +56,12 @@ const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected"
               <strong dir="auto">{{ recordTitle(assignment, ['assignment_name', 'shift_name'], 'تشغيل متكرر') }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ assignment.name }}</bdi>
             </div>
-            <!-- TODO(A-532): a stopped assignment (enabled is 0) shows no marker at all -->
-            <Badge :theme="statusTheme(assignment.status)" :label="statusLabel(assignment.status)" />
+            <div class="supervisor-assignment-flags">
+              <Badge :theme="statusTheme(assignment.status)" :label="statusLabel(assignment.status)" />
+              <!-- An approved assignment that is switched off generates no trips, and the
+                   status badge alone cannot tell that apart from one that is running. -->
+              <Badge v-if="!assignment.enabled" theme="gray" label="متوقف" />
+            </div>
           </header>
           <dl>
             <div><dt>الشفت</dt><dd dir="auto">{{ assignment.shift_name || assignment.work_shift_label || 'غير محدد' }}</dd></div>

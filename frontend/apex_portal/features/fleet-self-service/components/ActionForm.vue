@@ -74,6 +74,8 @@ async function submit() {
                     :options="field.options"
                     :rows="field.rows"
                     :required="field.required"
+                    :disabled="field.disabled"
+                    :description="field.description"
                 />
             </template>
             <p v-if="notice" class="salis-notice" role="status">{{ notice }}</p>

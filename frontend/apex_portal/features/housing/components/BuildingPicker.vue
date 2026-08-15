@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, watch } from "vue";
 import { Button, Select } from "frappe-ui";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { building, selectBuilding } from "../building.js";
 import { createSupervisorBuildingsResource } from "../data/buildings.js";
 
@@ -34,7 +35,7 @@ onMounted(() => {
 
 <template>
   <template v-if="buildings">
-    <div v-if="buildings.loading" class="feature-state" role="status">جاري تحميل المباني…</div>
+    <PortalSkeleton v-if="buildings.loading" :rows="1" label="جارٍ تحميل المباني" />
     <div v-else-if="buildings.error" class="feature-state feature-state--error">
       <p>تعذر تحميل المباني.</p>
       <Button variant="outline" label="إعادة المحاولة" @click="load" />

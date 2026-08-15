@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { ErrorMessage, createResource } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
-import { building } from "../building.js";
+import { building, selectBuilding } from "../building.js";
 import { createSupervisorBuildingsResource } from "../data/buildings.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 
@@ -35,11 +35,6 @@ const occupiedBeds = computed(() => Number(summary.value.occupied || 0));
 const unavailableBeds = computed(() => ["blocked", "out_of_service"]
   .reduce((total, key) => total + Number(summary.value[key] || 0), 0));
 const dueRounds = computed(() => safety.data?.due?.length || 0);
-
-function selectBuilding(name) {
-  // TODO(A-532): writes to a readonly ref
-  building.value = name;
-}
 
 async function load() {
   error.value = "";

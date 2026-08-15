@@ -8,6 +8,7 @@ const resource = createResource({
 });
 </script>
 <template>
-  <!-- TODO(A-532): the only QueuePage without detail-base, so its rows open nothing -->
+  <!-- No /assignments/:name route exists, so QueuePage renders these rows inert rather
+       than as links to nowhere. Give it a detail-base the day that route ships. -->
   <QueuePage title="قائمة الإسناد" :resource="resource" empty="لا توجد عمليات إسناد تحتاج متابعة." />
 </template>

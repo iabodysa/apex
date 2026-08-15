@@ -5,6 +5,7 @@ import { Link } from "frappe-ui/frappe";
 import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -131,9 +132,7 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
       <Button type="submit" variant="outline">تطبيق</Button>
     </form>
 
-    <div v-if="loading && !resource.data" class="feature-state" role="status">
-      جارٍ تحميل {{ title }}…
-    </div>
+    <PortalSkeleton v-if="loading && !resource.data" :rows="4" :label="`جارٍ تحميل ${title}`" />
     <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" @retry="refresh" />
     <div v-else-if="!rows.length" class="feature-state">{{ empty }}</div>
     <template v-else>

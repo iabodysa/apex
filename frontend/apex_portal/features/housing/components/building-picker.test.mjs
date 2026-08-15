@@ -33,7 +33,8 @@ describe("BuildingPicker", () => {
   it("distinguishes loading, error, and empty building states", async () => {
     resource.loading = true;
     const loading = mount(BuildingPicker);
-    expect(loading.text()).toContain("جاري تحميل المباني");
+    expect(loading.text()).toContain("جارٍ تحميل المباني");
+    expect(loading.get(".portal-skeleton").attributes("role")).toBe("status");
     loading.unmount();
 
     resource.loading = false;

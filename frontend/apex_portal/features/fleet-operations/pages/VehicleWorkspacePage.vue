@@ -6,6 +6,7 @@ import { actionAvailability, createSingleFlight } from "../state.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 
 // What each fleet_os action accepts for the operator's text, read from its signature.
 const NOTE_ARGUMENT = Object.freeze({
@@ -55,6 +56,21 @@ const route = useRoute(),
   notice = ref(""),
   reason = ref(""),
   once = createSingleFlight();
+const ACTION_LABEL = Object.freeze({
+  stop: "إيقاف",
+  workshopIn: "إدخال الورشة",
+  workshopOut: "إخراج من الورشة",
+  recover: "إعادة للخدمة",
+});
+// A title attribute is invisible on the tablet these buttons are pressed on, so every
+// refused action names itself and its reason beside the row.
+const blockedActions = computed(() =>
+  Object.keys(ACTION_LABEL)
+    .map((name) => ({ name, ...actionAvailability(vehicle.value?.capabilities?.[name] || { allowed: true }) }))
+    .filter((entry) => entry.disabled)
+    .map((entry) => ({ ...entry, label: ACTION_LABEL[entry.name] })),
+);
+const isBlocked = (name) => blockedActions.value.some((entry) => entry.name === name);
 async function load() {
   await Promise.all([vehicles.fetch(), vehicleTimeline.fetch({ plate: route.params.vehicle })]);
 }
@@ -95,7 +111,7 @@ onMounted(load);
       </div>
       <Badge v-if="vehicle" :theme="statusTheme(vehicle.vehicle_status || vehicle.status)" :label="statusLabel(vehicle.vehicle_status || vehicle.status)" />
     </header>
-    <div v-if="vehicles.loading" class="ops-state">جاري تحميل المركبة…</div>
+    <PortalSkeleton v-if="vehicles.loading" :rows="3" label="جارٍ تحميل المركبة" />
     <PortalErrorState v-else-if="vehicles.error" title="تعذّر تحميل المركبة" :message="vehicles.error" @retry="load" />
     <div v-else-if="!vehicle" class="ops-state ops-state--error">المركبة غير موجودة أو خارج نطاق مشروعك.</div>
     <div v-else class="ops-workspace">
@@ -107,11 +123,14 @@ onMounted(load);
             {{ vehicle.current_driver?.name_en || "من دون مندوب" }}
           </p>
           <div class="ops-actions">
-            <Button variant="outline" label="إيقاف" :disabled="vehicle.capabilities?.stop?.allowed === false" :title="vehicle.capabilities?.stop?.reason" @click="act('stop')" />
-            <Button variant="outline" label="إدخال الورشة" :disabled="vehicle.capabilities?.workshopIn?.allowed === false" :title="vehicle.capabilities?.workshopIn?.reason" @click="act('workshopIn')" />
-            <Button variant="outline" label="إخراج من الورشة" :disabled="vehicle.capabilities?.workshopOut?.allowed === false" :title="vehicle.capabilities?.workshopOut?.reason" @click="act('workshopOut')" />
-            <Button variant="solid" theme="green" label="إعادة للخدمة" :disabled="vehicle.capabilities?.recover?.allowed === false" :title="vehicle.capabilities?.recover?.reason" @click="act('recover')" />
+            <Button variant="outline" label="إيقاف" :disabled="isBlocked('stop')" @click="act('stop')" />
+            <Button variant="outline" label="إدخال الورشة" :disabled="isBlocked('workshopIn')" @click="act('workshopIn')" />
+            <Button variant="outline" label="إخراج من الورشة" :disabled="isBlocked('workshopOut')" @click="act('workshopOut')" />
+            <Button variant="solid" theme="green" label="إعادة للخدمة" :disabled="isBlocked('recover')" @click="act('recover')" />
           </div>
+          <ul v-if="blockedActions.length" class="ops-blocked-actions">
+            <li v-for="entry in blockedActions" :key="entry.name">{{ entry.label }}: {{ entry.reason }}</li>
+          </ul>
           <FormControl v-model="reason" type="textarea" :rows="2" label="ملاحظة الإجراء" />
           <p class="ops-hint">تُحفظ الملاحظة مع الإيقاف وإدخال الورشة فقط.</p>
           <p v-if="notice" class="ops-reason">{{ notice }}</p>
@@ -127,7 +146,7 @@ onMounted(load);
       </main>
       <aside class="ops-card">
         <h3>السجل الزمني</h3>
-        <p v-if="vehicleTimeline.loading" class="ops-state" role="status">جاري تحميل السجل الزمني…</p>
+        <PortalSkeleton v-if="vehicleTimeline.loading" :rows="3" label="جارٍ تحميل السجل الزمني" />
         <PortalErrorState
           v-else-if="vehicleTimeline.error"
           title="تعذّر تحميل السجل الزمني"

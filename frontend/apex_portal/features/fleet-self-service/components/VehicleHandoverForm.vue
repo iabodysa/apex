@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { Button, FileUploader, FormControl, createResource } from "frappe-ui";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import { createSingleFlight } from "../state.js";
 import {
@@ -114,7 +115,7 @@ onMounted(loadChecklist);
       <p>{{ intro }}</p>
     </header>
 
-    <div v-if="loadingChecklist" class="salis-state" role="status">جارٍ تحميل قالب الفحص المعتمد…</div>
+    <PortalSkeleton v-if="loadingChecklist" :rows="4" label="جارٍ تحميل قالب الفحص المعتمد" />
     <PortalErrorState
       v-else-if="checklistError"
       title="تعذّر بدء فحص المركبة"

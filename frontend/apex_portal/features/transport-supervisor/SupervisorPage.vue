@@ -8,6 +8,7 @@ import RequestTripPlanning from "./components/RequestTripPlanning.vue";
 import SupervisorRecordFacts from "./components/SupervisorRecordFacts.vue";
 import SupervisorRecordCollections from "./components/SupervisorRecordCollections.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
+import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import { safeErrorMessage } from "../../core/errorMessage.js";
 import { meaningfulRequestTitle } from "./assignmentState.js";
 
@@ -96,7 +97,7 @@ watch(doc, loadTransitions, { immediate: true });
       <span :class="spec.icon || 'lucide-activity'" aria-hidden="true" />
     </header>
 
-    <div v-if="state === 'loading'" class="feature-state" role="status">جارٍ تحميل السجل…</div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="4" label="جارٍ تحميل السجل" />
     <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" message="لا تملك صلاحية هذا السجل." @retry="record.reload" />
     <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل السجل" :message="record.get.error" @retry="record.reload" />
     <div v-else-if="state === 'empty'" class="feature-state">السجل غير موجود.</div>

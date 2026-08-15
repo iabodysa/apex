@@ -88,6 +88,25 @@ describe("Masar driver feature", () => {
     wrapper.unmount();
   });
 
+  it("links a route card by the id its own endpoint emits", async () => {
+    // my_worker_route_today names the id after the DocType it came from, my_trips_recent
+    // returns name; a card built on one key alone links the other tab to /route/undefined.
+    for (const [path, url, row] of [
+      ["/route", "apex.salis.api.driver_portal.my_worker_route_today", { dispatch_trip: "DT-1", route_name: "خط الشمال" }],
+      ["/trips", "apex.salis.api.driver_portal.my_trips_recent", { name: "DT-2", route_name: "خط الجنوب" }],
+    ]) {
+      resourceData.set(url, { trips: [row] });
+      const router = createRouter({ history: createMemoryHistory(), routes: driverRoutes });
+      await router.push(path);
+      await router.isReady();
+      const wrapper = mount(DriverPage, { global: { plugins: [router] } });
+      await flushPromises();
+
+      expect(wrapper.get("a.record-card").attributes("href")).toBe(`/route/${row.dispatch_trip || row.name}`);
+      wrapper.unmount();
+    }
+  });
+
   it("keeps personal service and bus execution while excluding fleet self-service", () => {
     expect(driverRoutes.map((route) => route.path)).toEqual(["/today", "/route", "/trips", "/requests", "/profile", "/accommodation", "/custody", "/route/:trip"]);
     const source = JSON.stringify(driverRoutes);

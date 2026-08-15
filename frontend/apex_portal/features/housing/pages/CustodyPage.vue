@@ -32,6 +32,9 @@ const returnItems = createResource({ url: "apex.habitat.api.custody_kiosk.return
 
 const articles = computed(() => catalog.data?.articles || []);
 const heldLines = computed(() => held.data?.lines || []);
+const outOfStock = computed(() => articles.value
+  .filter((article) => Number(article.store_balance) <= 0)
+  .map((article) => article.article_name || article.article));
 const allowed = computed(() => mode.value === "issue" ? canIssue : canReturn);
 const actionLabel = computed(() => mode.value === "issue" ? "تسليم العهدة" : "استلام العهدة المرتجعة");
 
@@ -42,11 +45,12 @@ async function refreshBalances() {
   if (state.holder) requests.push(held.fetch());
   await Promise.all(requests);
 }
-// TODO(A-532): no immediate:true, so a preselected building never loads
+// The picker's selection survives navigation, so the catalogue must load for a building
+// that was already chosen on another screen — not only when the choice changes here.
 watch(building, async (value) => {
   replace({ building: value });
   await refreshBalances();
-});
+}, { immediate: true });
 watch(mode, () => replace({ holder: state.holder }));
 async function selectHolder() {
   replace({ holder: { party_type: holderType.value, party: holderId.value } });
@@ -110,6 +114,9 @@ async function submit() {
       <FormControl v-model="scan" label="رمز الصنف" />
       <Button variant="subtle" :disabled="!state.holder || !scan" :loading="resolver.loading" @click="addScan">إضافة الصنف</Button>
       <div v-if="state.holder && mode === 'issue'" class="feature-page__list">
+        <!-- A greyed article is out of stock in this building's store; the number alone
+             inside the label does not say that is why it cannot be picked. -->
+        <p v-if="outOfStock.length" class="feature-page__empty">أصناف بدون رصيد في مستودع المبنى، ولا يمكن تسليمها: {{ outOfStock.join("، ") }}.</p>
         <Button v-for="article in articles" :key="article.article" variant="subtle" :disabled="Number(article.store_balance) <= 0" @click="addArticle(article)">
           {{ article.article_name }} · {{ article.store_balance ?? '—' }}
         </Button>

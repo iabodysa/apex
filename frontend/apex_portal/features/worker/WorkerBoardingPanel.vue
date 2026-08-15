@@ -12,6 +12,15 @@ defineEmits(["wait", "confirm"]);
 
 const canWait = computed(() => props.boarding.dispatch_trip && !["Boarded", "Absent"].includes(props.boarding.status) && Number(props.boarding.wait_count || 0) < Number(props.boarding.wait_max || 0));
 const canConfirm = computed(() => props.boarding.boarding_window?.can_confirm && props.boarding.status !== "Boarded");
+// "انتظرني" is refused for four different reasons; a grey button that never says which
+// one leaves the worker pressing it at the roadside.
+const waitReason = computed(() => {
+  if (canWait.value) return "";
+  if (!props.boarding.dispatch_trip) return "لم تُسند لك رحلة بعد، فلا يمكن طلب الانتظار.";
+  if (props.boarding.status === "Boarded") return "أنت على متن الحافلة، ولا حاجة لطلب الانتظار.";
+  if (props.boarding.status === "Absent") return "سُجّل غيابك عن هذه الرحلة.";
+  return "استهلكت طلبات الانتظار المتاحة لهذه الرحلة.";
+});
 const waitSeconds = computed(() => remainingSeconds(props.boarding.wait_at, props.boarding.wait_window_seconds, props.now));
 const notifySeconds = computed(() => remainingSeconds(props.boarding.notify_at, props.boarding.notify_window_seconds, props.now));
 </script>
@@ -40,6 +49,7 @@ const notifySeconds = computed(() => remainingSeconds(props.boarding.notify_at, 
       طلب الانتظار {{ boarding.wait_count || 0 }} من {{ boarding.wait_max }}
       <template v-if="waitSeconds">· طلبك فعال لمدة {{ waitSeconds }} ثانية</template>
     </small>
+    <small v-if="waitReason">{{ waitReason }}</small>
     <small v-if="!canConfirm && boarding.status !== 'Boarded'">يتاح تأكيد الصعود عندما تصل الحافلة إلى نقطتك.</small>
   </article>
 </template>

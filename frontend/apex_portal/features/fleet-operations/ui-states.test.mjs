@@ -120,7 +120,8 @@ describe("fleet operations async states", () => {
     resources.set("apex.salis.api.fleet_os.get_fleet_os", readResource({ data: vehicleData }));
     resources.set("apex.salis.api.fleet_os.get_vehicle_timeline", readResource({ loading: true }));
     const loading = await mountVehicle();
-    expect(loading.text()).toContain("جاري تحميل السجل الزمني");
+    expect(loading.text()).toContain("جارٍ تحميل السجل الزمني");
+    expect(loading.get(".portal-skeleton").attributes("role")).toBe("status");
     loading.unmount();
 
     const timeline = readResource({ error: new Error("network") });

@@ -154,8 +154,9 @@ watch(building, load, { immediate: true });
           <div class="feature-actions">
             <Button v-if="row.arrived" variant="subtle" @click="printSlip(row)">بطاقة الوصول</Button>
             <Button v-if="row.arrived && !row.housed" theme="green" variant="solid" @click="chooseBed(row)">اختيار سرير</Button>
-            <!-- TODO(A-532): a housed row still offers تسجيل الوصول -->
-            <Button v-else-if="canRegister" theme="green" variant="solid" @click="prepareManifest(row)">تسجيل الوصول</Button>
+            <!-- Only a worker who has not been registered yet can be registered; a housed
+                 row is finished and carries its own badge instead of an action. -->
+            <Button v-else-if="canRegister && !row.arrived" theme="green" variant="solid" @click="prepareManifest(row)">تسجيل الوصول</Button>
           </div>
         </article>
       </section>
