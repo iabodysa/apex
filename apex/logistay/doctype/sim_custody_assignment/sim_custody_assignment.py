@@ -61,7 +61,7 @@ class SIMCustodyAssignment(Document):
             self.company = frappe.db.get_value("SIM Card", self.sim_card, "company")
         self._validate_custodian_inputs()
         self._require_retirement_reason()
-        self._reject_back_dated_retirement()
+        self._reject_back_dated_event()
         self._enforce_company_compatibility()
         self._snapshot_cost_centers()
         if self.sim_card:
@@ -95,16 +95,20 @@ class SIMCustodyAssignment(Document):
                 title=_("Reason Required"),
             )
 
-    def _reject_back_dated_retirement(self):
-        """A retirement must be the LAST event on the SIM by date, not just by clock.
+    def _reject_back_dated_event(self):
+        """EVERY event must be the LAST one on the SIM by date, not just by clock.
 
         ``rebuild_sim_projection`` replays events ordered by ``assignment_date``, so a
         Lost event dated before an existing Assign replays FIRST and the Assign then
         overwrites it — the operator retires the SIM and the SIM still reads Assigned.
         The submit-time status check cannot catch this: it reads the CURRENT status,
         which legitimately allows the transition.
+
+        The replay does not care which action was back-dated: a Return, a Suspend or a
+        Transfer dated behind the chain submits and is overwritten just as silently, and
+        the operator is left with an event that changed nothing.
         """
-        if self.action not in TERMINAL_ACTIONS or not (self.sim_card and self.assignment_date):
+        if not (self.sim_card and self.assignment_date):
             return
         latest = frappe.get_all(
             "SIM Custody Assignment",
@@ -118,9 +122,9 @@ class SIMCustodyAssignment(Document):
             frappe.throw(
                 _(
                     "The {0} date {1} is before SIM {2}'s last custody event on {3}. "
-                    "Record the retirement on or after that date."
+                    "Record it on or after that date."
                 ).format(_(self.action), self.assignment_date, self.sim_card, latest),
-                title=_("Back-Dated Retirement"),
+                title=_("Back-Dated Custody Event"),
             )
 
     def _enforce_company_compatibility(self):
@@ -165,11 +169,14 @@ class SIMCustodyAssignment(Document):
         allowed = ALLOWED_PRIOR_STATUS.get(self.action, ())
         if status not in allowed:
             frappe.throw(
+                # Every interpolated value here is a stored English Select value, so each
+                # one goes through _() as lines 93 and 122 already do — otherwise the
+                # sentence an Arabic operator hits most often is half translated.
                 _("Cannot {0} SIM {1}: its status is {2}, expected {3}.").format(
-                    self.action,
+                    _(self.action),
                     self.sim_card,
-                    status or _("unknown"),
-                    " / ".join(allowed) or _("none"),
+                    _(status) if status else _("unknown"),
+                    " / ".join(_(s) for s in allowed) or _("none"),
                 )
             )
 
@@ -239,20 +246,32 @@ def rebuild_sim_projection(sim_card: str) -> None:
     edits), so the replay is the whole truth and nothing is preserved from the row
     being overwritten. That is what makes retirement reversible: cancelling the Lost
     event drops it from the replay and the SIM returns to the state it had before.
+
+    The replay is a LOCKING read. The SIM row lock the caller holds serializes the two
+    writers but does not refresh this transaction's REPEATABLE READ view, which
+    ``validate`` already pinned with a plain read of that same SIM row — so a plain
+    ``get_all`` here would replay an event set missing the winner's just-committed
+    event and write the wrong custodian onto the SIM. The lock and the decision have to
+    be one statement, the same shape as the bed allocation and the store balance.
     """
-    events = frappe.get_all(
-        "SIM Custody Assignment",
-        filters={"sim_card": sim_card, "docstatus": 1},
-        fields=[
-            "name",
-            "action",
-            "custodian_type",
-            "employee",
-            "project",
-            "cost_center",
-            "assignment_date",
-        ],
-        order_by="assignment_date asc, creation asc",
+    Event = frappe.qb.DocType("SIM Custody Assignment")
+    events = (
+        frappe.qb.from_(Event)
+        .select(
+            Event.name,
+            Event.action,
+            Event.custodian_type,
+            Event.employee,
+            Event.project,
+            Event.cost_center,
+            Event.assignment_date,
+        )
+        .where(Event.sim_card == sim_card)
+        .where(Event.docstatus == 1)
+        .orderby(Event.assignment_date)
+        .orderby(Event.creation)
+        .for_update()
+        .run(as_dict=True)
     )
     state = dict(_INITIAL_STATE)
     for event in events:

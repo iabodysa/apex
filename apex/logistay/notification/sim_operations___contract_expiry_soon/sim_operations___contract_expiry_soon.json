@@ -22,6 +22,6 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "Telecom Contract Expiring: {{ doc.name }} ({{ doc.supplier }})",
- "modified": "2026-07-25 04:51:30.324102"
+ "subject": "{{ _(\"Telecom Contract Expiring\") }}: {{ doc.name }} ({{ doc.supplier }})",
+ "modified": "2026-08-15 09:00:00.000000"
 }

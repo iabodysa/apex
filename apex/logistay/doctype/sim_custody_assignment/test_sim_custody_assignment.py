@@ -126,6 +126,67 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             self._event(sim, "Assign", custodian_type="Employee", employee=other_employee)
 
+    def test_the_replay_reads_the_event_chain_for_update(self):
+        """The SIM row lock does not refresh the reader's snapshot; the replay must.
+
+        ``on_submit`` locks the SIM row, but ``validate`` already pinned this
+        transaction's REPEATABLE READ view with a plain read of that same row. A
+        non-locking replay therefore answers from the pre-lock snapshot and folds an
+        event set that is missing the winner's just-committed event, writing the wrong
+        custodian onto the SIM. Calls the PRODUCTION function and captures the SQL it
+        emits, the same way the fuel-quota lock is graded.
+        """
+        from apex.logistay.doctype.sim_custody_assignment.sim_custody_assignment import (
+            rebuild_sim_projection,
+        )
+
+        captured: list[str] = []
+        real_sql = frappe.db.sql
+
+        def _recording_sql(query, *args, **kwargs):
+            captured.append(str(query))
+            return real_sql(query, *args, **kwargs)
+
+        frappe.db.sql = _recording_sql
+        try:
+            rebuild_sim_projection(f"NO-SUCH-SIM-{frappe.generate_hash(length=12)}")
+        finally:
+            frappe.db.sql = real_sql
+
+        locking = [
+            q for q in captured
+            if "SIM Custody Assignment" in q and "FOR UPDATE" in q.upper()
+        ]
+        self.assertTrue(
+            locking,
+            "rebuild_sim_projection must read the event chain with FOR UPDATE, or the "
+            f"loser of the SIM lock replays a stale snapshot. Captured: {captured}",
+        )
+
+    def test_back_dated_return_is_refused_like_a_back_dated_retirement(self):
+        """The replay orders by date, so ANY back-dated event is silently overwritten.
+
+        Named to sort AFTER ``test_assign_...``: this class shares state built in
+        ``setUpClass`` while its ``tearDown`` issues a full ``frappe.db.rollback()``, so
+        the first method to run takes that shared state down with it.
+
+        The guard used to run for Lost/Terminated only, which left a back-dated Return,
+        Suspend or Transfer to submit successfully and change nothing — the operator gets
+        a submitted event and a SIM whose custody never moved.
+        """
+        sim = self._sim(mobile="0551000042")
+        self._event(
+            sim, "Assign", custodian_type="Employee", employee=self.employee,
+            assignment_date="2026-06-01",
+        )
+        with self.assertRaises(frappe.ValidationError) as caught:
+            self._event(sim, "Return", assignment_date="2026-05-01")
+        self.assertIn("2026-05-01", str(caught.exception))
+        self.assertEqual(
+            self._status(sim), "Assigned",
+            "the refused Return must leave the projection exactly where it was",
+        )
+
     def test_projection_matches_latest_after_cancel(self):
         sim = self._sim()
         first = self._event(sim, "Assign", custodian_type="Employee", employee=self.employee)

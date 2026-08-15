@@ -100,8 +100,13 @@ class SIMCard(Document):
         """Refreshes the current and, on a contract move, the previous contract's SIM count."""
         self._refresh_contract_counts()
 
-    def on_trash(self):
-        """Refreshes the linked telecom contract's SIM count after the SIM Card is deleted."""
+    def after_delete(self):
+        """Refreshes the linked telecom contract's SIM count after the SIM Card is deleted.
+
+        ``after_delete``, not ``on_trash``: Frappe runs on_trash BEFORE the row leaves the
+        table (frappe/model/delete_doc.py:126 then :145), so a recount taken there still
+        counts the SIM being deleted and the contract keeps a count one too high forever.
+        """
         self._refresh_contract_counts()
 
     def _refresh_contract_counts(self):

@@ -106,3 +106,24 @@ class TestSIMCard(FrappeTestCase):
         self.assertEqual(
             frappe.db.get_value("Telecom Contract", self.contract.name, "sim_count"), 2
         )
+
+    def test_sim_count_drops_when_a_sim_is_deleted(self):
+        """The recount has to happen AFTER the row leaves the table.
+
+        Frappe runs ``on_trash`` before the delete and ``after_delete`` after it
+        (frappe/model/delete_doc.py:126 then :145-146), so a recount hung on on_trash
+        still counts the SIM being removed and the contract keeps a count one too high —
+        permanently, since nothing else recomputes it.
+        """
+        self._sim("0554440001")
+        doomed = self._sim("0554440002")
+        self.assertEqual(
+            frappe.db.get_value("Telecom Contract", self.contract.name, "sim_count"), 2
+        )
+
+        frappe.delete_doc("SIM Card", doomed.name, force=True, ignore_permissions=True)
+
+        self.assertEqual(
+            frappe.db.get_value("Telecom Contract", self.contract.name, "sim_count"), 1,
+            "the contract still counts a SIM that no longer exists",
+        )

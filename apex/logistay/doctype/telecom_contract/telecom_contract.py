@@ -58,7 +58,7 @@ class TelecomContract(Document):
 def refresh_sim_count(contract: str | None) -> None:
     """Recompute a contract's denormalized ``sim_count`` from live SIM Cards.
 
-    Called from SIM Card's own after_insert / on_update / on_trash so the count
+    Called from SIM Card's own after_insert / on_update / after_delete so the count
     on the contract never drifts from the number of SIMs pointing at it. No-op
     when the contract no longer exists (e.g. deleted in the same transaction).
     """
