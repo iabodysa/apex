@@ -206,7 +206,7 @@
    "link_fieldname": "trip_start_log"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-16 03:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Start Log",
@@ -214,46 +214,30 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Fleet Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "share": 1
   },
   {
-   "create": 1,
    "read": 1,
    "role": "Fleet Project Manager",
-   "submit": 1,
-   "write": 1,
    "report": 1
   },
   {
-   "create": 1,
    "read": 1,
    "role": "Fleet Supervisor",
-   "submit": 1,
-   "write": 1,
    "report": 1
   },
   {
-   "create": 1,
    "if_owner": 1,
    "read": 1,
-   "role": "Driver",
-   "submit": 1,
-   "write": 1
+   "role": "Driver"
   },
   {
-   "cancel": 1,
-   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
@@ -261,9 +245,7 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "share": 1
   },
   {
    "read": 1,
