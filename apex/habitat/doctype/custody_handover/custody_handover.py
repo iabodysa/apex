@@ -26,6 +26,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, now_datetime
 
+from apex.apex_core.utils.otp_lockout import clear_lockout
+
 VOUCHER_TYPE = "Custody Handover"
 
 
@@ -115,10 +117,18 @@ def hash_otp(code: str, name: str) -> str:
 
 
 def generate_otp(doc) -> str:
-    """Issue a fresh 6-digit code: store ONLY its hash and an expiry window, reset
-    the attempt counter and any lockout, and return the plaintext ONCE. The
-    validity window falls back to 10 minutes when the setting is unset (a new Int
-    field on the Habitat Settings Single reads 0, not its DocType default)."""
+    """Issue a fresh 6-digit code: store ONLY its hash and an expiry window, lift any
+    lockout, and return the plaintext ONCE. The validity window falls back to 10
+    minutes when the setting is unset (a new Int field on the Habitat Settings Single
+    reads 0, not its DocType default).
+
+    The lockout lives in Redis, so clearing it is a separate call from the db_set:
+    ``otp_attempts`` and ``otp_locked_until`` are written for the record and read by
+    nothing (``apex_core/utils/otp_lockout``). Without the clear, a reissued code is
+    refused for the rest of the window by misses charged against the code it replaced.
+    Shared by the custody handover and the facility asset delivery, so both reissue
+    paths lift their lockout by issuing.
+    """
     code = f"{secrets.randbelow(1_000_000):06d}"
     validity = frappe.db.get_single_value("Habitat Settings", "handover_otp_validity_minutes") or 10
     doc.db_set({
@@ -127,4 +137,5 @@ def generate_otp(doc) -> str:
         "otp_attempts": 0,
         "otp_locked_until": None,
     })
+    clear_lockout(doc.doctype, doc.name)
     return code

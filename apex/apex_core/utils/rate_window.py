@@ -60,3 +60,17 @@ def peek_window(name: str) -> int:
     """
     value = frappe.cache.get(frappe.cache.make_key(name))
     return int(value) if value else 0
+
+
+def clear_window(name: str) -> None:
+    """Drop the window so the next hit opens a fresh one with a fresh TTL.
+
+    For the caller that has just made the counted event impossible — a new code
+    issued, a new secret sent — where leaving the count standing refuses the very
+    request the reissue was meant to allow.
+
+    ``name`` is the RAW key name, as in ``charge_window``: ``delete_value`` applies
+    ``make_key`` itself (``frappe/utils/redis_wrapper.py:141-142``), so applying it
+    here too would delete a key nothing ever wrote.
+    """
+    frappe.cache.delete_value(name)

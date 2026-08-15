@@ -32,6 +32,7 @@ from apex.habitat.api.custody_handover import (
     _receive_leg_posted,
     approve_handover,
     confirm_handover,
+    regenerate_handover_otp,
 )
 from apex.tests.factories import ApexHabitatTestCase
 from apex.tests.factories import make_goods_receipt
@@ -238,3 +239,48 @@ class TestConfirmHandoverRace(ApexHabitatTestCase):
         )
         self.assertFalse(_receive_leg_posted(handover))
         self.assertEqual(_store_bal(self.article, self.dest), 0.0)
+
+    def test_a_reissued_code_lifts_the_lockout_it_replaces(self):
+        """Issuing a fresh code has to clear the misses charged against the old one.
+
+        The counter is a Redis window, so the DocType's otp_attempts and
+        otp_locked_until that generate_otp writes lift nothing. Without the clear, the
+        supervisor who regenerates hands the recipient a code that is refused for the
+        rest of the lockout, and both of them believe the new code should work.
+        """
+        make_goods_receipt(self.intake, self.article, self.proc_user, 2)
+        handover, _stale = self._approved_handover(2)
+        self.addCleanup(
+            frappe.cache.delete_value, f"otp-miss:{handover.doctype}:{handover.name}"
+        )
+        frappe.set_user(self.recv_user)
+        try:
+            for _n in range(MAX_OTP_ATTEMPTS):
+                with self.assertRaises(frappe.ValidationError):
+                    confirm_handover(handover.name, "000000")
+            self.assertTrue(
+                is_locked_out(handover.doctype, handover.name, attempts=MAX_OTP_ATTEMPTS),
+                "the lockout was never reached, so this case is not testing one",
+            )
+        finally:
+            frappe.set_user("Administrator")
+
+        frappe.set_user(self.proc_user)
+        try:
+            fresh = regenerate_handover_otp(handover.name)
+        finally:
+            frappe.set_user("Administrator")
+        self.assertFalse(
+            is_locked_out(handover.doctype, handover.name, attempts=MAX_OTP_ATTEMPTS),
+            "the reissue left the lockout standing, so the new code cannot be used",
+        )
+
+        frappe.set_user(self.recv_user)
+        try:
+            confirm_handover(handover.name, fresh)
+        finally:
+            frappe.set_user("Administrator")
+
+        handover.reload()
+        self.assertEqual(handover.status, "Confirmed")
+        self.assertEqual(_store_bal(self.article, self.dest), 2.0)

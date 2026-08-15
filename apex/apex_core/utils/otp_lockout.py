@@ -32,7 +32,7 @@ that touches rate limiting, notifications or request teardown should read all th
 
 from __future__ import annotations
 
-from apex.apex_core.utils.rate_window import charge_window, peek_window
+from apex.apex_core.utils.rate_window import charge_window, clear_window, peek_window
 
 
 def _miss_key(doctype: str, name: str) -> str:
@@ -64,3 +64,15 @@ def is_locked_out(doctype: str, name: str, *, attempts: int) -> bool:
     next attempt is refused, right or wrong.
     """
     return peek_window(_miss_key(doctype, name)) >= attempts
+
+
+def clear_lockout(doctype: str, name: str) -> None:
+    """Forget this document's wrong codes, because the code they were guessing is gone.
+
+    Issuing a fresh code has to lift the lockout or the reissue cannot be used: the
+    legitimate holder of the new code is refused for the rest of the window by misses
+    charged against a code that no longer opens anything. The DocType's own
+    ``otp_attempts`` and ``otp_locked_until`` are not the counter — see this module's
+    docstring — so clearing them lifts nothing.
+    """
+    clear_window(_miss_key(doctype, name))
