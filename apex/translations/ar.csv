@@ -130,6 +130,7 @@ Accrued by the Company,المستحق عندنا
 Accrued in the Rental Ledger,المستحق في سجل الإيجار
 Accrued total. Sum of the vehicle line amounts when lines are entered; otherwise derived from the linked Rental Accrual Ledger.,إجمالي الاستحقاق. مجموع مبالغ بنود المركبات عند إدخال البنود؛ وإلا فيُشتق من سجل استحقاق الإيجار المرتبط.
 Acknowledge,تأكيد الاطلاع
+Acknowledge (Accounting),اعتماد محاسبي
 Acknowledge receipt,تأكيد الاستلام
 Acknowledge selected ({0}),تأكيد الاطلاع على المحدد ({0})
 Acknowledged,تم الإقرار
@@ -436,7 +437,6 @@ Assigned SIMs suspended or lost: {0},شرائح مُسندة معلّقة أو �
 Assigned Tasks,المهام المسندة
 Assigned To,مُسند إلى
 Assigned To (Employee),مُسند إلى (الموظف)
-Assigned To is required when status is Assigned.,يلزم حقل «مُسند إلى» عندما تكون الحالة «مُسند».
 Assigned Today,السائقون المكلفون اليوم
 Assigned Trip,الرحلة المُسندة
 Assigned Vehicle,المركبة المسندة
@@ -665,6 +665,8 @@ Building License,رخصة المبنى
 Building License EXPIRED,رخصة المبنى منتهية
 Building License Expiring Soon,رخصة المبنى قاربت على الانتهاء
 Building License revoked: {0},سُحبت رخصة المبنى: {0}
+Building License {0} ({1} {2}) for building {3} expires on {4}.,رخصة المبنى {0} ({1} {2}) للمبنى {3} تنتهي في {4}.
+Building License {0} for building {1} has expired ({2}).,رخصة المبنى {0} للمبنى {1} منتهية ({2}).
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
 Building Operations Summary,ملخص عمليات المبنى
@@ -1119,6 +1121,7 @@ Could not raise the payment request. Please try again.,تعذّر رفع طلب 
 Could not read the passport — enter the details manually.,تعذّرت قراءة الجواز — أدخل التفاصيل يدوياً.
 Could not read the payment settings. Please try again.,تعذّر قراءة إعدادات الدفع. يرجى المحاولة مجدداً.
 Could not reassign the driver.,تعذّر إعادة تعيين السائق.
+Could not record the accounting acknowledgement.,تعذّر تسجيل الاعتماد المحاسبي.
 Could not regenerate the OTP. Please try again.,تعذّر إعادة توليد رمز التحقق. حاول مرة أخرى.
 Could not regenerate the code. Please try again.,تعذّر إعادة توليد الرمز. يرجى إعادة المحاولة.
 Could not regenerate the payment schedule. Please try again.,تعذّر إعادة توليد جدول الدفعات. يرجى المحاولة مجدداً.
@@ -1500,6 +1503,7 @@ Driver Attendance Image,صورة حضور السائق
 Driver Attendance Summary,ملخص حضور السائقين
 Driver Availability,توفّر السائقين
 Driver Clearance,إخلاء طرف سائق
+Driver Clearance Blocked,إخلاء طرف السائق موقوف
 Driver Clearance Certificate,شهادة إخلاء طرف السائق
 Driver Clearance Item,بند إخلاء طرف سائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
@@ -1539,6 +1543,7 @@ Driver {0} stopped: {1}.,تم إيقاف السائق {0}: {1}.
 Driver {0} was just assigned by {1}. Please review.,تم إسناد السائق {0} للتو بواسطة {1}. يُرجى المراجعة.
 Drivers,السائقون
 Drives the expiry watch and the expiry report.,يُستخدم لمتابعة انتهاء الصلاحية وتقريرها.
+Driving Licence Expiring,رخصة القيادة قاربت الانتهاء
 Drop target must be an available bed.,اختر سريرًا متاحًا للنقل إليه.
 Drop-off,الإنزال
 Drop-off Stop,محطة النزول
@@ -1709,6 +1714,7 @@ Exit 2 of 3 — transit / dispatch authorization by an Accommodation Manager.,ا
 Exit 2 — Logistics / Dispatch,الخروج 2 — النقل والتسيير
 Exit 2 — Receiving Acceptance,الخروج 2 — قبول الاستلام
 Exit Checkpoints,نقاط الخروج
+Exit Clearance Issued,صدر إخلاء الطرف
 Exit checkpoints can only be cleared while the delivery is Pending Exits.,لا يمكن اجتياز نقاط الخروج إلا عندما تكون حالة التسليم «بانتظار نقاط الخروج».
 Exit {0} has already been cleared.,تم اجتياز نقطة الخروج {0} مسبقًا.
 Exit {0} must be cleared before exit {1}.,يجب اجتياز نقطة الخروج {0} قبل نقطة الخروج {1}.
@@ -1931,6 +1937,8 @@ Fuel Reconciliation,مطابقة الوقود
 Fuel Request,طلب وقود
 Fuel Request Approval Threshold (L),حد اعتماد طلب الوقود (لتر)
 Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
+Fuel Request Awaiting Approval,طلب وقود بانتظار الاعتماد
+Fuel Request Decision,قرار طلب الوقود
 Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
 Fuel Request Voucher,أمر صرف وقود
 Fuel Request {0} is not pending (current status: {1}).,طلب الوقود {0} ليس قيد الانتظار (الحالة الحالية: {1}).
@@ -2256,7 +2264,6 @@ Invalid code.,رمز غير صحيح.
 Invalid handover direction.,اتجاه التسليم غير صحيح.
 Invalid incident type.,نوع الحادث غير صالح.
 Invalid or inactive location token.,رمز الموقع غير صالح أو غير مُفعّل.
-Invalid readiness status.,حالة جاهزية غير صالحة.
 Invalid status: {0},حالة غير صالحة: {0}
 Invalid submission.,طلب غير صالح.
 Inventory Completed,اكتمل الجرد
@@ -2355,13 +2362,13 @@ Landlord Contract Reference,رقم عقد المالك
 Landlord Signatory,الموقّع عن المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
+Large Worker Move Needs Escalation,نقل عمالة كبير يحتاج تصعيداً
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
 Last Count Date,تاريخ آخر جرد
 Last Generated By,آخر من أنشأه
 Last Generated On,تاريخ آخر إنشاء
 Last Inspected,آخر فحص
 Last Inspected Date,تاريخ آخر فحص
-Last Inventory Date,تاريخ آخر جرد
 Last Maintenance Date,تاريخ آخر صيانة
 Last Maintenance Work Order,أمر آخر صيانة
 Last Modified By Role,دور آخر مستخدم عدّل السجل
@@ -2373,7 +2380,6 @@ Last Seen,آخر ظهور
 Last Wait Request At,آخر طلب انتظار في
 Last Working Day,آخر يوم عمل
 Last day this vehicle was on rent in the period. Days alone cannot say which days were charged.,آخر يوم كانت فيه هذه المركبة مؤجّرة في الفترة. عدد الأيام وحده لا يقول أي أيام حُسبت.
-Last inventory,آخر جرد
 Last printed,آخر طباعة
 Late,متأخر
 Latest,الأحدث
@@ -2935,6 +2941,7 @@ On-call Only,عند الطلب فقط
 "One company item a departing driver held, and the state it came back in.",صنف واحد للشركة كان بيد سائق مغادر، والحال التي عاد بها.
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
 "One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
+"One kiosk cart submission, named by the client that sent it. The unique index is what makes a retried issue land once instead of decrementing the building store twice.",إرسال سلة واحدة من الكشك، يسمّيها العميل الذي أرسلها. الفهرس الفريد هو ما يجعل التسليم المعاد إرساله يُسجَّل مرة واحدة بدل أن يخصم من مستودع المبنى مرتين.
 "One mapping row for the Payment Router. Sets target[target_fieldname] = static_value when Static is checked, otherwise to the value of source_fieldname on the Salis Payment Request.",صف تعيين واحد لموجّه الدفع. يضبط target[target_fieldname] = static_value عند تحديد «ثابت»، وإلا يستخدم قيمة source_fieldname من طلب دفع ساليس.
 One row per scheduled rent payment on an Accommodation Lease. Status tracks payment state; rent is paid externally (no GL).,صف واحد لكل دفعة إيجار مجدولة في عقد إيجار سكن. تتتبع الحالة وضع الدفع، ويُسدّد الإيجار خارجيًا دون قيود محاسبية.
 One-Time Password,رمز التحقق لمرة واحدة
@@ -3193,6 +3200,7 @@ Payment Routing Settings,إعدادات توجيه الدفع
 Payment Schedule,جدول الدفع
 Payment Target Mismatch,نوع مستند الدفع لا يطابق الإعداد
 Payment Terms (Days),مهلة السداد (أيام)
+"Payment request {0} is {1}; only a submitted, finance-approved request can be paid.",طلب الدفع {0} حالته {1}؛ ولا يُدفع إلا طلب مُرحَّل ومعتمد مالياً.
 Payment schedule can only be regenerated on a Draft lease.,لا يمكن إعادة إنشاء جدول الدفع إلا لعقد إيجار في حالة «مسودة».
 Payment schedule will be generated automatically on first save.,سيُنشأ جدول الدفعات تلقائيًا عند الحفظ لأول مرة.
 "Payment target {0} is a Single settings record, so creating a payment would overwrite it instead of adding one. Choose a normal payment DocType.",هدف الدفع {0} سجل إعدادات مفرد، لذلك سيؤدي إنشاء الدفع إلى استبداله بدل إضافة مستند جديد. اختر نوع مستند دفع عادي.
@@ -3758,6 +3766,7 @@ Request,طلب
 Request Date,تاريخ الطلب
 Request Details,تفاصيل الطلب
 Request Evidence,طلب مستند
+Request Token,رمز الطلب
 Request Type,نوع الطلب
 Request Type {0} is not valid for the {1} transport type.,نوع الطلب {0} غير صالح لنوع النقل {1}.
 Request fuel for a vehicle to start the fuelling and reconciliation cycle.,اطلب وقوداً لمركبة لبدء دورة التزويد والتسوية.
@@ -4293,6 +4302,7 @@ Sewage Tank Suction,نزح خزان الصرف الصحي
 Share the on-site code with the receiving supervisor.,شارك رمز الموقع مع المشرف المستلِم.
 Share this code with the receiving supervisor: {0},شارك هذا الرمز مع المشرف المستلم: {0}
 Shared Meter,عدّاد مشترك
+Shared meter — {0}% of {1} = {2} (building share),عدّاد مشترك — {0}% من {1} = {2} (حصة المبنى)
 Sharing Note,ملاحظة المشاركة
 Shift,الوردية
 Shift Details,تفاصيل الوردية
@@ -4618,6 +4628,7 @@ Telecom Contract,عقد اتصالات
 Telecom Contract Expiring,عقد الاتصالات قارب على الانتهاء
 Telecom Contract Expiry,انتهاء عقود الاتصالات
 Telecom Contract {0} does not exist.,عقد الاتصالات {0} غير موجود.
+"Telecom Contract {0} is not submitted, so no SIM can be attached to it.",عقد الاتصالات {0} غير مُرحَّل، فلا يمكن ربط أي شريحة به.
 Telecom Control,عمليات الاتصالات
 Telecom Cost Allocation,توزيع تكاليف الاتصالات
 Telecom Service Contract,عقد خدمة اتصالات
@@ -4727,6 +4738,8 @@ The initiator who shipped the asset cannot confirm its own receipt.,لا يمك�
 The keys a worker or driver holds instead of a desk account.,المفاتيح التي يحملها العامل أو السائق بدل حساب المكتب.
 "The last day the driver actually worked. HR settles from this date, not from the day the paper was signed.",آخر يوم عمل فيه السائق فعلاً. تحسب الموارد البشرية المستحقات من هذا التاريخ، لا من يوم توقيع الورقة.
 The lease for,عقد إيجار
+The lease for building {0} ends on {1}.,عقد إيجار المبنى {0} ينتهي في {1}.
+The lease for building {0} has ended ({1}).,عقد إيجار المبنى {0} منتهٍ ({1}).
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
 The linked Employee Advance is no longer open for recovery.,سلفة الموظف المرتبطة ما عادت مفتوحة للاسترداد.
 The manifest worker this boarding state tracks.,العامل في كشف الركاب الذي تتبعه حالة الصعود هذه.
@@ -4864,6 +4877,7 @@ This site has no Apex demo data to remove.,لا توجد في هذا الموق�
 This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يُرجى ترتيب المغادرة
 This temporary stay is overdue for check-out — the worker is still checked in,تجاوزت هذه الإقامة المؤقتة موعد المغادرة، وما زال العامل مقيمًا.
 This temporary top-up is past its revert due date ({0}) and has not been reverted.,تجاوزت هذه التعبئة الإضافية المؤقتة موعد عودتها إلى الوضع السابق ({0})، ولم تُعد بعد.
+This transfer can no longer be reversed: Bed {0} is no longer free ({1}).,لا يمكن التراجع عن هذا النقل: السرير {0} لم يعد متاحاً ({1}).
 This transfer can no longer be reversed: the resident is no longer in Bed {0}.,لم يعد بالإمكان التراجع عن هذا النقل: الساكن لم يعد في السرير {0}.
 This transfer needs an active (checked-in) assignment to move.,يتطلب هذا النقل تسكينًا نشطًا لم تنتهِ إقامته.
 This transfer note carries no item lines — nothing has moved between the two stores,هذا السند لا يحمل أي بند — لم ينتقل شيء بين المستودعين
@@ -5015,6 +5029,7 @@ Trip Fulfilment Ledger is a posted audit record and cannot be edited.,سجل ت�
 Trip Fulfilment Over Time,تنفيذ الرحلات بمرور الوقت
 Trip Identification,بيانات الرحلة
 Trip Purpose,غرض الرحلة
+Trip Scheduled,رحلة مجدولة
 Trip Start Log,سجل بدء الرحلة
 Trip Start Register,سجل بدء الرحلات
 Trip Status,حالة الرحلة
@@ -5022,6 +5037,7 @@ Trip Stop Progress,تقدم محطة الرحلة
 Trip Stops,محطات الرحلة
 Trip Subject,موضوع الرحلة
 Trip Title,عنوان الرحلة
+Trip Tomorrow,رحلة الغد
 Trip Type,نوع الرحلة
 Trip boarding ledger. One immutable row per worker's final boarding outcome on a finalized Dispatch Trip. Maintained automatically by the system; never edited manually.,سجل صعود الرحلة. صف ثابت لكل عامل يوثق نتيجة صعوده النهائية في رحلة تسيير مكتملة. يديره النظام تلقائيًا ولا يُعدل يدويًا.
 Trip end odometer ({0}) cannot be less than start ({1}).,لا يمكن أن تكون قراءة العداد في نهاية الرحلة ({0}) أقل من قراءة البداية ({1}).
@@ -5169,6 +5185,7 @@ Vehicle Assignment {0} is not submitted.,إسناد المركبة {0} غير م
 Vehicle Assignment {0} must be submitted and Active.,إسناد المركبة {0} لازم يكون معتمداً ونشطاً.
 Vehicle Category,فئة المركبة
 Vehicle Code,رمز المركبة
+Vehicle Compliance Expiring Soon,امتثال المركبة قارب الانتهاء
 Vehicle Compliance Register,سجل امتثال المركبات
 Vehicle Custody,عهدة المركبة
 Vehicle Damage,أضرار مركبة
@@ -5189,6 +5206,7 @@ Vehicle Owner of Record,مالك المركبة المسجّل
 Vehicle Returned,تم إرجاع المركبة
 Vehicle Status,حالة المركبة
 Vehicle Suspension,إيقاف مركبة
+Vehicle Theft Reported,بلاغ سرقة مركبة
 Vehicle Under Assessment,المركبة تحت التقييم
 Vehicle Utilisation,استخدام المركبات
 Vehicle Utilisation Snapshot,لقطة استخدام المركبة
@@ -5207,15 +5225,19 @@ Vehicle {0} assigned to driver {1}.,تم إسناد المركبة {0} إلى ا
 Vehicle {0} custody recorded as {1}.,سُجلت عهدة المركبة {0} بحالة {1}.
 Vehicle {0} has been in the workshop since {1} (over {2} days).,المركبة {0} في الورشة منذ {1} (أكثر من {2} يوماً).
 Vehicle {0} has expired compliance and cannot be dispatched/assigned.,وثائق امتثال المركبة {0} منتهية، ولا يمكن تسييرها أو إسنادها.
+Vehicle {0} has had no dispatch trip in the last {1} days.,المركبة {0} بلا أي رحلة تشغيل خلال آخر {1} يوماً.
 Vehicle {0} has no open rental Receipt to return.,لا توجد للمركبة {0} عملية استلام إيجار مفتوحة لتسجيل إرجاعها.
 Vehicle {0} is already assigned to driver {1}.,المركبة {0} مُسندة بالفعل إلى السائق {1}.
 Vehicle {0} is assigned to driver {1}.,المركبة {0} مُسندة إلى السائق {1}.
 Vehicle {0} is not a rented vehicle (ownership is {1}).,المركبة {0} ليست مركبة مستأجرة (الملكية {1}).
+Vehicle {0} logged no dispatch trips in the last 7 days.,المركبة {0} لم تُسجّل أي رحلة تشغيل خلال آخر 7 أيام.
 Vehicle {0} not found.,المركبة {0} غير موجودة.
 Vehicle {0} reported stolen.,أُبلغ عن سرقة المركبة {0}.
 Vehicle {0} stopped: {1}.,تم إيقاف المركبة {0}: {1}.
 Vehicle {0} was just assigned by {1}. Please review.,تم إسناد المركبة {0} للتو بواسطة {1}. يُرجى المراجعة.
 Vehicle {0} was not re-linked on cancel; it is no longer free.,لم يُعد ربط المركبة {0} عند الإلغاء لأنها لم تعد متاحة.
+Vehicle {0}: {1} compliance expired on {2}.,المركبة {0}: امتثال {1} انتهى في {2}.
+Vehicle {0}: {1} compliance expires on {2}.,المركبة {0}: امتثال {1} ينتهي في {2}.
 Vehicles,المركبات
 Vehicles Charged in This Period,المركبات المحتسبة في هذه الفترة
 Vehicles In Service,المركبات في الخدمة
