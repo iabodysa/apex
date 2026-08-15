@@ -25,6 +25,10 @@ _ROW_SAVEPOINT = "temporary_worker_row"
 
 _BATCH_SIZE = 500
 
+# Every doctype carrying party_type/party, with the Employee mirror each one names. The
+# set is not a judgement call: it is the twelve results of
+# `grep -l '"fieldname": "party_type"' apex/*/doctype/*/*.json`, and a doctype missing
+# from here keeps pointing at a Temporary Worker no other document names any more.
 PARTY_DOCTYPES = {
     "Housing Assignment": "employee",
     "Housing Checkout": "employee",
@@ -36,6 +40,11 @@ PARTY_DOCTYPES = {
     "Custody Issue": "issued_to_employee",
     "Custody Return": "returned_by_employee",
     "Custody Damage Assessment": "employee",
+    # The custody BALANCE lives here. Leaving it behind strands the worker's stock: the
+    # checkout clearance gate reads the Employee leg and finds nothing to clear, and a
+    # later Custody Return posts against a holder whose balance is zero and is refused.
+    "Accommodation Stock Ledger": "employee",
+    "Custody Acknowledgment": "acknowledged_by_employee",
 }
 
 
