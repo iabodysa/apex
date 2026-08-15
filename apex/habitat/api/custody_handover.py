@@ -22,7 +22,7 @@ from apex.habitat.doctype.custody_handover.custody_handover import (
     hash_otp,
 )
 
-from apex.apex_core.utils.otp_lockout import charge_wrong_code
+from apex.apex_core.utils.otp_lockout import charge_wrong_code, is_locked_out
 from apex.habitat.utils.otp_policy import (
     ELEVATED_ROLE,
     LOCKOUT_MINUTES,
@@ -84,6 +84,12 @@ def confirm_handover(handover: str, otp: str):
 
     now = now_datetime()
     otp_required = _otp_required()
+
+    if otp_required and is_locked_out(doc.doctype, doc.name, attempts=MAX_OTP_ATTEMPTS):
+        frappe.throw(
+            _("Too many incorrect codes for this handover. Wait a few minutes and try again."),
+            frappe.RateLimitExceededError,
+        )
 
     if otp_required and locked.otp_expires_at and now > locked.otp_expires_at:
         frappe.throw(_("The one-time password has expired. Ask the procurement supervisor to regenerate it."))

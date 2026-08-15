@@ -4898,6 +4898,8 @@ Today's Dispatch Trips,رحلات التسيير اليوم
 Today's expected arrivals ({0}),الوافدون المتوقع وصولهم اليوم ({0})
 Token (Encrypted),الرمز (مشفّر)
 Token Hash,بصمة الرمز
+Too many incorrect codes for this delivery. Wait a few minutes and try again.,محاولات كثيرة برمز خاطئ لهذا التسليم. انتظر بضع دقائق ثم أعد المحاولة.
+Too many incorrect codes for this handover. Wait a few minutes and try again.,محاولات كثيرة برمز خاطئ لهذا التسليم. انتظر بضع دقائق ثم أعد المحاولة.
 Tools,أدوات
 Top Workers by Custody Value,أعلى العمال من حيث قيمة العهدة
 Top-up,تعبئة

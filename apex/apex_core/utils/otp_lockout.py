@@ -32,7 +32,11 @@ that touches rate limiting, notifications or request teardown should read all th
 
 from __future__ import annotations
 
-from apex.apex_core.utils.rate_window import charge_window
+from apex.apex_core.utils.rate_window import charge_window, peek_window
+
+
+def _miss_key(doctype: str, name: str) -> str:
+    return f"otp-miss:{doctype}:{name}"
 
 
 def charge_wrong_code(doctype: str, name: str, *, attempts: int, lockout_minutes: int) -> int:
@@ -41,7 +45,22 @@ def charge_wrong_code(doctype: str, name: str, *, attempts: int, lockout_minutes
     Keyed per document, so guessing at one record never locks another out.
     """
     return charge_window(
-        f"otp-miss:{doctype}:{name}",
+        _miss_key(doctype, name),
         lockout_minutes * 60,
         attempts,
     )
+
+
+def is_locked_out(doctype: str, name: str, *, attempts: int) -> bool:
+    """True once this document has taken enough wrong codes to refuse the next one.
+
+    The caller must ask this BEFORE comparing the code. Charging on the miss path
+    alone counts guesses but never stops one: every request still evaluates its
+    guess, and a correct guess arriving mid-lockout is accepted because the
+    counter is only consulted after the comparison has already returned.
+
+    The boundary matches ``charge_window``, which refuses the hit that carries the
+    count PAST ``attempts`` — so ``attempts`` misses already on record means the
+    next attempt is refused, right or wrong.
+    """
+    return peek_window(_miss_key(doctype, name)) >= attempts

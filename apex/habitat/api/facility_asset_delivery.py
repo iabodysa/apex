@@ -41,7 +41,7 @@ from apex.habitat.doctype.facility_asset_delivery.facility_asset_delivery import
     move_asset_on_delivery,
 )
 
-from apex.apex_core.utils.otp_lockout import charge_wrong_code
+from apex.apex_core.utils.otp_lockout import charge_wrong_code, is_locked_out
 from apex.habitat.utils.otp_policy import (
     ELEVATED_ROLE,
     LOCKOUT_MINUTES,
@@ -175,6 +175,12 @@ def confirm_receipt(delivery: str, code: str):
         return doc.name
 
     now = now_datetime()
+    if is_locked_out(DELIVERY_DOCTYPE, doc.name, attempts=MAX_OTP_ATTEMPTS):
+        frappe.throw(
+            _("Too many incorrect codes for this delivery. Wait a few minutes and try again."),
+            frappe.RateLimitExceededError,
+        )
+
     if locked.status != "Released":
         frappe.throw(_("Both exit checkpoints must be cleared before confirming receipt."))
 

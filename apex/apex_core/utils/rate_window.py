@@ -45,3 +45,18 @@ def charge_window(name: str, window_seconds: int, limit: int) -> int:
             frappe.RateLimitExceededError,
         )
     return int(value)
+
+
+def peek_window(name: str) -> int:
+    """Read the window's current count without charging it.
+
+    For a gate that must refuse BEFORE it evaluates the request — a lockout that
+    runs after the comparison has already answered the attacker's question.
+
+    ``frappe.cache.get_value`` cannot read this counter: it ``pickle.loads`` what
+    it finds (``frappe/utils/redis_wrapper.py:97``) and INCR stores a plain
+    integer. So the raw key is read directly, built with the same ``make_key`` the
+    charger used.
+    """
+    value = frappe.cache.get(frappe.cache.make_key(name))
+    return int(value) if value else 0
