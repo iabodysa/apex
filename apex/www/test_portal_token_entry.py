@@ -7,11 +7,35 @@ from frappe.tests.utils import FrappeTestCase
 from apex.www import driver, masar
 
 
+_MISSING = object()
+
+# Every thread-local a case in this file replaces. `site` and `conf` are the dangerous
+# pair: a render case sets site to "apex.localhost" while the run is on ci.localhost, and
+# without a restore every module that sorts after this one inherits the wrong site.
+_REPLACED_LOCALS = ("form_dict", "flags", "cookie_manager", "request", "site", "conf")
+
+
 class PortalEntryTestCase(FrappeTestCase):
     def setUp(self):
+        # Borrowed, so handed back: capture whatever frappe.local held before this case
+        # touched it and put it back afterwards, deleting the attribute again when it did
+        # not exist at all. FrappeTestCase's own class cleanup only restores `flags`.
+        for name in _REPLACED_LOCALS:
+            self.addCleanup(self._restore_local, name, getattr(frappe.local, name, _MISSING))
+
         frappe.local.form_dict = frappe._dict()
         frappe.local.flags = frappe._dict()
         frappe.local.cookie_manager = MagicMock()
+
+    @staticmethod
+    def _restore_local(name, value):
+        if value is _MISSING:
+            try:
+                delattr(frappe.local, name)
+            except AttributeError:
+                pass
+        else:
+            setattr(frappe.local, name, value)
 
     def _context(self):
         return SimpleNamespace()
