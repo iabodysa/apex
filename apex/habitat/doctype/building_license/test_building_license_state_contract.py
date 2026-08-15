@@ -119,6 +119,78 @@ class TestBuildingLicenseLifecycle(TestCase):
 
         doc.save.assert_not_called()
 
+    def _renew(self, doc, **kwargs):
+        """Every rule inside renew() used to be reachable only through the Revoked check,
+        so the rest of the endpoint could be deleted with this file green."""
+        fake = _raising_frappe()
+        fake.get_doc.return_value = doc
+        with (
+            patch.object(building_license, "frappe", fake),
+            patch.object(building_license, "_", side_effect=lambda message: message),
+            patch.object(building_license, "today", return_value="2026-08-15"),
+        ):
+            return _call(building_license.renew, "BL-1", **kwargs)
+
+    def test_renewal_rolls_the_expiry_forward_and_stamps_the_date(self):
+        doc = MagicMock(
+            status="Expiring Soon", docstatus=0, expiry_date="2026-09-01", renewal_lead_days=60
+        )
+        doc.name = "BL-1"
+
+        result = self._renew(doc, new_expiry_date="2027-09-01")
+
+        self.assertEqual(str(doc.expiry_date), "2027-09-01")
+        self.assertEqual(doc.last_renewal_date, "2026-08-15")
+        self.assertEqual(doc.status, "Active")
+        doc.save.assert_called_once()
+        self.assertEqual(result["expiry_date"], "2027-09-01")
+        self.assertEqual(result["last_renewal_date"], "2026-08-15")
+
+    def test_extend_days_is_measured_from_the_current_expiry(self):
+        doc = MagicMock(
+            status="Active", docstatus=0, expiry_date="2026-09-01", renewal_lead_days=60
+        )
+        doc.name = "BL-1"
+
+        result = self._renew(doc, extend_days=30)
+
+        self.assertEqual(result["expiry_date"], "2026-10-01")
+
+    def test_a_submitted_license_is_amended_not_renewed(self):
+        doc = MagicMock(
+            status="Active", docstatus=1, expiry_date="2026-09-01", renewal_lead_days=60
+        )
+        doc.name = "BL-1"
+
+        with self.assertRaises(frappe.ValidationError):
+            self._renew(doc, new_expiry_date="2027-09-01")
+
+        doc.save.assert_not_called()
+
+    def test_a_renewal_may_not_move_the_expiry_backwards_or_stand_still(self):
+        for new_expiry in ("2026-08-01", "2026-09-01"):
+            with self.subTest(new_expiry=new_expiry):
+                doc = MagicMock(
+                    status="Active", docstatus=0, expiry_date="2026-09-01", renewal_lead_days=60
+                )
+                doc.name = "BL-1"
+
+                with self.assertRaises(frappe.ValidationError):
+                    self._renew(doc, new_expiry_date=new_expiry)
+
+                doc.save.assert_not_called()
+
+    def test_a_renewal_with_neither_a_date_nor_a_span_is_refused(self):
+        doc = MagicMock(
+            status="Active", docstatus=0, expiry_date="2026-09-01", renewal_lead_days=60
+        )
+        doc.name = "BL-1"
+
+        with self.assertRaises(frappe.ValidationError):
+            self._renew(doc)
+
+        doc.save.assert_not_called()
+
     def test_scheduler_uses_shared_derivation_and_excludes_revoked(self):
         row = frappe._dict(
             name="BL-1",

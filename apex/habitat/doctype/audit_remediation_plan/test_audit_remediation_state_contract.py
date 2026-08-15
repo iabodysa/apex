@@ -205,6 +205,46 @@ class TestAuditRemediationActions(TestCase):
                     current
                 )
 
+    def test_the_transition_gate_itself_refuses_a_hand_edit(self):
+        """The case above is stopped by the roll-up check — its overall_status no longer
+        matches its rows — so the gate that reads ``remediation_transition`` never runs and
+        could be deleted whole. Here the roll-up already agrees and the flag is absent, so
+        only the transition gate can refuse."""
+        before = frappe._dict(
+            overall_status="Evidence Submitted",
+            remediation_items=[_item("ITEM-1", "In Progress")],
+        )
+        current = frappe._dict(
+            overall_status="Evidence Submitted",
+            remediation_items=[
+                _item("ITEM-1", "Evidence Submitted", "/files/proof.pdf")
+            ],
+            flags=frappe._dict(),
+        )
+        current.get_doc_before_save = lambda: before
+        fake = _raising_frappe()
+
+        self.assertEqual(
+            audit_remediation_plan.derive_overall_status(
+                current.remediation_items, None
+            ),
+            current.overall_status,
+            "the roll-up must already agree, or it is what refuses and the gate is untested",
+        )
+
+        with (
+            patch.object(audit_remediation_plan, "frappe", fake),
+            patch.object(
+                audit_remediation_plan, "_", side_effect=lambda message: message
+            ),
+        ):
+            with self.assertRaises(frappe.ValidationError) as raised:
+                audit_remediation_plan.AuditRemediationPlan.before_update_after_submit(
+                    current
+                )
+
+        self.assertIn("remediation action controls", str(raised.exception))
+
 
 class TestAuditRemediationMetadata(TestCase):
     def test_only_transition_fields_are_mutable_after_submit(self):

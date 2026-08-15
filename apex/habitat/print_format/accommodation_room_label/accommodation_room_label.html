@@ -81,7 +81,6 @@
     <div class="foot">
       {%- if supervisor %}{{ _("Facility Supervisor") }}: {{ supervisor }}{% if supervisor_phone %} · {{ supervisor_phone }}{% endif %} · {% endif -%}
       {{ _("Report any fault to your facility supervisor. In an emergency call him directly.") }}<br>
-      {%- if doc.last_inventory_date %}{{ _("Last inventory") }}: {{ frappe.format_date(doc.last_inventory_date) }} · {% endif -%}
       {{ doc.name }}<br>
       <span class="ax-sig">{{ ax.apex_mark(9) }} {{ _("System-generated document from Apex") }}</span>
     </div>

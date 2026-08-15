@@ -96,6 +96,28 @@ class TestMaintenanceRequestTransitions(TestCase):
         close_assignments.assert_called_once_with("Maintenance Request", "MR-1")
         self.assertEqual(result, {"name": "MR-1", "status": "Closed"})
 
+    def test_close_refuses_an_unsubmitted_or_unresolved_request_before_mutation(self):
+        """Both preconditions the endpoint carries, each on a case that reaches only it."""
+        for docstatus, status in ((0, "Resolved"), (1, "Open"), (1, "In Progress"), (1, "Closed")):
+            with self.subTest(docstatus=docstatus, status=status):
+                doc = MagicMock(docstatus=docstatus, status=status, name="MR-1")
+                doc.name = "MR-1"
+                fake = _raising_frappe()
+                fake.get_doc.return_value = doc
+
+                with (
+                    patch.object(maintenance_request, "frappe", fake),
+                    patch.object(maintenance_request, "_", side_effect=lambda message: message),
+                    patch.object(
+                        maintenance_request, "close_all_assignments", create=True
+                    ) as close_assignments,
+                ):
+                    with self.assertRaises(frappe.ValidationError):
+                        _call(maintenance_request.close_request, "MR-1")
+
+                doc.db_set.assert_not_called()
+                close_assignments.assert_not_called()
+
     def test_close_rolls_back_when_assignment_closure_fails(self):
         doc = MagicMock(docstatus=1, status="Resolved", name="MR-1")
         doc.name = "MR-1"
@@ -139,6 +161,25 @@ class TestMaintenanceRequestTransitions(TestCase):
         doc.db_set.assert_called_once_with("status", "Open")
         self.assertIn("Repair failed again", doc.add_comment.call_args.args[1])
         self.assertEqual(result, {"name": "MR-1", "status": "Open"})
+
+    def test_reopen_refuses_an_unsubmitted_or_still_open_request_before_mutation(self):
+        """The other two halves of the name: the docstatus boundary and the status one."""
+        for docstatus, status in ((0, "Closed"), (1, "Open"), (1, "In Progress")):
+            with self.subTest(docstatus=docstatus, status=status):
+                doc = MagicMock(docstatus=docstatus, status=status, name="MR-1")
+                doc.name = "MR-1"
+                fake = _raising_frappe()
+                fake.get_doc.return_value = doc
+
+                with (
+                    patch.object(maintenance_request, "frappe", fake),
+                    patch.object(maintenance_request, "_", side_effect=lambda message: message),
+                ):
+                    with self.assertRaises(frappe.ValidationError):
+                        _call(maintenance_request.reopen_request, "MR-1", "Repair failed again")
+
+                doc.db_set.assert_not_called()
+                doc.add_comment.assert_not_called()
 
 
 class TestMaintenanceWorkOrderContract(TestCase):
@@ -213,9 +254,9 @@ class TestMaintenanceWorkOrderContract(TestCase):
         ):
             maintenance_work_order.MaintenanceWorkOrder.on_cancel(work_order)
 
-    def test_only_live_work_orders_block_a_new_order(self):
+    def _validate_draft(self, duplicate):
         fake = _raising_frappe()
-        fake.db.exists.return_value = None
+        fake.db.exists.return_value = duplicate
         doc = self._draft()
 
         with (
@@ -228,10 +269,21 @@ class TestMaintenanceWorkOrderContract(TestCase):
             ),
         ):
             maintenance_work_order.validate(doc)
+        return fake
+
+    def test_only_live_work_orders_block_a_new_order(self):
+        fake = self._validate_draft(None)
 
         filters = fake.db.exists.call_args.args[1]
         self.assertEqual(filters["status"], ["in", ["Draft", "Planned", "In Progress"]])
         self.assertEqual(filters["docstatus"], ["!=", 2])
+
+    def test_a_live_duplicate_is_actually_refused(self):
+        """The filter shape alone proves nothing: with the throw deleted the probe still
+        runs, still carries these filters, and the second work order is still saved."""
+        with self.assertRaises(frappe.ValidationError) as raised:
+            self._validate_draft("MWO-EXISTING")
+        self.assertIn("MWO-EXISTING", str(raised.exception))
 
     def test_submit_starts_only_an_open_submitted_request(self):
         work_order = MagicMock(maintenance_request="MR-1")

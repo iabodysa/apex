@@ -11,7 +11,7 @@
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"Building License\") }} {{ doc.name }} {{ _(\"for building\") }} {{ doc.building }} {{ _(\"has expired\") }} ({{ doc.expiry_date }}).",
+ "message": "{{ _(\"Building License {0} for building {1} has expired ({2}).\").format(doc.name, doc.building, doc.expiry_date) }}",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Building License Expired",
@@ -23,5 +23,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "{{ _(\"Building License EXPIRED\") }}: {{ doc.name }}",
- "modified": "2026-08-15 09:00:00.000000"
+ "modified": "2026-08-15 18:20:00.000000"
 }

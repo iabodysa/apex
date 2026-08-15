@@ -137,9 +137,12 @@ def _compute_sharing(doc) -> None:
         doc.bill_amount = round(share, 2)
 
         if pct < 100.0:
-            doc.bill_share_note = (
-                f"Shared meter — {pct:.1f}% of {fmt_money(total, currency='SAR')} "
-                f"= {fmt_money(share, currency='SAR')} (building share)"
+            doc.bill_share_note = _(
+                "Shared meter — {0}% of {1} = {2} (building share)"
+            ).format(
+                f"{pct:.1f}",
+                fmt_money(total, currency="SAR"),
+                fmt_money(share, currency="SAR"),
             )
         else:
             doc.bill_share_note = ""

@@ -837,6 +837,10 @@ class CustodyKiosk {
 
 	_submit_issue(items, signature) {
 		this.$action_btn.prop("disabled", true);
+		// One token per cart submission, reused if the operator retries a request that
+		// timed out: the server returns the issue it already created rather than
+		// decrementing the building store a second time.
+		this._issue_token = this._issue_token || frappe.utils.get_random(24);
 		frappe.call({
 			method: "apex.habitat.api.custody_kiosk.issue_cart",
 			args: {
@@ -845,6 +849,7 @@ class CustodyKiosk {
 				building: this.building,
 				items_json: JSON.stringify(items),
 				signature: signature || null,
+				request_token: this._issue_token,
 			},
 			freeze: true,
 			freeze_message: __("Issuing…"),
@@ -861,6 +866,7 @@ class CustodyKiosk {
 					message: __("Issued to {0}: {1}", [this.party, r.message.custody_issue]),
 					indicator: "green",
 				});
+				this._issue_token = null;
 				this.cart = {};
 				this._render_cart();
 				this.refresh();

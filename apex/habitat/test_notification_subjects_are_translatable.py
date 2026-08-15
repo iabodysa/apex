@@ -71,5 +71,92 @@ class TestNotificationSubjectsAreTranslatable(unittest.TestCase):
         self.assertEqual(len(list(_notifications())), 23)
 
 
+"""The lease and licence bodies used to be built by concatenating separately-translated
+fragments — ``_("The lease for") building _("has ended")`` — around their placeholders.
+That hands the translator four words with no sentence to agree with and forces English
+word order onto Arabic. Each is now ONE msgid carrying positional placeholders.
+
+``str.format`` is available inside a Jinja notification body on purpose: Frappe removes
+``format`` and ``format_map`` from the sandbox's blocked attributes
+(frappe/utils/jinja.py:12), so the environment built here mirrors the one that renders
+these notifications.
+"""
+
+_SENTENCE_END = (".", "!", "?", ":")
+
+_WHOLE_SENTENCE_BODIES = {
+    "habitat___building_lease_expired": (
+        {"building": "BLDG-1", "lease_end_date": "2026-08-01"},
+        "The lease for building BLDG-1 has ended (2026-08-01).",
+    ),
+    "habitat___building_lease_expiring": (
+        {"building": "BLDG-1", "lease_end_date": "2026-09-01"},
+        "The lease for building BLDG-1 ends on 2026-09-01. "
+        "Please review renewal or termination.",
+    ),
+    "habitat___building_license_expired": (
+        {"name": "BL-1", "building": "BLDG-1", "expiry_date": "2026-08-01"},
+        "Building License BL-1 for building BLDG-1 has expired (2026-08-01).",
+    ),
+    "habitat___building_license_expiring_soon": (
+        {
+            "name": "BL-2",
+            "building": "BLDG-1",
+            "license_type": "Civil Defence Certificate",
+            "license_number": "LIC-9",
+            "expiry_date": "2026-09-01",
+        },
+        "Building License BL-2 (Civil Defence Certificate LIC-9) for building BLDG-1 "
+        "expires on 2026-09-01. Please start renewal.",
+    ),
+}
+
+
+def _render_capturing_msgids(template: str, doc: dict) -> tuple[str, list[str]]:
+    """Render one notification body the way Frappe does, recording every msgid."""
+    from types import SimpleNamespace
+
+    from jinja2.sandbox import SandboxedEnvironment
+
+    seen: list[str] = []
+
+    def gettext(message):
+        seen.append(message)
+        return message
+
+    env = SandboxedEnvironment()
+    rendered = env.from_string(template).render(_=gettext, doc=SimpleNamespace(**doc))
+    return rendered, seen
+
+
+class TestNotificationBodiesTranslateWholeSentences(unittest.TestCase):
+    def _body(self, notification: str) -> str:
+        path = APP_ROOT / "habitat" / "notification" / notification / f"{notification}.json"
+        return json.loads(path.read_text(encoding="utf-8"))["message"]
+
+    def test_each_body_renders_and_hands_the_translator_whole_sentences(self):
+        for notification, (doc, expected) in _WHOLE_SENTENCE_BODIES.items():
+            with self.subTest(notification=notification):
+                rendered, msgids = _render_capturing_msgids(self._body(notification), doc)
+                self.assertEqual(" ".join(rendered.split()), expected)
+                self.assertTrue(msgids, "the body must still route through _()")
+                for msgid in msgids:
+                    self.assertTrue(
+                        msgid.rstrip().endswith(_SENTENCE_END),
+                        f"{notification} hands the translator the fragment {msgid!r}",
+                    )
+
+    def test_the_check_can_actually_see_a_concatenated_body(self):
+        """Positive control: the shape that was replaced still fails the rule."""
+        rendered, msgids = _render_capturing_msgids(
+            '{{ _("The lease for") }} {{ doc.building }} {{ _("has ended") }}.',
+            {"building": "BLDG-1"},
+        )
+        self.assertEqual(rendered, "The lease for BLDG-1 has ended.")
+        self.assertFalse(
+            all(msgid.rstrip().endswith(_SENTENCE_END) for msgid in msgids)
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

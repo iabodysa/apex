@@ -182,12 +182,19 @@ def reject_handover(handover: str, reason: str):
     Not a cancel — docstatus stays 1 — so there is no before_cancel to move the
     positivity refusal into. It is already ordered correctly: reverse_stock_entries
     raises before the comment and the status write below, so a refused rejection
-    leaves the handover exactly as it was."""
+    leaves the handover exactly as it was.
+
+    The status is re-read under a row lock, the way confirm_handover reads it: the
+    reversal below takes no lock of its own (_live_rows is a plain read), so two
+    rejections arriving together both found live rows and credited the source store
+    twice for one shipment."""
     doc = _get_submitted(handover)
     _require_receiving_side(doc)
     if not (reason or "").strip():
         frappe.throw(_("A reason is required to reject a handover."))
-    if doc.status in ("Confirmed", "Rejected", "Cancelled"):
+
+    locked_status = frappe.db.get_value(VOUCHER_TYPE, doc.name, "status", for_update=True)
+    if locked_status in ("Confirmed", "Rejected", "Cancelled"):
         frappe.throw(_("Handover {0} can no longer be rejected.").format(doc.name))
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
         reverse_stock_entries,

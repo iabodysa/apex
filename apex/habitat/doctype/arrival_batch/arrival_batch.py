@@ -22,7 +22,16 @@ _MAX_EXPECTED_WORKERS = 500
 
 class ArrivalBatch(Document):
     def validate(self) -> None:
-        """Blocks an empty or over-500 worker manifest and sets expected_count and the batch title."""
+        """Blocks a honeypot-filled or empty or over-500 worker manifest, and sets
+        expected_count and the batch title.
+
+        The honeypot is read HERE, not only in submit_arrival_manifest: the live public
+        form saves through Frappe's own ``web_form.accept``, which copies every web form
+        field onto the document (frappe/website/doctype/web_form/web_form.py:632-647) and
+        never touches the hardened endpoint beside it."""
+        if self.get("website_field"):
+            frappe.throw(_("Invalid submission."), frappe.PermissionError)
+
         self.expected_count = len(self.expected_workers or [])
         if not self.expected_count:
             frappe.throw(_("Add at least one expected worker to the manifest."))

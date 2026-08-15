@@ -20,8 +20,6 @@
   "current_occupancy",
   "accommodation_room_sec_inventory",
   "readiness_status",
-  "accommodation_room_inventory_col",
-  "last_inventory_date",
   "accommodation_room_sec_inventory_notes",
   "inventory_notes",
   "accommodation_room_sec_system",
@@ -123,16 +121,6 @@
    "in_standard_filter": 1,
    "label": "Readiness Status",
    "options": "Unknown\nReady\nNeeds Cleaning\nNeeds Repair\nOut of Service",
-   "read_only": 1
-  },
-  {
-   "fieldname": "accommodation_room_inventory_col",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "last_inventory_date",
-   "fieldtype": "Date",
-   "label": "Last Inventory Date",
    "read_only": 1
   },
   {
@@ -240,7 +228,7 @@
    "table_fieldname": "findings"
   }
  ],
- "modified": "2026-08-11 10:18:00.000000",
+ "modified": "2026-08-15 18:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Room",
@@ -271,7 +259,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "room_number, building, last_inventory_date",
+ "search_fields": "room_number, building, readiness_status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [

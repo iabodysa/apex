@@ -35,7 +35,8 @@
   "custody_issue_system_col1",
   "naming_series",
   "custody_issue_system_col2",
-  "amended_from"
+  "amended_from",
+  "request_token"
  ],
  "fields": [
   {
@@ -231,6 +232,16 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "description": "One kiosk cart submission, named by the client that sent it. The unique index is what makes a retried issue land once instead of decrementing the building store twice.",
+   "fieldname": "request_token",
+   "fieldtype": "Data",
+   "label": "Request Token",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "unique": 1
   }
  ],
  "is_submittable": 1,
@@ -246,7 +257,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-08-08 01:40:00.000000",
+ "modified": "2026-08-15 18:20:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

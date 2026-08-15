@@ -221,7 +221,8 @@
    "fieldname": "assigned_to",
    "fieldtype": "Link",
    "label": "Assigned To",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "arr_col_resolution",
@@ -293,12 +294,11 @@
    "fieldname": "closed_by",
    "fieldtype": "Link",
    "label": "Closed By",
-   "options": "User",
-   "read_only": 1
+   "options": "User"
   }
  ],
  "is_submittable": 0,
- "modified": "2026-08-14 16:56:00.000000",
+ "modified": "2026-08-15 18:20:00.000000",
  "module": "Habitat",
  "name": "Resident Request",
  "naming_rule": "By \"Naming Series\" field",

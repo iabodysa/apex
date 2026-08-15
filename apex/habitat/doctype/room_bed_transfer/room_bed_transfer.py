@@ -147,6 +147,14 @@ def before_cancel(doc, method=None):
             )
         )
 
+    origin_status = frappe.db.get_value("Bed", doc.from_bed, "status", for_update=True)
+    if origin_status != "Available":
+        frappe.throw(
+            _("This transfer can no longer be reversed: Bed {0} is no longer free ({1}).").format(
+                doc.from_bed, _(origin_status or "")
+            )
+        )
+
 
 def on_cancel(doc, method=None):
     """Reverses the bed swap, re-points the assignment to the origin, and recalculates occupancy."""

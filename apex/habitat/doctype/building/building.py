@@ -322,24 +322,3 @@ def generate_safety_setup(building_name):
     })
 
     return safety_setup.report_setup(tally)
-
-
-@frappe.whitelist(methods=["POST"])
-def update_room_inventory(room_name, readiness_status, inventory_notes=None):
-    """Allow supervisor to record room readiness without opening full form."""
-    if not frappe.has_permission("Room", "write", doc=room_name):
-        frappe.throw(_("Not permitted"), frappe.PermissionError)
-
-    allowed = ("Unknown", "Ready", "Needs Cleaning", "Needs Repair", "Out of Service")
-    if readiness_status not in allowed:
-        frappe.throw(_("Invalid readiness status."))
-
-    updates = {
-        "readiness_status": readiness_status,
-        "last_inventory_date": today(),
-    }
-    if inventory_notes is not None:
-        updates["inventory_notes"] = inventory_notes
-
-    frappe.db.set_value("Room", room_name, updates)
-    return {"ok": True}

@@ -11,7 +11,7 @@
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"The lease for\") }} {{ doc.building }} {{ _(\"has ended\") }} ({{ doc.lease_end_date }}).",
+ "message": "{{ _(\"The lease for building {0} has ended ({1}).\").format(doc.building, doc.lease_end_date) }}",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Building Lease Expired",
@@ -23,5 +23,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "{{ _(\"Building Lease EXPIRED\") }}: {{ doc.building }}",
- "modified": "2026-08-15 09:00:00.000000"
+ "modified": "2026-08-15 18:20:00.000000"
 }

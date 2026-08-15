@@ -1,10 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Resident Request controller.
-
-``_sync_assignment_todo`` inserts with ``ignore_permissions`` because it writes a **ToDo** — the
-framework's own assignment record — to put the request in a supervisor's queue. Granting the role
-create on ToDo to satisfy it would let that role assign work to anyone on the site.
-"""
+"""Resident Request controller."""
 
 from __future__ import annotations
 
@@ -12,6 +7,8 @@ import re
 
 import frappe
 from frappe import _
+from frappe.desk.form.assign_to import add as add_assignment
+from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
 from apex.apex_core.utils.party_link import sync_party_employee
 
@@ -62,7 +59,15 @@ def before_insert(doc, method=None):
 
 
 def validate(doc, method=None):
-    """Resolves the location token, syncs the employee, blocks a bad token, and checks status rules."""
+    """Resolves the location token, syncs the employee, blocks a bad token, and checks status rules.
+
+    The honeypot is read HERE, not only in submit_resident_request: the live public form
+    saves through Frappe's own ``web_form.accept``, which copies every web form field onto
+    the document (frappe/website/doctype/web_form/web_form.py:632-647) and never touches
+    the hardened endpoint beside it. Checked only there, the trap caught nothing."""
+    if doc.get("website_field"):
+        frappe.throw(_("Invalid submission."), frappe.PermissionError)
+
     _populate_location_from_token(doc)
     sync_party_employee(doc)
     if doc.location_token and not doc.building:
@@ -79,45 +84,39 @@ def on_update(doc, method=None):
 
 
 def _sync_assignment_todo(doc):
-    """Create/close the follow-up ToDo directly (not via assign_to.add, which would
-    re-save this same document mid-on_update and raise a timestamp mismatch). The
-    parent's `_assign` is updated with update_modified=False so the desk badge still
-    shows without bumping this document's modified timestamp."""
+    """Drive Frappe's own assignment API rather than the records behind it.
+
+    ``_assign`` is a cache the ToDo controller owns: ``ToDo.on_update`` ->
+    ``update_in_reference`` (frappe/desk/doctype/todo/todo.py:87-120) rebuilds it from
+    EVERY live ToDo on the document. Writing it here replaced that aggregate with the
+    one name this field happens to hold, so a second assignee vanished from the desk
+    badge. ``assign_to.set_status`` (frappe/desk/form/assign_to.py:228-230) likewise
+    owns ``assigned_to`` and clears it when the assignment closes.
+
+    ``add`` is already duplicate-safe: an assignee who holds an open ToDo on this
+    document is skipped with a message, not re-assigned.
+
+    The timestamp is re-read because the API writes ``assigned_to`` back on any DocType
+    that owns a field of that name (frappe/desk/form/assign_to.py:97, and :228-230 on the
+    closing side) with no ``update_modified=False``. The row's ``modified`` therefore
+    moves while the caller still holds the pre-assignment value, and its next save of the
+    same handle throws TimestampMismatchError."""
     if doc.status in ("Resolved", "Rejected", "Closed"):
-        open_todos = frappe.get_all(
-            "ToDo",
-            filters={"reference_type": doc.doctype, "reference_name": doc.name, "status": "Open"},
-            pluck="name",
-        )
-        for todo in open_todos:
-            frappe.db.set_value("ToDo", todo, "status", "Cancelled")
-        if open_todos:
-            frappe.db.set_value(doc.doctype, doc.name, "_assign", None, update_modified=False)
+        close_all_assignments(doc.doctype, doc.name)
+        doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
         return
 
     if doc.status != "Assigned" or not doc.assigned_to:
         return
 
-    already = frappe.get_all(
-        "ToDo",
-        filters={"reference_type": doc.doctype, "reference_name": doc.name,
-                 "allocated_to": doc.assigned_to, "status": "Open"},
-        limit=1,
-    )
-    if already:
-        return
-    priority = doc.priority if doc.priority in ("Low", "Medium", "High") else "Medium"
-    frappe.get_doc({
-        "doctype": "ToDo",
-        "allocated_to": doc.assigned_to,
-        "reference_type": doc.doctype,
-        "reference_name": doc.name,
+    add_assignment({
+        "doctype": doc.doctype,
+        "name": doc.name,
+        "assign_to": frappe.as_json([doc.assigned_to]),
         "description": _("Resident request assigned for follow-up: {0}").format(doc.name),
-        "priority": priority,
-        "assigned_by": frappe.session.user,
-    }).insert(ignore_permissions=True)
-    frappe.db.set_value(doc.doctype, doc.name, "_assign",
-                        frappe.as_json([doc.assigned_to]), update_modified=False)
+        "priority": doc.priority if doc.priority in ("Low", "Medium", "High") else "Medium",
+    })
+    doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
 
 
 def _validate_status_transition(doc):
@@ -125,7 +124,11 @@ def _validate_status_transition(doc):
     status = doc.status or "New"
 
     if status == "Assigned" and not doc.assigned_to:
-        frappe.throw(_("Assigned To is required when status is Assigned."))
+        # A native unassign clears `assigned_to` behind the document
+        # (frappe/desk/form/assign_to.py:228-230) and leaves `status` alone. Refusing
+        # here instead wedged every later save of a request nobody is assigned to any
+        # more; `assigned_to` is read-only, so nothing else can reach this state.
+        doc.status = status = "New"
 
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
         frappe.throw(_("Resolution Notes are required when closing or resolving a request."))

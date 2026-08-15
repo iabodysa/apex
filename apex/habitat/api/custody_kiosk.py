@@ -264,6 +264,7 @@ def issue_cart(
     party: str | None = None,
     employee: str | None = None,
     signature: str | None = None,
+    request_token: str | None = None,
 ) -> dict:
     """Build and submit ONE Custody Issue from a kiosk cart.
 
@@ -286,10 +287,8 @@ def issue_cart(
     handover at issue time (distinct from the later Custody Acknowledgment record
     the holder can file from the Web Form).
 
-    This method adds NO posting, locking, or ledger logic of its own. It never
-    writes a Stock Ledger row directly; the read-only ledger engine is reached
-    only through the Custody Issue controller (no-GL Operational Memo boundary
-    preserved).
+    No ledger row is written here: the engine is reached only through the Custody
+    Issue controller, which is what keeps the no-GL Operational Memo boundary.
 
     Permission: caller must have ``create`` AND ``submit`` on Custody Issue
     (checked explicitly below; defense in depth on top of the role grant).
@@ -301,12 +300,26 @@ def issue_cart(
         party: the recipient docname for ``party_type``.
         employee: legacy Employee docname; used when no ``party`` is given.
         signature: optional signature data-URL captured at the kiosk.
+        request_token: client-generated key naming ONE cart submission. A retry after a
+            timed-out request carries the same token and gets the issue the first attempt
+            already created, instead of submitting a second one and decrementing the
+            building store twice. The refusal is the DocType's own ``unique`` index on
+            ``request_token``, not the look-up below: the look-up is a snapshot read and
+            two simultaneous retries would both pass it.
 
     Returns:
         dict: ``{"custody_issue": <docname>}``.
     """
     frappe.has_permission("Custody Issue", "create", throw=True)
     frappe.has_permission("Custody Issue", "submit", throw=True)
+
+    request_token = (request_token or "").strip() or None
+    if request_token:
+        already = frappe.db.get_value(
+            "Custody Issue", {"request_token": request_token}, "name"
+        )
+        if already:
+            return {"custody_issue": already}
 
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
@@ -334,6 +347,7 @@ def issue_cart(
             "party_type": party_type,
             "party": party,
             "items": rows,
+            "request_token": request_token,
         }
     )
     signature = (signature or "").strip()

@@ -902,17 +902,23 @@ class ArrivalsDesk {
 
 		$issue.on('click', () => {
 			if (!c._custody_lines.length) return;
+			// One token per cart submission, reused if the operator retries a request that
+			// timed out: the server returns the issue it already created rather than
+			// decrementing the building store a second time.
+			c._issue_token = c._issue_token || frappe.utils.get_random(24);
 			frappe.call({
 				method: 'apex.habitat.api.custody_kiosk.issue_cart',
 				args: {
 					employee: c.party,
 					building: this.building,
 					items_json: JSON.stringify(c._custody_lines.map((l) => ({ article: l.article, qty: l.qty }))),
+					request_token: c._issue_token,
 				},
 				freeze: true,
 				freeze_message: __('Issuing custody…'),
 				callback: (r) => {
 					if (r.exc || !r.message) return;
+					c._issue_token = null;
 					c._custody_issue = r.message.custody_issue;
 					this.custodyIssued = true;
 					frappe.show_alert({ message: __('Custody issued to {0}', [c.label]), indicator: 'green' });

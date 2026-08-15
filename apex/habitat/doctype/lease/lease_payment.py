@@ -92,12 +92,17 @@ def _instalment(lease_doc, due_date):
     )
 
 
-def _raised_payment(lease_doc, due_date):
+def _raised_payment(lease_doc, due_date, for_update=False):
     """The Payment Entry already raised for this instalment, or ``None``.
 
     Cancelled payments are deliberately included: the instalment WAS paid and reversed,
     and reporting that is the point — a probe that skipped them would quietly raise a
     second payment for a period whose first one is sitting cancelled in the ledger.
+
+    ``for_update`` makes it a locking read, which the guard in create_rent_payment needs
+    and the status read does not: the Lease lock does not cover this table, and a plain
+    SELECT answers from the transaction's snapshot — taken before that lock was waited
+    on — so the second click never saw the payment the first one had just committed.
     """
     return frappe.db.get_value(
         payable_allocation.PAYMENT_ENTRY_DOCTYPE,
@@ -109,6 +114,7 @@ def _raised_payment(lease_doc, due_date):
         },
         "name",
         order_by="creation asc",
+        for_update=for_update,
     )
 
 
@@ -150,7 +156,7 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     lease_doc.reload()
     row = _instalment(lease_doc, due_date)
 
-    existing = _raised_payment(lease_doc, row.due_date)
+    existing = _raised_payment(lease_doc, row.due_date, for_update=True)
     if existing:
         return _result(existing, True)
 

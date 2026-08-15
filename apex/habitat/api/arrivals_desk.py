@@ -317,10 +317,18 @@ def _employees_housed_elsewhere(allowed) -> set:
 
 
 def _employee_matches(txt, housed_emp, blocked_emp) -> list:
-    """Active Employees matching the typed text who are not already housed."""
+    """Active Employees matching the typed text who are not already housed.
+
+    The exclusion is part of the QUERY, not a pass over its result: applied after the
+    15-row limit it emptied the list whenever the first fifteen matches happened to be
+    housed, and the desk was told there was nobody to house."""
+    excluded = housed_emp | blocked_emp
+    filters = {"status": "Active"}
+    if excluded:
+        filters["name"] = ["not in", sorted(excluded)]
     emps = frappe.get_all(
         "Employee",
-        filters={"status": "Active"},
+        filters=filters,
         or_filters=(
             [["employee_name", "like", f"%{txt}%"], ["name", "like", f"%{txt}%"]] if txt else None
         ),
@@ -336,16 +344,21 @@ def _employee_matches(txt, housed_emp, blocked_emp) -> list:
             "sub": e.designation or e.name,
         }
         for e in emps
-        if e.name not in housed_emp and e.name not in blocked_emp
     ]
 
 
 def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
     """Active Temporary Workers matching the typed text (name, passport or id) who
-    are not already housed, most recently touched first."""
+    are not already housed, most recently touched first.
+
+    Housed workers are excluded in the QUERY for the reason _employee_matches gives:
+    dropping them from an already-limited page returns fewer rows than the page holds,
+    and sometimes none at all."""
     tw_filters = {"status": "Active"}
     if restrict:
         tw_filters["building"] = ["in", allowed]
+    if housed_tw:
+        tw_filters["name"] = ["not in", sorted(housed_tw)]
     tws = frappe.get_all(
         "Temporary Worker",
         filters=tw_filters,
@@ -372,7 +385,6 @@ def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
             "expiry_days": _expiry_days(t.expiry_date),
         }
         for t in tws
-        if t.name not in housed_tw
     ]
 
 
