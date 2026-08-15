@@ -338,6 +338,74 @@ def on_submit(doc, method=None):
                     message=frappe.get_traceback(),
                 )
 
+    _post_return_stock(doc, assignment)
+
+
+def _post_return_stock(doc, assignment):
+    """Move the resident's custody off their name on the Accommodation Stock Ledger.
+
+    Check-in credits the holder under voucher type "Housing Assignment"
+    (``housing_assignment._post_checkin_custody``). Without the matching drain here the
+    departed resident keeps a positive custody balance forever, the building store stays
+    permanently short by what they returned, and ``_assert_policy_allows`` eventually
+    refuses legitimate issues from that store on a shortage that does not physically
+    exist. The ledger is ``in_create`` with no role holding create or write, so there is
+    no manual correction path — it has to be posted here or not at all.
+
+    Two shapes, and the difference is the store mirror: goods that came back re-enter the
+    building store, goods recorded Lost or Damaged leave the holder without re-entering
+    anywhere, because that stock is gone. A partially returned Lost/Damaged row does both.
+
+    The party pair must be the one check-in credited, or the two legs never net out.
+    """
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        post_stock_entry, has_stock_entries,
+    )
+    if not doc.custody_return_items or has_stock_entries("Housing Checkout", doc.name):
+        return
+
+    # Only a stay whose check-in actually posted has a holder balance to move.
+    # ``_post_checkin_custody`` shipped after this app had live assignments and
+    # deliberately left those alone, so their residents hold nothing on the ledger;
+    # draining them would refuse the checkout outright — ``_assert_policy_allows``
+    # rejects moving more than the holder has — and strand a resident who is leaving.
+    if not has_stock_entries("Housing Assignment", doc.assignment):
+        return
+
+    party_type = doc.get("party_type") or assignment.party_type
+    party = doc.get("party") or assignment.party
+    if not party:
+        return
+
+    building = assignment.building
+    # What the resident actually holds, read from the ledger itself. The row's
+    # quantity_issued cannot be used: _populate_issued_quantities stamps it from Custody
+    # Issue records only, so it reads 0 for custody handed over at check-in — which is
+    # exactly the custody this drain exists to move. Capping on the held balance also
+    # means a row can never drain more than the resident has.
+    held = _outstanding_custody_for_party(party_type, party, doc.employee)
+    for row in doc.custody_return_items:
+        if not row.article:
+            continue
+        outstanding = held.get(row.article, 0)
+        returned = min(row.quantity_returned or 0, outstanding)
+        missing = max(outstanding - returned, 0) if row.return_status in ("Lost", "Damaged") else 0
+
+        if returned:
+            post_stock_entry(item_type="Custody Article", item=row.article, qty=-returned,
+                             building=building, party_type=party_type, party=party,
+                             voucher_type="Housing Checkout", voucher_no=doc.name,
+                             voucher_detail_no=row.name, posting_date=doc.checkout_date)
+            post_stock_entry(item_type="Custody Article", item=row.article, qty=returned,
+                             building=building, voucher_type="Housing Checkout",
+                             voucher_no=doc.name, voucher_detail_no=row.name,
+                             posting_date=doc.checkout_date)
+        if missing:
+            post_stock_entry(item_type="Custody Article", item=row.article, qty=-missing,
+                             building=building, party_type=party_type, party=party,
+                             voucher_type="Housing Checkout", voucher_no=doc.name,
+                             voucher_detail_no=row.name, posting_date=doc.checkout_date)
+
 
 def _cancel_orphan_damage_assessment(doc):
     """Reverse the on_submit side-effect: the auto-created Custody Damage Assessment
@@ -354,15 +422,25 @@ def _cancel_orphan_damage_assessment(doc):
 
 
 def before_cancel(doc, method=None):
-    """Blocks cancellation when no Cancellation Reason has been given."""
+    """Blocks cancellation when no Cancellation Reason has been given, or when the
+    custody this checkout returned has already moved on again."""
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        assert_reversal_allowed,
+    )
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
+    assert_reversal_allowed("Housing Checkout", doc.name)
 
 
 def on_cancel(doc, method=None):
-    """Drops the clearance sign-off, cancels the draft damage assessment, and reopens the stay."""
+    """Drops the clearance sign-off, cancels the draft damage assessment, puts the
+    custody back on the resident's name, and reopens the stay."""
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        reverse_stock_entries,
+    )
     _stamp_clearance(doc, clear=True)
     _cancel_orphan_damage_assessment(doc)
+    reverse_stock_entries("Housing Checkout", doc.name)
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
 
