@@ -42,7 +42,9 @@ apex.web_form.show_tracking_code = function (doc, options) {
 	const codeEl = document.createElement("code");
 	codeEl.style.cssText =
 		"font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;";
-	codeEl.textContent = frappe.utils.escape_html(code);
+	/* textContent assigns a text node and never parses markup, so escaping here
+	   does not protect anything — it just prints the entity. */
+	codeEl.textContent = code;
 
 	const hint = document.createElement("small");
 	hint.className = "text-muted";

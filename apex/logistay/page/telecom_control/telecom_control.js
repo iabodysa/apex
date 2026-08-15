@@ -27,24 +27,6 @@ function TC_CHART_COLORS() {
 	];
 }
 
-const TC_STYLE = {
-	root: 'display:flex;flex-direction:column;gap:var(--margin-lg,20px);padding-block:var(--padding-md,15px);',
-	filters: 'display:flex;flex-wrap:wrap;gap:var(--margin-sm,10px);align-items:flex-end;',
-	cards: 'display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--margin-sm,10px);',
-	card: 'border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);background:var(--card-bg);padding:var(--padding-md,15px);display:flex;flex-direction:column;gap:4px;',
-	card_value: 'font-size:var(--text-2xl,22px);font-weight:700;color:var(--text-color);',
-	card_label: 'font-size:var(--text-sm,12px);color:var(--text-muted);',
-	charts: 'display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--margin-md,15px);',
-	chart_box: 'border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);background:var(--card-bg);padding:var(--padding-sm,10px);min-height:220px;',
-	section_head: 'font-size:var(--text-md,14px);font-weight:600;color:var(--text-muted);',
-	table_wrap: 'overflow-x:auto;border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);',
-	pager: 'display:flex;gap:var(--margin-sm,10px);align-items:center;justify-content:flex-end;padding-block-start:var(--padding-sm,10px);',
-	empty: 'padding-block:var(--padding-xl,30px);text-align:center;color:var(--text-muted);',
-	drawer: 'position:fixed;inset-block:0;inset-inline-end:0;inline-size:min(420px,92vw);background:var(--fg-color,var(--card-bg));border-inline-start:1px solid var(--border-color);box-shadow:var(--shadow-lg);padding:var(--padding-lg,20px);overflow-y:auto;z-index:1030;display:none;',
-	drawer_row: 'display:flex;justify-content:space-between;gap:var(--margin-sm,10px);padding-block:6px;border-block-end:1px solid var(--border-color);font-size:var(--text-sm,12px);',
-	actions: 'display:flex;flex-wrap:wrap;gap:8px;margin-block:var(--margin-sm,10px);',
-};
-
 const TC_STATUS_COLOR = {
 	Assigned: 'blue',
 	Available: 'green',
@@ -86,20 +68,19 @@ class TelecomControl {
 	}
 
 	_build_skeleton() {
-		this.$root = $('<div class="telecom-control"></div>').attr('style', TC_STYLE.root).appendTo(this.page.main);
-		this.$filters = $('<div class="tc-filters"></div>').attr('style', TC_STYLE.filters).appendTo(this.$root);
-		this.$cards = $('<div class="tc-cards"></div>').attr('style', TC_STYLE.cards).appendTo(this.$root);
-		this.$charts = $('<div class="tc-charts"></div>').attr('style', TC_STYLE.charts).appendTo(this.$root);
-		$('<div></div>').attr('style', TC_STYLE.section_head).text(__('SIM Cards')).appendTo(this.$root);
-		this.$tableWrap = $('<div class="tc-table-wrap"></div>').attr('style', TC_STYLE.table_wrap).appendTo(this.$root);
-		this.$pager = $('<div class="tc-pager"></div>').attr('style', TC_STYLE.pager).appendTo(this.$root);
-		this.$empty = $('<div class="tc-empty"></div>').attr('style', TC_STYLE.empty).appendTo(this.$root).hide();
-		/* The overlay sits on <body> so the fixed drawer is not trapped in the page's
-		   stacking context; it carries the page root class so its rule in
+		this.$root = $('<div class="telecom-control tc-root"></div>').appendTo(this.page.main);
+		this.$filters = $('<div class="tc-filters"></div>').appendTo(this.$root);
+		this.$cards = $('<div class="tc-cards"></div>').appendTo(this.$root);
+		this.$charts = $('<div class="tc-charts"></div>').appendTo(this.$root);
+		$('<div class="tc-section-head"></div>').text(__('SIM Cards')).appendTo(this.$root);
+		this.$tableWrap = $('<div class="tc-table-wrap"></div>').appendTo(this.$root);
+		this.$pager = $('<div class="tc-pager"></div>').appendTo(this.$root);
+		this.$empty = $('<div class="tc-empty"></div>').appendTo(this.$root).hide();
+		/* The overlay and the drawer sit on <body> so the fixed drawer is not trapped in
+		   the page's stacking context; both carry the page root class so their rules in
 		   telecom_control.css can be scoped like every other rule in that file. */
 		this.$backdrop = $('<div class="telecom-control tc-backdrop"></div>').appendTo(document.body);
-		this.$drawer = $('<div class="tc-drawer" role="dialog" aria-modal="true"></div>')
-			.attr('style', TC_STYLE.drawer)
+		this.$drawer = $('<div class="telecom-control tc-drawer" role="dialog" aria-modal="true"></div>')
 			.attr('aria-label', __('SIM details'))
 			.appendTo(document.body);
 		this.$backdrop.on('click', () => this._close_drawer());
@@ -146,7 +127,7 @@ class TelecomControl {
 		$('<button class="btn btn-default btn-sm"></button>')
 			.text(__('Clear'))
 			.on('click', () => this._clear_filters())
-			.appendTo($('<div></div>').attr('style', 'align-self:flex-end;').appendTo(this.$filters));
+			.appendTo($('<div class="tc-filter-action"></div>').appendTo(this.$filters));
 	}
 
 	_on_filter_change(field, value) {
@@ -202,7 +183,7 @@ class TelecomControl {
 
 	_render_error() {
 		this.$empty.empty().show();
-		$('<div></div>').css('margin-block-end', '10px').text(__('Could not load Telecom Control. Please retry.')).appendTo(this.$empty);
+		$('<div class="tc-error-msg"></div>').text(__('Could not load Telecom Control. Please retry.')).appendTo(this.$empty);
 		$('<button class="btn btn-default btn-sm"></button>').text(__('Retry')).on('click', () => this.refresh()).appendTo(this.$empty);
 	}
 
@@ -218,9 +199,9 @@ class TelecomControl {
 			{ label: __('Monthly Commitment'), value: format_currency(data.monthly_commitment || 0) },
 		];
 		cards.forEach((c) => {
-			const $card = $('<div></div>').attr('style', TC_STYLE.card).appendTo(this.$cards);
-			$('<div></div>').attr('style', TC_STYLE.card_value).text(c.value).appendTo($card);
-			$('<div></div>').attr('style', TC_STYLE.card_label).text(c.label).appendTo($card);
+			const $card = $('<div class="tc-card"></div>').appendTo(this.$cards);
+			$('<div class="tc-card-value"></div>').text(c.value).appendTo($card);
+			$('<div class="tc-label"></div>').text(c.label).appendTo($card);
 		});
 	}
 
@@ -237,9 +218,9 @@ class TelecomControl {
 		];
 		specs.forEach((spec) => {
 			const rows = data[spec.key] || [];
-			const box = $('<div></div>').attr('style', TC_STYLE.chart_box).appendTo(this.$charts).get(0);
+			const box = $('<div class="tc-chart-box"></div>').appendTo(this.$charts).get(0);
 			if (!rows.length) {
-				$(box).append($('<div></div>').attr('style', TC_STYLE.card_label).text(`${spec.title}: ${__('No data')}`));
+				$(box).append($('<div class="tc-label"></div>').text(`${spec.title}: ${__('No data')}`));
 				return;
 			}
 			this.charts[spec.key] = new frappe.Chart(box, {
@@ -256,11 +237,11 @@ class TelecomControl {
 		const rows = payload.rows || [];
 		this.$tableWrap.empty();
 		if (!rows.length) {
-			this.$tableWrap.append($('<div></div>').attr('style', TC_STYLE.empty).text(__('No SIM cards match these filters.')));
+			this.$tableWrap.append($('<div class="tc-empty"></div>').text(__('No SIM cards match these filters.')));
 			this.$pager.empty();
 			return;
 		}
-		const $table = $('<table class="table tc-table" style="margin:0;"></table>').appendTo(this.$tableWrap);
+		const $table = $('<table class="table tc-table"></table>').appendTo(this.$tableWrap);
 		const heads = [__('Mobile Number'), __('Status'), __('Custodian'), __('Contract'), __('Cost Center')];
 		const $tr = $('<tr></tr>').appendTo($('<thead></thead>').appendTo($table));
 		heads.forEach((h) => $('<th></th>').text(h).appendTo($tr));
@@ -281,7 +262,7 @@ class TelecomControl {
 		this.$pager.empty();
 		const total = payload.total || 0;
 		const pages = Math.max(1, Math.ceil(total / this.state.page_size));
-		$('<span></span>').attr('style', TC_STYLE.card_label).text(__('Page {0} of {1} · {2} SIMs', [this.state.page, pages, total])).appendTo(this.$pager);
+		$('<span class="tc-label"></span>').text(__('Page {0} of {1} · {2} SIMs', [this.state.page, pages, total])).appendTo(this.$pager);
 		$('<button class="btn btn-default btn-sm"></button>')
 			.text(__('Previous'))
 			.prop('disabled', this.state.page <= 1)
@@ -301,7 +282,7 @@ class TelecomControl {
 		$(document).on('keydown.tc-drawer', (e) => {
 			if (e.key === 'Escape') this._close_drawer();
 		});
-		$('<div></div>').attr('style', TC_STYLE.section_head).text(__('Loading…')).appendTo(this.$drawer);
+		$('<div class="tc-section-head"></div>').text(__('Loading…')).appendTo(this.$drawer);
 		frappe
 			.call({ method: 'apex.logistay.api.telecom_control.get_sim_detail', args: { sim_card }, type: 'GET' })
 			.then((r) => {
@@ -310,7 +291,7 @@ class TelecomControl {
 			})
 			.catch(() => {
 				if (this.current_sim !== sim_card) return;
-				this.$drawer.empty().append($('<div></div>').attr('style', TC_STYLE.empty).text(__('Could not load SIM.')));
+				this.$drawer.empty().append($('<div class="tc-empty"></div>').text(__('Could not load SIM.')));
 			});
 	}
 
@@ -326,8 +307,8 @@ class TelecomControl {
 			return;
 		}
 		this.$drawer.empty();
-		const $head = $('<div style="display:flex;justify-content:space-between;align-items:center;"></div>').appendTo(this.$drawer);
-		$('<h4 style="margin:0;"></h4>').append(TC_LTR(detail.mobile_number || detail.name)).appendTo($head);
+		const $head = $('<div class="tc-drawer-head"></div>').appendTo(this.$drawer);
+		$('<h4 class="tc-drawer-title"></h4>').append(TC_LTR(detail.mobile_number || detail.name)).appendTo($head);
 		$('<button class="btn btn-default btn-sm tc-drawer-close">✕</button>')
 			.attr('aria-label', __('Close'))
 			.on('click', () => this._close_drawer())
@@ -346,21 +327,23 @@ class TelecomControl {
 			[__('Assigned On'), detail.assigned_on || ''],
 		];
 		fields.forEach(([label, value]) => {
-			const $row = $('<div></div>').attr('style', TC_STYLE.drawer_row).appendTo(this.$drawer);
-			$('<span></span>').attr('style', TC_STYLE.card_label).text(label).appendTo($row);
+			const $row = $('<div class="tc-drawer-row"></div>').appendTo(this.$drawer);
+			$('<span class="tc-label"></span>').text(label).appendTo($row);
 			$('<span></span>').text(value).appendTo($row);
 		});
 
-		$('<div></div>').attr('style', TC_STYLE.section_head).css('margin-block-start', '12px').text(__('Custody History')).appendTo(this.$drawer);
+		$('<div class="tc-section-head tc-section-head--spaced"></div>')
+			.text(__('Custody History'))
+			.appendTo(this.$drawer);
 		(detail.history || []).forEach((h) => {
-			const $row = $('<div></div>').attr('style', TC_STYLE.drawer_row).appendTo(this.$drawer);
+			const $row = $('<div class="tc-drawer-row"></div>').appendTo(this.$drawer);
 			$('<span></span>').text(`${__(h.action)} · ${h.assignment_date || ''}`).appendTo($row);
-			$('<span></span>').attr('style', TC_STYLE.card_label).text(h.employee_name || h.project || '').appendTo($row);
+			$('<span class="tc-label"></span>').text(h.employee_name || h.project || '').appendTo($row);
 		});
 	}
 
 	_render_action_bar(detail) {
-		const $bar = $('<div></div>').attr('style', TC_STYLE.actions).appendTo(this.$drawer);
+		const $bar = $('<div class="tc-actions"></div>').appendTo(this.$drawer);
 		const status = detail.status;
 		const btn = (label, handler, cls) =>
 			$(`<button class="btn btn-sm ${cls || 'btn-default'}"></button>`).text(label).on('click', handler).appendTo($bar);

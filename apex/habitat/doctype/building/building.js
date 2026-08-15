@@ -10,7 +10,11 @@ function _renderFloorLayout(frm) {
 			if (r.exc || !r.message) return;
 			var data = r.message;
 
-			var wrapper = frm.get_field("floor_layout_html").$wrapper;
+			/* building.css is injected into the whole app by script_manager.js the first
+			   time a Building form opens, not into this field. The root class below is
+			   what every rule in that file is held under, so it cannot restyle any
+			   other route. */
+			var wrapper = frm.get_field("floor_layout_html").$wrapper.addClass("apex-building-layout");
 			wrapper.empty();
 
 			var s = data.summary;
@@ -29,7 +33,7 @@ function _renderFloorLayout(frm) {
 			wrapper.append($(legendHtml));
 
 			if (!data.floors || !data.floors.length) {
-				wrapper.append($('<p style="color:#999;font-size:13px;">' + __("No rooms found for this building.") + '</p>'));
+				wrapper.append($('<p class="apex-layout-empty text-muted"></p>').text(__("No rooms found for this building.")));
 				return;
 			}
 
@@ -41,10 +45,11 @@ function _renderFloorLayout(frm) {
 				(floor.rooms || []).forEach(function (room) {
 					var occ = (room.current_occupancy != null ? room.current_occupancy : "—");
 					var cap = (room.bed_capacity != null ? room.bed_capacity : "—");
-					var tile = $(
-						'<div class="apex-room-tile color-' + (room.room_color || "grey") + '" title="' +
-						frappe.utils.escape_html(room.room_number || room.name) + '"></div>'
-					);
+					/* addClass/attr set the DOM directly, so neither the colour nor the
+					   room number is parsed as markup on its way in. */
+					var tile = $('<div class="apex-room-tile"></div>')
+						.addClass("color-" + (room.room_color || "grey"))
+						.attr("title", room.room_number || room.name);
 					tile.append($('<div></div>').text(room.room_number || room.name));
 					tile.append($('<div class="apex-room-occ"></div>').text(occ + "/" + cap));
 					tile.on("click", function () {

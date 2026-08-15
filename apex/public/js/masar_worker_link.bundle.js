@@ -26,7 +26,7 @@ apex.masar.show_portal_link_dialog = function (m, opts) {
 		? `<div style="text-align:center;margin:12px 0">
 		     <img src="${frappe.utils.escape_html(m.qr)}" alt="QR" style="width:200px;height:200px" />
 		   </div>`
-		: `<p style="color:#888">${__("QR rendering is unavailable on this site; share the link below.")}</p>`;
+		: `<p class="text-muted">${__("QR rendering is unavailable on this site; share the link below.")}</p>`;
 	const safe_link = frappe.utils.escape_html(m.link);
 
 	const copy_button = opts.copy_link
@@ -54,7 +54,7 @@ apex.masar.show_portal_link_dialog = function (m, opts) {
 			</p>
 			${copy_button}
 			${expiry}
-			<p style="color:#888;font-size:11px">${opts.note || ""}</p>
+			<p class="text-muted" style="font-size:11px">${frappe.utils.escape_html(opts.note || "")}</p>
 		</div>`);
 
 	if (opts.copy_link) {

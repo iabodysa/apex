@@ -33,7 +33,7 @@ frappe.listview_settings["Resident Request"] = {
 			}
 			const tones = { "Critical": "red", "High": "orange", "Medium": "blue", "Low": "gray" };
 			const tone = tones[value] || "gray";
-			return `<span class="indicator-pill ${tone}">${__(value)}</span>`;
+			return `<span class="indicator-pill ${tone}">${frappe.utils.escape_html(__(value))}</span>`;
 		},
 	},
 

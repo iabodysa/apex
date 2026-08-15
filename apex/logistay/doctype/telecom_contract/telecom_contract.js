@@ -115,7 +115,9 @@ function render_settlement(dialog, frm, period) {
 				: __('No payment raised for this period yet.');
 			$wrapper.html(
 				`<div class="text-muted" style="margin-block-end:8px;">` +
-					`<span class="indicator-pill no-indicator-dot ${colour}">${__(status.settlement)}</span> ` +
+					`<span class="indicator-pill no-indicator-dot ${colour}">${frappe.utils.escape_html(
+					__(status.settlement),
+				)}</span> ` +
 					`<span>${detail}</span></div>`,
 			);
 		})

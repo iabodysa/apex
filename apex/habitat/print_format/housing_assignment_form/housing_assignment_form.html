@@ -119,7 +119,7 @@
 
   {{ ax.declaration(_("I confirm that I have taken the room and bed shown above, together with the housing custody items listed, in the condition recorded. I undertake to keep the room and its contents in good order, to follow the housing rules of this building, to inform the facility supervisor before I leave, and to hand back every custody item on checkout. I accept that loss or damage caused by my negligence is assessed and recovered under company policy.")) }}
 
-  {%- if doc.terms_signature %}
+  {%- if doc.terms_signature and doc.terms_signature.startswith("data:") %}
   <div class="ax-note">
     <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
     <img src="{{ doc.terms_signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">

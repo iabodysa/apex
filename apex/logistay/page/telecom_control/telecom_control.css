@@ -1,7 +1,91 @@
 /* Copyright (c) 2026, afmcoltd */
 
 /* A Desk page stylesheet is injected into the whole app, not into the page.
-   Every selector below is held under .telecom-control for that reason. */
+   Every selector below is held under .telecom-control for that reason.
+
+   The drawer and the backdrop live on <body> so the fixed drawer is not trapped
+   in the page's stacking context; both carry the page root class so their rules
+   can be scoped like every other rule in this file. .tc-root is the compound the
+   page's own layout hangs off, so neither of those two picks up the page flow. */
+
+.telecom-control.tc-root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--margin-lg, 20px);
+	padding-block: var(--padding-md, 15px);
+}
+
+.telecom-control .tc-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--margin-sm, 10px);
+	align-items: flex-end;
+}
+
+.telecom-control .tc-filter-action {
+	align-self: flex-end;
+}
+
+.telecom-control .tc-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: var(--margin-sm, 10px);
+}
+
+.telecom-control .tc-card {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg);
+	padding: var(--padding-md, 15px);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.telecom-control .tc-card-value {
+	font-size: var(--text-2xl, 22px);
+	font-weight: 700;
+	color: var(--text-color);
+}
+
+.telecom-control .tc-label {
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.telecom-control .tc-charts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: var(--margin-md, 15px);
+}
+
+.telecom-control .tc-chart-box {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg);
+	padding: var(--padding-sm, 10px);
+	min-height: 220px;
+}
+
+.telecom-control .tc-section-head {
+	font-size: var(--text-md, 14px);
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.telecom-control .tc-section-head--spaced {
+	margin-block-start: 12px;
+}
+
+.telecom-control .tc-table-wrap {
+	overflow-x: auto;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+}
+
+.telecom-control .tc-table {
+	margin: 0;
+}
 
 .telecom-control .tc-table tbody tr {
 	cursor: pointer;
@@ -13,10 +97,68 @@
 	}
 }
 
+.telecom-control .tc-pager {
+	display: flex;
+	gap: var(--margin-sm, 10px);
+	align-items: center;
+	justify-content: flex-end;
+	padding-block-start: var(--padding-sm, 10px);
+}
+
+.telecom-control .tc-empty {
+	padding-block: var(--padding-xl, 30px);
+	text-align: center;
+	color: var(--text-muted);
+}
+
+.telecom-control .tc-error-msg {
+	margin-block-end: 10px;
+}
+
 .telecom-control.tc-backdrop {
 	position: fixed;
 	inset: 0;
 	background: rgba(0, 0, 0, 0.35);
 	z-index: 1029;
 	display: none;
+}
+
+.telecom-control.tc-drawer {
+	position: fixed;
+	inset-block: 0;
+	inset-inline-end: 0;
+	inline-size: min(420px, 92vw);
+	background: var(--fg-color, var(--card-bg));
+	border-inline-start: 1px solid var(--border-color);
+	box-shadow: var(--shadow-lg);
+	padding: var(--padding-lg, 20px);
+	overflow-y: auto;
+	z-index: 1030;
+	display: none;
+}
+
+.telecom-control .tc-drawer-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.telecom-control .tc-drawer-title {
+	margin: 0;
+}
+
+.telecom-control .tc-drawer-row {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--margin-sm, 10px);
+	padding-block: 6px;
+	border-block-end: 1px solid var(--border-color);
+	font-size: var(--text-sm, 12px);
+}
+
+.telecom-control .tc-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block: var(--margin-sm, 10px);
 }

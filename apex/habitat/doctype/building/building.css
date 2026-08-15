@@ -1,23 +1,33 @@
-.apex-floor-section { margin-bottom: 18px; }
-.apex-floor-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
-.apex-room-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-.apex-room-tile {
+/* Copyright (c) 2026, afmcoltd */
+
+/* frappe/public/js/frappe/form/script_manager.js:238 hands this file to
+   frappe.dom.set_style, which appends it to <head> for the whole app the first
+   time a Building form opens. Every selector is therefore held under
+   .apex-building-layout — the class building.js puts on the floor_layout_html
+   field wrapper — so nothing here can reach another route. */
+
+.apex-building-layout .apex-layout-empty { font-size: 13px; }
+.apex-building-layout .apex-floor-section { margin-bottom: 18px; }
+.apex-building-layout .apex-floor-label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--text-muted); }
+.apex-building-layout .apex-room-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.apex-building-layout .apex-room-tile {
   display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
   width: 72px; min-height: 48px; border-radius: 5px; cursor: pointer;
   font-size: 11px; font-weight: 600; color: var(--neutral-white); padding: 4px 3px; text-align: center;
+  /* A translucent black edge over a coloured tile, not a brand colour — no token. */
   border: 1px solid rgba(0,0,0,0.10); box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   transition: opacity 0.15s;
 }
-.apex-room-tile:hover { opacity: 0.85; }
-.apex-room-tile.color-green  { background: var(--green-500); }
-.apex-room-tile.color-orange { background: var(--orange-500); }
-.apex-room-tile.color-red    { background: var(--red-500); }
-.apex-room-tile.color-grey   { background: var(--gray-500); }
-.apex-room-occ { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.92; }
-.apex-layout-summary { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
-.apex-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
-.apex-legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-.apex-legend-dot.color-green  { background: var(--green-500); }
-.apex-legend-dot.color-orange { background: var(--orange-500); }
-.apex-legend-dot.color-red    { background: var(--red-500); }
-.apex-legend-dot.color-grey   { background: var(--gray-500); }
+.apex-building-layout .apex-room-tile:hover { opacity: 0.85; }
+.apex-building-layout .apex-room-tile.color-green  { background: var(--green-500); }
+.apex-building-layout .apex-room-tile.color-orange { background: var(--orange-500); }
+.apex-building-layout .apex-room-tile.color-red    { background: var(--red-500); }
+.apex-building-layout .apex-room-tile.color-grey   { background: var(--gray-500); }
+.apex-building-layout .apex-room-occ { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.92; }
+.apex-building-layout .apex-layout-summary { display: flex; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+.apex-building-layout .apex-legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
+.apex-building-layout .apex-legend-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.apex-building-layout .apex-legend-dot.color-green  { background: var(--green-500); }
+.apex-building-layout .apex-legend-dot.color-orange { background: var(--orange-500); }
+.apex-building-layout .apex-legend-dot.color-red    { background: var(--red-500); }
+.apex-building-layout .apex-legend-dot.color-grey   { background: var(--gray-500); }
