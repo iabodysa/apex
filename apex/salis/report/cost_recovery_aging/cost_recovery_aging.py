@@ -17,7 +17,9 @@ as_on_date (the reference date for aging; defaults to today).
 import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, nowdate
+from apex.apex_core.utils.report_helpers import scoped_names
 from apex.apex_core.utils.report_summary import count_card, total_card
+from apex.salis import permissions
 
 OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
@@ -66,6 +68,18 @@ def execute(filters=None):
         query_filters["status"] = filters["status"]
     else:
         query_filters["status"] = ["in", list(OPEN_STATUSES)]
+
+    # Movement Cost Recovery is row-scoped through its vehicle, but a Script Report builds
+    # its own query and permission_query_conditions never runs — so the scope is applied
+    # here or not at all.
+    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    if restrict:
+        if not allowed:
+            return columns, []
+        in_scope_vehicles = scoped_names("Salis Vehicle", allowed)
+        if not in_scope_vehicles:
+            return columns, []
+        query_filters["vehicle"] = ["in", in_scope_vehicles]
 
     records = frappe.get_all(
         "Movement Cost Recovery",
