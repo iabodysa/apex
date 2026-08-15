@@ -244,14 +244,8 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [
-  {
-   "group": "Maintenance",
-   "link_doctype": "Maintenance Request",
-   "link_fieldname": "related_facility_asset"
-  }
- ],
- "modified": "2026-08-06 22:39:00.000000",
+ "links": [],
+ "modified": "2026-08-15 06:48:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Inventory",
