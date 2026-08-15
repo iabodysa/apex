@@ -43,6 +43,12 @@ class TestOccupancySnapshot(FrappeTestCase):
         assignment.insert(ignore_permissions=True)
         assignment.submit()
 
+        # A snapshot row committed by an earlier run collides with the job's
+        # one-row-per-building-per-day guard: the building is skipped, and every assertion
+        # below then grades that stale row instead of this one. The site carried exactly
+        # such a row (ACC-OCC-2026-00032), which is how this was found.
+        frappe.db.delete("Occupancy Snapshot", {"building": BUILDING, "snapshot_date": today()})
+
         daily_occupancy_snapshot()
         rows = frappe.get_all(
             "Occupancy Snapshot",
