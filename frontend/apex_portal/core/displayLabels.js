@@ -196,7 +196,6 @@ const workerTransportLabels = Object.freeze({
   Pending: "بانتظار الصعود",
   Boarded: "تم الصعود",
   Absent: "لم يصعد",
-  "Worker Claimed": "أكد صعوده",
 });
 
 export function workerTransportStatusLabel(value) {

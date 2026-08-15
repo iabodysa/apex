@@ -292,9 +292,6 @@ scheduler_events = {
         "apex.apex_core.utils.employee_recovery.monthly_employee_recovery_run",
     ],
     "cron": {
-        "*/5 * * * *": [
-            "apex.salis.api.boarding_flow.auto_confirm_claimed_boardings",
-        ],
         "0 23 * * *": [
             "apex.apex_core.utils.access_log_cleanup.purge_oversized_access_logs",
         ],

@@ -7,9 +7,9 @@ Worker self-confirm model: a worker's "I'm on the bus" claim self-confirms
 (records the boarding event + marks them Boarded) and NOTIFIES the driver; there
 is no per-worker driver-approval gate. The driver intervenes only for an
 exception — driver_mark_not_boarded reverses a self-confirm (wrong bus / mistaken
-tap). The auto-confirm timeout machinery (_apply_auto_confirm,
-auto_confirm_claimed_boardings) is retained but inert: no path produces the
-"Worker Claimed" state it acts on, so the scheduled tick naturally no-ops.
+tap). ``worker_claim_at`` still stamps the moment of that claim and feeds the ledger's
+``boarded_at``; what is gone is the auto-confirm timeout that once flipped a separate
+"Worker Claimed" state, because self-confirm made that state unreachable.
 
 Builds on the existing boarding pass + manifest (``salis/api/boarding.py``) and
 the worker token identity (``salis/api/masar.py``); it does NOT duplicate the
@@ -31,17 +31,15 @@ writes their own row and the route, vehicle and driver assignment stay out of re
 RESETS an unauthorised field rather than refusing the save (``document.py:795``), which is why
 that guarantee is asserted on the value after the save rather than on an exception.
 
-``auto_confirm_claimed_boardings`` still passes ``ignore_permissions``, and that one is correct:
-it is a scheduled tick with no token and no actor, so there is no capacity to open. The
-``Trip Start Log`` writes keep the flag for the same reason they always had — the log is an
-``in_create`` audit record no role may write by hand.
+The ``Trip Start Log`` writes keep ``ignore_permissions`` for the reason they always had — the
+log is an ``in_create`` audit record no role may write by hand.
 """
 
 from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, cint, now_datetime, time_diff_in_seconds
+from frappe.utils import cint, now_datetime, time_diff_in_seconds
 
 from apex.apex_core.utils.portal_token_security import (
     DRIVER,
@@ -354,80 +352,6 @@ def _grace_elapsed(dispatch_trip):
     return time_diff_in_seconds(now_datetime(), start) >= grace * 60
 
 
-def _auto_confirm_cutoff():
-    """The instant a claim must predate to be due for auto-confirm.
-
-    Same edge as ``_apply_auto_confirm``'s own test, stated as a timestamp so the
-    scheduled tick can put it in the QUERY instead of loading every claimed trip to
-    discover most are not due yet. Recomputed per tick from the current time, so a claim
-    that crosses the cutoff between two ticks is picked up by the next one."""
-    minutes = get_boarding_setting("boarding_auto_confirm_minutes")
-    return add_to_date(now_datetime(), seconds=-(minutes * 60))
-
-
-def _apply_auto_confirm(trip):
-    """In-place: any Worker Claimed row whose claim is older than
-    boarding_auto_confirm_minutes becomes Boarded (confirm_source=Auto). Mutates
-    the passed Dispatch Trip doc's child rows but does NOT save — the caller
-    decides whether to persist. Returns the number of rows flipped.
-
-    This is the robust core of the 1/4-hour rule: it is evaluated at read time
-    (worker poll, depart) AND by the scheduled tick, so a claim confirms even
-    with no read path."""
-    minutes = get_boarding_setting("boarding_auto_confirm_minutes")
-    cutoff_seconds = minutes * 60
-    now = now_datetime()
-    flipped = 0
-    for row in trip.boarding_state or []:
-        if row.status != "Worker Claimed" or not row.worker_claim_at:
-            continue
-        if time_diff_in_seconds(now, row.worker_claim_at) >= cutoff_seconds:
-            row.status = "Boarded"
-            row.confirm_source = "Auto"
-            flipped += 1
-    return flipped
-
-
-def auto_confirm_claimed_boardings():
-    """Scheduled tick: auto-confirm timed-out worker claims across all active
-    trips, independent of any read path. Scans Dispatch Trips that have at least
-    one Worker Claimed boarding-state row and applies the timeout to each.
-
-    Registered in hooks scheduler_events (every few minutes). Idempotent and
-    cheap: a trip with no eligible claim is left untouched. Each trip is written
-    inside its own savepoint so one bad trip cannot cost the rest of the run.
-    """
-    trips = frappe.get_all(
-        "Trip Boarding State",
-        filters={
-            "status": "Worker Claimed",
-            "parenttype": "Dispatch Trip",
-            "worker_claim_at": ["<=", _auto_confirm_cutoff()],
-        },
-        pluck="parent",
-        distinct=True,
-    )
-    confirmed = 0
-    for name in set(trips):
-        frappe.db.savepoint(_ROW_SAVEPOINT)
-        try:
-            trip = _locked_trip(name)
-            flipped = _apply_auto_confirm(trip)
-            if flipped:
-                trip.save(ignore_permissions=True)
-                confirmed += flipped
-                _publish("boarding_update", name, {"auto_confirmed": flipped})
-        except Exception:
-            frappe.db.rollback(save_point=_ROW_SAVEPOINT)
-            frappe.log_error(
-                message=frappe.get_traceback(),
-                title=f"Boarding auto-confirm failed for {name}"[:140],
-            )
-    if confirmed:
-        frappe.db.commit()
-    return confirmed
-
-
 def _locked_trip(dispatch_trip):
     """Load a Dispatch Trip for a boarding write, holding its rows for the transaction.
 
@@ -498,9 +422,6 @@ def get_trip_boarding(dispatch_trip):
     notify_window = get_boarding_setting("boarding_notify_window_seconds")
 
     trip = _locked_trip(dispatch_trip)
-    if _apply_auto_confirm(trip):
-        with as_capacity(DRIVER):
-            trip.save()
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -820,9 +741,6 @@ def worker_trip_boarding(token=None):
     window = boarding_window.resolve(dispatch_trip, resolved[1], building)
 
     trip = _locked_trip(dispatch_trip)
-    if _apply_auto_confirm(trip):
-        with as_capacity(WORKER):
-            trip.save()
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
         _state_payload(row, notify_window_seconds)
@@ -871,17 +789,14 @@ def depart_and_finalize(dispatch_trip):
     grace_ok = _grace_elapsed(dispatch_trip)
 
     trip = _locked_trip(dispatch_trip)
-    changed = bool(_apply_auto_confirm(trip))
-    boarded = absent = pending = claimed = 0
+    changed = False
+    boarded = absent = pending = 0
     for row in trip.boarding_state or []:
         if row.status == "Boarded":
             boarded += 1
             continue
         if row.status == "Absent":
             absent += 1
-            continue
-        if row.status == "Worker Claimed":
-            claimed += 1
             continue
         if grace_ok and cint(row.notify_count) >= max_count:
             row.status = "Absent"
@@ -916,7 +831,6 @@ def depart_and_finalize(dispatch_trip):
         "boarded": boarded,
         "absent": absent,
         "pending": pending,
-        "claimed": claimed,
         "grace_elapsed": grace_ok,
     }
 

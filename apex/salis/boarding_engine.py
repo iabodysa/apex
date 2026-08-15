@@ -121,8 +121,8 @@ def post_trip_boarding(dispatch_trip: str) -> int:
 
     Reads the trip's Trip Boarding State child and, for every row whose status is
     a terminal outcome (Boarded / Absent), inserts a ledger row capturing that
-    final outcome. Workers still in a non-terminal state (Pending / Worker Claimed
-    / Driver Rejected) are NOT posted — they have no settled outcome yet.
+    final outcome. Workers still in a non-terminal state (Pending / Driver Rejected)
+    are NOT posted — they have no settled outcome yet.
 
     Idempotent on ``(dispatch_trip, employee)``: a worker already posted (original
     row) is skipped, so calling it again after a re-finalize posts no duplicate.
