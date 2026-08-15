@@ -57,8 +57,6 @@ from apex.salis.api import boarding_window
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
 _MISBOARD_TTL_SECONDS = 30 * 60
 
-_ROW_SAVEPOINT = "salis_boarding_auto_confirm_row"
-
 
 def _publish(event, dispatch_trip, payload, driver=None, employee=None, employees=None):
     """Announce a boarding flow event to everyone entitled to hear it.
