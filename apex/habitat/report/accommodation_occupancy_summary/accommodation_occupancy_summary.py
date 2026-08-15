@@ -37,7 +37,7 @@ def execute(filters=None):
     if filters and filters.get("building"):
         building_filters["name"] = filters["building"]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Building")
     if restrict:
         if not allowed:
             return columns, []

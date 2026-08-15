@@ -15,7 +15,7 @@ def get_compliance_percent(filters=None):
     without it told a building-scoped supervisor the compliance of the whole estate.
     """
     frappe.has_permission("Scheduled Task Instance", "read", throw=True)
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Scheduled Task Instance")
     if restrict and not allowed:
         return {"value": 100.0, "fieldtype": "Percent", "precision": 2}
     scope = {"building": ["in", allowed]} if restrict else {}
@@ -43,7 +43,7 @@ def get_buildings_over_threshold(filters=None):
     would be told how many buildings are over capacity ACROSS the whole estate.
     """
     frappe.has_permission("Building", "read", throw=True)
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Building")
     if restrict and not allowed:
         return {"value": 0, "fieldtype": "Int"}
 
@@ -70,7 +70,7 @@ def get_arrivals_today(filters=None):
     ``frappe.qb.get_query``, which never consults ``permission_query_conditions``,
     so the estate filter the Assignment LIST gets is absent here."""
     frappe.has_permission("Housing Assignment", "read", throw=True)
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Housing Assignment")
     if restrict and not allowed:
         return {"value": 0, "fieldtype": "Int"}
 
@@ -97,7 +97,7 @@ def get_pending_on_manifest(filters=None):
     Arrival Batch is enough — the housed subquery only ever joins back on an
     in-scope building."""
     frappe.has_permission("Arrival Batch", "read", throw=True)
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Arrival Batch")
     if restrict and not allowed:
         return {"value": 0, "fieldtype": "Int"}
 
@@ -179,7 +179,7 @@ def get_cleaning_compliance_today(filters=None):
     """Returns today's percentage of Cleaning Log room rows marked cleaned for the user's buildings."""
     frappe.has_permission("Cleaning Log", "read", throw=True)
     log_filters = {"cleaning_date": today(), "docstatus": ["<", 2]}
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Cleaning Log")
     if restrict:
         if not allowed:
             return {"value": 100.0, "fieldtype": "Percent", "precision": 1}
@@ -200,7 +200,7 @@ def get_safety_tasks_done_week(filters=None):
     """Returns the past week's percentage of Safety Task Executions not rated Poor or Not Done."""
     frappe.has_permission("Safety Task Execution", "read", throw=True)
     query_filters = {"docstatus": 1, "execution_date": [">=", add_days(today(), -7)]}
-    restrict, allowed = report_building_scope(frappe.session.user)
+    restrict, allowed = report_building_scope(frappe.session.user, doctype="Safety Task Execution")
     if restrict:
         if not allowed:
             return {"value": 100.0, "fieldtype": "Percent", "precision": 1}

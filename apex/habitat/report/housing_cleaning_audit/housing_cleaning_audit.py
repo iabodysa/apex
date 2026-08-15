@@ -49,7 +49,7 @@ def execute(filters=None):
 
     columns = _columns()
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Cleaning Log")
     chosen_building = filters.get("building") or ""
     if restrict:
         if not allowed or (chosen_building and chosen_building not in allowed):

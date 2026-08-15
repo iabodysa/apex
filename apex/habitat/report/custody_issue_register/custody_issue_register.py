@@ -42,7 +42,7 @@ def execute(filters=None):
     if filters.get("issued_to_employee"):
         query_filters["issued_to_employee"] = filters["issued_to_employee"]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Custody Issue")
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):

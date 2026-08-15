@@ -36,7 +36,7 @@ def execute(filters=None):
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Fuel Exception Case")
     if restrict:
         if not allowed:
             return columns, []

@@ -29,7 +29,7 @@ def execute(filters=None):
     due_condition = date_range_condition(filters, "due_date")
     if due_condition is not None:
         item_filters["due_date"] = due_condition
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Audit Remediation Plan")
     if restrict:
         if not allowed:
             return columns, []

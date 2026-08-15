@@ -33,7 +33,7 @@ def execute(filters=None):
         if filters.get("status"):
             log_filters["status"] = filters["status"]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Trip Start Log")
     if restrict:
         in_scope_drivers = scoped_names("Salis Driver", allowed) if allowed else []
         if not in_scope_drivers:

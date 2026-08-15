@@ -72,7 +72,7 @@ def execute(filters=None):
     # Movement Cost Recovery is row-scoped through its vehicle, but a Script Report builds
     # its own query and permission_query_conditions never runs — so the scope is applied
     # here or not at all.
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Movement Cost Recovery")
     if restrict:
         if not allowed:
             return columns, []

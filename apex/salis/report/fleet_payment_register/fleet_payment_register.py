@@ -32,7 +32,7 @@ def execute(filters=None):
         if date_condition is not None:
             query_filters["creation"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Salis Payment Request")
     if restrict:
         chosen = query_filters.get("project")
         if not allowed or (chosen and chosen not in allowed):

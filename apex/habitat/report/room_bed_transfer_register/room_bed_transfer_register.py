@@ -34,7 +34,7 @@ def execute(filters=None):
 
     chosen = filters.get("building")
     scope_buildings = [chosen] if chosen else None
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Room Bed Transfer")
     if restrict:
         if not allowed or (chosen and chosen not in allowed):
             return columns, [], None, None, _summary([])

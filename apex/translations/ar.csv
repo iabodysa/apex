@@ -5368,7 +5368,6 @@ Work stage of the request. Frappe assignments track who owns the work; they do n
 Work started — status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.
 Worked Hours,ساعات العمل
 Worker,عامل
-Worker Claimed,أكّد العامل صعوده
 Worker Claimed At,وقت تأكيد العامل صعوده
 Worker Consent Signature,توقيع موافقة العامل
 Worker Count,عدد العمال

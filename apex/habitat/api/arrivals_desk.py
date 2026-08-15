@@ -780,7 +780,9 @@ def get_arrival_summary(date=None, building=None) -> dict:
         frappe.has_permission("Building", "read", doc=building, throw=True)
     date = date or frappe.utils.today()
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(
+        frappe.session.user, doctype="Housing Assignment"
+    )
     if building:
         building_filter = building
     elif restrict:

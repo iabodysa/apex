@@ -99,8 +99,8 @@ def _get_buildings(building_filter):
     """Returns active buildings restricted to the user's permitted buildings and any building filter."""
     f = {"status": "Active"}
 
-    if not permissions._building_is_unscoped(frappe.session.user):
-        allowed = permissions._allowed_buildings(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Building")
+    if restrict:
         if building_filter:
             allowed = [b for b in allowed if b == building_filter]
         if not allowed:
@@ -118,13 +118,17 @@ def _is_scope_gap(building_filter):
 
     An explicit out-of-scope ``building_filter`` is treated as a normal empty
     filter, not a scope gap.
+
+    Reads the SAME narrowed scope ``_get_buildings`` reads. Reading the raw resolver
+    here instead would leave a user whose only Building permission is ``applicable_for``
+    some OTHER doctype with an empty report and no message explaining it.
     """
-    user = frappe.session.user
-    if permissions._building_is_unscoped(user):
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Building")
+    if not restrict:
         return False
     if building_filter:
         return False
-    return not permissions._allowed_buildings(user)
+    return not allowed
 
 
 def _no_scope_message():

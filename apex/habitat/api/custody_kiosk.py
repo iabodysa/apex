@@ -410,7 +410,7 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
         "status": ["in", _OPEN_ISSUE_STATUSES],
     }
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Custody Issue")
     if restrict:
         if not allowed:
             return []

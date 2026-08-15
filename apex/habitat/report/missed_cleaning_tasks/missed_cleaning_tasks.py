@@ -41,7 +41,7 @@ def execute(filters=None):
         {"label": frappe._("Days Since"), "fieldname": "days_since", "fieldtype": "Int", "width": 90},
     ]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Cleaning Log")
     chosen = filters.get("building")
     if restrict:
         if not allowed or (chosen and chosen not in allowed):

@@ -51,8 +51,8 @@ def get_data(filters):
         conditions["employee"] = filters["employee"]
 
     user = frappe.session.user
-    if not permissions._building_is_unscoped(user):
-        allowed = permissions._allowed_buildings(user)
+    restrict, allowed = permissions.report_building_scope(user, doctype="Accommodation Stock Ledger")
+    if restrict:
         if not allowed:
             return []
         chosen = conditions.get("building")

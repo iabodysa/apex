@@ -218,13 +218,19 @@ class _ScopeCase(unittest.TestCase):
         return None
 
     def _render(self, unscoped, buildings, filters=None):
-        """Run the report under a constructed scope; return (rows, recorded get_all calls)."""
+        """Run the report under a constructed scope; return (rows, recorded get_all calls).
+
+        ``_`` is stubbed because the real one loads a site's translations and otherwise
+        writes to a bench log path. ``get_user_permissions`` is answered with ``{}``, which
+        is true of this harness's user — its scope is the constructed ``_allowed_buildings``.
+        Answering it rather than stubbing ``for_doctype`` leaves the ``applicable_for``
+        narrowing running for real against a stub that carries no db surface.
+        """
         recorder = _Recorder()
-        # `_` is stubbed too: the real one loads a site's translations and, failing that,
-        # writes to a bench log path, so leaving it live would couple this to a bench.
         with patch.object(HP, "_building_is_unscoped", return_value=unscoped), \
              patch.object(HP, "_allowed_buildings", return_value=list(buildings)), \
              patch.object(HP, "_allowed_buildings_for", return_value=list(buildings)), \
+             patch.object(frappe.permissions, "get_user_permissions", return_value={}), \
              patch.object(R.frappe, "get_all", recorder), \
              patch.object(R.frappe, "_", lambda text, *a, **kw: text), \
              patch.object(R, "today", lambda: "2026-07-26"), \

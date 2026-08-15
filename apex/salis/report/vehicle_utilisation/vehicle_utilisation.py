@@ -44,7 +44,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["snapshot_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Utilisation Snapshot")
     if restrict:
         if not allowed:
             return columns, []

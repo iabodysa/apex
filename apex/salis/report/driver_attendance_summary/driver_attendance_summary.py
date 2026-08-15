@@ -26,7 +26,7 @@ def execute(filters=None):
             attendance_filters["attendance_date"] = date_condition
 
     or_filters = None
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Driver Attendance")
     if restrict:
         in_scope_drivers = scoped_names("Salis Driver", allowed) if allowed else []
         if in_scope_drivers:

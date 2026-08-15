@@ -41,7 +41,7 @@ def execute(filters=None):
         {"label": frappe._("Days Since Checkout"), "fieldname": "days_since", "fieldtype": "Int", "width": 130},
     ]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Housing Checkout")
     chosen_building = filters.get("building") or ""
     if restrict and (not allowed or (chosen_building and chosen_building not in allowed)):
         return columns, []

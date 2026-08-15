@@ -45,7 +45,7 @@ def execute(filters=None):
     if filters.get("period_month"):
         query_filters["period_month"] = filters["period_month"]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Fuel Consumption Ledger")
     if restrict:
         if not allowed:
             return columns, []

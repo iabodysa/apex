@@ -39,7 +39,7 @@ def execute(filters=None):
     elif to_date:
         query_filters["pickup_datetime"] = ["<=", to_date]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Transport Request")
     if restrict:
         if not allowed:
             return columns, []

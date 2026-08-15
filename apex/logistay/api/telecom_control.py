@@ -75,14 +75,18 @@ def _sanitize_filters(raw):
     return clean
 
 
-def _company_scope(user=None):
-    """Return the list of allowed companies, or None for an oversight user.
+def _company_scope(doctype, user=None):
+    """Return the list of allowed companies for ``doctype``, or None for an oversight user.
 
     ``None``  -> no company restriction (oversight role).
     ``[]``    -> a scoped user with no company permission: caller returns nothing.
     ``[...]`` -> restrict to these companies.
+
+    ``doctype`` is REQUIRED and positional: it is the ``applicable_for`` narrowing key,
+    and the endpoints below read two different DocTypes (SIM Card, Telecom Contract), so
+    a default here would silently widen whichever of them it did not name.
     """
-    restrict, allowed = permissions.report_company_scope(user or frappe.session.user)
+    restrict, allowed = permissions.report_company_scope(user or frappe.session.user, doctype=doctype)
     return allowed if restrict else None
 
 
@@ -118,7 +122,7 @@ def _grouped_counts(filters, group_field, limit=None):
 def get_summary_cards(filters=None):
     """Returns SIM and active-contract summary counts and monthly commitment for the control desk."""
     frappe.has_permission("SIM Card", "read", throw=True)
-    allowed = _company_scope()
+    allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
     empty = {
         "total_sims": 0,
@@ -166,7 +170,7 @@ def get_summary_cards(filters=None):
 def get_charts(filters=None):
     """Returns SIM Card counts grouped by status, supplier, project, and cost center for the charts."""
     frappe.has_permission("SIM Card", "read", throw=True)
-    allowed = _company_scope()
+    allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
     if not access:
         return {"by_status": [], "by_supplier": [], "by_project": [], "by_cost_center": []}
@@ -182,7 +186,7 @@ def get_charts(filters=None):
 def get_sim_rows(filters=None, page=1, page_size=DEFAULT_PAGE_SIZE):
     """Returns a paged, filtered, company-scoped list of SIM Cards with custodian names attached."""
     frappe.has_permission("SIM Card", "read", throw=True)
-    allowed = _company_scope()
+    allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
     page = _clamp(page, 1, 100000, 1)
     page_size = _clamp(page_size, 1, MAX_PAGE_SIZE, DEFAULT_PAGE_SIZE)
@@ -224,7 +228,7 @@ def _attach_custodian_names(rows):
 def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
     """Returns active or expired Telecom Contracts ending within the given day window."""
     frappe.has_permission("Telecom Contract", "read", throw=True)
-    allowed = _company_scope()
+    allowed = _company_scope("Telecom Contract")
     within_days = _clamp(within_days, 1, MAX_EXPIRY_DAYS, DEFAULT_EXPIRY_DAYS)
     sim_filters = _sanitize_filters(filters)
     contract_filters = {
@@ -267,7 +271,7 @@ def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
 def get_cost_center_totals(filters=None):
     """Normalized monthly commitment per cost center across active contracts."""
     frappe.has_permission("Telecom Contract", "read", throw=True)
-    allowed = _company_scope()
+    allowed = _company_scope("Telecom Contract")
     sim_filters = _sanitize_filters(filters)
     contract_filters = {"docstatus": 1, "status": "Active"}
     if allowed is not None:

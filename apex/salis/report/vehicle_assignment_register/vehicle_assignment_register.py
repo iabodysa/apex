@@ -43,7 +43,7 @@ def execute(filters=None):
         if filters.get(field):
             query_filters[field] = filters[field]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Assignment")
     if restrict:
         chosen = query_filters.get("project")
         if not allowed or (chosen and chosen not in allowed):

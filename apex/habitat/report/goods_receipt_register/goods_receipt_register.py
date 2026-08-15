@@ -36,7 +36,7 @@ def execute(filters=None):
     elif filters.get("to_date"):
         query_filters["receipt_date"] = ["<=", filters["to_date"]]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Goods Receipt")
     if restrict:
         chosen = query_filters.get("intake_building")
         if not allowed or (chosen and chosen not in allowed):

@@ -48,6 +48,11 @@ BUILDING_OTHER = "_Test Building 2"
 HABITAT_DOCTYPE = "Custody Issue"
 SALIS_DOCTYPE = "Fuel Quota"
 
+# A second building-scoped DocType, used only as the "not this one" side of the
+# ``applicable_for`` case below. Any registered building DocType would do: the narrowed-out
+# answer is "1=0" / an empty list whatever scope strategy the DocType uses.
+HABITAT_OTHER_DOCTYPE = "Cleaning Log"
+
 
 def _grant(user, allow, for_value):
     if not frappe.db.exists(
@@ -83,6 +88,15 @@ class TestSharedPermissionScope(FrappeTestCase):
         cls.dual = _user("psc_dual@example.com", "Fleet Supervisor")
         _grant(cls.dual, "Building", BUILDING)
         _grant_project(cls.dual, cls.proj)
+        # narrowed: ONE building, granted only for HABITAT_DOCTYPE via applicable_for
+        cls.narrow = _user("psc_narrowed_sup@example.com", "Resident Supervisor")
+        frappe.permissions.add_user_permission(
+            "Building",
+            BUILDING,
+            cls.narrow,
+            ignore_permissions=True,
+            applicable_for=HABITAT_DOCTYPE,
+        )
 
     def setUp(self):
         frappe.local.cache = {}
@@ -147,6 +161,47 @@ class TestSharedPermissionScope(FrappeTestCase):
         )
         p = frappe._dict(doctype=SALIS_DOCTYPE, project=self.proj, owner="dispatcher")
         self.assertFalse(SP.project_scoped_has_permission(p, "read", user=self.bare))
+
+    def test_applicable_for_narrows_a_report_exactly_as_it_narrows_the_list(self):
+        """A User Permission carrying ``applicable_for`` must reach BOTH surfaces.
+
+        Frappe honours ``applicable_for`` on the list path only — it hands the DocType to
+        every ``permission_query_conditions`` hook, and its own resolver keeps a row when
+        ``not applicable_for or applicable_for == doctype``
+        (``frappe/permissions.py:747``). A report builds its own query, so the same
+        narrowing has to arrive through ``report_*_scope``'s ``doctype`` argument. This
+        asserts the two answers are identical for the granted DocType and for another.
+        """
+        # the fragment frappe splices into the LIST query, via the registered hook
+        from apex import hooks
+
+        self.assertEqual(
+            hooks.permission_query_conditions[HABITAT_DOCTYPE],
+            "apex.habitat.permissions.building_scope_query",
+        )
+        self.assertEqual(
+            HP.building_scope_query(user=self.narrow, doctype=HABITAT_DOCTYPE),
+            _in("`building`", [BUILDING]),
+        )
+        self.assertEqual(
+            HP.building_scope_query(user=self.narrow, doctype=HABITAT_OTHER_DOCTYPE), "1=0"
+        )
+
+        # the tuple every REPORT and dashboard endpoint reads — same verdict, both ways
+        self.assertEqual(
+            HP.report_building_scope(user=self.narrow, doctype=HABITAT_DOCTYPE),
+            (True, [BUILDING]),
+        )
+        self.assertEqual(
+            HP.report_building_scope(user=self.narrow, doctype=HABITAT_OTHER_DOCTYPE),
+            (True, []),
+        )
+
+        # and omitting the argument is what the fix removes: the scope widens back to the
+        # unnarrowed building on a surface the admin narrowed away.
+        self.assertEqual(
+            HP.report_building_scope(user=self.narrow), (True, [BUILDING])
+        )
 
     def test_dual_permission_no_cross_scope_collision(self):
         buildings = HP._allowed_buildings(self.dual)

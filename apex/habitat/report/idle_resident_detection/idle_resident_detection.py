@@ -63,7 +63,7 @@ def _get_data(filters):
     """Returns idle-resident rows from active assignments with an ended or missing project."""
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Housing Assignment")
     if restrict:
         if filters.get("building"):
             allowed = [b for b in allowed if b == filters["building"]]

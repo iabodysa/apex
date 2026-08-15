@@ -22,7 +22,7 @@ def execute(filters=None):
     if filters.get("company"):
         query["company"] = filters["company"]
 
-    restrict, allowed = permissions.report_company_scope(frappe.session.user)
+    restrict, allowed = permissions.report_company_scope(frappe.session.user, doctype="Telecom Contract")
     if restrict:
         if not allowed:
             return columns, []

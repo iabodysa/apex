@@ -32,7 +32,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["dispatch_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Passenger Manifest")
     if restrict:
         in_scope = scoped_names("Route Plan", allowed) if allowed else []
         chosen = query_filters.get("route_plan")

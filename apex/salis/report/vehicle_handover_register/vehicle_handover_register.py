@@ -34,7 +34,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["handover_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Handover")
     if restrict:
         in_scope = scoped_names("Salis Vehicle", allowed) if allowed else []
         chosen = query_filters.get("vehicle")

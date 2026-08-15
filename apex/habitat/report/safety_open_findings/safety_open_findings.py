@@ -34,7 +34,7 @@ def execute(filters=None):
     if filters.get("priority"):
         query_filters["priority"] = filters["priority"]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Safety Task Execution")
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):

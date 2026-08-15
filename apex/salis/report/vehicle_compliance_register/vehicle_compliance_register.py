@@ -34,7 +34,7 @@ def execute(filters=None):
         else:
             row_filters["expiry_date"] = ["<=", filters["to_date"]]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user)
+    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Salis Vehicle")
     if restrict:
         if not allowed:
             return columns, []

@@ -42,7 +42,7 @@ def execute(filters=None):
     if not filters.get("include_settled") and not filters.get("status"):
         query_filters["status"] = ["not in", list(SETTLED_STATUSES)]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Resident Request")
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):

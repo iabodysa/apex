@@ -149,7 +149,7 @@ def execute(filters=None):
         if filters.get("building"):
             parent_filters["building"] = filters["building"]
 
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Operational Depreciation Snapshot")
     if restrict:
         chosen = parent_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):

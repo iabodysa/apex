@@ -43,7 +43,7 @@ def execute(filters=None):
         query_filters["accounting_acknowledged"] = ack
 
     or_filters = None
-    restrict, allowed = permissions.report_building_scope(frappe.session.user)
+    restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Facility Asset Movement")
     if restrict:
         if not allowed:
             return columns, []
