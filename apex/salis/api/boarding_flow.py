@@ -31,8 +31,10 @@ writes their own row and the route, vehicle and driver assignment stay out of re
 RESETS an unauthorised field rather than refusing the save (``document.py:795``), which is why
 that guarantee is asserted on the value after the save rather than on an exception.
 
-The ``Trip Start Log`` writes keep ``ignore_permissions`` for the reason they always had — the
-log is an ``in_create`` audit record no role may write by hand.
+The ``Trip Start Log`` writes run inside ``as_capacity`` too, bound to the identity each caller
+already resolved (the driver for the two driver-authored writes below, the worker for the
+self-confirm) — ``apex.salis.permissions._trip_start_log_capacity_verdict`` is what refuses one
+holder's write against another's log, not a DocPerm on the shared capacity role alone.
 """
 
 from __future__ import annotations
@@ -604,7 +606,7 @@ def worker_claim_boarded(token=None):
     if target is None:
         return {"dispatch_trip": dispatch_trip, "status": None}
 
-    log = _get_or_create_trip_log(dispatch_trip)
+    log = _get_or_create_trip_log(dispatch_trip, employee)
     if not _already_boarded(log, employee):
         log.append(
             "boarding_events",
@@ -616,7 +618,8 @@ def worker_claim_boarded(token=None):
                 "method": "Worker",
             },
         )
-        log.save(ignore_permissions=True)
+        with as_capacity(WORKER, employee):
+            log.save()
 
     if target.status != "Boarded":
         target.worker_claim_at = now_datetime()
@@ -640,11 +643,13 @@ def worker_claim_boarded(token=None):
     }
 
 
-def _remove_boarding_event(dispatch_trip, employee):
+def _remove_boarding_event(dispatch_trip, employee, driver=None):
     """Drop a worker's registered boarding event from the trip's open manifest log
     (the driver "not boarded" exception reversing a self-confirm). Best-effort: no
     open log or no row for the worker is a clean no-op. Leaves any unregistered
-    rider rows untouched."""
+    rider rows untouched. ``driver`` is the resolved caller of the exception (its sole
+    caller, ``driver_mark_not_boarded``, already has it); the write runs inside
+    ``as_capacity(DRIVER, driver)``."""
     log_name = frappe.db.get_value(
         "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
     )
@@ -658,7 +663,8 @@ def _remove_boarding_event(dispatch_trip, employee):
     if len(kept) == len(log.boarding_events or []):
         return
     log.set("boarding_events", kept)
-    log.save(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        log.save()
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
@@ -680,7 +686,7 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     if target is None:
         frappe.throw(_("Worker {0} is not on this trip's boarding state.").format(employee))
 
-    _remove_boarding_event(dispatch_trip, employee)
+    _remove_boarding_event(dispatch_trip, employee, trip.driver)
 
     target.status = "Pending"
     target.confirm_source = None
@@ -811,7 +817,7 @@ def depart_and_finalize(dispatch_trip):
         with as_capacity(DRIVER):
             trip.save()
 
-    _close_trip_log(dispatch_trip)
+    _close_trip_log(dispatch_trip, trip.driver)
 
     try:
         from apex.salis.boarding_engine import post_trip_boarding
@@ -838,10 +844,12 @@ def depart_and_finalize(dispatch_trip):
     }
 
 
-def _close_trip_log(dispatch_trip):
+def _close_trip_log(dispatch_trip, driver=None):
     """Move the trip's open draft Trip Start Log to Completed with an end stamp.
     The headcount log is the manifest record; finalize closes it. No-op when no
-    open log exists (the trip never had a boarding event)."""
+    open log exists (the trip never had a boarding event). ``driver`` is the resolved
+    caller of the sole caller, ``depart_and_finalize``; the write runs inside
+    ``as_capacity(DRIVER, driver)``."""
     name = frappe.db.get_value(
         "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
     )
@@ -851,4 +859,5 @@ def _close_trip_log(dispatch_trip):
     log.status = "Completed"
     if not log.end_datetime:
         log.end_datetime = now_datetime()
-    log.save(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        log.save()

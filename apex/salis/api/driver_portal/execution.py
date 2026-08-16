@@ -2,14 +2,18 @@
 """Salis Driver Portal — execution endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged.
 
 All four endpoints are ``allow_guest`` and identify the driver by presented credential through
-``_resolve_driver``, so ``frappe.session.user`` is Guest and there are no roles to consult. The
-four ``ignore_permissions`` writes on Trip Start Log stand on that: the credential resolution is
-the permission check. Granting Guest write on the log to remove them would be the wider hole.
+``_resolve_driver``, so ``frappe.session.user`` is Guest until each write opens ``as_capacity``.
+Every Trip Start Log write here runs inside ``as_capacity(DRIVER, driver)`` — the credential
+resolution authenticates, the Driver role's own DocPerm plus
+``apex.salis.permissions._trip_start_log_capacity_verdict`` authorise, and the doc's own
+``driver`` must equal the resolved identity or the write is refused by the framework, not by
+this module.
 """
 
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api.driver_portal import (
     _resolve_driver,
@@ -50,10 +54,11 @@ def start_my_trip(dispatch_trip):
 	Identity-scoped: the driver is resolved credential-first and the trip is honoured
 	only when it belongs to that driver (``_resolve_my_trip``). Gets-or-creates the
 	Trip Start Log for (trip, driver) and stamps ``start_datetime``; idempotent — a
-	second tap returns the existing state rather than duplicating. The Driver holds an
-	``if_owner`` DocPerm on Trip Start Log, and the write is server-authoritative
-	(driver resolved credential-first), so ``ignore_permissions`` is set. No GL — Trip Start
-	Log is a headcount/execution record only."""
+	second tap returns the existing state rather than duplicating. Written inside
+	``as_capacity(DRIVER, driver)`` with ``driver`` set on the doc before insert (not left
+	to ``fetch_from``), so the create-permission check already sees the field it must
+	match against the resolved identity. No GL — Trip Start Log is a headcount/execution
+	record only."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -74,7 +79,8 @@ def start_my_trip(dispatch_trip):
                 "start_datetime": frappe.utils.now_datetime(),
             }
         )
-        doc.insert(ignore_permissions=True)
+        with as_capacity(DRIVER, driver):
+            doc.insert()
     from apex.salis.api.boarding_flow import (
         _manifest_employees,
         _publish,
@@ -99,8 +105,9 @@ def complete_my_trip(dispatch_trip):
 
 	Identity-scoped (``_resolve_my_trip``). Updates the existing log's status to
 	Completed and stamps ``end_datetime``; if the driver never tapped start, the log is
-	created and immediately completed so the day still records execution. Server-
-	authoritative, so ``ignore_permissions`` is set. No GL."""
+	created and immediately completed so the day still records execution. Written inside
+	``as_capacity(DRIVER, driver)``, with ``driver`` set on a freshly-created doc before
+	insert. No GL."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -125,8 +132,8 @@ def complete_my_trip(dispatch_trip):
     doc.status = "Completed"
     if not doc.end_datetime:
         doc.end_datetime = frappe.utils.now_datetime()
-    doc.flags.ignore_permissions = True
-    doc.save() if not doc.is_new() else doc.insert()
+    with as_capacity(DRIVER, driver):
+        doc.save() if not doc.is_new() else doc.insert()
     from apex.salis.api.boarding_flow import _manifest_employees, _publish
 
     _publish(
@@ -149,8 +156,9 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 	trip to be started (an open Trip Start Log must exist — the driver taps Start first).
 	Idempotent and reversible: a stop already tracked is updated in place (re-marking the
 	same state is a no-op), and ``done=0`` clears it. ``route_stop`` is the source Route
-	Stop child row name — the stable key matched across reloads. Server-authoritative, so
-	``ignore_permissions`` is set. No GL."""
+	Stop child row name — the stable key matched across reloads. Written inside
+	``as_capacity(DRIVER, driver)``, an existing loaded doc so ``driver`` is already
+	populated from its stored row. No GL."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -177,8 +185,8 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
                 "done_at": frappe.utils.now_datetime() if done else None,
             },
         )
-    log.flags.ignore_permissions = True
-    log.save()
+    with as_capacity(DRIVER, driver):
+        log.save()
     return {
         "route_stop": route_stop,
         "done": bool(done),
@@ -218,8 +226,8 @@ def mark_arrived(dispatch_trip, route_stop):
                 "arrived_at": now,
             },
         )
-    log.flags.ignore_permissions = True
-    log.save()
+    with as_capacity(DRIVER, driver):
+        log.save()
     _publish(
         "boarding_arrived",
         dispatch_trip,

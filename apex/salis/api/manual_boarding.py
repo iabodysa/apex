@@ -1,14 +1,18 @@
 """Driver fallback when a worker cannot present a scannable boarding pass.
 
-Both writes pass ``ignore_permissions`` for the reason in ``boarding.py``: the driver holds no
-role, and Boarding Scan Log is an ``in_create`` audit record no role may write by hand. This is
-the fallback path, so every attempt is logged whether it succeeds or fails — a DocPerm that made
-the write legal would also let the log be edited afterwards, which is the one thing it must not.
+The Boarding Scan Log write keeps ``ignore_permissions`` for the reason in ``boarding.py``: it is
+an ``in_create`` audit record no role may write by hand, and this is the fallback path, so every
+attempt is logged whether it succeeds or fails — a DocPerm that made the write legal would also
+let the log be edited afterwards, which is the one thing it must not. The Trip Start Log write
+runs inside ``as_capacity(DRIVER, driver)`` instead: it is the driver's own execution record, and
+``apex.salis.permissions._trip_start_log_capacity_verdict`` refuses it when the log's own driver
+is not the resolved identity.
 """
 
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
@@ -52,7 +56,8 @@ def board_worker(dispatch_trip, employee):
         scan_log = _log_attempt(dispatch_trip, trip, employee, "Wrong Trip")
         return {"result": "Wrong Trip", "scan_log": scan_log}
 
-    log = boarding._get_or_create_log(dispatch_trip)
+    driver = trip.get("driver")
+    log = boarding._get_or_create_log(dispatch_trip, driver)
     if boarding._already_boarded(log, employee):
         scan_log = _log_attempt(dispatch_trip, trip, employee, "Duplicate", log.name)
         return {"result": "Duplicate", "scan_log": scan_log, "trip_start_log": log.name}
@@ -65,7 +70,8 @@ def board_worker(dispatch_trip, employee):
             "method": "Manual",
         },
     )
-    log.save(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        log.save()
     mark_boarded(dispatch_trip, employee, source="Manual")
     scan_log = _log_attempt(dispatch_trip, trip, employee, "Valid", log.name, created=1)
     return {

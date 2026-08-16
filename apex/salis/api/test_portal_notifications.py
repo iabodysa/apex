@@ -53,7 +53,7 @@ class TestPortalNotifications(TestCase):
             },
         )
         self.assertTrue(values["last_seen"])
-        doc.save.assert_called_once_with(ignore_permissions=True)
+        doc.save.assert_called_once_with()
         self.assertTrue(result["subscribed"])
 
     @patch.object(portal_notifications.web_push, "is_allowed_push_endpoint", return_value=True)

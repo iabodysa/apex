@@ -1,16 +1,16 @@
 # Copyright (c) 2026, afmcoltd
 """Worker and driver device opt-in endpoints for background notifications.
 
-The save passes ``ignore_permissions`` because the caller is a token subject with no user record —
-``resolve_portal_subject`` maps the bearer token to a worker or driver, and there are no roles to
-consult. The subscription is that subject's own device registration, and the token resolution
-above is what authorises writing it.
+The save runs inside ``as_capacity(audience, subject)``: ``resolve_portal_subject`` maps the
+bearer token to a worker or driver first (the authentication), then the capacity role's own
+create/write DocPerm plus ``portal_identity.portal_push_subscription_has_permission`` authorise
+writing that subject's own device registration — never another holder's.
 """
 
 import frappe
 from frappe import _
 
-from apex.apex_core.utils.portal_identity import DRIVER, WORKER, resolve_portal_subject
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER, as_capacity, resolve_portal_subject
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api import web_push
 
@@ -94,7 +94,8 @@ def save_subscription(
             "last_seen": frappe.utils.now_datetime(),
         }
     )
-    doc.save(ignore_permissions=True)
+    with as_capacity(audience, subject):
+        doc.save()
     return {"subscribed": True}
 
 

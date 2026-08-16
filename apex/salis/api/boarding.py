@@ -6,11 +6,12 @@ and is bound to (trip, worker); every scan attempt is recorded as an immutable
 Boarding Scan Log row. No GL/money. A driver may only act on their own trips
 (resolved server-side); the client never supplies a driver id.
 
-The three writes pass ``ignore_permissions`` because the driver holds no role — he reaches Apex by
-credential, not as a Frappe user with permissions of his own — and because Boarding Scan Log is an
-``in_create`` audit record that no role may write by hand. The HMAC signature and the server-side
-trip ownership check above are what authorise the write; there is no role for a DocPerm to attach
-to, and one on the scan log would make the audit trail forgeable from the Desk.
+The Boarding Scan Log write (``_log_scan``) keeps ``ignore_permissions``: it is an ``in_create``
+audit record no role may write by hand, and one on the scan log would make the audit trail
+forgeable from the Desk. The Trip Start Log writes (get-or-create + the boarding event append) run
+inside ``as_capacity(DRIVER, driver)`` instead — it is the driver's own execution record, and
+``apex.salis.permissions._trip_start_log_capacity_verdict`` refuses the write when the log's own
+driver is not the identity the HMAC-verified pass / server-resolved trip ownership check bound.
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from frappe.utils.password import get_encryption_key
 
 from apex.apex_core.utils.portal_identity import (
     DRIVER,
+    as_capacity,
     presented_token,
     resolve_portal_subject,
 )
@@ -313,11 +315,15 @@ def _trip_manifest_workers(
     return {e for e in _manifest_employees(dispatch_trip, transport_request) if e}
 
 
-def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
+def _get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe.model.document.Document":
     """Return the open Trip Start Log for the trip, creating a draft one if none
     exists yet. One scan should not need a separately-opened log — the first valid
     scan opens it. A submitted/cancelled log is not reused; a fresh draft is made
-    so post-submission scans never mutate a closed record."""
+    so post-submission scans never mutate a closed record.
+
+    ``driver`` is the server-resolved driver the create is authorised under — set on the
+    doc directly (not left to its ``fetch_from``) so the create-permission check already
+    sees the field it must match against the ``as_capacity`` identity."""
     existing = frappe.db.get_value(
         "Trip Start Log",
         {"dispatch_trip": dispatch_trip, "docstatus": 0},
@@ -330,11 +336,13 @@ def _get_or_create_log(dispatch_trip: str) -> "frappe.model.document.Document":
         {
             "doctype": "Trip Start Log",
             "dispatch_trip": dispatch_trip,
+            "driver": driver,
             "status": "Started",
             "start_datetime": now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        log.insert()
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -471,7 +479,8 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
-    log = _get_or_create_log(dispatch_trip)
+    driver = trip.get("driver")
+    log = _get_or_create_log(dispatch_trip, driver)
 
     if _already_boarded(log, worker):
         log_name = _log_scan(
@@ -494,7 +503,8 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
             "method": "QR",
         },
     )
-    log.save(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        log.save()
 
     scan_log = _log_scan(
         dispatch_trip, trip, worker, "Valid", pass_token,

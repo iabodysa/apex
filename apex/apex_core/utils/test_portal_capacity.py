@@ -15,6 +15,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.utils.portal_identity import CAPACITY_USERS, DRIVER, WORKER, as_capacity
+from apex.apex_core.setup.seeders.portal_identity_seed import (
+    DRIVER_CAPACITY_ROLE,
+    WORKER_CAPACITY_ROLE,
+)
 
 
 class TestPortalCapacity(FrappeTestCase):
@@ -64,8 +68,16 @@ class TestPortalCapacity(FrappeTestCase):
     def test_each_capacity_holds_create_on_the_documents_it_raises(self):
         """The grants are what let the portal writes drop ignore_permissions."""
         owned = {
-            DRIVER: ("Fuel Request", "Vehicle Incident", "Vehicle Handover"),
-            WORKER: ("Resident Request", "Transport Request", "Transport Trip Rating"),
+            DRIVER: (
+                "Fuel Request",
+                "Vehicle Incident",
+                "Vehicle Handover",
+            ),
+            WORKER: (
+                "Resident Request",
+                "Transport Request",
+                "Transport Trip Rating",
+            ),
         }
         for role, doctypes in owned.items():
             for doctype in doctypes:
@@ -75,4 +87,23 @@ class TestPortalCapacity(FrappeTestCase):
                         {"parent": doctype, "role": role, "permlevel": 0, "create": 1},
                     ),
                     f"{role} cannot create {doctype}",
+                )
+
+        # Trip Start Log and Portal Push Subscription grant the CAPACITY-only roles
+        # instead, because a portal write to either has to be told from one holder to
+        # the next: Driver and Worker are held by real people, so a create there would
+        # reach every one of them rather than the token-resolved path alone.
+        for capacity_role in (DRIVER_CAPACITY_ROLE, WORKER_CAPACITY_ROLE):
+            for doctype in ("Trip Start Log", "Portal Push Subscription"):
+                self.assertTrue(
+                    frappe.db.exists(
+                        "DocPerm",
+                        {
+                            "parent": doctype,
+                            "role": capacity_role,
+                            "permlevel": 0,
+                            "create": 1,
+                        },
+                    ),
+                    f"{capacity_role} cannot create {doctype}",
                 )

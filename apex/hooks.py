@@ -425,6 +425,7 @@ has_permission = {
     "Salis Driver": _SALIS_SCOPE_CHECK,
     "Passenger Manifest": _SALIS_SCOPE_CHECK,
     "Masar Worker Token": "apex.apex_core.utils.portal_identity.masar_worker_token_has_permission",
+    "Portal Push Subscription": "apex.apex_core.utils.portal_identity.portal_push_subscription_has_permission",
     "Facility Asset Custody Assignment": _HABITAT_SCOPE_CHECK,
     "Operational Depreciation Snapshot": _HABITAT_SCOPE_CHECK,
     "Custody Return": _HABITAT_SCOPE_CHECK,

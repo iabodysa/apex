@@ -107,7 +107,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-08-16 06:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Portal Push Subscription",
@@ -119,6 +119,16 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "role": "Portal Worker Capacity",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "role": "Portal Driver Capacity",
    "write": 1
   }
  ],

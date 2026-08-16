@@ -59,6 +59,17 @@ class TestBoardingRace(FrappeTestCase):
         self.employee.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         self._cleanup.append(("Employee", self.employee.name))
 
+        # A trip's Trip Start Log is now identity-scoped to its OWN driver (see
+        # apex.salis.permissions._trip_start_log_capacity_verdict), so the race fixture
+        # needs a real one -- the concurrency mechanic under test does not depend on WHO
+        # the driver is, only that the trip has one, same as every other boarding fixture.
+        self.driver = frappe.get_doc({
+            "doctype": "Salis Driver",
+            "full_name": "Race Driver " + _h(),
+            "status": "Active",
+        }).insert(ignore_permissions=True).name
+        self._cleanup.append(("Salis Driver", self.driver))
+
         self.request = frappe.get_doc({
             "doctype": "Transport Request",
             "request_date": "2026-06-20",
@@ -72,6 +83,7 @@ class TestBoardingRace(FrappeTestCase):
             "doctype": "Dispatch Trip",
             "naming_series": "DT-.######",
             "transport_request": self.request.name,
+            "driver": self.driver,
             "trip_date": "2026-06-20",
             "status": "Planned",
         })
@@ -260,11 +272,14 @@ class TestBoardingRace(FrappeTestCase):
             "the Dispatch Trip lock must precede _get_or_create_log (race window guard removed?)",
         )
 
-    def test_get_or_create_log_uses_ignore_permissions(self):
-        """Sanity: the helper still inserts the log audit-ok (the lock does not
-        change the authorization model, only the ordering)."""
-        self.assertIn("ignore_permissions=True", func_source(
-            _read(_BOARDING_SRC), _BOARDING_SRC, "_get_or_create_log"))
+    def test_get_or_create_log_inserts_under_the_resolved_drivers_capacity(self):
+        """Sanity: the helper still inserts the log (the lock does not change the
+        authorization model, only the ordering) -- now under ``as_capacity(DRIVER,
+        driver)`` rather than ``ignore_permissions``, so the create-permission check
+        can compare the log's own driver to the resolved identity."""
+        body = func_source(_read(_BOARDING_SRC), _BOARDING_SRC, "_get_or_create_log")
+        self.assertIn("as_capacity(DRIVER, driver)", body)
+        self.assertNotIn("ignore_permissions", body)
 
 
 def _read(path):

@@ -206,7 +206,7 @@
    "link_fieldname": "trip_start_log"
   }
  ],
- "modified": "2026-08-16 03:10:00.000000",
+ "modified": "2026-08-16 06:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Start Log",
@@ -236,6 +236,16 @@
    "if_owner": 1,
    "read": 1,
    "role": "Driver"
+  },
+  {
+   "create": 1,
+   "role": "Portal Driver Capacity",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "role": "Portal Worker Capacity",
+   "write": 1
   },
   {
    "delete": 1,

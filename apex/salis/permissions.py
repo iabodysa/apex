@@ -42,6 +42,7 @@ through. They exist so callers outside this module can still resolve by FUNCTION
 import frappe
 
 from apex.apex_core.utils import permission_scope
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER, capacity_subject
 from apex.salis.utils import get_driver_for_session_user
 
 UNSCOPED_ROLES = {
@@ -777,6 +778,50 @@ DOCUMENT_RULES = {
 }
 
 
+def _trip_start_log_capacity_verdict(doc, ptype):
+    """The document verdict for a portal capacity writing Trip Start Log.
+
+    Trip Start Log is shared by two different capacities for two different reasons, so
+    one comparison cannot answer both:
+
+    A Driver capacity owns the log's execution fields (status, stop progress, the
+    boarding events a QR/manual scan appends) — its own row is the one whose ``driver``
+    equals :func:`capacity_subject` (DRIVER), the identity ``as_capacity`` bound for this
+    request. A shared capacity user's ``owner`` can never make that distinction (every
+    portal-written row has the SAME owner), which is why this reads the bound subject
+    instead.
+
+    A Worker capacity only ever appends its OWN boarding self-confirm to a trip it did
+    not create and does not own — the log is the driver's, but the worker's claim on it
+    is legitimate exactly when the worker is on that trip's manifest, the same forward
+    resolution the confirm endpoints already used to find the trip in the first place.
+    Checked by manifest membership rather than a row field because no field on Trip
+    Start Log names the confirming worker at the PARENT level (only its child
+    ``boarding_events`` rows do, and a fresh create has none yet to read).
+
+    Falls fully to :func:`permission_scope.portal_capacity_verdict` first (denies
+    read/report/etc outright, same as any capacity) and only narrows the create/write/
+    submit case further; never widens it.
+    """
+    verdict = permission_scope.portal_capacity_verdict(ptype)
+    if verdict is False:
+        return False
+
+    driver_field = getattr(doc, "driver", None)
+    if driver_field and driver_field == capacity_subject(DRIVER):
+        return verdict
+
+    worker = capacity_subject(WORKER)
+    dispatch_trip = getattr(doc, "dispatch_trip", None)
+    if worker and dispatch_trip:
+        from apex.salis.api.boarding_flow import _manifest_employees
+
+        if worker in _manifest_employees(dispatch_trip):
+            return verdict
+
+    return False
+
+
 def project_scoped_has_permission(doc, ptype, user=None):
     """Dispatch the document check for ``doc``'s DocType to its rule in ``SALIS_SCOPE``.
 
@@ -790,10 +835,15 @@ def project_scoped_has_permission(doc, ptype, user=None):
 
     A portal capacity is answered before the table is consulted, because none of these
     rules can answer it: every one of them ends at a project the capacity cannot hold.
-    See ``permission_scope.portal_capacity_verdict``.
+    Trip Start Log gets its OWN capacity verdict (:func:`_trip_start_log_capacity_verdict`)
+    because it is the one Salis DocType a capacity actually writes to today; every other
+    capacity-reached DocType (Fuel Request, Dispatch Trip's ``boarding_state``) still
+    answers through the plain ``permission_scope.portal_capacity_verdict``, unchanged.
     """
     user = _resolve_user(user)
     if permission_scope.is_portal_capacity(user):
+        if getattr(doc, "doctype", None) == "Trip Start Log":
+            return _trip_start_log_capacity_verdict(doc, ptype)
         return permission_scope.portal_capacity_verdict(ptype)
 
     kind, spec = SALIS_SCOPE.get(getattr(doc, "doctype", None)) or _column()

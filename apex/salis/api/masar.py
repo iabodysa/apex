@@ -35,8 +35,12 @@ The capacity is never a login: it exists for the duration of one write and is ha
 ``finally``, so the role it carries is unreachable from outside. That is what makes granting it
 read on those DocTypes safe — no request ever runs as it.
 
-The Trip Start Log write still passes ``ignore_permissions``: it is an ``in_create`` audit record
-that no role may write by hand, which is the control rather than a gap in one.
+The Trip Start Log write (the worker's boarding self-confirm, appended to the trip's shared
+execution log) now runs inside ``as_capacity(WORKER, employee)`` too. It is the driver's log, not
+the worker's, so the Worker role's DocPerm alone cannot scope it; the record-level gate is
+``apex.salis.permissions._trip_start_log_capacity_verdict``, which authorises a Worker capacity
+write only when the resolved employee is on the trip's own manifest — the same forward resolution
+``_worker_today_dispatch_trip`` already used to find that trip.
 """
 
 import frappe
@@ -1013,12 +1017,17 @@ def notify_hr_iqama_expiring(token=None):
 _WORKER_BOARDING_METHOD = "Worker"
 
 
-def _get_or_create_trip_log(dispatch_trip):
+def _get_or_create_trip_log(dispatch_trip, employee=None):
     """The trip's open (draft) Trip Start Log, created if none exists yet — the
     same get-or-create the driver QR scan uses (salis/api/boarding.py), so a
     worker self-confirm and a driver scan append to ONE shared log. A
     submitted/cancelled log is not reused; a fresh draft is opened so a
-    post-submission confirm never mutates a closed record."""
+    post-submission confirm never mutates a closed record.
+
+    ``employee`` is the resolved worker a fresh create is authorised under: the log is
+    the driver's, so the create runs inside ``as_capacity(WORKER, employee)`` and
+    ``_trip_start_log_capacity_verdict`` checks the employee against the trip's manifest
+    rather than any field on the row itself."""
     existing = frappe.db.get_value(
         "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
     )
@@ -1032,7 +1041,8 @@ def _get_or_create_trip_log(dispatch_trip):
             "start_datetime": frappe.utils.now_datetime(),
         }
     )
-    log.insert(ignore_permissions=True)
+    with as_capacity(WORKER, employee):
+        log.insert()
     from apex.salis.api.boarding_flow import ensure_trip_boarding_state
 
     ensure_trip_boarding_state(dispatch_trip)
@@ -1090,7 +1100,7 @@ def confirm_boarding(token=None, transport_request=None):
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
-    log = _get_or_create_trip_log(dispatch_trip)
+    log = _get_or_create_trip_log(dispatch_trip, employee)
 
     if _already_boarded(log, employee):
         return {
@@ -1112,7 +1122,8 @@ def confirm_boarding(token=None, transport_request=None):
             "method": _WORKER_BOARDING_METHOD,
         },
     )
-    log.save(ignore_permissions=True)
+    with as_capacity(WORKER, employee):
+        log.save()
     from apex.salis.api.boarding_flow import mark_boarded
 
     mark_boarded(dispatch_trip, employee)

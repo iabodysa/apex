@@ -238,7 +238,7 @@ def _reject_invalid_token() -> None:
 
 
 @contextmanager
-def as_capacity(audience: str):
+def as_capacity(audience: str, subject: str | None = None):
     """Run a block as the capacity user, then hand the session back.
 
     Only ever open this AFTER a token has been resolved: the token is the authentication and this
@@ -249,15 +249,41 @@ def as_capacity(audience: str):
     on install and on every migrate, so a missing one is an installation fault, and the write
     inside would fail with a permission error naming the DocType — which is the more useful
     message anyway. A guard here would cost a query on every portal write to restate that.
+
+    ``subject`` is the token-resolved Employee or Salis Driver the caller already holds — the one
+    fact the shared capacity user's own identity cannot carry, since every physical worker or
+    driver writes through the SAME row. A ``has_permission`` dispatcher that must tell one
+    holder's record from another's reads it back through :func:`capacity_subject` while this block
+    is open; omitting it (the default) leaves that lookup returning None, which is correct for a
+    write no dispatcher needs to individuate.
     """
     _require_audience(audience)
     user = CAPACITY_USERS[audience]
     previous = frappe.session.user
+    previous_subject = getattr(frappe.local, "apex_capacity_subject", None)
     frappe.set_user(user)
+    frappe.local.apex_capacity_subject = (audience, subject) if subject else None
     try:
         yield user
     finally:
         frappe.set_user(previous)
+        frappe.local.apex_capacity_subject = previous_subject
+
+
+def capacity_subject(audience: str) -> str | None:
+    """The Employee/Salis Driver bound to the open ``as_capacity(audience, subject=...)``
+    block, or None outside one, for a mismatched audience, or when none was passed.
+
+    Reads request-local state rather than re-deriving the subject from
+    ``frappe.session.user``, because the capacity user IS the same row for every physical
+    holder of that audience — there is nothing on the session to individuate from.
+    """
+    _require_audience(audience)
+    current = getattr(frappe.local, "apex_capacity_subject", None)
+    if not current:
+        return None
+    bound_audience, subject = current
+    return subject if bound_audience == audience else None
 
 
 def resolve_portal_subject(audience: str, token=None, required=False):
@@ -700,3 +726,44 @@ def credential_delivery_destination(
             frappe.PermissionError,
         )
     return stored
+
+
+_PUSH_SUBSCRIPTION_SUBJECT_FIELDS = {WORKER: "employee", DRIVER: "driver"}
+
+
+def portal_push_subscription_has_permission(doc, ptype, user=None):
+    """Deny a portal capacity from touching another subject's push registration.
+
+    Registered in ``hooks.py`` (``has_permission``) for Portal Push Subscription. A
+    non-capacity caller (only System Manager holds any DocPerm on this DocType) defers to
+    Frappe's ordinary resolution — this dispatcher answers for the capacity users alone.
+
+    ``portal_identity_seed`` never grants either capacity a create/write DocPerm scoped
+    finer than the role itself, so without this hook one worker's device row would be
+    exactly as writable as every other worker's the moment ``create``/``write`` is
+    granted. The refusal compares the row's own ``employee``/``driver`` to
+    :func:`capacity_subject` — the identity ``as_capacity`` bound for THIS request — never
+    to the capacity user's own name, which is the same row for every holder and so cannot
+    individuate anyone. Read/report/print stay denied for a capacity outright: neither
+    portal endpoint here ever needs a permission-checked read (both resolve the identity
+    first and query ``frappe.db`` directly), so there is nothing to defer.
+    """
+    from apex.apex_core.utils.permission_scope import (
+        is_portal_capacity,
+        portal_capacity_verdict,
+    )
+
+    user = user or frappe.session.user
+    if not is_portal_capacity(user):
+        return None
+
+    verdict = portal_capacity_verdict(ptype)
+    if verdict is False:
+        return False
+
+    audience = WORKER if user == CAPACITY_USERS[WORKER] else DRIVER
+    field = _PUSH_SUBSCRIPTION_SUBJECT_FIELDS[audience]
+    bound = capacity_subject(audience)
+    if bound and getattr(doc, field, None) == bound:
+        return verdict
+    return False
