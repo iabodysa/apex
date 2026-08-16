@@ -64,6 +64,8 @@ DEMO_DOCTYPES = (
     "Accommodation Ledger",
     "QR Location",
     "Custody Handover",
+    "Vehicle Handover Checklist Template",
+    "Vehicle Assignment",
     "Vehicle Handover",
     "Vehicle Incident",
     "File",
@@ -1037,21 +1039,68 @@ def _build_custody_handover(context):
     ).name
 
 
+_HANDOVER_CHECKS = ("Spare tyre", "Jack and wrench", "First aid kit", "Fire extinguisher")
+
+
+def _build_handover_checklist_template(context):
+    """Creates the active checklist a receipt must be raised against.
+
+    vehicle_handover.py:89-118 requires a template for a receipt, requires it active, and
+    requires the handover's rows to equal the template's rows EXACTLY — so the two lists
+    are built from one tuple rather than written twice.
+    """
+    context["handover_template"] = _create(
+        "Vehicle Handover Checklist Template",
+        {
+            "template_name": "Demo Vehicle Handover Checklist",
+            "is_active": 1,
+            "items": [{"check_item": item} for item in _HANDOVER_CHECKS],
+        },
+    ).name
+
+
+def _build_vehicle_assignment(context):
+    """Creates the demo vehicle assignment the handover receipt is raised against.
+
+    Submitted, not left a draft: vehicle_handover.py:150 refuses a receipt whose assignment
+    is not both submitted and Active, so a draft here fails the step that follows.
+    """
+    assignment = _create(
+        "Vehicle Assignment",
+        {
+            "vehicle": context["vehicle"],
+            "driver": context["driver"],
+            "start_date": today(),
+            "status": "Active",
+        },
+    )
+    assignment.submit()
+    context["vehicle_assignment"] = assignment.name
+
+
 def _build_vehicle_handover(context):
-    """Creates the demo vehicle handover receipt with its inspection checklist."""
+    """Creates the demo vehicle handover receipt with its inspection checklist.
+
+    ``Receipt``, not the ``Transfer`` the controller defaults to: this is the vehicle's
+    first handover, so there is no previous driver, and vehicle_handover.py:44-49 requires
+    both drivers for a transfer. A receipt in turn requires the assignment it is raised
+    against (vehicle_handover.py:141), which the step above creates.
+    """
     context["vehicle_handover"] = _create(
         "Vehicle Handover",
         {
             "vehicle": context["vehicle"],
+            "direction": "Receipt",
+            "vehicle_assignment": context["vehicle_assignment"],
+            "checklist_template": context["handover_template"],
             "to_driver": context["driver"],
             "handover_date": today(),
             "fuel_level": "Half",
             "discrepancy_status": "Clean",
+            # ok=1 on every row: vehicle_handover.py:119-120 demands a remark on any row
+            # left unchecked, and a clean receipt is the scenario this demo shows.
             "handover_check_items": [
-                {"check_item": "Spare tyre"},
-                {"check_item": "Jack and wrench"},
-                {"check_item": "First aid kit"},
-                {"check_item": "Fire extinguisher"},
+                {"check_item": item, "ok": 1} for item in _HANDOVER_CHECKS
             ],
         },
     ).name
@@ -1343,6 +1392,8 @@ _BUILD_STEPS = (
     ("Accommodation Ledger", _build_accommodation_ledger),
     ("QR Location", _build_qr_location),
     ("Custody Handover", _build_custody_handover),
+    ("Vehicle Handover Checklist Template", _build_handover_checklist_template),
+    ("Vehicle Assignment", _build_vehicle_assignment),
     ("Vehicle Handover", _build_vehicle_handover),
     ("Vehicle Incident", _build_vehicle_incident),
     ("Vehicle Damage Write-Off", _build_vehicle_write_off),
