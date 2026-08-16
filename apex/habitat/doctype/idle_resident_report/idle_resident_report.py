@@ -4,8 +4,8 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils.user import get_users_with_role
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.apex_core.utils.role_assignment import assign_role
 
 
 class IdleResidentReport(Document):
@@ -31,28 +31,25 @@ _DEPARTMENT_ROLE = {
 
 def after_insert(doc, method=None):
     """Force accountability: put the new report in the responsible department's
-    desk queue as ToDos (one per active role holder). Idempotent — assign_to.add
-    skips any user that already has an Open ToDo for this document, and ToDo's
-    on_update handler maintains _assign automatically.
-    """
-    from frappe.desk.form import assign_to as _assign_to
+    desk queue as ToDos (one per active role holder who may already read it).
 
+    Routed through ``assign_role`` rather than a raw ``get_users_with_role`` +
+    ``assign_to.add``: a role holder who cannot read this document would otherwise be
+    handed one via a DocShare, or blocked outright with Document Sharing off
+    (assign_to.py:98-110). No DocPerm currently grants HR Manager read here, so an HR
+    report is queued to nobody until that is granted — reported, not silently widened.
+    """
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
         return
-    assignees = [user for user in get_users_with_role(role) if user != "Guest"]
-    if not assignees:
-        return
-    _assign_to.add(
-        {
-            "doctype": doc.doctype,
-            "name": doc.name,
-            "assign_to": assignees,
-            "description": _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
-                doc.responsible_department, doc.employee_name or doc.employee, doc.building),
-            "priority": "High" if doc.reason_category == "Legal Case" else "Medium",
-            "assigned_by": frappe.session.user,
-        }
+    assign_role(
+        doc.doctype,
+        doc.name,
+        role,
+        _("Idle resident reported to {0}: employee {1} (building {2}). Please action.").format(
+            doc.responsible_department, doc.employee_name or doc.employee, doc.building
+        ),
+        priority="High" if doc.reason_category == "Legal Case" else "Medium",
     )
 
 
