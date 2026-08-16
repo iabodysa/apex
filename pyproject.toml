@@ -58,8 +58,8 @@ typing-modules = ["frappe.types.DF"]
 # style vote, not a consistency check", which was true while the repo had not voted.
 # .editorconfig votes: indent_style = space. Once no file may indent with a tab at all,
 # no file can mix, so W191 is the stricter statement of the same invariant and it scores
-# zero on the tree today. Covers apex/ only, which is the root lint.yml hands ruff;
-# setup.py is the one tracked .py outside it.
+# zero on the tree today. Covers apex/ only, which is the root lint.yml hands ruff, and no
+# tracked .py sits outside it since setup.py was deleted (2026-08-16).
 extend-select = ["W191"]
 
 # Package __init__.py files re-export their split submodules for back-compat
