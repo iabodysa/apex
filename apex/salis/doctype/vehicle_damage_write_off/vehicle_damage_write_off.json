@@ -198,6 +198,7 @@
    "label": "Disposition"
   },
   {
+   "allow_on_submit": 1,
    "default": "Open",
    "description": "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",
    "fieldname": "status",
@@ -271,7 +272,7 @@
    "link_fieldname": "write_off_case"
   }
  ],
- "modified": "2026-08-08 01:42:00.000000",
+ "modified": "2026-08-16 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Damage Write-Off",

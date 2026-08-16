@@ -272,6 +272,23 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
         self.assertEqual(case.docstatus, 1)
         self.assertEqual(case.status, "Approved")
 
+    def test_approved_case_can_close(self):
+        """Approved and Closed are BOTH docstatus 1, so the Close transition writes
+        ``status`` on an already-submitted document -- reachable only because the field
+        carries ``allow_on_submit``. Without it the framework's own update-after-submit
+        guard would refuse the very row the workflow's own JSON offers this action on."""
+        case = self._case(estimated_cost=500)
+        frappe.set_user(self.supervisor)
+        apply_workflow(case, "Authorize (Regional)")
+        case.reload()
+        self.assertEqual(case.status, "Approved")
+
+        frappe.set_user(self.manager)
+        apply_workflow(case, "Close")
+        case.reload()
+        self.assertEqual(case.docstatus, 1)
+        self.assertEqual(case.status, "Closed")
+
     def test_approved_case_cannot_edit_cost_below_threshold(self):
         """An Approved case's estimated_cost carries no allow_on_submit, so the
         framework's update-after-submit guard refuses lowering it back under the
