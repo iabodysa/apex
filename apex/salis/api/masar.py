@@ -1384,3 +1384,78 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     except frappe.exceptions.UniqueValidationError:
         frappe.throw(_("You have already rated this trip."))
     return {"status": "success", "name": doc.name}
+
+
+_PUBLIC_TRIP_FIELDS = ["name", "route_plan", "vehicle", "depart_time", "status"]
+
+
+@frappe.whitelist(allow_guest=True)
+@rate_limit(limit=30, seconds=60)
+def get_public_trip_board():
+    """Today's trips, published with no token: which vehicle, which route, when it
+    leaves, and where it stands -- an arrivals-board surface anyone standing at the
+    gate can read without signing in.
+
+    Carries nothing about WHO rides. ``passengers``/``employee`` never leave the
+    Route Stop / Passenger Manifest rows, and this reads only the four fields named
+    above plus the stop shape (name, building, planned time) -- no phone number, no
+    national id, no manifest. The personal half (my seat, my housing, my documents)
+    stays behind ``get_worker_transport``/``get_worker_boarding_pass``, which still
+    require a resolved token.
+    """
+    trip_date = frappe.utils.today()
+    trips = frappe.get_all(
+        "Dispatch Trip",
+        filters={"trip_date": trip_date, "docstatus": ["!=", 2]},
+        fields=_PUBLIC_TRIP_FIELDS,
+        order_by="depart_time asc, name asc",
+        limit_page_length=0,
+    )
+
+    route_names = {t["route_plan"] for t in trips if t.get("route_plan")}
+    route_title = (
+        {
+            r["name"]: r["route_name"]
+            for r in frappe.get_all(
+                "Route Plan", filters={"name": ["in", list(route_names)]},
+                fields=["name", "route_name"],
+            )
+        }
+        if route_names
+        else {}
+    )
+
+    vehicle_ids = {t["vehicle"] for t in trips if t.get("vehicle")}
+    plate_by_vehicle = (
+        {
+            v["name"]: v["plate_number"]
+            for v in frappe.get_all(
+                "Salis Vehicle", filters={"name": ["in", list(vehicle_ids)]},
+                fields=["name", "plate_number"],
+            )
+        }
+        if vehicle_ids
+        else {}
+    )
+
+    board = []
+    for t in trips:
+        board.append(
+            {
+                "dispatch_trip": t["name"],
+                "route_name": route_title.get(t.get("route_plan")) or t.get("route_plan"),
+                "depart_time": _fmt_time(t.get("depart_time")),
+                "vehicle_plate": plate_by_vehicle.get(t.get("vehicle")) or t.get("vehicle"),
+                "status": t.get("status"),
+                "stops": [
+                    {
+                        "stop_name": s.get("stop_name"),
+                        "location": s.get("location"),
+                        "planned_time": _fmt_time(s.get("planned_time")),
+                    }
+                    for s in _ordered_trip_stops(t["name"], t.get("route_plan"))
+                ],
+            }
+        )
+
+    return {"date": trip_date, "trips": board}
