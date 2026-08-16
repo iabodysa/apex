@@ -12,10 +12,10 @@ Safety Round alone silently unlocked every other Building-scoped DocType for tha
 test is the oracle for that fix: the SAME permission must admit the doctype it names and
 exclude the one it does not.
 
-The building is ``test_records.json``'s, not a minted one: the previous form of this file
-built a Company, a Site and a Building in ``setUpClass`` and deleted all three again, to own
-a name to hang one User Permission on. ``test_dependencies`` stands that chain up once per
-run instead. The User Permission itself is the subject and is still built here.
+The building is ``test_records.json``'s, not a minted one: ``test_dependencies`` stands the
+Company / Site / Building chain up once per run, so this file owns a name to hang one User
+Permission on without building and tearing that chain down itself. The User Permission
+itself is the subject and is still built here.
 """
 
 from __future__ import annotations

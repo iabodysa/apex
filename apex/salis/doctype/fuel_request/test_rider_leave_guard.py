@@ -202,13 +202,12 @@ class TestRiderLeaveGuard(FrappeTestCase):
     def test_fuel_request_rejected_for_onleave_rider(self):
         """The rejection, and the clearance task that must OUTLIVE it.
 
-        This case used to assert the ToDo existed after the refused insert, and it passed
-        — but only because a test has no request around it. In production the controller
-        throws, and ``app.py`` rolls the whole request transaction back with it, so a ToDo
-        inserted inline was created and discarded in the same breath: the follow-up task
-        the docstring promises never reached a supervisor. The task is therefore enqueued,
-        which puts it outside the transaction, and this case now grades the hand-off
-        rather than a row that only a test can see.
+        In production the controller throws, and ``app.py`` rolls the whole request
+        transaction back with it, so a ToDo inserted inline is created and discarded in
+        the same breath — never reaching a supervisor. The clearance task is therefore
+        raised via ``frappe.enqueue``, which puts it outside the transaction, so this
+        case grades the hand-off rather than a row that only a test's own uncommitted
+        transaction can see.
         """
         emp = self._employee_on_leave("T119 Fuel OnLeave Emp")
         driver = _driver(

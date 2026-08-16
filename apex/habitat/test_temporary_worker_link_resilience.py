@@ -2,11 +2,11 @@
 """``link_temporary_workers`` must roll back only the worker that failed.
 
 The daily linker walks every Active Temporary Worker and CONTINUES past a row
-that raises. It used to recover with a bare ``frappe.db.rollback()``, which takes
-no savepoint and so discarded the WHOLE transaction — every worker already linked
-earlier in the same run lost its link, and one bad passport threw away the run's
-good work. The recovery is now ``frappe.db.rollback(save_point=...)``: the same
-per-row isolation ``salis/fuel_engine.py`` and ``salis/rental_engine.py`` use.
+that raises. It recovers with ``frappe.db.rollback(save_point=...)``: the same
+per-row isolation ``salis/fuel_engine.py`` and ``salis/rental_engine.py`` use. A bare
+``frappe.db.rollback()`` instead takes no savepoint and would discard the WHOLE
+transaction — every worker already linked earlier in the same run would lose its
+link, and one bad passport would throw away the run's good work.
 
 Two properties, one per test: a worker linked BEFORE the failure keeps its link,
 and a worker reached AFTER the failure is still linked. Both also assert the

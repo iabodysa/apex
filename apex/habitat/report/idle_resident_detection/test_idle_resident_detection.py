@@ -2,11 +2,10 @@
 """Idle Resident Detection: an active resident whose project has ended is a candidate, one whose
 project is still open is not, and a report already open against the candidate is joined in.
 
-The building, its rooms, its beds and the employees all come from ``test_records.json``. The one
-record still built here is the ENDED project — that is the report's whole discriminator, so
-building it is asserting, not arranging. The previous form of this file stood up a Company, a
-Building, two Projects, two Rooms, two Beds, two Employees and two Assignments in ``setUp``, per
-test method.
+The building, its rooms, its beds and the employees all come from ``test_records.json`` rather
+than a Company, a Building, two Projects, two Rooms, two Beds, two Employees and two Assignments
+stood up in ``setUp`` per test method. The one record still built here is the ENDED project — that
+is the report's whole discriminator, so building it is asserting, not arranging.
 """
 
 from __future__ import annotations

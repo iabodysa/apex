@@ -8,10 +8,10 @@ hold both halves of it: the read answers in the page's own key vocabulary and gi
 user who is not a driver a clean empty state instead of a 403, and the write refuses a
 vehicle the caller does not hold.
 
-Both endpoints used to live on ``driver_portal``. They moved to ``fleet_employee``, and
-``apex/www/test_portal_shell_contract.py:26-29`` now asserts ``get_my_vehicle`` stays out
-of ``driver_portal/profile.py``. The portal switch did not move with them: /fleet is not
-behind ``Salis Settings.enable_driver_portal``, which is why no case here toggles it.
+Both endpoints live on ``fleet_employee``, not ``driver_portal`` —
+``apex/www/test_portal_shell_contract.py:26-29`` asserts ``get_my_vehicle`` stays out
+of ``driver_portal/profile.py``. /fleet is not behind
+``Salis Settings.enable_driver_portal``, which is why no case here toggles it.
 """
 
 import frappe

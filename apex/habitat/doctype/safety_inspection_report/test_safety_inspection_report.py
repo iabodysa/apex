@@ -283,11 +283,10 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
             return json.load(fh)
 
     def test_sir_json_is_read_only(self):
-        """``read_only`` is the whole of the concealment; it used to assert ``hidden`` too.
-
+        """``read_only`` is the whole of the concealment; ``hidden`` is not, because
         Frappe has no root ``hidden`` property on a DocType -- it is absent from
         frappe/core/doctype/doctype/doctype.json, so BaseDocument.get_valid_dict never
-        persists it. Asserting it proved only that the JSON still carried a key nothing
+        persists it. Asserting it would prove only that the JSON carries a key nothing
         reads. ``read_only`` is the honoured one: frappe labels it "User Cannot Search"
         and frappe/utils/user.py drops such a doctype from can_search and can_read.
         """

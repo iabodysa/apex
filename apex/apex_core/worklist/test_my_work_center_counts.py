@@ -1,12 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """A Number Card must count the whole queue, not the first page of it.
 
-The three cards used to fetch rows and call ``len()``, but every read behind them is
-capped — 50 per DocType for the two "my documents" cards, 200 + 100 for Pending My
-Action — so each stopped rising at its cap and reported a number the operator had no way
-to know was wrong. The count also has to keep passing through ``get_list``:
-``frappe.db.count`` applies neither DocPerms nor ``permission_query_conditions``, so it
-would report a scoped user rows they are denied everywhere else.
+The three cards must count through ``get_list``, never by fetching rows and calling
+``len()``: every read behind them is capped — 50 per DocType for the two "my documents"
+cards, 200 + 100 for Pending My Action — so a ``len()`` over a capped read plateaus at the
+cap and reports a number the operator has no way to know is wrong. ``frappe.db.count``
+cannot substitute either: it applies neither DocPerms nor ``permission_query_conditions``,
+so it would report a scoped user rows they are denied everywhere else.
 """
 
 from __future__ import annotations

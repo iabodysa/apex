@@ -7,8 +7,9 @@ and that driver cost recovery is consent-gated and maps to exactly one
 native HRMS Employee Advance.
 
 The vehicle and its rider are the shipped fixtures rather than a fresh pair per case —
-twenty-one cases used to mint forty-two records to hang an incident off. Each case hands
-the pair back: every incident it submitted is cancelled and the two links are cleared.
+a fresh pair for each of the twenty-one cases here would mint forty-two records just to
+hang an incident off. Each case hands the pair back: every incident it submitted is
+cancelled and the two links are cleared.
 """
 
 from __future__ import annotations
@@ -123,8 +124,7 @@ class TestVehicleIncident(FrappeTestCase):
         inc = self._incident("Theft")
         inc.submit()
         # on_submit moves the case to Under Review, which is the state close_incident_internal
-        # requires and which both dashboard cards count alongside Open. The assertion used to
-        # read "Open" and had simply never executed.
+        # requires and which both dashboard cards count alongside Open.
         self.assertEqual(
             inc.status, "Under Review", "a submitted theft opens as a case under review"
         )

@@ -14,6 +14,17 @@ dependencies = ["pywebpush>=2,<2.4"]
 [project.urls]
 Repository = "https://github.com/iabodysa/apex"
 
+# bench reads this and nothing else to decide whether an app may be installed against the
+# frappe in the bench; `get_required_frappe_version` (bench/app.py:543-556) prints a warning
+# on every install when it is absent. erpnext and hrms are listed because apex imports from
+# both at runtime, and the same file resolves each dependency's version through its own
+# pyproject. The floors are the shipped v15 line, not the exact versions installed here —
+# pinning those would refuse a patch upgrade of the framework.
+[tool.bench.frappe-dependencies]
+frappe = ">=15.0.0,<16.0.0"
+erpnext = ">=15.0.0,<16.0.0"
+hrms = ">=15.0.0,<16.0.0"
+
 # No pytest extra and no [tool.pytest.ini_options] on purpose: the suite runs under the
 # bench, via `bench --site test.localhost run-tests --app apex` (.github/workflows/
 # test.yml). 271 of the 358 test_*.py files subclass frappe's FrappeTestCase, which needs

@@ -1,12 +1,12 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Pinning tests for the batched _worker_today_dispatch_trip resolver ( N+1).
 
-The resolver used to make O(trips x requests) DB round-trips on the worker
-boarding poll (a hot, guest-facing path): one Route Plan lookup per trip, one
-assigned-request read per trip, and one Transport Request Worker + Transport
-Request read per candidate. collapses those into three bulk reads joined in
-memory. Behaviour is byte-identical, so these tests pin the resolver OUTPUT
-against a real multi-trip x multi-request fixture:
+The resolver collapses what would otherwise be O(trips x requests) DB round-trips on the
+worker boarding poll (a hot, guest-facing path) — one Route Plan lookup per trip, one
+assigned-request read per trip, and one Transport Request Worker + Transport Request
+read per candidate — into three bulk reads joined in memory. These tests pin the
+resolver's OUTPUT against a real multi-trip x multi-request fixture, so a change that
+reintroduces per-row DB calls or alters the resolved shape fails here:
 
   * the earliest-departing trip the worker is on wins, and the returned
     (dispatch_trip, transport_request, pickup_point, accommodation_building)
@@ -15,10 +15,10 @@ against a real multi-trip x multi-request fixture:
     trip's direct request) still resolves to that trip + assigned request;
   * a client-supplied transport_request narrows the own-set to that request's trip.
 
-The two workers and the building are the shipped fixtures, which is what replaced the
-``test_ignore`` block that used to prune the HR/master auto-dependency walk. The requests
-and trips are still inserted with ignore_validate/links/mandatory so the resolver logic is
-exercised without a full fleet graph.
+The two workers and the building are the fixtures ``test_dependencies`` (line 32) names;
+Frappe stands them up once per run. The requests and trips are still inserted with
+ignore_validate/links/mandatory so the resolver logic is exercised without a full fleet
+graph.
 """
 
 from __future__ import annotations

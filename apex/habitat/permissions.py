@@ -18,9 +18,9 @@ what is in scope. Frappe hands the DocType to both hooks, so one registration ea
 ``hooks.py`` covers every DocType.
 
 Adding a scoped DocType is a row in ``BUILDING_SCOPE`` plus its two ``hooks.py``
-entries. It is deliberately not a new function: the previous shape carried one
-hand-written function per DocType, and threading a single new argument through them
-(commit 7bd58d09, the ``applicable_for`` narrowing) had to edit all thirty-four.
+entries. It is deliberately not a new function: a hand-written function per DocType
+would need threading any single new cross-cutting argument — an ``applicable_for``
+narrowing, say — through all thirty-four individually.
 
 Two invariants hold on every path and are the reason the edge cases look asymmetric:
 

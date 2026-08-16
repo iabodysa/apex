@@ -17,8 +17,8 @@ Notification Settings rows, not about call shape.
 
 Nothing here builds a User. ``test_dependencies = ["User"]`` stands frappe's own three
 unprivileged fixture users up once per run, and each case that needs an unwilling or
-disabled recipient BORROWS one and hands it back — the previous form of this file minted
-three Users and deleted them again in class cleanup.
+disabled recipient BORROWS one and hands it back, rather than minting and deleting Users
+per class.
 """
 
 from __future__ import annotations

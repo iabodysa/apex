@@ -103,7 +103,7 @@ class TestFreelancer(FrappeTestCase):
         Manager holds no permlevel-1 row, so its create was REMOVED rather than
         left to fail: `Document.insert` resets the unwritable PII to the
         `frappe.new_doc` value (empty) at document.py:306 before
-        `_validate_mandatory` runs at :310, so the button used to raise
+        `_validate_mandatory` runs at :310, so a create button would raise
         MandatoryError on every single press.
 
         The refusal is caught by NAME: `frappe.PermissionError` does not descend
@@ -159,11 +159,12 @@ class TestFreelancer(FrappeTestCase):
         """The core proof: with the custom Party Type registered, a Journal Entry
         can carry party_type='Freelancer' + party=<a freelance>.
 
- The registration used to be a class-level ``skipUnless``, evaluated
-        at IMPORT time — so the one test that proves the shipped ``party_type.json``
-        fixture actually landed was silently dropped whenever it had not. Assert it:
-        the Party Type is shipped by this app and erpnext is a required app, so a
-        missing one is a fixture regression, not a portability concern.
+        This registration must not be gated behind a class-level ``skipUnless``:
+        evaluated at IMPORT time, a skip would silently drop the one test that proves
+        the shipped ``party_type.json`` fixture actually landed, on every run where it
+        had not. Assert it: the Party Type is shipped by this app and erpnext is a
+        required app, so a missing one is a fixture regression, not a portability
+        concern.
         """
         self.assertTrue(
             frappe.db.exists("DocType", "Journal Entry"),

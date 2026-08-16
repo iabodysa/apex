@@ -1,10 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Accommodation Ledger's own contract: a row needs a posting date, a building and a ledger type.
 
-The building comes from ``test_records.json``, so the link is really checked. The previous form of
-this file pointed at a building named ``QA-BLDG`` that has never existed on any site and passed
-``ignore_links=True`` to stop Frappe noticing, and carried a sixteen-line ``test_ignore`` block for
-masters the ledger does not link to.
+The building comes from ``test_records.json``, so the link is really checked, rather than a
+``QA-BLDG`` name that exists on no site with ``ignore_links=True`` passed to stop Frappe noticing,
+or a sixteen-line ``test_ignore`` block for masters the ledger does not link to.
 """
 
 from __future__ import annotations
@@ -45,7 +44,7 @@ class TestAccommodationLedger(FrappeTestCase):
             row.insert(ignore_permissions=True)
 
     def test_a_row_saved_without_a_ledger_type_silently_takes_the_first_one(self):
-        """The previous form of this case asserted MandatoryError and had never run to find out.
+        """A required Select left empty is not caught by the mandatory check.
 
         ``ledger_type`` is a required Select, and Frappe fills a required Select with the FIRST of
         its options when it is left empty — so the mandatory pass never fires and the row is

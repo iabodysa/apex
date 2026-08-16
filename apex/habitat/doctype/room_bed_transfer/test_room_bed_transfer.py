@@ -2,10 +2,10 @@
 """Room Bed Transfer's own contract: it needs an assignment and a date, it refuses a target room
 that carries no building, and cancelling it puts the resident back where he started.
 
-The building, its rooms, its beds and the employee all come from ``test_records.json``. The one
-record still built per case is the roomless room the integrity guard exists to reject — that is the
-subject, not scaffolding. The previous form of this file rebuilt a Company, a Site, a Building, a
-Room, a Bed, an Employee, a Project and an Assignment for every one of its five methods.
+The building, its rooms, its beds and the employee all come from ``test_records.json`` rather than
+a Company, a Site, a Building, a Room, a Bed, an Employee, a Project and an Assignment rebuilt for
+every one of its five methods. The one record still built per case is the roomless room the
+integrity guard exists to reject — that is the subject, not scaffolding.
 """
 
 from __future__ import annotations

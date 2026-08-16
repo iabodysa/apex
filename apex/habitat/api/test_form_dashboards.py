@@ -4,8 +4,8 @@ than replacing it, and the Building metrics reader returns its shape.
 
 The two merge cases never needed a database at all — they hand the override a native payload and
 read the result. Only the metrics case needs a building, and that one comes from
-``test_records.json``. The previous form built a Company, a Cost Center lookup, a Site and a
-Building inside the metrics test to read five dictionary keys back.
+``test_records.json`` rather than a Company, a Cost Center lookup, a Site and a Building built
+inside the test to read five dictionary keys back.
 """
 
 from __future__ import annotations

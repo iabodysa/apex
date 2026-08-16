@@ -59,7 +59,7 @@ class BuildingLicense(Document):
         """Stamp ``last_renewal_date`` whenever the license is renewed.
 
         A renewal is recorded when the validity (``expiry_date``) is pushed
-        forward versus the previously-recorded value — the operator has
+        forward versus the last-recorded value — the operator has
         extended the license. Two real renewal paths are covered:
 
         * editing a still-draft license and pushing ``expiry_date`` forward; and

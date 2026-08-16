@@ -63,11 +63,11 @@ def is_cached(points):
 def _remember(points, path, ttl):
     """Store a routing answer under its own expiring key.
 
-    It used to be a field in one Redis HASH via ``hset``. A hash field carries no TTL,
-    so ``CACHE_TTL_SECONDS`` could not be applied to it and was never referenced — which
-    meant a router outage cached the empty answer FOREVER, and every later request for
-    that route drew no line until someone flushed Redis. One key per route makes the
-    lifetime expressible, so a failure is forgotten in minutes and retried.
+    One key per route, not a field in one shared Redis HASH via ``hset``: a hash field
+    carries no TTL, so ``CACHE_TTL_SECONDS`` could not apply to it, and a router outage
+    would cache the empty answer FOREVER — every later request for that route would draw
+    no line until someone flushed Redis. One key per route makes the lifetime
+    expressible, so a failure is forgotten in minutes and retried.
     """
     frappe.cache.set_value(_cache_key(points), path, expires_in_sec=ttl)
 

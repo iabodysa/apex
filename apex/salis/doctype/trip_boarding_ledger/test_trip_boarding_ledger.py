@@ -12,9 +12,9 @@ mutable Trip Boarding State child into an immutable ledger row:
     reversal_of) and flags the original is_cancelled, leaving the original intact,
     and is idempotent (no double reversal).
 
-The three workers on the manifest are the shipped Employee fixtures; naming the
-dependency is what replaced the ``test_ignore`` block that used to prune the walk behind
-their construction. The trip is the subject and is still built here.
+The three workers on the manifest are the shipped Employee fixtures ``test_dependencies``
+(line 29) names; Frappe stands them up instead of the file walking its own
+auto-dependencies. The trip is the subject and is still built here.
 """
 
 from __future__ import annotations

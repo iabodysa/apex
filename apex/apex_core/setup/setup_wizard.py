@@ -67,11 +67,11 @@ def apply_apex_setup(args=None):
 def _created_company():
     """The company this wizard has just created, read rather than asked for.
 
-    The Apex slide used to carry Link fields at Company and Cost Center. Frappe renders
+    The Apex slide carries no Link fields at Company or Cost Center: Frappe renders
     every slide before it runs a single stage, and ERPNext creates the company in a
-    stage, so both pickers queried empty tables — the operator was asked a question he
-    could not answer, and the blank he was forced to leave was written down as a choice.
-    ERPNext's stage runs before this completion hook, so both values exist by now."""
+    stage, so a picker on the slide would query an empty table, forcing the operator to
+    leave blank a choice he could not make. ERPNext's stage runs before this completion
+    hook, so both values already exist here."""
     return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
 
 

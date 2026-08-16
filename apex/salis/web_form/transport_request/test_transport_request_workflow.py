@@ -396,7 +396,7 @@ class TestTransportRequestWorkflow(FrappeTestCase):
             "from_location": "HQ",
             "to_location": "Ministry Office",
             "project": self.project,
-            # The edit the form used to invite: a requester who is not the creator.
+            # The edit the form allows: a requester who is not the creator.
             "requested_by": self.requester,
             "source_channel": "Desk",
             "status": "New",

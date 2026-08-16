@@ -277,10 +277,10 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         )
 
     def test_cancelling_a_delivery_clears_the_audit_trail_it_stamped(self):
-        """move_asset_on_delivery stamps previous_*/last_movement_date and on_cancel
-        reset none of them, so a cancelled delivery left the asset back in the intake
-        store claiming it had previously been in the intake store, dated to a
-        delivery that no longer exists."""
+        """move_asset_on_delivery stamps previous_*/last_movement_date, and on_cancel
+        must reset them along with the location: leaving them stamped would show the
+        asset back in the intake store while still claiming it had already been in the
+        intake store, dated to a delivery that no longer exists."""
         before = self._audit_trail()
         self.assertFalse(before.previous_building, "seed asset must carry no previous building")
         self.assertFalse(before.last_movement_date, "seed asset must carry no movement date")
@@ -312,8 +312,8 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
 
     def test_cancelling_a_superseded_delivery_cannot_drag_the_asset_back(self):
         """A Delivered delivery followed by a movement onward: cancelling the delivery
-        used to restore from_building blindly, teleporting the asset back into the
-        intake store it had physically left."""
+        must not restore from_building blindly, teleporting the asset back into the
+        intake store it has physically left."""
         d = self._delivery()
         code = self._release(d)
         frappe.set_user(self.receiver)

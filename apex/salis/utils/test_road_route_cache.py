@@ -76,9 +76,10 @@ class TestTheRouterOutageExpires(FrappeTestCase):
     def test_the_old_hash_shape_could_not_have_expired(self):
         """The negative control, stated as the defect itself rather than as a claim.
 
-        Writing the failure the way the code used to — a field in one shared hash —
-        leaves Redis reporting -1 for that hash, which is 'no expiry set'. No TTL
-        argument could have changed that, which is why the constant sat unused.
+        Writing the failure as a field in one shared Redis hash — the shape
+        ``road_route._remember`` (road_route.py:63-72) rejects — leaves Redis
+        reporting -1 for that hash, which is 'no expiry set'. No TTL argument can
+        change that: a hash field carries no per-field expiry at all.
         """
         frappe.cache.hset(road_route.CACHE_KEY, "probe-fingerprint", [])
         try:

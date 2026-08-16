@@ -152,9 +152,10 @@ class RentalSettlement(Document):
         A Currency child column is NOT NULL DEFAULT 0, so the row as stored cannot tell a
         typed 0 from a blank. Only the incoming request can: a field the caller omitted
         arrives as None, a typed 0 arrives as 0. On a re-save the form posts the stored
-        number back, so the previously stored line answers instead - an amount that still
-        equals its own days x daily_rate was ours and follows an edit to either input,
-        one that differs was asserted by hand and stands.
+        number back, so ``stored`` — the doc-before-save row this method looks up —
+        answers instead: an amount that still equals its own days x daily_rate was ours
+        and follows an edit to either input, one that differs was asserted by hand and
+        stands.
         """
         if row.amount is None:
             return True

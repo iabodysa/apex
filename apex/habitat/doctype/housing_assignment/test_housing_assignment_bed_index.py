@@ -187,16 +187,12 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
         self.assertIn(ACTIVE_INDEX, after)
 
     def test_no_patch_is_still_claimed_for_the_bed_index(self):
-        """The declaration is now the ONLY delivery path, and the tree must say so.
-
-        This replaces a case asserting the opposite — that a legacy
-        ``patches/v0_7/add_bed_assignment_index`` had to stay registered so a site
-        mid-upgrade still got the index. Every patch was deleted by owner decision on
-        2026-08-07 because each had already run everywhere and a fresh install runs none:
-        the schema comes from the DocType JSON and ``on_doctype_update``. Asserting the
-        patch's continued presence graded a delivery path the app no longer has, so the
-        clause is inverted: a re-registered legacy patch would now be the defect, because
-        it would race the declaration and can only produce a second index for one path.
+        """The declaration is the ONLY delivery path for the bed index, and the tree
+        must say so: the schema comes from the DocType JSON and
+        ``on_doctype_update``, so a legacy ``patches/v0_7/add_bed_assignment_index``
+        registration is not required for a site mid-upgrade to get the index. A
+        re-registered legacy patch would be the defect: it would race the
+        declaration and can only produce a second index for one path.
         """
         app_root = str(Path(apex.__file__).resolve().parent)
         patch_path = os.path.join(

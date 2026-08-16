@@ -18,10 +18,11 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood. The suite moved out of the
-# app on 2026-08-02, so `dirname(__file__)/..` named `.claude/tests/apex`, a tree holding
-# nothing but test modules: every source scan read through here graded an empty file list
-# and passed, and the translation reader died on an ar.csv that is not there.
+# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
+# resolves against wherever this module's copy sits, and the maintainer mirror at
+# `.claude/tests/apex` (SUITE_PACKAGE below) holds nothing but test modules — a source
+# scan rooted there would grade an empty file list and pass, and the translation reader
+# would die on an ar.csv that is not there.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")

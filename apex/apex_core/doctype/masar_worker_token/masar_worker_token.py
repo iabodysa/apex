@@ -284,8 +284,8 @@ class MasarWorkerToken(Document):
         self._persist_pending_token_fields()
 
     def regenerate(self):
-        """Rotate the token (invalidates any previously shared link/QR). Returns the
-        fresh RAW token — the only moment it is available in clear."""
+        """Rotate the token; any link or QR shared before this call stops resolving.
+        Returns the fresh RAW token — the only moment it is available in clear."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         raw = self._mint()

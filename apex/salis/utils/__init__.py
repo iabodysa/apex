@@ -267,9 +267,8 @@ _CLEARANCE_SAVEPOINT = "apex_salis_rider_clearance"
 def _workflow_source_states(action):
     """The states the native Transport Request Workflow lists as sources for ``action``.
 
-    Read off the Workflow record rather than copied into this module. The copy that
-    used to live here was a verbatim duplicate of the workflow's own state -> doc_status
-    map, and a duplicate of a governance table is the one that drifts."""
+    Read off the Workflow record rather than copied into this module: a duplicate of a
+    governance table is the one that drifts."""
     from frappe.model.workflow import get_workflow_name
 
     workflow = get_workflow_name("Transport Request")
@@ -301,12 +300,12 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
 	   transition role, so the operational chain never deadlocks on a permission
 	   gap. It does not cover skipping the transition's own place in the chain.
 
-	The fallback writes ``status`` and nothing else. It used to carry a private
-	copy of the Workflow's state -> doc_status map and write ``docstatus`` with it,
-	which turned a permission gap into a submit: a Fleet Manager who cannot
-	authorize their own request could submit a Route Plan naming it and land it at
-	Scheduled / docstatus 1 with no Authorize transition, no Workflow Action row and
-	no ``before_submit``. Every transition this helper is used for moves between two
+	The fallback writes ``status`` and nothing else. A private copy of the Workflow's
+	state -> doc_status map, writing ``docstatus`` from it, turns a permission gap into
+	a submit: a Fleet Manager who cannot authorize their own request could submit a
+	Route Plan naming it and land it at Scheduled / docstatus 1 with no Authorize
+	transition, no Workflow Action row and no ``before_submit``. Every transition this
+	helper is used for moves between two
 	states of the SAME doc_status, so there is nothing legitimate for it to write; a
 	docstatus change belongs on the native path.
 
@@ -375,10 +374,8 @@ def revert_transport_request(
 	A Check field needs the second — NULL is not 0 to a filter, so a request whose
 	``is_assigned`` is nulled rather than zeroed still reads as assigned.
 
-	``docstatus`` is not written here either. Both reversal states are doc_status 1
-	(Scheduled <- Fulfilled), so there was never anything for it to change; the
-	private state -> doc_status map it used to read from is gone with the forward
-	helper's.
+	``docstatus`` is not written here either: both reversal states are doc_status 1
+	(Scheduled <- Fulfilled), so there is nothing for it to change.
 	"""
     if not tr_name:
         return None

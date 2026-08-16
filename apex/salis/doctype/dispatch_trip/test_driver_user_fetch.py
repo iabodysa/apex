@@ -7,9 +7,9 @@ portal user (``receiver_by_document_field`` reads a LOCAL field — it does not
 follow a dotted cross-doc path). These tests prove the fetch lands the driver's
 user on each transaction document.
 
-The rider, the vehicle and the portal user are all shipped fixtures — naming them as
-dependencies is what replaced the ``test_ignore`` block that used to prune the walk behind
-their construction. The user is the one ERPNext's own Employee fixture is wired to, so the
+The rider, the vehicle and the portal user are all shipped fixtures named by
+``test_dependencies`` (line 21); Frappe stands them up instead of the file walking its
+own auto-dependencies. The user is the one ERPNext's own Employee fixture is wired to, so the
 mirror has a real portal account to land without this file minting one. The link written
 onto the borrowed rider is cleared again after each case.
 """

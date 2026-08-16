@@ -6,13 +6,13 @@
 transition, it falls back to a direct write so the operational chain does not deadlock
 on a permission gap.
 
-That fallback used to carry a private copy of the Workflow's own state -> doc_status
-table and write ``docstatus`` from it. So a Fleet Manager who raises a Transport Request
-themselves — and whose self-approval the workflow's own Segregation-of-Duties condition
-refuses — could create a Route Plan naming it, submit the plan, and land the request at
-Scheduled / docstatus 1: authorized and submitted by its own requester, with no Authorize
-transition executed, no Workflow Action row and no ``before_submit`` re-check. An
-explicitly Rejected request went the same way.
+A fallback that carries its own private copy of the Workflow's own state -> doc_status
+table, writing ``docstatus`` from it directly, lets a Fleet Manager who raises a
+Transport Request themselves — and whose self-approval the workflow's own
+Segregation-of-Duties condition refuses — create a Route Plan naming it, submit the
+plan, and land the request at Scheduled / docstatus 1: authorized and submitted by its
+own requester, with no Authorize transition executed, no Workflow Action row and no
+``before_submit`` re-check. An explicitly Rejected request goes the same way.
 
 The fallback now writes ``status`` and nothing else, and only from a state the Workflow
 itself lists as a source for that action.

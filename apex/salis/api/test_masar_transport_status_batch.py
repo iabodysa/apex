@@ -1,10 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 """the worker transport read must not query a trip's status per row.
 
-``get_worker_transport`` already batch-fetches every Dispatch Trip the caller's
-requests point at, then used to issue one ``frappe.db.get_value`` per row for that
-same trip's ``status`` three lines below the batch. Commit 4baa8b17 introduced it,
-undoing a batching the original author had done deliberately.
+``get_worker_transport`` batch-fetches every Dispatch Trip the caller's requests
+point at, and must fold that same trip's ``status`` into the same batch rather than
+issuing a separate ``frappe.db.get_value`` per row three lines below it — a per-row
+read there silently reintroduces the N+1 this file guards against.
 
 The measurement, not the assertion, is the point: this counts the Dispatch Trip
 reads the endpoint makes and requires the count to stay flat as the request count

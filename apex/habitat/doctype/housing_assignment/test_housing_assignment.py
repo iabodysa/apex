@@ -184,11 +184,11 @@ class TestAccommodationAssignment(FrappeTestCase):
         }).insert(ignore_permissions=True).name
 
     def test_a_failed_submit_keeps_rows_written_earlier_in_the_same_request(self):
-        """on_submit used to wrap its occupancy writes in ``except Exception:
-        frappe.db.rollback(); frappe.throw(generic)``. ``frappe.db.rollback()`` takes
-        no savepoint, so it discarded the WHOLE request transaction — everything the
-        request wrote before the submit, not just this assignment — and replaced the
-        real error with "Could not update bed occupancy".
+        """on_submit must not wrap its occupancy writes in ``except Exception:
+        frappe.db.rollback(); frappe.throw(generic)``: ``frappe.db.rollback()`` takes
+        no savepoint, so it would discard the WHOLE request transaction —
+        everything the request wrote before the submit, not just this assignment —
+        and replace the real error with "Could not update bed occupancy".
 
         The recount is made to fail deliberately: nothing reachable from a fixture
         makes ``recalculate_spatial`` throw, and the point under test is what a

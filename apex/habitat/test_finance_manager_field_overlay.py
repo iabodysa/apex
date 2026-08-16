@@ -23,16 +23,16 @@ document, and the two levels are independent grants -- which is also why a perml
 row is never a duplicate of a permlevel-0 row and dedupe must key on the
 (role, permlevel) PAIR.
 
-THE 2026-07-27 DECISION -- Custody Damage Assessment now ALSO carries a permlevel-0
+CUSTODY DAMAGE ASSESSMENT IS THE EXCEPTION -- it ALSO carries a permlevel-0
 ``read`` row for Finance Manager, granted over three stated costs: the shipped role
 profile already pairs Finance Manager with Internal Auditor, who holds the read, so only
-a hand-assembled solo finance user lacked it; the permlevel-1 row unlocks exactly one
+a hand-assembled solo finance user lacks it; the permlevel-1 row unlocks exactly one
 field while a level-0 read is the WHOLE record, resident identity included; and Finance
 Manager is unscoped, so the read spans every building. ``TestTheGrantedReadIsWhatWasDecided``
 keeps that cost visible in the test instead of only in a decision note. The other four keep
 the overlay-only shape. The row also carries ``report``; the register it was granted for,
-``Custody Damage Register``, was retired by ``apex/patches/v2_3/retire_replaced_reports.py``,
-so the flag now opens no shipped report and nothing here grades it.
+``Custody Damage Register``, is retired by ``apex/patches/v2_3/retire_replaced_reports.py``,
+so the flag opens no shipped report and nothing here grades it.
 
 MAINTENANCE REQUEST IS A SECOND EXCEPTION and is asserted separately below: it ships an
 ``All`` permlevel-0 row (read+create, if_owner), and every logged-in user holds ``All``
@@ -70,7 +70,8 @@ OVERLAY = {
 
 FINANCE = "Finance Manager"
 
-# The one of the five the 2026-07-27 decision granted a permlevel-0 read on.
+# The one of the five DocTypes granted a permlevel-0 read for Finance Manager (see the
+# module docstring for the reasons).
 GRANTED = "custody_damage_assessment"
 
 # Fields the granted read newly puts in front of Finance Manager. Named so the cost of
@@ -135,8 +136,8 @@ def rows_for(meta: dict, role: str) -> dict:
 class TestThePatternStillShips(unittest.TestCase):
     """Change-detector. Adding a permlevel-0 Finance Manager row to one of these five is
     a document grant, so it may not arrive as a silent side effect of unrelated work.
-    Custody Damage Assessment is the one that HAS been argued and granted, on
-    2026-07-27; every other slug still has to come through the same door."""
+    Custody Damage Assessment is the one DocType that carries that grant already;
+    every other slug still has to come through the same door."""
 
     def test_four_ship_permlevel_one_only_and_the_granted_one_carries_both(self):
         for slug in OVERLAY:
@@ -180,8 +181,8 @@ class TestThePatternStillShips(unittest.TestCase):
 class TestLayeredNotFlat(unittest.TestCase):
 
     def test_a_solo_finance_manager_still_cannot_open_three_of_the_five(self):
-        """Two are now out of this set for different reasons: Maintenance Request through
-        its ``All`` row, Custody Damage Assessment through the 2026-07-27 grant."""
+        """Two are out of this set for different reasons: Maintenance Request through
+        its ``All`` row, Custody Damage Assessment through its permlevel-0 read grant."""
         for slug in OVERLAY:
             if slug in ("maintenance_request", GRANTED):
                 continue
@@ -230,7 +231,7 @@ class TestLayeredNotFlat(unittest.TestCase):
 
 
 class TestTheGrantedReadIsWhatWasDecided(unittest.TestCase):
-    """The 2026-07-27 grant and its price, asserted together."""
+    """The Custody Damage Assessment grant and its price, asserted together."""
 
     def test_a_solo_finance_manager_now_opens_the_record_and_reads_the_resident(self):
         """One method on purpose: the access and what it exposes are the same fact, and
@@ -258,7 +259,7 @@ class TestTheGrantedReadIsWhatWasDecided(unittest.TestCase):
                     "if it was renamed, rename it here too",
                 )
 
-        # A read, and after 2026-07-31 the report surface over it. Any OTHER right turning
+        # The grant covers exactly ``read`` and ``report``. Any OTHER right turning
         # 1 is a widening no one decided. ``report`` is deliberately absent from this list
         # and asserted positively in TestTheReportGrantIsBothHalves instead.
         for ptype in ("write", "create", "submit", "cancel", "delete", "export", "share"):
@@ -324,9 +325,9 @@ class TestTheReasonIsRecordedBesideThePattern(unittest.TestCase):
                 path = os.path.join(_HABITAT_DOCTYPES, slug, f"{slug}.py")
                 with open(path, encoding="utf-8") as handle:
                     head = handle.read(2400)
-                # The board id this used to also assert is deliberately gone: a card
-                # reference means nothing to a reader without the board, and pinning
-                # one here blocked draining it from the five docstrings.
+                # This asserts MARKER only, never a board/card id: a card reference means
+                # nothing to a reader without the board, and pinning one here would block
+                # draining it from the five docstrings.
                 self.assertIn(self.MARKER, head, f"{slug}: permlevel reason no longer recorded")
 
 

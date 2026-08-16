@@ -3,9 +3,9 @@
 writes one signed row, reverse_stock_entries posts the negative mirror, and nobody may create a
 row by hand.
 
-The building, the article and the employee all come from ``test_records.json``; the previous form
-of this file built a Company, a Site, a Building, a Custody Asset Category, a Custody Article and
-an Employee in ``setUp``, per test method, to post two ledger rows.
+The building, the article and the employee all come from ``test_records.json`` rather than a
+Company, a Site, a Building, a Custody Asset Category, a Custody Article and an Employee built in
+``setUp`` per test method, to post two ledger rows.
 """
 
 from __future__ import annotations
@@ -66,8 +66,8 @@ class TestAccommodationStockLedger(FrappeTestCase):
 
     def test_a_drain_entry_carries_a_negative_signed_quantity(self):
         # The engine refuses to move more out of a holder than the holder has, so the custody the
-        # drain empties is filled first. The previous form of this case posted the -3 against an
-        # employee holding nothing and had never run to find out that the policy refuses it.
+        # drain empties is filled first: posting the -3 straight against an employee holding
+        # nothing would be refused by that policy instead of exercised.
         post_stock_entry(
             item_type="Custody Article", item=self.article, qty=3, building=BUILDING,
             employee=self.employee, voucher_type="Test Voucher", voucher_no="TV-NEG-0",

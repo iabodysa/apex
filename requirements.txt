@@ -1,2 +1,0 @@
-# Frappe applications and Python runtime packages are declared in hooks.py and
-# pyproject.toml/setup.py respectively.

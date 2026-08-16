@@ -7,14 +7,13 @@ same three cases differing only in the module, the route string and the role nam
 one parameterised case, and it is now ``GATED_SURFACES`` below. Every distinct value the
 four files carried is still driven; nothing was dropped to make the table tidy.
 
-THE GATE MOVED, AND THESE ASSERTIONS FOLLOWED IT. The doors used to be checked through
-``ctx.has_portal_role`` / ``ctx.can_view`` / ``ctx.has_fleet_role`` and "no csrf_token for a
-user without the role". None of those exist now: every portal door goes through
-``publish_portal_context``, which issues the CSRF token to every AUTHENTICATED caller as
-part of the shared shell, and expresses the gate as ``boot["apex_portal"]["capabilities"]``
-— an empty list for a user the role check refused. Asserting the old field names against
-the current code passed on ``None`` while proving nothing, which is what the
-pre-conversion form of these tests did.
+THESE ASSERTIONS TARGET WHERE THE GATE LIVES. Every portal door goes through
+``publish_portal_context`` (apex_core/utils/portal_bootstrap.py:132), which issues the CSRF
+token to every AUTHENTICATED caller as part of the shared shell, and expresses the gate as
+``boot["apex_portal"]["capabilities"]`` — an empty list for a user the role check refused.
+Asserting against ``ctx.has_portal_role``, ``ctx.can_view``, ``ctx.has_fleet_role``, or a
+missing csrf_token instead proves nothing: none of those fields exist on the context this
+function publishes, so the assertion would pass on ``None`` without checking anything.
 
 Two doors are NOT in the table because their contract is genuinely different, and each
 keeps its own case below:

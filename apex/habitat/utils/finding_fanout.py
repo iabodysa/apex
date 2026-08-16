@@ -45,7 +45,7 @@ def fan_out_findings(findings_rows, source_doc) -> list[str]:
             ``self.findings`` on a Safety Task Execution or one of the SIR
             finding tables).
         source_doc: the parent Document driving the fan-out (a Safety Task
-            Execution or a Safety Inspection Report). Used to map shared fields
+            Execution or a Safety Inspection Report), read to map shared fields
             (building, inspector) and to decide which source back-link to stamp.
 
     Returns:

@@ -2,9 +2,9 @@
 """Guards for the Unified Action Inbox aggregation API.
 
 Most tests are pure-Python source guards (no live site). ``TestActionInboxOrphanHandling``
-adds behavioural regression coverage for the orphaned-reference crash (2026-06-02: a retired
-``Support Ticket`` left 286 Open Workflow Actions whose deleted controller made the inbox
-500 on ``get_transitions``) and needs a site.
+adds behavioural regression coverage for the orphaned-reference crash: a Workflow Action
+referencing a DocType that no longer exists crashes the inbox with a 500 on
+``get_transitions``, and this coverage needs a site.
 
 NOTHING HERE IS CONVERTED TO A FIXTURE, AND THAT IS THE POINT. Every record this file builds
 is a Workflow Action pointing at a DocType that must NOT exist — an orphan cannot come from
@@ -171,7 +171,8 @@ class TestActionInboxPage(unittest.TestCase):
 
 
 class TestActionInboxOrphanHandling(FrappeTestCase):
-    """Behavioural regression for the 2026-06-02 orphaned-reference crash."""
+    """Behavioural regression for the orphaned-reference crash: a Workflow Action pointing
+    at a deleted DocType controller crashes ``get_transitions`` with a 500."""
 
     MISSING_DT = "Zz Retired DocType For Inbox Test"
 

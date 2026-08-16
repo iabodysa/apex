@@ -63,10 +63,10 @@ def seed_portal_identities() -> None:
 
     ``enabled: 0`` is what actually closes the door: frappe/auth.py:274-277 refuses a
     login for a user that is not enabled and frappe/auth.py:707 refuses its API key the
-    same way. ``simultaneous_sessions``, which this used to zero, gates neither — it is
-    read as ``... or 1`` (frappe/sessions.py:66) and only caps concurrent sessions, so
-    zero meant one. No password is set either, so there is nothing to authenticate
-    against in the first place.
+    same way. ``simultaneous_sessions`` gates neither login path — it is read as
+    ``... or 1`` (frappe/sessions.py:66) and only caps concurrent sessions, so a zero
+    value still permits one. No password is set either, so there is nothing to
+    authenticate against in the first place.
 
     ``frappe.set_user`` never consults ``enabled`` (frappe/__init__.py:641 only rewrites
     ``frappe.local.session``), so ``as_capacity`` still reaches the identity, and

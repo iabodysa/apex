@@ -87,10 +87,10 @@ class TestAccommodationLease(FrappeTestCase):
 class TestRegenerateScheduleFailure(FrappeTestCase):
     """What a REFUSED ``regenerate_schedule`` costs the rest of the request.
 
-    The endpoint used to wrap its ``doc.save()`` in ``except Exception:
-    frappe.db.rollback(); frappe.throw(generic)``. ``frappe.db.rollback()`` takes no
-    savepoint, so it discarded the WHOLE request transaction — every row written
-    before this endpoint was reached, not just the lease — and reported "Could not
+    The endpoint must not wrap its ``doc.save()`` in ``except Exception:
+    frappe.db.rollback(); frappe.throw(generic)``: ``frappe.db.rollback()`` takes no
+    savepoint, so it would discard the WHOLE request transaction — every row written
+    before this endpoint was reached, not just the lease — and report "Could not
     save changes" in place of the validation error that actually refused the save.
 
     The refusal below is real, not injected: an existing lease is widened into an

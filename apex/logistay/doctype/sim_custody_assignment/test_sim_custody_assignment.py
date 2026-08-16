@@ -179,9 +179,10 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         ``setUpClass`` while its ``tearDown`` issues a full ``frappe.db.rollback()``, so
         the first method to run takes that shared state down with it.
 
-        The guard used to run for Lost/Terminated only, which left a back-dated Return,
-        Suspend or Transfer to submit successfully and change nothing — the operator gets
-        a submitted event and a SIM whose custody never moved.
+        The guard must run for every event type, not Lost/Terminated only: scoped that
+        narrow, a back-dated Return, Suspend or Transfer would submit successfully and
+        change nothing — the operator gets a submitted event and a SIM whose custody
+        never moved.
         """
         sim = self._sim(mobile="0551000042")
         self._event(

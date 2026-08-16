@@ -1,11 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """A settlement line typed as zero and a line left blank are two different facts.
 
-``validate`` used to overwrite every draft line with days x daily_rate, so an operator
-could not record that a vehicle owed nothing: a row of days=3, daily_rate=100, amount=0
-saved as 300. A settlement claiming nothing then reported a perfect match against the
-rental accrual ledger, because ``accrued_total`` was the recomputed 300 rather than the
-0 that was typed.
+``validate`` must overwrite a draft line's amount only when ``_amount_was_derived``
+says it is ours to recompute (rental_settlement.py:149-164), not every draft line
+unconditionally: a row of days=3, daily_rate=100, amount=0 must save as 0, not the
+recomputed 300. Overwriting an explicit zero would make a settlement claiming nothing
+report a perfect match against the rental accrual ledger, since ``accrued_total`` would
+then read the recomputed 300 rather than the 0 the operator typed.
 
 The distinction was measured before it was relied on. A Currency child column is NOT NULL
 DEFAULT 0, so the stored row cannot carry it; only the incoming request can, where an

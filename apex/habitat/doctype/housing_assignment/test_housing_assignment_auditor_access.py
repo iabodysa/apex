@@ -76,7 +76,7 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
         auditor = self._auditor()
         frappe.set_user(auditor)
 
-        # Half 1 — THE OPEN. get_report_doc carries both gates the role used to die on:
+        # Half 1 — THE OPEN. get_report_doc carries both gates the role must clear:
         # Report.is_permitted() at query_report.py:41 and has_permission(ref, "report")
         # at :47. Calling it is the real open path, not a re-implementation of it.
         opened = get_report_doc("Accommodation Occupancy Summary")

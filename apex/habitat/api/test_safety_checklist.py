@@ -398,10 +398,10 @@ class TestSafetyChecklist(FrappeTestCase):
         self.assertIn("Monthly", due)
 
     def test_a_failed_cadence_does_not_take_the_successful_ones_with_it(self):
-        """Each cadence stands alone (safety_checklist.py:480). One fire door that
-        cannot be recorded used to discard the whole daily-plus-weekly walk; the failed
-        cadence is now rolled back to its own savepoint and named in ``failed`` while
-        the cadences that succeeded stay recorded."""
+        """Each cadence stands alone (safety_checklist.py:480): a failed cadence is
+        rolled back to its own savepoint and named in ``failed``, while the cadences
+        that succeeded stay recorded. Without that isolation, one fire door that
+        cannot be recorded would discard the whole daily-plus-weekly walk."""
         self._insert_submitted_round("Weekly", today())
         before_daily = frappe.db.count(
             "Safety Round", {"building": self.building, "cadence": "Daily"}

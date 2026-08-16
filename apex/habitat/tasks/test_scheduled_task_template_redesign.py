@@ -13,10 +13,10 @@ Five tests:
   4. test_template_with_3_items_and_2_assignments_creates_6_instances
   5. test_frequency_override_is_used_when_set
 
-A sixth pinned the backfill patch to [pre_model_sync], because it read the legacy
-``building`` column before sync_all() dropped it. That patch is gone — ``apex/patches``
-no longer ships a ``v1_x`` package and patches.txt was emptied of already-run patches by
-the owner on 2026-08-07 — so there is nothing left for it to grade.
+A sixth test would grade the backfill patch pinned to [pre_model_sync], because it read the legacy
+``building`` column before sync_all() dropped it. That patch is gone: ``apex/patches``
+no longer ships a ``v1_x`` package, and patches.txt carries no already-run patches —
+so there is nothing left for a sixth test to grade.
 """
 
 from __future__ import annotations

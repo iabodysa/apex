@@ -100,8 +100,8 @@ class TestASelfNamedIdentifierIsRefusedByTheLoaderItself(unittest.TestCase):
 
     def test_a_contract_id_equal_to_its_doctype_is_refused_before_get_value(self):
         """``move_to_contract`` checks the contract first, so the refusal lands before
-        the SIM is loaded AND before the ``get_value`` whose ``None`` used to become
-        an AttributeError."""
+        the SIM is loaded AND before the ``get_value`` call whose ``None`` return would
+        otherwise raise an AttributeError."""
         self._refuses(
             sim_actions,
             lambda: _move_to_contract("SIM-2026-00001", CONTRACT_DOCTYPE),

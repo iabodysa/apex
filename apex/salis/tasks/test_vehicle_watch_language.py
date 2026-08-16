@@ -30,7 +30,7 @@ JOB_NAMES = (
     "vehicle_utilization_summary",
 )
 
-# The spliced halves the compliance watcher used to hand a translator on their own.
+# The bare fragments the compliance watcher's msgids must never carry on their own.
 FRAGMENTS = ("expired on", "expires on")
 
 

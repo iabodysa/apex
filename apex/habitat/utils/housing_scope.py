@@ -2,9 +2,9 @@
 """Which Active buildings the caller may see, derived once.
 
 Three read endpoints — the Front Desk portfolio, its empty-state explainer, and the
-Arrivals Desk building picker — each need the same answer, and each used to re-derive
-it from the two ``permissions`` primitives. The derivation lives here so a change to
-what "in scope" means reaches all three.
+Arrivals Desk building picker — each need the same answer. The derivation lives here,
+not re-derived independently in each endpoint from the two ``permissions`` primitives,
+so a change to what "in scope" means reaches all three.
 """
 
 from __future__ import annotations

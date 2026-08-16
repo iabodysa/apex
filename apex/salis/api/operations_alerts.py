@@ -328,8 +328,7 @@ def resolve_alert(name, note=None):
 
     Permission is re-checked as ``write`` on the referenced document. An audit
     comment lands on the document with the resolver's note. If the underlying
-    condition still holds, the next scheduled pass queues the document again —
-    exactly as the retired alert dedupe window used to re-raise.
+    condition still holds, the next scheduled pass queues the document again.
     """
     reason = (note or _("Resolved by {0}").format(frappe.session.user)).strip()
     ref = _queue_ref_checked(name)

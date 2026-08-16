@@ -13,8 +13,8 @@ These invariants are proven against the live controller and resolver:
   * the desk issuer shows the raw once while the row it wrote stores only the hash.
 
 Nothing here builds a worker. ``test_dependencies = ["Employee"]`` stands ERPNext's own
-Employee fixtures up once per run — the previous form of this file minted a fresh Employee
-per test method (four Employees, and a Company lookup for each) to hang one token on.
+Employee fixtures up once per run, so every case hangs its token on a shared Employee
+instead of minting one (and its Company lookup) per method.
 
 ONE TOKEN PER EMPLOYEE IS THE MODEL, so the fixture employee cannot carry two at once:
 ``autoname`` names the row after the party and ``employee`` is unique. ``FrappeTestCase``

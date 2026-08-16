@@ -362,12 +362,12 @@ def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee``, scoped via the
     child table.
 
-    Rejected and Cancelled are excluded; Fulfilled is NOT, and the docstring used to
-    claim otherwise. It is the caller that partitions these rows into the worker's
-    upcoming and past rides, so dropping Fulfilled would empty the past half of his
-    screen. The list is unbounded and has no date floor, which is a real cost on a
-    long-tenured worker's 10-second poll — recorded here rather than silently narrowed,
-    because paging it changes what the screen shows."""
+    Rejected and Cancelled are excluded; Fulfilled is included. It is the caller that
+    partitions these rows into the worker's upcoming and past rides, so dropping
+    Fulfilled would empty the past half of his screen. The list is unbounded and has
+    no date floor, which is a real cost on a long-tenured worker's 10-second poll —
+    recorded here rather than silently narrowed, because paging it changes what the
+    screen shows."""
     parents = frappe.get_all(
         "Transport Request Worker",
         filters={"employee": employee, "parenttype": "Transport Request"},

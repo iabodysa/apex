@@ -1,11 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """The capacity identity is seeded with its login closed, and converges if it was not.
 
-``simultaneous_sessions = 0`` used to stand for "closed": frappe reads that field as
+``enabled`` is the field the login refuses on (frappe/auth.py:274-277), and these cases
+hold the seeder to it, including for an identity created before the field was set — the
+seeder converges such a row rather than leaving it open (portal_identity_seed.py:76-78).
+``simultaneous_sessions`` does not stand for "closed": frappe reads that field as
 ``... or 1`` (frappe/sessions.py:66) and consults it only when capping concurrent
-sessions, so it gated nothing. ``enabled`` is the field the login refuses on
-(frappe/auth.py:274-277), and these cases hold the seeder to it — including for an
-identity created before the field was set, which the seeder used to skip.
+sessions, so it gates nothing.
 """
 
 from __future__ import annotations

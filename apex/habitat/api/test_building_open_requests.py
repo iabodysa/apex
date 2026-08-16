@@ -2,9 +2,8 @@
 """building_open_requests counts only the resident requests that are still open, and only the ones
 raised against the building it was asked about.
 
-Both buildings come from ``test_records.json``; the previous form of this file minted two throwaway
-buildings per test method so its counts would be delta-free. A savepoint gives the same isolation
-without the records.
+Both buildings come from ``test_records.json`` rather than being minted per test method: a
+savepoint gives the same delta-free isolation without duplicating the records.
 """
 
 from __future__ import annotations

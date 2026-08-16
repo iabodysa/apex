@@ -81,10 +81,10 @@ def _assignments_holding_custody(assignments) -> set:
     ONE definition serves the board, the quick-checkout guard and the checkout gate:
     the net Accommodation Stock Ledger balance, which is what
     ``housing_checkout._outstanding_custody_for_employee`` reads and what the stock
-    balance report and the value-at-risk card already use. The board previously asked
-    a different question — whether the assignment carried any Accommodation Custody
-    Item child row — and those rows are written by the desk form and cleared by
-    nothing, so a resident who returned everything stayed blocked for ever.
+    balance report and the value-at-risk card already use. Checking instead whether the
+    assignment carries any Accommodation Custody Item child row would break this: those
+    rows are written by the desk form and cleared by nothing, so a resident who returned
+    everything would stay blocked for ever.
 
     One bulk query regardless of occupancy: the ledger is read once for every
     employee on the board, never per bed.

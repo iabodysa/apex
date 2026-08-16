@@ -41,8 +41,8 @@ def depreciation_pct(original_cost, book_value):
 def health_state(original_cost, book_value):
     """The article's depreciation state as a STABLE key, never as display text.
 
-    The summary card used to count rows by comparing against the translated label, so
-    the count depended on the language the row was built in. The key is the fact; the
+    Counting rows by comparing against the translated label instead would make the
+    count depend on the language the row was built in. The key is the fact; the
     label is a rendering of it.
     """
     if not original_cost and book_value:

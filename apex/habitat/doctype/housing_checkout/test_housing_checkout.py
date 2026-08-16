@@ -305,9 +305,9 @@ class TestHousingCheckoutUnits(FrappeTestCase):
                 frappe._dict(article="QA-ART-RETURNED", return_status="Returned"),
             ],
             add_comment=lambda *args, **kwargs: None,
-            # on_submit stamps the clearance through db_set after the hand-off. The previous form
-            # of this stub carried no db_set, so the run died on `'NoneType' object is not
-            # callable` — it had never executed to find out.
+            # on_submit stamps the clearance through db_set after the hand-off, so the stub
+            # must provide a callable db_set or the run dies on `'NoneType' object is not
+            # callable`.
             db_set=lambda *args, **kwargs: None,
         )
 

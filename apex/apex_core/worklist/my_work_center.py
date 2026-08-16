@@ -25,8 +25,8 @@ This is the live aggregator — NO new DocType, NO cache. Every row is read with
 apply. Workflow transitions are applied by the native endpoints; this module only
 reads. WORKLIST_REGISTRY (legacy per-DocType registry) is kept for
 ``get_submitted_by_me_count`` / ``get_approved_last_48h_count`` Number Cards that
-still aggregate the user's own submitted documents — it is NOT used to source
-workflow actions (those come from Frappe's native Workflow Action DocType).
+still aggregate the user's own submitted documents; it does not source workflow
+actions, which come from Frappe's native Workflow Action DocType instead.
 """
 
 from __future__ import annotations

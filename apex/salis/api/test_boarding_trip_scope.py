@@ -4,8 +4,9 @@
 ``STAFF_ROLES`` is a bare role-set intersection, and two of its members — Fleet Project
 Manager and Fleet Supervisor — are absent from ``permissions.UNSCOPED_ROLES``: they are
 exactly the scoped roles the Dispatch Trip row-scope exists for. Holding one says the
-actor may act on THEIR project's trips, and the staff branch used to read the row by name
-with no project predicate at all, so eight whitelisted boarding endpoints handed another
+actor may act on THEIR project's trips, but a row read by name alone carries no project
+predicate and cannot distinguish in-project from out-of-project trips — so a staff branch
+that reads the row directly, instead of through the document gate, hands another
 project's manifest, boarding pass and boarding writes to whoever named the trip.
 
 The row read cannot make that distinction and no registered hook rescues it:

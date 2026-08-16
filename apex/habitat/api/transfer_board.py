@@ -15,10 +15,10 @@ builds + submits a real Room Bed Transfer so the existing controller runs:
   ``bed`` / ``room`` / ``building`` in place (no new assignment, no checkout, no
   ledger entry), and recalculates the room/building occupancy counters.
 
-The cross-building rule used to be raised HERE as well. It is not any more: this
-page is one caller among several, so a copy of the rule in the page left the Desk
-form, ``frappe.client`` REST and Data Import free to bypass it. The rule now lives
-only in the controller, where every path meets it, and this page inherits it.
+The cross-building rule lives only in the controller, where every path meets it, and
+this page inherits it rather than raising a copy of its own. Duplicating the rule here
+would leave the Desk form, ``frappe.client`` REST and Data Import free to bypass it,
+since this page is only one caller among several.
 
 Concurrency: the integrity guarantee lives in the controller, not in this page.
 The Room Bed Transfer controller is being hardened with a ``SELECT ... FOR

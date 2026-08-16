@@ -1,14 +1,13 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Maintenance Work Order lifecycle, driven by the roles that actually hold it.
 
-The completion half of this DocType used to be unreachable. ``mark_completed``
-demanded ``actual_start_date`` and ``actual_end_date``, neither of which is an
-allow_on_submit field, so once the Work Order was submitted no role on the site —
-not the Maintenance Technician, not a System Manager — could put a value in them.
-The shipped "Mark as Completed" button therefore threw for every Work Order whose
-"actual" dates had not been invented before the work began, and the suite missed it
-because both existing fixtures pre-filled those dates on the draft and inserted with
-``ignore_permissions=True``.
+``actual_start_date`` and ``actual_end_date`` are not allow_on_submit fields, so
+``mark_completed`` must set them itself rather than require them already present:
+once the Work Order is submitted, no role on the site — not the Maintenance
+Technician, not a System Manager — can put a value in them directly, so demanding
+them upfront would throw for every Work Order whose "actual" dates were not invented
+before the work began. A fixture that pre-fills those dates on the draft and inserts
+with ``ignore_permissions=True`` would hide that defect instead of catching it.
 
 ``TestMaintenanceWorkOrderLifecycle`` drives the real thing instead: a System Manager
 issues and submits the order, a Maintenance Technician scoped to the building by a
@@ -648,15 +647,16 @@ class TestMaintenanceWorkOrderSideEffects(MaintenanceWorkOrderPersonas):
         }).insert(ignore_permissions=True).name
 
     def test_a_failed_completion_keeps_rows_written_earlier_in_the_same_request(self):
-        """``mark_completed`` used to wrap its whole write sequence in
-        ``except Exception: frappe.db.rollback(); frappe.throw(generic)``.
-        ``frappe.db.rollback()`` takes no savepoint, so it discarded the WHOLE request
-        transaction — everything the request wrote before the completion, not just
-        this Work Order — and its "No changes were saved" message hid the failure.
+        """``mark_completed`` must not wrap its whole write sequence in
+        ``except Exception: frappe.db.rollback(); frappe.throw(generic)``:
+        ``frappe.db.rollback()`` takes no savepoint, so it would discard the WHOLE
+        request transaction — everything the request wrote before the completion, not
+        just this Work Order — and its "No changes were saved" message would hide the
+        failure.
 
         The fault is planted on the LAST step of the sequence on purpose: by then the
         evidence db_set, the request status write and the ledger insert have all
-        happened, so this is the case where a global rollback destroyed the most.
+        happened, so this is the case where a global rollback would destroy the most.
         """
         from unittest.mock import patch
 

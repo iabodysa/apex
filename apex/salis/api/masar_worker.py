@@ -21,13 +21,14 @@ four clauses, or is named an exception below. Breaking one is a defect.
    owns — never a scope to trust.
 3. Carry ``@rate_limit``: a passwordless bearer token on an unbounded endpoint is
    an unbounded credential. Writes are tighter than reads.
-4. A system write is the framework's own call with ``ignore_permissions=True`` on it,
-   nothing wrapped. An ``audit-ok`` comment beside it was deleted on 2026-08-07 because
-   a comment drifts from its line, and the wrapper that replaced it was deleted on
-   2026-08-08 because it renamed the grant without withdrawing one: 26 raw plus 105
-   named was the same 131 sites. The count that matters is the raw one.
+4. A system write is the framework's own ``ignore_permissions=True`` call, nothing
+   wrapped and no per-call comment beside it: a comment drifts out of sync with the
+   line it sits beside, and a wrapper can rename the grant without ever withdrawing
+   one, hiding the true count behind a layer of indirection. The count that matters
+   is the raw ``ignore_permissions=True`` count, not a named-helper count that can
+   silently diverge from it.
 
-Measured by AST over ``masar.py`` on 2026-08-08: 17 whitelisted endpoints, 14
+Measured by AST over ``masar.py``: 17 whitelisted endpoints, 14
 token-scoped, and all 14 resolve and rate-limit. The five writes
 (``create_worker_request``, ``notify_hr_iqama_expiring``, ``confirm_boarding``,
 ``create_worker_transport_request``, ``submit_trip_rating``) write only after the

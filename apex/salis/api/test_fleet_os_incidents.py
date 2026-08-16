@@ -3,10 +3,10 @@
 
 The /fleet board tabs read ``vehicle.damages`` (Vehicle Damage Write-Off rows),
 ``vehicle.accidents`` (Accident Vehicle Incident rows) and the card stripe reads
-``vehicle.stolen_info`` (the latest Theft incident). ``get_fleet_os`` used to
-return all three hardcoded empty, so the tabs always showed the empty state even
-for a vehicle that had incidents on record. This guards that they now carry the
-real rows in the exact shape the SPA render code reads.
+``vehicle.stolen_info`` (the latest Theft incident). This guards that
+``get_fleet_os`` carries the real rows, in the exact shape the SPA render code
+reads, for a vehicle that has incidents on record — not the three panels
+hardcoded empty regardless of what is on record.
 
 The empty assertion on the second fixture vehicle is non-vacuous: if a future
 refactor wrongly fanned every vehicle's incidents onto every card, the clean

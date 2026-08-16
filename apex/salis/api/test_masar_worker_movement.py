@@ -34,13 +34,12 @@ from apex.tests import factories
 class TestMasarSchemaInstall(FrappeTestCase):
     """Only the schema facts the behavioural cases below cannot reach.
 
-    Pruned 2026-08-15 (Overtesting). Two cases went: ``test_doctypes_installed``
-    asserted Trip Start Log and Trip Boarding Event exist, and
-    ``test_trip_start_log_is_submittable_in_salis`` asserted the meta says submittable —
-    both of which ``test_submit_posts_no_gl_entry`` below establishes by actually
-    inserting a Trip Start Log with a Trip Boarding Event child row and submitting it to
-    docstatus 1. A DocType you just submitted a document of is installed and submittable;
-    asserting it separately is the existence-versus-position mistake.
+    ``test_submit_posts_no_gl_entry`` below already establishes that Trip Start Log and
+    Trip Boarding Event exist and that Trip Start Log is submittable, by inserting a
+    Trip Start Log with a Trip Boarding Event child row and submitting it to docstatus 1.
+    A DocType you just submitted a document of is installed and submittable, so a case
+    that asserts either fact separately here repeats the existence-versus-position
+    mistake.
 
     What survives is the Habitat-Salis bridge field, because behaviour does NOT establish
     it: the read endpoint proves the link RESOLVES, but neither its target doctype nor

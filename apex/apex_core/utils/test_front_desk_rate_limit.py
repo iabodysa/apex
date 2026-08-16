@@ -160,11 +160,10 @@ class TestFrontDeskRateLimit(FrappeTestCase):
     def _driver_token(self, fixture):
         """A shipped Salis Driver and a live barcode for it.
 
-        The driver used to be minted here, one per call, so a case needing two distinct
-        scan subjects inserted two Salis Drivers to prove a quota is keyed per subject. The
-        subject is the CREDENTIAL, not the person, so the two shipped drivers carry it.
-        ``driver`` is unique on the token, and FrappeTestCase rolls back per class, so the
-        row is dropped when the case ends.
+        The subject is the CREDENTIAL, not the person, so two shipped Salis Drivers stand
+        ready for any case that needs two distinct scan subjects to prove a quota is keyed
+        per subject. ``driver`` is unique on the token, and FrappeTestCase rolls back per
+        class, so the row is dropped when the case ends.
         """
         driver = frappe.db.get_value("Salis Driver", {"full_name": fixture})
         token = frappe.get_doc(

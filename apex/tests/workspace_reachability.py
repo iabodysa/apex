@@ -34,10 +34,11 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood. The suite moved out of the
-# app on 2026-08-02, so `dirname(__file__)/..` named `.claude/tests/apex`, which holds no
-# workspace JSON at all — the glob went quiet and every sidebar guard reading through here
-# graded an empty set while reporting green.
+# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
+# resolves against wherever this module's copy sits, and the maintainer mirror at
+# `.claude/tests/apex` (source_tree.py's SUITE_PACKAGE) holds no workspace JSON at all —
+# a glob rooted there goes quiet and every sidebar guard reading through here grades an
+# empty set while reporting green.
 _APP = str(Path(apex.__file__).resolve().parent)
 _WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
 

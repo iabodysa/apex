@@ -686,11 +686,9 @@ class FuelTopupLifecycleTest(FrappeTestCase):
     @patch("apex.salis.doctype.fuel_request.fuel_request.frappe.db.get_value")
     def test_topup_is_applied_once_and_reversed_once(self, get_value, set_value, _lock, _timeline):
         """The idempotence flag is the controller's to write, so the flag write is what
-        is graded. The test used to set ``topup_applied`` by hand between the two calls,
-        which left the one line that makes the guard work — ``db_set("topup_applied", 1)``
-        — covered by nothing: deleting it kept the test green. Here the mock writes the
-        attribute back the way ``db_set`` does, so a controller that stopped setting the
-        flag would top the quota up twice and fail on the second call."""
+        is graded: the mock's ``db_set`` writes ``topup_applied`` back onto the doc the
+        same way the real ``db_set`` does. A controller that stops setting the flag tops
+        the quota up twice and fails on the second ``_apply_topup`` call."""
         get_value.return_value = SimpleNamespace(monthly_litres=100.0, status="Active")
         doc = SimpleNamespace(
             name="FR-1",

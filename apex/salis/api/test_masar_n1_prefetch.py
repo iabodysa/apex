@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Masar perf guard: the worker-route read path bulk-prefetches.
 
-The driver "my worker route today" endpoint folds three helpers that each used to
-issue one ``frappe.db.get_value`` per row inside a loop (N+1):
+The driver "my worker route today" endpoint folds three helpers, each guarded against
+issuing one ``frappe.db.get_value`` per row inside a loop (N+1):
 
   * ``_today_worker_trips``  — Route Plan.transport_request + Transport Request.service_line per trip
   * ``_registered_workers``  — Employee.employee_name per manifest row

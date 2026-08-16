@@ -170,11 +170,11 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         }).insert(ignore_permissions=True).name
 
     def test_a_failed_post_keeps_rows_written_earlier_in_the_same_request(self):
-        """on_submit used to wrap _post_ledger_row in ``except Exception:
-        frappe.db.rollback(); frappe.throw(generic)``. frappe.db.rollback() takes no
-        savepoint, so it discarded the WHOLE request transaction — every row written
+        """on_submit must not wrap _post_ledger_row in ``except Exception:
+        frappe.db.rollback(); frappe.throw(generic)``: frappe.db.rollback() takes no
+        savepoint, so it would discard the WHOLE request transaction — every row written
         before the submit was reached, not just this bill — and the generic message
-        then stood in for the error that actually failed the post.
+        would then stand in for the error that actually failed the post.
 
         Both halves are graded: the caller is handed the original exception (a
         RuntimeError, where the wrapper would have converted it to a

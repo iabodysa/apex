@@ -1,9 +1,9 @@
 # Copyright (c) 2026, AFMCO and contributors
 """get_site_address honours the form's current Site over the building's stored one.
 
-Regression for: switching the Site dropdown before saving used to show the
-OLD site's address, because the server read the building's saved `site` instead of
-the form's value. The endpoint now accepts the current `site` and prefers it.
+The endpoint accepts the current ``site`` argument and prefers it over the building's
+stored value. Reading the building's saved ``site`` instead would show the OLD site's
+address whenever the Site dropdown is switched before saving.
 """
 
 import frappe

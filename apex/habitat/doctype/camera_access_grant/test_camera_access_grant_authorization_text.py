@@ -138,8 +138,9 @@ class TestCameraAccessGrantAuthorizationText(FrappeTestCase):
         )
 
     def test_the_field_is_still_optional_and_still_a_user_link(self):
-        """The non-change. Text was rewritten; the column was not touched, so shipped
-        rows keep their value and no patch is owed."""
+        """The field's shape stays as shipped even where its description text differs:
+        fieldtype, options and reqd are unchanged, so existing rows keep their value
+        and no patch is owed."""
         field = self._field()
         self.assertEqual(field.get("fieldtype"), "Link")
         self.assertEqual(field.get("options"), "User")

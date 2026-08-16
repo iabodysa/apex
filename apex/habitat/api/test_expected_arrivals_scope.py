@@ -1,11 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """get_expected_arrivals — the Intake zone's pre-arrival manifest, and who may read it.
 
-``building`` is an OPTIONAL argument, and omitting it used to mean "the whole estate":
-a building-scoped supervisor asking for a date received every building's manifest for
-it, each row carrying an expected worker's name, passport number and nationality. That
-is cross-tenant PII, not an aggregate — which is why these cases assert over the ROWS
-and their passport numbers rather than over a count.
+``building`` is an OPTIONAL argument: omitting it must still scope the caller to their own
+building, not "the whole estate" — a regression would show a building-scoped supervisor
+every building's manifest for the date, each row carrying an expected worker's name,
+passport number and nationality. That is cross-tenant PII, not an aggregate — which is why
+these cases assert over the ROWS and their passport numbers rather than over a count.
 
 The two registered scope primitives cannot reach this endpoint, so a test that only
 proved they are registered would prove nothing. ``frappe.get_all`` hardcodes

@@ -3,9 +3,8 @@
 
 Nothing here builds a world. ``test_dependencies`` names the two roots and Frappe stands the whole
 chain up once per run — Bed pulls Room, Room pulls Building, Building pulls Site and Company, and
-Employee comes from ERPNext's own fixture. The previous form of this file built Company, Project,
-Employee, Site, Building, Room and Bed in ``setUp``, per test method, to assert four numbers on one
-snapshot row.
+Employee comes from ERPNext's own fixture, not Company, Project, Employee, Site, Building, Room and
+Bed built in ``setUp`` per test method to assert four numbers on one snapshot row.
 """
 
 from __future__ import annotations

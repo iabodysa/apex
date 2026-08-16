@@ -5,8 +5,8 @@ and a receipt whose goods have already left the store may not be cancelled at al
 
 The two buildings, the article and the employee all come from ``test_records.json`` — the second
 fixture building already carries ``is_procurement_store``, which is what the Goods Receipt case
-needs. The previous form of this file built a Company, a Site, two Buildings, a Custody Asset
-Category, a Custody Article and an Employee in ``setUp``, per test method.
+needs, rather than a Company, a Site, two Buildings, a Custody Asset Category, a Custody Article
+and an Employee built in ``setUp`` per test method.
 """
 
 from __future__ import annotations

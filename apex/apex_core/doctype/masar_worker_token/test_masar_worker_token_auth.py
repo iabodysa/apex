@@ -413,8 +413,8 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
         self.assertEqual(field.permlevel, 1, "token must be at permlevel 1")
 
         high = {p.role for p in meta.permissions if getattr(p, "permlevel", 0) == 1 and p.read}
-        # Owner decision 2026-07-27: System Manager alone holds level 1. The housing role's
-        # read row was withdrawn -- no written reason for it was ever found.
+        # System Manager is the only role with a permlevel-1 read row
+        # (masar_worker_token.json:235-238); no housing or fleet role may gain one.
         self.assertEqual(high, {"System Manager"}, "permlevel-1 read must be System Manager alone")
         for low in (
             "Accommodation Manager",
@@ -657,7 +657,8 @@ class TestMasarWorkerTokenAutoname(_TokenCase):
     def test_token_with_only_employee_names_and_validates(self):
         """Insert a token supplying ONLY employee (no party / party_type). It must insert,
         autoname to the employee (field:party, party derived from employee), and back-fill
-        party_type/party — exactly the case that previously threw."""
+        party_type/party via before_insert's employee -> party mirror
+        (masar_worker_token.py:275)."""
         emp = self.worker()
         self.addCleanup(self.drop_token, emp)
         doc = frappe.get_doc({"doctype": TOKEN_DOCTYPE, "employee": emp}).insert(

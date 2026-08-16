@@ -26,11 +26,11 @@ def setUpModule():
     """this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
     install and migrate. Its absence is a regression — FAIL, never skip.
 
-    All three classes below used to carry ``@unittest.skipUnless(get_workflow_name(...))``,
-    which is evaluated at IMPORT time and turns the seed regression this file exists to
-    catch into a silent green run of nine cases. The two sibling workflow suites in this
-    tree (fuel_claim, fuel_exception_case) already made this call; these had been left
-    behind.
+    None of the three classes below may carry ``@unittest.skipUnless(get_workflow_name(...))``:
+    that decorator evaluates at IMPORT time, so it would turn the seed regression this
+    file exists to catch into a silent green run of nine cases instead of the FAIL above.
+    The two sibling workflow suites in this tree (fuel_claim, fuel_exception_case) apply
+    the same ``setUpModule`` convention.
     """
     active = get_workflow_name("Movement Cost Recovery")
     if active != WORKFLOW:
@@ -163,8 +163,9 @@ class TestMovementCostRecoverySelfApproval(FrappeTestCase):
 class TestMovementCostRecoveryDoA(FrappeTestCase):
     """Delegation-of-Authority tier gate: a recovery at/above the Cost Recovery
     Operations Threshold needs Operations-tier authority (Fleet Manager); below it
-    Regional-tier (Fleet Supervisor) suffices. Proves the threshold is REAL (was
-    previously a dead Salis Settings field with no reader).
+    Regional-tier (Fleet Supervisor) suffices. Proves the threshold is REAL: the
+    DoA tier gate has a reader for the Salis Settings field and actually branches
+    on it, rather than the field sitting unread.
 
     Movement Cost Recovery is project-scoped through its vehicle (``SALIS_SCOPE``
     maps it to a hop onto ``Salis Vehicle.project``), and Fleet Supervisor is a

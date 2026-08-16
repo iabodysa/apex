@@ -6,9 +6,9 @@ a wrong code — can confirm the receive leg into the destination store.
 The two buildings and the article come from ``test_records.json``; the second fixture building
 already carries ``is_procurement_store``, which is what the intake leg needs. The two users are
 still built here, because who may confirm and who may not IS the separation of duties under test.
-The previous form of this file built a Company, a Site, two Buildings, a Custody Asset Category and
-a Custody Article in ``setUp``, per test method — and force-deleted every building on the site in a
-``tearDownModule`` to clean up after itself, which the fixtures make unnecessary.
+Fixtures replace building a Company, a Site, two Buildings, a Custody Asset Category and a Custody
+Article in ``setUp`` per test method, and remove the need for a ``tearDownModule`` that
+force-deletes every building on the site to clean up after itself.
 """
 
 from __future__ import annotations
@@ -141,8 +141,7 @@ class TestCustodyHandover(FrappeTestCase):
         handover.reload()
         self.assertNotEqual(handover.status, "Confirmed")
         self.assertTrue(handover.otp_hash, "a miss leaves the code live, it does not consume it")
-        # The previous form of this case asserted otp_attempts == 1. The miss is no longer counted
-        # on the document at all — charge_wrong_code keys its window on the document name in the
-        # cache (apex/apex_core/utils/otp_lockout.py:38) — so the field stays 0 and the assertion
-        # had never run to find out.
+        # The miss is not counted on the document at all: charge_wrong_code keys its window on
+        # the document name in the cache (apex/apex_core/utils/otp_lockout.py:38), so
+        # otp_attempts stays 0 here.
         self.assertEqual(self._store_balance(DESTINATION), 0.0)

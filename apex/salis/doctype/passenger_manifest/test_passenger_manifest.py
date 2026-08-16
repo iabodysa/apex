@@ -5,8 +5,8 @@ A duplicate employee row inflates passenger_count and the seat headcount, so a
 repeated employee is rejected; distinct rows pass and passenger_count mirrors the
 row total. Empty-employee rows are ignored by the guard.
 
-The two passengers are the shipped Employee fixtures; naming the dependency is what
-replaced the ``test_ignore`` block that used to prune the walk behind their construction.
+The two passengers are the shipped Employee fixtures ``test_dependencies`` (line 18)
+names; Frappe stands them up instead of the file walking its own auto-dependencies.
 Nothing here is inserted — the guard is exercised on an unsaved document.
 """
 

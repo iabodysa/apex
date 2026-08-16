@@ -110,8 +110,8 @@ def restore_asset_audit_trail(facility_asset: str) -> None:
     ``previous_building``, ``previous_location_in_building`` and
     ``last_movement_date`` are snapshots taken on SUBMIT. A cancel that restores
     the location but leaves those three behind has the asset citing a movement
-    that no longer exists: reverting one move on a fresh asset read "at A,
-    previously A", still stamped with the cancelled move's date.
+    that no longer exists: reverting the only move on a fresh asset would read "at
+    A, prior location also A", still stamped with the cancelled move's date.
 
     The ledger is the movement history, so the honest values are the newest
     surviving row's origin and posting date — or blank when the cancel undid the

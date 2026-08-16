@@ -111,12 +111,12 @@ def _assert_party_in_scope(party_type, party) -> None:
 def get_intake_settings() -> dict:
     """The Arrivals Desk feature flags, answered without exposing Habitat Settings.
 
-    The desk used to read ``enable_passport_mrz_ocr`` through
+    The desk reads ``enable_passport_mrz_ocr`` here rather than through
     ``frappe.client.get_single_value``, which needs read on the whole Single. Habitat
-    Settings grants read to System Manager only, so the Resident Supervisor the page
-    is published to met a blocking permission dialog on every load — a client-side
-    ``.catch()`` cannot suppress it, because the dialog is raised by the transport,
-    not by the promise the caller holds.
+    Settings grants read to System Manager only, so routing through it would meet the
+    Resident Supervisor the page is published to with a blocking permission dialog on
+    every load — a client-side ``.catch()`` cannot suppress it, because the dialog is
+    raised by the transport, not by the promise the caller holds.
 
     Only the one boolean is returned, and only to a caller who could actually use the
     passport register sheet it gates (the same ``Temporary Worker`` create right that
@@ -768,12 +768,13 @@ def get_arrival_summary(date=None, building=None) -> dict:
     over-capacity placement count. Built from a BOUNDED set of bulk queries (no
     per-row round trips), mirroring get_building_grid. Creates and locks nothing.
 
-    ``building`` is OPTIONAL, and omitting it used to mean "the whole estate" for every
-    caller — so a building-scoped supervisor was told the estate's housed count, its
-    per-supplier split, its over-capacity placements and its manifest expectation. The
-    scope is spliced in explicitly, the same way dashboard.py does it: ``frappe.get_all``
-    hardcodes ``ignore_permissions=True`` (frappe/__init__.py:2050), so the registered
-    permission_query_conditions never runs here.
+    ``building`` is OPTIONAL: when omitted, the scope comes from
+    ``permissions.report_building_scope`` and is spliced into the filter explicitly, the
+    same way dashboard.py does it, because ``frappe.get_all`` hardcodes
+    ``ignore_permissions=True`` (frappe/__init__.py:2050) and the registered
+    permission_query_conditions never runs here. Removing that splice would show a
+    building-scoped supervisor the whole estate's housed count, per-supplier split,
+    over-capacity placements and manifest expectation.
     """
     frappe.has_permission("Housing Assignment", "read", throw=True)
     if building:
@@ -843,16 +844,16 @@ def get_expected_arrivals(date=None, building=None) -> dict:
     registration and housing tallies. Read-only; bounded queries; the
     Arrival Batch DocType may not exist yet (returns an empty manifest then).
 
-    ``building`` is OPTIONAL, and omitting it used to mean "the whole estate" — so a
-    building-scoped supervisor received every building's manifest for the date, each
-    row carrying the expected worker's name, passport number and nationality. Neither
-    registered scope primitive can reach this read: ``frappe.get_all`` hardcodes
+    ``building`` is OPTIONAL: when omitted, the scope is spliced into the filter
+    explicitly, exactly as ``get_arrival_summary`` above does it, because neither
+    registered scope primitive can reach this read. ``frappe.get_all`` hardcodes
     ``ignore_permissions=True`` (frappe/__init__.py:2050), so the
     ``permission_query_conditions`` fragment never runs, and the ``has_permission``
     hook is dispatched only from ``get_doc_permissions`` (frappe/permissions.py:206),
     which ``frappe.has_permission`` reaches only when it is given a doc — the
-    type-level gate below passes none. The scope is therefore spliced into the filter
-    explicitly, exactly as ``get_arrival_summary`` above does it."""
+    type-level gate below passes none. Skipping the splice would hand a
+    building-scoped supervisor every building's manifest for the date, each row
+    carrying the expected worker's name, passport number and nationality."""
     date = date or frappe.utils.today()
     if not frappe.db.exists("DocType", "Arrival Batch"):
         return _empty_manifest(date, building)

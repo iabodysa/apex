@@ -120,8 +120,8 @@ class TestBuildingLicenseLifecycle(TestCase):
         doc.save.assert_not_called()
 
     def _renew(self, doc, **kwargs):
-        """Every rule inside renew() used to be reachable only through the Revoked check,
-        so the rest of the endpoint could be deleted with this file green."""
+        """Exercises every rule inside renew(), not only the Revoked check: deleting
+        the rest of the endpoint must fail this file, not leave it green."""
         fake = _raising_frappe()
         fake.get_doc.return_value = doc
         with (

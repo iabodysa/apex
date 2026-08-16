@@ -10,14 +10,11 @@ Room tiles get a server-computed ``signal`` (red / amber / green) driven by open
 Maintenance Requests and a building-level recent-damage flag. The client must NOT
 recompute the signal.
 
-Safety EVIDENCE is not written here. This module used to expose a
-``log_building_inspection`` POST that built and submitted a building-scoped
-Safety Inspection Report; that record is deprecated in favour of Safety Round,
-and the endpoint was its last remaining producer. It also bypassed the Safety
-Round maker-checker gate outright — one caller inserted AND submitted in a single
-request, so the author ratified their own evidence. Common-area findings now go
-through Safety Round + its Safety Task Execution rows, which the page links to
-rather than writes.
+Safety EVIDENCE is not written here. Safety Inspection Report is deprecated in
+favour of Safety Round: common-area findings go through Safety Round and its
+Safety Task Execution rows, which this page only links to. A write path here that
+both creates and submits Safety Round evidence in a single request would bypass
+its maker-checker gate, letting a caller ratify its own evidence.
 
 :func:`get_safety_map` is read-only and built from a BOUNDED set of bulk queries
 (no N+1): one rooms query, one open-Maintenance-Request query grouped by room in

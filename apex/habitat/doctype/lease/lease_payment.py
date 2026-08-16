@@ -1,14 +1,14 @@
 # Copyright (c) 2026, afmcoltd
 """Raising the rent for one lease instalment as a payment that settles a real payable.
 
-The Generate Payment button used to build a Payment Entry in the browser and copy the
-scheduled rent onto ``paid_amount``. That document carried no ``references`` row, so it
-was an ON-ACCOUNT payment: it closed no landlord invoice, moved no
-``outstanding_amount``, and reconciled nothing — while reading, on screen, exactly like
-the rent being paid. This module routes the same button through
+This module routes the Generate Payment button through
 ``apex_core.utils.payable_allocation``, the shared engine the Telecom Contract payment
 already uses, so the amount and the allocation both come from ERPNext's own payable
-logic instead of from the rent schedule.
+logic instead of from the rent schedule. Building the Payment Entry in the browser and
+copying the scheduled rent onto ``paid_amount`` instead would carry no ``references``
+row, making it an ON-ACCOUNT payment: it would close no landlord invoice, move no
+``outstanding_amount``, and reconcile nothing — while reading, on screen, exactly like
+the rent being paid.
 
 The insert passes ``ignore_permissions`` because the accommodation operator who raises the rent is
 not a finance user. Payment Entry's create permission belongs to Accounts roles; granting it here
@@ -29,12 +29,12 @@ to the payment, Accounts can cancel it without the lease vetoing the cancellatio
 Boundary — this layer submits nothing and posts no GL. The Payment Entry is created in
 Draft and left for finance to review and submit.
 
-Which document type gets raised is NOT decided here either. The button used to read the
-Payment Routing target in the browser and then pick among three hard-coded branches,
-so a deployment could configure one target and be handed another from this one screen.
-The target is now read server-side and a mismatch is refused outright: a rent payment
-settles a landlord Purchase Invoice, and only a Payment Entry carries the allocation
-that does it, so this surface obeys the configuration or declines to act.
+Which document type gets raised is NOT decided here either. The target is read
+server-side and a mismatch is refused outright: a rent payment settles a landlord
+Purchase Invoice, and only a Payment Entry carries the allocation that does it, so this
+surface obeys the configuration or declines to act. Reading the Payment Routing target
+in the browser and picking among three hard-coded branches instead would let a
+deployment configure one target and be handed another from this one screen.
 """
 
 from __future__ import annotations

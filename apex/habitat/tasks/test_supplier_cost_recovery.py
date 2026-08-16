@@ -4,10 +4,9 @@ the ledger, the report aggregates the month with the markup applied, and the dis
 building to its own long-queue job.
 
 The building, its rooms, its beds, the employee and the supplier all come from ``test_records.json``
-— Supplier from ERPNext's own. The only thing arranged here is the building's annual rent, which is
-the number the daily share is computed from, and it is handed straight back. The previous form of
-this file built a Company, a Supplier, a Site, a Building, a Room, a Bed and an Employee in
-``setUp``, per test method.
+— Supplier from ERPNext's own — rather than a Company, a Supplier, a Site, a Building, a Room, a Bed
+and an Employee built in ``setUp`` per test method. The only thing arranged here is the building's
+annual rent, which is the number the daily share is computed from, and it is handed straight back.
 """
 
 from __future__ import annotations

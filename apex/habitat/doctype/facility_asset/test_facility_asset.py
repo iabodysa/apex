@@ -1,10 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Facility Asset's own contract: it needs a name and a building, and it takes the name it is given.
 
-The building comes from ``test_records.json``, so the link is really checked. The previous form of
-this file pointed at a building named ``QA-BLDG`` that has never existed on any site and passed
-``ignore_links=True`` to stop Frappe noticing, and carried a sixteen-line ``test_ignore`` block for
-masters the asset does not link to.
+The building comes from ``test_records.json``, so the link is really checked, rather than a
+``QA-BLDG`` name that exists on no site with ``ignore_links=True`` passed to stop Frappe noticing,
+or a sixteen-line ``test_ignore`` block for masters the asset does not link to.
 """
 
 from __future__ import annotations

@@ -845,13 +845,12 @@ def purge_test_buildings():
     number removed. Idempotent, best-effort per row (as Administrator). Invoked from
     a ``tearDownModule`` in building-creating test modules.
 
-    It walks the registry above, never ``get_all("Building")``. The previous version
-    walked the table and subtracted a baseline snapshot that only a ``before_tests``
-    hook filled, which made the blast radius depend on a caller — and this app
-    registers no such hook, so the subtracted set was empty under every runner and
-    this emptied the site's Building table. Registering one would not have saved the
-    fixtures either: ``frappe/test_runner.py:83-87`` runs ``before_tests`` before any
-    ``make_test_records``, so a fixture Building is outside the snapshot by
+    It walks the registry above, never ``get_all("Building")``: querying the whole table
+    and subtracting a baseline snapshot depends on a ``before_tests`` hook this app does
+    not register, so the subtracted set would be empty under every runner and this would
+    empty the site's Building table. Registering such a hook would not save the fixtures
+    either — ``frappe/test_runner.py:83-87`` runs ``before_tests`` before any
+    ``make_test_records``, so a fixture Building sits outside the snapshot by
     construction.
 
     ``force=True`` bypasses the link-validation check, so a registered building with

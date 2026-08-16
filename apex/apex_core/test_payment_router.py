@@ -245,8 +245,9 @@ class TestPaymentRouter(FrappeTestCase):
 
         pr.reload()
         self.assertEqual(pr.linked_payment_entry, created)
-        # The default target is Payment Request, never Payment Entry — which is the
-        # type this link used to declare. The stamped type must name what was built.
+        # The default target is Payment Request, never Payment Entry: linked_payment_doctype
+        # must name what was actually built (salis_payment_request.json:237-242 declares
+        # linked_payment_entry as a Dynamic Link over it).
         self.assertEqual(pr.linked_payment_doctype, "Payment Request")
         self.assertFalse(frappe.db.exists("Payment Entry", created))
 
@@ -615,7 +616,9 @@ class TestPaymentRouter(FrappeTestCase):
         self.assertEqual(pr.linked_payment_entry, created)
         # The pair resolves against the table it names ...
         self.assertTrue(frappe.db.exists(pr.linked_payment_doctype, pr.linked_payment_entry))
-        # ... and not against the type the field used to declare.
+        # ... never against Payment Entry: linked_payment_entry is a Dynamic Link over
+        # linked_payment_doctype, not a fixed Link -> Payment Entry
+        # (salis_payment_request.json:237-242).
         self.assertFalse(frappe.db.exists("Payment Entry", created))
 
     def test_link_field_is_a_dynamic_link_over_the_stamped_doctype(self):

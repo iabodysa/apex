@@ -24,14 +24,14 @@ def reconcile_operations_alerts() -> None:
     writers' work. Vehicle Suspension, Rental Office and Fuel Quota each have a single
     writer and reconcile inside it.
 
-    Fuel Quota used to drain here, and that is what made the fuel overage alert
-    unreachable. This job is DAILY and read "the current month"; its only queuer,
-    ``fuel_engine.monthly_fuel_reconciliation``, is MONTHLY and fires at 00:00 on the
-    1st. The two agreed on the calendar and both therefore looked at a month with no
-    ledger rows in it. Anchoring the queuer on the closed month without moving the
-    drain would have been worse — this job would have closed every breach it found the
-    following morning — so the drain moved to the queuer, where the period is decided
-    once.
+    Fuel Quota does NOT drain here. This job is DAILY and reads "the current month";
+    its only queuer, ``fuel_engine.monthly_fuel_reconciliation``, is MONTHLY and fires
+    at 00:00 on the 1st. Draining Fuel Quota here would agree with the queuer on the
+    calendar, so both would look at a month with no ledger rows in it yet and the fuel
+    overage alert would be unreachable. Anchoring the queuer on the closed month
+    without moving the drain would be worse still — this job would close every breach
+    it found the following morning — so the drain lives in the queuer, where the
+    period is decided once.
 
     A document stays queued while ANY of its writers' conditions holds:
 

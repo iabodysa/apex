@@ -102,7 +102,7 @@ def get_my_worker_route_today():
 
         {
           "driver": "DRV-000001",
-          "date": "2026-05-30",
+          "date": "YYYY-MM-DD",
           "trips": [
             {
               "dispatch_trip": "DT-000007",
@@ -163,7 +163,7 @@ def get_my_worker_route_summary() -> dict:
 
         {
           "driver": "DRV-000001",
-          "date": "2026-05-30",
+          "date": "YYYY-MM-DD",
           "trip_count": 2,
           "stop_count": 5,
           "expected_total": 7,
@@ -653,7 +653,7 @@ def get_worker_request_detail(token=None, name=None):
     not match and yields no row, at which point we raise
     ``frappe.PermissionError``. The client-supplied ``name`` is therefore never
     trusted on its own — it can only ever address the token-owner's own rows, so
-    this endpoint cannot be used to read another worker's request.
+    this endpoint cannot read another worker's request.
 
     Returns the request's status, a reconstructed created -> current status
     timeline (the DocType has no status-history child table, so it is built from
@@ -973,7 +973,7 @@ def notify_hr_iqama_expiring(token=None):
     When in window, posts a native in-app ``Notification Log`` (type Alert) to the
     HR inbox (HR Manager, fallback System Manager) — the SAME channel
     ``temporary_worker_engine._notify_hr`` uses; no separate ticketing engine, no
-    GL. Tight ``rate_limit`` so the personal link cannot be used to spam HR.
+    GL. Tight ``rate_limit`` so the personal link cannot spam HR.
     Returns ``{"notified": bool, "days_left": int|None, "recipients": int}``."""
     employee = _resolve_worker(token)
     emp = _employee_doc(employee)

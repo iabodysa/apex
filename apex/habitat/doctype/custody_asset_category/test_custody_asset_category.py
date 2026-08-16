@@ -2,9 +2,9 @@
 """Custody Asset Category's own contract: it is named by its category_name, and that name is unique.
 
 The uniqueness case borrows the record from ``test_records.json`` rather than inserting one to
-collide with — the fixture already stands, so the test asserts the rule instead of arranging it.
-The previous form of this file built its own pair to collide and carried a sixteen-line
-``test_ignore`` block for masters a category does not link to.
+collide with — the fixture already stands, so the test asserts the rule instead of arranging it,
+rather than building its own pair to collide or carrying a sixteen-line ``test_ignore`` block for
+masters a category does not link to.
 """
 
 from __future__ import annotations

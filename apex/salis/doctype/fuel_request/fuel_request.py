@@ -260,8 +260,8 @@ class FuelRequest(Document):
 		  already reached the allocation), and
 		* this draw alone would overrun what is left. An exhaustion test on its own
 		  cannot see that: 15 L against a 10 L quota with 0 consumed satisfies
-		  ``consumed < monthly``, so the oversized FIRST draw used to pass here and
-		  push consumed_litres past the allocation at Done.
+		  ``consumed < monthly``, so checking exhaustion alone lets an oversized
+		  FIRST draw through and pushes consumed_litres past the allocation at Done.
 
 		Called once before submit for early desk feedback and again inside the
 		consumption step, where the quota row is already locked and the read is
@@ -330,7 +330,7 @@ class FuelRequest(Document):
         )
 
     def _reverse_quota_consumption(self):
-        """Reverse a previously applied quota consumption on cancel."""
+        """Reverse the quota consumption ``quota_applied`` marks as applied, on cancel."""
         if not self.quota_applied or not self.fuel_quota:
             return
 

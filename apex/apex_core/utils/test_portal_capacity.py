@@ -28,10 +28,9 @@ class TestPortalCapacity(FrappeTestCase):
         """The identity has no door: no password is ever set on it.
 
         Asserted against ``__Auth``, where frappe stores the credential
-        (frappe/utils/password.py), because that is the claim. The field this used to
-        read, ``simultaneous_sessions``, gates no login at all: frappe reads it as
-        ``... or 1`` (frappe/sessions.py:66) and only to cap concurrent sessions, so a
-        zero there proved nothing.
+        (frappe/utils/password.py), because that is the claim. ``simultaneous_sessions``
+        cannot serve as this proof: frappe reads it as ``... or 1`` (frappe/sessions.py:66)
+        and only to cap concurrent sessions, so a zero there proves nothing about login.
         """
         for email in CAPACITY_USERS.values():
             self.assertFalse(

@@ -6,10 +6,9 @@ once per run, so the two fixture plates are the whole cast. Every case that move
 it back in ``addCleanup`` — a shared record is only reusable while each test leaves it as it found
 it.
 
-Three classes that stood in the previous form of this file are gone rather than converted: they
-covered ``bulk_stop_vehicles``, ``bulk_workshop_in``, ``create_handover`` and ``get_status_meta``,
-a console surface that was retired on purpose and that
-``apex/www/test_portal_shell_contract.py`` now forbids from ever returning.
+This file does not cover ``bulk_stop_vehicles``, ``bulk_workshop_in``, ``create_handover``
+or ``get_status_meta``: that console surface is retired, and
+``apex/www/test_portal_shell_contract.py`` forbids it from ever returning.
 """
 
 from __future__ import annotations

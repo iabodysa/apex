@@ -7,13 +7,12 @@ Housing Assignment's bed/room/building; ``on_cancel`` reverses all of it. A
 regression that leaves ``from_bed`` Occupied or fails to flip ``to_bed`` would
 double-book or strand beds in the occupancy grid.
 
-The move is BETWEEN TWO ROOMS OF ONE BUILDING. It used to be written across two
-buildings, which encoded as correct the very behaviour the controller now
-rejects: a cross-building move re-points the assignment with ``db_set`` and so
-never re-derives the cost centre, Company or allowance state that the new
-building implies. Two rooms in one building still exercise every spatial field
-the swap touches, and they are what makes the ROOM counters observable — a
-same-room move would hide the drift this module now guards.
+The move is BETWEEN TWO ROOMS OF ONE BUILDING. Writing it across two buildings would
+encode as correct the very behaviour the controller rejects: a cross-building move
+re-points the assignment with ``db_set`` and so never re-derives the cost centre,
+Company or allowance state that the new building implies. Two rooms in one building
+still exercise every spatial field the swap touches, and they are what makes the ROOM
+counters observable — a same-room move would hide the drift this module guards.
 
 Counters are asserted as DELTAS around the move, and against the live
 active-assignment count. Housing Assignment and Housing Checkout have always

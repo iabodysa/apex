@@ -152,8 +152,8 @@ def _scoped_tasks(building, cadence):
 def _current_period(cadence, on_date=None):
     """Return ``(start, end, period)`` for ``cadence``'s CURRENT period.
 
-    ``start`` / ``end`` are inclusive ``datetime.date`` boundaries used to test
-    whether an existing round's ``round_date`` falls in the live period.
+    ``start`` / ``end`` are inclusive ``datetime.date`` boundaries: an existing round's
+    ``round_date`` is tested against them to decide whether it falls in the live period.
 
     ``period`` is a kind plus the numbers, never a rendered string: the portals hold
     their own language toggle in local storage, so a label built here is frozen in the
@@ -479,10 +479,9 @@ def submit_due_rounds(building, round_date, results):
 
     EACH CADENCE STANDS ALONE. A cadence that fails is rolled back to its own
     savepoint and reported in ``failed``; the cadences that succeeded stay
-    submitted. One fire door that cannot be recorded without a photo used to
-    discard a whole daily-plus-weekly walk, which destroyed a morning of work to
-    protect nothing — the round it belongs to is the unit that must be
-    all-or-nothing, not the trip.
+    submitted. This keeps one fire door that cannot be recorded without a photo
+    from discarding a whole daily-plus-weekly walk — the round it belongs to is
+    the unit that must be all-or-nothing, not the trip.
 
     After the rounds commit, the manager is emailed a report
     (:func:`_email_round_report`). A mail failure is caught and logged and never

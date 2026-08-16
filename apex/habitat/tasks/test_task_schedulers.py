@@ -4,16 +4,17 @@
 These need frappe IMPORTABLE, not a live site. ``TestWeeklyOccupancySyncEmptyBuilding``
 drives the SHIPPED ``occupancy.weekly_occupancy_sync`` with only its database edges
 stubbed, and ``TestDeadBeforeSaveGuardsRemoved`` imports the real controller modules.
-The latter used to swallow an ImportError into a ``skipTest``, which turned "the
-controllers no longer import" — a genuine breakage — into a green run, so the import
-is now allowed to fail loudly.: the occupancy class used to REIMPLEMENT the building pass it claimed to cover —
-a local copy of production's loop, asserted against itself — so
-``weekly_occupancy_sync`` was deletable with every test in this file still green. That
-is worse than no coverage, because it looks like coverage. It now calls the real
-function; the skip condition under test is production's own, and deleting it or
-inverting it reds the tests. ``TestLedgerTypeOptions`` had the same defect one layer
-over: it compared two hand-maintained copies of Select options with each other, so
-dropping an option from either shipped DocType JSON left it green. It reads the JSON.
+The latter must let an ImportError fail loudly rather than swallow it into a
+``skipTest``: catching it would turn "the controllers no longer import" — a genuine
+breakage — into a green run. ``TestWeeklyOccupancySyncEmptyBuilding`` calls the real
+``weekly_occupancy_sync`` rather than reimplementing the building pass it claims to
+cover: a local copy of production's loop, asserted against itself, would leave
+``weekly_occupancy_sync`` deletable with every test in this file still green — worse
+than no coverage, because it looks like coverage. Calling the real function makes the
+skip condition under test production's own, so deleting it or inverting it reds the
+tests. ``TestLedgerTypeOptions`` reads the shipped DocType JSON directly rather than
+comparing two hand-maintained copies of Select options with each other, which would
+stay green even if an option were dropped from either shipped DocType JSON.
 """
 
 from __future__ import annotations
@@ -112,10 +113,10 @@ class _QueryBuilder:
 
 
 class _FakeDB:
-    """Records the savepoint traffic, because that is now part of the contract.
+    """Records the savepoint traffic, because that is part of the contract.
 
-    The fake previously offered a no-arg ``rollback`` and no ``savepoint`` at all,
-    which is the shape of the bug: it could only model an all-or-nothing recovery.
+    A fake offering only a no-arg ``rollback`` and no ``savepoint`` at all could only
+    model an all-or-nothing recovery, not a partial one.
     """
 
     def __init__(self):
@@ -309,9 +310,9 @@ class TestLedgerTypeOptions(unittest.TestCase):
     """Finding 1: Accommodation Ledger ledger_type must include every Utility Account
     utility_type value — read off the shipped JSON, never a copy kept here.
 
-    Both sets used to be hand-maintained constants in this file compared with each
-    other, so dropping Gas from either DocType left the class green: the defect
-    one layer over, a test asserting against its own copy of production.
+    Hand-maintained constants compared with each other instead would let dropping Gas
+    from either DocType leave the class green: a test asserting against its own copy
+    of production, the defect one layer over.
     """
 
     def setUp(self):

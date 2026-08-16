@@ -208,8 +208,9 @@ class TestRoomBedTransferCrossBuilding(FrappeTestCase):
         )
 
     def test_cross_building_transfer_is_rejected_on_a_direct_document_call(self):
-        """RED->GREEN. The document path — no Transfer Board involved — used to
-        accept a move into another building and re-point the assignment there."""
+        """RED->GREEN. The document path — no Transfer Board involved — must reject a
+        move into another building rather than accept it and re-point the assignment
+        there."""
         fx = self._world()
         asg = self._active_assignment(fx)
         before_a = self._building_occupancy(fx.a_building)
@@ -243,9 +244,9 @@ class TestRoomBedTransferCrossBuilding(FrappeTestCase):
         self.assertEqual(self._building_occupancy(fx.b_building), before_b)
 
     def test_cross_building_transfer_is_rejected_through_the_transfer_board(self):
-        """NON-REGRESSION, not RED->GREEN: the board rejected this before too — the
-        rule simply used to live in the page. What is guarded here is that moving
-        the rule into the controller did not change what the operator sees, and
+        """NON-REGRESSION, not RED->GREEN: the board rejects this too, even though the
+        rule lives in the controller now, not the page. What is guarded here is that
+        the rule living in the controller does not change what the operator sees, and
         that no Room Bed Transfer row survives the refusal."""
         fx = self._world()
         asg = self._active_assignment(fx)
@@ -268,9 +269,10 @@ class TestRoomBedTransferCrossBuilding(FrappeTestCase):
 
         ``from_bed`` is a ``fetch_from`` snapshot frozen at the draft save and NOT
         refreshed on the submitting save (base_document.py:850 skips the fetch once
-        docstatus is submitted). A draft raised from bed 1 and submitted after the
-        resident moved to bed 3 used to free bed 1 (already free) and occupy bed 2,
-        leaving bed 3 Occupied by nobody — one resident, two occupied beds."""
+        docstatus is submitted). Submitting a draft raised from bed 1 after the
+        resident has since moved to bed 3 must be refused: otherwise it would free bed
+        1 (already free) and occupy bed 2, leaving bed 3 Occupied by nobody — one
+        resident, two occupied beds."""
         fx = self._world()
         bed2 = self._bed(fx.a_building, fx.a_room)
         bed3 = self._bed(fx.a_building, fx.a_room)

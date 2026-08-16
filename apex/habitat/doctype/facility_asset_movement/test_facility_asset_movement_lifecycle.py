@@ -144,15 +144,14 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
     """The two ledger properties no OTHER module covers: a posted row cannot be edited,
     and re-posting the same movement does not post twice.
 
-    What USED to be here and is deliberately gone: ``test_submit_posts_one_immutable_from_to_row``
-    also asserted the from/to values of the posting row, and ``test_cancel_posts_negated_reversal``
-    asserted that cancelling adds one negated reversal. Both are covered field-for-field and
-    more strictly by ``test_facility_asset_movement_reachability`` — its
+    ``test_submit_posts_one_immutable_from_to_row`` and ``test_cancel_posts_negated_reversal``
+    are deliberately absent from this class: both are covered field-for-field and more strictly
+    by ``test_facility_asset_movement_reachability`` — its
     ``test_submit_posts_exactly_one_ledger_effect`` counts the ledger GLOBALLY as well as per
-    source (so a double post anywhere fails, which the count-by-source version could not
+    source (so a double post anywhere fails, which a count-by-source version could not
     catch), and its ``test_cancel_preserves_the_audit_trail`` asserts the original row
     survives unedited alongside exactly one reversal that points back at it. Duplicating the
-    weaker halves here only meant a change to the ledger contract had to be made twice.
+    weaker versions here would only mean a change to the ledger contract has to be made twice.
     """
 
     LEDGER = "Facility Asset Movement Ledger"

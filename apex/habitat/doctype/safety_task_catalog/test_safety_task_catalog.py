@@ -8,8 +8,8 @@ autoname is ``naming_series:`` while ``task_code`` carries a unique index, so ``
 mints a new docname on every rebuild and the code collides rather than being skipped — the same
 trap ERPNext's Project fixture carries. Declaring it would leave a suite that passes until the day
 someone clears ``sites/<site>/.test_log``. Nothing in this file needs the row, so nothing declares
-it. The previous form also carried a sixteen-line ``test_ignore`` block for masters the catalog
-does not link to.
+it, nor does it carry a sixteen-line ``test_ignore`` block for masters the catalog does not link
+to.
 """
 
 from __future__ import annotations
@@ -82,7 +82,7 @@ class TestSafetyTaskCatalog(FrappeTestCase):
             entry.insert(ignore_permissions=True)
 
     def test_an_entry_saved_without_a_frequency_silently_becomes_a_daily_task(self):
-        """The previous form of this case asserted MandatoryError and had never run to find out.
+        """A required Select left empty is not caught by the mandatory check.
 
         ``frequency`` is a required Select, and Frappe fills a required Select with the FIRST of
         its options when it is left empty — so the mandatory pass never fires and the entry is

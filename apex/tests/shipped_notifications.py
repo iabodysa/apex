@@ -24,9 +24,10 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, for the reason spelled out in shipped_doctypes.py: since the
-# 2026-08-02 relocation this file's own parent holds no notification JSON, so a root taken
-# from `__file__` made every reader of this loader grade nothing and pass.
+# The INSTALLED package, for the reason spelled out in shipped_doctypes.py: this file's
+# own parent, in the maintainer mirror (`.claude/tests/apex`, source_tree.py's
+# SUITE_PACKAGE), holds no notification JSON, so a root taken from `__file__` would make
+# every reader of this loader grade nothing and still pass.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 
 # One level of module dir, then `notification/<slug>/<slug>.json`. NOT recursive:

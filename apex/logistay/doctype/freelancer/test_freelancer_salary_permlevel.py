@@ -167,12 +167,12 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         and that happens at document.py:412, before validate at :414 — so the save
         survives and both concealed columns come back unchanged.
 
-        Collapsed 2026-08-15 from two near-identical cases: this one and
+        This test and
         `test_freelancer.py::test_the_housing_role_can_still_maintain_an_existing_freelance`
-        built the same fixture, made the same housing user, made the same status edit and
-        the same save, and differed only in which permlevel-1 field they read back —
-        monthly_salary here, national_id_or_iqama there. Both values are kept, as one
-        subTest each, so neither verdict was lost.
+        build the same fixture, make the same housing user, make the same status edit and
+        the same save, differing only in which permlevel-1 field is read back —
+        monthly_salary here, national_id_or_iqama there. Both checks run here as one
+        subTest each, so neither verdict is lost.
         """
         nid = f"ID{frappe.generate_hash(length=12)}"
         doc = self._freelance(salary=4200)

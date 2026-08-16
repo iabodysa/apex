@@ -11,10 +11,10 @@ ORIGINAL row is ever negated, and a row that already has a reversal is skipped.
 These tests prove: the reversal nets litres+amount to zero, sets ``reversal_of``,
 and is idempotent (no double reversal on a second call / cancel).
 
-All three classes read the shipped vehicle fixture instead of minting one apiece. Every
-ledger row is keyed on its SOURCE document, never on the vehicle, so one vehicle serves
-all three without their rows ever meeting. Naming the dependency is also what replaced the
-``test_ignore`` block that used to prune the auto-dependency walk behind that construction.
+All three classes read the shipped vehicle fixture ``test_dependencies`` (line 28)
+names, instead of minting one apiece; Frappe stands it up instead of the file walking
+its own auto-dependencies. Every ledger row is keyed on its SOURCE document, never on
+the vehicle, so one vehicle serves all three without their rows ever meeting.
 """
 
 import frappe

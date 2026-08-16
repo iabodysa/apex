@@ -4,9 +4,8 @@
 The endpoint boards a worker on a driver's trip with ``ignore_permissions`` and no
 role behind the caller, so five gates are the whole of its authorization: the portal
 kill switch, the actor/trip resolution, the row lock, the manifest membership, and
-the duplicate check. The single test that used to live here patched EVERY one of them
-out and asserted only the happy path — so each gate could be deleted from the endpoint
-and this file stayed green.
+the duplicate check. A case that mocks every one of them out and asserts only the happy
+path lets any gate be deleted from the endpoint without this file catching it.
 
 Each gate now has a case in which it REFUSES, and each of those asserts that nothing
 was written: that is what a deleted gate fails. The happy path is kept as one case

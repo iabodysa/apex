@@ -19,11 +19,12 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood. The suite moved out of the
-# app on 2026-08-02, so `dirname(__file__)/..` now names `.claude/tests/apex`, a tree that
-# holds no JSON at all — the glob went quiet and every guard reading through here graded
-# an empty set while still reporting green. Rooting on the imported package also means a
-# run that imported apex from another worktree scans the code it actually imported.
+# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
+# resolves against wherever this module's copy sits, and the maintainer mirror at
+# `.claude/tests/apex` (source_tree.py's SUITE_PACKAGE) holds no JSON at all — a glob
+# rooted there goes quiet and every guard reading through here grades an empty set while
+# still reporting green. Rooting on the imported package also means a run that imported
+# apex from another worktree scans the code it actually imported.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 DOCTYPE_GLOB = os.path.join(APP_ROOT, "*", "doctype", "*", "*.json")
 

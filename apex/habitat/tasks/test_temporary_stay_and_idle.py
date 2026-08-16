@@ -4,10 +4,10 @@ temporary stay must name the date it ends, an idle report must not be resolved w
 duplicated while one is open, it routes a ToDo to the responsible department, and the ageing job
 accrues the days.
 
-The building, its room, its bed, the employee and the project all come from ``test_records.json``.
-The two users are still built here, because who receives the alert and who receives the routed ToDo
-IS what those two cases assert. The previous form of this file built a Company, a Site, a Building,
-an Employee and a Project in ``setUp``, per test method, for seven test methods.
+The building, its room, its bed, the employee and the project all come from ``test_records.json``
+rather than a Company, a Site, a Building, an Employee and a Project built in ``setUp`` per test
+method for seven test methods. The two users are still built here, because who receives the alert
+and who receives the routed ToDo IS what those two cases assert.
 """
 
 from __future__ import annotations

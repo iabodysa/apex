@@ -5,9 +5,9 @@ the ones placed in an over-capacity bed, and writes nothing.
 
 The building, its room, its ordinary bed, the employees and the supplier all come from
 ``test_records.json`` — Supplier and Employee from ERPNext's own. The over-capacity bed is still
-minted here, because ``is_temporary`` is the flag the count under test reads. The previous form of
-this file scoped every case to a building name it never created and passed ``ignore_links=True`` so
-Frappe would not notice, which meant the building scope it asserts was never really exercised.
+minted here, because ``is_temporary`` is the flag the count under test reads. The building is a
+real linked record, not a bare name passed with ``ignore_links=True``: only a real building makes
+the building-scope assertions below actually exercise the scope they claim to test.
 
 Counts are exact because the second fixture building holds nothing else, and because the arrivals a
 case writes are rolled back to a savepoint before the next one runs.
@@ -141,11 +141,12 @@ class TestArrivalsSummary(FrappeTestCase):
         self.addCleanup(patcher.stop)
 
     def test_omitting_the_building_no_longer_means_the_whole_estate(self):
-        """The optional-argument hole: no ``building`` used to mean every building.
+        """The optional ``building`` argument must not mean every building.
 
-        A supervisor scoped to one building asked for "today" and was told the estate's
-        housed count, its supplier split, its over-capacity placements and its manifest
-        expectation — none of which they may see one document at a time.
+        A supervisor scoped to one building asks for "today" and must get only their
+        building's housed count, supplier split, over-capacity placements and manifest
+        expectation — never the whole estate's, which they may not see one document at
+        a time.
         """
         self._arrival_in_another_building()
         self.assertEqual(

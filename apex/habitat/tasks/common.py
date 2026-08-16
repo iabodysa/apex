@@ -75,8 +75,8 @@ def _notify_user_system(
 ) -> None:
     """Post an in-app (system) Notification Log of type Alert to ONE specific user.
 
-    Single-recipient sibling of _notify_role_system — used to reach the building's
-    own responsible supervisor (not the whole role). Falsy/disabled user = no-op.
+    Single-recipient sibling of _notify_role_system, for reaching the building's own
+    responsible supervisor specifically (not the whole role). Falsy/disabled user = no-op.
     Thin wrapper over the shared system_notify helper. Optional ``document_type``/
     ``document_name`` link the alert to its source record, which is also the helper's
     per-user dedup key.

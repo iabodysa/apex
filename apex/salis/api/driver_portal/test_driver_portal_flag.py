@@ -8,13 +8,12 @@ ONLY thing that proves it bites. The two shipped suites beside the controllers
 "_require_enabled")`` so they can reach the body under test — which is right for them
 and is exactly why the guard needs proving somewhere that does not patch it.
 
-Repointed 2026-08-15: the four cases here called ``get_driver_context``,
-``driver_check_in``, ``submit_fuel_request`` and ``my_support_tickets``. The first,
-second and fourth no longer exist anywhere in the app; ``submit_fuel_request`` moved to
-``apex/salis/api/fleet_employee.py``. Every case was therefore an AttributeError, not a
-proof. They are replaced by one parameterised case over the surviving surface, taking a
-read, a personal read and a write so the guard is graded on all three shapes rather than
-on one endpoint that happened to survive.
+The cases below cover the surviving driver-portal surface — ``get_driver_profile``,
+``my_trips_today`` and ``personal.get_my_custody`` as reads, ``start_my_trip`` as the
+write — so the guard is graded on all three call shapes rather than on one endpoint.
+An endpoint named here must match a name currently exported by
+``apex/salis/api/driver_portal/__init__.py`` or ``personal.py``; a moved or removed
+endpoint raises AttributeError instead of proving the guard.
 """
 
 import frappe

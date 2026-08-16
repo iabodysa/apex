@@ -8,10 +8,10 @@ Fuel Consumption Ledger was empty, because ``accrue_fuel_consumption`` is daily.
 allocation was compared against ~0 litres, no breach was ever found, and the fuel-overage
 alert had never fired at all.
 
-The second case is the half that makes the first one hold: the drain used to live in the
-DAILY ``reconcile_operations_alerts`` and to key off the current month too. Anchoring the
-queuer on the closed month without moving the drain would have queued a breach at 00:00
-on the 1st and closed it again the same day.
+The second case is the half that makes the first one hold: the DAILY
+``reconcile_operations_alerts`` must not drain Fuel Quota or key off the current month.
+Anchoring the queuer on the closed month without moving the drain there would queue a
+breach at 00:00 on the 1st and close it again the same day.
 """
 
 from __future__ import annotations

@@ -1,11 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 """What a REFUSED ``load_template_into_doc`` costs the rest of the request.
 
-The endpoint used to wrap its ``doc.save()`` in ``except Exception:
-frappe.db.rollback(); frappe.throw(generic)``. ``frappe.db.rollback()`` takes no
-savepoint, so it discarded the WHOLE request transaction — every row the request
+The endpoint must not wrap its ``doc.save()`` in ``except Exception:
+frappe.db.rollback(); frappe.throw(generic)``: ``frappe.db.rollback()`` takes no
+savepoint, so it would discard the WHOLE request transaction — every row the request
 had written before this endpoint was reached, not just the appended template rows —
-and the generic message then stood in for the validation error that actually
+and the generic message would then stand in for the validation error that actually
 refused the save.
 
 Both halves are asserted here: a row written EARLIER in the same request survives

@@ -3,9 +3,11 @@
 
 ``assign_requests_to_trip`` stamps ``is_assigned`` / ``assigned_to_trip`` on a Transport
 Request while the trip is still a Planned DRAFT, and the re-assignment guard then refuses
-that request to any other trip. Nothing used to clear either field, and there is no
-unassign endpoint — so the documented recovery path (end the trip, re-dispatch the
-request) was closed and only a DB-level edit could free the workers on it.
+that request to any other trip. There is no unassign endpoint, so the trip's own exit —
+delete of a draft, or cancel — is the only path that clears ``is_assigned`` /
+``assigned_to_trip`` and reopens the documented recovery path (end the trip, re-dispatch
+the request); a trip exit that stopped clearing the fields would leave only a DB-level
+edit to free the workers on it.
 
 Both exits are graded here because a trip leaves by two doors and only one of them is
 cancel: a draft is DELETED, never cancelled, so ``on_cancel`` alone left every abandoned

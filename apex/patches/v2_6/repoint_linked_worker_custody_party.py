@@ -6,7 +6,8 @@ from apex.habitat.temporary_worker_engine import _repoint_party
 
 
 def execute():
-    """Re-point the party columns the daily linker used to skip.
+    """Re-point the party columns PARTY_DOCTYPES was extended to cover
+    (temporary_worker_engine.py:32-48).
 
     ``PARTY_DOCTYPES`` listed ten of the twelve doctypes that carry party_type/party;
     Accommodation Stock Ledger and Custody Acknowledgment were missing, so every worker

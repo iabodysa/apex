@@ -281,9 +281,10 @@ def resolve_damage_assessment_building(assignment, bed):
 def _stamp_clearance(doc, clear=False):
     """Name the person who inspected and released the resident, and unname him on cancel.
 
-    The clearance certificate used to sign off as the building's standing supervisor, who
-    may never have seen the room. Both fields are read-only and written here, and a
-    cancelled checkout drops them so no withdrawn paper keeps a signatory.
+    The clearance certificate signs off as ``frappe.session.user``, not the building's
+    standing supervisor, who may never have seen the room. Both fields are read-only and
+    written here, and a cancelled checkout drops them so no withdrawn paper keeps a
+    signatory.
     """
     doc.db_set({
         "cleared_by": None if clear else frappe.session.user,

@@ -11,8 +11,8 @@ with the right event, room (``doctype="Dispatch Trip"``) and ``after_commit``.
 The true socket round-trip needs the live bench (the integrator confirms in
 the browser).
 
-The rider is the shipped fixture. Naming it as a dependency is what replaced the
-``test_ignore`` block that used to prune the walk behind its construction.
+The rider is the shipped fixture ``test_dependencies`` (line 24) names; Frappe stands
+it up instead of the file walking its own auto-dependencies.
 """
 
 from unittest.mock import patch

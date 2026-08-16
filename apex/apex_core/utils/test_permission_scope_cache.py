@@ -8,12 +8,12 @@ fragments, the ``has_permission`` form/submit guards, and the report-side
   * ``apex.habitat.permissions._allowed_buildings``  (Building User Permissions)
   * ``apex.salis.permissions._allowed_projects``     (Project User Permissions)
 
-Both used to SELECT ``User Permission`` directly with ``pluck="for_value"`` and memoise the
-result in ``frappe.local.cache``. That pluck returned the value and dropped every other
-column — ``applicable_for`` included — so a permission granted for ONE doctype silently
-applied to all of them. They now delegate to ``frappe.permissions.get_user_permissions``,
-which returns the whole row, caches per user in Redis, and short-circuits Administrator and
-Guest before any query.
+Both delegate to ``frappe.permissions.get_user_permissions``, which returns the whole row,
+caches per user in Redis, and short-circuits Administrator and Guest before any query.
+Neither may SELECT ``User Permission`` directly with ``pluck="for_value"`` and memoise the
+result in ``frappe.local.cache`` instead: that pluck returns the value and drops every other
+column — ``applicable_for`` included — so a permission granted for ONE doctype would
+silently apply to all of them.
 
 These tests lock what is OURS in that arrangement:
 

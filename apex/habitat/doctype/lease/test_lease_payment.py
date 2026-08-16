@@ -1,11 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
 """A rent payment must settle a real landlord payable, not sit on account.
 
-The Generate Payment button used to build the Payment Entry in the browser with
-``paid_amount = selected.amount || rent_amount``. That document had no ``references``
-row, so it was an ON-ACCOUNT payment: it closed no invoice, moved no
-``outstanding_amount``, and reconciled nothing — while carrying exactly the rent figure
-the operator expected to see, which is why nobody re-read it.
+Building the Payment Entry in the browser with
+``paid_amount = selected.amount || rent_amount`` instead would carry no ``references``
+row, making it an ON-ACCOUNT payment: it would close no invoice, move no
+``outstanding_amount``, and reconcile nothing — while carrying exactly the rent figure
+the operator expects to see, which is why it would go unnoticed.
 
 So these cases check the ALLOCATION, never the amount. The load-bearing one is
 ``test_the_allocation_is_the_invoice_not_the_rent_schedule``: it deliberately gives the
@@ -17,10 +17,10 @@ Entry, so cancelling it in Accounts must reverse the lease's view with no revers
 running — and, unlike the Telecom Contract, no cancel exemption either: the lease stores
 no link to the payment, so nothing on it can veto the cancellation.
 
-``TestTheRentSurfaceObeysTheConfiguredPaymentTarget`` covers the other divergence: the
-button used to read the Payment Routing target in the BROWSER and then pick among three
-hard-coded branches, so every target those branches did not name — the router's own
-Payment Request default included — quietly opened a Payment Entry anyway. Those cases
+``TestTheRentSurfaceObeysTheConfiguredPaymentTarget`` covers the other divergence:
+reading the Payment Routing target in the BROWSER and picking among three hard-coded
+branches instead would let every target those branches did not name — the router's own
+Payment Request default included — quietly open a Payment Entry anyway. Those cases
 change the configuration and assert the outcome changes with it.
 
 Every submitted lease here is approved through ``apply_workflow``. Lease is governed by

@@ -19,14 +19,13 @@ raises PermissionError from the link check and from a dozen other places before 
 controller is reached, so ``assertRaises(PermissionError)`` on its own can be
 satisfied by a failure that has nothing to do with the rule under test.
 
-FIXTURES, AND WHY THEY ARE NOT MINTED PER METHOD ANY MORE. This file used to insert a
-Salis Driver, one or two Users and up to two Projects for every method. Users are the
-expensive one: frappe refuses a User insert once 60 have been created in the last hour
-(``throttle_user_creation``), so a suite that mints identities per method eventually fails
-with "Throttled" for reasons that have nothing to do with what it tests. The drivers are now
-apex's own ``_Test Driver`` / ``_Test Driver Two`` fixtures, the issuers are stable
-get-or-create identities keyed by the scope they hold, and the two projects are named rather
-than tagged so they are created once and reused.
+FIXTURES ARE SHARED, NOT MINTED PER METHOD. Minting a fresh Salis Driver, one or two Users
+and up to two Projects per method risks frappe's User-insert throttle
+(``throttle_user_creation`` refuses inserts once 60 Users have been created in the last
+hour), which would fail the suite with "Throttled" for reasons unrelated to what it tests.
+The drivers are apex's own ``_Test Driver`` / ``_Test Driver Two`` fixtures, the issuers are
+stable get-or-create identities keyed by the scope they hold, and the two projects are named
+rather than tagged so they are created once and reused across methods.
 
 FrappeTestCase rolls back rows once per CLASS, not per method, so everything a method writes
 onto a SHARED fixture — the driver's project and status, the credential row itself — is

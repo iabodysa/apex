@@ -101,9 +101,9 @@ def submit_via_workflow(doc):
     A bare ``doc.submit()`` on a workflow-governed doctype is now refused by
     ``apex.apex_core.utils.workflow_guard`` unless the current user holds an authorized
     transition to a submit (doc_status 1) state. Tests whose subject is the controller's
-    ``on_submit`` SIDE-EFFECT (not the approval gate) used to rely on the native-submit
-    force-jump to reach docstatus 1. Reproduce that endpoint legitimately: land the
-    PERSISTED workflow state on the first submit (doc_status 1) state via a raw db write —
+    ``on_submit`` SIDE-EFFECT (not the approval gate) need a legitimate way to reach
+    docstatus 1: land the PERSISTED workflow state on the first submit (doc_status 1)
+    state via a raw db write —
     the same endpoint ``set_workflow_state_on_action`` force-jumped to — so both the
     guard's fast-path and Frappe's ``validate_workflow`` (which rejects a multi-hop
     in-memory state jump) see the state already at the sanctioned target, then submit.
@@ -147,8 +147,8 @@ def _user(email, role):
 
 
 def _project(project_name="QA Scope Project"):
-    """Return a Project named ``project_name``, creating it if absent. Idempotent.
-    Used to give a scoped Salis user a tenant to be permitted for.
+    """Return a Project named ``project_name``, creating it if absent. Idempotent —
+    it gives a scoped Salis user a tenant to be permitted for.
 
     A thin default-carrying alias over ``factories.make_project``: it was a fourth
     hand-written copy of that get-or-create, written in a shape the copy-paste

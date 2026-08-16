@@ -5,22 +5,22 @@
 today's Planned trips plus every still-Dispatched trip, so the map does not issue a
 request per row.
 
-Rewritten 2026-08-15. Every case here was a Silent-Pass, in three separate ways:
+Every case here guards against a Silent-Pass, in three separate ways:
 
   * the endpoint returns a paginated ENVELOPE (``{"positions": [...], "start", ...}``),
-    not a list. Four cases did ``for row in get_active_driver_positions()``, which
-    iterates a dict and yields its five KEYS — so they looped over strings and graded
-    nothing about any trip;
-  * ``test_a_driver_with_no_fix_is_listed_rather_than_dropped`` asserted
-    ``any(not p) or all(p)``, which is true for every possible list, including the empty
-    one. A tautology cannot fail;
-  * ``test_the_scope_is_the_callers_own_plans`` skipped unless a ``movement.demo@``
-    user existed. It does not exist on ci.localhost, so it had never run, and it read a
-    ``route_plan`` key the payload stopped carrying when the subject moved from Route
-    Plan to Route Assignment.
+    not a list, so a case must not do ``for row in get_active_driver_positions()`` — that
+    iterates a dict and yields its five KEYS, looping over strings and grading nothing
+    about any trip;
+  * ``test_a_driver_with_no_fix_is_listed_rather_than_dropped`` asserts a condition that
+    must be satisfiable as false: ``any(not p) or all(p)`` is true for every possible
+    list, including the empty one, so a tautology here would grade nothing;
+  * ``test_the_scope_is_the_callers_own_plans`` requires no pre-seeded site user and
+    reads ``route_assignment`` rather than ``route_plan``, which is the field the
+    payload actually carries (apex/salis/api/route_supervisor.py), so it runs on
+    ci.localhost and any fresh site.
 
-The population is now built by the test instead of read off whatever the site happens
-to hold, so a fresh site grades the same contract as a seeded one.
+The population is built by the test instead of read off whatever the site happens to
+hold, so a fresh site grades the same contract as a seeded one.
 """
 
 import frappe

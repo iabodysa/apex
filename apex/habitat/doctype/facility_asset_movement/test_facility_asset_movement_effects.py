@@ -149,7 +149,7 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
 
-    # A delivered room that is not a Room record used to be erased by the next movement.
+    # A delivered room that is not a Room record must survive the next movement, not be erased.
 
     FREE_TEXT_ROOM = "Storage Annex B"
 
@@ -238,11 +238,11 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
 
     def test_cancel_clears_the_audit_trail_of_the_movement_it_undid(self):
-        """previous_*/last_movement_date are on_submit snapshots that no on_cancel
-        reset, so reverting the only movement on a fresh asset left it reading "at A,
-        previously A" and still stamped with the date of a move that no longer
-        exists. The audit PAIR must survive or vanish together with the movement it
-        describes."""
+        """previous_*/last_movement_date are on_submit snapshots; on_cancel must reset
+        them together with the location, or reverting the only movement on a fresh
+        asset would read "at A, prior location also A" while still stamped with the
+        date of a move that no longer exists. The audit PAIR must survive or vanish
+        together with the movement it describes."""
         before = self._audit_trail()
         # A never-moved asset carries no trail; that is the value cancel must return to.
         self.assertFalse(before.previous_building, "seed asset must carry no previous building")
@@ -274,8 +274,8 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
             "an asset back at A must not also claim it was previously at A",
         )
 
-    # An out-of-order cancel used to restore from_* blindly, dragging an asset that had
-    # already moved on back to a building it had physically left.
+    # An out-of-order cancel must not restore from_* blindly: that would drag an asset that has
+    # already moved on back to a building it has physically left.
 
     def _second_leg(self):
         """Building C + room L2, and a SUBMITTED second movement B -> C on the same

@@ -22,10 +22,9 @@ def idle_vehicle_watch() -> None:
 
     A vehicle is idle if it has no submitted Dispatch Trip (status
     Dispatched/Completed) on or after the cutoff (``idle_vehicle_days``; Salis
-    Settings, default 7). Previously this ran one ``get_all`` per vehicle (N+1);
-    now a single grouped query returns the set of vehicles WITH a recent trip,
-    and the idle set is the difference in memory — same behaviour, one DB round
-    trip for the trip data instead of one per vehicle.
+    Settings, default 7). A single grouped query returns the set of vehicles WITH a
+    recent trip, and the idle set is the difference in memory: one DB round trip for
+    the trip data rather than one ``get_all`` per vehicle (N+1).
     """
     from frappe.utils import add_days, today
 
