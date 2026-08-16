@@ -43,12 +43,13 @@ def _route_plan(route_name, project):
     )
 
 
-def _submitted_manifest(route_plan, vehicle, driver):
+def _submitted_manifest(route_plan, vehicle, driver, dispatch_trip=None):
     """Insert and submit a Passenger Manifest with one boarded passenger row."""
     doc = frappe.get_doc(
         {
             "doctype": "Passenger Manifest",
             "route_plan": route_plan,
+            "dispatch_trip": dispatch_trip,
             "vehicle": vehicle,
             "driver": driver,
             "dispatch_date": frappe.utils.today(),
@@ -66,6 +67,25 @@ def _submitted_manifest(route_plan, vehicle, driver):
     doc.insert(ignore_permissions=True)
     doc.submit()
     return doc
+
+
+def _dispatch_trip(project, route_plan, vehicle, driver):
+    """Get-or-create a Dispatch Trip carrying ``project``; return its name."""
+    return (
+        frappe.get_doc(
+            {
+                "doctype": "Dispatch Trip",
+                "trip_type": "Ad Hoc",
+                "trip_date": frappe.utils.today(),
+                "project": project,
+                "route_plan": route_plan,
+                "vehicle": vehicle,
+                "driver": driver,
+            }
+        )
+        .insert(ignore_permissions=True)
+        .name
+    )
 
 
 class TestPassengerManifestRegister(FrappeTestCase):
@@ -108,3 +128,41 @@ class TestPassengerManifestRegister(FrappeTestCase):
         self.assertTrue(columns, "columns must still be returned to an out-of-scope caller")
         self.assertEqual(rows, [])
         self.assertEqual(summary[0]["value"], 0)
+
+    def test_scope_follows_the_trip_project_not_the_route_plan_project(self):
+        """A manifest whose Dispatch Trip sits in a DIFFERENT project than its Route
+        Plan must be scoped by the trip -- the same axis the desk list hook uses --
+        or this register and the desk list disagree on the same document."""
+        other_project = make_project("A564 PMR Other Project")
+        trip = _dispatch_trip(other_project, self.route_plan, self.vehicle, self.driver)
+        manifest = _submitted_manifest(self.route_plan, self.vehicle, self.driver, dispatch_trip=trip)
+
+        def _purge():
+            manifest.cancel()
+            frappe.delete_doc("Passenger Manifest", manifest.name, force=True, ignore_permissions=True)
+
+        self.addCleanup(_purge)
+
+        insider = _user("a564-pmr-other-insider@test.local", "Fleet Supervisor")
+        frappe.get_doc(
+            {"doctype": "User Permission", "user": insider, "allow": "Project", "for_value": other_project}
+        ).insert(ignore_permissions=True)
+        with as_user(insider):
+            _columns, rows, _chart, _report_summary, _summary = execute({})
+        self.assertIn(
+            manifest.name,
+            {row["name"] for row in rows},
+            "a caller scoped to the trip's own project must see the manifest",
+        )
+
+        outsider = _user("a564-pmr-route-only-outsider@test.local", "Fleet Supervisor")
+        frappe.get_doc(
+            {"doctype": "User Permission", "user": outsider, "allow": "Project", "for_value": self.project}
+        ).insert(ignore_permissions=True)
+        with as_user(outsider):
+            _columns, rows, _chart, _report_summary, _summary = execute({})
+        self.assertNotIn(
+            manifest.name,
+            {row["name"] for row in rows},
+            "a caller scoped only to the route plan's project must not see a manifest whose trip sits elsewhere",
+        )

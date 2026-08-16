@@ -7,8 +7,9 @@ never boarded is one document and forty lines, and rolling it up to the document
 hide the passenger that matters. Only submitted manifests are listed — a draft has not
 dispatched, and a cancelled manifest is out with docstatus 2.
 
-Scoped by the route plan's project through the same resolver the permission hook uses,
-so a scope correction reaches this report and the desk list together.
+Scoped through the actual trip, with a Route Plan fallback when a manifest carries no
+dispatch_trip -- the same axis SALIS_SCOPE["Passenger Manifest"] (permissions.py
+_manifest()) projects the desk list through, so a scope correction reaches both together.
 """
 
 import frappe
@@ -33,13 +34,6 @@ def execute(filters=None):
         query_filters["dispatch_date"] = date_condition
 
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Passenger Manifest")
-    if restrict:
-        in_scope = frappe.get_all("Route Plan", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
-        chosen = query_filters.get("route_plan")
-        if not in_scope or (chosen and chosen not in in_scope):
-            return columns, [], None, None, _summary([])
-        if not chosen:
-            query_filters["route_plan"] = ["in", in_scope]
 
     manifests = frappe.get_all(
         "Passenger Manifest",
@@ -47,6 +41,34 @@ def execute(filters=None):
         fields=["name", "dispatch_date", "route_plan", "dispatch_trip", "vehicle", "driver"],
         order_by="dispatch_date desc",
     )
+    if restrict:
+        # SALIS_SCOPE["Passenger Manifest"] projects through the actual trip, with a
+        # Route Plan fallback (permissions.py _manifest()) -- so this must scope the
+        # same way, or an out-of-scope trip on an in-scope route plan (or the reverse)
+        # disagrees between the desk list and this register.
+        if not allowed:
+            manifests = []
+        else:
+            trip_names = [m.dispatch_trip for m in manifests if m.dispatch_trip]
+            trip_projects = (
+                frappe._dict(
+                    frappe.get_all(
+                        "Dispatch Trip",
+                        filters={"name": ["in", trip_names]},
+                        fields=["name", "project"],
+                        as_list=True,
+                    )
+                )
+                if trip_names
+                else {}
+            )
+
+            def _in_scope(m):
+                if m.dispatch_trip:
+                    return trip_projects.get(m.dispatch_trip) in allowed
+                return frappe.db.get_value("Route Plan", m.route_plan, "project") in allowed
+
+            manifests = [m for m in manifests if _in_scope(m)]
     if not manifests:
         return columns, [], None, None, _summary([])
 

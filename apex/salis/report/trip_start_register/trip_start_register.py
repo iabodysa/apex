@@ -35,10 +35,14 @@ def execute(filters=None):
 
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Trip Start Log")
     if restrict:
-        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
-        if not in_scope_drivers:
+        # Scoped on Dispatch Trip.project, matching the list view's own hook
+        # (SALIS_SCOPE["Trip Start Log"] projects through the trip, not the driver) --
+        # a borrowed driver running an in-scope trip must stay visible here, and an
+        # in-scope driver running an out-of-scope trip must stay hidden.
+        in_scope_trips = frappe.get_all("Dispatch Trip", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
+        if not in_scope_trips:
             return columns, []
-        log_filters["driver"] = ["in", in_scope_drivers]
+        log_filters["dispatch_trip"] = ["in", in_scope_trips]
 
     rows = frappe.get_all(
         "Trip Start Log",
