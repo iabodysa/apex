@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { Badge, Button, createResource } from "frappe-ui";
 import AsyncPanel from "../components/AsyncPanel.vue";
+import { useResourceState } from "../../../core/useResourceState.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 const contextResource = createResource({
   url: "apex.salis.api.fleet_employee.get_context",
@@ -9,6 +10,7 @@ const contextResource = createResource({
   auto: false,
 });
 const context = computed(() => contextResource.data || {});
+const state = useResourceState(contextResource, () => context.value.state === "unlinked");
 const grants = new Set(globalThis.window?.apex_portal?.capabilities || []);
 const can = (capability) => grants.has(capability);
 onMounted(() => contextResource.fetch());
@@ -19,9 +21,9 @@ onMounted(() => contextResource.fetch());
       <p class="salis-eyebrow">مرحباً بك</p>
       <h2>خدمات ساليس</h2>
     </header>
-    <AsyncPanel v-if="contextResource.loading" state="loading" title="جاري تجهيز حسابك" message="نتحقق من مركبتك وخدماتك." />
-    <AsyncPanel v-else-if="contextResource.error" state="error" title="تعذر تجهيز الحساب" message="حاول مرة ثانية." @retry="contextResource.fetch()" />
-    <AsyncPanel v-else-if="context.state === 'unlinked'" state="empty" title="حسابك غير مرتبط بمندوب" message="راجع مشرف التشغيل لربط المستخدم ببياناتك." />
+    <AsyncPanel v-if="state === 'loading'" state="loading" title="جاري تجهيز حسابك" message="نتحقق من مركبتك وخدماتك." />
+    <AsyncPanel v-else-if="state === 'error'" state="error" title="تعذر تجهيز الحساب" message="حاول مرة ثانية." @retry="contextResource.fetch()" />
+    <AsyncPanel v-else-if="state === 'empty'" state="empty" title="حسابك غير مرتبط بمندوب" message="راجع مشرف التشغيل لربط المستخدم ببياناتك." />
     <template v-else>
       <article class="salis-card">
         <div>
