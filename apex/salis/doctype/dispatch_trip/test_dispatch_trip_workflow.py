@@ -281,7 +281,12 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         dt.save(ignore_permissions=True)
 
         frappe.set_user(self.supervisor)
-        self.assertNotIn("Complete", _actions(dt))
+        self.assertIn(
+            "Complete",
+            _actions(dt),
+            "the supervisor who dispatched the trip closes it; without this the "
+            "finished trip stays on his active board and only a manager can clear it",
+        )
 
         frappe.set_user(self.manager)
         self.assertIn("Complete", _actions(dt))

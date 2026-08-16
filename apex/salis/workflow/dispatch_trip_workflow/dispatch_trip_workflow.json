@@ -70,6 +70,15 @@
    "state": "Dispatched",
    "action": "Complete",
    "next_state": "Completed",
+   "allowed": "Fleet Supervisor",
+   "allow_self_approval": 1,
+   "condition": ""
+  },
+  {
+   "doctype": "Workflow Transition",
+   "state": "Dispatched",
+   "action": "Complete",
+   "next_state": "Completed",
    "allowed": "Fleet Project Manager",
    "allow_self_approval": 1,
    "condition": ""
