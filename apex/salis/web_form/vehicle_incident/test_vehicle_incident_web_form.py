@@ -15,6 +15,8 @@ import json
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from apex.tests import factories
 from frappe.website.doctype.web_form.web_form import accept
 
 test_dependencies = ["Salis Vehicle"]
@@ -30,7 +32,10 @@ def _h(n=12):
 class TestVehicleIncidentWebForm(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
-        self.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": PLATE}, "name")
+        # A vehicle of this test's own: the assertions below count Vehicle Incident rows for
+        # it, and the shipped `vehicle_incident` fixture already points at the borrowed plate,
+        # so the count read 2 where the test had created 1.
+        self.vehicle = factories.make_vehicle(f"_T WF {frappe.generate_hash(length=12)}")
         self.addCleanup(self._drop_drafts)
         self.addCleanup(frappe.set_user, "Administrator")
 

@@ -134,7 +134,22 @@ def submit_via_workflow(doc):
 
 def _user(email, role):
     """Return a User with ``email``, creating it if needed, and ensure it holds
-    ``role``. Idempotent: re-uses an existing user/role grant."""
+    ``role``. Idempotent: re-uses an existing user/role grant.
+
+    THE THROTTLE IS RAISED IN SITE CONFIG, NOT WORKED AROUND HERE.
+    ``throttle_user_creation`` (frappe/core/doctype/user/user.py:1250-1255) refuses the
+    sixty-first User created in any sixty-minute window. A site that already carries these
+    accounts never reaches the limit, which is why the ceiling stayed invisible until a freshly
+    rebuilt site had to create every one of them in a single run — and then refused 253 tests
+    with "Throttled". The fix is ``throttle_user_limit`` in the test site's config, which is the
+    knob the framework put there for exactly this.
+
+    ``frappe.flags.in_import`` was tried first and REVERTED: it does return early from the
+    throttle, but it also skips ``_set_defaults`` entirely (frappe/model/document.py:833-834), so
+    the user is inserted with none of its field defaults. Four notification tests then failed
+    because the account never reached the recipient list a defaulted user reaches. A flag that
+    solves the named problem and three unnamed ones is not a fix.
+    """
     if not frappe.db.exists("User", email):
         u = frappe.get_doc({"doctype": "User", "email": email,
                             "first_name": email.split("@")[0], "send_welcome_email": 0})

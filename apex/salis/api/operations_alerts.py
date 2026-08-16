@@ -203,15 +203,22 @@ def bulk_acknowledge_alerts(names):
 
     Each row is run through ``acknowledge_alert``, which re-checks ``write``
     server-side, so a row the caller may not act on is skipped rather than
-    trusted from the client. Queue rows never transition, so this returns an
-    empty moved list.
+    trusted from the client.
+
+    THE RETURNED LIST NAMES THE ROWS THE CALLER WAS ALLOWED TO ACT ON, and is read
+    from ``ok`` rather than from ``acknowledged``. A queue row has no state to move to,
+    so ``acknowledge_alert`` reports ``acknowledged=False`` for every row by design
+    (:197) — reading that key here made the list unconditionally empty, and the desk
+    renders its length as "{0} acknowledged" (operations_control.js:900), so an
+    operator who acknowledged ten rows was told nought. The two sibling bulk actions
+    already read ``ok`` for this reason.
     """
     if isinstance(names, str):
         names = frappe.parse_json(names)
     acknowledged = []
     for name in names or []:
         try:
-            if acknowledge_alert(name).get("acknowledged"):
+            if acknowledge_alert(name).get("ok"):
                 acknowledged.append(name)
         except frappe.PermissionError:
             continue

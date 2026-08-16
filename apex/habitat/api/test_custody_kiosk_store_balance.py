@@ -24,7 +24,7 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
 test_dependencies = ["Bed", "Employee", "Custody Article"]
 
 BUILDING = "_Test Building"
-ARTICLE = "_T-Custody Article-00005"
+ARTICLE = "_T-Custody Article-00001"
 
 
 class TestKioskStoreBalanceExcludesWorkerCustody(FrappeTestCase):

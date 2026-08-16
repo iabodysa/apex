@@ -185,13 +185,15 @@ class TestWorkspaceHeadlineCharts(unittest.TestCase):
         silenced. The sibling that grades a chart reference against the shipped Dashboard
         Chart records is the load-bearing half and still runs.
 
-        ONE WORKSPACE IS EXEMPT, and it is named rather than pattern-matched so that adding
-        a second requires editing this line. ``Back Engines`` is not a screen an operator
-        opens: it is System Manager only, sits under Apex Core, and its own content block
-        says it exists "so that nothing is invisible" — it is the inventory of every chart
-        and card that is built but not placed. The rule protects daily screens from
-        becoming dashboards; an inventory of the unplaced is the opposite of that, and
-        stripping its 46 rows would hide exactly what it was built to show.
+        ONE WORKSPACE IS EXEMPT BY OWNER DECISION, and it is named rather than
+        pattern-matched so that adding a second requires editing this line. ``Back Engines``
+        is not a screen an operator opens: it is System Manager only, sits under Apex Core,
+        and its own content block says it exists "so that nothing is invisible" — it is the
+        inventory of every chart and card that is built but not placed. The rule protects
+        daily screens from becoming dashboards; an inventory of the unplaced is the opposite
+        of that, and stripping its 46 rows would hide exactly what it was built to show.
+        The exemption was proposed on that reasoning and ratified by the owner, so it is not
+        a reader's judgement to re-open.
 
         The assertion is therefore stronger than a bare emptiness check: it pins WHICH file
         may carry charts, so a chart landing on any other workspace still fails, and a

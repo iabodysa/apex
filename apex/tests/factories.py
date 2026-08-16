@@ -97,6 +97,9 @@ def make_company(name="Test AFMCO", **kwargs):
         "company_name": name,
         "abbr": "TAFM",
         "default_currency": "SAR",
+        # Company.country is mandatory. The old dev site already carried this record, so the
+        # insert branch never ran there and the omission stayed invisible until a fresh site.
+        "country": frappe.defaults.get_global_default("country") or "Saudi Arabia",
         **kwargs,
     })
     doc.insert(ignore_permissions=True)

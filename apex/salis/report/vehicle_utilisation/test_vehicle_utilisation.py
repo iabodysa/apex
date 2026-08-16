@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+
+from apex.tests import factories
 from frappe.utils import add_days, today
 
 from apex.salis.report.vehicle_utilisation.vehicle_utilisation import execute
@@ -44,7 +46,11 @@ class TestVehicleUtilisation(FrappeTestCase):
         so one build serves the whole class and the class rollback takes them away again.
         """
         super().setUpClass()
-        cls.vehicle = frappe.db.get_value("Salis Vehicle", {"plate_number": PLATE}, "name")
+        # A vehicle of this class's own, never the shipped `_T ABC 1001`. That plate is
+        # VEH-000001, which the shipped `vehicle_utilisation_snapshot` fixture already carries
+        # a snapshot for — so `snapshots` read 3 where the class had built 2, and the test
+        # graded the site's fixtures rather than the rollup.
+        cls.vehicle = factories.make_vehicle(f"_T UTIL {frappe.generate_hash(length=12)}")
         cls._snapshot(today(), trips=10, idle=2, util=80.0)
         cls._snapshot(add_days(today(), -7), trips=6, idle=4, util=60.0)
 

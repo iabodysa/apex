@@ -37,9 +37,7 @@ class TestHousedWorkersAreExcludedInTheQuery(TestCase):
         fake.get_all.return_value = _rows(["EMP-16"])
 
         with patch.object(arrivals_desk, "frappe", fake):
-            results = arrivals_desk._employee_matches(
-                "a", {"EMP-1", "EMP-2"}, {"EMP-3"}
-            )
+            results = arrivals_desk._employee_matches("a", {"EMP-1", "EMP-2", "EMP-3"})
 
         filters = fake.get_all.call_args.kwargs["filters"]
         self.assertEqual(filters["name"], ["not in", ["EMP-1", "EMP-2", "EMP-3"]])
@@ -57,7 +55,7 @@ class TestHousedWorkersAreExcludedInTheQuery(TestCase):
         fake.get_all.return_value = _rows(sorted(housed))
 
         with patch.object(arrivals_desk, "frappe", fake):
-            results = arrivals_desk._employee_matches("a", housed, set())
+            results = arrivals_desk._employee_matches("a", housed)
 
         self.assertEqual(
             len(results),
@@ -88,6 +86,6 @@ class TestHousedWorkersAreExcludedInTheQuery(TestCase):
         fake.get_all.return_value = []
 
         with patch.object(arrivals_desk, "frappe", fake):
-            arrivals_desk._employee_matches("a", set(), set())
+            arrivals_desk._employee_matches("a", set())
 
         self.assertNotIn("name", fake.get_all.call_args.kwargs["filters"])

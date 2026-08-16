@@ -270,6 +270,14 @@ class TestPortalTokenSecurity(FrappeTestCase):
         )
 
     def _make_user(self, role, *, allow=None, for_value=None):
+        """A throwaway user holding one role, DELETED when the test that asked for it ends.
+
+        The email carries a fresh hash, so every run of this class used to leave a new
+        `portal-security-*` account behind holding a real role. Those accounts join every
+        role-based recipient list for ever, and four unrelated notification tests assert their
+        own user is in such a list — so they began failing against a list of thirty-seven
+        strangers none of them created. A fixture that outlives its test is not a fixture.
+        """
         tag = frappe.generate_hash(length=12).lower()
         user = (
             frappe.get_doc(
@@ -284,8 +292,9 @@ class TestPortalTokenSecurity(FrappeTestCase):
             .insert(ignore_permissions=True)
             .name
         )
+        self.addCleanup(frappe.delete_doc, "User", user, force=True, ignore_permissions=True)
         if allow and for_value:
-            frappe.get_doc(
+            permission = frappe.get_doc(
                 {
                     "doctype": "User Permission",
                     "user": user,
@@ -293,6 +302,13 @@ class TestPortalTokenSecurity(FrappeTestCase):
                     "for_value": for_value,
                 }
             ).insert(ignore_permissions=True)
+            self.addCleanup(
+                frappe.delete_doc,
+                "User Permission",
+                permission.name,
+                force=True,
+                ignore_permissions=True,
+            )
         return user
 
     def _house(self, employee, building):
@@ -524,7 +540,9 @@ class TestPortalTokenSecurity(FrappeTestCase):
         with self.assertRaises(frappe.PermissionError):
             resolve_driver_token(token._plaintext_token)
 
-    def test_mixed_driver_binding_rejected_on_insert(self):
+    def test_driver_holder_type_rejects_worker_fields_on_insert_full_or_partial(self):
+        """holder_type=Driver refuses ANY worker-audience field on insert, whether
+        the worker subject is fully populated or only party_type is present."""
         with self.assertRaises(frappe.ValidationError):
             frappe.get_doc(
                 {
@@ -537,7 +555,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
                 }
             ).insert(ignore_permissions=True)
 
-    def test_driver_party_type_without_worker_subject_is_rejected(self):
         with self.assertRaises(frappe.ValidationError):
             frappe.get_doc(
                 {

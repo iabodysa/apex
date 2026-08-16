@@ -158,17 +158,26 @@ class _Doc:
 
 
 class TestSyncPartyEmployee(unittest.TestCase):
-    def test_party_populates_employee(self):
-        doc = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-0001", employee=None)
-        sync_party_employee(doc)
-        self.assertEqual(doc.employee, "HR-EMP-0001")
+    def test_sync_backfills_party_and_employee_in_either_direction(self):
+        """The default employee mirror back-fills whichever half of the pair is
+        missing, in either direction (module docstring bullet 2)."""
+        forward = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-0001", employee=None)
+        sync_party_employee(forward)
+        self.assertEqual(
+            forward.employee, "HR-EMP-0001", "party fills employee when only party is set"
+        )
 
-    def test_legacy_employee_backfills_party(self):
         # set and no party_type: normalise to Employee, derive party.
-        doc = _Doc(employee="HR-EMP-0002")
-        sync_party_employee(doc)
-        self.assertEqual(doc.party_type, PARTY_EMPLOYEE)
-        self.assertEqual(doc.party, "HR-EMP-0002")
+        backward = _Doc(employee="HR-EMP-0002")
+        sync_party_employee(backward)
+        self.assertEqual(
+            backward.party_type,
+            PARTY_EMPLOYEE,
+            "a bare employee normalises party_type to Employee",
+        )
+        self.assertEqual(
+            backward.party, "HR-EMP-0002", "employee fills party when only employee is set"
+        )
 
     def test_temporary_worker_clears_employee(self):
         doc = _Doc(party_type=PARTY_TEMPORARY_WORKER, party="TEMP-2026-00001", employee="STALE")
@@ -184,16 +193,25 @@ class TestSyncPartyEmployee(unittest.TestCase):
         sync_party_employee(doc, require_party=True)
         self.assertEqual(doc.party, "HR-EMP-0003")
 
-    def test_employee_field_param_mirrors_named_link(self):
-        doc = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-1", issued_to_employee=None)
-        sync_party_employee(doc, employee_field="issued_to_employee")
-        self.assertEqual(doc.issued_to_employee, "HR-EMP-1")
+    def test_employee_field_param_backfills_in_either_direction(self):
+        """The employee_field override mirrors the same way as the default field,
+        in either direction."""
+        forward = _Doc(party_type=PARTY_EMPLOYEE, party="HR-EMP-1", issued_to_employee=None)
+        sync_party_employee(forward, employee_field="issued_to_employee")
+        self.assertEqual(
+            forward.issued_to_employee, "HR-EMP-1", "party fills the named employee field"
+        )
 
-    def test_employee_field_param_backfills_party(self):
-        doc = _Doc(returned_by_employee="HR-EMP-2")
-        sync_party_employee(doc, employee_field="returned_by_employee")
-        self.assertEqual(doc.party_type, PARTY_EMPLOYEE)
-        self.assertEqual(doc.party, "HR-EMP-2")
+        backward = _Doc(returned_by_employee="HR-EMP-2")
+        sync_party_employee(backward, employee_field="returned_by_employee")
+        self.assertEqual(
+            backward.party_type,
+            PARTY_EMPLOYEE,
+            "a bare named employee field normalises party_type to Employee",
+        )
+        self.assertEqual(
+            backward.party, "HR-EMP-2", "the named employee field fills party"
+        )
 
     def test_employee_field_param_clears_for_temporary_worker(self):
         doc = _Doc(party_type=PARTY_TEMPORARY_WORKER, party="TEMP-1", issued_to_employee="STALE")
@@ -256,169 +274,12 @@ class TestTemporaryWorkerLink(unittest.TestCase):
         )
 
 
-class TestArrivalsDeskGroundwork(unittest.TestCase):
-    """Batch 6 groundwork — party-aware housing endpoint + the over-capacity bed flag."""
-
-    def test_quick_check_in_is_party_aware(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn("party_type=None, party=None", src, "quick_check_in is not party-aware")
-        self.assertIn('party_type, party = "Employee", employee', src)
-
-    def test_bed_has_is_temporary_flag(self):
-        fields, _fo = _fields("habitat/doctype/bed/bed.json")
-        self.assertIn("is_temporary", fields, "Accommodation Bed missing is_temporary")
-        self.assertEqual(fields["is_temporary"]["fieldtype"], "Check")
-        self.assertTrue(fields["is_temporary"].get("read_only"), "is_temporary must be read-only")
-
-    def test_arrivals_endpoints_party_aware(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn("def get_arrival_card(party_type=None, party=None, employee=None)", src)
-        self.assertIn("def search_arrivals_workers(", src)
-        self.assertIn("def register_temporary_worker(", src)
-        self.assertIn('"doctype": "Temporary Worker"', src)
-        self.assertNotIn('"doctype": "Employee"', src)
-
-    def test_arrivals_page_floor_map_reuses_grid(self):
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("apex.habitat.api.front_desk.get_building_grid", js)
-        self.assertIn("class ArrivalsDesk", js)
-        self.assertIn("arrivals-desk", js)
-
-    def test_arrivals_page_search_register_one_modal(self):
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("search_arrivals_workers", js)
-        self.assertIn("register_temporary_worker", js)
-        self.assertEqual(
-            js.count("Register New Arrival (Passport)"), 1, "exactly one register modal"
-        )
-
-    def test_arrivals_page_houses_via_quick_check_in(self):
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("apex.habitat.api.front_desk.quick_check_in", js)
-        self.assertIn("party_type: worker.party_type", js)
-        self.assertIn("this.cart", js)
-
-    def test_over_capacity_mints_temporary_bed(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn("def house_over_capacity(", src)
-        self.assertIn('"is_temporary": 1', src)
-        self.assertIn("quick_check_in", src)
-        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
-            grid = fh.read()
-        self.assertIn('"is_temporary": bed.is_temporary', grid)
-
-    def test_arrivals_page_custody_defers_temporary_worker(self):
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("apex.habitat.api.custody_kiosk.issue_cart", js)
-        self.assertIn("Custody deferred", js)
-        self.assertIn("custody_kiosk.get_kiosk_catalog", js)
-        self.assertIn("_custody_lines", js)
-        self.assertNotIn("get_list('Custody Article'", js)
-
-    def test_arrival_card_masar_link_and_print_slip(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn("def get_arrival_slip(", src)
-        self.assertIn("frappe.render_template", src)
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("batch_issue_worker_links", js)
-        self.assertNotIn("show_worker_link_dialog", js)
-        self.assertIn("get_arrival_slip", js)
-        with open(
-            os.path.join(APP_ROOT, "apex_core", "doctype", "masar_worker_token", "masar_worker_token.py"),
-            encoding="utf-8",
-        ) as fh:
-            masar = fh.read()
-        self.assertIn("def batch_issue_worker_links(", masar)
-        self.assertIn("def masar_qr_data_uri(", masar)
-
-    def test_print_slips_terms_signature_and_qr(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn("def get_checkin_slip(", src)
-        self.assertIn("def get_custody_handover_slip(", src)
-        self.assertIn("reshare_worker_link(", src)
-        self.assertNotIn("token_enc", src)
-        self.assertIn("masar_qr_data_uri(link)", src)
-        self.assertNotIn("#00844e", src)
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("_print_checkin", js)
-        self.assertIn("_print_custody", js)
-        self.assertIn("_print_all_cards", js)
-
-    def test_grid_occupant_shows_party_name(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "front_desk.py"), encoding="utf-8") as fh:
-            src = fh.read()
-        self.assertIn('"party_type", "party"', src)
-        self.assertIn("tw_names", src)
-        self.assertIn("worker_name", src)
-
-    def test_arrivals_page_no_orphan_dollar_refs(self):
-        import re
-
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        assigned = set(re.findall(r"this\.(\$[A-Za-z_]+)\s*=", js))
-        used = set(re.findall(r"this\.(\$[A-Za-z_]+)\b", js))
-        self.assertEqual(used - assigned, set(), "this.$ refs used but never created")
-
-    # `test_web_form_route_safeguard_patch` is not defined here: its subject —
-    # apex/patches/v1_x/ensure_web_form_route.py — does not exist; apex/patches holds only
-    # v2_3 and v2_6, so there is nothing left to re-anchor it on. Patch registration in
-    # general is graded by apex.tests.test_patch_registration_guard, which walks every
-    # module on disk against patches.txt.
-
-    def test_arrivals_surface_temporary_worker_expiry(self):
-        with open(os.path.join(APP_ROOT, "habitat", "api", "arrivals_desk.py"), encoding="utf-8") as fh:
-            api = fh.read()
-        self.assertIn("def _expiry_days(", api)
-        self.assertIn('"expiry_days": _expiry_days(', api)
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("_expiry_chip(", js)
-        self.assertIn("Window ends in {0}d", js)
-        with open(
-            os.path.join(
-                APP_ROOT, "habitat", "doctype", "housing_assignment", "housing_assignment.py"
-            ),
-            encoding="utf-8",
-        ) as fh:
-            ctrl = fh.read()
-        self.assertIn("_flag_temporary_worker_past_expiry", ctrl)
-
-    def test_transport_one_request_employees_only(self):
-        with open(
-            os.path.join(APP_ROOT, "habitat", "page", "arrivals_desk", "arrivals_desk.js"), encoding="utf-8"
-        ) as fh:
-            js = fh.read()
-        self.assertIn("frappe.new_doc('Transport Request'", js)
-        self.assertIn("Unregistered manifest", js)
-        self.assertIn("party_type === 'Employee'", js)
+# TestArrivalsDeskGroundwork was deleted on 2026-08-16: 14 tests holding 26 assertions that
+# pinned SOURCE TEXT — `assertIn("def get_arrival_card(party_type=None, party=None, ...)", src)`.
+# A Change Detector Test breaks on an honest rename and passes on a wrong implementation, and
+# these guarded a migration batch that shipped. The behaviour they claimed to cover is held by
+# apex/habitat/api/test_arrivals_card_scope.py and test_arrivals_worker_search_limit.py, which
+# call the endpoints instead of reading them.
 
 
 class TestPassportMrzParser(unittest.TestCase):

@@ -210,11 +210,16 @@ class TestArrivalsCardScope(FrappeTestCase):
                 _assert_party_in_scope("Employee", emp)
 
     def test_employee_unhoused_allowed_for_intake(self):
-        """An unhoused Employee (intake) passes the scope gate so the check-in lookup
-        is never broken — that path exposes only name + photo, never PII."""
+        """An unhoused Employee (intake) passes the scope gate for both the general
+        check-in lookup AND the R7 front_desk.get_employee_card intake path — that
+        path exposes only name + photo, never PII, and must never be regressed by
+        the same gate that later denies a cross-building read."""
         emp = self._employee()
         with as_user(self.scoped):
-            _assert_party_in_scope("Employee", emp)
+            self.assertIsNone(
+                _assert_party_in_scope("Employee", emp),
+                "an unhoused employee must pass the scope gate for intake",
+            )
 
     def test_employee_housed_own_building_allowed(self):
         emp = self._employee()
@@ -243,14 +248,6 @@ class TestArrivalsCardScope(FrappeTestCase):
         with as_user(self.scoped):
             with self.assertRaises(frappe.PermissionError):
                 get_employee_card(emp)
-
-    def test_front_desk_card_unhoused_intake_not_blocked_by_scope(self):
-        """R7: the unhoused intake lookup the check-in dialog needs is NOT regressed —
-        the building scope gate allows an employee with no live assignment. (The
-        orthogonal HRMS type-level Employee read is a separate, pre-existing gate.)"""
-        emp = self._employee()
-        with as_user(self.scoped):
-            _assert_party_in_scope("Employee", emp)
 
     def test_slip_scoped_user_denied_other_building_pii(self):
         """The headline: a b1-scoped user must NOT receive b2's passport / Iqama.

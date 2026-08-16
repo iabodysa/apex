@@ -96,7 +96,9 @@ class TestUnconfiguredPushIsAReportedNoOp(unittest.TestCase):
         self.assertIsNone(web_push.public_key())
 
     def test_a_send_is_a_no_op_that_names_its_reason(self):
-        result = web_push.send_to_driver("DRV-0001", "Trip assigned", "Your next trip is ready.")
+        result = web_push.send_to_subject(
+            web_push.DRIVER, "DRV-0001", "Trip assigned", "Your next trip is ready."
+        )
         self.assertEqual(result, {"sent": 0, "reason": "not_configured"})
 
     def test_an_enqueue_does_not_even_wake_the_worker(self):

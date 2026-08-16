@@ -15,11 +15,11 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.tests import factories
+
 from apex.salis.report.driver_clearance_register.driver_clearance_register import execute
 
 test_dependencies = ["Salis Driver"]
-
-DRIVER_NAME = "_Test Driver"
 
 _EXPECTED_FIELDS = [
     "name",
@@ -33,8 +33,18 @@ _EXPECTED_FIELDS = [
 
 class TestDriverClearanceRegister(FrappeTestCase):
     def setUp(self):
+        """Build a driver of this test's own, never the shipped `_Test Driver`.
+
+        The outstanding-counter assertions below say the driver carries zero open fuel
+        exceptions and zero open recoveries. `_Test Driver` is `DRV-000001`, which the shipped
+        `fuel_exception_case` fixture already points at, so the counters read 1 and the test
+        graded the site's history instead of the report.
+        """
         frappe.set_user("Administrator")
-        self.driver = frappe.db.get_value("Salis Driver", {"full_name": DRIVER_NAME}, "name")
+        tag = frappe.generate_hash(length=12)
+        self.driver, _email = factories.make_driver_chain(
+            f"clearance-register-{tag}@example.com", "Clearance Register"
+        )
         self.clearance = frappe.get_doc(
             {
                 "doctype": "Driver Clearance",

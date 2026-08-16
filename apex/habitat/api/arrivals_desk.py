@@ -289,40 +289,42 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     }
 
 
-def _already_housed_parties(restrict, allowed):
-    """``(employee_ids, temporary_worker_ids)`` already holding a live bed, so the
-    search never offers a worker who is already in one."""
-    housed_filters = occupancy.active_assignment_filters()
-    if restrict:
-        housed_filters["building"] = ["in", allowed]
+def _housed_employees() -> set:
+    """Every Employee holding a live bed, in any building.
+
+    Deliberately unscoped, because the two axes this endpoint searches are excluded on
+    different grounds. An Employee carries no building of their own, so the only question
+    is whether they already hold a bed anywhere — offering one who is housed in another
+    estate would name an out-of-estate worker AND propose a double assignment.
+    """
     housed = frappe.get_all(
         "Housing Assignment",
-        filters=housed_filters,
-        fields=["party_type", "party", "employee"],
-    )
-    housed_emp = {h.employee for h in housed if h.employee}
-    housed_tw = {h.party for h in housed if h.party_type == "Temporary Worker" and h.party}
-    return housed_emp, housed_tw
-
-
-def _employees_housed_elsewhere(allowed) -> set:
-    """Employees living in a building outside the caller's estate. They are already
-    housed, and naming them here would leak an out-of-estate worker."""
-    blocked = frappe.get_all(
-        "Housing Assignment",
-        filters=occupancy.active_assignment_filters(building=["not in", allowed]),
+        filters=occupancy.active_assignment_filters(),
         fields=["employee"],
     )
-    return {b.employee for b in blocked if b.employee}
+    return {h.employee for h in housed if h.employee}
 
 
-def _employee_matches(txt, housed_emp, blocked_emp) -> list:
+def _housed_temporary_workers(restrict, allowed) -> set:
+    """Temporary Workers holding a live bed inside the caller's estate.
+
+    Scoped to match ``_temporary_worker_matches``, which filters the candidates on their
+    own ``building`` field: a worker outside the estate is already absent from that list,
+    so widening this read would exclude rows that were never offered.
+    """
+    filters = occupancy.active_assignment_filters(party_type="Temporary Worker")
+    if restrict:
+        filters["building"] = ["in", allowed]
+    housed = frappe.get_all("Housing Assignment", filters=filters, fields=["party"])
+    return {h.party for h in housed if h.party}
+
+
+def _employee_matches(txt, excluded) -> list:
     """Active Employees matching the typed text who are not already housed.
 
     The exclusion is part of the QUERY, not a pass over its result: applied after the
     15-row limit it emptied the list whenever the first fifteen matches happened to be
     housed, and the desk was told there was nobody to house."""
-    excluded = housed_emp | blocked_emp
     filters = {"status": "Active"}
     if excluded:
         filters["name"] = ["not in", sorted(excluded)]
@@ -392,7 +394,12 @@ def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
 def search_arrivals_workers(building=None, txt=None) -> list:
     """Combined worker lookup for the desk: registered Employees first, then active
     Temporary Workers, each tagged with ``party_type`` so the page can house either.
-    Read-permission-gated per doctype (a user who cannot read a doctype gets none)."""
+    Read-permission-gated per doctype (a user who cannot read a doctype gets none).
+
+    The two axes are read SEPARATELY because they are scoped differently. An Employee is
+    excluded when housed anywhere; a Temporary Worker is excluded when housed inside the
+    caller's estate, which is the only place their own list can reach.
+    """
     txt = (txt or "").strip()
     results = []
 
@@ -400,14 +407,13 @@ def search_arrivals_workers(building=None, txt=None) -> list:
     if restrict and not allowed:
         return []
 
-    housed_emp, housed_tw = _already_housed_parties(restrict, allowed)
-    blocked_emp = _employees_housed_elsewhere(allowed) if restrict else set()
-
     if frappe.has_permission("Employee", "read"):
-        results += _employee_matches(txt, housed_emp, blocked_emp)
+        results += _employee_matches(txt, _housed_employees())
 
     if frappe.has_permission("Temporary Worker", "read"):
-        results += _temporary_worker_matches(txt, restrict, allowed, housed_tw)
+        results += _temporary_worker_matches(
+            txt, restrict, allowed, _housed_temporary_workers(restrict, allowed)
+        )
 
     return results
 

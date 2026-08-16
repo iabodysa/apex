@@ -234,14 +234,16 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
         ]
         self.assertEqual(trip_reads, [])
 
-    def test_missing_guest_credential_is_denied_before_existing_trip_lookup(self):
+    def test_missing_guest_credential_is_denied_before_trip_lookup(self):
+        """The pre-read Guest denial fires before ANY Dispatch Trip lookup,
+        whether the named trip exists or is missing entirely."""
         own_trip, _other_trip = self._paired_trips(self._testMethodName)
-        self._assert_guest_rejected_before_trip_read(own_trip.name)
-
-    def test_missing_guest_credential_is_denied_before_nonexistent_trip_lookup(self):
-        self._assert_guest_rejected_before_trip_read(
-            "MISSING-" + frappe.generate_hash(length=12)
-        )
+        with self.subTest(trip="existing trip"):
+            self._assert_guest_rejected_before_trip_read(own_trip.name)
+        with self.subTest(trip="missing trip"):
+            self._assert_guest_rejected_before_trip_read(
+                "MISSING-" + frappe.generate_hash(length=12)
+            )
 
     def test_staff_without_driver_credential_can_resolve_any_trip(self):
         _own_trip, other_trip = self._paired_trips(self._testMethodName)
@@ -277,30 +279,35 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
                     denials.append(str(denial.exception))
         self.assertEqual(denials[0], denials[1])
 
-    def test_invalid_cookie_under_staff_session_is_denied(self):
+    def test_bad_presented_cookie_under_staff_session_is_denied(self):
+        """A garbage or blank driver cookie is denied under a staff session,
+        for a trip that belongs to someone else."""
         _own_trip, other_trip = self._paired_trips(self._testMethodName)
         frappe.set_user("Administrator")
         with _request_cookies({"masar_dt": "invalid"}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError, msg="a garbage cookie must be denied"
+            ):
                 boarding._resolve_trip(other_trip.name)
-
-    def test_blank_presented_cookie_under_staff_session_is_denied(self):
-        _own_trip, other_trip = self._paired_trips(self._testMethodName)
-        frappe.set_user("Administrator")
         with _request_cookies({"masar_dt": ""}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError, msg="a blank cookie must be denied"
+            ):
                 boarding._resolve_trip(other_trip.name)
 
-    def test_invalid_cookie_is_denied_before_missing_trip_lookup(self):
+    def test_bad_cookie_is_denied_before_missing_trip_lookup(self):
+        """A garbage or blank driver cookie is denied before the trip lookup
+        even runs, for a trip that does not exist."""
         frappe.set_user("Administrator")
         with _request_cookies({"masar_dt": "invalid"}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError, msg="a garbage cookie must be denied"
+            ):
                 boarding._resolve_trip("MISSING-" + frappe.generate_hash(length=12))
-
-    def test_blank_cookie_is_denied_before_missing_trip_lookup(self):
-        frappe.set_user("Administrator")
         with _request_cookies({"masar_dt": ""}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError, msg="a blank cookie must be denied"
+            ):
                 boarding._resolve_trip("MISSING-" + frappe.generate_hash(length=12))
 
     def test_each_request_block_gets_a_private_bad_token_window(self):
@@ -350,19 +357,34 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
                 if previous is not sentinel:
                     setattr(frappe.local, fieldname, previous)
 
-    def test_invalid_cookie_cannot_write_forged_pass_audit(self):
+    def test_bad_cookie_cannot_write_forged_pass_audit(self):
+        """A garbage or blank cookie is refused before any Boarding Scan Log
+        row is written for a forged pass."""
         before = frappe.db.count("Boarding Scan Log")
         with _request_cookies({"masar_dt": "invalid"}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError,
+                msg="a garbage cookie must be refused before any pass write",
+            ):
                 boarding.scan_boarding_pass("forged-pass")
-        self.assertEqual(frappe.db.count("Boarding Scan Log"), before)
+        self.assertEqual(
+            frappe.db.count("Boarding Scan Log"),
+            before,
+            "a refused garbage-cookie scan must not write an audit row",
+        )
 
-    def test_blank_cookie_cannot_write_forged_pass_audit(self):
         before = frappe.db.count("Boarding Scan Log")
         with _request_cookies({"masar_dt": ""}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError,
+                msg="a blank cookie must be refused before any pass write",
+            ):
                 boarding.scan_boarding_pass("forged-pass")
-        self.assertEqual(frappe.db.count("Boarding Scan Log"), before)
+        self.assertEqual(
+            frappe.db.count("Boarding Scan Log"),
+            before,
+            "a refused blank-cookie scan must not write an audit row",
+        )
 
     def test_missing_cookie_guest_cannot_write_forged_pass_audit(self):
         before = frappe.db.count("Boarding Scan Log")

@@ -27,19 +27,6 @@ WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 _FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
 
 
-def _live_dispatch_trip(transport_request):
-    """The Dispatch Trip a worker's request is riding on RIGHT NOW — status
-    Dispatched, driver en route. The Transport Request's own ``dispatch_trip`` link
-    is stamped only at fulfilment (Completed), so during the en-route window — the
-    exact time the live ETA is wanted — resolve the active trip directly by its
-    back-link + live status. None when no trip is currently dispatched."""
-    return frappe.db.get_value(
-        "Dispatch Trip",
-        {"transport_request": transport_request, "status": "Dispatched", "docstatus": ["<", 2]},
-        "name",
-    )
-
-
 def _fmt_time(value):
     """Render a Time field as a clean zero-padded ``HH:MM:SS`` string (or None).
 
