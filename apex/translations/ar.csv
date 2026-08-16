@@ -3601,6 +3601,7 @@ Recovery,الاسترداد
 Recovery Advance,سلفة الاسترداد
 Recovery Amount,مبلغ الاسترداد
 Recovery Details,تفاصيل الاسترداد
+Recovery is disabled,الاسترداد معطّل
 Recovery Salary Component,مكوّن راتب الاسترداد
 Recovery Salary Component is required to enable recovery.,مكوّن راتب الاسترداد مطلوب لتفعيل الاسترداد.
 Recovery Salary Component must be a Deduction.,يجب أن يكون مكوّن راتب الاسترداد من نوع «خصم».
@@ -4049,6 +4050,7 @@ Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلا
 Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
 Salary Component,مكوّن الراتب
 Salary Deduction,خصم من الراتب
+"Salary recovery is switched off. Turn on Employee Advance recovery in Salis Settings, and set its deduction Salary Component, before deducting from a worker's wage.",استرداد الراتب معطّل. فعّل استرداد سلفة الموظف من إعدادات ساليس، وحدد مكوّن الراتب الخاص بالخصم، قبل الخصم من راتب العامل.
 Sales Taxes and Charges Template,قالب ضرائب ورسوم المبيعات
 Salis,ساليس
 Salis Active Trips,رحلات ساليس النشطة
