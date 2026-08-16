@@ -5584,3 +5584,4 @@ workshop status,حالة الورشة
 {0} {1} is not a stop on this trip.,{0}: المحطة {1} ليست ضمن هذه الرحلة.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 {0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
+This notification endpoint is already registered as {0}.,نقطة الإشعارات هذه مسجّلة بالفعل باسم {0}.
