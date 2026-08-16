@@ -19,7 +19,7 @@ staleness guard drops any Open row whose document has since moved past that stat
 from __future__ import annotations
 
 import frappe
-from frappe.model.workflow import get_workflow_name, get_workflow_state_field
+from frappe.model.workflow import get_transitions, get_workflow_name, get_workflow_state_field
 
 
 _PAGE_WORKFLOW_ACTIONS = 200
@@ -30,8 +30,25 @@ _PAGE_TODOS = 100
 @frappe.whitelist()
 def get_pending_actions() -> dict:
     """Return ``{workflow_actions, todos}`` awaiting the current user's action,
-    capped at the page's render budget."""
-    return _pending(_PAGE_WORKFLOW_ACTIONS, _PAGE_TODOS)
+    capped at the page's render budget. Each workflow action already carries its
+    resolved ``transitions``, so the page can draw its buttons straight away."""
+    result = _pending(_PAGE_WORKFLOW_ACTIONS, _PAGE_TODOS)
+    _attach_transitions(result["workflow_actions"])
+    return result
+
+
+def _attach_transitions(workflow_actions: list) -> None:
+    """Resolve each row's allowed transitions in place, one ``get_doc`` per row on
+    the server that already read the row — not one HTTP round trip per row from the
+    page before a single Approve button could be drawn. A row whose transitions
+    cannot be resolved (permission denied, document moved on since the read) gets an
+    empty list rather than aborting the whole inbox."""
+    for row in workflow_actions:
+        try:
+            doc = frappe.get_doc(row["reference_doctype"], row["reference_name"])
+            row["transitions"] = get_transitions(doc, raise_exception=False)
+        except Exception:
+            row["transitions"] = []
 
 
 def _pending(workflow_limit: int, todo_limit: int) -> dict:

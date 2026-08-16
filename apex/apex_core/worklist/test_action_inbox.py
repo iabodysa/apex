@@ -25,6 +25,7 @@ from frappe.tests.utils import FrappeTestCase
 
 import apex
 from apex.apex_core.utils import workflow_utils
+from apex.apex_core.worklist import action_inbox
 
 # Two levels up, not one: this test sits in apex/apex_core/worklist/, so APP_ROOT is the
 # apex package. A relocation that leaves this at ".." silently builds
@@ -54,6 +55,49 @@ class TestActionInboxAPI(unittest.TestCase):
         self.assertIn('"allocated_to": frappe.session.user', src)
         self.assertNotIn(".insert(", src)
         self.assertNotIn("frappe.new_doc(", src)
+
+
+class TestActionInboxAttachesTransitions(unittest.TestCase):
+    """``get_pending_actions`` must resolve each row's allowed transitions itself, so
+    the page never fires a round trip per row before it can draw an Approve button."""
+
+    def test_each_workflow_action_carries_its_resolved_transitions(self):
+        with (
+            patch.object(action_inbox, "_pending") as pending,
+            patch.object(action_inbox, "frappe") as frappe_mock,
+            patch.object(action_inbox, "get_transitions") as get_transitions_mock,
+        ):
+            pending.return_value = {
+                "workflow_actions": [
+                    {"reference_doctype": "Leave Application", "reference_name": "LA-0001"}
+                ],
+                "todos": [],
+            }
+            frappe_mock.get_doc.return_value = "the-loaded-doc"
+            get_transitions_mock.return_value = [{"action": "Approve"}]
+
+            result = action_inbox.get_pending_actions()
+
+        self.assertEqual(
+            result["workflow_actions"][0]["transitions"], [{"action": "Approve"}]
+        )
+        frappe_mock.get_doc.assert_called_once_with("Leave Application", "LA-0001")
+        get_transitions_mock.assert_called_once_with("the-loaded-doc", raise_exception=False)
+
+    def test_an_unresolvable_row_gets_an_empty_list_not_a_crash(self):
+        with (
+            patch.object(action_inbox, "_pending") as pending,
+            patch.object(action_inbox, "frappe") as frappe_mock,
+        ):
+            pending.return_value = {
+                "workflow_actions": [{"reference_doctype": "X", "reference_name": "Y"}],
+                "todos": [],
+            }
+            frappe_mock.get_doc.side_effect = Exception("boom")
+
+            result = action_inbox.get_pending_actions()
+
+        self.assertEqual(result["workflow_actions"][0]["transitions"], [])
 
 
 class TestOrphanCleanup(unittest.TestCase):
@@ -118,9 +162,17 @@ class TestActionInboxPage(unittest.TestCase):
         with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
             js = fh.read()
         self.assertIn("apex.apex_core.worklist.my_work_center.get_my_work", js)
-        self.assertIn("frappe.model.workflow.get_transitions", js)
         self.assertIn("frappe.model.workflow.apply_workflow", js)
         self.assertEqual(js.count("new frappe.ui.Dialog"), 0)
+
+    def test_page_draws_transitions_from_the_row_with_no_second_round_trip(self):
+        """Each row already carries its resolved ``transitions`` (attached server-side
+        by ``get_pending_actions``), so the page must not fire a per-row
+        ``get_transitions`` call before it can draw an Approve button."""
+        with open(os.path.join(self.PAGE, "action_inbox.js"), encoding="utf-8") as fh:
+            js = fh.read()
+        self.assertNotIn("frappe.model.workflow.get_transitions", js)
+        self.assertIn("row.transitions", js)
 
     def test_page_no_orphan_dollar_refs(self):
         import re

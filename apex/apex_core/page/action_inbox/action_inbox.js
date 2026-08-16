@@ -153,16 +153,7 @@ class ActionInbox {
 		$('<span class="ai-card-state"></span>').text(__('State: {0}', [__(row.workflow_state || '')])).appendTo($meta);
 
 		const $actions = $('<div class="ai-card-actions"></div>').attr('style', AI_STYLE.card_actions).appendTo($card);
-		$('<span class="ai-actions-load text-muted"></span>').text(__('Loading actions…')).appendTo($actions);
-		frappe
-			.xcall('frappe.model.workflow.get_transitions', {
-				doc: { doctype: row.reference_doctype, name: row.reference_name },
-			})
-			.then((transitions) => this._render_transitions($actions, $card, row, transitions || []))
-			.catch(() => {
-				$actions.empty();
-				$('<span class="ai-actions-none text-muted"></span>').text(__('No actions available.')).appendTo($actions);
-			});
+		this._render_transitions($actions, $card, row, row.transitions || []);
 	}
 
 	_render_transitions($actions, $card, row, transitions) {
