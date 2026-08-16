@@ -14,7 +14,8 @@ A Reason is required to record SIM {0} as {1}.,يلزم سبب لتسجيل ال
 A SIM Card asset belonging to one Telecom Contract. Its mobile number stays editable in place; custody state is projected from the latest submitted SIM Custody Assignment.,أصل شريحة اتصال يتبع عقد اتصالات واحداً. يبقى رقم جواله قابلاً للتعديل في مكانه، وتُشتق حالة العهدة من آخر إسناد عهدة شريحة مُعتمد.
 A SIM can only move to a contract within its own company.,لا يمكن نقل الشريحة إلا إلى عقد ضمن شركتها نفسها.
 A SIM can only move to a submitted contract.,لا يمكن نقل الشريحة إلا إلى عقد مُعتمد.
-A SIM has been suspended,تم تعليق شريحة
+"A SIM has been suspended: {0} (held by {1}).",تم تعليق شريحة: {0} (بحوزة {1}).
+"A SIM has been suspended: {0}.",تم تعليق شريحة: {0}.
 A Salis Driver is required for a driver access token.,يلزم تحديد سائق ساليس لإصدار رمز دخول للسائق.
 A Security-category finding requires photo evidence before it can escalate. Please attach an Evidence Photo before submitting.,تتطلب ملاحظة فئة الأمن صورة إثبات قبل تصعيدها. أرفق صورة إثبات قبل الاعتماد.
 A Top-up request requires an active Fuel Quota.,يتطلب طلب زيادة الحصة وجود حصة وقود سارية.
@@ -3993,6 +3994,7 @@ SIM Exceptions,استثناءات الشرائح
 SIM Lines Covered,عدد الشرائح المشمولة
 SIM Lines Held Under This Contract,الشرائح المسجّلة على هذا العقد
 SIM Suspended,شريحة موقوفة
+"SIM Suspended: {0}",تعليق شريحة: {0}
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
 SIM details,تفاصيل الشريحة
 SIMs,الشرائح
@@ -5490,7 +5492,6 @@ fuel grades,أنواع الوقود
 generated,مُنشأ
 has ended,انتهى
 has expired,انتهت صلاحيته
-held by,بحوزة
 incidents,البلاغات
 km,كم
 matched,مطابق

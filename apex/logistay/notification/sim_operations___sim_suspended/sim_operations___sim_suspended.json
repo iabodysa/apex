@@ -5,11 +5,11 @@
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "SIM Custody Assignment",
- "enabled": 1,
+ "enabled": 0,
  "event": "Submit",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"A SIM has been suspended\") }}: {{ doc.sim_card }}{% if doc.previous_custodian_employee %} ({{ _(\"held by\") }} {{ doc.previous_custodian_employee }}){% endif %}.",
+ "message": "DISABLED: replaced by SimCustodyAssignment.on_submit's controller-driven _notify_suspended, which scopes each recipient by their own company. receiver_by_role here resolves through get_info_based_on_role with ignore_permissions=True (frappe/email/doctype/notification/notification.py), so this fixture could not be company-scoped and stayed as a template only.",
  "message_type": "HTML",
  "module": "Logistay",
  "name": "SIM Operations - SIM Suspended",
@@ -21,5 +21,5 @@
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
  "subject": "{{ _(\"SIM Suspended\") }}: {{ doc.sim_card }}",
- "modified": "2026-08-15 09:00:00.000000"
+ "modified": "2026-08-16 00:00:00.000000"
 }

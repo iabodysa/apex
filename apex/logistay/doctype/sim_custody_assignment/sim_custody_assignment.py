@@ -23,7 +23,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
+from apex.apex_core.utils.system_notify import notify_user_system
+from apex.logistay import permissions
 from apex.logistay.doctype.sim_card.sim_card import set_projection
+from apex.logistay.tasks.sim_alerts import _sim_operations_users
 from apex.logistay.utils.cost_center import (
     resolve_employee_cost_center,
     resolve_project_cost_center,
@@ -196,12 +199,41 @@ class SIMCustodyAssignment(Document):
         self.previous_project = prior.get("current_project")
 
     def on_submit(self):
-        """Rechecks the SIM's locked status, then rebuilds its custody projection."""
+        """Rechecks the SIM's locked status, rebuilds its custody projection, and on a
+        Suspend notifies each SIM Operations User scoped to THIS event's own company.
+
+        Was a shipped Notification fixture (receiver_by_role: SIM Operations User),
+        which frappe.email.doctype.notification.notification.get_info_based_on_role
+        resolves with ignore_permissions=True -- so a company-scoped SIM Operations
+        User was emailed a suspension from every other company too. Controller-driven
+        so the same report_company_scope narrowing sim_alerts.py already applies to
+        the daily digest applies here, per recipient, on the event that caused it.
+        """
         locked_status = frappe.db.get_value(
             "SIM Card", self.sim_card, "status", for_update=True
         )
         self._check_prior_status(locked_status)
         rebuild_sim_projection(self.sim_card)
+        if self.action == "Suspend":
+            self._notify_suspended()
+
+    def _notify_suspended(self):
+        subject = _("SIM Suspended: {0}").format(self.sim_card)
+        if self.previous_custodian_employee:
+            body = _("A SIM has been suspended: {0} (held by {1}).").format(
+                self.sim_card, self.previous_custodian_employee
+            )
+        else:
+            body = _("A SIM has been suspended: {0}.").format(self.sim_card)
+
+        for user in _sim_operations_users():
+            restrict, allowed = permissions.report_company_scope(user, doctype="SIM Card")
+            if restrict and self.company not in (allowed or []):
+                continue
+            notify_user_system(
+                user, subject, body,
+                document_type="SIM Custody Assignment", document_name=self.name,
+            )
 
     def on_cancel(self):
         """Rebuilds the SIM's custody projection after this event is cancelled."""

@@ -1,8 +1,11 @@
 # Copyright (c) 2026, AFMCO and contributors
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.tests import factories
+from apex.tests._helpers import _user
 
 test_ignore = [
     "Company",
@@ -110,6 +113,34 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         self.assertEqual(self._status(sim), "Suspended")
         with self.assertRaises(frappe.ValidationError):
             self._event(sim, "Assign", custodian_type="Employee", employee=self.employee)
+
+    def test_suspend_notifies_only_the_scoped_recipient(self):
+        """The Notification fixture this replaced (now disabled) resolved every
+        SIM Operations User site-wide, ignore_permissions and all -- a controller
+        call must not repeat that leak."""
+        in_scope = _user("sca_ops_in_scope@example.com", "SIM Operations User")
+        frappe.get_doc(
+            {"doctype": "User Permission", "user": in_scope, "allow": "Company",
+             "for_value": self.company}
+        ).insert(ignore_permissions=True)
+
+        other_company = factories.make_company("Other AFMCO Suspend", abbr="OAFMS").name
+        out_of_scope = _user("sca_ops_out_of_scope@example.com", "SIM Operations User")
+        frappe.get_doc(
+            {"doctype": "User Permission", "user": out_of_scope, "allow": "Company",
+             "for_value": other_company}
+        ).insert(ignore_permissions=True)
+
+        sim = self._sim()
+        with patch(
+            "apex.logistay.doctype.sim_custody_assignment.sim_custody_assignment"
+            ".notify_user_system"
+        ) as notify:
+            self._event(sim, "Suspend")
+
+        notified = {call.args[0] for call in notify.call_args_list}
+        self.assertIn(in_scope, notified)
+        self.assertNotIn(out_of_scope, notified)
 
     def test_transfer_return_reactivate_cycle(self):
         sim = self._sim()
