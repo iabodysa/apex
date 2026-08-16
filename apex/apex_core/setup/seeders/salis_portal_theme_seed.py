@@ -4,10 +4,9 @@
 The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
 install and migrate as Administrator, with no session user whose roles could be consulted.
 
-This lived in ``patches/v1_0/seed_salis_portal_theme.py`` and nothing else re-created it:
-no ``after_install`` step, no ``after_migrate`` step, and ``seed_all`` covers the habitat
-and salis data files rather than this Single. A stamped patch never runs again, so the
-patch was the only thing that had ever set these values.
+A Single needs a seeder rather than a patch: ``seed_all`` covers the habitat and salis
+data files and not this record, and a stamped patch never runs again, so a patch would
+set these values on existing sites and on no new one.
 
 Only BLANK fields are filled, so an administrator's later choice is never overwritten,
 and a site whose DocType has not migrated yet is skipped rather than raising.

@@ -4,8 +4,8 @@
 Single DocType that documents and surfaces how an external frontend integrates
 with this Frappe backend over HTTP. The real linking always uses native Frappe
 tools (User API Access tokens, OAuth Client, Webhook); this DocType holds only
-app-specific coordination config and a pointer to docs/INTEGRATION.md. There is
-no business logic and no custom authentication here by design.
+app-specific coordination config, with the starter guidance in its own intro field.
+There is no business logic and no custom authentication here by design.
 """
 
 from __future__ import annotations

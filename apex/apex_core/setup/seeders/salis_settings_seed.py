@@ -4,10 +4,9 @@
 The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
 install and migrate as Administrator, with no session user whose roles could be consulted.
 
-This lived in ``patches/v1_0/seed_salis_settings.py``, which ``salis/setup.py`` imported
-to run at install time. A patch is a one-time migration for sites that already exist; the
-defaults every NEW site needs belong beside the other seeders, and hooks.py runs this on
-both after_install and after_migrate.
+A patch is a one-time migration for sites that already exist; the defaults every NEW site
+needs belong beside the other seeders, which is why hooks.py runs this on both
+after_install and after_migrate.
 
 Only BLANK fields are filled, so an administrator's later edit is never clobbered.
 ``default_company`` and ``default_cost_center`` are linked ONLY when exactly one candidate
