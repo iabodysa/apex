@@ -31,14 +31,12 @@ Size note: 330 test lines against 37 in the subject (8.9x), for 14 distinct beha
 from __future__ import annotations
 
 import unittest
-from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from unittest import mock
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.utils import rate_window
 from apex.apex_core.utils.rate_limit_identity import canonical_command
 from apex.salis.api import boarding, driver_portal
 
@@ -117,27 +115,6 @@ class TestFrontDeskRateLimit(FrappeTestCase):
             f"the rate-limit window {name} outlived its cleanup",
         )
 
-    def _clear_window(self, cmd, ip):
-        """A cmd-named window, in BOTH identity shapes. Body-charged endpoints only.
-
-        Un-keyed, which every endpoint this file drives now is (``resolve_worker``
-        included, since that change): the identity is the bare address, so the name is
-        ``rl:<cmd>:<ip>`` (rate_limiter.py:150,155). The ``@rate_limit`` endpoints no
-        longer take their name from ``cmd`` at all and belong to
-        ``_clear_metered_window``; what is left here charges in its own body.
-
-        Keyed, which none is any longer: the identity was the address joined to a
-        form_dict lookup, and a real request carries no field by that name, so the
-        lookup yielded "" and the name ended in a bare colon (rate_limiter.py:143,
-        147-148). The retired shape is still swept because a cleanup that clears a
-        window by a HARDCODED name is silently vacuous the day the name changes:
-        ``_drop_window`` deletes a name that was never created and then asserts it is
-        absent, which stays GREEN while the window that WAS spent leaks into the next
-        test. Dropping this line is only safe once nothing can produce the shape.
-        """
-        self._drop_window(f"rl:{cmd}:{ip}")
-        self._drop_window(f"rl:{cmd}:{ip}:")
-
     def _clear_metered_window(self, endpoint, ip):
         """The window a ``@rate_limit`` endpoint really charges.
 
@@ -150,6 +127,19 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         ``cmd``, so those keep ``_clear_window``.
         """
         self._drop_window(f"rl:{canonical_command(endpoint)}:{ip}")
+
+    def _clear_pass_windows(self, cmd, ip):
+        """The window get_boarding_pass actually charges.
+
+        ``_enforce_pass_read_rate_limit`` (salis/api/boarding.py) charges the
+        address window as ``rl:<cmd>:pass-address:<ip>`` via
+        ``_charge_request_window`` -- never the bare ``rl:<cmd>:<ip>`` shape, so a
+        cleanup written against that bare shape deletes a name that was never
+        created and the window that WAS spent leaks for its full 60s.
+        ``_FakeRequest`` carries no ``remote_addr``, so the sibling ``pass-peer``
+        identity is always absent here and never charges a window to clean.
+        """
+        self._drop_window(f"rl:{cmd}:pass-address:{ip}")
 
     def _clear_actor_window(self, cmd, actor):
         self._drop_window(f"rl:{cmd}:scan-actor:{actor}")
@@ -270,7 +260,7 @@ class TestFrontDeskRateLimit(FrappeTestCase):
 
     def test_get_boarding_pass_throttles_the_121st_call_from_one_ip(self):
         cmd = self.cmd + "-gbp"
-        self.addCleanup(self._clear_window, cmd, self.ip)
+        self.addCleanup(self._clear_pass_windows, cmd, self.ip)
         with _request_from(self.ip, cmd):
             for i in range(BOARDING_LIMIT):
                 with self.assertRaises(frappe.DoesNotExistError):
@@ -304,7 +294,6 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         driver_a, token_a = self._driver_token("_Test Driver")
         driver_b, token_b = self._driver_token("_Test Driver Two")
         cmd = self.cmd + "-scan-subject"
-        self.addCleanup(self._clear_window, cmd, self.ip)
         self.addCleanup(self._clear_actor_window, cmd, driver_a)
         self.addCleanup(self._clear_actor_window, cmd, driver_b)
         previous_user = frappe.session.user
@@ -359,44 +348,12 @@ class TestFrontDeskRateLimit(FrappeTestCase):
         finally:
             frappe.set_user(previous_user)
 
-    def test_scan_bucket_initialization_is_atomic_and_expiry_is_not_refreshed(self):
-        # The counter is shared, so the script is read from the module that OWNS it
-        # rather than through a re-export kept alive only for this line.
-        script = rate_window.INCR_AND_EXPIRE_SCRIPT
-        self.assertIsInstance(script, str)
-
-        cache = frappe.cache
-        cache_key = cache.make_key(f"rl:{self.cmd}:scan-atomic:test-actor")
-        cache.delete(cache_key)
-        self.addCleanup(cache.delete, cache_key)
-
-        workers = 32
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            values = list(
-                executor.map(
-                    lambda _index: cache.eval(
-                        script,
-                        1,
-                        cache_key,
-                        boarding.SCAN_RATE_WINDOW_SECONDS,
-                    ),
-                    range(workers),
-                )
-            )
-
-        self.assertEqual(sorted(int(value) for value in values), list(range(1, workers + 1)))
-        self.assertGreater(cache.ttl(cache_key), 0)
-        self.assertLessEqual(cache.ttl(cache_key), boarding.SCAN_RATE_WINDOW_SECONDS)
-
-        cache.expire(cache_key, 1)
-        value = cache.eval(
-            script,
-            1,
-            cache_key,
-            boarding.SCAN_RATE_WINDOW_SECONDS,
-        )
-        self.assertEqual(int(value), workers + 1)
-        self.assertLessEqual(cache.ttl(cache_key), 1)
+    # `test_scan_bucket_initialization_is_atomic_and_expiry_is_not_refreshed` is not
+    # defined here: it evaluated INCR_AND_EXPIRE_SCRIPT directly against Redis,
+    # asserting INCR/EXPIRE semantics Redis itself guarantees, calling no app
+    # function. Both claims (atomicity, TTL not refreshed) are proved against
+    # `charge_window` itself by test_rate_window.py's test_the_charge_never_reads_
+    # the_counter_before_writing_it and test_a_later_hit_never_refreshes_the_window.
 
     def test_no_request_context_does_not_throttle(self):
         """Without an HTTP request the decorator is a no-op (rate_limiter.py:134),

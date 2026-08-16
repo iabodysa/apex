@@ -228,26 +228,64 @@ class TestArrivalsCardScope(FrappeTestCase):
             _assert_party_in_scope("Employee", emp)
 
     def test_card_full_stack_housed_other_building_denied(self):
-        """Full-stack belt-and-suspenders: get_arrival_card for an out-of-estate
-        Employee raises (whether from the HRMS type gate or the building scope gate,
-        the out-of-scope card is never returned)."""
+        """Full-stack: get_arrival_card for an out-of-estate Employee raises from the
+        building scope gate specifically.
+
+        The scoped fixture user has no type-level ``read`` on Employee at all, so
+        without help the orthogonal HRMS type gate at ``_arrival_identity`` would
+        raise first and this test would pass even with the building scope gate
+        deleted. Employee read is granted here (the same targeted has_permission
+        patch test_scoped_arrival_slip_rotates_worker_credential uses) so the
+        building scope gate is the only thing left that can raise, and the message
+        is asserted so a PermissionError from a different gate cannot satisfy this
+        test."""
         emp = self._employee()
         self._house(emp, self.b2)
-        with as_user(self.scoped):
-            with self.assertRaises(frappe.PermissionError):
-                get_arrival_card(party_type="Employee", party=emp)
+        has_permission = frappe.has_permission
+
+        def allow_employee_read(doctype=None, ptype="read", *args, **kwargs):
+            if doctype == "Employee" and ptype == "read":
+                return True
+            return has_permission(doctype, ptype, *args, **kwargs)
+
+        with patch("frappe.has_permission", side_effect=allow_employee_read):
+            with as_user(self.scoped):
+                with self.assertRaises(frappe.PermissionError) as error:
+                    get_arrival_card(party_type="Employee", party=emp)
+        self.assertIn(
+            "not permitted to access this worker's record", str(error.exception)
+        )
 
     def test_front_desk_card_housed_other_building_denied(self):
         """R7: front_desk.get_employee_card (name+photo) now applies the same building
-        scope — an employee housed in another estate is denied to a scoped user (the
-        scope gate fires regardless of the orthogonal HRMS type-level Employee read)."""
+        scope — an employee housed in another estate is denied to a scoped user.
+
+        The scoped fixture user has no type-level ``read`` on Employee at all, so
+        without help the orthogonal HRMS type gate at front_desk.get_employee_card
+        would raise first and this test would pass even with the building scope
+        gate deleted. Employee read is granted here (the same targeted
+        has_permission patch test_scoped_arrival_slip_rotates_worker_credential
+        uses) so the building scope gate is the only thing left that can raise, and
+        the message is asserted so a PermissionError from a different gate cannot
+        satisfy this test."""
         from apex.habitat.api.front_desk import get_employee_card
 
         emp = self._employee()
         self._house(emp, self.b2)
-        with as_user(self.scoped):
-            with self.assertRaises(frappe.PermissionError):
-                get_employee_card(emp)
+        has_permission = frappe.has_permission
+
+        def allow_employee_read(doctype=None, ptype="read", *args, **kwargs):
+            if doctype == "Employee" and ptype == "read":
+                return True
+            return has_permission(doctype, ptype, *args, **kwargs)
+
+        with patch("frappe.has_permission", side_effect=allow_employee_read):
+            with as_user(self.scoped):
+                with self.assertRaises(frappe.PermissionError) as error:
+                    get_employee_card(emp)
+        self.assertIn(
+            "not permitted to access this worker's record", str(error.exception)
+        )
 
     def test_slip_scoped_user_denied_other_building_pii(self):
         """The headline: a b1-scoped user must NOT receive b2's passport / Iqama.
