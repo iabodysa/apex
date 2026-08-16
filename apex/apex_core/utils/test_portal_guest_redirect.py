@@ -98,9 +98,11 @@ class TestRouteSmoke(FrappeTestCase):
         self.assertIn("socketio_port", ctx.boot["apex_portal"])
 
     def test_guest_is_redirected_on_admin_routes(self):
-        # /driver dropped from this list — made it a passwordless
-        # token portal (guest-accessible, covered by test_driver_guest_context_keys).
-        # fleet + safety remain login-gated admin routes.
+        """`/fleet` and `/safety` are login-gated, so a Guest never reaches their context.
+
+        `/driver` is deliberately absent: it is a passwordless token portal and a Guest
+        MUST reach it. `test_driver_guest_context_keys` holds that side of the contract.
+        """
         frappe.set_user("Guest")
         for page in (fleet_page, safety_page):
             with self.assertRaises(frappe.Redirect):
