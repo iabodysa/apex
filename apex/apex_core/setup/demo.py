@@ -169,14 +169,20 @@ def boot_demo(bootinfo):
 
 
 def build_demo_data():
-    """Build the demo scenario as the demo user. Background job — never inline."""
+    """Build the demo scenario as the demo user. Background job — never inline.
+
+    Returns ``{"built": bool, "stopped_at": str | None}``. The verdict exists because a
+    step failure rolls the whole scenario back and reports to the operator out of band, so
+    without it a caller cannot tell a full scenario from an empty one — every outcome looked
+    like ``None`` and a build that produced nothing read as one that succeeded.
+    """
     if frappe.db.exists("User", DEMO_OWNER):
-        return
+        return {"built": False, "stopped_at": "already built"}
 
     operator = frappe.session.user
     if not _company():
         _report_build_failure(operator, "Company", None)
-        return
+        return {"built": False, "stopped_at": "Company"}
 
     gender = _demo_gender()
 
@@ -197,10 +203,11 @@ def build_demo_data():
 
     if failure:
         _report_build_failure(operator, *failure)
-        return
+        return {"built": False, "stopped_at": failure[0]}
 
     _scope_supervisor(context.get("building"))
     frappe.cache.delete_keys("bootinfo")
+    return {"built": True, "stopped_at": None}
 
 
 def _report_build_failure(operator, doctype, traceback):
