@@ -1,0 +1,35 @@
+[
+ {
+  "doctype": "Maintenance Inspection Report",
+  "inspection_date": "2026-01-10",
+  "building": "_Test Building",
+  "inspector": "_T-Employee-00001",
+  "inspection_type": "Periodic",
+  "overall_result": "Pass",
+  "findings": [
+   {
+    "finding_category": "General",
+    "severity": "Low",
+    "description": "_T-Minor scuff on hallway wall"
+   }
+  ]
+ },
+ {
+  "doctype": "Maintenance Inspection Report",
+  "inspection_date": "2026-02-15",
+  "building": "_Test Building 2",
+  "facility_asset": "FAC-AST-2026-0006",
+  "inspector": "_T-Employee-00002",
+  "inspection_type": "Emergency",
+  "overall_result": "Fail",
+  "findings": [
+   {
+    "finding_category": "Maintenance",
+    "severity": "Critical",
+    "issue_type": "Electrical",
+    "description": "_T-Generator fails to start on load test",
+    "room": "_T-201"
+   }
+  ]
+ }
+]

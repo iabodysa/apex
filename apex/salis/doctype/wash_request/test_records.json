@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Wash Request",
+  "naming_series": "WR-.######",
+  "vehicle": "VEH-000001",
+  "wash_type": "Exterior"
+ },
+ {
+  "doctype": "Wash Request",
+  "naming_series": "WR-.######",
+  "vehicle": "VEH-000002",
+  "wash_type": "Full",
+  "sticker_requested": 1,
+  "status": "Cancelled"
+ }
+]

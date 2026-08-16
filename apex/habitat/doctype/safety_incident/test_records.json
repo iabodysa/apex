@@ -1,0 +1,21 @@
+[
+ {
+  "doctype": "Safety Incident",
+  "naming_series": "HSI-.YYYY.-.#####",
+  "incident_datetime": "2026-01-05 09:00:00",
+  "building": "_Test Building",
+  "incident_type": "Structural",
+  "severity": "Low",
+  "description": "_T-Minor slip near entrance"
+ },
+ {
+  "doctype": "Safety Incident",
+  "naming_series": "HSI-.YYYY.-.#####",
+  "incident_datetime": "2026-02-10 14:30:00",
+  "building": "_Test Building 2",
+  "incident_type": "Fire",
+  "severity": "Critical",
+  "status": "Under Investigation",
+  "description": "_T-Electrical fire in utility room"
+ }
+]

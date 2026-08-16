@@ -1,0 +1,18 @@
+[
+ {
+  "doctype": "Driver Clearance",
+  "driver": "DRV-000023",
+  "naming_series": "DCL-.######",
+  "clearance_reason": "Resignation",
+  "last_working_day": "2026-01-31"
+ },
+ {
+  "doctype": "Driver Clearance",
+  "driver": "DRV-000021",
+  "naming_series": "DCL-.######",
+  "clearance_reason": "Termination",
+  "last_working_day": "2026-02-15",
+  "vehicle_returned": 1,
+  "fuel_chip_returned": 1
+ }
+]

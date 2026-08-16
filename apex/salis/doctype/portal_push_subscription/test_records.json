@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Portal Push Subscription",
+  "holder_type": "Worker",
+  "employee": "HR-EMP-00893",
+  "endpoint": "https://fcm.googleapis.com/fcm/send/_test-worker-endpoint-1",
+  "p256dh": "_test-p256dh-key-worker",
+  "auth": "_test-auth-secret-worker"
+ },
+ {
+  "doctype": "Portal Push Subscription",
+  "holder_type": "Driver",
+  "driver": "DRV-000023",
+  "endpoint": "https://fcm.googleapis.com/fcm/send/_test-driver-endpoint-1",
+  "p256dh": "_test-p256dh-key-driver",
+  "auth": "_test-auth-secret-driver",
+  "enabled": 0
+ }
+]

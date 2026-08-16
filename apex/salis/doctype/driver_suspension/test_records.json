@@ -1,0 +1,18 @@
+[
+ {
+  "doctype": "Driver Suspension",
+  "naming_series": "SD-.######",
+  "driver": "DRV-000001",
+  "stop_reason": "Leave",
+  "stop_date": "2026-01-05"
+ },
+ {
+  "doctype": "Driver Suspension",
+  "naming_series": "SD-.######",
+  "driver": "DRV-000002",
+  "stop_reason": "Violation",
+  "stop_date": "2026-02-10",
+  "release_vehicle": 1,
+  "related_vehicle": "VEH-000002"
+ }
+]

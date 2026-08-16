@@ -1,0 +1,26 @@
+[
+ {
+  "doctype": "Maintenance Material Template",
+  "template_name": "_T-Electrical Fault Kit",
+  "issue_type": "Electrical",
+  "is_active": 1,
+  "items": [
+   {
+    "material": "Air Filters",
+    "quantity": 2
+   }
+  ]
+ },
+ {
+  "doctype": "Maintenance Material Template",
+  "template_name": "_T-Plumbing Fault Kit",
+  "issue_type": "Plumbing",
+  "is_active": 0,
+  "items": [
+   {
+    "material": "Basin Mixer",
+    "quantity": 1
+   }
+  ]
+ }
+]

@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Safety Finding Ledger",
+  "company": "_Test Company",
+  "posting_date": "2026-01-10",
+  "building": "_Test Building",
+  "finding": "_T-Smoke detector missing in corridor",
+  "severity": "High",
+  "status": "Open",
+  "resolved": 0
+ },
+ {
+  "doctype": "Safety Finding Ledger",
+  "company": "_Test Company",
+  "posting_date": "2026-02-15",
+  "building": "_Test Building 2",
+  "finding": "_T-Fire extinguisher tag expired",
+  "severity": "Low",
+  "status": "Resolved",
+  "resolved": 1
+ }
+]

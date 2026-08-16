@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Facility Asset Delivery",
+  "naming_series": "FAD-.YYYY.-.#####",
+  "delivery_date": "2026-01-05",
+  "facility_asset": "FAC-AST-2026-0007",
+  "from_building": "DQ D99EB093",
+  "to_building": "_Test Building",
+  "initiated_by": "Administrator",
+  "receiving_supervisor": "pr_finmaker@example.com"
+ },
+ {
+  "doctype": "Facility Asset Delivery",
+  "naming_series": "FAD-.YYYY.-.#####",
+  "delivery_date": "2026-01-10",
+  "facility_asset": "FAC-AST-2026-0006",
+  "from_building": "DQ 766E52D3",
+  "to_building": "_Test Building 2",
+  "initiated_by": "pr_finmaker@example.com",
+  "receiving_supervisor": "Administrator"
+ }
+]

@@ -1,0 +1,36 @@
+[
+ {
+  "doctype": "Custody Handover",
+  "naming_series": "ACC-HND-.YYYY.-.#####",
+  "handover_date": "2026-01-12",
+  "from_building": "_Test Building",
+  "to_building": "_Test Building 2",
+  "procurement_supervisor": "test@example.com",
+  "receiving_supervisor": "Administrator",
+  "items": [
+   {
+    "item_type": "Custody Article",
+    "item": "_T-Custody Article-00001",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "doctype": "Custody Handover",
+  "naming_series": "ACC-HND-.YYYY.-.#####",
+  "handover_date": "2026-02-14",
+  "from_building": "_Test Building 2",
+  "to_building": "_Test Building",
+  "procurement_supervisor": "Administrator",
+  "receiving_supervisor": "test@example.com",
+  "all_items_verified": 1,
+  "items": [
+   {
+    "item_type": "Custody Article",
+    "item": "_T-Custody Article-00002",
+    "qty": 5,
+    "condition_on_transfer": "Good"
+   }
+  ]
+ }
+]

@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Transport Request",
+  "naming_series": "TR-.######",
+  "service_line": "Administrative Trip",
+  "request_type": "Administrative Trip / Document Signing",
+  "destination": "Riyadh Head Office",
+  "transport_purpose": "Other"
+ },
+ {
+  "doctype": "Transport Request",
+  "naming_series": "TR-.######",
+  "service_line": "Site Transport",
+  "request_type": "Accommodation to Project Shuttle",
+  "accommodation_building": "_Test Building",
+  "project": "PROJ-0207",
+  "transport_purpose": "Shift Relocation",
+  "passenger_count": 12
+ }
+]

@@ -1,0 +1,25 @@
+[
+ {
+  "doctype": "Idle Resident Report",
+  "naming_series": "IDLE-.YYYY.-.####",
+  "party_type": "Employee",
+  "employee": "_T-Employee-00001",
+  "building": "_Test Building",
+  "reason_category": "New Hire",
+  "responsible_department": "HR",
+  "reported_on": "2026-01-10"
+ },
+ {
+  "doctype": "Idle Resident Report",
+  "naming_series": "IDLE-.YYYY.-.####",
+  "party_type": "Employee",
+  "employee": "_T-Employee-00002",
+  "building": "_Test Building 2",
+  "reason_category": "Legal Case",
+  "responsible_department": "Legal",
+  "reported_on": "2026-02-05",
+  "status": "Resolved",
+  "resolution_category": "Deployed",
+  "resolution_notes": "_T-Deployed to project after legal hold cleared"
+ }
+]

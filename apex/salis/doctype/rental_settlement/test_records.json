@@ -1,0 +1,12 @@
+[
+ {
+  "doctype": "Rental Settlement",
+  "rental_office": "_T-Rental Office Riyadh",
+  "period_month": "2026-01"
+ },
+ {
+  "doctype": "Rental Settlement",
+  "rental_office": "_T-Rental Office Jeddah",
+  "period_month": "2026-06"
+ }
+]

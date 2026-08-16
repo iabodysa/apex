@@ -1,0 +1,25 @@
+[
+ {
+  "doctype": "Housing Inventory",
+  "item_name": "Steel Bunk Bed",
+  "item_category": "Furniture",
+  "naming_series": "HINV-.YYYY.-.#####",
+  "building": "_Test Building",
+  "room": "_T-101",
+  "expected_quantity": 2,
+  "counted_quantity": 2,
+  "condition": "Good",
+  "status": "Active"
+ },
+ {
+  "doctype": "Housing Inventory",
+  "item_name": "Split AC Unit",
+  "item_category": "Electrical Fixture",
+  "naming_series": "HINV-.YYYY.-.#####",
+  "building": "_Test Building 2",
+  "expected_quantity": 5,
+  "counted_quantity": 3,
+  "condition": "Needs Maintenance",
+  "status": "Under Maintenance"
+ }
+]

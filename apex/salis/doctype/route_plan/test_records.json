@@ -1,0 +1,18 @@
+[
+ {
+  "doctype": "Route Plan",
+  "naming_series": "RP-.######",
+  "route_name": "_T-Morning Site Shuttle",
+  "project": "PROJ-0207",
+  "shift": "Morning",
+  "driver": "DRV-000023",
+  "vehicle": "VEH-000007"
+ },
+ {
+  "doctype": "Route Plan",
+  "naming_series": "RP-.######",
+  "route_name": "_T-Evening Return Shuttle",
+  "project": "PROJ-0206",
+  "shift": "Evening"
+ }
+]

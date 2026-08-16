@@ -1,0 +1,12 @@
+[
+ {
+  "doctype": "Scheduled Task Instance",
+  "template": "_Test Monthly AC Check",
+  "due_date": "2026-03-15"
+ },
+ {
+  "doctype": "Scheduled Task Instance",
+  "template": "_Test Weekly Fire Drill",
+  "due_date": "2026-01-05"
+ }
+]

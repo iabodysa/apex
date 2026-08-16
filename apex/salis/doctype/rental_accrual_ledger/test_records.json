@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Rental Accrual Ledger",
+  "naming_series": "RAL-.######",
+  "vehicle": "VEH-000002",
+  "accrual_date": "2026-01-10",
+  "daily_rate": 150,
+  "amount": 150
+ },
+ {
+  "doctype": "Rental Accrual Ledger",
+  "naming_series": "RAL-.######",
+  "vehicle": "VEH-000002",
+  "accrual_date": "2026-01-11",
+  "daily_rate": 150,
+  "amount": 150,
+  "settled": 1
+ }
+]

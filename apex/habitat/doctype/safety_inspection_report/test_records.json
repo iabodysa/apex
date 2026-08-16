@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Safety Inspection Report",
+  "building": "_Test Building",
+  "inspection_date": "2026-01-14",
+  "inspector": "Administrator",
+  "naming_series": "FSI-.YYYY.-.#####",
+  "safety_section_clear": 1
+ },
+ {
+  "doctype": "Safety Inspection Report",
+  "building": "_Test Building 2",
+  "inspection_date": "2026-02-20",
+  "inspector": "Administrator",
+  "naming_series": "FSI-.YYYY.-.#####",
+  "safety_section_clear": 0,
+  "previous_repairs_confirmed": 1,
+  "previous_repair_notes": "Prior fire extinguisher fault confirmed repaired."
+ }
+]

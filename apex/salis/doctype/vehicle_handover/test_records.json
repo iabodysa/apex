@@ -1,0 +1,26 @@
+[
+ {
+  "doctype": "Vehicle Handover",
+  "naming_series": "GV-.######",
+  "vehicle": "VEH-000001",
+  "direction": "Transfer",
+  "from_driver": "DRV-000001",
+  "to_driver": "DRV-000002",
+  "handover_date": "2026-01-15",
+  "odometer_reading": 1000,
+  "fuel_level": "Half"
+ },
+ {
+  "doctype": "Vehicle Handover",
+  "naming_series": "GV-.######",
+  "vehicle": "VEH-000002",
+  "direction": "Transfer",
+  "from_driver": "DRV-000002",
+  "to_driver": "DRV-000001",
+  "handover_date": "2026-02-15",
+  "odometer_reading": 500,
+  "fuel_level": "Full",
+  "discrepancy_status": "Discrepancy",
+  "discrepancy_notes": "_T-Scratch on rear bumper noted"
+ }
+]

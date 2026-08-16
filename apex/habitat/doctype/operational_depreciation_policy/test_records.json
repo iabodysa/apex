@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Operational Depreciation Policy",
+  "policy_name": "_Test Straight Line 5yr",
+  "useful_life_years": 5,
+  "depreciation_method": "Straight Line",
+  "residual_value_pct": 10
+ },
+ {
+  "doctype": "Operational Depreciation Policy",
+  "policy_name": "_Test Declining Balance 3yr",
+  "useful_life_years": 3,
+  "depreciation_method": "Declining Balance",
+  "residual_value_pct": 0
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "doctype": "City",
+  "city_name": "_T-City-Riyadh",
+  "country": "Saudi Arabia"
+ },
+ {
+  "doctype": "City",
+  "city_name": "_T-City-Dubai",
+  "country": "United Arab Emirates"
+ }
+]

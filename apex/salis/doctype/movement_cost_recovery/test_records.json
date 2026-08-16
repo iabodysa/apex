@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Movement Cost Recovery",
+  "naming_series": "MCR-.######",
+  "recovery_type": "Vehicle Damage",
+  "vehicle": "VEH-000007",
+  "driver": "DRV-000023",
+  "request_date": "2026-01-18",
+  "amount": 850,
+  "basis_evidence": "/files/_test-damage-photo.pdf"
+ },
+ {
+  "doctype": "Movement Cost Recovery",
+  "naming_series": "MCR-.######",
+  "recovery_type": "Fine / Violation",
+  "employee": "HR-EMP-00893",
+  "request_date": "2026-02-22",
+  "amount": 150,
+  "acknowledgement_received": 1,
+  "basis_evidence": "/files/_test-traffic-fine.pdf"
+ }
+]

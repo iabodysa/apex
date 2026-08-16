@@ -1,0 +1,23 @@
+[
+ {
+  "doctype": "Passenger Manifest",
+  "naming_series": "PM-.######",
+  "dispatch_date": "2026-01-10",
+  "vehicle": "VEH-000001",
+  "driver": "DRV-000001"
+ },
+ {
+  "doctype": "Passenger Manifest",
+  "naming_series": "PM-.######",
+  "dispatch_date": "2026-01-15",
+  "vehicle": "VEH-000002",
+  "driver": "DRV-000002",
+  "passengers": [
+   {
+    "passenger_name": "_T-Passenger One",
+    "seat_number": "A1",
+    "boarded": 1
+   }
+  ]
+ }
+]

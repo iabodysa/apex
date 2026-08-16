@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Housing Checkout",
+  "naming_series": "ACC-CHKOUT-.YYYY.-.####",
+  "assignment": "ACC-ASGN-2026-0001",
+  "checkout_date": "2026-08-16",
+  "checkout_reason": "End of Contract"
+ },
+ {
+  "doctype": "Housing Checkout",
+  "naming_series": "ACC-CHKOUT-.YYYY.-.####",
+  "assignment": "ACC-ASGN-2026-0002",
+  "checkout_date": "2026-08-16",
+  "checkout_reason": "Absconding"
+ }
+]

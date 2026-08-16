@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Accommodation Ledger",
+  "posting_date": "2026-01-15",
+  "ledger_type": "Rent",
+  "posting_mode": "Operational Memo",
+  "building": "_Test Building",
+  "cost_center": "_Test Cost Center - _TC",
+  "total_site_cost": 4000
+ },
+ {
+  "doctype": "Accommodation Ledger",
+  "posting_date": "2026-02-15",
+  "ledger_type": "Electricity",
+  "posting_mode": "GL Posted",
+  "building": "_Test Building 2",
+  "total_site_cost": 850
+ }
+]

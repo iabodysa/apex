@@ -1,0 +1,14 @@
+[
+ {
+  "doctype": "Fuel Platform",
+  "platform_name": "_T-Sadad Fuel Card",
+  "provider": "Sadad",
+  "status": "Active"
+ },
+ {
+  "doctype": "Fuel Platform",
+  "platform_name": "_T-Legacy Fuel Coupons",
+  "provider": "Aramco",
+  "status": "Inactive"
+ }
+]

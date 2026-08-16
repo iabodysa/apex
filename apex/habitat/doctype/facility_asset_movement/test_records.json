@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Facility Asset Movement",
+  "movement_date": "2026-01-15",
+  "facility_asset": "FAC-AST-2026-0007",
+  "movement_category": "Same-Company Relocation",
+  "to_building": "_Test Building",
+  "release_approved_by": "Administrator",
+  "receiving_confirmed_by": "test@example.com"
+ },
+ {
+  "doctype": "Facility Asset Movement",
+  "movement_date": "2026-02-20",
+  "facility_asset": "FAC-AST-2026-0006",
+  "movement_category": "Maintenance Dispatch",
+  "movement_reason": "Maintenance",
+  "to_building": "_Test Building 2",
+  "moved_by": "_T-Employee-00001",
+  "release_approved_by": "Administrator",
+  "receiving_confirmed_by": "test@example.com"
+ }
+]

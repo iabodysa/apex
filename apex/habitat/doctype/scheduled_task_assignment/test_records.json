@@ -1,0 +1,14 @@
+[
+ {
+  "doctype": "Scheduled Task Assignment",
+  "template": "_Test Monthly AC Check",
+  "building": "_Test Building",
+  "effective_from": "2026-01-01"
+ },
+ {
+  "doctype": "Scheduled Task Assignment",
+  "template": "_Test Weekly Fire Drill",
+  "building": "_Test Building",
+  "effective_from": "2026-06-01"
+ }
+]

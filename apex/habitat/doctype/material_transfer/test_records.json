@@ -1,0 +1,32 @@
+[
+ {
+  "doctype": "Material Transfer",
+  "naming_series": "ACC-MTR-.YYYY.-.######",
+  "transfer_date": "2026-01-08",
+  "from_building": "_Test Building",
+  "to_building": "_Test Building 2",
+  "items": [
+   {
+    "item_type": "Custody Article",
+    "item": "ART-0059",
+    "qty": 5
+   }
+  ]
+ },
+ {
+  "doctype": "Material Transfer",
+  "naming_series": "ACC-MTR-.YYYY.-.######",
+  "transfer_date": "2026-02-14",
+  "from_building": "_Test Building 2",
+  "to_building": "_Test Building",
+  "waybill_reference": "WB-2026-077",
+  "carrier_note": "Company pickup truck",
+  "items": [
+   {
+    "item_type": "Maintenance Material",
+    "item": "Air Filters",
+    "qty": 3
+   }
+  ]
+ }
+]

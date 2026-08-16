@@ -1,0 +1,29 @@
+[
+ {
+  "doctype": "Housing Assignment",
+  "naming_series": "ACC-ASGN-.YYYY.-.####",
+  "party_type": "Employee",
+  "employee": "_T-Employee-00001",
+  "building": "_Test Building",
+  "room": "_T-101",
+  "bed": "_T-101-A",
+  "assignment_type": "New Assignment",
+  "stay_type": "Permanent",
+  "check_in_date": "2026-01-15",
+  "project": "_T-Project-00002"
+ },
+ {
+  "doctype": "Housing Assignment",
+  "naming_series": "ACC-ASGN-.YYYY.-.####",
+  "party_type": "Employee",
+  "employee": "_T-Employee-00002",
+  "building": "_Test Building 2",
+  "room": "_T-201",
+  "bed": "_T-201-A",
+  "assignment_type": "New Assignment",
+  "stay_type": "Temporary",
+  "check_in_date": "2026-02-01",
+  "expected_checkout_date": "2026-05-01",
+  "project": "_T-Project-00002"
+ }
+]

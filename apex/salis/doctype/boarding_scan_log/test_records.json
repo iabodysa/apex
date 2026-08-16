@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Boarding Scan Log",
+  "naming_series": "BSL-.YYYY.-.######",
+  "result": "Valid",
+  "method": "QR",
+  "boarding_event_created": 1
+ },
+ {
+  "doctype": "Boarding Scan Log",
+  "naming_series": "BSL-.YYYY.-.######",
+  "result": "Invalid Token",
+  "method": "Manual",
+  "notes": "Token failed hash check at gate scanner."
+ }
+]

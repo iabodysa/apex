@@ -1,0 +1,31 @@
+[
+ {
+  "doctype": "Arrival Batch",
+  "naming_series": "ARR-BATCH-.YYYY.-.####",
+  "building": "_Test Building",
+  "expected_date": "2026-01-20",
+  "expected_workers": [
+   {
+    "worker_name": "_T-Arrival Worker One",
+    "passport_number": "P1234567"
+   }
+  ]
+ },
+ {
+  "doctype": "Arrival Batch",
+  "naming_series": "ARR-BATCH-.YYYY.-.####",
+  "building": "_Test Building 2",
+  "expected_date": "2026-02-05",
+  "labour_supplier": "_Test Supplier",
+  "expected_workers": [
+   {
+    "worker_name": "_T-Arrival Worker Two",
+    "passport_number": "P2345678"
+   },
+   {
+    "worker_name": "_T-Arrival Worker Three",
+    "passport_number": "P3456789"
+   }
+  ]
+ }
+]

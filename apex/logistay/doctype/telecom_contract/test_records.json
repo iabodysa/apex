@@ -1,0 +1,26 @@
+[
+ {
+  "doctype": "Telecom Contract",
+  "naming_series": "TEL-CTR-.YYYY.-.#####",
+  "company": "_Test Company",
+  "supplier": "_Test Supplier",
+  "contract_start_date": "2026-01-01",
+  "contract_end_date": "2026-12-31",
+  "billing_frequency": "Monthly",
+  "recurring_amount": 500,
+  "currency": "USD"
+ },
+ {
+  "doctype": "Telecom Contract",
+  "naming_series": "TEL-CTR-.YYYY.-.#####",
+  "company": "_Test Company",
+  "supplier": "_Test Supplier 1",
+  "contract_start_date": "2026-01-01",
+  "contract_end_date": "2027-01-01",
+  "billing_frequency": "Annually",
+  "recurring_amount": 6000,
+  "currency": "AED",
+  "auto_renews": 1,
+  "notice_period_days": 30
+ }
+]

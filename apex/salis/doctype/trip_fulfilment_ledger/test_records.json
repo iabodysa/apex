@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Trip Fulfilment Ledger",
+  "vehicle": "VEH-000007",
+  "driver": "DRV-000023",
+  "trip_date": "2026-01-09",
+  "worker_count": 14,
+  "has_timestamps": 1,
+  "source_doctype": "Dispatch Trip",
+  "source_name": "DT-TEST-0001"
+ },
+ {
+  "doctype": "Trip Fulfilment Ledger",
+  "vehicle": "VEH-000006",
+  "driver": "DRV-000021",
+  "trip_date": "2026-02-11",
+  "worker_count": 0,
+  "has_timestamps": 0,
+  "source_doctype": "Dispatch Trip",
+  "source_name": "DT-TEST-0002"
+ }
+]

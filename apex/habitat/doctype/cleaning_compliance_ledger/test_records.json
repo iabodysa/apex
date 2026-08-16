@@ -1,0 +1,17 @@
+[
+ {
+  "doctype": "Cleaning Compliance Ledger",
+  "posting_date": "2026-01-10",
+  "building": "_Test Building",
+  "room": "_T-101",
+  "cleaned": 1
+ },
+ {
+  "doctype": "Cleaning Compliance Ledger",
+  "posting_date": "2026-01-11",
+  "building": "_Test Building",
+  "room": "_T-102",
+  "cleaned": 0,
+  "skip_reason": "Room occupied"
+ }
+]

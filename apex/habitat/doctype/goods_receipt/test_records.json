@@ -1,0 +1,34 @@
+[
+ {
+  "doctype": "Goods Receipt",
+  "naming_series": "ACC-GRN-.YYYY.-.#####",
+  "receipt_date": "2026-01-05",
+  "intake_building": "_Test Building 2",
+  "procurement_supervisor": "Administrator",
+  "external_reference": "PO-2026-001",
+  "supplier_name": "Al Rashid Trading",
+  "items": [
+   {
+    "item_type": "Custody Article",
+    "item": "ART-0059",
+    "qty": 20
+   }
+  ]
+ },
+ {
+  "doctype": "Goods Receipt",
+  "naming_series": "ACC-GRN-.YYYY.-.#####",
+  "receipt_date": "2026-02-10",
+  "intake_building": "_Test Building 2",
+  "procurement_supervisor": "Administrator",
+  "external_reference": "PO-2026-014",
+  "supplier_name": "Gulf Maintenance Supplies",
+  "items": [
+   {
+    "item_type": "Maintenance Material",
+    "item": "Air Filters",
+    "qty": 8
+   }
+  ]
+ }
+]

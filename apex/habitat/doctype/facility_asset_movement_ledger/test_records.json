@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Facility Asset Movement Ledger",
+  "posting_datetime": "2026-01-10 08:00:00",
+  "from_building": "_Test Building",
+  "to_building": "_Test Building 2",
+  "source_doctype": "Facility Asset Movement",
+  "source_name": "_T-FAM-0001",
+  "is_cancelled": 0
+ },
+ {
+  "doctype": "Facility Asset Movement Ledger",
+  "posting_datetime": "2026-02-01 09:30:00",
+  "from_building": "_Test Building 2",
+  "to_building": "_Test Building",
+  "source_doctype": "Facility Asset Movement",
+  "source_name": "_T-FAM-0002",
+  "is_cancelled": 1
+ }
+]

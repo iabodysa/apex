@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Safety Task Execution",
+  "naming_series": "STE-.YYYY.-.#####",
+  "execution_date": "2026-01-05",
+  "building": "_Test Building",
+  "task": "STC-0061",
+  "execution_status": "Excellent"
+ },
+ {
+  "doctype": "Safety Task Execution",
+  "naming_series": "STE-.YYYY.-.#####",
+  "execution_date": "2026-02-05",
+  "building": "_Test Building 2",
+  "task": "STC-0061",
+  "execution_status": "Average",
+  "executed_by": "Administrator"
+ }
+]

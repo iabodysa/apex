@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Utility Account",
+  "naming_series": "UTIL-ACC-.####",
+  "building": "_Test Building",
+  "utility_type": "Electricity",
+  "account_number": "_T-UTIL-ELEC-001",
+  "status": "Active"
+ },
+ {
+  "doctype": "Utility Account",
+  "naming_series": "UTIL-ACC-.####",
+  "building": "_Test Building 2",
+  "utility_type": "Water",
+  "account_number": "_T-UTIL-WATER-001",
+  "status": "Closed",
+  "is_shared_meter": 1,
+  "cost_bearing_pct": 50
+ }
+]

@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Scheduled Task Template",
+  "template_name": "_Test Monthly AC Check",
+  "task_type": "Maintenance",
+  "frequency": "Monthly",
+  "is_active": 1
+ },
+ {
+  "doctype": "Scheduled Task Template",
+  "template_name": "_Test Weekly Fire Drill",
+  "task_type": "Safety",
+  "frequency": "Weekly",
+  "is_active": 0
+ }
+]

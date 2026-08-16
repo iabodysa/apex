@@ -1,0 +1,21 @@
+[
+ {
+  "doctype": "Fuel Claim",
+  "naming_series": "FCM-.######",
+  "project": "_T-Project-00002",
+  "vehicle": "VEH-000001",
+  "period_month": "2026-01",
+  "claimed_litres": 200,
+  "claimed_amount": 400
+ },
+ {
+  "doctype": "Fuel Claim",
+  "naming_series": "FCM-.######",
+  "project": "_T-Project-00002",
+  "vehicle": "VEH-000002",
+  "period_month": "2026-02",
+  "claimed_litres": 350,
+  "claimed_amount": 700,
+  "is_increase": 1
+ }
+]

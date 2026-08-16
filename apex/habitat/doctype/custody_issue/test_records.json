@@ -1,0 +1,29 @@
+[
+ {
+  "doctype": "Custody Issue",
+  "naming_series": "CUST-ISS-.YYYY.-.####",
+  "issue_date": "2026-01-10",
+  "building": "_Test Building",
+  "party_type": "Employee",
+  "items": [
+   {
+    "article": "_T-Custody Article-00001",
+    "qty": 2
+   }
+  ]
+ },
+ {
+  "doctype": "Custody Issue",
+  "naming_series": "CUST-ISS-.YYYY.-.####",
+  "issue_date": "2026-02-05",
+  "building": "_Test Building 2",
+  "party_type": "Temporary Worker",
+  "issued_to_name": "_T-Free Text Worker",
+  "items": [
+   {
+    "article": "_T-Custody Article-00002",
+    "qty": 1
+   }
+  ]
+ }
+]

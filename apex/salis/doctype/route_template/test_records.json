@@ -1,0 +1,28 @@
+[
+ {
+  "doctype": "Route Template",
+  "template_name": "_T-Morning Pickup Route",
+  "route_type": "Pickup",
+  "is_active": 1,
+  "stops": [
+   {
+    "stop_name": "_T-Camp Gate"
+   },
+   {
+    "stop_name": "_T-Site Office"
+   }
+  ]
+ },
+ {
+  "doctype": "Route Template",
+  "template_name": "_T-Evening Dropoff Route",
+  "route_type": "Drop-off",
+  "is_active": 0,
+  "description": "_T-Retired evening route",
+  "stops": [
+   {
+    "stop_name": "_T-Site Office"
+   }
+  ]
+ }
+]

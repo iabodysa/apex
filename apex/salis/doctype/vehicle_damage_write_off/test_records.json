@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Vehicle Damage Write-Off",
+  "naming_series": "VWO-.######",
+  "vehicle": "VEH-000001",
+  "evidence": "/files/_t-damage-evidence-1.pdf",
+  "damage_description": "_T-Front bumper cracked in parking collision"
+ },
+ {
+  "doctype": "Vehicle Damage Write-Off",
+  "naming_series": "VWO-.######",
+  "vehicle": "VEH-000002",
+  "evidence": "/files/_t-damage-evidence-2.pdf",
+  "damage_description": "_T-Engine damage beyond economical repair",
+  "recommended_action": "Write-Off",
+  "estimated_cost": 15000,
+  "disposal_route": "Scrap Yard"
+ }
+]

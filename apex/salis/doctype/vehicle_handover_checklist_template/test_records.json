@@ -1,0 +1,27 @@
+[
+ {
+  "doctype": "Vehicle Handover Checklist Template",
+  "template_name": "_T-Standard Sedan Checklist",
+  "is_active": 1,
+  "items": [
+   {
+    "check_item": "Tyre condition",
+    "remark": "Check tread depth"
+   },
+   {
+    "check_item": "Fuel level",
+    "remark": "Record on handover"
+   }
+  ]
+ },
+ {
+  "doctype": "Vehicle Handover Checklist Template",
+  "template_name": "_T-Retired Bus Checklist",
+  "is_active": 0,
+  "items": [
+   {
+    "check_item": "Fire extinguisher present"
+   }
+  ]
+ }
+]

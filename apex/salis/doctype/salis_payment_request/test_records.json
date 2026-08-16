@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Salis Payment Request",
+  "naming_series": "PAY-.######",
+  "expense_type": "Fuel",
+  "amount": 500,
+  "vehicle": "VEH-000001"
+ },
+ {
+  "doctype": "Salis Payment Request",
+  "naming_series": "PAY-.######",
+  "expense_type": "Fine / Violation",
+  "amount": 150,
+  "remarks": "_T-Speeding fine issued"
+ }
+]

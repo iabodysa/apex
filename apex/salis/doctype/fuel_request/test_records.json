@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Fuel Request",
+  "naming_series": "FR-.######",
+  "request_type": "Standard",
+  "vehicle": "VEH-000001",
+  "requested_litres": 50
+ },
+ {
+  "doctype": "Fuel Request",
+  "naming_series": "FR-.######",
+  "request_type": "Chip",
+  "vehicle": "VEH-000002",
+  "action": "Issue"
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Safety Round",
+  "naming_series": "SRN-.YYYY.-.#####",
+  "building": "_Test Building",
+  "round_date": "2026-01-05",
+  "cadence": "Weekly",
+  "supervisor": "test@example.com"
+ },
+ {
+  "doctype": "Safety Round",
+  "naming_series": "SRN-.YYYY.-.#####",
+  "building": "_Test Building 2",
+  "round_date": "2026-01-10",
+  "cadence": "Monthly",
+  "supervisor": "Administrator",
+  "is_reinspection": 0
+ }
+]

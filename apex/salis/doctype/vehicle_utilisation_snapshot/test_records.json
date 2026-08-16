@@ -1,0 +1,23 @@
+[
+ {
+  "doctype": "Vehicle Utilisation Snapshot",
+  "snapshot_date": "2026-01-05",
+  "vehicle": "VEH-000007",
+  "naming_series": "VUS-.######",
+  "period_days": 7,
+  "trips_count": 12,
+  "idle_days": 0,
+  "utilisation_pct": 100
+ },
+ {
+  "doctype": "Vehicle Utilisation Snapshot",
+  "snapshot_date": "2026-01-12",
+  "vehicle": "VEH-000006",
+  "naming_series": "VUS-.######",
+  "period_days": 7,
+  "trips_count": 2,
+  "idle_days": 5,
+  "utilisation_pct": 28.5,
+  "notes": "Vehicle mostly idle awaiting repair parts."
+ }
+]

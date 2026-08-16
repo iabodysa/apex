@@ -1,0 +1,29 @@
+[
+ {
+  "doctype": "Work Shift",
+  "naming_series": "WS-.####",
+  "shift_name": "_T-Day Shift",
+  "is_active": 1,
+  "start_time": "06:00:00",
+  "end_time": "14:00:00",
+  "applicable_days": [
+   { "day_of_week": "Monday" },
+   { "day_of_week": "Tuesday" },
+   { "day_of_week": "Wednesday" },
+   { "day_of_week": "Thursday" },
+   { "day_of_week": "Friday" }
+  ]
+ },
+ {
+  "doctype": "Work Shift",
+  "naming_series": "WS-.####",
+  "shift_name": "_T-Night Shift",
+  "is_active": 0,
+  "start_time": "22:00:00",
+  "end_time": "06:00:00",
+  "applicable_days": [
+   { "day_of_week": "Saturday" },
+   { "day_of_week": "Sunday" }
+  ]
+ }
+]

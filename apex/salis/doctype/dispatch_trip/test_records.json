@@ -1,0 +1,16 @@
+[
+ {
+  "doctype": "Dispatch Trip",
+  "naming_series": "DT-.######",
+  "trip_type": "Ad Hoc",
+  "trip_date": "2026-01-10"
+ },
+ {
+  "doctype": "Dispatch Trip",
+  "naming_series": "DT-.######",
+  "trip_type": "Scheduled",
+  "trip_date": "2026-02-01",
+  "vehicle": "VEH-000001",
+  "driver": "DRV-000001"
+ }
+]

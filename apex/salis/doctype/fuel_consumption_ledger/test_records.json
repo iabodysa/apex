@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Fuel Consumption Ledger",
+  "vehicle": "VEH-000007",
+  "driver": "DRV-000023",
+  "period_month": "2026-01",
+  "litres": 120.5,
+  "amount": 250,
+  "source_type": "Fuel Request",
+  "source_name": "FR-TEST-0001"
+ },
+ {
+  "doctype": "Fuel Consumption Ledger",
+  "vehicle": "VEH-000006",
+  "driver": "DRV-000021",
+  "period_month": "2026-02",
+  "litres": 95,
+  "amount": 198.5,
+  "source_type": "Fuel Daily Log",
+  "source_name": "FDL-TEST-0001"
+ }
+]

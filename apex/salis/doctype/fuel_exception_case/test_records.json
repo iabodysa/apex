@@ -1,0 +1,17 @@
+[
+ {
+  "doctype": "Fuel Exception Case",
+  "naming_series": "FEX-.######",
+  "exception_type": "Over-Consumption",
+  "description": "_T-Vehicle consumed 40% more fuel than average this month.",
+  "vehicle": "VEH-000001"
+ },
+ {
+  "doctype": "Fuel Exception Case",
+  "naming_series": "FEX-.######",
+  "exception_type": "GPS Mismatch",
+  "description": "_T-GPS trail does not match claimed route distance.",
+  "vehicle": "VEH-000002",
+  "project": "_T-Project-00002"
+ }
+]

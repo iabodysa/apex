@@ -1,0 +1,13 @@
+[
+ {
+  "doctype": "Vehicle Category",
+  "category_name": "_T-Sedan",
+  "default_fuel_type": "Petrol"
+ },
+ {
+  "doctype": "Vehicle Category",
+  "category_name": "_T-Bus",
+  "default_fuel_type": "Diesel",
+  "description": "Large passenger bus for site shuttle routes."
+ }
+]

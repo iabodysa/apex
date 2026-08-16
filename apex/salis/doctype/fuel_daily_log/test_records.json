@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Fuel Daily Log",
+  "naming_series": "FDL-.######",
+  "vehicle": "VEH-000001",
+  "log_date": "2026-01-10",
+  "litres": 45.5,
+  "amount": 150,
+  "odometer": 12000
+ },
+ {
+  "doctype": "Fuel Daily Log",
+  "naming_series": "FDL-.######",
+  "vehicle": "VEH-000002",
+  "log_date": "2026-01-15",
+  "litres": 60,
+  "amount": 200,
+  "driver": "DRV-000002"
+ }
+]

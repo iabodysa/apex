@@ -1,0 +1,14 @@
+[
+ {
+  "doctype": "Rental Office",
+  "office_name": "_T-Rental Office Riyadh",
+  "city": "Riyadh",
+  "status": "Active"
+ },
+ {
+  "doctype": "Rental Office",
+  "office_name": "_T-Rental Office Jeddah",
+  "city": "Jeddah",
+  "status": "Inactive"
+ }
+]

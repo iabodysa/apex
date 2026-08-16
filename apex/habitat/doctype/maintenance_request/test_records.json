@@ -1,0 +1,24 @@
+[
+ {
+  "doctype": "Maintenance Request",
+  "naming_series": "MAINT-.YYYY.-.#####",
+  "building": "_Test Building",
+  "room": "_T-101",
+  "issue_type": "Electrical",
+  "priority": "Medium",
+  "reported_by": "test@example.com",
+  "issue_description": "_T-Light fixture flickering in room"
+ },
+ {
+  "doctype": "Maintenance Request",
+  "naming_series": "MAINT-.YYYY.-.#####",
+  "building": "_Test Building 2",
+  "room": "_T-201",
+  "bed": "_T-201-A",
+  "issue_type": "Plumbing",
+  "priority": "Critical",
+  "reported_by": "Administrator",
+  "issue_description": "_T-Bathroom pipe leaking near bed",
+  "requires_procurement": 1
+ }
+]

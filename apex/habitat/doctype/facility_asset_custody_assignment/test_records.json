@@ -1,0 +1,19 @@
+[
+ {
+  "doctype": "Facility Asset Custody Assignment",
+  "naming_series": "FAC-CUST-.YYYY.-.#####",
+  "supervisor": "Administrator",
+  "building": "_Test Building",
+  "handover_date": "2026-01-20",
+  "all_assets_verified": 1,
+  "witness": "Administrator"
+ },
+ {
+  "doctype": "Facility Asset Custody Assignment",
+  "naming_series": "FAC-CUST-.YYYY.-.#####",
+  "supervisor": "Administrator",
+  "building": "_Test Building 2",
+  "handover_date": "2026-02-01",
+  "all_assets_verified": 0
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "doctype": "Maintenance Material",
+  "material_name": "_Test AC Filter",
+  "material_category": "Air Conditioning",
+  "is_active": 1
+ },
+ {
+  "doctype": "Maintenance Material",
+  "material_name": "_Test Ceiling Bulb",
+  "material_category": "Electrical",
+  "is_active": 0
+ }
+]

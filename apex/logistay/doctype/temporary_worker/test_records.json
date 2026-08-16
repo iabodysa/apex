@@ -1,0 +1,20 @@
+[
+ {
+  "doctype": "Temporary Worker",
+  "naming_series": "TEMP-.YYYY.-.#####",
+  "worker_name": "_T-Temp Worker One",
+  "passport_number": "_T-P0000001",
+  "arrival_date": "2026-01-01",
+  "status": "Active",
+  "window_days": 30
+ },
+ {
+  "doctype": "Temporary Worker",
+  "naming_series": "TEMP-.YYYY.-.#####",
+  "worker_name": "_T-Temp Worker Two",
+  "passport_number": "_T-P0000002",
+  "arrival_date": "2026-02-01",
+  "status": "Expired",
+  "window_days": 90
+ }
+]

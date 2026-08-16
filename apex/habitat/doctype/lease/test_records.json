@@ -1,0 +1,22 @@
+[
+ {
+  "doctype": "Lease",
+  "naming_series": "ACC-LEASE-.YYYY.-.####",
+  "building": "_Test Building",
+  "lease_start_date": "2026-01-01",
+  "lease_end_date": "2026-12-31",
+  "rent_amount": 5000,
+  "billing_cycle": "Monthly",
+  "first_payment_date": "2026-01-01"
+ },
+ {
+  "doctype": "Lease",
+  "naming_series": "ACC-LEASE-.YYYY.-.####",
+  "building": "_Test Building 2",
+  "lease_start_date": "2026-01-01",
+  "lease_end_date": "2027-12-31",
+  "rent_amount": 20000,
+  "billing_cycle": "Annual",
+  "first_payment_date": "2026-01-01"
+ }
+]
