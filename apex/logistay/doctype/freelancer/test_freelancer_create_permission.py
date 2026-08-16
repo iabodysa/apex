@@ -1,56 +1,23 @@
 # Copyright (c) 2026, AFMCO and contributors
 """A `create` grant a role cannot complete is worse than no grant at all.
 
-Freelancer shipped `create=1` for **Accommodation Manager** at permlevel 0 while
-`national_id_or_iqama` is `reqd` at permlevel **1**, and that role held no
-permlevel-1 row. Every attempt therefore died the same way, and the button was
-still on the form:
+Freelancer shipped `create=1` for Accommodation Manager at permlevel 0 while
+`national_id_or_iqama` is `reqd` at permlevel 1, and that role held no permlevel-1 row. The
+button stayed on the form and every press died the same way: `validate_higher_perm_levels`
+runs before `_validate` (frappe/model/document.py:306,310), `reset_values_if_no_permlevel_access`
+blanks the id (base_document.py:1263), and `_validate_mandatory` raises (document.py:946). A
+permlevel-1 row is not a substitute for the permlevel-0 one — `is_perm_applicable`
+(frappe/permissions.py:283) keeps only permlevel 0 when resolving create — so both are needed.
+The fix removed `create`, because Freelancer's permlevel-1 set is deliberately narrow.
 
-  * `Document.insert` runs `validate_higher_perm_levels()`
-    (frappe/model/document.py:306) BEFORE `_validate()` (:310).
-  * With no permlevel-1 write row, `get_permlevel_access("write")`
-    (document.py:808) omits 1, so `reset_values_if_no_permlevel_access`
-    (base_document.py:1263) overwrites the submitted national id with the value
-    from `frappe.new_doc` — empty, since the field has no default.
-  * `_validate_mandatory` (document.py:946) then raises `frappe.MandatoryError`.
+The per-role DocPerm assertions this module used to carry are gone: they pinned the JSON's text,
+and `test_freelancer.py::test_only_the_permlevel1_roles_can_create` already asks the same thing
+live for those roles. What it did NOT cover — the read-only Internal Auditor must not reach the
+permlevel-1 PII boundary — is kept below and asked the same live way.
 
-A permlevel-1 row is NOT a duplicate of the permlevel-0 one and never a
-substitute for it: `is_perm_applicable` (frappe/permissions.py:283) keeps only
-`permlevel == 0` rows when resolving create/read/write, so the two rows answer
-two different questions and both are needed to create a record with PII on it.
-
-The fix removed `create` rather than widening permlevel 1, because Freelancer's
-permlevel-1 set is deliberately narrow — Finance Manager and System Manager
-only, with even the Internal Auditor kept out.
-
-WHAT MOVED HERE AND WHY. This module used to carry a second class asserting the
-Freelancer DocPerm JSON row by row (create present/omitted, permlevel-1 rows
-present/absent, per role) — a Change Detector Test pinning the file's text.
-Every one of those claims is now asked live, of the framework, and mostly by a
-sibling that already existed: `test_freelancer.py::test_only_the_permlevel1_roles_can_create`
-inserts as Finance Manager (succeeds) and as Accommodation Manager
-(`frappe.PermissionError`), checking `frappe.has_permission` and
-`get_permlevel_access` on a real document. That test is a strict superset of
-what the removed JSON-reading assertions covered for those two roles, so
-deleting the duplicate loses no coverage a reader could notice.
-
-The one claim the sibling did NOT cover — that the read-only Internal Auditor
-never reaches Freelancer's permlevel-1 boundary either — is kept below, asked
-the same live way. A future widening of the auditor's grant is a real
-regression (PII exposed to a read-only role); it would not be caught by the
-app-wide sweep, because a role that CAN complete a create it now holds is not
-an "unusable create" by that sweep's definition.
-
-The app-wide sweep still rides here rather than in `apex/tests/` on purpose: it
-is the recurrence guard for the defect this module documents, it needs no
-site, and the colocation ratchet (apex/tests/test_colocation_ratchet.py)
-forbids a new central module. It has no per-DocType behavioural substitute —
-proving it live would mean inserting as every create-holding role against
-every one of the app's 50+ shipped DocTypes, most of which carry unrelated
-mandatory links this module has no business setting up.
-
-Run standalone (from the repo root):
-  python3 -m unittest apex.logistay.doctype.freelancer.test_freelancer_create_permission -v
+The app-wide sweep stays here rather than in `apex/tests/`: it is the recurrence guard for this
+defect, needs no site, and has no behavioural substitute short of inserting as every
+create-holding role against every shipped DocType.
 """
 
 from __future__ import annotations
