@@ -214,7 +214,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-13 20:47:00.000000",
+ "modified": "2026-08-16 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",
@@ -222,7 +222,7 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "cancel": 0,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
