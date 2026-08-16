@@ -63,7 +63,14 @@ def template_frequency(frequency):
 
 
 def _ensure_building_scope(catalog, building_name, tally) -> None:
-    """Put the building inside a non-universal catalog task's applicable scope."""
+    """Put the building inside a non-universal catalog task's applicable scope.
+
+    Appended through the parent and saved, not inserted standalone: a standalone child
+    row survives only until the catalog's own next save, which drops every stored child
+    row absent from the in-memory parent (document.py:471-496) and silently narrows the
+    task's scope with no error. ``_get_or_create_template`` below does this correctly
+    for its own child table; this mirrors it.
+    """
     scope_exists = frappe.db.exists(
         "Safety Task Building Scope",
         {"parent": catalog.name, "parenttype": "Safety Task Catalog", "building": building_name},
@@ -72,12 +79,9 @@ def _ensure_building_scope(catalog, building_name, tally) -> None:
         tally.skipped_scopes += 1
         return
     try:
-        scope = frappe.new_doc("Safety Task Building Scope")
-        scope.parent = catalog.name
-        scope.parenttype = "Safety Task Catalog"
-        scope.parentfield = "applicable_buildings"
-        scope.building = building_name
-        scope.insert(ignore_permissions=True)
+        doc = frappe.get_doc("Safety Task Catalog", catalog.name)
+        doc.append("applicable_buildings", {"building": building_name})
+        doc.save(ignore_permissions=True)
         tally.created_scopes += 1
     except Exception as exc:
         tally.failures.append(

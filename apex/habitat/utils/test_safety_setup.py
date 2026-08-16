@@ -165,6 +165,39 @@ class TestApplyCatalogIdempotency(FrappeTestCase):
             frappe.db.exists("Scheduled Task Template", {"safety_task_catalog": catalog.name})
         )
 
+    def test_building_scope_survives_an_already_open_forms_save(self):
+        """An editor's form loaded BEFORE the scope is added must not silently wipe it
+        on save: a standalone child-row insert never bumps the parent's ``modified``
+        (document.py check_if_latest checks only that), so the stale form's save sails
+        past the staleness check and document.py:471-496 drops every stored child row
+        absent from its in-memory list. Appending through the parent and saving fixes
+        this by bumping ``modified`` itself, so the stale form is correctly REFUSED
+        (TimestampMismatchError) instead of silently corrupting the scope.
+        """
+        task_code = f"UTIL-SAFETY-SURVIVE-{_tag()}"
+        catalog = _make_catalog(task_code, "Monthly", applicable_to_all_buildings=0)
+        building = _make_building(f"Safety Setup Utils Survive {_tag()}")
+        self.addCleanup(self._cleanup, building.name, catalog.name)
+
+        already_open_form = frappe.get_doc("Safety Task Catalog", catalog.name)
+
+        safety_setup.apply_catalog(catalog, building.name, safety_setup.SafetySetupTally())
+        self.assertTrue(
+            frappe.db.exists(
+                "Safety Task Building Scope", {"parent": catalog.name, "building": building.name}
+            )
+        )
+
+        with self.assertRaises(frappe.TimestampMismatchError):
+            already_open_form.save(ignore_permissions=True)
+
+        self.assertTrue(
+            frappe.db.exists(
+                "Safety Task Building Scope", {"parent": catalog.name, "building": building.name}
+            ),
+            "a stale form's refused save must not have taken the scope down with it",
+        )
+
 
 class TestSafetySetupReporting(FrappeTestCase):
     """``setup_summary`` / ``setup_message`` / ``report_setup`` read a tally back."""
