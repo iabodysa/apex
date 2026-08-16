@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO Support Services Co. Ltd and Contributors
-"""Shared portal-bootstrap helpers + per-route smoke (T-646).
+"""Shared portal-bootstrap helpers + per-route smoke.
 
 guest_redirect was extracted from the four www host pages (driver / masar / fleet /
 safety). This pins the helper both ways (raises for Guest, no-ops otherwise) and
@@ -67,7 +67,7 @@ class TestRouteSmoke(FrappeTestCase):
         self.assertNotIn("masar_token", ctx, "the raw token must not be in the shell context")
 
     def test_driver_guest_context_keys(self):
-        # A-046: /driver is a passwordless token portal (like /masar) —
+        # /driver is a passwordless token portal (like /masar) —
         # guest-accessible, no login redirect. Capabilities stay empty until a valid
         # token cookie resolves a driver, and the raw token never leaks into the
         # shell context.
@@ -98,7 +98,7 @@ class TestRouteSmoke(FrappeTestCase):
         self.assertIn("socketio_port", ctx.boot["apex_portal"])
 
     def test_guest_is_redirected_on_admin_routes(self):
-        # /driver dropped from this list — A-046 made it a passwordless
+        # /driver dropped from this list — made it a passwordless
         # token portal (guest-accessible, covered by test_driver_guest_context_keys).
         # fleet + safety remain login-gated admin routes.
         frappe.set_user("Guest")
