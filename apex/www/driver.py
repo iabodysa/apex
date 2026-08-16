@@ -26,8 +26,6 @@ from apex.apex_core.utils.portal_language import render_in_arabic
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
-DRIVER_LINK_DEAD_COOKIE = "driver_link_dead"
-_LINK_DEAD_MAX_AGE_SECONDS = 5 * 60
 DRIVER_CAPABILITIES = (
     "driver.today",
     "driver.profile.read",
@@ -49,10 +47,8 @@ def get_context(context):
     if query_token_supplied:
         if valid_token and _token_resolves(valid_token):
             _set_token_cookie(valid_token)
-            _clear_dead_link_marker()
         else:
             _delete_cookie(DRIVER_TOKEN_COOKIE)
-            _set_dead_link_marker()
         frappe.local.flags.redirect_location = "/driver/"
         raise frappe.Redirect
 
@@ -60,7 +56,6 @@ def get_context(context):
 
     cookie_token = _request_token_cookie()
     subject = _resolve_token_subject(cookie_token) if cookie_token else None
-    _consume_dead_link_marker()
     if cookie_token and not subject:
         _delete_cookie(DRIVER_TOKEN_COOKIE)
     return publish_portal_context(
@@ -104,37 +99,6 @@ def _set_token_cookie(token: str) -> None:
         samesite="Lax",
         max_age=_COOKIE_MAX_AGE_SECONDS,
     )
-
-
-def _set_dead_link_marker() -> None:
-    """Carry only a short-lived failure flag across the query-stripping redirect."""
-    cm = getattr(frappe.local, "cookie_manager", None)
-    if cm is None:
-        return
-    cm.set_cookie(
-        DRIVER_LINK_DEAD_COOKIE,
-        "1",
-        httponly=True,
-        samesite="Lax",
-        max_age=_LINK_DEAD_MAX_AGE_SECONDS,
-    )
-
-
-def _clear_dead_link_marker() -> None:
-    _delete_cookie(DRIVER_LINK_DEAD_COOKIE)
-
-
-def _consume_dead_link_marker() -> bool:
-    request = getattr(frappe.local, "request", None)
-    if request is None:
-        return False
-    try:
-        is_dead = request.cookies.get(DRIVER_LINK_DEAD_COOKIE) == "1"
-    except Exception:
-        return False
-    if is_dead:
-        _clear_dead_link_marker()
-    return is_dead
 
 
 def _delete_cookie(name: str) -> None:

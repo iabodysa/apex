@@ -156,25 +156,13 @@ class TestDriverTokenEntry(PortalEntryTestCase):
 
         resolves.assert_called_once_with("dead-driver-token")
         self.assertEqual(frappe.local.flags.redirect_location, "/driver/")
-        frappe.local.cookie_manager.set_cookie.assert_called_once_with(
-            driver.DRIVER_LINK_DEAD_COOKIE,
-            "1",
-            httponly=True,
-            samesite="Lax",
-            max_age=driver._LINK_DEAD_MAX_AGE_SECONDS,
-        )
-        token_cookie_calls = [
-            call
-            for call in frappe.local.cookie_manager.set_cookie.call_args_list
-            if call.args and call.args[0] == driver.DRIVER_TOKEN_COOKIE
-        ]
-        self.assertEqual(token_cookie_calls, [])
+        frappe.local.cookie_manager.set_cookie.assert_not_called()
         frappe.local.cookie_manager.delete_cookie.assert_called_once_with(
             driver.DRIVER_TOKEN_COOKIE
         )
 
     @patch.object(driver, "_token_resolves")
-    def test_malformed_or_empty_query_is_marked_dead_and_stripped(
+    def test_malformed_or_empty_query_is_stripped_without_a_token_cookie(
         self, resolves
     ):
         for raw in ("bad token!", ""):
@@ -185,24 +173,18 @@ class TestDriverTokenEntry(PortalEntryTestCase):
                 with self.assertRaises(frappe.Redirect):
                     driver.get_context(self._context())
                 self.assertEqual(frappe.local.flags.redirect_location, "/driver/")
-                frappe.local.cookie_manager.set_cookie.assert_called_once_with(
-                    driver.DRIVER_LINK_DEAD_COOKIE,
-                    "1",
-                    httponly=True,
-                    samesite="Lax",
-                    max_age=driver._LINK_DEAD_MAX_AGE_SECONDS,
+                frappe.local.cookie_manager.set_cookie.assert_not_called()
+                frappe.local.cookie_manager.delete_cookie.assert_called_once_with(
+                    driver.DRIVER_TOKEN_COOKIE
                 )
         resolves.assert_not_called()
 
     @patch.object(driver, "render_in_arabic")
     @patch.object(driver, "_request_token_cookie", return_value="")
     @patch("apex.apex_core.utils.portal_bootstrap.get_csrf_token", return_value="csrf")
-    def test_dead_link_marker_survives_redirect_for_one_render_without_secret(
+    def test_render_without_a_token_cookie_publishes_no_capabilities(
         self, _csrf, _cookie, _arabic
     ):
-        frappe.local.request = SimpleNamespace(
-            cookies={driver.DRIVER_LINK_DEAD_COOKIE: "1"}
-        )
         frappe.local.form_dict = frappe._dict()
         frappe.local.site = "apex.localhost"
         frappe.local.conf = frappe._dict(
@@ -214,6 +196,5 @@ class TestDriverTokenEntry(PortalEntryTestCase):
         context = driver.get_context(self._context())
 
         self.assertEqual(context.boot["apex_portal"]["capabilities"], [])
-        frappe.local.cookie_manager.delete_cookie.assert_called_once_with(
-            driver.DRIVER_LINK_DEAD_COOKIE
-        )
+        self.assertTrue(context.csrf_token, "an unauthenticated render still needs a CSRF token")
+        frappe.local.cookie_manager.delete_cookie.assert_not_called()
