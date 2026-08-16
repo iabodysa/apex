@@ -38,7 +38,7 @@ class TestIdleResidentDetection(FrappeTestCase):
 
         ended = frappe.get_doc({
             "doctype": "Project",
-            "project_name": "_T Ended " + frappe.generate_hash(length=8),
+            "project_name": "_T Ended " + frappe.generate_hash(length=12),
         }).insert(ignore_permissions=True).name
         frappe.db.set_value("Project", ended, "status", "Completed")
         self.ended_project = ended

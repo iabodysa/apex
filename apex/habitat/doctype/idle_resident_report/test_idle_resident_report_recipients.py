@@ -28,7 +28,7 @@ class TestIdleResidentReportRecipients(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.tag = frappe.generate_hash(length=10).upper()
+        cls.tag = frappe.generate_hash(length=12).upper()
 
         cls.duplicated = _user("irr_dup@example.com", ROLE)
         cls.plain = _user("irr_plain@example.com", ROLE)

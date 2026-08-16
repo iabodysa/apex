@@ -20,7 +20,7 @@ from frappe.utils import today
 from apex.habitat.report.missed_cleaning_tasks.missed_cleaning_tasks import execute
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

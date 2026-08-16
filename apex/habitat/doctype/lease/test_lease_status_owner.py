@@ -18,7 +18,7 @@ from frappe.utils import add_days, today
 WORKFLOW = "Lease Workflow"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

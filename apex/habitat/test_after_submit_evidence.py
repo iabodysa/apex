@@ -28,7 +28,7 @@ from apex.habitat.doctype.subcontractor_service_order.subcontractor_service_orde
 from apex.tests.factories import make_goods_receipt
 
 
-def _h(n=10):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

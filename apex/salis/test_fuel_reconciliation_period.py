@@ -38,7 +38,7 @@ class TestFuelReconciliationPeriod(FrappeTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Salis Vehicle",
-                "plate_number": "_FR " + frappe.generate_hash(length=8).upper(),
+                "plate_number": "_FR " + frappe.generate_hash(length=12).upper(),
                 "status": "Active",
             }
         ).insert(ignore_permissions=True, ignore_mandatory=True)
@@ -70,7 +70,7 @@ class TestFuelReconciliationPeriod(FrappeTestCase):
                 "period_month": period_month,
                 "litres": litres,
                 "source_type": "Fuel Daily Log",
-                "source_name": frappe.generate_hash(length=10),
+                "source_name": frappe.generate_hash(length=12),
             }
         ).insert(ignore_permissions=True)
         self.addCleanup(self._drop, "Fuel Consumption Ledger", doc.name)

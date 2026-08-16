@@ -52,7 +52,7 @@ class TestATripReleasesItsRequests(FrappeTestCase):
         if existing:
             return existing
         return self._new(
-            "Project", project_name="_DT Project " + frappe.generate_hash(length=6).upper()
+            "Project", project_name="_DT Project " + frappe.generate_hash(length=12).upper()
         ).name
 
     def _request(self):

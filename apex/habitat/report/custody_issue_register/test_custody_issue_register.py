@@ -22,7 +22,7 @@ from apex.habitat.report.custody_issue_register.custody_issue_register import ex
 REPORT = "Custody Issue Register"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

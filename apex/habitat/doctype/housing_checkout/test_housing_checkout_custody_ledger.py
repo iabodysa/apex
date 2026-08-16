@@ -62,7 +62,7 @@ class TestHousingCheckoutCustodyLedger(FrappeTestCase):
         # gate refuses moving more than the building has.
         post_stock_entry(
             item_type="Custody Article", item=ARTICLE, qty=5, building=BUILDING,
-            voucher_type="Goods Receipt", voucher_no=f"_T-SEED-{frappe.generate_hash(length=8)}",
+            voucher_type="Goods Receipt", voucher_no=f"_T-SEED-{frappe.generate_hash(length=12)}",
         )
 
     def _check_in(self):

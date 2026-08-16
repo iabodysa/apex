@@ -32,8 +32,8 @@ class TestKioskStoreBalanceExcludesWorkerCustody(FrappeTestCase):
         frappe.set_user("Administrator")
         self.worker = frappe.get_doc({
             "doctype": "Temporary Worker",
-            "worker_name": "TW-" + frappe.generate_hash(length=10).upper(),
-            "passport_number": "P" + frappe.generate_hash(length=10).upper(),
+            "worker_name": "TW-" + frappe.generate_hash(length=12).upper(),
+            "passport_number": "P" + frappe.generate_hash(length=12).upper(),
             "status": "Active",
         }).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
 
@@ -45,7 +45,7 @@ class TestKioskStoreBalanceExcludesWorkerCustody(FrappeTestCase):
         self.fail(f"{ARTICLE} is not in the kiosk catalog")
 
     def test_stock_in_a_temporary_workers_hands_is_not_offered_as_shelf_stock(self):
-        voucher = "_T-KIOSK-" + frappe.generate_hash(length=8)
+        voucher = "_T-KIOSK-" + frappe.generate_hash(length=12)
         post_stock_entry(
             item_type="Custody Article", item=ARTICLE, qty=3, building=BUILDING,
             voucher_type="Goods Receipt", voucher_no=voucher,

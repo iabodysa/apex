@@ -182,7 +182,7 @@ class TestStateContractsActuallyWrite(FrappeTestCase):
         self.driver = frappe.get_doc({
             "doctype": "Salis Driver",
             "naming_series": "DRV-.######",
-            "full_name": "_T Legacy Driver " + frappe.generate_hash(length=8),
+            "full_name": "_T Legacy Driver " + frappe.generate_hash(length=12),
         }).insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
         # The legacy values are no longer Select options, so a legacy site is reproduced the
         # only way it can be: written past validation, exactly as the upgrade finds them.

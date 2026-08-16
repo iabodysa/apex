@@ -40,7 +40,7 @@ TILE_FILTERS = [
 ]
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

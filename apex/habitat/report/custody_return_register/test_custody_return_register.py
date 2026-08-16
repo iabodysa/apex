@@ -21,7 +21,7 @@ from apex.habitat.report.custody_return_register.custody_return_register import 
 REPORT = "Custody Return Register"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

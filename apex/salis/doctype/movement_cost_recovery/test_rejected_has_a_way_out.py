@@ -24,7 +24,7 @@ WORKFLOW = "Movement Cost Recovery Workflow"
 MANAGER_ROLE = "Fleet Manager"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 

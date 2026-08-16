@@ -98,7 +98,7 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         data = {
             "doctype": "Rental Settlement",
             "rental_office": self._office(
-                "RS Workflow Office " + frappe.generate_hash(length=8).upper()
+                "RS Workflow Office " + frappe.generate_hash(length=12).upper()
             ),
             "period_month": "2026-05",
             "claimed_total": 1000,

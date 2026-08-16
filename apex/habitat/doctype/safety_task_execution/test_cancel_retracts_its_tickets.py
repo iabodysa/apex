@@ -20,7 +20,7 @@ from frappe.utils import today
 FAILING_RESULT = "Poor"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -44,7 +44,7 @@ class TestCancellingAnExecutionRetractsItsTickets(FrappeTestCase):
         cls.room = frappe.get_doc(
             {
                 "doctype": "Room",
-                "room_number": "STE" + _h(4),
+                "room_number": "STE" + _h(12),
                 "building": cls.building,
                 "capacity": 2,
             }

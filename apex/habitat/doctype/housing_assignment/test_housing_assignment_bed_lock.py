@@ -44,7 +44,7 @@ class TestHousingAssignmentBedLock(FrappeTestCase):
         else on the bench is currently housing him."""
         return frappe.get_doc({
             "doctype": "Employee",
-            "first_name": "_T Bed Lock " + frappe.generate_hash(length=8),
+            "first_name": "_T Bed Lock " + frappe.generate_hash(length=12),
             "company": self.company,
             "status": "Active",
             "gender": "Male",

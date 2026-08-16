@@ -47,14 +47,14 @@ class TestArrivalsSummary(FrappeTestCase):
             "naming_series": "BED-.####",
             "room": ROOM,
             "building": BUILDING,
-            "bed_code": "_T-201-OC-" + frappe.generate_hash(length=6).upper(),
+            "bed_code": "_T-201-OC-" + frappe.generate_hash(length=12).upper(),
             "status": "Available",
             "is_temporary": 1,
         }).insert(ignore_permissions=True).name
 
         self.worker = frappe.get_doc({
             "doctype": "Temporary Worker",
-            "worker_name": "_T Worker " + frappe.generate_hash(length=8).upper(),
+            "worker_name": "_T Worker " + frappe.generate_hash(length=12).upper(),
             "passport_number": "P" + frappe.generate_hash(length=12).upper(),
             "labour_supplier": SUPPLIER,
         }).insert(ignore_permissions=True, ignore_mandatory=True).name
@@ -122,7 +122,7 @@ class TestArrivalsSummary(FrappeTestCase):
             "naming_series": "BED-.####",
             "room": "_T-101",
             "building": other,
-            "bed_code": "_T-101-XB-" + frappe.generate_hash(length=6).upper(),
+            "bed_code": "_T-101-XB-" + frappe.generate_hash(length=12).upper(),
             "status": "Available",
         }).insert(ignore_permissions=True).name
         self._arrival(DATE, "Employee", self._employee("_Test Employee 2"), bed, building=other)

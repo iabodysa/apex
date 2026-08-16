@@ -45,7 +45,7 @@ class TestTheWorkerStopIsTheDriverStop(FrappeTestCase):
     def _building(self):
         return self._new(
             "Building",
-            building_name="_BW " + frappe.generate_hash(length=8).upper(),
+            building_name="_BW " + frappe.generate_hash(length=12).upper(),
         ).name
 
     def _stop_row(self):
@@ -62,13 +62,13 @@ class TestTheWorkerStopIsTheDriverStop(FrappeTestCase):
         if existing:
             return existing
         return self._new(
-            "Project", project_name="_BW Project " + frappe.generate_hash(length=6).upper()
+            "Project", project_name="_BW Project " + frappe.generate_hash(length=12).upper()
         ).name
 
     def _route_plan(self):
         return self._new(
             "Route Plan",
-            plan_name="_BW Plan " + frappe.generate_hash(length=6).upper(),
+            plan_name="_BW Plan " + frappe.generate_hash(length=12).upper(),
             project=self.project,
             stops=[self._stop_row()],
         ).name

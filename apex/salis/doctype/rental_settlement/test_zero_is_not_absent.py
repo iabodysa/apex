@@ -27,7 +27,7 @@ class TestATypedZeroSurvives(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Rental Office",
-                    "office_name": "_ZS " + frappe.generate_hash(length=8).upper(),
+                    "office_name": "_ZS " + frappe.generate_hash(length=12).upper(),
                     "status": "Active",
                 }
             )

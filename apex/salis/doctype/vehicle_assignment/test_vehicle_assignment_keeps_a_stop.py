@@ -24,11 +24,11 @@ class TestAnAssignmentKeepsAnOpenStop(FrappeTestCase):
         frappe.set_user("Administrator")
         self.vehicle = self._new(
             "Salis Vehicle",
-            plate_number="_VS " + frappe.generate_hash(length=8).upper(),
+            plate_number="_VS " + frappe.generate_hash(length=12).upper(),
             status="Active",
         )
         self.driver = self._new(
-            "Salis Driver", full_name="_VS Rider " + frappe.generate_hash(length=8).upper()
+            "Salis Driver", full_name="_VS Rider " + frappe.generate_hash(length=12).upper()
         )
 
     def _new(self, doctype, **values):

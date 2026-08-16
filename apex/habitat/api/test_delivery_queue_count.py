@@ -22,7 +22,7 @@ FIXTURE_ROWS = 51
 LIST_LIMIT = 50
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -31,7 +31,7 @@ class TestTheDeliveryQueueCount(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        cls.tag = _h(10)
+        cls.tag = _h(12)
         # A delivery refuses to save without a Facility Asset, and an asset needs a
         # building and a supervisor. One asset serves all the rows; the queue is what
         # is under test, not the asset.

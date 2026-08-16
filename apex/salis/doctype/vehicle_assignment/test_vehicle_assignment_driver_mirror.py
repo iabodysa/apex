@@ -42,7 +42,7 @@ class TestVehicleAssignmentDriverMirror(FrappeTestCase):
         self.other_driver = self._new("Salis Driver", full_name=self._tag("_VM Rider No Login"))
 
     def _tag(self, prefix):
-        return f"{prefix} {frappe.generate_hash(length=8).upper()}"
+        return f"{prefix} {frappe.generate_hash(length=12).upper()}"
 
     def _new(self, doctype, **values):
         doc = frappe.get_doc({"doctype": doctype, **values}).insert(

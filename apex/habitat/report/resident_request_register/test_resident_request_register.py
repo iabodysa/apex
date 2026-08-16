@@ -23,7 +23,7 @@ from apex.habitat.report.resident_request_register.resident_request_register imp
 REPORT = "Resident Request Register"
 
 
-def _h(n=8):
+def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 
 
@@ -54,7 +54,7 @@ class TestTheResidentRequestRegister(FrappeTestCase):
             {
                 "doctype": "Resident Request",
                 "building": self.building,
-                "worker_name": "RR " + _h(4),
+                "worker_name": "RR " + _h(12),
                 "priority": priority,
                 "status": status,
                 "assigned_to": assigned,
