@@ -345,7 +345,6 @@ Approve (Finance),اعتماد (المالية)
 Approve Handover,اعتماد التسليم
 Approve and Generate,اعتماد وتوليد
 Approve fuel request {0}?,اعتماد طلب الوقود {0}؟
-Approve or cancel this document through its workflow action; a direct submit or cancel is not allowed.,اعتمد هذا المستند أو ألغه من خلال إجراء سير العمل؛ الاعتماد أو الإلغاء المباشر غير مسموح به.
 Approved,معتمد
 Approved By,معتمد من
 Approved Fuel Awaiting Fulfilment,وقود معتمد بانتظار التنفيذ
@@ -5551,7 +5550,6 @@ workshop status,حالة الورشة
 "{0} custody line(s) came back short, lost or damaged.",{0} سطر عهدة رجع ناقصًا أو مفقودًا أو تالفًا.
 {0} day(s),{0} يوم
 {0} days,{0} أيام
-"{0} does not grant {1} the Report permission, so a user holding only {1} sees this report and gets a PermissionError on opening it. Either grant report on {0} to {1} in a permlevel-0 row that is not if_owner, or remove {1} from this report's Roles.",{0} لا يمنح الدور {1} صلاحية التقرير، لذلك أي مستخدم لا يحمل سوى {1} يرى هذا التقرير ويظهر له خطأ صلاحيات عند فتحه. إما أن تمنح الدور {1} صلاحية التقرير على {0} في صف بمستوى صلاحية صفر غير مقيّد بالمالك، وإما أن تحذف {1} من أدوار هذا التقرير.
 "{0} event-driven task(s) (As Needed / On Entry) were not scheduled — they run on a trigger, not a calendar: {1}.",لم تُجدول {0} مهمة مرتبطة بحدث (عند الحاجة أو عند الدخول)، لأنها تعمل عند وقوع الحدث لا حسب التقويم: {1}.
 {0} free,{0} متاح
 {0} free of {1} beds,{0} متاح من أصل {1} سرير
