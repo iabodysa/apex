@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import frappe
+
 from apex.apex_core.utils.portal_bootstrap import (
     build_portal_bootstrap,
     build_portal_shell_meta,
@@ -133,3 +135,53 @@ class TestPortalBootstrap(TestCase):
         self.assertEqual(context.boot["apex_portal"]["entry"], "housing")
         self.assertEqual(context.boot["apex_portal"]["capabilities"], ["estate_read"])
         self.assertNotIn("Administrator", str(context.boot))
+
+    def test_publishes_the_arabic_dictionary_as_its_own_contract(self):
+        """The portal is a standalone document, so it receives no bootinfo and no
+        ``frappe._messages`` — this contract is the only way ar.csv reaches the page.
+
+        The session language is pinned to ``ar`` rather than inherited, for two reasons. The
+        suite runs in English, so an inherited language would look for an ``en.csv`` apex
+        does not ship and hand back ``{}`` — a pass that proves nothing. And ``{}`` IS the
+        correct answer for an English session, so the assertion has to name the language it
+        is grading rather than assume one.
+
+        Asserted on a non-empty dictionary rather than on the key's presence, because an
+        empty one would satisfy a presence check and ship an untranslated portal. Asserted
+        as a SEPARATE attribute rather than a member of ``boot``: ``core/session.js``
+        refuses any unknown key inside the bootstrap dict, so folding the dictionary in
+        there would throw in the browser.
+        """
+        from types import SimpleNamespace
+        from unittest.mock import patch
+
+        self.addCleanup(setattr, frappe.local, "lang", getattr(frappe.local, "lang", "en"))
+        frappe.local.lang = "ar"
+        context = SimpleNamespace()
+        with patch(
+            "apex.apex_core.utils.portal_bootstrap.frappe.get_site_config",
+            return_value={
+                "socketio_port": 9001,
+                "disable_async": 0,
+                "encryption_key": "test-key",
+            },
+        ), patch(
+            "apex.apex_core.utils.portal_bootstrap.get_csrf_token",
+            return_value="csrf-test",
+        ):
+            publish_portal_context(
+                context,
+                entry="housing",
+                public_path="/housing",
+                initial_route="/overview",
+                capabilities=["estate_read"],
+                subject="Administrator",
+            )
+
+        self.assertIsInstance(context.portal_messages, dict)
+        self.assertTrue(context.portal_messages, "the Arabic dictionary reached the page empty")
+        self.assertNotIn(
+            "portal_messages",
+            context.boot["apex_portal"],
+            "the dictionary must stay its own contract — session.js refuses unknown boot keys",
+        )

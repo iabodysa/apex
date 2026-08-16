@@ -16,6 +16,7 @@ import re
 
 import frappe
 from frappe.sessions import get_csrf_token
+from frappe.translate import get_translations_from_csv
 from frappe.utils import cint
 
 PORTAL_PUBLIC_PATHS = {
@@ -141,6 +142,18 @@ def publish_portal_context(
     conf = frappe.get_site_config()
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
+    # Resolved once, so the dictionary the page receives and the language it declares can
+    # never disagree — a portal announcing "ar" while carrying the English dictionary would
+    # look correct in both halves and be wrong.
+    language = getattr(frappe.local, "lang", None) or "ar"
+    # Apex's own CSV, and only apex's. get_all_translations merges every installed app for
+    # the desk boot; that dictionary is an order of magnitude larger than anything this
+    # phone shell renders. The portal is a standalone document (it closes its own </body>,
+    # so template_page.py:199-204 never wraps it in Frappe's chrome) and therefore receives
+    # no bootinfo and no frappe._messages — this contract is how the strings arrive at all.
+    # A language apex ships no CSV for yields {}, and {} is the correct answer: __() then
+    # returns its own English argument, which is what an English session should see.
+    context.portal_messages = get_translations_from_csv(language, "apex")
     context.shell_meta = build_portal_shell_meta(
         entry=entry,
         public_path=public_path,
@@ -154,7 +167,7 @@ def publish_portal_context(
             site_name=frappe.local.site,
             socketio_port=cint(conf.get("socketio_port")) or 9000,
             async_enabled=not cint(conf.get("disable_async")),
-            language=getattr(frappe.local, "lang", None) or "ar",
+            language=language,
             subject_scope=opaque_subject_scope(entry=entry, subject=subject),
         )
     }
