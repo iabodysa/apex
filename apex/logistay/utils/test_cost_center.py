@@ -33,6 +33,34 @@ class TestResolveEmployeeCostCenter(unittest.TestCase):
                 cost_center.resolve_employee_cost_center("E-1", "Acme"), "CC-EMP"
             )
 
+    def test_employee_own_cost_center_wins_over_department_and_company(self):
+        """All three candidates present at once: only the precedence order, not a
+        single-candidate short circuit, can be what selects the Employee's own value."""
+        values = {
+            ("Employee", "payroll_cost_center"): "CC-EMP",
+            ("Employee", "department"): "D-1",
+            ("Department", "payroll_cost_center"): "CC-DEPT",
+            ("Company", "cost_center"): "CC-CO",
+        }
+        with mock.patch.object(cost_center, "_field", _field_map(values)):
+            self.assertEqual(
+                cost_center.resolve_employee_cost_center("E-1", "Acme"), "CC-EMP"
+            )
+
+    def test_department_cost_center_wins_over_company_when_employee_absent(self):
+        """Employee's own value absent, Department and Company both present: only
+        the precedence order can be what selects Department over Company."""
+        values = {
+            ("Employee", "payroll_cost_center"): None,
+            ("Employee", "department"): "D-1",
+            ("Department", "payroll_cost_center"): "CC-DEPT",
+            ("Company", "cost_center"): "CC-CO",
+        }
+        with mock.patch.object(cost_center, "_field", _field_map(values)):
+            self.assertEqual(
+                cost_center.resolve_employee_cost_center("E-1", "Acme"), "CC-DEPT"
+            )
+
     def test_falls_back_to_department_cost_center(self):
         values = {
             ("Employee", "payroll_cost_center"): None,

@@ -17,6 +17,7 @@ from apex.logistay.report.telecom_contract_expiry import telecom_contract_expiry
 from apex.logistay.report.telecom_cost_allocation import telecom_cost_allocation
 from apex.logistay.tasks import sim_alerts
 from apex.tests import factories
+from apex.tests._helpers import _user
 
 ALL_REPORTS = [
     employees_holding_multiple_sims,
@@ -86,3 +87,75 @@ class TestSIMReports(FrappeTestCase):
     def test_assigned_suspended_digest_runs(self):
         """With no suspended or lost assigned SIM the digest is a no-op that must not raise."""
         sim_alerts.assigned_suspended_or_lost_watch()
+
+    def test_assigned_suspended_digest_notifies_a_scoped_recipient(self):
+        """A SIM still held while Suspended reaches exactly one Notification Log for a
+        recipient scoped to the SIM's own company -- the case the no-op above cannot
+        prove, since its seeded state never lets the digest's body run at all."""
+        sim = frappe.get_doc(
+            {
+                "doctype": "SIM Card",
+                "naming_series": "SIM-.YYYY.-.#####",
+                "company": self.company,
+                "telecom_contract": self.contract.name,
+                "mobile_number": "0553330099",
+            }
+        ).insert(ignore_permissions=True, ignore_links=True)
+        frappe.get_doc(
+            {
+                "doctype": "SIM Custody Assignment",
+                "naming_series": "SIM-CUST-.YYYY.-.#####",
+                "company": self.company,
+                "sim_card": sim.name,
+                "action": "Assign",
+                "assignment_date": frappe.utils.today(),
+                "custodian_type": "Employee",
+                "employee": self.employee,
+            }
+        ).insert(ignore_permissions=True, ignore_links=True).submit()
+        frappe.get_doc(
+            {
+                "doctype": "SIM Custody Assignment",
+                "naming_series": "SIM-CUST-.YYYY.-.#####",
+                "company": self.company,
+                "sim_card": sim.name,
+                "action": "Suspend",
+                "assignment_date": frappe.utils.today(),
+            }
+        ).insert(ignore_permissions=True, ignore_links=True).submit()
+        self.assertEqual(frappe.db.get_value("SIM Card", sim.name, "status"), "Suspended")
+
+        recipient = "sim_ops_digest@example.com"
+        _user(recipient, "SIM Operations User")
+        if not frappe.db.exists(
+            "User Permission", {"user": recipient, "allow": "Company", "for_value": self.company}
+        ):
+            frappe.get_doc(
+                {
+                    "doctype": "User Permission",
+                    "user": recipient,
+                    "allow": "Company",
+                    "for_value": self.company,
+                }
+            ).insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.db.delete,
+            "User Permission",
+            {"user": recipient, "allow": "Company", "for_value": self.company},
+        )
+
+        before = frappe.db.count(
+            "Notification Log", {"for_user": recipient, "type": "Alert"}
+        )
+        sim_alerts.assigned_suspended_or_lost_watch()
+        after = frappe.get_all(
+            "Notification Log",
+            filters={"for_user": recipient, "type": "Alert"},
+            fields=["name", "subject", "email_content"],
+            order_by="creation desc",
+            limit_page_length=0,
+        )
+        self.assertEqual(
+            len(after) - before, 1, "expected exactly one digest notification for the recipient"
+        )
+        self.assertIn(sim.mobile_number, after[0].email_content)
