@@ -46,6 +46,10 @@
     color: var(--accent-ink);
     font-weight: 900;
 }
+.salis-state__mark svg {
+    inline-size: 22px;
+    block-size: 22px;
+}
 .salis-list {
     display: grid;
     gap: var(--sp-3);

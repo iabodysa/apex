@@ -55,7 +55,11 @@ onMounted(() => props.resource.fetch());
             state="empty"
             title="لا توجد سجلات"
             :message="empty"
-        />
+        >
+            <template v-if="createTo" #action>
+                <RouterLink class="salis-primary-link" :to="createTo">إضافة جديد</RouterLink>
+            </template>
+        </AsyncPanel>
         <ul v-else class="salis-list">
             <li v-for="row in rows" :key="row.name || row.id">
                 <div class="record-identity">

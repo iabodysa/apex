@@ -73,7 +73,7 @@ def _preflight():
         "Maintenance Request", fields=["name", "status", "docstatus", "assigned_to"]
     ):
         maintenance_status(row.status)
-        if row.assigned_to and not frappe.db.exists("User", row.assigned_to):
+        if row.assigned_to and not frappe.db.exists("User", {"name": row.assigned_to}):
             raise ValueError(
                 f"Maintenance Request {row.name} has unknown assignee {row.assigned_to!r}"
             )
@@ -264,13 +264,13 @@ def _converge_audit_plans():
 
 def _retire_assignment_notification():
     name = "Habitat - Maintenance Request Assigned"
-    if frappe.db.exists("Notification", name):
+    if frappe.db.exists("Notification", {"name": name}):
         frappe.delete_doc("Notification", name, ignore_permissions=True, force=True)
 
 
 def _converge_maintenance_kanban():
     name = "Maintenance Requests"
-    if not frappe.db.exists("Kanban Board", name):
+    if not frappe.db.exists("Kanban Board", {"name": name}):
         return
     board = frappe.get_doc("Kanban Board", name)
     canonical = [

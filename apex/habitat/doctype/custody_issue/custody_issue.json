@@ -257,7 +257,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-08-15 18:20:00.000000",
+ "modified": "2026-08-16 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",
@@ -296,6 +296,12 @@
    "read": 1,
    "report": 1,
    "role": "Internal Auditor"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Procurement Supervisor"
   },
   {
    "permlevel": 1,

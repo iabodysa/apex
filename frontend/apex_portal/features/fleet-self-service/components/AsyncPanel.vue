@@ -1,4 +1,5 @@
 <script setup>
+import { FeatherIcon } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 defineProps({
@@ -22,9 +23,12 @@ defineEmits(["retry"]);
         @retry="$emit('retry')"
     />
     <section v-else-if="state === 'empty'" class="salis-state" :data-state="state" role="status">
-        <span class="salis-state__mark" aria-hidden="true">—</span>
+        <span class="salis-state__mark" aria-hidden="true">
+            <slot name="icon"><FeatherIcon name="inbox" :stroke-width="1.75" /></slot>
+        </span>
         <h2>{{ title }}</h2>
         <p>{{ message }}</p>
+        <slot name="action" />
     </section>
     <slot v-else />
 </template>

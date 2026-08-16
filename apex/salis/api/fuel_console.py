@@ -74,7 +74,7 @@ def _drive_fuel_action(doc, action: str) -> None:
             frappe.PermissionError,
         )
     frappe.throw(
-        _("Only a Fleet Supervisor, Fleet Project Manager, or Fleet Manager can {0} a fuel request.").format(
+        _("Only a Fleet Project Manager or Fleet Manager can {0} a fuel request.").format(
             action.lower()
         ),
         frappe.PermissionError,

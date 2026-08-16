@@ -2953,7 +2953,7 @@ Only Service Orders with status Scheduled can be marked In Progress.,لا يمك
 Only Task Instances with status Open can be marked In Progress.,لا يمكن تسجيل المهمة «قيد التنفيذ» إلا إذا كانت حالتها «مفتوحة».
 Only Without an Idle Report,بدون تقرير ساكن غير مشغّل فقط
 Only Work Orders with status Planned can be marked In Progress.,لا يمكن تحديد حالة 'قيد التنفيذ' إلا لأوامر العمل ذات الحالة 'مخطط'.
-"Only a Fleet Supervisor, Fleet Project Manager, or Fleet Manager can {0} a fuel request.",لا يحق {0} طلب الوقود إلا لمشرف الأسطول أو مدير مشروع الأسطول أو مدير الأسطول.
+Only a Fleet Project Manager or Fleet Manager can {0} a fuel request.,لا يحق {0} طلب الوقود إلا لمدير مشروع الأسطول أو مدير الأسطول.
 Only a dispatched trip can be executed.,لا يمكن تنفيذ الرحلة قبل إرسالها.
 Only a handover Under Review can be approved.,لا يمكن اعتماد التسليم إلا إذا كان قيد المراجعة.
 Only a resolved Maintenance Request can be closed.,لا يمكن إغلاق طلب الصيانة إلا بعد معالجته.

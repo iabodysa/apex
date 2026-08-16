@@ -298,7 +298,7 @@
   }
  ],
  "is_submittable": 0,
- "modified": "2026-08-15 18:20:00.000000",
+ "modified": "2026-08-16 09:00:00.000000",
  "module": "Habitat",
  "name": "Resident Request",
  "naming_rule": "By \"Naming Series\" field",
@@ -345,6 +345,7 @@
   {
    "create": 1,
    "read": 1,
+   "report": 1,
    "role": "Resident Request Coordinator",
    "write": 1
   },
