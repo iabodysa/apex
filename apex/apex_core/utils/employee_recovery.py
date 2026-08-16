@@ -491,6 +491,7 @@ def validate_recovery_additional_salary(doc, method=None):
         return
     if advance.docstatus != 1 or advance.status not in OPEN_ADVANCE_STATUSES:
         frappe.throw(_("The linked Employee Advance is no longer open for recovery."))
+    _refuse_while_recovery_is_disabled()
     component = _recovery_component()
     advance_employee = advance.get("employee")
     advance_company = advance.get("company")
@@ -530,9 +531,37 @@ def validate_recovery_additional_salary(doc, method=None):
         )
 
 
+def _recovery_enabled() -> bool:
+    """True once Salis Settings turns wage recovery on. Off is the shipped default."""
+    return bool(
+        frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
+    )
+
+
+def _refuse_while_recovery_is_disabled():
+    """Refuse a person's deduction, naming the switch that has to be turned on.
+
+    The scheduled run stays a silent no-op while recovery is off, because nobody is
+    waiting on it. A person who presses Deduct, or saves a recovery Additional
+    Salary by hand, IS waiting, and a silent return teaches them the button is
+    broken. The field checks below this cannot carry the message: with recovery off
+    there is no configured component to compare against, so every one of them fails
+    and the reader is sent to inspect a document that is correct.
+    """
+    if not _recovery_enabled():
+        frappe.throw(
+            _(
+                "Salary recovery is switched off. Turn on Employee Advance recovery in "
+                "Salis Settings, and set its deduction Salary Component, before deducting "
+                "from a worker's wage."
+            ),
+            title=_("Recovery is disabled"),
+        )
+
+
 def _recovery_component() -> str | None:
     """Return the configured native deduction component while recovery is enabled."""
-    if not frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery"):
+    if not _recovery_enabled():
         return None
     component = frappe.db.get_single_value(
         "Salis Settings", "employee_advance_recovery_component"
@@ -560,6 +589,7 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     Assessment deduction does. Returns the Additional Salary name, or ``None`` when
     recovery is deferred (nothing recoverable this period) or already queued for it.
     """
+    _refuse_while_recovery_is_disabled()
     advance_doc = frappe.get_doc("Employee Advance", advance, for_update=True)
     frappe.has_permission("Employee Advance", "read", doc=advance_doc, throw=True)
     frappe.has_permission("Additional Salary", "create", throw=True)

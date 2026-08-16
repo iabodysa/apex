@@ -733,5 +733,48 @@ class TestEmployeeRecovery(unittest.TestCase):
         self.assertEqual(advance.set_status.call_count, 2)
 
 
+class TestRecoveryDisabledRefusal(unittest.TestCase):
+    """A person pressing Deduct, or saving a recovery Additional Salary by hand, while
+    recovery is off must see a named reason -- not the silent no-op the scheduled run
+    is allowed, and not a field-comparison error pointing at a document that is correct."""
+
+    @patch.object(employee_recovery, "_")
+    @patch.object(employee_recovery, "frappe")
+    def test_refuses_while_disabled(self, frappe_mock, translate):
+        frappe_mock.db.get_single_value.return_value = 0
+        translate.side_effect = lambda message: message
+        frappe_mock.throw.side_effect = frappe.ValidationError
+
+        with self.assertRaises(frappe.ValidationError):
+            employee_recovery._refuse_while_recovery_is_disabled()
+
+        self.assertIn("Recovery is disabled", frappe_mock.throw.call_args.kwargs["title"])
+
+    @patch.object(employee_recovery, "frappe")
+    def test_does_not_refuse_while_enabled(self, frappe_mock):
+        frappe_mock.db.get_single_value.return_value = 1
+
+        employee_recovery._refuse_while_recovery_is_disabled()
+
+        frappe_mock.throw.assert_not_called()
+
+    @patch.object(employee_recovery, "_recovery_component", wraps=employee_recovery._recovery_component)
+    @patch.object(employee_recovery, "frappe")
+    def test_schedule_recovery_deduction_refuses_before_reading_the_advance(
+        self, frappe_mock, component
+    ):
+        """The refusal has to come before any advance/component lookup, or a caller
+        who only has recovery-off state to look at is sent chasing a document that
+        never had a chance to be wrong."""
+        frappe_mock.db.get_single_value.return_value = 0
+        frappe_mock.throw.side_effect = frappe.ValidationError
+
+        with self.assertRaises(frappe.ValidationError):
+            employee_recovery.schedule_recovery_deduction("ADV-1")
+
+        frappe_mock.get_doc.assert_not_called()
+        component.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
