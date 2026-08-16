@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for the Top Workers by Custody Value chart source (A-564).
+"""Contract test for the Top Workers by Custody Value chart source.
 
 A dashboard chart source must return ``{"labels": [...], "datasets": [...]}``
 with ``labels`` and each dataset's ``values`` the SAME length — a ragged chart
@@ -19,7 +19,7 @@ from apex.habitat.dashboard_chart_source.top_workers_by_custody_value.top_worker
 from apex.tests._helpers import as_user
 from apex.tests.factories import make_building, make_company, make_goods_receipt
 
-# Shipped test fixtures (apex.tests.factories docstring / A-564 card): stable
+# Shipped test fixtures (apex.tests.factories docstring / card): stable
 # across every bench, never a per-run generated name.
 ARTICLE = "_T-Custody Article-00001"
 EMPLOYEE = "_T-Employee-00001"

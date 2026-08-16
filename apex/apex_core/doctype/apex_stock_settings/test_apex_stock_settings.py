@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract tests for the stock engine's policy gate (A-564).
+"""Contract tests for the stock engine's policy gate.
 
 Covers the Single's five callables: ``validate``, ``policy``,
 ``assert_posting_allowed``, ``_may_backdate`` and ``store_is_open``.
@@ -54,9 +54,6 @@ class TestApexStockSettings(FrappeTestCase):
         doc.save(ignore_permissions=True)
         frappe.clear_cache(doctype=SETTINGS)
         return doc
-
-    # -- validate ---------------------------------------------------------
-
     def test_validate_rejects_negative_backdating_days(self):
         doc = frappe.get_single(SETTINGS)
         doc.backdating_days = -1
@@ -71,9 +68,6 @@ class TestApexStockSettings(FrappeTestCase):
         doc.save(ignore_permissions=True)
         msgs = " ".join(m.get("message", "") for m in frappe.get_message_log())
         self.assertIn("no effect", msgs.lower())
-
-    # -- policy -------------------------------------------------------------
-
     def test_policy_reflects_current_settings(self):
         self._set(
             enable_stock_engine=1,
@@ -95,9 +89,6 @@ class TestApexStockSettings(FrappeTestCase):
                 "require_active_store": False,
             },
         )
-
-    # -- assert_posting_allowed ---------------------------------------------
-
     def test_assert_posting_allowed_throws_when_engine_off(self):
         self._set(enable_stock_engine=0)
         with self.assertRaises(frappe.ValidationError):
@@ -140,9 +131,6 @@ class TestApexStockSettings(FrappeTestCase):
         building = make_building(name="A564 Open Store Building", is_procurement_store=1, store_is_active=1)
         self._set(enable_stock_engine=1, stock_frozen_upto=None, backdating_days=5, require_active_store=1)
         assert_posting_allowed(building.name, posting_date=today())
-
-    # -- _may_backdate --------------------------------------------------------
-
     def test_may_backdate_true_for_system_manager(self):
         # Administrator always carries System Manager.
         self.assertTrue(_may_backdate("Some Role That Does Not Exist"))
@@ -151,9 +139,6 @@ class TestApexStockSettings(FrappeTestCase):
         email = _user("a564-stock-maybd@example.com", "Employee")
         with as_user(email):
             self.assertFalse(_may_backdate("System Manager"))
-
-    # -- store_is_open --------------------------------------------------------
-
     def test_store_is_open_false_for_empty_building(self):
         self.assertFalse(store_is_open(None))
 

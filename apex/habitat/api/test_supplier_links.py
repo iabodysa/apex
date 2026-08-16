@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``get_data`` (A-564): merges Habitat's Supplier-dashboard
+"""Contract test for ``get_data`` merges Habitat's Supplier-dashboard
 links into the native Supplier dashboard payload WITHOUT dropping what was
 already there."""
 

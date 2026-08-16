@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``seed_catalog`` (A-564): inserts every catalog entry
+"""Contract test for ``seed_catalog`` inserts every catalog entry
 that does not already exist, and is idempotent — a second run creates nothing
 new and raises nothing."""
 

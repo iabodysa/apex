@@ -50,16 +50,12 @@ class TestPortalPushSubscription(FrappeTestCase):
         return doc
 
     def test_two_subscriptions_cannot_share_endpoint(self):
-        # Regression guard for A-565: defect. ``endpoint`` is declared ``"unique": 1`` in
-        # portal_push_subscription.json, but its fieldtype is Small Text — Frappe's
-        # schema builder (frappe/database/schema.py:212,241, the "text"/"longtext"
-        # exclusion) never emits a MySQL UNIQUE index for a text/longtext column, and
-        # neither document.py nor base_document.py runs any app-level uniqueness
-        # check independent of that index. So two Portal Push Subscription rows CAN
-        # share one endpoint despite the declared constraint — confirmed on this site:
-        # `SHOW INDEX FROM tabPortal Push Subscription WHERE Column_name='endpoint'`
-        # returns no rows. This assertion proves the sharing is refused; it currently
-        # fails because nothing refuses it.
+        """Two rows may not hold one endpoint, though no index enforces it.
+
+        The field is declared unique and the declaration is dropped in silence: Small Text
+        maps to a MySQL text column, and the schema builder skips a unique index on text
+        (frappe/database/schema.py:212). The controller carries the guarantee instead.
+        """
         shared = _endpoint()
         self._insert(self._sub(endpoint=shared))
 

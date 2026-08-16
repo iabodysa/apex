@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for QR Location's ``before_save`` (A-564): generates a
+"""Contract test for QR Location's ``before_save`` generates a
 ``location_token`` when missing, and always rebuilds ``public_url`` from it."""
 
 from __future__ import annotations

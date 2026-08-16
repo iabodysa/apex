@@ -187,7 +187,7 @@ class TestOperationsAlerts(FrappeTestCase):
         """A row the caller may act on should come back in ``acknowledged`` —
         exactly what bulk_assign_alerts and bulk_snooze_alerts already report for
         a permitted row."""
-        # Regression guard for A-564: bulk_acknowledge_alerts once read the always-False
+        # Regression guard for bulk_acknowledge_alerts once read the always-False
         # "acknowledged" key, so the desk's "{0} acknowledged" banner always said nought.
         # checks acknowledge_alert(name).get("acknowledged"), but acknowledge_alert
         # (operations_alerts.py:197) always returns acknowledged=False — so this

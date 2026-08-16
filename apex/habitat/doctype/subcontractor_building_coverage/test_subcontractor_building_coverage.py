@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``SubcontractorBuildingCoverage.before_save`` (A-564): blocks
+"""Contract test for ``SubcontractorBuildingCoverage.before_save`` blocks
 saving when the loaded document's doctype is not "Subcontractor Building
 Coverage" — its own docstring's stated contract.
 

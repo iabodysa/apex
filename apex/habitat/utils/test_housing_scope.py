@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``active_building_scope`` (A-564).
+"""Contract test for ``active_building_scope``.
 
 An unscoped oversight role sees every Active building (``is_scoped=False``,
 ``filters={"status": "Active"}``). A building-scoped user with a granted

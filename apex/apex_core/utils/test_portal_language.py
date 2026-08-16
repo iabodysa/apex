@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``render_in_arabic`` (A-564): sets the request's translation
+"""Contract test for ``render_in_arabic`` sets the request's translation
 language to Arabic for the rest of the render, regardless of the session user's
 own language preference."""
 

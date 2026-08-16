@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Contract test for ``apply_vat`` (A-564): fills ``tax_amount``/``grand_total``
+"""Contract test for ``apply_vat`` fills ``tax_amount``/``grand_total``
 from ``base`` and the document's own ``tax_rate``, both derived and read-only."""
 
 from __future__ import annotations

@@ -198,7 +198,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "ignore_permissions. Authorisation is the session-resolved Salis Driver "
         "(base._session_driver) and the Issue is stamped to him, so he can raise one "
         "only as himself. The module docstring records the same reservation. Waived "
-        "pending the narrower answer tracked on A-521.3.",
+        "pending the narrower answer tracked on.3.",
     ),
     (
         "salis/api/fleet_employee_services.py",
@@ -207,7 +207,7 @@ PERMISSION_RECHECK_ALLOWLIST = [
         "Communication, and Driver create on Communication would hand over the whole "
         "email and comment surface. _my_issue refuses any Issue not raised by the "
         "session-resolved driver before the Communication is inserted. Waived pending "
-        "A-521.3.",
+        ".3.",
     ),
     (
         "salis/api/manual_boarding.py",
