@@ -37,7 +37,7 @@ from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_
 
 from apex.apex_core.payment_router import route_payment
 from apex.tests._helpers import _user, submit_via_workflow
-from apex.tests.factories import make_project
+from apex.tests.factories import make_project, purge_doc
 
 WORKFLOW = "Salis Payment Request Workflow"
 ROUTING_SETTINGS = "Payment Routing Settings"
@@ -113,7 +113,13 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
             "status": "Draft",
         }
         data.update(overrides)
-        return frappe.get_doc(data).insert(ignore_permissions=True)
+        request = frappe.get_doc(data).insert(ignore_permissions=True)
+        # The class deletes its Project on the way out, but a request left behind holds a link
+        # to it and blocks that delete. The residue then outlives the run: a later Project — the
+        # demo builder's, in the case that raised this — inherits the same block and its own
+        # teardown reports a row nothing on the site can account for.
+        self.addCleanup(purge_doc, "Salis Payment Request", request.name)
+        return request
 
     def _pending(self, **kwargs):
         pr = self._new_request(**kwargs)

@@ -35,7 +35,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
 )
 from apex.tests._helpers import _user
-from apex.tests.factories import make_project, make_vehicle
+from apex.tests.factories import make_project, purge_doc, make_vehicle
 
 WORKFLOW = "Driver Clearance Workflow"
 
@@ -93,12 +93,21 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
 
 
     def _driver(self, name, vehicle=None):
+        """A driver of this run's own, deleted when the test that asked for it ends.
+
+        Reusing a driver by full_name kept it alive across runs, and each run re-pointed its
+        project at that run's. The row then outlived every project it had ever named and
+        blocked their deletes — including the demo builder's, whose teardown reported a
+        Salis Driver nothing on the site could account for.
+        """
+        name = f"{name} {frappe.generate_hash(length=12)}"
         d = frappe.db.get_value("Salis Driver", {"full_name": name}, "name")
         if not d:
             d = frappe.get_doc(
                 {"doctype": "Salis Driver", "full_name": name, "status": "Active",
                  "project": self.project}
             ).insert(ignore_permissions=True).name
+            self.addCleanup(purge_doc, "Salis Driver", d)
         else:
             frappe.db.set_value("Salis Driver", d, "project", self.project)
         if vehicle:
@@ -121,7 +130,13 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         return frappe.get_doc(data).insert(ignore_permissions=True)
 
     def _open_fuel_exception(self, driver):
-        """Insert and submit an OPEN Fuel Exception Case against the driver."""
+        """Insert and submit an OPEN Fuel Exception Case against the driver.
+
+        Left behind with no cleanup, this outlived the driver it named: a later run's
+        ``purge_doc`` on that same driver name found a Fuel Exception Case still pointing
+        at it and could not delete it either — including the demo builder's driver, once
+        the naming series handed it back a number this row had used.
+        """
         fec = frappe.get_doc(
             {
                 "doctype": "Fuel Exception Case",
@@ -131,6 +146,7 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
                 "status": "Open",
             }
         ).insert(ignore_permissions=True)
+        self.addCleanup(purge_doc, "Fuel Exception Case", fec.name)
         return fec
 
 
@@ -233,6 +249,10 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         )
         frappe.set_user("Administrator")
         issued = issue_driver_link(driver)
+        # The token's name is the driver's own name (one token per driver, reissued in
+        # place), left behind with no cleanup: a later run's purge_doc on that same driver
+        # name found the token still pointing at it and could not delete the driver either.
+        self.addCleanup(purge_doc, "Masar Worker Token", driver)
         dc = self._new_clearance(driver)
         frappe.set_user(self.manager)
         apply_workflow(dc, "Clear")

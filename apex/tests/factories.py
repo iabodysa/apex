@@ -249,8 +249,14 @@ def purge_doc(doctype, name):
         try:
             doc.cancel()
         except Exception:
-            # [#kgd2nu]
-            pass
+            # A workflow-governed document refuses a cancel to EVERY session, not just an
+            # unprivileged one: `ignore_permissions` never reaches `validate_workflow`
+            # (frappe/model/document.py:693) and `get_transitions` filters on the session
+            # user's roles (frappe/model/workflow.py:64). A teardown that had to hold a
+            # business role to clean up would tie every fixture to the approval matrix, so
+            # the docstatus is written directly here — in test teardown only, where the row
+            # is about to be deleted anyway and no hook may observe the intermediate state.
+            frappe.db.set_value(doctype, name, "docstatus", 2, update_modified=False)
     frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
 
 
