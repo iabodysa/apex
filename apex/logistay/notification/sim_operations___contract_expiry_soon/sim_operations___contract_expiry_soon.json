@@ -11,7 +11,7 @@
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "DISABLED: replaced by apex.logistay.tasks.contract_alerts.contract_expiry_soon_watch, a daily scheduled task that scopes each recipient by their own company. receiver_by_role here resolves through get_info_based_on_role with ignore_permissions=True (frappe/email/doctype/notification/notification.py), so this fixture could not be company-scoped and stayed as a template only.",
+ "message": "",
  "message_type": "HTML",
  "module": "Logistay",
  "name": "SIM Operations - Contract Expiry Soon",

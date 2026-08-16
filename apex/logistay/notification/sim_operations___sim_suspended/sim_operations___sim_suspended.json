@@ -9,7 +9,7 @@
  "event": "Submit",
  "idx": 0,
  "is_standard": 1,
- "message": "DISABLED: replaced by SimCustodyAssignment.on_submit's controller-driven _notify_suspended, which scopes each recipient by their own company. receiver_by_role here resolves through get_info_based_on_role with ignore_permissions=True (frappe/email/doctype/notification/notification.py), so this fixture could not be company-scoped and stayed as a template only.",
+ "message": "",
  "message_type": "HTML",
  "module": "Logistay",
  "name": "SIM Operations - SIM Suspended",
