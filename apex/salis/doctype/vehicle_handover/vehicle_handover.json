@@ -92,7 +92,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "To Driver",
-   "options": "Salis Driver"
+   "options": "Salis Driver",
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "vehicle_handover_main_col",
@@ -238,7 +239,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-08-14 16:35:00.000000",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",

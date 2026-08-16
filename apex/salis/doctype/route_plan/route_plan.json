@@ -89,6 +89,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]",
    "options": "Salis Driver"
   },
   {
@@ -266,7 +267,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-08-13 16:02:00.000000",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

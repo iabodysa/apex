@@ -219,7 +219,8 @@
    "in_list_view": 1,
    "label": "Driver",
    "options": "Salis Driver",
-   "permlevel": 1
+   "permlevel": 1,
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "generation_key",
@@ -407,7 +408,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-16 18:40:00.000000",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

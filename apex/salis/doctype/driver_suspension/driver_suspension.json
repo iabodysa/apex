@@ -43,7 +43,8 @@
    "label": "Driver",
    "options": "Salis Driver",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "description": "Reason the driver is being stopped from operating, whether due to a violation, leave, termination, transfer, or another cause.",
@@ -119,7 +120,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-25 20:51:08.765027",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Suspension",

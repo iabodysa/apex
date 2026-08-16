@@ -353,7 +353,8 @@
    "fieldname": "assigned_driver",
    "fieldtype": "Link",
    "label": "Assigned Driver",
-   "options": "Salis Driver"
+   "options": "Salis Driver",
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "dispatch_trip",
@@ -476,7 +477,7 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-14 16:56:00.000000",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

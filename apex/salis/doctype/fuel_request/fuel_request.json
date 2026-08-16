@@ -157,7 +157,8 @@
    "in_standard_filter": 1,
    "label": "Driver",
    "options": "Salis Driver",
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "depends_on": "eval:doc.request_type=='Standard'",
@@ -486,7 +487,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-08-16 08:52:23.392223",
+ "modified": "2026-08-16 22:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

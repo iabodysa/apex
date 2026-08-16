@@ -28,6 +28,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 
 from apex.salis.utils import add_timeline_note, lock_driver, lock_vehicle, set_current_driver
+from apex.salis.utils.driver_availability import planned_trips_for_driver
 
 _CLOSED_FUEL_EXCEPTION_STATUSES = ("Resolved", "Rejected", "Closed")
 
@@ -142,6 +143,11 @@ class DriverClearance(Document):
             missing.append(_("Open Fuel Exception Cases"))
         if (self.outstanding_recoveries or 0) != 0:
             missing.append(_("Open Movement Cost Recoveries"))
+        planned = planned_trips_for_driver(self.driver)
+        if planned:
+            missing.append(
+                _("Planned trips still assigned to him ({0})").format(", ".join(planned[:5]))
+            )
 
         if missing:
             frappe.throw(

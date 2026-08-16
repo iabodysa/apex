@@ -12,11 +12,20 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver, set_current_driver
+from apex.salis.utils.driver_availability import (
+    dispatched_trips_for_driver,
+    refuse_to_stop_a_driver_who_still_holds_planned_trips,
+)
 
 
 class DriverSuspension(Document):
     def validate(self):
-        """Requires a vehicle to release, defaulting it from the driver's current vehicle when unset."""
+        """Requires a vehicle to release, and a driver whose planned trips are handed over.
+
+        The trip check runs here rather than on submit so the operator is told while
+        he is still filling the form, not after he has asked for the stop to take effect.
+        """
+        refuse_to_stop_a_driver_who_still_holds_planned_trips(self.driver)
         if self.release_vehicle:
             if not self.related_vehicle and self.driver:
                 self.related_vehicle = frappe.db.get_value(
@@ -51,6 +60,23 @@ class DriverSuspension(Document):
             "Salis Driver",
             self.driver,
             _("Stopped via {0}: {1}.").format(self.name, _(self.stop_reason)),
+        )
+        self._report_any_trip_he_is_still_running()
+
+    def _report_any_trip_he_is_still_running(self):
+        """Name the trips already on the road, which a stop does not and cannot recall.
+
+        A planned trip refuses the stop; a dispatched one is a vehicle in motion, and
+        an accident cannot wait for it to finish. The supervisor is told instead.
+        """
+        running = dispatched_trips_for_driver(self.driver)
+        if not running:
+            return
+        self.add_comment(
+            "Comment",
+            _("Still on the road at the time of the stop: {0}. Recall or close each one.").format(
+                ", ".join(running)
+            ),
         )
 
     def on_cancel(self):
