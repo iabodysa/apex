@@ -584,11 +584,15 @@ class TestBackendBoardContract(unittest.TestCase):
             self.assertEqual(by_name[fieldname]["no_copy"], 1)
 
     def test_no_demo_data_import_mode_or_bespoke_policy_runtime(self):
+        # Runtime only, which is what the name claims. A patch that retires the policy has
+        # to name it, and so does a test that asserts the retirement — scanning either
+        # turns the evidence of removal into evidence of survival.
+        from apex.tests.source_tree import is_test_file, rel
+
         python_sources = "\n".join(
             path.read_text(encoding="utf-8")
             for path in APP_ROOT.rglob("*.py")
-            if "test_backend_board_contract.py" not in str(path)
-            and "/patches/" not in str(path)
+            if "/patches/" not in str(path) and not is_test_file(rel(str(path)))
         )
         self.assertNotIn("flags.in_import", python_sources)
         self.assertNotIn("Salary Deduction Policy", python_sources)

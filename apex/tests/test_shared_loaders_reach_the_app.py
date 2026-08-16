@@ -117,7 +117,11 @@ class TestSharedLoadersReachTheApp(unittest.TestCase):
         shipped = [p for p in corpus if p.startswith(source_tree.APP_ROOT)]
         mirrored = [p for p in corpus if p.startswith(source_tree.SUITE_ROOT)]
         self.assertGreater(len(shipped), 100, "no shipped test module was read")
-        self.assertGreater(len(mirrored), 50, "no mirror test module was read")
+        # The mirror is being emptied on purpose as modules ship, so its floor is one, not
+        # a headcount: what this grades is that BOTH roots are read, which a collapse of
+        # SUITE_PACKAGE onto APP_ROOT would hide. The equality below is the real check —
+        # every file in the corpus belongs to exactly one root.
+        self.assertGreater(len(mirrored), 0, "no mirror test module was read")
         self.assertEqual(len(shipped) + len(mirrored), len(corpus))
 
 
