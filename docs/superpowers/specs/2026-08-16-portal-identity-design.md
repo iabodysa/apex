@@ -1,6 +1,6 @@
 # Portal identity — QR enrolment, device sessions, and an audit trail
 
-Status: proposed. Owner-directed design, 2026-08-16. Supersedes nothing until A-521.1 is decided.
+Status: proposed. Supersedes nothing until A-521.1 is decided.
 
 ## The problem this solves
 

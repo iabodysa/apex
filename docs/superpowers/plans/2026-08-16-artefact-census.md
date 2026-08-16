@@ -17,7 +17,7 @@
 - **Every fan-out reports its own coverage**: `expected N, distinct M, duplicated K, unopened J`. `unopened > 0` voids the verdict; it does not round down.
 - **A planted defect must survive to the report.** If the canary is not caught, the run is void regardless of what else it found.
 - Concurrency is capped at 16 agents; that is a ceiling, not a target.
-- Output is one file: `.claude/audits/artefact-census-2026-08-16.json`.
+- Output is one file: `.claude/audits/artefact-census.json`.
 
 ---
 
@@ -26,7 +26,7 @@
 - `Create: .claude/tools/census/enumerate.py` — walks `apex/**`, emits one record per artefact with its measurable facts. No judgement, no network, no writes to the repo.
 - `Create: .claude/tools/census/codebook.py` — the 14 questions as data: id, text, kind (`mechanical`/`judgement`), and for mechanical ones the function that answers it.
 - `Create: .claude/tools/census/aggregate.py` — joins agent verdicts back onto the census, asserts the join, computes coverage and disagreement, writes the final report.
-- `Create: .claude/audits/artefact-census-2026-08-16.json` — the deliverable.
+- `Create: .claude/audits/artefact-census.json` — the deliverable.
 - `Modify: none.` This plan grades the app; it does not change it. Fixes are carded from the report afterwards.
 
 ---
@@ -218,7 +218,7 @@ for q in ('q01_parses','q02_folder_name','q05_referenced','q06_reaches_operator'
     print(q, dict(collections.Counter(r['mechanical'][q] for r in rs)))
 "
 ```
-Expected, from the measurement already taken on 2026-08-16: `q06_reaches_operator` returns `no` for all 46 dashboard charts and 54 of the 113 number cards. **Those 100 artefacts have their `q09_needed` answer already** — nobody sees them — so they go to the report as a finding, not to an agent.
+Expected: `q06_reaches_operator` returns `no` for all 46 dashboard charts and 54 of the 113 number cards. **Those 100 artefacts have their `q09_needed` answer already** — nobody sees them — so they go to the report as a finding, not to an agent.
 
 - [ ] **Step 3: Write the residue slices**
 
@@ -282,7 +282,7 @@ Expected: slice1's verdict file, with `q09_needed: no`. If the canary was passed
 
 **Files:**
 - Create: `.claude/tools/census/aggregate.py`
-- Create: `.claude/audits/artefact-census-2026-08-16.json`
+- Create: `.claude/audits/artefact-census.json`
 
 **Interfaces:**
 - Consumes: `census-mechanical.json` and every `verdicts/slice<N>.json`.
@@ -321,9 +321,9 @@ Expected: PASS.
 - [ ] **Step 5: Produce the report and read the headline**
 
 ```bash
-python3 .claude/tools/census/aggregate.py --out .claude/audits/artefact-census-2026-08-16.json
+python3 .claude/tools/census/aggregate.py --out .claude/audits/artefact-census.json
 python3 -c "
-import json; d = json.load(open('.claude/audits/artefact-census-2026-08-16.json'))
+import json; d = json.load(open('.claude/audits/artefact-census.json'))
 print(d['population'], d['coverage'], d['control'])
 print({k: v['unneeded'] for k, v in d['by_kind'].items()})
 "
@@ -332,8 +332,8 @@ print({k: v['unneeded'] for k, v in d['by_kind'].items()})
 - [ ] **Step 6: Commit**
 
 ```bash
-git add .claude/tools/census/aggregate.py .claude/tools/census/test_aggregate.py .claude/audits/artefact-census-2026-08-16.json
-git commit -m "add feature — the artefact census report, adding .claude/audits/artefact-census-2026-08-16.json"
+git add .claude/tools/census/aggregate.py .claude/tools/census/test_aggregate.py .claude/audits/artefact-census.json
+git commit -m "add feature — the artefact census report, adding .claude/audits/artefact-census.json"
 ```
 
 ---
