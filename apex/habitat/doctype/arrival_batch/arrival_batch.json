@@ -165,37 +165,6 @@
    "report": 1,
    "export": 1,
    "idx": 4
-  },
-  {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "permlevel": 1,
-   "read": 1,
-   "write": 1,
-   "idx": 5
-  },
-  {
-   "doctype": "DocPerm",
-   "role": "Accommodation Manager",
-   "permlevel": 1,
-   "read": 1,
-   "write": 1,
-   "idx": 6
-  },
-  {
-   "doctype": "DocPerm",
-   "role": "Resident Supervisor",
-   "permlevel": 1,
-   "read": 1,
-   "write": 1,
-   "idx": 7
-  },
-  {
-   "doctype": "DocPerm",
-   "role": "Internal Auditor",
-   "permlevel": 1,
-   "read": 1,
-   "idx": 8
   }
  ],
  "links": [
@@ -205,5 +174,5 @@
    "link_fieldname": "arrival_batch"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000"
+ "modified": "2026-08-16 00:00:00.000000"
 }
