@@ -15,6 +15,12 @@ import frappe
 
 
 def execute():
+    """Delete every duplicate but the newest, keyed on the endpoint they share.
+
+    The delete passes ``ignore_permissions`` because a patch runs during migrate as
+    Administrator with no session user whose roles could be consulted. Without the flag the
+    delete is refused and the duplicates survive the migration that exists to clear them.
+    """
     duplicated = frappe.db.sql(
         """
         select endpoint
