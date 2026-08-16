@@ -163,6 +163,11 @@ def doctype_json_files():
     for path in candidates:
         if os.sep + "doctype" + os.sep not in path:
             continue
+        if not os.path.exists(path):
+            # `_tracked_json_files` asks git, which still lists a file deleted in the
+            # working tree but not yet committed. That file is no longer shipped, so it
+            # is not a candidate — and opening it would fail the whole scan.
+            continue
         with open(path, encoding="utf-8") as handle:
             try:
                 doc = json.load(handle)

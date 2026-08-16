@@ -191,27 +191,39 @@ class TestGetDriverForUser(FrappeTestCase):
         finally:
             frappe.set_user("Administrator")
 
-    def test_invalid_cookie_never_falls_back_to_linked_session(self):
+    def test_bad_presented_cookie_never_falls_back_to_linked_session(self):
+        """A garbage or blank credential is refused outright, never silently
+        dropped back to the session's linked driver."""
         frappe.set_user(self.user)
         with _request_cookies({"masar_dt": "invalid"}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError,
+                msg="a garbage cookie must not fall back to the linked session",
+            ):
                 utils.get_driver_for_user()
-
-    def test_blank_presented_cookie_never_falls_back_to_linked_session(self):
-        frappe.set_user(self.user)
         with _request_cookies({"masar_dt": ""}):
-            with self.assertRaises(frappe.PermissionError):
+            with self.assertRaises(
+                frappe.PermissionError,
+                msg="a blank cookie must not fall back to the linked session",
+            ):
                 utils.get_driver_for_user()
 
-    def test_absent_cookie_preserves_explicit_session_preview(self):
+    def test_session_resolution_survives_absent_or_cookieless_request(self):
+        """The session-only fallback works whether the request carries an
+        empty cookie jar or no request object exists at all."""
         frappe.set_user(self.user)
         with _request_cookies({}):
-            self.assertEqual(utils.get_driver_for_user(), self.driver.name)
-
-    def test_missing_request_preserves_explicit_session_preview(self):
-        frappe.set_user(self.user)
+            self.assertEqual(
+                utils.get_driver_for_user(),
+                self.driver.name,
+                "an empty cookie jar still resolves via the session",
+            )
         with _without_request():
-            self.assertEqual(utils.get_driver_for_user(), self.driver.name)
+            self.assertEqual(
+                utils.get_driver_for_user(),
+                self.driver.name,
+                "no request object at all still resolves via the session",
+            )
 
     def test_valid_cookie_precedes_explicit_linked_user(self):
         frappe.set_user(self.user)
@@ -341,12 +353,21 @@ class TestGetDriverForUser(FrappeTestCase):
         with self.assertRaises(frappe.PermissionError):
             driver_portal._resolve_driver(self.unlinked_user)
 
-    def test_find_driver_delegates_to_shared_helper(self):
+    def test_aliases_delegate_to_shared_helper(self):
+        """Both boarding and driver-portal aliases forward to the one
+        credential-aware resolver instead of re-implementing it."""
         with patch.object(driver_portal, "get_driver_for_user", return_value="SENTINEL") as m:
-            self.assertEqual(driver_portal._find_driver("someone@example.com"), "SENTINEL")
+            self.assertEqual(
+                driver_portal._find_driver("someone@example.com"),
+                "SENTINEL",
+                "driver_portal._find_driver must return the shared helper's result",
+            )
         m.assert_called_once_with("someone@example.com")
 
-    def test_driver_for_user_delegates_to_shared_helper(self):
         with patch.object(boarding, "get_driver_for_user", return_value="SENTINEL") as m:
-            self.assertEqual(boarding._driver_for_user("someone@example.com"), "SENTINEL")
+            self.assertEqual(
+                boarding._driver_for_user("someone@example.com"),
+                "SENTINEL",
+                "boarding._driver_for_user must return the shared helper's result",
+            )
         m.assert_called_once_with("someone@example.com")
