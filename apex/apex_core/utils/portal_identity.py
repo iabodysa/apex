@@ -533,6 +533,128 @@ def authorize_revocation(audience: str, subject: str, user=None) -> bool:
     return authorize_issuance(audience, subject, user, require_active=False)
 
 
+def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
+    """The ``holder_type``-guarded WHERE fragment for one audience the caller may issue for.
+
+    ``audience`` is always ``DRIVER`` or ``WORKER`` here (the loop in
+    :func:`masar_worker_token_scope_query` supplies nothing else), so it is interpolated
+    as a literal rather than escaped, matching every other hardcoded fragment in this
+    module.
+    """
+    if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
+        return "`holder_type` = '{0}'".format(audience)
+
+    if audience == DRIVER:
+        from apex.salis import permissions as salis_permissions
+
+        projects = salis_permissions._allowed_projects(user)
+        if not projects:
+            return "1=0"
+        escaped = ", ".join(frappe.db.escape(v) for v in projects)
+        return (
+            "(`holder_type` = 'Driver' and `driver` in ("
+            "select `name` from `tabSalis Driver` where `project` in ({0})))"
+        ).format(escaped)
+
+    from apex.habitat import permissions as habitat_permissions
+
+    buildings = habitat_permissions._allowed_buildings(user)
+    if not buildings:
+        return "1=0"
+    escaped = ", ".join(frappe.db.escape(v) for v in buildings)
+    return (
+        "(`holder_type` = 'Worker' and `employee` in ("
+        "select `employee` from `tabHousing Assignment` where `docstatus` = 1 "
+        "and `check_out_date` is null and `building` in ({0})))"
+    ).format(escaped)
+
+
+def masar_worker_token_scope_query(user=None, doctype=None) -> str:
+    """WHERE fragment scoping the Masar Worker Token list/report view.
+
+    Registered in ``hooks.py`` (``permission_query_conditions``), paired with
+    :func:`masar_worker_token_has_permission`. Masar Worker Token has no Project or
+    Building column of its own, and its two holder types sit on two different tenancy
+    axes, so this dispatches per row's ``holder_type`` rather than delegating to
+    ``apex.salis.permissions`` or ``apex.habitat.permissions``' own DocType-keyed
+    fragments: Driver rows scope through ``Salis Driver.project``, Worker rows through
+    the employee's live Housing Assignment building — the SAME two reads
+    :func:`authorize_issuance` performs on write, off the SAME ``ISSUER_ROLES`` /
+    ``_UNSCOPED_ISSUER_ROLES`` tables, so a row a caller may not issue for is never a
+    row they may list.
+
+    A role absent from ``ISSUER_ROLES[audience]`` contributes no clause for that
+    audience, so a caller holding neither set sees no rows at all — "1=0". A role in
+    ``_UNSCOPED_ISSUER_ROLES[audience]`` sees every row of that audience unrestricted
+    (HR User over every Worker row, Fleet Manager over every Driver row), exactly as
+    ``authorize_issuance`` defers those roles' write. Everyone else is confined to the
+    Project / Building they hold a User Permission for.
+    """
+    del doctype
+    user = user or frappe.session.user
+    if user == "Administrator":
+        return ""
+    roles = set(frappe.get_roles(user))
+
+    clauses = []
+    for audience in (DRIVER, WORKER):
+        if roles.intersection(ISSUER_ROLES[audience]):
+            clauses.append(_audience_scope_clause(audience, user, roles))
+    if not clauses:
+        return "1=0"
+    return "({0})".format(" or ".join(clauses))
+
+
+def masar_worker_token_has_permission(doc, ptype, user=None):
+    """Deny reading, reporting or printing a Masar Worker Token row outside issuer scope.
+
+    Registered in ``hooks.py`` (``has_permission``), paired with
+    :func:`masar_worker_token_scope_query` — same tables, same verdicts, so a row
+    hidden from the list can never still open on the form or print. Only ``read`` /
+    ``report`` / ``print`` are gated: ``create`` / ``write`` / ``delete`` stay exactly
+    as they run today, decided by the DocPerm plus :func:`authorize_issuance`'s own
+    explicit project/building check on every issuance and rotation, which this must
+    not duplicate or disagree with.
+
+    Returns False to block, or None to defer to Frappe's default resolution (the
+    DocPerm). Never True.
+    """
+    if ptype not in ("read", "report", "print"):
+        return None
+    user = user or frappe.session.user
+    if user == "Administrator":
+        return None
+    roles = set(frappe.get_roles(user))
+    audience = getattr(doc, "holder_type", None)
+    if audience not in ISSUER_ROLES or not roles.intersection(ISSUER_ROLES[audience]):
+        return False
+    if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
+        return None
+
+    if audience == DRIVER:
+        from apex.salis import permissions as salis_permissions
+
+        driver = getattr(doc, "driver", None)
+        project = frappe.db.get_value("Salis Driver", driver, "project") if driver else None
+        if project and project in set(salis_permissions._allowed_projects(user)):
+            return None
+        return False
+
+    from apex.habitat import permissions as habitat_permissions
+
+    employee = getattr(doc, "employee", None)
+    if not employee:
+        return False
+    assignments = frappe.get_all(
+        "Housing Assignment",
+        filters={"employee": employee, "docstatus": 1, "check_out_date": ["is", "not set"]},
+        pluck="building",
+    )
+    buildings = {b for b in assignments if b}
+    allowed = set(habitat_permissions._allowed_buildings(user))
+    return None if buildings and buildings.issubset(allowed) else False
+
+
 def credential_delivery_destination(
     audience: str,
     subject: str,
