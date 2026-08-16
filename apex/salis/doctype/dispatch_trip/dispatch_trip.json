@@ -207,7 +207,8 @@
    "in_list_view": 1,
    "label": "Vehicle",
    "options": "Salis Vehicle",
-   "permlevel": 1
+   "permlevel": 1,
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "dispatch_trip_sec_assignment_col1",
@@ -408,7 +409,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

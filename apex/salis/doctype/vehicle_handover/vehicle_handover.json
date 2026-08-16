@@ -55,7 +55,8 @@
    "label": "Vehicle",
    "options": "Salis Vehicle",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "description": "The submitted assignment whose receipt or return this document records.",
@@ -239,7 +240,7 @@
    "link_fieldname": "source_handover"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Handover",

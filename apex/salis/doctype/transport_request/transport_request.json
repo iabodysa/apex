@@ -343,7 +343,8 @@
    "fieldname": "assigned_vehicle",
    "fieldtype": "Link",
    "label": "Assigned Vehicle",
-   "options": "Salis Vehicle"
+   "options": "Salis Vehicle",
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "transport_request_sec_assignment_col1",
@@ -477,7 +478,7 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

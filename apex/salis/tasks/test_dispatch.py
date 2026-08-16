@@ -95,3 +95,55 @@ class TestRecurringDispatch(FrappeTestCase):
                 call("Dispatch Trip", {"generation_key": "RA-0001:2026-08-15"}),
             ],
         )
+
+    @patch("apex.salis.tasks.dispatch.frappe.db.get_value")
+    @patch("apex.salis.tasks.dispatch.frappe.new_doc")
+    @patch("apex.salis.tasks.dispatch.frappe.db.exists")
+    @patch("apex.salis.tasks.dispatch.frappe.get_doc")
+    def test_a_stopped_driver_is_left_off_the_trip_the_shift_generates(
+        self, get_doc, exists, new_doc, get_value
+    ):
+        """The route still runs, with no driver, so the assignment queue picks it up.
+
+        The assignment names its driver once and regenerates from it every shift. Without
+        this the generator writes a stopped driver's name back onto tomorrow's trip the
+        morning after he was stopped, and the refusal that made him hand today's trips over
+        buys nothing.
+        """
+        assignment = frappe._dict(
+            name="RA-0002",
+            docstatus=1,
+            status="Approved",
+            enabled=1,
+            starts_on=date(2026, 8, 13),
+            ends_on=None,
+            generated_through=None,
+            work_shift="WS-0001",
+            route_template="RT-0001",
+            project="PROJ-1",
+            driver="DRV-STOPPED",
+            vehicle="VEH-1",
+            shift_name="Night",
+            db_set=MagicMock(),
+        )
+        shift = frappe._dict(
+            is_active=1,
+            start_time=time(22, 0),
+            end_time=time(5, 0),
+            applicable_days=[frappe._dict(day_of_week="Thursday")],
+        )
+        get_doc.side_effect = [assignment, shift]
+        exists.return_value = False
+        get_value.return_value = "Stopped"
+        trip = MagicMock()
+        new_doc.return_value = trip
+
+        generate_for_assignment("RA-0002", start_date="2026-08-13", end_date="2026-08-13")
+
+        payload = trip.update.call_args.args[0]
+        self.assertIsNone(
+            payload["driver"], "a stopped driver must not be written onto a new trip"
+        )
+        self.assertEqual(
+            payload["vehicle"], "VEH-1", "the route and its vehicle still run"
+        )

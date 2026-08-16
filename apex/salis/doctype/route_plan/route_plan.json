@@ -113,6 +113,7 @@
    "fetch_if_empty": 1,
    "fieldname": "vehicle",
    "fieldtype": "Link",
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]",
    "in_list_view": 1,
    "label": "Vehicle",
    "options": "Salis Vehicle"
@@ -267,7 +268,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",

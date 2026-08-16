@@ -32,6 +32,28 @@ Every other field names a driver who may legitimately be stopped, and stays unfi
     Masar Worker Token.driver         an issued identity, read long after it lapses
     Issue.custom_driver               a complaint may name any driver
 
+Salis Vehicle is graded the same way and by the same rule. Filtered to Active:
+
+    Dispatch Trip.vehicle · Fuel Quota.vehicle · Fuel Request.vehicle ·
+    Route Assignment.vehicle · Route Plan.vehicle · Salis Driver.current_vehicle ·
+    Transport Request.assigned_vehicle · Vehicle Assignment.vehicle ·
+    Vehicle Handover.vehicle
+
+Left unfiltered, and why:
+
+    Vehicle Suspension.vehicle        a vehicle Under Maintenance can still be stopped
+    Wash Request.vehicle              a stopped vehicle is still washed
+    Driver Clearance.assigned_vehicle a read-only snapshot of what he held
+    Driver Suspension.related_vehicle the vehicle being released, in any state
+    Vehicle Incident.vehicle          the incident is why it stopped
+    Vehicle Damage Write-Off · Fuel Exception Case · Movement Cost Recovery ·
+    Salis Payment Request             a case that outlives the stop
+    Rental Accrual Ledger · Rental Settlement Item · Rental Vehicle Movement
+                                      a rented vehicle is often already Released
+    Fuel Claim · Fuel Consumption Ledger · Fuel Daily Log · Trip Fulfilment Ledger ·
+    Trip Start Log · Passenger Manifest · Vehicle Utilisation Snapshot
+                                      machine-written history
+
 ``link_filters`` shapes the PICKER and nothing else: ``link.js:600`` applies it inside the
 form control, so no API path is narrowed by it and every server-side refusal stays where
 it is.

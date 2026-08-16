@@ -51,7 +51,8 @@
    "label": "Vehicle",
    "options": "Salis Vehicle",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "driver",
@@ -136,7 +137,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Assignment",

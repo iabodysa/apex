@@ -43,7 +43,8 @@
    "label": "Vehicle",
    "options": "Salis Vehicle",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fetch_from": "vehicle.current_driver",
@@ -162,7 +163,7 @@
    "link_fieldname": "fuel_quota"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Quota",

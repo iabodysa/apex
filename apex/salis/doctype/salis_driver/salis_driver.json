@@ -131,7 +131,8 @@
    "label": "Current Vehicle",
    "options": "Salis Vehicle",
    "read_only": 1,
-   "description": "Stamped by the driver's assignment, not entered here."
+   "description": "Stamped by the driver's assignment, not entered here.",
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "driver_sec_compliance",
@@ -306,7 +307,7 @@
    "link_fieldname": "driver"
   }
  ],
- "modified": "2026-08-11 10:04:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Driver",

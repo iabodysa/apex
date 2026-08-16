@@ -101,7 +101,8 @@
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "label": "Default Vehicle",
-   "options": "Salis Vehicle"
+   "options": "Salis Vehicle",
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fetch_from": "work_shift.start_time",
@@ -215,7 +216,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-16 22:40:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",

@@ -36,6 +36,25 @@ def generation_key(route_assignment: str, trip_date: date) -> str:
     return f"{route_assignment}:{trip_date.isoformat()}"
 
 
+def _driver_if_still_available(driver):
+    """The assignment's driver, or ``None`` once he is no longer Active.
+
+    A Route Assignment names its driver once and generates a trip from it every shift for
+    the next fortnight. Stopping the driver refuses the stop while trips already name him,
+    but nothing re-reads the assignment, so without this the generator writes his name back
+    on tomorrow's trip the morning after he was stopped.
+
+    The route still runs: the trip is created with no driver, which is what the assignment
+    queue reads as needing one. Dropping the trip instead would strand the workers waiting
+    on that route.
+    """
+    if not driver:
+        return None
+    if frappe.db.get_value("Salis Driver", driver, "status") != "Active":
+        return None
+    return driver
+
+
 def generate_for_assignment(route_assignment, start_date=None, end_date=None):
     assignment = frappe.get_doc("Route Assignment", route_assignment, for_update=True)
     if not (
@@ -60,6 +79,7 @@ def generate_for_assignment(route_assignment, start_date=None, end_date=None):
         return 0
 
     weekdays = {row.day_of_week for row in shift.applicable_days if row.day_of_week}
+    driver = _driver_if_still_available(assignment.driver)
     created = 0
     for trip_date in scheduled_dates(start, end, weekdays):
         key = generation_key(assignment.name, trip_date)
@@ -80,7 +100,7 @@ def generate_for_assignment(route_assignment, start_date=None, end_date=None):
                 "planned_start": planned_start,
                 "planned_end": planned_end,
                 "vehicle": assignment.vehicle,
-                "driver": assignment.driver,
+                "driver": driver,
                 "status": "Planned",
                 "generation_key": key,
             }
