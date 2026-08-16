@@ -35,36 +35,102 @@ const TC_STATUS_COLOR = {
 	Terminated: 'gray',
 };
 
-const TC_FILTER_KEY = 'telecom_control_filters';
+const TC_SETTINGS_KEY = 'telecom-control';
+const TC_ROUTE_FILTERS = ['company', 'supplier', 'telecom_contract', 'project', 'cost_center', 'status'];
 
 const TC_RETIRE_FROM = {
 	Lost: ['Available', 'Assigned', 'Suspended'],
 	Terminated: ['Available', 'Assigned', 'Suspended', 'Lost'],
 };
 
+function _tc_cell_text(value) {
+	return frappe.utils.escape_html(value == null ? '' : String(value));
+}
+
+// Mobile numbers are LTR digits; the bdi wrap keeps them left-to-right inside an
+// Arabic row, matching the wrap TC_LTR already applies to the same field in the drawer.
+function _tc_ltr_cell(value) {
+	return `<bdi dir="ltr">${_tc_cell_text(value)}</bdi>`;
+}
+
+function _tc_status_pill(value) {
+	const color = TC_STATUS_COLOR[value] || 'gray';
+	return `<span class="indicator-pill no-indicator-dot ${color}">${_tc_cell_text(__(value || ''))}</span>`;
+}
+
+const TC_TABLE_COLUMNS = [
+	{ id: 'mobile_number', label: 'Mobile Number', format: _tc_ltr_cell },
+	{ id: 'status', label: 'Status', format: _tc_status_pill },
+	{ id: 'custodian_display', label: 'Custodian' },
+	{ id: 'telecom_contract', label: 'Contract' },
+	{ id: 'current_cost_center', label: 'Cost Center' },
+];
+
 class TelecomControl {
 	constructor(page) {
 		this.page = page;
-		this.filters = this._load_filters();
 		this.state = { page: 1, page_size: 20 };
 		this.charts = {};
 		this.current_sim = null;
 		this._gen = 0;
+		this._restore_filters();
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
-		this.refresh();
+		this.ready.then(() => {
+			/* frappe.ui.form.make_control fires df.onchange asynchronously (via
+			   frappe.run_serially) even for the control's own construction-time
+			   set_value(), arriving well after this constructor returns. Until this
+			   flag flips, _on_filter_change ignores that echo instead of persisting
+			   an empty filter set over whatever this.ready is about to restore. */
+			this._filters_ready = true;
+			this._sync_controls();
+			this.refresh();
+		});
 	}
 
-	_load_filters() {
-		try {
-			return JSON.parse(localStorage.getItem(TC_FILTER_KEY)) || {};
-		} catch (e) {
-			return {};
-		}
+	// A deep link (frappe.route_options) wins over the saved filter set; either way
+	// `this.ready` gates the first refresh and the first control sync until it resolves.
+	_restore_filters() {
+		this.filters = {};
+		const opts = frappe.route_options || {};
+		let from_route = false;
+		TC_ROUTE_FILTERS.forEach((k) => {
+			if (opts[k] != null && opts[k] !== '') {
+				this.filters[k] = String(opts[k]);
+				from_route = true;
+			}
+		});
+		frappe.route_options = null;
+		this.ready = frappe.model.user_settings
+			.get(TC_SETTINGS_KEY)
+			.then((s) => {
+				const saved = (s || {}).filters;
+				if (!from_route && saved) {
+					TC_ROUTE_FILTERS.forEach((k) => {
+						if (saved[k]) this.filters[k] = saved[k];
+					});
+				}
+			})
+			.catch(() => {});
 	}
 
-	_save_filters() {
-		localStorage.setItem(TC_FILTER_KEY, JSON.stringify(this.filters));
+	_sync_controls() {
+		Object.keys(this.controls).forEach((field) => {
+			this.controls[field].set_value(this.filters[field] || '');
+		});
+	}
+
+	// Saves the active filter set to this user's settings and pushes it into the URL so
+	// the page's current view can be bookmarked or shared.
+	_persist_filters() {
+		const active = {};
+		TC_ROUTE_FILTERS.forEach((k) => {
+			if (this.filters[k]) active[k] = this.filters[k];
+		});
+		frappe.model.user_settings.save(TC_SETTINGS_KEY, 'filters', active);
+		const route = frappe.get_route() || [];
+		const qs = frappe.utils.make_query_string(active);
+		frappe.router.push_state('/' + ['app', route[1] || 'telecom-control'].join('/') + qs);
 	}
 
 	_build_skeleton() {
@@ -131,19 +197,18 @@ class TelecomControl {
 	}
 
 	_on_filter_change(field, value) {
+		if (!this._filters_ready) return;
 		if (value) {
 			this.filters[field] = value;
 		} else {
 			delete this.filters[field];
 		}
 		this.state.page = 1;
-		this._save_filters();
 		this.refresh();
 	}
 
 	_clear_filters() {
 		this.filters = {};
-		this._save_filters();
 		Object.values(this.controls).forEach((c) => c.set_value(''));
 		this.state.page = 1;
 		this.refresh();
@@ -153,6 +218,7 @@ class TelecomControl {
 		const newest = apex.desk.newest_only(this, "_gen");
 		const page = this.state.page;
 		this._render_loading();
+		this._persist_filters();
 		const args = { filters: this.filters };
 		Promise.all([
 			this._call('get_summary_cards', args),
@@ -235,27 +301,57 @@ class TelecomControl {
 
 	_render_table(payload) {
 		const rows = payload.rows || [];
-		this.$tableWrap.empty();
+		this._clear_grid();
 		if (!rows.length) {
 			this.$tableWrap.append($('<div class="tc-empty"></div>').text(__('No SIM cards match these filters.')));
 			this.$pager.empty();
 			return;
 		}
-		const $table = $('<table class="table tc-table"></table>').appendTo(this.$tableWrap);
-		const heads = [__('Mobile Number'), __('Status'), __('Custodian'), __('Contract'), __('Cost Center')];
-		const $tr = $('<tr></tr>').appendTo($('<thead></thead>').appendTo($table));
-		heads.forEach((h) => $('<th></th>').text(h).appendTo($tr));
-		const $tbody = $('<tbody></tbody>').appendTo($table);
+		// Custodian has no single backing field on SIM Card — it is the employee name,
+		// falling back to the project, falling back to "Unassigned" — so it is resolved
+		// once per row before the row reaches the grid, same as every other column value.
 		rows.forEach((row) => {
-			const $r = $('<tr></tr>').on('click', () => this._open_drawer(row.name)).appendTo($tbody);
-			$('<td></td>').append(TC_LTR(row.mobile_number)).appendTo($r);
-			const $st = $('<td></td>').appendTo($r);
-			$(`<span class="indicator-pill no-indicator-dot ${TC_STATUS_COLOR[row.status] || 'gray'}"></span>`).text(__(row.status || '')).appendTo($st);
-			$('<td></td>').text(row.custodian_name || row.current_project || __('Unassigned')).appendTo($r);
-			$('<td></td>').text(row.telecom_contract || '').appendTo($r);
-			$('<td></td>').text(row.current_cost_center || '').appendTo($r);
+			row.custodian_display = row.custodian_name || row.current_project || __('Unassigned');
+		});
+		this.table_rows = rows;
+		const $mount = $('<div class="tc-table"></div>').appendTo(this.$tableWrap);
+		this.datatable = new frappe.DataTable($mount.get(0), {
+			columns: TC_TABLE_COLUMNS.map(({ id, label, format }) => ({
+				id,
+				name: __(label),
+				editable: false,
+				format: format || _tc_cell_text,
+			})),
+			data: rows,
+			layout: 'fluid',
+			serialNoColumn: false,
+			checkboxColumn: false,
+			/* The filter row ships an untranslatable English title on every box, and this
+			   page already filters server-side within the operator's company scope. */
+			inlineFilters: false,
+			cellHeight: 35,
+			language: frappe.boot.lang,
+			translations: frappe.utils.datatable.get_translations(),
+			direction: frappe.utils.is_rtl() ? 'rtl' : 'ltr',
+		});
+		/* The row is read from the data index stamped on the cell, not from its rendered
+		   position: sorting a column reorders the view and leaves that index alone. */
+		$mount.on('click', '.dt-scrollable .dt-cell', (e) => {
+			const row = this.table_rows[cint($(e.currentTarget).attr('data-row-index'))];
+			if (row) this._open_drawer(row.name);
 		});
 		this._render_pager(payload);
+	}
+
+	/* The table registers listeners on document, released only by destroy(); emptying the
+	   wrap around it leaks one pair per render. */
+	_clear_grid() {
+		if (this.datatable) {
+			this.datatable.destroy();
+			this.datatable = null;
+			this.table_rows = null;
+		}
+		this.$tableWrap.empty();
 	}
 
 	_render_pager(payload) {

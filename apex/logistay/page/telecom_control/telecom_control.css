@@ -84,15 +84,16 @@
 }
 
 .telecom-control .tc-table {
-	margin: 0;
+	inline-size: 100%;
+	font-size: var(--text-sm, 13px);
 }
 
-.telecom-control .tc-table tbody tr {
+.telecom-control .tc-table .dt-scrollable .dt-row {
 	cursor: pointer;
 }
 
 @media (hover: hover) {
-	.telecom-control .tc-table tbody tr:hover {
+	.telecom-control .tc-table .dt-scrollable .dt-row:hover {
 		background-color: var(--fg-hover-color);
 	}
 }
