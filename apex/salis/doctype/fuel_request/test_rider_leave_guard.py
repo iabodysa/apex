@@ -55,7 +55,7 @@ test_ignore = [
 ]
 
 
-def _driver(full_name, status="Active", employee=None, supervisor=None):
+def _driver(full_name, status="Active", employee=None, supervisor=None, project=None):
     """Get-or-create a Salis Driver carrying ``status``.
 
     The status is written with ``frappe.db.set_value`` rather than through the
@@ -71,12 +71,13 @@ def _driver(full_name, status="Active", employee=None, supervisor=None):
                 "full_name": full_name,
                 "employee": employee,
                 "supervisor": supervisor,
+                "project": project,
             }
         ).insert(ignore_permissions=True).name
     frappe.db.set_value(
         "Salis Driver",
         name,
-        {"status": status, "employee": employee, "supervisor": supervisor},
+        {"status": status, "employee": employee, "supervisor": supervisor, "project": project},
     )
     return name
 
@@ -131,6 +132,37 @@ def _supervisor_user():
     return email
 
 
+def _project_scoped_supervisor(email, project):
+    """A Fleet Supervisor user permitted only on ``project`` by User Permission;
+    returns the login email. The permission is a fixture, kept for the whole
+    module rather than deleted per test, matching ``_supervisor_user``."""
+    if not frappe.db.exists("User", email):
+        u = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": email,
+                "first_name": email.split("@")[0],
+                "send_welcome_email": 0,
+            }
+        ).insert(ignore_permissions=True)
+    else:
+        u = frappe.get_doc("User", email)
+    if "Fleet Supervisor" not in frappe.get_roles(email):
+        u.add_roles("Fleet Supervisor")
+    if not frappe.db.exists(
+        "User Permission", {"user": email, "allow": "Project", "for_value": project}
+    ):
+        frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": email,
+                "allow": "Project",
+                "for_value": project,
+            }
+        ).insert(ignore_permissions=True)
+    return email
+
+
 def _open_clearance_todos(driver):
     return frappe.get_all(
         "ToDo",
@@ -147,6 +179,8 @@ class TestRiderLeaveGuard(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         self.supervisor = _supervisor_user()
+        self.project = factories.make_project("T119 Rider Guard Project")
+        self.other_project = factories.make_project("T119 Rider Guard Other Project")
 
     def tearDown(self):
         frappe.set_user("Administrator")
@@ -254,6 +288,27 @@ class TestRiderLeaveGuard(FrappeTestCase):
             pluck="allocated_to",
         )
         self.assertIn(self.supervisor, allocated)
+        self.addCleanup(lambda: self._purge_todos(driver))
+
+    def test_role_fallback_skips_a_supervisor_scoped_to_another_project(self):
+        """No per-record supervisor: the Fleet Supervisor role fallback must still
+        respect project scope, or an out-of-scope supervisor gets a task whose
+        link they cannot open."""
+        in_scope = _project_scoped_supervisor("t119_in_scope@example.com", self.project)
+        out_of_scope = _project_scoped_supervisor(
+            "t119_out_of_scope@example.com", self.other_project
+        )
+        driver = _driver("T119 Role Fallback", status="Stopped", project=self.project)
+
+        raise_rider_clearance_task(driver, vehicle=None)
+
+        allocated = frappe.get_all(
+            "ToDo",
+            filters={"reference_type": "Salis Driver", "reference_name": driver, "status": "Open"},
+            pluck="allocated_to",
+        )
+        self.assertIn(in_scope, allocated)
+        self.assertNotIn(out_of_scope, allocated)
         self.addCleanup(lambda: self._purge_todos(driver))
 
     def test_vehicle_assignment_rejected_for_inactive_rider(self):

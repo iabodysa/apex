@@ -483,15 +483,18 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
 	recover the vehicle + custody from a rider who is on leave / inactive but
 	still holds a vehicle.
 
-	Native primitive: a Frappe **ToDo** assigned to the supervisor — the standard
-	"actionable item owned by a person" object, surfaced on their desk and in the
-	assignment badge, the same shape the retired alert DocType's replacement
-	queues use.
+	Native primitive: ``frappe.desk.form.assign_to.add`` — the standard "actionable
+	item owned by a person" call, not a raw ``ToDo`` insert, so the bell and email
+	notification the ToDo controller does not send on its own still reach the
+	supervisor.
 
 	Assignee resolution (first that yields a user):
 	  1. The supervisor on the driver's current Vehicle Assignment.
 	  2. The ``supervisor`` recorded on the Salis Driver master.
-	  3. Every enabled holder of the ``Fleet Supervisor`` role.
+	  3. Every enabled holder of the ``Fleet Supervisor`` role who can see the
+	     driver's own project (``apex.salis.permissions.report_project_scope``) —
+	     an out-of-scope supervisor is never handed a task whose link they cannot
+	     open.
 
 	Idempotent: keyed on an open ToDo for the same driver (``reference_type`` =
 	Salis Driver, ``reference_name`` = driver) — re-running never spawns a second
@@ -528,20 +531,29 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
             "Recover the vehicle and custody."
         ).format(label, veh or _("n/a"))
 
-        created = []
-        for user in assignees:
-            todo = frappe.get_doc(
-                {
-                    "doctype": "ToDo",
-                    "allocated_to": user,
-                    "reference_type": "Salis Driver",
-                    "reference_name": driver,
-                    "description": description,
-                    "priority": "High",
-                    "assigned_by": frappe.session.user,
-                }
-            ).insert(ignore_permissions=True)
-            created.append(todo.name)
+        from frappe.desk.form import assign_to as _assign_to
+
+        _assign_to.add(
+            {
+                "doctype": "Salis Driver",
+                "name": driver,
+                "assign_to": assignees,
+                "description": description,
+                "priority": "High",
+                "assigned_by": frappe.session.user,
+            },
+            ignore_permissions=True,
+        )
+        created = frappe.get_all(
+            "ToDo",
+            filters={
+                "reference_type": "Salis Driver",
+                "reference_name": driver,
+                "allocated_to": ["in", assignees],
+                "status": "Open",
+            },
+            pluck="name",
+        )
 
         if source_doctype and source_name:
             add_timeline_note(source_doctype, source_name, description)
@@ -557,8 +569,11 @@ def _clearance_assignees(driver):
     """Resolve the Movement Supervisor user(s) for a driver's clearance task.
 
 	Prefers the per-record supervisor (Vehicle Assignment, then Salis Driver
-	master) and falls back to the Fleet Supervisor role holders. Administrator /
-	Guest and disabled users are filtered out."""
+	master) and falls back to the Fleet Supervisor role holders scoped to the
+	driver's own project — the same project scope ``apex.salis.permissions``
+	enforces everywhere else, so this fallback cannot hand a task to a
+	supervisor who could not open the driver it names. Administrator / Guest
+	and disabled users are filtered out."""
     candidates = []
 
     assignment_sup = frappe.get_all(
@@ -576,11 +591,17 @@ def _clearance_assignees(driver):
         candidates.append(driver_sup)
 
     if not candidates:
-        candidates = frappe.get_all(
+        from apex.salis import permissions as salis_permissions
+
+        project = frappe.db.get_value("Salis Driver", driver, "project")
+        for user in frappe.get_all(
             "Has Role",
             filters={"role": "Fleet Supervisor", "parenttype": "User"},
             pluck="parent",
-        )
+        ):
+            restrict, allowed = salis_permissions.report_project_scope(user)
+            if not restrict or (project and project in allowed):
+                candidates.append(user)
 
     seen = []
     for user in candidates:
