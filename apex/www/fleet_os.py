@@ -24,13 +24,20 @@ FLEET_ROLES = {
 }
 
 
-def has_apps_screen_access() -> bool:
-    """Gate for the /apps app-selector tile — same role AND permission check get_context()
-    applies, so the tile never shows for a user the page turns away. Wired as the
-    has_permission of the "apex-fleet-os" tile in hooks.py add_to_apps_screen."""
+def _may_view() -> bool:
+    """A fleet role plus live read on Salis Vehicle — the one gate both the /apps tile
+    and get_context() apply, so a Role Permission Manager edit to Salis Vehicle can
+    never leave the tile advertising a board the page then refuses."""
     return bool(FLEET_ROLES & set(frappe.get_roles())) and bool(
         frappe.has_permission("Salis Vehicle", "read")
     )
+
+
+def has_apps_screen_access() -> bool:
+    """Gate for the /apps app-selector tile — same check get_context() applies, so the
+    tile never shows for a user the page turns away. Wired as the has_permission of the
+    "apex-fleet-os" tile in hooks.py add_to_apps_screen."""
+    return _may_view()
 
 
 def get_context(context):
@@ -38,9 +45,7 @@ def get_context(context):
     guest_redirect("/fleet-os")
 
     render_in_arabic()
-    allowed = bool(FLEET_ROLES & set(frappe.get_roles())) and bool(
-        frappe.has_permission("Salis Vehicle", "read")
-    )
+    allowed = _may_view()
     grants = ["fleet.operations.read"] if allowed else []
     if allowed and frappe.has_permission("Fuel Request", "write"):
         grants.append("fleet.operations.fuel")
