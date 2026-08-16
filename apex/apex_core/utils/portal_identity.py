@@ -5,6 +5,32 @@
 issue, use and revocation — an audit trail written about the actor, never by them. The caller here
 is usually a token holder with no user at all, and a role able to write this log could rewrite the
 record of its own access, which is the one thing an audit trail must refuse.
+
+DECISION (2026-08-16), against the two native alternatives raised for this token: REFUSED,
+both times, and named here so the question is not re-opened without new information.
+
+A Website User per worker would give ``frappe.session.user`` = the worker, a correct
+``owner`` on every record, and User Permission scoping for free. Refused on the
+employee-lifecycle cost, not the code cost: this workforce is provisioned and deprovisioned
+at labour-camp scale, by device, not by desk — a QR scan onto a phone the man already
+carries, no email, no password, no reset flow he can complete unsupervised. A Website User
+account ties identity to a login the framework expects to be recoverable by the holder; this
+one has to be recoverable by re-scanning at the gate. Retiring the token for a session login
+would trade a solved onboarding problem for one this app does not otherwise have to solve.
+
+Against the native token-shaped primitives, one line each: ``User.api_key``/``api_secret``
+(frappe/core/doctype/user/user.py:1345) still requires a User, so it inherits the same
+lifecycle cost above without covering the QR-issued, per-device, revocable shape this token
+exists for. Document Share Key grants one document, not a session's worth of endpoints, and
+carries no holder-type/expiry/revocation model of its own. ``verified_command.get_signed_params``
+/ ``verify_request`` (frappe/utils/verified_command.py) is a stateless HMAC on URL params with
+no server-side row to revoke — right for a one-shot unsubscribe link, wrong for a
+repeatedly-called portal session. Web Form Request (with its references Dynamic Link table and
+``expires_on``) is the closest shape to this token, but it does not exist in the installed
+frappe 15.109.0 on this bench (confirmed: no such DocType anywhere under
+frappe-bench/apps) — it ships on a later frappe than this site runs. Re-open this decision when
+the bench reaches a version that carries it; until then Masar Worker Token is the nearest
+native-equivalent this app can actually run.
 """
 
 from __future__ import annotations
