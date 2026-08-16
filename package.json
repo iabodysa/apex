@@ -1,0 +1,8 @@
+{
+  "name": "apex",
+  "private": true,
+  "_comment": "bench build reads this file at the app root and runs its build script (frappe/esbuild/esbuild.js:439-458). Without it the portal bundle and its service workers have to be committed, because nothing on the deploy path would ever produce them.",
+  "scripts": {
+    "build": "npm install --prefix frontend && npm run build --prefix frontend"
+  }
+}

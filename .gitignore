@@ -119,3 +119,12 @@ docs/**/*secret*
 docs/**/*.key
 docs/**/*.pem
 .vite/
+
+# The portal bundle and its two service workers are build output. `bench build` runs the
+# root package.json build script for every installed app (frappe/esbuild/esbuild.js:439-458),
+# so the deploy produces them and the repository does not carry them — the same split hrms
+# ships with. Committing them again would put a second copy of every asset in the history
+# and let a hand edit disagree with its source.
+apex/public/apex_portal/
+apex/www/masar-sw.min.js
+apex/www/driver-sw.min.js

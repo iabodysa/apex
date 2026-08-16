@@ -17,22 +17,11 @@ jobs:
       - name: Install the frozen frontend workspace
         working-directory: frontend
         run: npm ci
-      - name: Build the unified portal
-        working-directory: frontend
+      # The deploy runs this exact script: `bench build` reads the app-root package.json
+      # and calls it (frappe/esbuild/esbuild.js:439-458). The portal output is not in the
+      # repository, so a build that fails here is a portal that never reaches a driver.
+      - name: Build the unified portal the way the deploy does
         run: npm run build
-      - name: Reject stale generated portal output
-        run: |
-          set -uo pipefail
-          drift=$(git status --porcelain --untracked-files=all -- \
-            apex/public/apex_portal \
-            apex/templates/includes/apex_portal_app.html \
-            apex/www/masar-sw.min.js \
-            apex/www/driver-sw.min.js)
-          if [ -n "$drift" ]; then
-            echo "::error::Committed unified portal output is stale."
-            echo "$drift"
-            exit 1
-          fi
 
   manifest-ownership:
     runs-on: ubuntu-latest
