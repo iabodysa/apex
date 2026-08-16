@@ -4182,6 +4182,10 @@ Select the vehicle being handed over.,اختر المركبة الجاري تس�
 Select the vehicle for this trip.,اختر المركبة لهذه الرحلة.
 Select the vehicle to be fuelled.,اختر المركبة المراد تزويدها بالوقود.
 Select the vehicle to release.,اختر المركبة المراد فك ارتباطها بالسائق.
+Reassign the trips first,عيّن الرحلات لسائق آخر أولًا
+Planned trips still assigned to him ({0}),رحلات مخططة ما زالت باسمه ({0})
+"Still on the road at the time of the stop: {0}. Recall or close each one.","رحلات كانت جارية وقت الإيقاف: {0}. استدعِ كل واحدة أو أقفلها."
+"{0} still has {1} planned trip(s): {2}. Assign another driver to them first.","{0} عنده {1} رحلة مخططة: {2}. عيّن لها سائقًا آخر أولًا."
 Select the {0} this payment settles. A payment with no invoice behind it settles nothing in the ledger.,اختر {0} التي تسددها هذه الدفعة. لا تسوي الدفعة أي مبلغ في الدفتر دون فاتورة مرتبطة بها.
 "Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
 Selected Bed {0} does not belong to Room {1},السرير المحدد {0} لا ينتمي إلى الغرفة {1}

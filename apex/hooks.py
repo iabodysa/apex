@@ -109,13 +109,6 @@ override_doctype_class = {
 }
 
 doc_events = {
-    "*": {
-        "before_submit": "apex.apex_core.utils.workflow_guard.before_submit",
-        "before_cancel": "apex.apex_core.utils.workflow_guard.before_cancel",
-    },
-    "Report": {
-        "validate": "apex.apex_core.utils.report_role_guard.validate",
-    },
     "Employee": {
         "on_change": "apex.apex_core.utils.portal_identity.on_employee_change",
     },

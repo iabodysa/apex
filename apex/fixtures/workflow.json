@@ -3600,7 +3600,7 @@
   "transitions": [
    {
     "action": "Approve",
-    "allow_self_approval": 1,
+    "allow_self_approval": 0,
     "allowed": "Fleet Supervisor",
     "condition": "doc.route_supervisor == frappe.session.user",
     "next_state": "Approved",
@@ -3613,7 +3613,7 @@
    },
    {
     "action": "Approve",
-    "allow_self_approval": 1,
+    "allow_self_approval": 0,
     "allowed": "Fleet Manager",
     "condition": "",
     "next_state": "Approved",
@@ -3626,7 +3626,7 @@
    },
    {
     "action": "Approve",
-    "allow_self_approval": 1,
+    "allow_self_approval": 0,
     "allowed": "System Manager",
     "condition": "",
     "next_state": "Approved",
