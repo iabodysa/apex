@@ -1,19 +1,24 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Trip Start Log is meant to be machine-written: no role may create or write one.
+"""Trip Start Log is written by a real DocPerm grant now, never by ``ignore_permissions``
+— but the grant names only the two ephemeral capacity roles, never a role a person holds.
 
-Every code path that writes a Trip Start Log bypasses permissions — the four driver-portal
-endpoints (``salis/api/driver_portal/execution.py``), the boarding flow
-(``salis/api/boarding_flow.py``), the scan path (``salis/api/boarding.py``), the Masar worker
-endpoints (``salis/api/masar.py``) and manual boarding (``salis/api/manual_boarding.py``) all
-pass ``ignore_permissions`` or set the flag. So the DocPerm rows grant nothing the app needs,
-and by the standard ERPNext applies to GL Entry the bypass is meant to BE the control: no role
-holds create or write, and the machine writes past it.
+The four driver-portal endpoints (``salis/api/driver_portal/execution.py``), the boarding
+flow (``salis/api/boarding_flow.py``), the scan path (``salis/api/boarding.py``) and the
+Masar worker endpoints (``salis/api/masar.py``) all write inside ``as_capacity(WORKER, ...)``
+or ``as_capacity(DRIVER, ...)`` and insert/save with no permission bypass. ``Portal Worker
+Capacity``/``Portal Driver Capacity`` (``portal_identity_seed.py``) are the ONLY roles the
+shipped DocPerm grants create/write to, and only the two login-disabled capacity users hold
+either role — a real Driver or Worker never does. Per-record scope beyond the blanket role
+grant is ``apex.salis.permissions._trip_start_log_capacity_verdict``, which the framework
+consults through the ``has_permission`` hook: the shared role's own row (``if_owner: 1`` for
+Driver) is a separate, narrower grant for a driver reading his own log, not for writing it.
 
 Two legs, because they fail for different reasons and a reader must be told which:
 
   1. the shipped JSON — what the app installs on a fresh site;
-  2. the live site — what the framework actually refuses, resolved through DocPerm rows,
-     the ``project_scoped_has_permission`` hook and the real insert path.
+  2. the live site — what the framework actually refuses for a role a PERSON holds,
+     resolved through DocPerm rows, the ``_trip_start_log_capacity_verdict`` hook and the
+     real insert path.
 
 ``in_create`` does NOT make leg 2 pass on its own: ``frappe/utils/user.py`` moves the DocType
 out of ``can_create`` and folds it back into ``can_write``, which hides the desk's New button
@@ -31,6 +36,10 @@ import unittest
 import frappe
 
 import apex
+from apex.apex_core.setup.seeders.portal_identity_seed import (
+    DRIVER_CAPACITY_ROLE,
+    WORKER_CAPACITY_ROLE,
+)
 from apex.tests._helpers import _user, as_user
 from apex.tests.factories import (
     make_driver_chain,
@@ -73,20 +82,39 @@ def _grants(row):
 class TestTripStartLogShippedDocPerms(unittest.TestCase):
     """The JSON leg — no site required."""
 
-    def test_no_role_is_shipped_create_or_write(self):
+    def test_only_the_capacity_roles_are_shipped_create_or_write(self):
+        """No role a PERSON can hold may create or write -- only the two ephemeral
+        capacity roles, which no real Driver or Worker is ever granted."""
         rows = _shipped_permissions()
         # A DocType with no permission rows at all would pass the loop below having
         # graded nothing; the shipped file has rows and the count is the proof it read them.
         self.assertTrue(rows, f"{_JSON} carries no permission rows to grade")
 
         offenders = sorted(
-            (row.get("role"), ptype) for row in rows for ptype in _grants(row)
+            (row.get("role"), ptype)
+            for row in rows
+            for ptype in _grants(row)
+            if row.get("role") not in (DRIVER_CAPACITY_ROLE, WORKER_CAPACITY_ROLE)
         )
         self.assertEqual(
             offenders,
             [],
-            f"{DOCTYPE} is machine-written; these shipped DocPerm rows grant a write at "
-            f"permlevel 0: {offenders}",
+            f"{DOCTYPE} is capacity-written; these shipped DocPerm rows grant a write at "
+            f"permlevel 0 to a role a real person can hold: {offenders}",
+        )
+
+        capacity_grants = sorted(
+            (row.get("role"), ptype) for row in rows for ptype in _grants(row)
+        )
+        self.assertEqual(
+            capacity_grants,
+            [
+                (DRIVER_CAPACITY_ROLE, "create"),
+                (DRIVER_CAPACITY_ROLE, "write"),
+                (WORKER_CAPACITY_ROLE, "create"),
+                (WORKER_CAPACITY_ROLE, "write"),
+            ],
+            f"expected exactly the two capacity roles to hold create+write: {capacity_grants}",
         )
 
 
