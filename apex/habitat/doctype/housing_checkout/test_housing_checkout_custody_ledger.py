@@ -29,7 +29,7 @@ test_dependencies = ["Bed", "Employee", "Custody Article"]
 
 BUILDING = "_Test Building"
 ROOM = "_T-101"
-ARTICLE = "_T-Custody Article-00005"
+ARTICLE = "_T-Custody Article-00001"
 
 
 def _holder_balance(party_type, party, article):

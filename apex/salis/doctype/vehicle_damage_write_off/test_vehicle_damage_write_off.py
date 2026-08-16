@@ -271,3 +271,22 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
         case.reload()
         self.assertEqual(case.docstatus, 1)
         self.assertEqual(case.status, "Approved")
+
+    def test_approved_case_cannot_edit_cost_below_threshold(self):
+        """An Approved case's estimated_cost carries no allow_on_submit, so the
+        framework's update-after-submit guard refuses lowering it back under the
+        threshold — the Operations approval already given cannot be undercut by a
+        later edit."""
+        case = self._case(estimated_cost=5000)
+        frappe.set_user(self.manager)
+        apply_workflow(case, "Authorize (Operations)")
+        case.reload()
+        self.assertEqual(case.needs_operations, 1)
+
+        case.estimated_cost = 500
+        with self.assertRaises(frappe.ValidationError):
+            case.save()
+
+        case.reload()
+        self.assertEqual(case.estimated_cost, 5000)
+        self.assertEqual(case.needs_operations, 1)

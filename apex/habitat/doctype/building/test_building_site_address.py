@@ -35,7 +35,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
                     "address_title": "T138 A",
                     "address_type": "Other",
                     "address_line1": "A Street 1",
-                    "city": "Riyadh",
+                    "city": "Riyadh", "country": "Saudi Arabia",
                     "links": [{"link_doctype": "Site", "link_name": site_a}],
                 }
             ).insert(ignore_permissions=True)
@@ -57,7 +57,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
             frappe.get_doc(
                 {
                     "doctype": "Address", "address_title": "T144 Site Addr",
-                    "address_type": "Other", "address_line1": "Site Street", "city": "Riyadh",
+                    "address_type": "Other", "address_line1": "Site Street", "city": "Riyadh", "country": "Saudi Arabia",
                     "links": [{"link_doctype": "Site", "link_name": site_a}],
                 }
             ).insert(ignore_permissions=True)
@@ -66,7 +66,7 @@ class TestBuildingSiteAddress(FrappeTestCase):
             own = frappe.get_doc(
                 {
                     "doctype": "Address", "address_title": "T144 Own Addr",
-                    "address_type": "Other", "address_line1": "Own Street 9", "city": "Jeddah",
+                    "address_type": "Other", "address_line1": "Own Street 9", "city": "Jeddah", "country": "Saudi Arabia",
                 }
             ).insert(ignore_permissions=True).name
         company = (

@@ -40,26 +40,27 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         self.assertTrue(res["changed"])
         self.assertEqual(frappe.db.get_value("Resident Request", doc.name, "status"), "Triaged")
 
-    def test_advance_rejects_out_of_sequence_jump(self):
-        """A jump that skips the guard-free progression is refused — Assigned needs
-        an assignee and is never reachable by a one-tap advance."""
+    def test_advance_rejects_any_target_other_than_the_expected_next_status(self):
+        """Both cases hit the SAME guard (``if to_status != expected: throw`` —
+        resident_request.py:320): Assigned needs an assignee and is never reachable
+        by a one-tap advance, and New's only allowed target is Triaged, so In
+        Progress is rejected too — proving the server, not the client, owns the
+        progression, for more than one disallowed target."""
         doc = self._request("New")
-        with self.assertRaises(frappe.ValidationError):
+        with self.assertRaises(
+            frappe.ValidationError, msg="Assigned is refused: it needs an assignee first"
+        ):
             advance_triage_status(doc.name, "Assigned")
+        with self.assertRaises(
+            frappe.ValidationError, msg="In Progress is refused: New's only allowed target is Triaged"
+        ):
+            advance_triage_status(doc.name, "In Progress")
 
     def test_advance_is_idempotent(self):
         """Advancing to the current status is a no-op, not an error."""
         doc = self._request("Triaged")
         res = advance_triage_status(doc.name, "Triaged")
         self.assertFalse(res["changed"])
-
-    def test_advance_runs_controller_validation(self):
-        """Falsifies that the advance bypasses the rule: New's only allowed target is
-        Triaged, so requesting In Progress from New is rejected by the sequence map
-        (proving the server, not the client, owns the progression)."""
-        doc = self._request("New")
-        with self.assertRaises(frappe.ValidationError):
-            advance_triage_status(doc.name, "In Progress")
 
     def test_bulk_triage_only_advances_new_rows(self):
         """Bulk triage advances New rows and leaves non-New rows untouched, applying
@@ -164,17 +165,18 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         _apply_priority_rules(doc)
         self.assertNotEqual(doc.priority, "High")
 
-    def test_priority_genuine_ac_request_bumps(self):
-        """A real A/C term as a whole word still escalates to High."""
-        doc = frappe._dict(request_category="AC", description="the ac is broken", priority=None)
-        _apply_priority_rules(doc)
-        self.assertEqual(doc.priority, "High")
+    def test_priority_ac_pattern_bumps_on_either_alternative(self):
+        """One regex, two alternatives (``_AC_PATTERN = r"\\ba[/\\-]?c\\b|air.?condi"``
+        — resident_request.py:182): a whole-word 'ac' request escalates, and so does
+        the multi-word 'air conditioning' phrase, proving both branches of the same
+        pattern bump priority to High."""
+        whole_word = frappe._dict(request_category="AC", description="the ac is broken", priority=None)
+        _apply_priority_rules(whole_word)
+        self.assertEqual(whole_word.priority, "High", "a whole-word 'ac' term must bump to High")
 
-    def test_priority_air_conditioning_phrase_bumps(self):
-        """The multi-word 'air conditioning' high term also escalates."""
-        doc = frappe._dict(request_category="Other", description="air conditioning not working", priority=None)
-        _apply_priority_rules(doc)
-        self.assertEqual(doc.priority, "High")
+        phrase = frappe._dict(request_category="Other", description="air conditioning not working", priority=None)
+        _apply_priority_rules(phrase)
+        self.assertEqual(phrase.priority, "High", "the 'air conditioning' phrase must bump to High")
 
 
     def test_honeypot_filled_is_rejected(self):

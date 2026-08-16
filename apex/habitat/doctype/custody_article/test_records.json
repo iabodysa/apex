@@ -10,5 +10,11 @@
   "article_name": "_Test Pillow",
   "category": "_Test Custody Category",
   "standard_unit_cost": 5
+ },
+ {
+  "doctype": "Custody Article",
+  "article_name": "_Test Ledger Article",
+  "category": "_Test Custody Category",
+  "standard_unit_cost": 12
  }
 ]

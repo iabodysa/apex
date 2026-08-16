@@ -1,8 +1,8 @@
 [
  {
   "doctype": "Trip Fulfilment Ledger",
-  "vehicle": "VEH-000007",
-  "driver": "DRV-000023",
+  "vehicle": "VEH-000001",
+  "driver": "DRV-000001",
   "trip_date": "2026-01-09",
   "worker_count": 14,
   "has_timestamps": 1,
@@ -11,8 +11,8 @@
  },
  {
   "doctype": "Trip Fulfilment Ledger",
-  "vehicle": "VEH-000006",
-  "driver": "DRV-000021",
+  "vehicle": "VEH-000002",
+  "driver": "DRV-000002",
   "trip_date": "2026-02-11",
   "worker_count": 0,
   "has_timestamps": 0,

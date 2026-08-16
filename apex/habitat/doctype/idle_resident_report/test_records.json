@@ -3,7 +3,7 @@
   "doctype": "Idle Resident Report",
   "naming_series": "IDLE-.YYYY.-.####",
   "party_type": "Employee",
-  "employee": "_T-Employee-00001",
+  "employee": "_T-Employee-00003",
   "building": "_Test Building",
   "reason_category": "New Hire",
   "responsible_department": "HR",

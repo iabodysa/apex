@@ -42,47 +42,43 @@ class TestResidentRequestCoordinatorPerms(unittest.TestCase):
         self.perms = _load_perms()
 
 
-    def test_permlevel0_row_present(self):
+    def test_permlevel0_row_shape(self):
+        """The Coordinator's permlevel-0 row: present, and shaped for triage work
+        without record-destroying power — read/write/create but no delete, no submit
+        (the DocType is not submittable to begin with)."""
         rows = _rows_for(self.perms, ROLE, 0)
         self.assertEqual(len(rows), 1, f"Expected exactly one permlevel-0 row for {ROLE!r}")
-
-    def test_permlevel0_has_read_write_create(self):
-        row = _rows_for(self.perms, ROLE, 0)[0]
-        self.assertEqual(row.get("read"), 1)
-        self.assertEqual(row.get("write"), 1)
-        self.assertEqual(row.get("create"), 1)
-
-    def test_permlevel0_no_delete(self):
-        row = _rows_for(self.perms, ROLE, 0)[0]
+        row = rows[0]
+        self.assertEqual(row.get("read"), 1, "permlevel-0 must grant read")
+        self.assertEqual(row.get("write"), 1, "permlevel-0 must grant write")
+        self.assertEqual(row.get("create"), 1, "permlevel-0 must grant create")
         self.assertNotEqual(row.get("delete"), 1, "Coordinator must NOT have delete")
-
-    def test_permlevel0_no_submit(self):
-        row = _rows_for(self.perms, ROLE, 0)[0]
         self.assertNotEqual(row.get("submit"), 1, "DocType is not submittable; no submit perm")
 
-    def test_permlevel1_row_present(self):
+    def test_permlevel1_row_shape(self):
+        """The Coordinator's permlevel-1 row: present, with read/write on the
+        confidential fields that permlevel gates."""
         rows = _rows_for(self.perms, ROLE, 1)
         self.assertEqual(len(rows), 1, f"Expected exactly one permlevel-1 row for {ROLE!r}")
+        row = rows[0]
+        self.assertEqual(row.get("read"), 1, "permlevel-1 must grant read")
+        self.assertEqual(row.get("write"), 1, "permlevel-1 must grant write")
 
-    def test_permlevel1_has_read_write(self):
-        row = _rows_for(self.perms, ROLE, 1)[0]
-        self.assertEqual(row.get("read"), 1)
-        self.assertEqual(row.get("write"), 1)
-
-
-    def test_existing_permlevel0_roles_still_present(self):
+    def test_existing_roles_are_untouched(self):
+        """Adding the Coordinator's rows must not disturb what System Manager,
+        Accommodation Manager and Resident Supervisor already had at either
+        permlevel — including System Manager's delete, the one privileged bit most
+        at risk of being silently dropped by a careless permission-block edit."""
         for role in ("System Manager", "Accommodation Manager", "Resident Supervisor"):
-            rows = _rows_for(self.perms, role, 0)
-            self.assertEqual(len(rows), 1, f"Existing permlevel-0 row gone for {role!r}")
-
-    def test_existing_permlevel1_roles_still_present(self):
-        for role in ("System Manager", "Accommodation Manager", "Resident Supervisor"):
-            rows = _rows_for(self.perms, role, 1)
-            self.assertEqual(len(rows), 1, f"Existing permlevel-1 row gone for {role!r}")
-
-    def test_system_manager_still_has_delete(self):
-        row = _rows_for(self.perms, "System Manager", 0)[0]
-        self.assertEqual(row.get("delete"), 1, "System Manager permlevel-0 delete must remain")
+            rows0 = _rows_for(self.perms, role, 0)
+            self.assertEqual(len(rows0), 1, f"Existing permlevel-0 row gone for {role!r}")
+            rows1 = _rows_for(self.perms, role, 1)
+            self.assertEqual(len(rows1), 1, f"Existing permlevel-1 row gone for {role!r}")
+        system_manager_row = _rows_for(self.perms, "System Manager", 0)[0]
+        self.assertEqual(
+            system_manager_row.get("delete"), 1,
+            "System Manager permlevel-0 delete must remain",
+        )
 
     def test_the_permission_table_holds_exactly_these_rows(self):
         """A bare row COUNT says nothing about which row appeared. The pair is the key,

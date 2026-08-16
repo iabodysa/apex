@@ -6,7 +6,7 @@
   "naming_series": "DEP-SNAP-.YYYY.-.####",
   "items": [
    {
-    "article": "ART-0059",
+    "article": "_T-Custody Article-00001",
     "original_cost": 500,
     "age_years": 2
    }
@@ -19,7 +19,7 @@
   "naming_series": "DEP-SNAP-.YYYY.-.####",
   "items": [
    {
-    "article": "ART-0058",
+    "article": "_T-Custody Article-00002",
     "original_cost": 900,
     "age_years": 5
    }

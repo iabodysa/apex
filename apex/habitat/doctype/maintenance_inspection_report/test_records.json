@@ -18,7 +18,7 @@
   "doctype": "Maintenance Inspection Report",
   "inspection_date": "2026-02-15",
   "building": "_Test Building 2",
-  "facility_asset": "FAC-AST-2026-0006",
+  "facility_asset": "FAC-AST-2026-0001",
   "inspector": "_T-Employee-00002",
   "inspection_type": "Emergency",
   "overall_result": "Fail",

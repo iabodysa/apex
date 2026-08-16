@@ -13,6 +13,13 @@ from frappe.tests.utils import FrappeTestCase
 
 test_dependencies = ["Building"]
 
+# `linked_erpnext_asset` is the bridge to ERPNext Asset and no test record sets it, but
+# `get_dependencies` (frappe/test_runner.py:358-380) walks every Link field regardless. Walking
+# Asset drags in ERPNext's purchase chain, which ends at `Payment Gateway` — a DocType that ships
+# with the separate `payments` app and is absent from a frappe/erpnext/hrms bench, so the walk
+# raises DoesNotExistError before a single Facility Asset is created.
+test_ignore = ["Asset"]
+
 BUILDING = "_Test Building"
 
 

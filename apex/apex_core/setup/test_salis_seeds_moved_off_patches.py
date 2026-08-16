@@ -31,7 +31,6 @@ from frappe.tests.utils import FrappeTestCase
 from apex import hooks
 from apex.apex_core.setup.seeders import salis_portal_theme_seed
 from apex.apex_core.setup.seeders.salis_portal_theme_seed import seed_salis_portal_theme
-from apex.apex_core.setup.seeders.salis_roles_seed import seed_salis_roles
 from apex.apex_core.setup.seeders.salis_settings_seed import (
     DEFAULTS as SETTINGS_DEFAULTS,
     seed_salis_settings,
@@ -41,7 +40,6 @@ from apex.tests.source_tree import is_test_file, rel
 APP_ROOT = pathlib.Path(frappe.get_app_path("apex"))
 
 MOVED_SEEDS = (
-    "apex.apex_core.setup.seeders.salis_roles_seed.seed_salis_roles",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
 )
@@ -114,15 +112,32 @@ class TestTheSalisSeedsLeftThePatchesDirectory(FrappeTestCase):
                 )
 
     def test_the_portal_role_loses_desk_access(self):
-        """The one thing the framework gets wrong: make_module_and_roles inserts every
-        role with desk_access 1, and Driver is portal-only."""
-        before = frappe.db.get_value("Role", "Driver", "desk_access")
-        self.addCleanup(frappe.db.set_value, "Role", "Driver", "desk_access", before)
+        """The one thing the framework gets wrong, and the fixture that corrects it.
 
-        frappe.db.set_value("Role", "Driver", "desk_access", 1)
-        self.assertIn("Driver", seed_salis_roles())
-        self.assertFalse(frappe.db.get_value("Role", "Driver", "desk_access"))
-        self.assertEqual(seed_salis_roles(), [], "a second run must change nothing")
+        make_module_and_roles (frappe/core/doctype/doctype/doctype.py:1876-1882) inserts
+        every role named in a permissions block with desk_access 1, and Driver is
+        portal-only. A fixture wins that race for good: migrate.py:120-145 runs sync_all
+        before sync_fixtures, on install and on every migrate, so the shipped role.json is
+        applied after the framework's default rather than racing it.
+        """
+        entry = [f for f in hooks.fixtures if f.get("dt") == "Role"]
+        self.assertEqual(len(entry), 1, "Role is not declared once in hooks.fixtures")
+        self.assertIn(
+            ["name", "in", ["Driver"]],
+            entry[0]["filters"],
+            "the Role fixture no longer filters to the portal-only role",
+        )
+
+        shipped = json.loads(
+            (APP_ROOT / "fixtures" / "role.json").read_text(encoding="utf-8")
+        )
+        driver = [row for row in shipped if row["name"] == "Driver"]
+        self.assertEqual(len(driver), 1, "role.json does not ship exactly one Driver row")
+        self.assertEqual(driver[0]["desk_access"], 0, "the shipped Driver keeps desk access")
+        self.assertFalse(
+            frappe.db.get_value("Role", "Driver", "desk_access"),
+            "Driver holds desk access on this site, so the fixture did not apply",
+        )
 
     def test_the_settings_seed_fills_a_blank_field_and_leaves_a_set_one_alone(self):
         field = "alert_lead_days"

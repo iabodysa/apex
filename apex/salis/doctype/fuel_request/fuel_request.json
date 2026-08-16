@@ -486,7 +486,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-08-14 16:35:00.000000",
+ "modified": "2026-08-16 08:52:23.392223",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",
@@ -520,6 +520,7 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Supervisor",
+   "submit": 1,
    "write": 1
   },
   {

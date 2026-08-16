@@ -2,14 +2,14 @@
  {
   "doctype": "Trip Start Log",
   "naming_series": "TSL-.######",
-  "dispatch_trip": "DT-000351",
+  "dispatch_trip": "DT-000001",
   "status": "Started",
   "start_datetime": "2026-01-10 06:00:00"
  },
  {
   "doctype": "Trip Start Log",
   "naming_series": "TSL-.######",
-  "dispatch_trip": "DT-000350",
+  "dispatch_trip": "DT-000002",
   "status": "Completed",
   "start_datetime": "2026-01-11 06:00:00",
   "end_datetime": "2026-01-11 07:30:00"

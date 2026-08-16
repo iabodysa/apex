@@ -146,6 +146,49 @@ def _unresolved_link(frappe, doctype, record):
     return None
 
 
+def _linked_doctypes(frappe, doctype):
+    """Every DocType this one points at through a Link, its own and its child rows'.
+
+    Read off the schema rather than guessed: a Link field declares its target in
+    ``options``, which is the same metadata ``_unresolved_link`` already reads to decide
+    whether a record can be created. Dynamic Link is deliberately absent — its target is a
+    value in a sibling field, so no static reading of the schema can name it.
+    """
+    meta = frappe.get_meta(doctype)
+    targets = {f.options for f in meta.get("fields", {"fieldtype": "Link"}) if f.options}
+    for table in meta.get_table_fields():
+        child = frappe.get_meta(table.options)
+        targets |= {f.options for f in child.get("fields", {"fieldtype": "Link"}) if f.options}
+    return targets - {doctype}
+
+
+def order_specs(frappe, specs):
+    """Sort specs so a DocType is seeded after everything it links to.
+
+    The order is DERIVED, not declared: seeding Room before Building fails because Room
+    carries a Link to Building, and the schema already says so. Deriving it means nobody
+    maintains a hand-written list that silently rots when a field is added.
+
+    Returns ``(ordered, cyclic)``. A cycle — two DocTypes that Link to each other — cannot
+    be ordered at all, so those specs come back separately for the caller's retry loop
+    rather than being forced into an order that is a guess.
+    """
+    provided = {spec["doctype"]: spec for spec in specs}
+    needs = {
+        dt: _linked_doctypes(frappe, dt) & set(provided) for dt in provided if frappe.db.table_exists(dt)
+    }
+    ordered, placed = [], set()
+    while True:
+        ready = sorted(dt for dt in needs if dt not in placed and needs[dt] <= placed)
+        if not ready:
+            break
+        for dt in ready:
+            ordered.append(provided[dt])
+            placed.add(dt)
+    cyclic = [spec for dt, spec in provided.items() if dt not in placed]
+    return ordered, cyclic
+
+
 def apply_spec(spec):
     """Create the records for one spec. Returns ``{created, skipped, failed}``.
 
@@ -192,16 +235,41 @@ def seed(module_dir, only=None):
 
     Wire from ``hooks.py`` ``after_install`` / ``after_migrate`` as
     ``apex.apex_core.setup.seed.seed("habitat")`` (and ``"salis"``).
+
+    ORDER FIRST, RETRY ONLY FOR WHAT ORDER CANNOT SEE. ``order_specs`` derives the sequence
+    from the schema — a DocType is seeded after everything its Link fields point at — so
+    Room follows Building because Room's own metadata says it must. What that reading
+    cannot express is a Dynamic Link, whose target is a value in a sibling field, or a
+    cycle; those come back as ``cyclic`` and go through the retry loop below, which repeats
+    the remainder after every productive round and stops on NO PROGRESS rather than after a
+    fixed number of tries, so a real defect still surfaces as a failure instead of being
+    buried under repeated attempts. Frappe's own make_records
+    (frappe/desk/page/setup_wizard/setup_wizard.py:504-541) does neither: it logs a failing
+    record and moves on.
     """
     import frappe
 
     totals = {"created": 0, "skipped": 0, "failed": 0}
-    for spec in load_specs(module_dir, only=only):
-        if not spec.get("apply", True):
-            continue
-        result = apply_spec(spec)
-        for k in totals:
-            totals[k] += result[k]
+    specs = [spec for spec in load_specs(module_dir, only=only) if spec.get("apply", True)]
+    ordered, cyclic = order_specs(frappe, specs)
+    pending = ordered + cyclic
+    while pending:
+        progressed, still_pending = False, []
+        round_totals = {"created": 0, "skipped": 0, "failed": 0}
+        for spec in pending:
+            result = apply_spec(spec)
+            for k in round_totals:
+                round_totals[k] += result[k]
+            if result["created"]:
+                progressed = True
+            if result["skipped"] or result["failed"]:
+                still_pending.append(spec)
+        # The last round's numbers are the true ones: an earlier round's skip may have
+        # become this round's create, so accumulating every round would double-count.
+        totals = round_totals
+        if not progressed:
+            break
+        pending = still_pending
     frappe.db.commit()
     return totals
 

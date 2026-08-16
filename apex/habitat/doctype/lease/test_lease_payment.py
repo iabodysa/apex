@@ -240,20 +240,27 @@ class TestARentPaymentIsAllocatedToItsInvoice(_RentPaymentCase):
 
 
 class TestARentPaymentWithoutAPayableIsRefused(_RentPaymentCase):
-    def _refuse(self, lease, invoice_name, expected_fragment, due_date=FIRST_DUE):
+    def _refuse(self, lease, invoice_name, expected_fragment, due_date=FIRST_DUE, facet=None):
         before = self.payment_count(self.landlord)
         with self.assertRaises(frappe.ValidationError) as caught:
             lease_payment.create_rent_payment(lease.name, due_date, invoice_name)
-        # Assert the MESSAGE: a link check raises the same ValidationError class and
-        # would satisfy a bare assertRaises while proving nothing about the guard.
-        self.assertIn(expected_fragment, str(caught.exception))
-        self.assertEqual(self.payment_count(self.landlord), before)
+        if facet:
+            self.assertIn(expected_fragment, str(caught.exception), facet)
+            self.assertEqual(self.payment_count(self.landlord), before, facet)
+        else:
+            # Assert the MESSAGE: a link check raises the same ValidationError class and
+            # would satisfy a bare assertRaises while proving nothing about the guard.
+            self.assertIn(expected_fragment, str(caught.exception))
+            self.assertEqual(self.payment_count(self.landlord), before)
 
-    def test_no_invoice_at_all_is_refused(self):
-        self._refuse(self.lease(), None, "Purchase Invoice")
-
-    def test_an_empty_invoice_name_is_refused(self):
-        self._refuse(self.lease(), "", "Purchase Invoice")
+    def test_a_missing_invoice_reference_is_refused_whether_null_or_empty(self):
+        """``load_eligible_payable`` guards with ``if not purchase_invoice`` — one
+        falsy check, not an ``is None`` check — so both shapes a caller can send for
+        "nothing selected" must hit the SAME line (payable_allocation.py:87-94)."""
+        self._refuse(self.lease(), None, "Purchase Invoice",
+                     facet="a None invoice_name is refused")
+        self._refuse(self.lease(), "", "Purchase Invoice",
+                     facet="an empty-string invoice_name is refused")
 
     def test_a_draft_invoice_cannot_be_paid(self):
         self._refuse(self.lease(), self.invoice(submit=False).name, "not submitted")

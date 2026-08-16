@@ -10,7 +10,7 @@
   "assignment_type": "New Assignment",
   "stay_type": "Permanent",
   "check_in_date": "2026-01-15",
-  "project": "_T-Project-00002"
+  "project": "_T-Project-00001"
  },
  {
   "doctype": "Housing Assignment",
@@ -24,6 +24,6 @@
   "stay_type": "Temporary",
   "check_in_date": "2026-02-01",
   "expected_checkout_date": "2026-05-01",
-  "project": "_T-Project-00002"
+  "project": "_T-Project-00001"
  }
 ]

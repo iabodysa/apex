@@ -2,7 +2,7 @@
  {
   "doctype": "Vehicle Utilisation Snapshot",
   "snapshot_date": "2026-01-05",
-  "vehicle": "VEH-000007",
+  "vehicle": "VEH-000001",
   "naming_series": "VUS-.######",
   "period_days": 7,
   "trips_count": 12,
@@ -12,7 +12,7 @@
  {
   "doctype": "Vehicle Utilisation Snapshot",
   "snapshot_date": "2026-01-12",
-  "vehicle": "VEH-000006",
+  "vehicle": "VEH-000002",
   "naming_series": "VUS-.######",
   "period_days": 7,
   "trips_count": 2,

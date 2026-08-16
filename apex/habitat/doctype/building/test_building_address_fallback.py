@@ -44,6 +44,7 @@ def _ensure_address(title, line1, city, link_doctype=None, link_name=None):
         "address_type": "Other",
         "address_line1": line1,
         "city": city,
+        "country": "Saudi Arabia",
     }
     if link_doctype and link_name:
         payload["links"] = [{"link_doctype": link_doctype, "link_name": link_name}]

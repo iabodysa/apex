@@ -13,7 +13,7 @@
   "service_line": "Site Transport",
   "request_type": "Accommodation to Project Shuttle",
   "accommodation_building": "_Test Building",
-  "project": "PROJ-0207",
+  "project": "_T-Project-00001",
   "transport_purpose": "Shift Relocation",
   "passenger_count": 12
  }

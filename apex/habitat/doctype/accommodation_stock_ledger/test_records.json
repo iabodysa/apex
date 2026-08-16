@@ -4,7 +4,7 @@
   "naming_series": "ACC-SLE-.YYYY.-.######",
   "posting_date": "2026-01-15",
   "item_type": "Custody Article",
-  "item": "ART-0059",
+  "item": "_T-Custody Article-00003",
   "signed_qty": 10,
   "building": "_Test Building"
  },
@@ -13,11 +13,11 @@
   "naming_series": "ACC-SLE-.YYYY.-.######",
   "posting_date": "2026-02-01",
   "item_type": "Custody Article",
-  "item": "ART-0058",
+  "item": "_T-Custody Article-00003",
   "signed_qty": -4,
   "building": "_Test Building 2",
-  "employee": "HR-EMP-00893",
+  "employee": "_T-Employee-00001",
   "party_type": "Employee",
-  "party": "HR-EMP-00893"
+  "party": "_T-Employee-00001"
  }
 ]
