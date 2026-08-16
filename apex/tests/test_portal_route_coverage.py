@@ -105,13 +105,11 @@ def served_routes() -> dict[str, set[str]]:
 def guarded_bundles() -> set[str]:
     """Bundle directories under ``apex/public/`` that the CI freshness job protects.
 
-    A-538: this used to read ``jobs.bundle-guard.strategy.matrix.include`` and pull a
-    ``portal`` key off each leg. That matrix no longer exists — the portal converged on
-    ONE unified bundle, so the job builds once and proves freshness with a single
-    ``git status --porcelain`` over the generated paths. Reading the retired key raised
-    ``KeyError: 'strategy'`` on every run, which is why all three cases below ERRORED
-    rather than grading anything. The question they ask is still the right one, so it is
-    re-anchored on the paths the job actually names.
+    The portal ships ONE unified bundle, so the job builds once and proves freshness
+    with a single ``git status --porcelain`` over the generated paths — there is no
+    ``jobs.bundle-guard.strategy.matrix.include`` per-leg key to read. This reads the
+    literal ``apex/public/<name>`` paths out of the job's own step scripts instead,
+    answering the freshness question directly rather than through a matrix key.
 
     yaml is imported HERE, not at module scope: it is the only dependency in this file
     and only this half needs it, so the served-route parser above stays importable

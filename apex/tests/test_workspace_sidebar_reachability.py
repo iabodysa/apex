@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-122 — a child workspace is reachable only when every ancestor is reachable too.
+"""A child workspace is reachable only when every ancestor is reachable too.
 
 The SIM fold retired the root ``SIM Operations`` workspace and moved its surface into
 ``Custody and Costs``, which hangs off ``Habitat``. Nothing in the permission model broke:
@@ -31,11 +31,11 @@ File-level and stdlib-only on purpose: the invariant is a property of the shippe
 is_standard JSON, so it has to fail on the change that writes the bad JSON rather than on
 a site that has already migrated it.
 
-A-127 promoted the scan itself into ``tests/workspace_reachability.py`` so a second
+The scan itself lives in ``tests/workspace_reachability.py`` so a second
 suite (``test_b5_role_workspaces.py``) can assert parent-chain reachability without
 either copying the logic or importing a sibling ``test_*`` module — which
-``tests/test_no_cross_test_imports.py`` forbids. This file keeps the A-122 persona
-assertions and the detector's own falsifiability tests.
+``tests/test_no_cross_test_imports.py`` forbids. This file keeps the SIM Operations
+persona assertions and the detector's own falsifiability tests.
 """
 
 import unittest
@@ -47,19 +47,19 @@ from apex.tests.workspace_reachability import (
     workspaces as _workspaces,
 )
 
-# The A-122 persona: the single role a SIM operator holds, and the workspace that
+# The SIM Operations persona: the single role a SIM operator holds, and the workspace that
 # absorbed the SIM surface when the root SIM Operations workspace was folded away.
 SIM_ROLE = "SIM Operations User"
 SIM_WORKSPACE = "Custody and Costs"
 
-# Ratchet, not an excuse list. A-125 closed the last two entries — Compliance and Rentals
+# Ratchet, not an excuse list. The last two entries closed — Compliance and Rentals
 # granted Government Relations Officer and Internal Auditor while its Salis parent granted
 # neither — by widening the Salis root, so the set is now empty and ANY orphan fails.
 KNOWN_ORPHAN_PAIRS = frozenset()
 
 
 class TestSimOperationsSidebarReachability(unittest.TestCase):
-    """The A-122 persona itself, asserted by name so it can never be ratcheted away."""
+    """The SIM Operations persona itself, asserted by name so it can never be ratcheted away."""
 
     def test_sim_operations_user_reaches_the_custody_workspace(self):
         pages = _workspaces()
@@ -99,7 +99,7 @@ class TestSimOperationsSidebarReachability(unittest.TestCase):
 
 
 class TestWorkspaceParentChainIntegrity(unittest.TestCase):
-    """The general parent/child visibility invariant behind the A-122 regression."""
+    """The general parent/child visibility invariant behind the SIM Operations sidebar regression."""
 
     def test_no_new_orphaned_workspace_role_pairs(self):
         found = _orphan_pairs(_workspaces())

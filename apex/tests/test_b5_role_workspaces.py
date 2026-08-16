@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-042 — domain-only navigation (supersedes B5/P-159 per-role landing pages).
+"""Domain-only navigation: the per-role landing pages are retired.
 
 The owner-approved consolidation removed the four per-role landing Workspaces
 (Resident Supervisor / Fleet Supervisor / Safety Officer / Maintenance Technician)
@@ -8,7 +8,7 @@ and folded their unique content into the business-domain workspaces. This proves
 1. the four role workspaces no longer exist (the delete + orphan-row patch worked);
 2. every retired role still reaches a domain workspace gated to it;
 3. every retired role reaches that workspace THROUGH ITS PARENT CHAIN — a gated child
-   whose ancestor the persona cannot see is never drawn in the sidebar (A-127);
+   whose ancestor the persona cannot see is never drawn in the sidebar;
 4. every domain-workspace shortcut / link / number-card / chart target resolves to a
    live record (a dangling migrated link_to or a dropped tile would fail here);
 5. each element migrated forward actually landed on its new domain home, including the

@@ -155,10 +155,10 @@ class TestWorkspaceVisibility(unittest.TestCase):
 
 
 class TestWorkspaceHeadlineCharts(unittest.TestCase):
-    """Each domain workspace pins a single headline Dashboard Chart (P-094).
+    """Each domain workspace pins a single headline Dashboard Chart.
 
-    The earlier lean design shipped no charts; P-092/P-094 superseded it — every
-    domain workspace now surfaces one headline chart. The load-bearing invariant
+    The earlier lean design shipped no charts; every domain workspace now surfaces
+    one headline chart. The load-bearing invariant
     is the silent-drop trap: a workspace that references a chart record absent
     from disk renders nothing with no error. This guard enforces that every wired
     chart resolves to an on-disk is_standard Dashboard Chart record.
@@ -213,7 +213,7 @@ class TestWorkspaceHeadlineCharts(unittest.TestCase):
 class TestWorkspaceOperationalLinkSeparation(unittest.TestCase):
     """Background and portal-owned records stay out of daily workspaces."""
 
-    # A-042 retired the per-role landing workspaces; the daily-hygiene guard now
+    # The per-role landing workspaces are retired; the daily-hygiene guard now
     # covers only the business-domain workspaces that absorbed their content.
     REMOVED_LINKS = {
         "salis/workspace/fleet/fleet.json": {"Driver Attendance", "Fuel Daily Log"},
@@ -222,7 +222,7 @@ class TestWorkspaceOperationalLinkSeparation(unittest.TestCase):
         "habitat/workspace/housing_and_safety/housing_and_safety.json": {
             "Scheduled Task Instance"
         },
-        # A-111 folded the Masar child workspace into the Salis root, which now carries
+        # The Masar child workspace folded into the Salis root, which now carries
         # its transport navigation — so the same engine records stay out of Salis.
         "salis/workspace/salis/salis.json": {"Trip Start Log", "Trip Boarding Event"},
     }
@@ -239,10 +239,10 @@ class TestWorkspaceOperationalLinkSeparation(unittest.TestCase):
     def test_driver_attendance_summary_report_has_exactly_one_home(self):
         """Owner rule: no report and no DocType appears on two workspaces.
 
-        This guard used to pin the report to Fleet, which was true while it also sat on
-        Salis. Reachability is what it was defending, and one home satisfies that; two is
-        the thing the rule forbids. Asserting the COUNT keeps the protection — a report
-        that falls off every workspace still fails here.
+        This guard asserts the report has exactly ONE home. Reachability is what it
+        defends, and one home satisfies that; two is the thing the rule forbids.
+        Asserting the COUNT keeps the protection — a report that falls off every
+        workspace still fails here.
         """
         homes = [
             path

@@ -4,7 +4,7 @@
 A patch module that is on disk but in no patches.txt section never runs on a
 migrate. That is sometimes correct (a demo seeder that must never touch a
 customer site) and sometimes a shipped bug (a backfill everyone assumed was
-wired). Nothing in the repo could previously tell the two apart, so this guard
+wired). Nothing in the repo could tell the two apart, so this guard
 forces every unregistered module to say WHY in its own docstring.
 
 Four checks:
@@ -59,12 +59,12 @@ REPO_ROOT = os.path.dirname(APP_ROOT)
 PATCHES_DIR = os.path.join(APP_ROOT, "patches")
 PATCHES_TXT = os.path.join(APP_ROOT, "patches.txt")
 
-# The escape hatch stays small on purpose. RE-MEASURED 2026-08-15 (A-538): ZERO modules
-# claim it today — the four the previous comment described (a no-op kept alive by
-# after_install, two demo seeders held out of the migrate path, one operator-only
-# cutover) are all gone, and `_unregistered_modules()` is empty against the 9 modules on
-# disk. The ceiling stays as a live ratchet, not a description of the present.
-# Raising it is a reviewed decision, not a way to make a failing guard pass.
+# The escape hatch stays small on purpose. ZERO modules currently claim it: the four
+# that once did — a no-op kept alive by after_install, two demo seeders held out of
+# the migrate path, one operator-only cutover — are all gone, and
+# `_unregistered_modules()` is empty against the 9 modules on disk. The ceiling stays
+# as a live ratchet, not a description of the present. Raising it is a reviewed
+# decision, not a way to make a failing guard pass.
 MAX_UNREGISTERED = 5
 
 MARKER_WHY = "UNREGISTERED-PATCH:"

@@ -43,15 +43,15 @@ SYNC_SLUGS = sorted({slug for _module, slug in IMPORTABLE_DOCTYPES})
 # per module below because the slug carries the module name.
 DASHBOARD_SLUGS = ("dashboard_chart", "number_card")
 
-# Frozen pre-existing mismatches, as "<module>/<slug>/<folder>". A-150 drained the
-# last five by renaming the FOLDER to scrub(name), punctuation included: the record
-# name is the primary key a Dashboard or Workspace row points at, so renaming the
-# record to buy a cleaner path would orphan those pointers, and "(" or "%" in a
-# record folder is what a Desk re-export writes anyway (ERPNext and HRMS ship many).
+# Frozen pre-existing mismatches, as "<module>/<slug>/<folder>". Renaming the FOLDER
+# to scrub(name), punctuation included, is the fix: the record name is the primary
+# key a Dashboard or Workspace row points at, so renaming the record to buy a
+# cleaner path would orphan those pointers, and "(" or "%" in a record folder is
+# what a Desk re-export writes anyway (ERPNext and HRMS ship many).
 # Nothing may be added here: a new entry admits a record re-export will duplicate.
 KNOWN_MISMATCHES = frozenset()
 
-# Floor for the vacuity check; the app shipped 522 record folders at A-150.
+# Floor for the vacuity check; the app ships 522 record folders today.
 MIN_RECORD_FOLDERS = 480
 
 

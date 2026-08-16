@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Every shared loader must read a NON-EMPTY population off the installed app.
 
-This is the guard for the defect class A-370 and A-376 were opened over. The suite moved
-out of the app package on 2026-08-02 and each loader kept deriving its root from its own
+This is the guard for the loader-root defect class. The suite moved
+out of the app package and each loader kept deriving its root from its own
 ``__file__``, which now names ``.claude/tests/apex`` — a tree of test modules and nothing
 else. The globs went quiet, the loops they feed had no iterations, and roughly a third of
 the maintainer suite reported green while asserting nothing at all.
@@ -91,7 +91,7 @@ class TestSharedLoadersReachTheApp(unittest.TestCase):
         directory and they must answer zero.
 
         A floor over a population that no longer moves is not a guard. This one passed
-        through the whole of A-550 while ``SUITE_ROOT`` resolved to the repo root and
+        through the collapse below while ``SUITE_ROOT`` resolved to the repo root and
         the mirror was invisible, because the shipped count had risen past 300 on its
         own — the right number for the wrong population. Proving the readers go empty
         when handed an empty root is what tells a real pass from that.
@@ -106,7 +106,7 @@ class TestSharedLoadersReachTheApp(unittest.TestCase):
     def test_the_corpus_spans_both_roots(self):
         """Each root contributes, so a collapse of one onto the other reds here.
 
-        The A-550 defect was exactly that collapse: ``SUITE_PACKAGE`` came out equal to
+        The defect was exactly that collapse: ``SUITE_PACKAGE`` came out equal to
         ``APP_ROOT``, so the mirror's share was zero and every consumer scanned the app
         twice instead of the corpus once. A count alone cannot see it; a per-root count
         can.

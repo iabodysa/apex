@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-286: the module breadcrumb target must be pinned in the shipped JSON.
+"""The module breadcrumb target must be pinned in the shipped JSON.
 
 Desk resolves a record's module crumb to ``module_wise_workspaces[module][0]``
 (``frappe/public/js/frappe/views/breadcrumbs.js:161`` builds the href at :117),
@@ -25,7 +25,7 @@ because ``set_user_and_timestamp`` only overwrites it outside install/patch/migr
 (``frappe/model/document.py:601-604``), and ``db_insert`` only stamps ``now()``
 when the value is empty. A pinned root therefore sorts first no matter what
 ``os.listdir`` returns and no matter how often anything re-imports — the ordering
-survives the very act that used to break it, which a repair pass run afterwards
+survives the very act that would otherwise break it, which a repair pass run afterwards
 cannot promise.
 
 Why a file-level scan rather than a bench assertion: the invariant is a property

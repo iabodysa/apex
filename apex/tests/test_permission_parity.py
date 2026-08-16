@@ -18,9 +18,9 @@ CORE_ALLOWLIST = {
     "Address": "frappe",
     "Issue": "frappe",
     "Employee": "hrms",  # Portal credential lifecycle revocation
-    "Sales Invoice": "erpnext",  # Logistay invoice issuance gate (P-191)
-    "Additional Salary": "hrms",  # Logistay payroll/WPS validate gate (P-192)
-    "Report": "frappe",  # A-201 report-role runnability guard (apex-owned refs only)
+    "Sales Invoice": "erpnext",  # Logistay invoice issuance gate
+    "Additional Salary": "hrms",  # Logistay payroll/WPS validate gate
+    "Report": "frappe",  # report-role runnability guard (apex-owned refs only)
     # on_cancel: lets Accounts cancel a payment a Telecom Contract billing log still cites.
     "Payment Entry": "erpnext",
 }
@@ -122,7 +122,7 @@ def _module_defined_names(module_dotted):
     """Top-level names defined in an apex module, or None if the file is missing.
 
     Resolves `apex.a.b` -> apex/a/b.py (or a/b/__init__.py) and AST-collects
-    every top-level def/class/assignment/import alias. Used to prove a hooked handler's
+    every top-level def/class/assignment/import alias. Proves a hooked handler's
     attribute still exists after a rename, without importing (no frappe needed).
     """
     parts = module_dotted.split(".")
@@ -169,7 +169,7 @@ class TestPermissionParity(unittest.TestCase):
         for map_name, entries in self.maps.items():
             for doctype in entries:
                 # "*" is Frappe's GLOBAL wildcard: doc_events["*"] registers a handler on
-                # EVERY doctype (the A-083 app-wide native-submit/native-cancel workflow
+                # EVERY doctype (the app-wide native-submit/native-cancel workflow
                 # guard, merged with the per-doctype events). It is a legitimate
                 # cross-cutting registration, not a stale post-rename doctype key.
                 if doctype == "*":

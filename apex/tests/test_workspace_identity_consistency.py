@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Every shipped Workspace keeps name == label == title (A-126).
+"""Every shipped Workspace keeps name == label == title.
 
 File-level test -- stdlib only, no Frappe site needed.
 
@@ -36,8 +36,8 @@ APP_ROOT = str(Path(apex.__file__).resolve().parent)
 WORKSPACE_GLOB = os.path.join(APP_ROOT, "*", "workspace", "*", "*.json")
 
 # Workspaces allowed to break the name == label == title rule, by path relative
-# to apex/. DELIBERATELY EMPTY: every workspace the app ships is consistent as of
-# A-126. Adding an entry here is an explicit, reviewable exemption -- it is not a
+# to apex/. DELIBERATELY EMPTY: every workspace the app ships is consistent.
+# Adding an entry here is an explicit, reviewable exemption -- it is not a
 # place to park a new violation.
 KNOWN_INCONSISTENT: frozenset = frozenset()
 

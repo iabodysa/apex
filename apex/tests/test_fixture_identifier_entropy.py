@@ -10,12 +10,12 @@ from apex.tests.source_tree import suite_rel, test_py_files
 
 MIN_RANDOM_CHARACTERS = 12
 
-# The subject here is the TEST corpus, not the product. This used to root itself on the
-# maintainer mirror alone, which was right until the corpus moved: 358 test modules now
-# ship inside the installed package beside their subjects and 110 remain in the mirror,
-# so a scan of either root alone reads a minority of its own population and the floor
-# below stops meaning what it says. source_tree.test_py_files() already unions both roots
-# and its docstring carries the reason, so the anchor is borrowed rather than restated.
+# The subject here is the TEST corpus, not the product: 358 test modules ship inside
+# the installed package beside their subjects and 110 remain in the mirror, so a scan
+# of either root alone reads a minority of its own population and the floor below
+# would stop meaning what it says. source_tree.test_py_files() already unions both
+# roots and its docstring carries the reason, so the anchor is borrowed rather than
+# restated.
 
 
 def _test_files() -> list[Path]:

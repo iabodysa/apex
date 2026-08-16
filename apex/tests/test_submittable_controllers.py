@@ -1,7 +1,7 @@
 # Copyright (c) 2026, AFMCO and contributors
 
 """M-20: coverage for four submittable controllers that carry real validate
-guards and on_submit / on_cancel side-effects but previously had no test:
+guards and on_submit / on_cancel side-effects but lacked a test:
 
   * Vehicle Handover
   * Vehicle Damage Write-Off

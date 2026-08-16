@@ -35,14 +35,11 @@ from frappe.tests.utils import FrappeTestCase
 
 APP = frappe.get_app_path("apex")
 
-# A-042 folded the per-role landing pages into the business-domain workspaces;
-# the (role, workspace, onboarding, step, target) contract now names the domain
-# workspace that embeds each onboarding and gates the role. The workspace and
-# onboarding names below are the shipped records: "Housing" and "Safety" both
-# folded into the "Housing and Safety" workspace and its single "Housing and
-# Safety Go-Live" onboarding; "Custody" is "Custody and Costs"; "Salis Fuel
-# Setup" never existed as its own record -- the vehicle-handover step ships
-# under "Fleet Go-Live".
+# The (role, workspace, onboarding, step, target) contract names the domain
+# workspace that embeds each onboarding and gates the role. "Housing" and "Safety"
+# both fold into "Housing and Safety" and its "Housing and Safety Go-Live"
+# onboarding; "Custody" is "Custody and Costs"; "Salis Fuel Setup" never exists as
+# its own record -- the vehicle-handover step ships under "Fleet Go-Live".
 DAILY_FLOW_CONTRACT = (
     (
         "Resident Supervisor",
@@ -209,10 +206,9 @@ class TestOnboardingSteps(FrappeTestCase):
         self.assertEqual(bad, [], f"module onboarding step links that do not resolve: {bad}")
 
     def test_daily_role_tours_visible_to_their_role(self):
-        # A list, not a dict: the A-042 fold collapsed the Safety Officer and
-        # Maintenance Technician go-lives onto the same "Housing and Safety
-        # Go-Live" record as the Resident Supervisor one, so one name now
-        # carries more than one role check.
+        # A list, not a dict: the Safety Officer and Maintenance Technician go-lives
+        # collapse onto the same "Housing and Safety Go-Live" record as the
+        # Resident Supervisor one, so one name carries more than one role check.
         expected = [
             ("Housing and Safety Go-Live", "Resident Supervisor"),
             ("Fleet Go-Live", "Fleet Supervisor"),

@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""A-085 Findings 1 & 3 - the workflow-state field of every approval / lifecycle
+"""The workflow-state field of every approval / lifecycle
 DocType is ``read_only``, so the state is driven only by its native Workflow (or
-the server engine) and can never be hand-edited on the form. Finding 1 also pins
-Utility Bill Entry down to the four states its approval workflow actually uses
+the server engine) and can never be hand-edited on the form. Utility Bill Entry is
+additionally pinned down to the four states its approval workflow actually uses
 (the dead Received / Under Review / Paid / Disputed options were dropped).
 
 Asserted against ``frappe.get_meta`` (the migrated DocType), not the on-disk
@@ -13,7 +13,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 # DocType -> workflow-state field. Each is Workflow- or engine-driven, so its
-# state field must be read_only (A-085 findings 1 & 3).
+# state field must be read_only.
 STATE_FIELDS = {
     "Utility Bill Entry": "status",
     "Lease": "status",

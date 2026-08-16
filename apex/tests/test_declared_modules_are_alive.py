@@ -9,7 +9,7 @@ So a declared name is published to the Desk module list, the User "Block Modules
 picker, the Module Profile picker and every module-count claim on EVERY fresh
 site — whether or not anything is behind it.
 
-That is exactly what the SIM Operations fold left behind (A-187): the source moved
+That is exactly what the SIM Operations fold left behind: the source moved
 to ``apex/logistay/``, every record was restamped, the package was emptied down to
 ``__init__.py`` — and the modules.txt line stayed, so the ghost kept being minted.
 It had already produced one published-docs error ("the four names in modules.txt"
@@ -31,7 +31,7 @@ no escape-hatch marker for "reserved name, empty by design": reserving a name in
 modules.txt is not free, it publishes a ghost to every new site, and a name costs
 nothing to add on the day the first record or file lands.
 
-Central by necessity (A-196): the invariant is over ``apex/modules.txt`` — a
+Central by necessity: the invariant is over ``apex/modules.txt`` — a
 root-level register — and over EVERY module's records and package at once, so no
 single module directory is an honest home. Same shape as the patches.txt guard
 beside it. It shipped at ``apex/test_declared_modules_are_alive.py`` where frappe

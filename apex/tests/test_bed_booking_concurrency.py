@@ -5,7 +5,7 @@ File-level test — no Frappe site needed. Uses ast and stdlib only.
 
 This test verifies that the row-lock guard is present in the Accommodation
 Assignment on_submit handler — written either as raw SQL ("SELECT ... FOR UPDATE")
-or via the query builder ("frappe.qb...for_update()", the P-209 port) — providing
+or via the query builder ("frappe.qb...for_update()") — providing
 row-level lock protection against concurrent double-booking.
 
 What a full stress test would do

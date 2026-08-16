@@ -371,7 +371,7 @@ def _is_whitelisted(decorator):
 def _called_local_funcs(func_node):
     """Names of bare-name function calls in the body, e.g. ``route_payment(x)``.
 
-    Used to follow ONE level of intra-module delegation: a whitelisted endpoint
+    Follows ONE level of intra-module delegation: a whitelisted endpoint
     that delegates its write to a module-level helper (``return route_payment(...)``)
     is still a write endpoint, and the permission check may legitimately live in
     either the endpoint or that helper.
@@ -553,11 +553,10 @@ class TestHttpMethodEnforcement(unittest.TestCase):
                 "in test_http_enforcement.py with a justification."
             )
 
-    # A-538: this was two methods running the identical algorithm over the two
-    # constants — `test_allowlist_entries_still_exist` and
-    # `test_permission_recheck_allowlist_entries_still_exist`. Collapsed to one subTest
-    # run over both lists; every entry of both is still opened and still named
-    # individually in the failure.
+    # One subTest run over both allowlist constants — `test_allowlist_entries_still_exist`
+    # and `test_permission_recheck_allowlist_entries_still_exist` — rather than two
+    # methods running the identical algorithm; every entry of both is still opened and
+    # still named individually in the failure.
     def test_allowlist_entries_still_exist(self):
         """Every entry in either allowlist must still resolve to real code.
 

@@ -34,8 +34,8 @@ APP_ROOT = Path(apex.__file__).resolve().parent
 def _series_head_file():
     """Path to the note for the version this app currently ships.
 
-    It used to point at ``v<major>_<minor>_0.md``, the head of the minor series, and that
-    is not what the popup reads. ``get_change_log_for_app``
+    A naive anchor might point at ``v<major>_<minor>_0.md``, the head of the minor
+    series — but that is not what the popup reads. ``get_change_log_for_app``
     (frappe/utils/change_log.py:60-86) walks the whole major folder and keeps every file
     whose version satisfies ``from_version < version <= to_version`` — a ``.0`` note is one
     candidate among many and is required by nothing. What the guard should protect is that
@@ -118,7 +118,7 @@ class TestChangeLogPopup(unittest.TestCase):
     def test_popup_has_something_to_show_for_the_current_version(self):
         """The clause the popup actually has to satisfy.
 
-        A user sitting on the previously shipped version opens the desk after an
+        A user sitting on an older shipped version opens the desk after an
         upgrade. `get_change_log_for_app` returns the notes in
         `(their version, this version]`; if this version shipped no note of its
         own, that list is EMPTY and the popup never appears. The series head

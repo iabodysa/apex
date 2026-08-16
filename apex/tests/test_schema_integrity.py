@@ -73,11 +73,10 @@ class TestSchemaIntegrity(FrappeTestCase):
                     d = json.load(handle)
             except (OSError, json.JSONDecodeError):
                 continue
-            # A-538: `d.get(...)` used to run unguarded and this case ERRORED on every
-            # run with AttributeError. Nine `test_records.json` files sit in doctype/
+            # `d.get(...)` requires a dict. Nine `test_records.json` files sit in doctype/
             # directories and parse to a LIST, not a dict — fallout from the "no DocType
-            # without a test record" rule. The sibling guard already did it this way
-            # (test_doctype_root_keys.py:171).
+            # without a test record" rule. The isinstance check below guards against
+            # that, same as the sibling guard (test_doctype_root_keys.py:171).
             if not isinstance(d, dict) or d.get("doctype") != "DocType":
                 continue
             read += 1
@@ -94,7 +93,7 @@ class TestSchemaIntegrity(FrappeTestCase):
                 target = links.get(link)
                 if target and "." not in src and frappe.db.exists("DocType", target) and not frappe.get_meta(target).get_field(src):
                     bad.append(f"{d['name']}.{f.get('fieldname')} ({ff})")
-        # A-538 positive control: every method in this file accumulates `bad = []` over a
+        # Positive control: every method in this file accumulates `bad = []` over a
         # glob, so a stale APP anchor or a moved glob would report green over nothing.
         self.assertGreater(read, 100, f"only {read} DocType JSONs read — the glob broke")
         self.assertEqual(bad, [], f"fetch_from sources that do not exist: {bad}")

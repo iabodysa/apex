@@ -1,5 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Release-hygiene guard (P-129): no NEW cross-test-module imports.
+"""Release-hygiene guard: no NEW cross-test-module imports.
 
 A test module must NOT import fixture helpers from a sibling ``test_*`` module —
 shared builders belong in ``tests/factories.py``. This guard AST-scans every
@@ -9,13 +9,13 @@ import z`` / ``import apex.x.test_y``, and the relative ``from .test_y import z`
 / ``from . import test_y`` forms a colocated test can use), unless the pair is
 in the frozen ``_BASELINE`` of pre-existing debt.
 
-Scope (A-123): the glob used to be ``tests/*.py`` only, so the 137 colocated
+Scope: the glob covered ``tests/*.py`` only, so the 137 colocated
 ``test_*.py`` files under habitat/salis/apex_core/logistay escaped the ratchet
 entirely — and 4 of them already violated it undetected. The scan is now
 app-wide, so a test relocated out of ``apex/tests/`` carries the ratchet with it
 instead of silently leaving it.
 
-Importer scope (A-170): the offender scan used to iterate ``test_*.py`` only, so
+Importer scope: the offender scan iterated ``test_*.py`` only, so
 the ban was launderable in one hop. ``tests/`` legitimately holds non-``test_``
 modules — ``factories.py``, ``_helpers.py``, ``workspace_reachability.py`` — and a
 new one could ``from .test_x import helper`` and re-export it; every ``test_*``
@@ -26,7 +26,7 @@ strictly stronger than closing the ``tests/``-helper hole alone and costs nothin
 importing a test module is never legitimate from anywhere, production included, and
 the app-wide sweep finds 0 offenders today — so the baseline stays empty.
 
-The baseline is EMPTY (P-135 retired all 44 pairs — every shared helper and the
+The baseline is EMPTY (all 44 pairs are retired — every shared helper and the
 base ``ApexHabitatTestCase`` were promoted into ``tests/factories.py``). The
 ratchet is therefore absolute: ANY import of a ``test_*`` module from any other
 module fails. Put the shared fixture in ``tests/factories.py`` (a non-``test_*``
@@ -41,14 +41,13 @@ import unittest
 from apex.tests.source_tree import APP_ROOT as _APP_ROOT
 from apex.tests.source_tree import SUITE_PACKAGE as _SUITE_PACKAGE
 
-# A-538: the anchor used to be ``dirname(dirname(__file__))``, which after the
-# 2026-08-02 move named ``.claude/tests/apex`` — the mirror, a tree holding nothing
-# but test modules. The comment above it still claimed ``apex/``. So the guard that
-# exists to stop a PRODUCTION module importing a test module never saw a single
-# production module: its offender universe was the mirror. Anchoring on
-# ``source_tree.APP_ROOT`` (``apex.__file__``) restores the intended population, and
-# the mirror is scanned too — the suite's own modules are equally forbidden to
-# import a sibling ``test_*``.
+# The naive anchor ``dirname(dirname(__file__))`` resolves relative to this file, so
+# once the suite moved off the app package it named ``.claude/tests/apex`` — the
+# mirror, a tree holding nothing but test modules — while a stale comment above it
+# still claimed ``apex/``. That left the guard blind to every PRODUCTION module: its
+# offender universe was the mirror alone. Anchoring on ``source_tree.APP_ROOT``
+# (``apex.__file__``) restores the intended population, and the mirror is scanned
+# too — the suite's own modules are equally forbidden to import a sibling ``test_*``.
 
 _BASELINE = frozenset()
 
@@ -153,7 +152,7 @@ def _scan():
 
 class TestNoCrossTestImports(unittest.TestCase):
     def test_importer_scan_covers_non_test_modules(self):
-        # The A-170 blind spot: the shared non-test_ helpers under tests/
+        # The offender-scan blind spot: the shared non-test_ helpers under tests/
         # are the laundering vector, so they must be in the OFFENDER universe, not
         # only the import-target universe.
         scanned = {_rel(p) for p in _importer_files()}
@@ -162,8 +161,8 @@ class TestNoCrossTestImports(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(_APP_ROOT, rel)), f"{rel} moved — update this test")
             self.assertIn(rel, scanned, f"{rel} could launder the ban if left unscanned")
         # Positive control: the offender universe must reach real production code,
-        # not only test modules. Before A-538 this passed on the mirror, where the
-        # non-``test_`` files were the mirror's own duplicated helpers.
+        # not only test modules. With the naive anchor this passed on the mirror,
+        # where the non-``test_`` files were the mirror's own duplicated helpers.
         self.assertIn("hooks.py", scanned, "offender universe does not reach the app root")
         self.assertTrue(
             any(not os.path.basename(p).startswith("test_") for p in scanned),
@@ -182,7 +181,7 @@ class TestNoCrossTestImports(unittest.TestCase):
         )
 
     def test_cleaned_files_have_no_cross_test_imports(self):
-        # _MUST_BE_CLEAN is keyed by bare basename (the P-129 files all lived in
+        # _MUST_BE_CLEAN is keyed by bare basename (all of these currently live in
         # tests/); match on basename so it keeps holding after a relocation.
         offenders = sorted(
             (f, m) for (f, m) in _scan() if os.path.basename(f) in _MUST_BE_CLEAN
