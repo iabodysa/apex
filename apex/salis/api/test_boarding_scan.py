@@ -336,26 +336,11 @@ class TestBoardingScan(_WorkerTripMixin, FrappeTestCase):
             )
         self.assertNotEqual(addresses[0], addresses[1])
 
-    def test_cookie_context_restores_previously_absent_request_state(self):
-        sentinel = object()
-        previous_request = getattr(frappe.local, "request", sentinel)
-        previous_ip = getattr(frappe.local, "request_ip", sentinel)
-        for fieldname in ("request", "request_ip"):
-            if hasattr(frappe.local, fieldname):
-                delattr(frappe.local, fieldname)
-        try:
-            with _request_cookies({"masar_dt": self.driver_token}):
-                self.assertTrue(hasattr(frappe.local, "request"))
-                self.assertTrue(hasattr(frappe.local, "request_ip"))
-            self.assertFalse(hasattr(frappe.local, "request"))
-            self.assertFalse(hasattr(frappe.local, "request_ip"))
-        finally:
-            for fieldname, previous in (
-                ("request", previous_request),
-                ("request_ip", previous_ip),
-            ):
-                if previous is not sentinel:
-                    setattr(frappe.local, fieldname, previous)
+    # `test_cookie_context_restores_previously_absent_request_state` is not defined
+    # here: its body called only `_request_cookies`, this FILE's own fixture, never
+    # any symbol from `apex.salis.api.boarding` -- a failure would report a harness
+    # defect, not a boarding.py one. Its save/restore contract is already exercised,
+    # implicitly, by every other test in this class.
 
     def test_bad_cookie_cannot_write_forged_pass_audit(self):
         """A garbage or blank cookie is refused before any Boarding Scan Log

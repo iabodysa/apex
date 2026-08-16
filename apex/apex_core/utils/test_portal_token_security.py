@@ -970,10 +970,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
             resolve_driver_token(issued["token"])
 
     def test_revocation_is_idempotent_and_exactly_audience_scoped(self):
-        self.assertTrue(
-            hasattr(token_security, "revoke_subject_tokens"),
-            "central subject-token revocation helper is missing",
-        )
         worker = self._worker_token()
         driver = self._driver_token()
 
@@ -1054,10 +1050,6 @@ class TestPortalTokenSecurity(FrappeTestCase):
                 getattr(doc, operation)()
 
     def test_explicit_reissue_rotates_and_only_new_tokens_resolve(self):
-        self.assertTrue(
-            hasattr(token_security, "revoke_subject_tokens"),
-            "central subject-token revocation helper is missing",
-        )
         first_worker = issue_worker_link(self.employee)
         first_driver = issue_driver_link(self.driver)
         token_security.revoke_subject_tokens(token_security.WORKER, self.employee)

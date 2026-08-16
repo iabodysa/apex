@@ -42,7 +42,6 @@ from frappe.tests.utils import FrappeTestCase
 from apex.tests._helpers import submit_via_workflow
 
 from apex.apex_core.payment_router import (
-    DEFAULT_TARGET_DOCTYPE,
     LINK_DOCTYPE_FIELD,
     LINK_NAME_FIELD,
     SOURCE_DOCTYPE,
@@ -190,7 +189,6 @@ class TestPaymentRouter(FrappeTestCase):
         s = frappe.get_single(SETTINGS)
         self.assertFalse(s.target_payment_doctype)
         self.assertEqual(get_target_doctype(s), "Payment Request")
-        self.assertEqual(DEFAULT_TARGET_DOCTYPE, "Payment Request")
 
     def test_routes_to_native_payment_request_by_default(self):
         """An approved request, with the router unconfigured, builds a real native
@@ -482,6 +480,13 @@ class TestPaymentRouter(FrappeTestCase):
         Nothing checked the target before: ``frappe.new_doc`` was called on whatever
         the config named, so the operator learned about their mistake (if at all)
         from a stack trace far from the field they got wrong.
+
+        This is the ROUTER's own guard (``validate_target_doctype``,
+        payment_router.py), reached on the write path Payment Routing Settings
+        itself never exercises. On save, an absent DocType is refused earlier by
+        Frappe's own ``_validate_links`` (frappe/model/document.py, before
+        ``run_before_save_methods`` reaches the controller's ``validate``) — that
+        boundary is the framework's, not ours, so it is not repeated as a case here.
         """
         good = self._approved_request()
         self._configure("Note", [{"target_fieldname": "title", "source_fieldname": "name"}])
@@ -661,15 +666,7 @@ class TestPaymentRouter(FrappeTestCase):
             s.save(ignore_permissions=True)
         self.assertIn("paid_amont", str(cm.exception))
 
-    def test_missing_target_is_refused_by_the_native_link_check_on_save(self):
-        """Records WHERE the guard is, so a later reader does not credit ours.
-
-        ``_validate_links`` runs at frappe/model/document.py:413, BEFORE
-        ``run_before_save_methods`` reaches the controller's ``validate`` — so on the
-        save path an absent DocType is refused by Frappe itself. Ours is what covers
-        the writers that skip both, proven above against the router.
-        """
-        s = frappe.get_single(SETTINGS)
-        s.target_payment_doctype = "Apex A278 Absent Payment DocType"
-        with self.assertRaises(frappe.LinkValidationError):
-            s.save(ignore_permissions=True)
+    # `test_missing_target_is_refused_by_the_native_link_check_on_save` is not
+    # defined here: it asserted only Frappe's own `_validate_links`, never reaching
+    # the app's `validate_target_doctype` guard, so deleting that guard left it
+    # green. See `test_uninstalled_target_refuses_and_builds_nothing`'s docstring.

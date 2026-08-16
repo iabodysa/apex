@@ -187,11 +187,10 @@ class TestRecoveryAdvanceAccount(FrappeTestCase):
         )
         self.assertEqual(row.custom_source_doctype, "Employee")
         self.assertEqual(row.custom_source_document, subject)
-        self.assertEqual(
-            frappe.db.get_value("Account", row.advance_account, "account_type"),
-            "Receivable",
-            "HRMS refuses to submit an advance on a non-Receivable account",
-        )
+        # No account_type re-read here: self.advance_account is built Receivable on
+        # both branches of _receivable_account above, so a get_value readback of
+        # what the fixture already guaranteed can never fail. The type gate itself
+        # is covered by test_an_advance_account_that_is_not_receivable_raises_nothing.
 
     def test_an_advance_account_that_is_not_receivable_raises_nothing(self):
         """A misconfigured account degrades to 'no recovery raised' instead of

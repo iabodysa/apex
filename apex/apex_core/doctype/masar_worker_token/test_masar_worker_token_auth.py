@@ -447,9 +447,15 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
     def test_every_guest_worker_endpoint_carries_a_rate_limit(self):
         """Each ``@frappe.whitelist(allow_guest=True)`` worker endpoint that resolves a
         token must also carry an ``@rate_limit`` — the throttle that stops a personal link
-        being driven as a brute-force / enumeration oracle. The decorator wraps the function
-        via functools.wraps and stashes ``__wrapped__``; a missing throttle leaves that
-        attribute absent."""
+        being driven as a brute-force / enumeration oracle.
+
+        ``__wrapped__`` cannot prove this: ``frappe.whitelist`` itself wraps every
+        endpoint via ``functools.wraps`` (frappe/utils/typing_validations.py), so
+        that attribute is present whether or not ``@rate_limit`` ever ran — a
+        whitelisted function with no throttle at all still reports it. Instead this
+        asserts ``_apex_rate_limit``, the marker
+        ``apex.apex_core.utils.rate_limit_identity.rate_limit`` stamps on its own
+        wrapper, which exists only when that decorator does."""
         guest_endpoints = [
             masar.get_enum_labels,
             masar.get_worker_context,
@@ -467,10 +473,17 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
             masar.create_worker_transport_request,
         ]
         for fn in guest_endpoints:
-            self.assertTrue(
-                hasattr(fn, "__wrapped__"),
-                f"{fn.__name__} must be wrapped by @rate_limit (brute-force throttle)",
-            )
+            with self.subTest(endpoint=fn.__name__):
+                self.assertTrue(
+                    hasattr(fn, "_apex_rate_limit"),
+                    f"{fn.__name__} must be wrapped by @rate_limit (brute-force throttle)",
+                )
+
+    def test_the_rate_limit_marker_can_actually_fail(self):
+        """Negative control for the case above: a whitelisted function with no
+        ``@rate_limit`` at all must NOT carry ``_apex_rate_limit`` — proving the
+        assertion above can fail, unlike the ``__wrapped__`` check it replaced."""
+        self.assertFalse(hasattr(masar.get_my_worker_route_today, "_apex_rate_limit"))
 
     def test_token_field_is_permlevel_one(self):
         """The ``token`` Data field sits at permlevel 1, so a role without a permlevel-1

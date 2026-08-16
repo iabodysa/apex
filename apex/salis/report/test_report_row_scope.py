@@ -465,6 +465,24 @@ class TestEveryScopedRefReportAppliesItsScope(unittest.TestCase):
             + "".join(f"  {name}: {reason}\n" for name, reason in sorted(found.items())),
         )
 
+    def test_scope_owning_modules_reads_the_mirrored_hooks_file_live(self):
+        """The enumeration is driven by the hooks file handed in, not hardcoded.
+
+        A mirrored hooks.py carrying one extra permission_query_conditions entry must
+        produce that one extra DocType alongside every DocType the shipped file already
+        scopes -- proving scope_owning_modules() re-parses hooks_path rather than reading
+        some fixed snapshot of today's tree."""
+        mirror = _mirror_hooks_with(
+            "Apex Mirrored Probe DocType",
+            "apex.habitat.permissions.accommodation_assignment_query",
+        )
+        self.addCleanup(os.remove, mirror)
+        mirrored = scope_owning_modules(hooks_path=mirror)
+        self.assertEqual(
+            mirrored.get("Apex Mirrored Probe DocType"), "apex.habitat.permissions"
+        )
+        self.assertLessEqual(set(self.scoped), set(mirrored))
+
 
 if __name__ == "__main__":
     unittest.main()

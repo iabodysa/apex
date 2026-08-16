@@ -376,38 +376,18 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertNotIn("Cancel", _actions(dt))
 
 
-    def test_insert_at_completed_blocked(self):
-        with self.assertRaises(frappe.ValidationError):
-            frappe.get_doc(
-                {"doctype": "Dispatch Trip", "status": "Completed"}
-            ).insert(ignore_permissions=True)
-
-
     # --- controller-level state guards, independent of the workflow record -----
 
-    def test_state_flow_insert_at_completed_blocked(self):
-        """Controller rejects a direct insert at a terminal state (Completed).
-
-        This is the existing guard; it is preserved here as the canonical
-        state-flow anchor test so the module always proves the initial-status
-        contract regardless of which other tests are skipped."""
-        with self.assertRaises(frappe.ValidationError):
-            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Completed"}).insert(
-                ignore_permissions=True)
-
-    def test_insert_at_dispatched_blocked(self):
-        """Controller rejects a direct insert at Dispatched — only the workflow
-        may move a trip to that state."""
-        with self.assertRaises(frappe.ValidationError):
-            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Dispatched"}).insert(
-                ignore_permissions=True)
-
-    def test_insert_at_cancelled_blocked(self):
-        """Controller rejects a direct insert at Cancelled — only the workflow
-        may cancel a submitted-Completed trip."""
-        with self.assertRaises(frappe.ValidationError):
-            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Cancelled"}).insert(
-                ignore_permissions=True)
+    def test_insert_at_non_planned_status_blocked(self):
+        """Controller rejects a direct insert at any non-initial status — only
+        the workflow may move a trip past Planned (Dispatched, Cancelled) or
+        into a terminal state (Completed)."""
+        for status in ("Completed", "Dispatched", "Cancelled"):
+            with self.subTest(status=status):
+                with self.assertRaises(frappe.ValidationError):
+                    frappe.get_doc(
+                        {"doctype": "Dispatch Trip", "status": status}
+                    ).insert(ignore_permissions=True)
 
     def test_insert_at_planned_succeeds(self):
         """The only valid creation state is Planned; the insert must not raise."""
@@ -462,13 +442,16 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         """Workflow blocks the Complete action when the trip is still Planned.
 
         The transition table has no Planned → Completed edge, so apply_workflow
-        must raise a ValidationError.
+        must raise a ValidationError. This is a pure state-machine check, so a
+        bare Planned trip is enough — no route, vehicle or driver is read by
+        either the offered-actions lookup or the transition table.
         """
-        tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
-        vehicle = self._make_vehicle("INV1")
-        driver = self._make_driver("INV1")
-        dt = self._make_trip(rp, vehicle, driver)
+        dt = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
 
         frappe.set_user(self.manager)
         offered = _actions(dt)
@@ -511,12 +494,15 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
         After the first Dispatch the trip is in Dispatched state; the Dispatch
         action has no outgoing edge from Dispatched, so the second call must
-        raise a ValidationError rather than silently succeeding or crashing."""
-        tr, rp = self._make_scheduled_tr(self.project)
-        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
-        vehicle = self._make_vehicle("IDP1")
-        driver = self._make_driver("IDP1")
-        dt = self._make_trip(rp, vehicle, driver)
+        raise a ValidationError rather than silently succeeding or crashing.
+        The trip never reaches docstatus 1 in this test, so a bare Planned
+        trip (no route, vehicle or driver) carries the same state machine."""
+        dt = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
 
         frappe.set_user(self.manager)
         apply_workflow(dt, "Dispatch")
@@ -534,8 +520,12 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         A trip missing the vehicle field must not pass before_submit even when
         the workflow state is otherwise valid. We bypass the controller validate
         at insert time so the readiness check (before_submit) is the gate under
-        test. The doc is submitted directly as Administrator so no role gate
-        interferes; the controller's _enforce_dispatch_readiness must throw."""
+        test. completion_notes is set directly in the DB alongside the forced
+        status so the earlier _require_completion_notes guard in validate()
+        cannot fire first and mask the vehicle guard this test targets. The
+        doc is submitted directly as Administrator so no role gate interferes;
+        the message is asserted so a bare ValidationError from a different
+        guard cannot pass as this one."""
         bare = frappe.get_doc({
             "doctype": "Dispatch Trip",
             "status": "Planned",
@@ -548,12 +538,18 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         bare.flags.ignore_validate = False
         bare.flags.ignore_mandatory = False
 
-        frappe.db.set_value("Dispatch Trip", bare.name, "status", "Completed")
+        frappe.db.set_value(
+            "Dispatch Trip",
+            bare.name,
+            {"status": "Completed", "completion_notes": "Delivered."},
+        )
         bare.reload()
         bare.flags.ignore_validate = False
         bare.flags.ignore_mandatory = False
-        with self.assertRaises(frappe.ValidationError):
+        with self.assertRaises(frappe.ValidationError) as ctx:
             bare.submit()
+        self.assertIn("Dispatch readiness", str(ctx.exception))
+        self.assertIn("Vehicle", str(ctx.exception))
 
 
     def test_completion_notes_required_when_status_completed(self):

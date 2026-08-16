@@ -82,6 +82,10 @@ class TestMaintenanceWorkOrder(FrappeTestCase):
                 )
 
     def test_create_valid_work_order(self):
+        """A well-formed draft passes validate() unrejected, and the controller's own
+        rollup (validate() sums procurement_items.estimated_cost into
+        total_procurement_cost) runs and is read back — not just that Frappe assigned
+        a name, which naming_series autoname does regardless of any app code."""
         doc = frappe.get_doc({
             "doctype": "Maintenance Work Order",
             "naming_series": "MWO-.YYYY.-.####",
@@ -89,9 +93,14 @@ class TestMaintenanceWorkOrder(FrappeTestCase):
             "work_description": "Fix pipe leak in room 101",
             "planned_start_date": "2026-06-10",
             "planned_end_date": "2026-06-12",
+            "procurement_items": [
+                {"item_description": "Pipe fitting", "estimated_cost": 150},
+                {"item_description": "Sealant", "estimated_cost": 25.5},
+            ],
         })
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertIsNotNone(doc.name)
+        self.assertEqual(doc.total_procurement_cost, 175.5)
         frappe.delete_doc("Maintenance Work Order", doc.name, force=True, ignore_permissions=True)
 
     def test_missing_work_description_raises(self):
