@@ -6,7 +6,12 @@ Occupancy Snapshot, Vehicle Utilisation Snapshot and Operational Depreciation
 Snapshot grow without bound via scheduled jobs. Each controller must expose a
 ``clear_old_logs(days)`` staticmethod (the LogType interface run_log_clean_up
 invokes) and be registered in the ``default_log_clearing_doctypes`` hook so
-daily_maintenance reclaims them. The financial ledgers must NOT be registered."""
+daily_maintenance reclaims them. The financial ledgers must NOT be registered.
+
+Access Log already implements ``clear_old_logs`` in frappe core
+(frappe/core/doctype/access_log/access_log.py) — it was never registered in
+EITHER frappe's own hook or this app's, so the size-based clearing cron only
+ever swept rows over 1MB and an ordinary audit row accumulated forever."""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -37,12 +42,14 @@ class TestLogClearing(FrappeTestCase):
             )
 
     def test_default_log_clearing_hook_registered(self):
-        """The three snapshots are registered with their retention windows; ledgers are not."""
+        """The three snapshots and Access Log are registered with their retention
+        windows; ledgers are not."""
         hook = frappe.get_hooks("default_log_clearing_doctypes") or {}
         for dt, retention in (
             ("Occupancy Snapshot", 365),
             ("Vehicle Utilisation Snapshot", 365),
             ("Operational Depreciation Snapshot", 730),
+            ("Access Log", 90),
         ):
             self.assertIn(dt, hook, f"{dt} must be registered for log clearing.")
             self.assertEqual(int(hook[dt][-1]), retention)
@@ -55,6 +62,15 @@ class TestLogClearing(FrappeTestCase):
             self.assertNotIn(
                 ledger, hook, f"{ledger} must NOT be registered for log clearing."
             )
+
+    def test_access_log_already_supports_clearing_and_now_gets_registered(self):
+        """Frappe's own AccessLog implements the LogType interface -- the registration
+        this card adds is what was missing, not a new clear_old_logs method."""
+        from frappe.core.doctype.log_settings.log_settings import _supports_log_clearing
+
+        self.assertTrue(_supports_log_clearing("Access Log"))
+        hook = frappe.get_hooks("default_log_clearing_doctypes") or {}
+        self.assertIn("Access Log", hook)
 
     def test_depreciation_snapshot_clears_submitted_with_children_keeps_drafts(self):
         marker = frappe.generate_hash(length=12)

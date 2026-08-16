@@ -303,6 +303,10 @@ default_log_clearing_doctypes = {
     "Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
     "Operational Depreciation Snapshot": 730,
+    # Neither frappe's own default_log_clearing_doctypes (frappe/hooks.py:564-576) nor this
+    # dict named it, so the size-based clearing cron only ever swept rows over 1MB and an
+    # ordinary audit row accumulated forever. 90 days matches frappe's own Activity Log entry.
+    "Access Log": 90,
 }
 
 override_doctype_dashboards = {
