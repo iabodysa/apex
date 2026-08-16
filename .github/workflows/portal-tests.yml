@@ -21,6 +21,13 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      # The PWA contract test reads the build's own `.vite/manifest.json` (tooling/
+      # service-workers.js), which only exists after a build. Without this step the suite
+      # failed with ENOENT on 10 of 60 runs — a step-order defect, never a product defect.
+      - name: Build the portal so the generated manifest exists
+        working-directory: frontend
+        run: npm run build
+
       - name: Run the frontend test suite
         working-directory: frontend
         run: npm test
