@@ -392,17 +392,9 @@
    "link_fieldname": "generated_maintenance_request",
    "parent_doctype": "Maintenance Inspection Report",
    "table_fieldname": "findings"
-  },
-  {
-   "group": "Safety",
-   "is_child_table": 1,
-   "link_doctype": "Linked Maintenance Request Item",
-   "link_fieldname": "maintenance_request",
-   "parent_doctype": "Safety Inspection Report",
-   "table_fieldname": "linked_maintenance_requests"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-16 07:10:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

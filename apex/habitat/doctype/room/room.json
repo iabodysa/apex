@@ -216,19 +216,11 @@
    "is_child_table": 1,
    "link_doctype": "Inspection Finding Item",
    "link_fieldname": "room",
-   "parent_doctype": "Safety Inspection Report",
-   "table_fieldname": "safety_findings"
-  },
-  {
-   "group": "Safety",
-   "is_child_table": 1,
-   "link_doctype": "Inspection Finding Item",
-   "link_fieldname": "room",
    "parent_doctype": "Safety Task Execution",
    "table_fieldname": "findings"
   }
  ],
- "modified": "2026-08-15 18:20:00.000000",
+ "modified": "2026-08-16 07:10:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Room",
