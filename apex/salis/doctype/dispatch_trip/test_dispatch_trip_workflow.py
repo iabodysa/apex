@@ -1,37 +1,33 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Native Workflow tests for Dispatch Trip (the FINAL status DocType on the
-Salis Workflow Spine).
+Salis Workflow Spine), plus the controller-level state guards that operate
+independently of that workflow.
 
-These lock in the conversion of Dispatch Trip from a hand-rolled status machine
-(the old ``_ALLOWED_TRANSITIONS`` map + ``_enforce_status_flow``) to the native
-**Dispatch Trip Workflow**, and prove the behaviours the workflow now owns plus
-the cross-document side-effects the controller still owns:
+Two layers are proven here, both against the real ``frappe.model.workflow.apply_workflow``
+driven by concrete role-holding users (role gate enforced) — never a mocked shortcut:
 
-  * the workflow is seeded and active for Dispatch Trip, reusing the ``status``
-    field, with the docstatus map Planned=0 / Dispatched=0 / Completed=1 /
-    Cancelled=2;
-  * a trip walks Planned --Dispatch--> Dispatched --Complete--> Completed via
-    ``apply_workflow`` as concrete role-holding users (role gate enforced);
-  * ``Complete`` is the submit transition (docstatus 0 -> 1) and its on_submit
-    side-effects fire end-to-end: the linked Transport Request is driven to
-    **Fulfilled** through *its* native workflow, and the vehicle odometer is
-    advanced;
-  * the cancel / call-off path: ``Cancel`` (submitted Completed -> Cancelled,
-    docstatus 1 -> 2) fires the ``on_cancel`` reversal — the Transport Request is
-    rolled back Fulfilled -> Scheduled and the Trip Fulfilment Ledger row is
-    removed;
-  * illegal jumps are blocked by the workflow (Planned -> Completed skips
-    Dispatched; a draft trip is never offered Cancel — a draft -> Cancelled
-    transition is forbidden by Frappe and is intentionally absent);
-  * the controller-level initial-status guard still rejects a direct insert at a
-    later/terminal status (the insert-bypass the workflow cannot cover).
+  * the WORKFLOW layer — seeded and active for Dispatch Trip, reusing the ``status``
+    field, with the docstatus map Planned=0 / Dispatched=0 / Completed=1 / Cancelled=2;
+    a trip walks Planned --Dispatch--> Dispatched --Complete--> Completed; ``Complete``
+    is the submit transition (docstatus 0 -> 1) and its on_submit side-effects fire
+    end-to-end (the linked Transport Request is driven to Fulfilled through *its* own
+    native workflow, and the vehicle odometer is advanced); the cancel / call-off path
+    (``Cancel``, submitted Completed -> Cancelled, docstatus 1 -> 2) fires the
+    ``on_cancel`` reversal; illegal jumps are blocked by the workflow (Planned ->
+    Completed skips Dispatched; a draft trip is never offered Cancel);
 
-The tests drive the real ``frappe.model.workflow.apply_workflow`` as concrete
-users, exercising the same path a desk action takes (role gate + condition +
-docstatus transition), not a mocked shortcut. Dispatch Trip is project-scoped
-through its parent Route Plan, so scoped operational roles are granted a Project
-User Permission in setUp (Fleet Manager is an unscoped oversight role and needs
-none).
+  * the CONTROLLER layer — ``_guard_initial_status`` (insert at any state other than
+    Planned is rejected), ``_enforce_dispatch_readiness`` (submit without required
+    fields is rejected), ``_require_completion_notes`` (Completed status without notes
+    is rejected), ``_validate_odometer`` (lone start/end or end < start is rejected),
+    and the workflow gate refusing a no-op duplicate transition — guards that live in
+    the Dispatch Trip controller independently of the native workflow and would still
+    have to hold even on a site where the workflow record was never seeded.
+
+Dispatch Trip is project-scoped through its parent Route Plan, so scoped operational
+roles are granted a Project User Permission in setUpClass (Fleet Manager is an
+unscoped oversight role and needs none). Every fixture is registered with
+``addCleanup`` at creation time so it is removed even when a test fails mid-way.
 """
 
 import frappe
@@ -42,6 +38,11 @@ from apex.tests._helpers import _user
 from apex.tests.factories import make_project, make_vehicle, purge_doc, purge_trip_request
 
 WORKFLOW = "Dispatch Trip Workflow"
+
+
+def _h(n=12):
+    """Short random hash suffix for unique fixture names."""
+    return frappe.generate_hash(length=n).upper()
 
 
 def _actions(doc):
@@ -104,6 +105,31 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             }).insert(ignore_permissions=True).name
         return d
 
+    @staticmethod
+    def _make_vehicle(suffix=None, odometer=0):
+        plate = "SSF-" + (suffix or _h(12))
+        existing = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
+        if existing:
+            return existing
+        return frappe.get_doc({
+            "doctype": "Salis Vehicle",
+            "plate_number": plate,
+            "status": "Active",
+            "odometer": odometer,
+        }).insert(ignore_permissions=True).name
+
+    @staticmethod
+    def _make_driver(suffix=None):
+        full_name = "SSF Driver " + (suffix or _h(12))
+        existing = frappe.db.get_value("Salis Driver", {"full_name": full_name}, "name")
+        if existing:
+            return existing
+        return frappe.get_doc({
+            "doctype": "Salis Driver",
+            "full_name": full_name,
+            "status": "Active",
+        }).insert(ignore_permissions=True).name
+
     def _scheduled_tr(self):
         """A Transport Request driven (as Administrator) all the way to Scheduled
         with a submitted Route Plan, ready for a Dispatch Trip. Returns
@@ -147,6 +173,51 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.addCleanup(lambda: purge_trip_request(tr.name, rp.name))
         return tr, rp.name
 
+    def _make_scheduled_tr(self, project):
+        """A Transport Request driven all the way to Scheduled, with a submitted
+        Route Plan. Returns ``(tr_doc, route_plan_name)``. The caller registers
+        its own cleanup via ``addCleanup`` — unlike ``_scheduled_tr`` above, this
+        variant does not clean up after itself.
+
+        The plan carries its two stops because a Dispatch Trip copies its executable
+        route from the plan (``trip_manifest.copy_route_stops``) and
+        ``_enforce_dispatch_readiness`` refuses a trip with no stop to run."""
+        tr = frappe.get_doc({
+            "doctype": "Transport Request",
+            "service_line": "Administrative Trip",
+            "request_type": "Administrative Trip / Document Signing",
+            "destination": "Ministry Office",
+            "from_location": "HQ",
+            "to_location": "Ministry Office",
+            "project": project,
+            "requested_by": self.pmanager,
+            "source_channel": "Desk",
+            "status": "New",
+        }).insert(ignore_permissions=True)
+
+        frappe.set_user(self.supervisor)
+        apply_workflow(tr, "Validate")
+        tr.reload()
+        frappe.set_user(self.manager)
+        apply_workflow(tr, "Authorize (Operations)")
+        frappe.set_user("Administrator")
+        tr.reload()
+
+        rp = frappe.get_doc({
+            "doctype": "Route Plan",
+            "route_name": "SSF Route " + _h(12),
+            "transport_request": tr.name,
+            "project": project,
+            "stops": [
+                {"stop_name": "HQ", "location": "HQ"},
+                {"stop_name": "Ministry Office", "location": "Ministry Office"},
+            ],
+        }).insert(ignore_permissions=True)
+        rp.submit()
+        tr.reload()
+        self.assertEqual(tr.status, "Scheduled")
+        return tr, rp.name
+
     def _new_trip(self, route_plan, vehicle, driver):
         dt = frappe.get_doc({
             "doctype": "Dispatch Trip",
@@ -159,6 +230,20 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         return dt
 
+    def _make_trip(self, route_plan, vehicle, driver, status="Planned"):
+        dt = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "route_plan": route_plan,
+            "vehicle": vehicle,
+            "driver": driver,
+            "trip_date": frappe.utils.today(),
+            "status": status,
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
+        return dt
+
+
+    # --- native workflow: seeding, lifecycle, cancel reversal, illegal jumps ----
 
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Dispatch Trip"), WORKFLOW)
@@ -291,3 +376,238 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             frappe.get_doc(
                 {"doctype": "Dispatch Trip", "status": "Completed"}
             ).insert(ignore_permissions=True)
+
+
+    # --- controller-level state guards, independent of the workflow record -----
+
+    def test_state_flow_insert_at_completed_blocked(self):
+        """Controller rejects a direct insert at a terminal state (Completed).
+
+        This is the existing guard; it is preserved here as the canonical
+        state-flow anchor test so the module always proves the initial-status
+        contract regardless of which other tests are skipped."""
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Completed"}).insert(
+                ignore_permissions=True)
+
+    def test_insert_at_dispatched_blocked(self):
+        """Controller rejects a direct insert at Dispatched — only the workflow
+        may move a trip to that state."""
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Dispatched"}).insert(
+                ignore_permissions=True)
+
+    def test_insert_at_cancelled_blocked(self):
+        """Controller rejects a direct insert at Cancelled — only the workflow
+        may cancel a submitted-Completed trip."""
+        with self.assertRaises(frappe.ValidationError):
+            frappe.get_doc({"doctype": "Dispatch Trip", "status": "Cancelled"}).insert(
+                ignore_permissions=True)
+
+    def test_insert_at_planned_succeeds(self):
+        """The only valid creation state is Planned; the insert must not raise."""
+        dt = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
+        self.assertEqual(dt.status, "Planned")
+        self.assertEqual(dt.docstatus, 0)
+
+
+    def test_happy_path_lifecycle(self):
+        """A trip walks Planned → Dispatched → Completed via apply_workflow.
+
+        Verifies status and docstatus at each step, and that completion_notes
+        must be set before the Complete transition is applied. Side-effects
+        (TR fulfilment, ledger) are proved above.
+        """
+        tr, rp = self._make_scheduled_tr(self.project)
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
+        vehicle = self._make_vehicle("HP1")
+        driver = self._make_driver("HP1")
+        dt = self._make_trip(rp, vehicle, driver)
+
+        self.assertEqual(dt.status, "Planned")
+        self.assertEqual(dt.docstatus, 0)
+
+        frappe.set_user(self.supervisor)
+        self.assertIn("Dispatch", _actions(dt))
+        apply_workflow(dt, "Dispatch")
+        dt.reload()
+        self.assertEqual(dt.status, "Dispatched")
+        self.assertEqual(dt.docstatus, 0)
+
+        frappe.set_user("Administrator")
+        dt.completion_notes = "All workers delivered on time."
+        dt.odometer_start = 1000
+        dt.odometer_end = 1120
+        dt.save(ignore_permissions=True)
+
+        frappe.set_user(self.manager)
+        self.assertIn("Complete", _actions(dt))
+        apply_workflow(dt, "Complete")
+        dt.reload()
+        self.assertEqual(dt.status, "Completed")
+        self.assertEqual(dt.docstatus, 1)
+
+
+    def test_invalid_transition_from_planned_to_completed_blocked(self):
+        """Workflow blocks the Complete action when the trip is still Planned.
+
+        The transition table has no Planned → Completed edge, so apply_workflow
+        must raise a ValidationError.
+        """
+        tr, rp = self._make_scheduled_tr(self.project)
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
+        vehicle = self._make_vehicle("INV1")
+        driver = self._make_driver("INV1")
+        dt = self._make_trip(rp, vehicle, driver)
+
+        frappe.set_user(self.manager)
+        offered = _actions(dt)
+        self.assertNotIn("Complete", offered)
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(dt, "Complete")
+
+
+    def test_invalid_transition_from_completed_to_dispatched_blocked(self):
+        """Once a trip is Completed (submitted), the only legal next action is
+        Cancel (Fleet Manager → Cancelled/docstatus 2). Dispatch is not
+        offered and apply_workflow must raise a ValidationError."""
+        tr, rp = self._make_scheduled_tr(self.project)
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
+        vehicle = self._make_vehicle("INV2")
+        driver = self._make_driver("INV2")
+        dt = self._make_trip(rp, vehicle, driver)
+
+        frappe.set_user(self.manager)
+        apply_workflow(dt, "Dispatch")
+        dt.reload()
+        dt.completion_notes = "Delivered."
+        dt.odometer_start = 200
+        dt.odometer_end = 240
+        frappe.set_user("Administrator")
+        dt.save(ignore_permissions=True)
+        frappe.set_user(self.manager)
+        apply_workflow(dt, "Complete")
+        dt.reload()
+        self.assertEqual(dt.status, "Completed")
+
+        offered = _actions(dt)
+        self.assertNotIn("Dispatch", offered)
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(dt, "Dispatch")
+
+
+    def test_idempotent_transition_dispatch_twice_raises(self):
+        """Applying the same Dispatch action twice must raise on the second call.
+
+        After the first Dispatch the trip is in Dispatched state; the Dispatch
+        action has no outgoing edge from Dispatched, so the second call must
+        raise a ValidationError rather than silently succeeding or crashing."""
+        tr, rp = self._make_scheduled_tr(self.project)
+        self.addCleanup(lambda: purge_trip_request(tr.name, rp))
+        vehicle = self._make_vehicle("IDP1")
+        driver = self._make_driver("IDP1")
+        dt = self._make_trip(rp, vehicle, driver)
+
+        frappe.set_user(self.manager)
+        apply_workflow(dt, "Dispatch")
+        dt.reload()
+        self.assertEqual(dt.status, "Dispatched")
+
+        dt.reload()
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(dt, "Dispatch")
+
+
+    def test_submit_without_vehicle_blocked(self):
+        """before_submit enforces dispatch readiness: vehicle is required.
+
+        A trip missing the vehicle field must not pass before_submit even when
+        the workflow state is otherwise valid. We bypass the controller validate
+        at insert time so the readiness check (before_submit) is the gate under
+        test. The doc is submitted directly as Administrator so no role gate
+        interferes; the controller's _enforce_dispatch_readiness must throw."""
+        bare = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+        })
+        bare.flags.ignore_validate = True
+        bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
+
+        bare.flags.ignore_validate = False
+        bare.flags.ignore_mandatory = False
+
+        frappe.db.set_value("Dispatch Trip", bare.name, "status", "Completed")
+        bare.reload()
+        bare.flags.ignore_validate = False
+        bare.flags.ignore_mandatory = False
+        with self.assertRaises(frappe.ValidationError):
+            bare.submit()
+
+
+    def test_completion_notes_required_when_status_completed(self):
+        """Saving a trip with status=Completed but no completion_notes raises.
+
+        This guard lives in validate(), so it fires on every save, not only on
+        submit. We bypass the workflow to set the status directly so we can
+        exercise the controller guard in isolation."""
+        bare = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+        })
+        bare.flags.ignore_validate = True
+        bare.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
+
+        bare.status = "Completed"
+        bare.completion_notes = ""
+        with self.assertRaises(frappe.ValidationError):
+            bare.save(ignore_permissions=True)
+
+
+    def test_odometer_end_less_than_start_blocked(self):
+        """Odometer end reading below start reading is rejected at validate.
+
+        The doc is inserted clean (no bypass flags), so the guard runs on the
+        first save as well. Values are then changed on the doc object (without
+        a DB round-trip) and a second save must raise."""
+        bare = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+            "odometer_start": 100,
+            "odometer_end": 200,
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
+
+        bare.odometer_start = 500
+        bare.odometer_end = 300
+        with self.assertRaises(frappe.ValidationError):
+            bare.save(ignore_permissions=True)
+
+    def test_lone_odometer_start_without_end_blocked(self):
+        """Setting odometer_start without a matching odometer_end is rejected.
+
+        _validate_odometer treats Int 0 as «not set» (both-or-neither rule).
+        A positive start with end=0 has start_set=True, end_set=False and must
+        raise a ValidationError."""
+        bare = frappe.get_doc({
+            "doctype": "Dispatch Trip",
+            "status": "Planned",
+            "trip_date": frappe.utils.today(),
+            "odometer_start": 100,
+            "odometer_end": 200,
+        }).insert(ignore_permissions=True)
+        self.addCleanup(lambda: purge_doc("Dispatch Trip", bare.name))
+
+        bare.odometer_start = 100
+        bare.odometer_end = 0
+        with self.assertRaises(frappe.ValidationError):
+            bare.save(ignore_permissions=True)

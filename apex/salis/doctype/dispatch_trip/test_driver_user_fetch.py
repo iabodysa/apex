@@ -1,18 +1,27 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Driver-user mirror fetch.
+"""Two small regressions anchored on the shipped ``_Test Driver`` fixture.
 
-Dispatch Trip and Fuel Request each carry a local read-only ``driver_user`` that
-fetches ``driver.driver_user`` so a native Notification can target the driver's
-portal user (``receiver_by_document_field`` reads a LOCAL field — it does not
-follow a dotted cross-doc path). These tests prove the fetch lands the driver's
-user on each transaction document.
+Driver-user mirror fetch: Dispatch Trip and Fuel Request each carry a local
+read-only ``driver_user`` that fetches ``driver.driver_user`` so a native
+Notification can target the driver's portal user (``receiver_by_document_field``
+reads a LOCAL field — it does not follow a dotted cross-doc path). These tests
+prove the fetch lands the driver's user on each transaction document.
+
+Dispatch Trip realtime publish: a trip change (assignment / status / board) must
+push a ``driver_trip_update`` to the Dispatch Trip doctype room so subscribed
+drivers' portals refetch ahead of a manual refresh. This proves the SERVER half:
+``on_update`` calls ``frappe.publish_realtime`` with the right event, room
+(``doctype="Dispatch Trip"``) and ``after_commit``. The true socket round-trip
+needs the live bench (the integrator confirms in the browser).
 
 The rider, the vehicle and the portal user are all shipped fixtures named by
-``test_dependencies`` (line 21); Frappe stands them up instead of the file walking its
+``test_dependencies`` (line 25); Frappe stands them up instead of the file walking its
 own auto-dependencies. The user is the one ERPNext's own Employee fixture is wired to, so the
 mirror has a real portal account to land without this file minting one. The link written
 onto the borrowed rider is cleared again after each case.
 """
+
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -81,4 +90,47 @@ class TestDriverUserFetch(FrappeTestCase):
             lambda: frappe.delete_doc(
                 "Fuel Request", fr.name, force=True, ignore_permissions=True
             )
+        )
+
+    def test_on_update_publishes_driver_trip_update(self):
+        with patch("frappe.publish_realtime") as pub:
+            trip = frappe.get_doc(
+                {
+                    "doctype": "Dispatch Trip",
+                    "trip_date": today(),
+                    "driver": self.driver,
+                    "status": "Planned",
+                }
+            )
+            trip.insert(ignore_permissions=True)
+            self.addCleanup(
+                lambda: frappe.delete_doc(
+                    "Dispatch Trip", trip.name, force=True, ignore_permissions=True
+                )
+            )
+
+        calls = [
+            c
+            for c in pub.call_args_list
+            if c.args and c.args[0] == "driver_trip_update"
+        ]
+        self.assertTrue(
+            calls,
+            "on_update must publish a driver_trip_update so drivers' portals refetch.",
+        )
+        kwargs = calls[0].kwargs
+        self.assertEqual(
+            kwargs.get("doctype"),
+            "Dispatch Trip",
+            "driver_trip_update must be routed to the Dispatch Trip doctype room "
+            "(the socket server gates delivery on read permission).",
+        )
+        self.assertTrue(
+            kwargs.get("after_commit"),
+            "driver_trip_update must be after_commit so subscribers read committed state.",
+        )
+        self.assertEqual(
+            calls[0].args[1].get("name"),
+            trip.name,
+            "The advisory payload should carry the trip name.",
         )

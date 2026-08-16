@@ -1,9 +1,36 @@
 # Copyright (c) 2026, AFMCO and contributors
-from unittest.mock import patch
+"""Resident Request behaviour across four concerns that all sit on the one DocType:
+
+* ``TestAccommodationResidentRequest`` — the triage lifecycle (one-tap advance, bulk
+  triage sync/async split), QR-token building resolution, priority-rule bumping, the
+  public intake endpoint (honeypot + transaction rollback), and the native ToDo
+  created/closed by an assignment.
+* ``TestResidentRequestConvert`` — converting a triaged request into the operational
+  document that does the work (Maintenance Request / Safety Incident), and the
+  back-link stamped onto the request for traceability.
+* ``TestResidentRequestUsesNativeAssignment`` / ``TestNativeUnassignDoesNotWedgeTheRequest``
+  — assignment belongs to Frappe, not to this controller. Two defects are held here:
+  ``_assign`` was written by hand as ``[assigned_to]``, which replaced the aggregate
+  ``ToDo.on_update`` -> ``update_in_reference`` builds from every live ToDo — a second
+  assignee disappeared from the desk badge. Nothing in this module may write ``_assign``.
+  And ``status="Assigned"`` refused to save without ``assigned_to``, on a field the
+  native unassign clears behind the document. That wedged every later save.
+  ``assigned_to`` is read-only so the desk cannot reach that state any other way. Both
+  classes patch ``resident_request.frappe`` wholesale and never touch the database, so
+  they run as plain ``unittest.TestCase``.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.habitat.doctype.resident_request import resident_request
 from apex.habitat.doctype.resident_request import resident_request as rr
 from apex.habitat.doctype.resident_request.resident_request import (
     _apply_priority_rules,
@@ -18,6 +45,16 @@ from apex.habitat.doctype.resident_request.resident_request import (
 from apex.habitat.web_form.accommodation_resident_request import (
     accommodation_resident_request as intake,
 )
+from apex.tests.factories import ApexHabitatTestCase
+from apex.tests import factories
+
+test_ignore = factories.test_ignore
+
+
+def _open_todos(name, user="Administrator"):
+    return frappe.get_all("ToDo", filters={
+        "reference_type": "Resident Request", "reference_name": name,
+        "allocated_to": user, "status": "Open"})
 
 
 class TestAccommodationResidentRequest(FrappeTestCase):
@@ -224,4 +261,229 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         self.assertFalse(
             frappe.db.exists("Resident Request", name),
             "the insert must roll back with the transaction; a manual commit would defeat this",
+        )
+
+
+    # --- v0.8.4: assignment creates a native ToDo; resolving/closing closes it -----
+
+    def _new_request(self):
+        doc = frappe.get_doc({
+            "doctype": "Resident Request",
+            "request_category": "Maintenance",
+            "description": "Test request " + frappe.generate_hash(length=12),
+            "status": "New",
+        })
+        doc.insert(ignore_permissions=True)
+        return doc
+
+    def test_assign_creates_todo_then_resolve_closes_it(self):
+        """Assigning creates one ToDo, re-saving does not duplicate it, and
+        resolving closes it. The ToDo creation is idempotent (no duplicate per
+        assignee)."""
+        doc = self._new_request()
+        self.assertEqual(len(_open_todos(doc.name)), 0)
+
+        doc.status = "Assigned"
+        doc.assigned_to = "Administrator"
+        doc.save(ignore_permissions=True)
+        self.assertEqual(len(_open_todos(doc.name)), 1, "assigning must create one ToDo")
+
+        doc.save(ignore_permissions=True)
+        self.assertEqual(len(_open_todos(doc.name)), 1, "no duplicate ToDo on re-save")
+
+        doc.status = "Resolved"
+        doc.resolution_notes = "Done"
+        doc.save(ignore_permissions=True)
+        self.assertEqual(len(_open_todos(doc.name)), 0, "resolving must close the ToDo")
+
+
+class TestResidentRequestConvert(ApexHabitatTestCase):
+    """Converting a triaged Accommodation Resident Request into the operational
+    document that does the work, and stamping the back-link (target_doctype /
+    target_document) onto the request for traceability. Mirrors the Maintenance
+    Request -> Work Order mapper pattern."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        factories.make_company("Test AFMCO")
+        cls.building = factories.make_building("RRC-BLDG", company="Test AFMCO")
+        cls.room = factories.make_room("RRC-BLDG", room_number="RRC-BLDG-R01")
+
+    def _new_request(self, category="Maintenance", priority="High", **kw):
+        doc = frappe.get_doc({
+            "doctype": "Resident Request",
+            "request_category": category,
+            "priority": priority,
+            "description": "Convert test " + frappe.generate_hash(length=12),
+            "building": "RRC-BLDG",
+            "room": "RRC-BLDG-R01",
+            "status": "New",
+            **kw,
+        })
+        doc.insert(ignore_permissions=True)
+        return doc
+
+    def _convert(self, name):
+        from apex.habitat.doctype.resident_request.resident_request import (
+            convert_request,
+        )
+        return convert_request(name)
+
+    def test_maintenance_category_creates_maintenance_request_and_links_back(self):
+        req = self._new_request(category="Plumbing", priority="High")
+        res = self._convert(req.name)
+
+        self.assertEqual(res["target_doctype"], "Maintenance Request")
+        self.assertTrue(res["target_document"])
+        self.assertFalse(res["already_converted"])
+
+        req.reload()
+        self.assertEqual(req.target_doctype, "Maintenance Request")
+        self.assertEqual(req.target_document, res["target_document"])
+        self.assertEqual(req.status, "In Progress")
+
+        mr = frappe.get_doc("Maintenance Request", res["target_document"])
+        self.assertEqual(mr.building, "RRC-BLDG")
+        self.assertEqual(mr.room, "RRC-BLDG-R01")
+        self.assertEqual(mr.priority, "High")
+        self.assertEqual(mr.issue_type, "Plumbing")
+        self.assertEqual(mr.issue_description, req.description)
+
+    def test_conversion_is_idempotent(self):
+        req = self._new_request(category="Maintenance")
+        first = self._convert(req.name)
+        second = self._convert(req.name)
+
+        self.assertFalse(first["already_converted"])
+        self.assertTrue(second["already_converted"])
+        self.assertEqual(first["target_document"], second["target_document"])
+
+        count = frappe.db.count("Maintenance Request",
+                                {"name": first["target_document"]})
+        self.assertEqual(count, 1)
+
+    def test_safety_category_creates_safety_incident(self):
+        req = self._new_request(category="Safety", priority="Critical",
+                                issue_location="Staircase")
+        res = self._convert(req.name)
+
+        self.assertEqual(res["target_doctype"], "Safety Incident")
+        inc = frappe.get_doc("Safety Incident", res["target_document"])
+        self.assertEqual(inc.building, "RRC-BLDG")
+        self.assertEqual(inc.severity, "Critical")
+
+        req.reload()
+        self.assertEqual(req.target_doctype, "Safety Incident")
+        self.assertEqual(req.target_document, res["target_document"])
+
+    def test_non_convertible_category_throws(self):
+        req = self._new_request(category="Suggestion")
+        with self.assertRaises(frappe.exceptions.ValidationError):
+            self._convert(req.name)
+
+        req.reload()
+        self.assertFalse(req.target_doctype)
+        self.assertFalse(req.target_document)
+
+    def test_terminal_status_is_not_overridden_on_convert(self):
+        req = self._new_request(category="Maintenance", status="Resolved",
+                                resolution_notes="Closed at source")
+        res = self._convert(req.name)
+        req.reload()
+        self.assertEqual(req.status, "Resolved")
+        self.assertEqual(req.target_document, res["target_document"])
+
+
+def _raising_frappe() -> MagicMock:
+    fake = MagicMock()
+
+    def throw(message, exc=None, **_kwargs):
+        raise (exc or frappe.ValidationError)(message)
+
+    fake.throw.side_effect = throw
+    fake.as_json.side_effect = json.dumps
+    return fake
+
+
+def _mock_request(status, assigned_to=None, priority="Medium"):
+    doc = MagicMock(
+        doctype="Resident Request",
+        status=status,
+        assigned_to=assigned_to,
+        priority=priority,
+    )
+    doc.name = "RR-1"
+    return doc
+
+
+class TestResidentRequestUsesNativeAssignment(TestCase):
+    def _sync(self, doc):
+        fake = _raising_frappe()
+        with (
+            patch.object(resident_request, "frappe", fake),
+            patch.object(resident_request, "_", side_effect=lambda message: message),
+            patch.object(resident_request, "add_assignment") as add,
+            patch.object(resident_request, "close_all_assignments") as close,
+        ):
+            resident_request.on_update(doc)
+        return fake, add, close
+
+    def test_assignment_goes_through_the_native_api_and_never_writes_assign(self):
+        fake, add, close = self._sync(_mock_request("Assigned", "supervisor@example.com"))
+
+        args = add.call_args.args[0]
+        self.assertEqual(args["doctype"], "Resident Request")
+        self.assertEqual(args["name"], "RR-1")
+        self.assertEqual(json.loads(args["assign_to"]), ["supervisor@example.com"])
+        close.assert_not_called()
+        self.assertNotIn(
+            "_assign",
+            [call.args[2] for call in fake.db.set_value.call_args_list if len(call.args) > 2],
+            "_assign is the ToDo controller's cache; writing it here loses every other assignee",
+        )
+
+    def test_a_closing_status_closes_the_native_assignments(self):
+        for status in ("Resolved", "Rejected", "Closed"):
+            with self.subTest(status=status):
+                fake, add, close = self._sync(_mock_request(status, "supervisor@example.com"))
+                close.assert_called_once_with("Resident Request", "RR-1")
+                add.assert_not_called()
+                fake.db.set_value.assert_not_called()
+
+    def test_no_todo_is_inserted_by_hand(self):
+        fake, _add, _close = self._sync(_mock_request("Assigned", "supervisor@example.com"))
+        self.assertEqual(
+            [call for call in fake.get_doc.call_args_list],
+            [],
+            "the ToDo is inserted by assign_to.add, not by this module",
+        )
+
+
+class TestNativeUnassignDoesNotWedgeTheRequest(TestCase):
+    def _validate_status(self, doc):
+        fake = _raising_frappe()
+        with (
+            patch.object(resident_request, "frappe", fake),
+            patch.object(resident_request, "_", side_effect=lambda message: message),
+        ):
+            resident_request._validate_status_transition(doc)
+
+    def test_assigned_without_an_assignee_falls_back_instead_of_refusing(self):
+        doc = _mock_request("Assigned", None)
+        self._validate_status(doc)
+        self.assertEqual(
+            doc.status,
+            "New",
+            "a native unassign must return the request to the queue, not block every save",
+        )
+
+    def test_assigned_to_is_read_only_so_only_the_native_assignment_writes_it(self):
+        meta = json.loads(
+            Path(__file__).with_name("resident_request.json").read_text(encoding="utf-8")
+        )
+        field = next(f for f in meta["fields"] if f["fieldname"] == "assigned_to")
+        self.assertTrue(
+            field.get("read_only"),
+            "a second writer on assigned_to is what let status and assignment disagree",
         )

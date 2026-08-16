@@ -1,17 +1,18 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""get_site_address resolves the building's address from the SAVED record.
+"""get_site_address resolves the building's address, both from the saved record and
+from the form's in-progress (unsaved) selection.
 
-Regression for: the building-address-over-site fallback is live in the
-controller (building.get_site_address) but the existing suite only
-drives it through the unsaved-form path, passing `site` /
-`building_address` explicitly as keyword args. The persistence path — where BOTH
-args are omitted (None) and the endpoint reads the STORED `building_address` and
-`site` off the record — was never asserted.
-
-These tests omit the args so the controller falls back to `frappe.db.get_value`
-(controller lines reading the saved building_address, then the saved site), and
-assert the precedence ORDER end-to-end from the database:
+``TestBuildingAddressFallback`` covers the persistence path: the building-address-over-
+site fallback is live in the controller (building.get_site_address), but drives it with
+BOTH `site` / `building_address` args omitted, so the endpoint falls back to
+`frappe.db.get_value` (reading the saved building_address, then the saved site) and the
+precedence order is asserted end-to-end from the database:
     stored building_address  >  stored site  >  empty.
+
+``TestBuildingSiteAddress`` covers the unsaved-form path: the same endpoint called WITH
+explicit `site` / `building_address` keyword args, so a Site switched in the dropdown
+before saving overrides the building's stored site, and an explicitly passed
+building_address (or an explicit blank) overrides what is stored.
 """
 
 import frappe
@@ -126,3 +127,62 @@ class TestBuildingAddressFallback(FrappeTestCase):
         cleared = get_site_address(bldg)
         self.assertIn("Site Street 11", cleared)
         self.assertNotIn("Own Street 13", cleared)
+
+
+class TestBuildingSiteAddress(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_passed_site_overrides_stored_site(self):
+        site_a = _ensure_site("T138 Site A")
+        site_b = _ensure_site("T138 Site B")
+        if not frappe.db.exists("Address", {"address_title": "T138 A"}):
+            frappe.get_doc(
+                {
+                    "doctype": "Address",
+                    "address_title": "T138 A",
+                    "address_type": "Other",
+                    "address_line1": "A Street 1",
+                    "city": "Riyadh", "country": "Saudi Arabia",
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
+                }
+            ).insert(ignore_permissions=True)
+        company = (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+        bldg = make_building(name="T138 Building", site=site_a, company=company).name
+
+        self.assertTrue(get_site_address(bldg))
+        self.assertEqual(get_site_address(bldg, site=site_b), "")
+
+    def test_building_address_overrides_site(self):
+        """the building's own selected Address wins over the Site's; clearing it
+        falls back to the Site."""
+        site_a = _ensure_site("T144 Site")
+        if not frappe.db.exists("Address", {"address_title": "T144 Site Addr"}):
+            frappe.get_doc(
+                {
+                    "doctype": "Address", "address_title": "T144 Site Addr",
+                    "address_type": "Other", "address_line1": "Site Street", "city": "Riyadh", "country": "Saudi Arabia",
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
+                }
+            ).insert(ignore_permissions=True)
+        own = frappe.db.get_value("Address", {"address_title": "T144 Own Addr"})
+        if not own:
+            own = frappe.get_doc(
+                {
+                    "doctype": "Address", "address_title": "T144 Own Addr",
+                    "address_type": "Other", "address_line1": "Own Street 9", "city": "Jeddah", "country": "Saudi Arabia",
+                }
+            ).insert(ignore_permissions=True).name
+        company = (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+        bldg = make_building(name="T144 Building", site=site_a, company=company).name
+
+        own_text = get_site_address(bldg, site=site_a, building_address=own)
+        self.assertIn("Own Street 9", own_text)
+        self.assertNotIn("Site Street", own_text)
+        self.assertIn("Site Street", get_site_address(bldg, site=site_a, building_address=""))

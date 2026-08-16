@@ -1,7 +1,27 @@
 # Copyright (c) 2026, AFMCO and contributors
+"""Housing Assignment core lifecycle, plus the bed-occupancy index it depends on.
+
+* ``TestAccommodationAssignment`` — creation/validation (mandatory fields, duplicate
+  active assignment, occupied bed, room/building mismatch), the Temporary Worker
+  expiry warning, the terms-signature capture, and that a failed submit does not
+  discard rows written earlier in the same request.
+* ``TestHousingAssignmentBedIndexDeclaration`` / ``TestFreshInstallHookDeclaresTheIndexes``
+  — the two bed-occupancy indexes (``idx_asgn_bed``, ``idx_asgn_bed_active``) that the
+  duplicate/occupied-bed guards above depend on for a query plan that scales. They are
+  DECLARED, not only patched: ``housing_assignment.on_doctype_update`` is the one
+  delivery path that reaches both a brand-new site (fresh install skips patches
+  outright) and an already-installed one (``bench migrate``). The mock-based class
+  proves the delegation itself; the DDL-based class proves the real index shape by
+  dropping and re-declaring it against a live database.
+"""
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
+import unittest
+from unittest import mock
+from apex.apex_core.utils import ledger_index
+from apex.habitat.doctype.housing_assignment import housing_assignment
 
 test_ignore = [
     "Additional Salary",
@@ -234,3 +254,82 @@ class TestAccommodationAssignment(FrappeTestCase):
             frappe.db.get_value("Housing Assignment", doc.name, "terms_signature"),
             data_uri,
         )
+
+
+# `on_doctype_update` is the one delivery path reaching BOTH a fresh site and an upgraded
+# one: a fresh install marks every registered patch complete WITHOUT running it, so an index
+# delivered by a patch alone would exist only on upgraded sites. The legacy v0_7 patch stays
+# registered and uses the SAME index names, so a migrated site grows no duplicates.
+
+
+DOCTYPE = "Housing Assignment"
+BED_INDEX = "idx_asgn_bed"
+ACTIVE_INDEX = "idx_asgn_bed_active"
+LEGACY_PATCH = "apex.patches.v0_7.add_bed_assignment_index"
+
+_EXPECTED_INDEXES = {
+    "idx_asgn_bed": ["bed"],
+    "idx_asgn_bed_active": ["bed", "docstatus", "check_out_date"],
+}
+
+
+def _index_calls(add_index_mock):
+    """{index_name: [column, ...]} recorded off the mocked helper, so an assertion
+    reads as the index contract rather than as call plumbing."""
+    calls = {}
+    for call in add_index_mock.call_args_list:
+        doctype, fields, index_name = call.args
+        assert doctype == "Housing Assignment", f"unexpected doctype {doctype!r}"
+        calls[index_name] = list(fields)
+    return calls
+
+
+class TestFreshInstallHookDeclaresTheIndexes(unittest.TestCase):
+    """No live site or DB is needed: the DDL boundary (``add_index_guarded``) is
+    mocked, so what is asserted is the delegation itself, never the SQL."""
+
+    def test_on_doctype_update_declares_both_bed_indexes(self):
+        """``on_doctype_update`` is the only path that indexes a brand-new site, so
+        it must declare both bed indexes over exactly the columns the occupancy
+        lookup reads."""
+        with mock.patch.object(
+            ledger_index, "add_index_guarded", return_value=True
+        ) as add_index:
+            housing_assignment.on_doctype_update()
+
+        self.assertEqual(_index_calls(add_index), _EXPECTED_INDEXES)
+
+
+def _index_columns(doctype, index_name):
+    """The ordered column list of one index, straight out of MariaDB."""
+    rows = frappe.db.sql(
+        f"SHOW INDEX FROM `tab{doctype}` WHERE Key_name = %s",
+        (index_name,),
+        as_dict=True,
+    )
+    return [row["Column_name"] for row in sorted(rows, key=lambda r: r["Seq_in_index"])]
+
+
+def _indexes_covering(doctype, columns):
+    """Every index name whose ordered column list equals ``columns``.
+
+    Assert on THIS, not on an index name, wherever the framework may already
+    have built an equivalent index of its own. ``bed`` is a Link carrying
+    ``search_index: 1``, so Frappe creates its own single-column index (named
+    ``bed`` at table creation, ``bed_index`` on a later alter). Since that change the
+    guarded helper recognises that equivalence and declines to add a duplicate
+    under our name, so ``idx_asgn_bed`` is present on some sites and absent on
+    others while the invariant the query planner needs — bed is indexed — holds
+    on both. A test that pinned the name would fail on exactly the sites where
+    the deduplication worked.
+    """
+    rows = frappe.db.sql(f"SHOW INDEX FROM `tab{doctype}`", as_dict=True)
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["Key_name"], []).append(row)
+    return {
+        name
+        for name, index_rows in grouped.items()
+        if [r["Column_name"] for r in sorted(index_rows, key=lambda r: r["Seq_in_index"])]
+        == list(columns)
+    }

@@ -14,8 +14,35 @@ from apex.salis.doctype.dispatch_trip.dispatch_trip import (
     create_ad_hoc_trip,
 )
 
+# No case in this module inserts a Dispatch Trip: every trip here is an in-memory
+# DispatchTrip/doc object exercising one controller method directly (aggregate
+# logic under mocks, or a single validate-time guard), so the module needs none
+# of the usual link-fixture auto-dependencies.
+test_ignore = [
+    "Salis Vehicle",
+    "Salis Driver",
+    "Route Plan",
+    "Transport Request",
+    "Payment Gateway",
+]
+
+
+def _times_trip(status, depart, ret):
+    """An unsaved Dispatch Trip carrying only what ``_validate_trip_times`` reads."""
+    return frappe.get_doc(
+        {
+            "doctype": "Dispatch Trip",
+            "status": status,
+            "depart_time": depart,
+            "return_time": ret,
+        }
+    )
+
 
 class TestDispatchTripAggregate(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+
     def _trip(self, **values):
         data = {
             "doctype": "Dispatch Trip",
@@ -479,3 +506,56 @@ class TestDispatchTripAggregate(FrappeTestCase):
 
         get_doc.assert_not_called()
         savepoint.assert_not_called()
+    # Frappe stores an empty Int field as 0, so an odometer_end set while
+    # odometer_start is left at its 0 default would pass a naive `if not start`
+    # check and silently break distance/odometer-advance accounting on submit.
+    # _validate_odometer requires both-or-neither and end >= start.
+
+    def _odometer_trip(self, start, end):
+        doc = frappe.new_doc("Dispatch Trip")
+        doc.odometer_start = start
+        doc.odometer_end = end
+        return doc
+
+    def test_odometer_end_set_while_start_zero_throws(self):
+        doc = self._odometer_trip(0, 150)
+        with self.assertRaises(frappe.ValidationError):
+            doc._validate_odometer()
+
+    def test_odometer_start_set_while_end_zero_throws(self):
+        doc = self._odometer_trip(100, 0)
+        with self.assertRaises(frappe.ValidationError):
+            doc._validate_odometer()
+
+    def test_odometer_end_less_than_start_throws(self):
+        doc = self._odometer_trip(200, 150)
+        with self.assertRaises(frappe.ValidationError):
+            doc._validate_odometer()
+
+    def test_odometer_both_unset_passes(self):
+        doc = self._odometer_trip(0, 0)
+        doc._validate_odometer()
+
+    def test_odometer_valid_pair_passes(self):
+        doc = self._odometer_trip(100, 250)
+        doc._validate_odometer()
+    # The guard only fires on a Completed trip with BOTH times set; a return
+    # earlier than the depart is rejected, equal/later is accepted. Planned
+    # trips are exempt (a freshly created trip carries an auto-filled nowtime
+    # that would false-positive).
+
+    def test_times_completed_return_before_depart_is_rejected(self):
+        with self.assertRaises(frappe.ValidationError):
+            _times_trip("Completed", "10:00:00", "08:00:00")._validate_trip_times()
+
+    def test_times_completed_return_after_depart_passes(self):
+        _times_trip("Completed", "08:00:00", "10:00:00")._validate_trip_times()
+
+    def test_times_completed_equal_times_pass(self):
+        _times_trip("Completed", "09:00:00", "09:00:00")._validate_trip_times()
+
+    def test_times_planned_reversed_times_are_exempt(self):
+        _times_trip("Planned", "10:00:00", "08:00:00")._validate_trip_times()
+
+    def test_times_completed_missing_one_time_is_exempt(self):
+        _times_trip("Completed", "10:00:00", None)._validate_trip_times()

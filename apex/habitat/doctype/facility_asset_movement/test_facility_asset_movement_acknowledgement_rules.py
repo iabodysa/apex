@@ -3,13 +3,25 @@
 
 The endpoint carries four rules, not one: permlevel-1 write on the flag, a submitted
 document, an intercompany movement, and the separation of duties that stops the submitter
-signing off their own transfer. The mock tests beside this file asserted only that two
-permission methods were CALLED, so the docstatus and intercompany refusals could each be
-deleted whole with the suite green.
+signing off their own transfer. A mock that asserts only that two permission methods were
+CALLED lets the docstatus and intercompany refusals each be deleted whole with the suite
+green, so ``TestEveryAcknowledgementRefusalIsExercised`` below drives every refusal by its
+actual outcome (a raised exception, an untouched ``db_set``) instead.
+
+``TestFacilityAssetMovementAcknowledgement`` grades the same two permission primitives at a
+coarser level — patching ``frappe.get_doc`` / ``frappe.get_roles`` / ``frappe.session``
+directly rather than replacing the endpoint module's whole ``frappe`` — so a change to which
+permission call the endpoint makes is caught here too, independent of the outcome-level
+refusals above.
 
 It also has to be reachable. The Number Card publishes the queue of movements waiting for
 this sign-off; with no client caller the only way to clear that queue was a hand-written
 API call, so the queue only ever counted up.
+
+Every class in this module is a pure mock of ``acknowledge_intercompany_movement`` — no
+database record is ever created. The DB-backed grading of the same endpoint (a real
+submitted, intercompany Facility Asset Movement, a real accountant) lives in
+``test_facility_asset_movement_acknowledgement.py`` beside this file.
 """
 
 from __future__ import annotations
@@ -121,3 +133,62 @@ class TestTheSignOffIsReachableFromTheForm(TestCase):
             script,
             "the endpoint needs a control on the form, not just a name in a string",
         )
+
+
+class TestFacilityAssetMovementAcknowledgement(TestCase):
+    """Coarser-grained mock of the same endpoint: patches the two permission
+    primitives directly on the module's real ``frappe`` object rather than
+    replacing ``frappe`` wholesale, so a change to which permission call the
+    endpoint makes shows up here independent of the outcome-level refusals above."""
+
+    def test_acknowledgement_uses_document_and_field_permissions(self):
+        movement = MagicMock()
+        movement.name = "MOVE-1"
+        movement.docstatus = 1
+        movement.is_intercompany = 1
+        movement.owner = "preparer@example.com"
+        movement.accounting_acknowledged = 0
+        movement.has_permlevel_access_to.return_value = True
+
+        with (
+            patch.object(facility_asset_movement.frappe, "get_doc", return_value=movement),
+            patch.object(
+                facility_asset_movement.frappe,
+                "get_roles",
+                return_value=["Finance Manager"],
+            ),
+            patch.object(
+                facility_asset_movement.frappe,
+                "session",
+                SimpleNamespace(user="accountant@example.com"),
+            ),
+        ):
+            facility_asset_movement.acknowledge_intercompany_movement("MOVE-1")
+
+        movement.check_permission.assert_called_once_with("read")
+        movement.has_permlevel_access_to.assert_called_once_with(
+            "accounting_acknowledged",
+            permission_type="write",
+        )
+
+    def test_acknowledgement_rejects_field_without_write_permission(self):
+        movement = MagicMock()
+        movement.name = "MOVE-1"
+        movement.docstatus = 1
+        movement.is_intercompany = 1
+        movement.owner = "preparer@example.com"
+        movement.accounting_acknowledged = 0
+        movement.has_permlevel_access_to.return_value = False
+
+        with (
+            patch.object(facility_asset_movement.frappe, "get_doc", return_value=movement),
+            patch.object(
+                facility_asset_movement.frappe,
+                "session",
+                SimpleNamespace(user="accountant@example.com"),
+            ),
+            self.assertRaises(frappe.PermissionError),
+        ):
+            facility_asset_movement.acknowledge_intercompany_movement("MOVE-1")
+
+        movement.db_set.assert_not_called()

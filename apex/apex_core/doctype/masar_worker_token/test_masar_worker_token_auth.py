@@ -27,14 +27,24 @@ each case drops the row it minted instead of waiting for a rollback that has not
 WHY SOME CASES TAKE A DIFFERENT FIXTURE EMPLOYEE. Notification Log rows are not rolled back
 between methods of one class, so the iqama cases each take their own worker; otherwise the
 "no HR row exists yet" precondition would read the previous case's row.
+
+TWO CLASSES COLOCATED HERE FOR THE SAME REASON. The hash-at-rest tests (inside
+``TestMasarWorkerTokenAuth``, below the audience-scope tests) prove the token column
+never holds the raw value and reuse ``_TokenCase.mint``/``.worker()`` unchanged — the
+exact fixture shape their own file used to build by hand. ``TestMasarIdentityContract``
+proves the worker/driver audience-exclusivity contract against ``portal_identity``
+directly, entirely under mocks; it needs no fixture at all, so it colocates for topic
+rather than plumbing.
 """
 
 from __future__ import annotations
 
+from unittest import TestCase
 from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils.password import decrypt
 
 from apex.apex_core.doctype.masar_worker_token import masar_worker_token as token_module
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
@@ -46,6 +56,7 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     resolve_driver_token,
     revoke_driver_tokens,
 )
+from apex.apex_core.utils import portal_identity as security
 from apex.salis.api import masar
 
 test_dependencies = ["Employee", "Salis Driver", "User"]
@@ -321,6 +332,64 @@ class TestMasarWorkerTokenAuth(_TokenCase):
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(first["token"])
         self.assertEqual(masar._resolve_worker(second["token"]), employee)
+
+    # -- Hashed at rest -- the raw personal token must never be stored in clear: a
+    # direct read of the row must expose ZERO usable secret. The row keeps only a
+    # SHA-256 hash (what the resolver matches) plus a site-key-encrypted recoverable
+    # copy (``token_enc``) so the desk can re-share the SAME link without rotating.
+
+    def test_minted_row_stores_the_hash_not_the_raw_token(self):
+        """A minted token exposes the RAW value once (via the controller), but the
+        stored ``token`` column is its SHA-256 hash -- the plaintext is absent from the
+        row, so a direct DB read leaks no usable secret."""
+        doc = self.mint(self.worker())
+        raw = doc._plaintext_token
+        self.assertTrue(raw, "the raw token must be available once, right after mint")
+
+        stored = frappe.db.get_value(TOKEN_DOCTYPE, doc.name, "token")
+        self.assertNotEqual(stored, raw, "the raw token must never be stored in clear")
+        self.assertEqual(stored, _hash_token(raw), "the row must store the SHA-256 hash")
+        self.assertEqual(len(stored), 64, "a SHA-256 hex digest is 64 chars")
+
+    def test_raw_link_still_resolves_after_hashing(self):
+        """The anti-leak contract is preserved: the raw token (the value baked into the
+        worker's /masar link) resolves to exactly its own Employee even though the row
+        stores only the hash."""
+        emp = self.worker()
+        doc = self.mint(emp)
+        raw = doc._plaintext_token
+
+        self.assertEqual(masar._resolve_worker(raw), emp)
+        self.assertEqual(masar.get_worker_context(token=raw)["employee"], emp)
+        with self.assertRaises(frappe.PermissionError):
+            masar._resolve_worker(doc.token)
+
+    def test_encrypted_copy_round_trips_to_the_raw_token(self):
+        """``token_enc`` is a recoverable (site-key) copy so the desk can re-share the
+        SAME link without rotating; it decrypts back to the raw, and it is NOT the raw
+        in clear (a DB read of it is useless without the site key)."""
+        doc = self.mint(self.worker())
+        raw = doc._plaintext_token
+
+        enc = frappe.db.get_value(TOKEN_DOCTYPE, doc.name, "token_enc")
+        self.assertTrue(enc, "an encrypted recoverable copy must be stored")
+        self.assertNotEqual(enc, raw, "the encrypted copy must not equal the raw token")
+        self.assertEqual(decrypt(enc), raw, "the encrypted copy must round-trip to the raw")
+
+    def test_issue_worker_link_shows_raw_but_stores_hash(self):
+        """The desk issuer returns the RAW token/link (shown once) while the row it
+        wrote stores only the hash -- the show-once, hash-at-rest guarantee end to
+        end."""
+        emp = self.worker()
+        res = issue_worker_link(employee=emp)
+        self.addCleanup(self.drop_token, emp)
+        raw = res["token"]
+        self.assertIn(raw, res["link"], "the returned link must carry the raw token")
+        self.assertEqual(masar._resolve_worker(raw), emp, "the issued link must resolve")
+
+        stored = frappe.db.get_value(TOKEN_DOCTYPE, {"employee": emp}, "token")
+        self.assertEqual(stored, _hash_token(raw), "the row must store only the hash")
+        self.assertNotEqual(stored, raw)
 
 
 class TestMasarWorkerTokenSecurityHardening(_TokenCase):
@@ -683,3 +752,96 @@ class TestMasarWorkerTokenAutoname(_TokenCase):
         self.assertTrue(frappe.db.exists(TOKEN_DOCTYPE, {"employee": emp}))
         again = get_or_create_for_employee(emp)
         self.assertEqual(again.name, doc.name)
+
+
+class TestMasarIdentityContract(TestCase):
+    """The worker/driver audience-exclusivity contract, proven under mocks.
+
+    A plain ``TestCase`` on purpose: every case here mocks ``frappe.db`` (or the
+    resolver itself) rather than touching the database, so it needs no
+    ``test_dependencies`` and no ``FrappeTestCase`` rollback machinery.
+    """
+
+    @patch.object(security, "_throttle_bad_token_attempt")
+    @patch.object(security.frappe.db, "get_value")
+    def test_worker_and_driver_tokens_are_audience_exclusive(
+        self, get_value, _throttle
+    ):
+        get_value.return_value = None
+
+        with self.assertRaises(frappe.PermissionError):
+            security.resolve_portal_subject(
+                security.DRIVER, "worker-token", required=True
+            )
+
+        token_filters = get_value.call_args.args[1]
+        self.assertEqual(token_filters["holder_type"], security.DRIVER)
+        self.assertEqual(token_filters["enabled"], 1)
+
+    @patch.object(security, "presented_token", return_value=("", False))
+    def test_salis_session_is_not_a_driver_bearer_credential(self, _presented):
+        self.assertIsNone(resolve_driver_token())
+
+    def test_binding_rejects_mixed_worker_and_driver_subjects(self):
+        row = frappe._dict(
+            holder_type="Worker",
+            party_type="Employee",
+            party="EMP-1",
+            employee="EMP-1",
+            driver="DRV-1",
+        )
+        with self.assertRaises(frappe.PermissionError):
+            security.validate_subject_binding(
+                row, security.WORKER, exception=frappe.PermissionError
+            )
+
+    @staticmethod
+    def _worker_row(expires_on):
+        return frappe._dict(
+            holder_type="Worker",
+            party_type="Employee",
+            party="EMP-1",
+            employee="EMP-1",
+            driver=None,
+            expires_on=expires_on,
+        )
+
+    @patch.object(security, "_throttle_bad_token_attempt")
+    @patch.object(security.frappe.db, "get_value")
+    def test_expired_token_fails_closed(self, get_value, _throttle):
+        """The two reads answer differently on purpose.
+
+        One ``return_value`` for both made the Employee-status read return the token row,
+        which is not "Active" — so the refusal came from the status gate whatever the
+        expiry said, and the case passed identically for a token expiring in 2099.
+        """
+        get_value.side_effect = [self._worker_row("2000-01-01 00:00:00"), "Active"]
+        with self.assertRaises(frappe.PermissionError):
+            security.resolve_portal_subject(security.WORKER, "expired", required=True)
+
+    @patch.object(security, "_throttle_bad_token_attempt")
+    @patch.object(security.frappe.db, "get_value")
+    def test_an_unexpired_token_resolves_its_subject(self, get_value, _throttle):
+        """The mirror the expiry case needs: same mocks, expiry the only difference."""
+        get_value.side_effect = [self._worker_row("2099-01-01 00:00:00"), "Active"]
+        self.assertEqual(
+            security.resolve_portal_subject(security.WORKER, "live", required=True),
+            "EMP-1",
+        )
+
+    def test_revocation_disables_the_subjects_notification_devices(self):
+        with (
+            patch.object(security, "_lock_subject_row", return_value=frappe._dict(name="EMP-1")),
+            patch.object(
+                security,
+                "_lock_subject_token_rows",
+                return_value=[frappe._dict(name="TOKEN-1", enabled=1)],
+            ),
+            patch.object(security, "log_credential_event"),
+            patch.object(security.frappe.db, "set_value"),
+            patch.object(security.frappe.db, "table_exists", return_value=True),
+            patch("apex.salis.api.web_push.disable_subject_subscriptions") as disable,
+        ):
+            self.assertEqual(security.revoke_subject_tokens(security.WORKER, "EMP-1"), 1)
+
+        disable.assert_called_once_with(security.WORKER, "EMP-1")

@@ -25,10 +25,16 @@ neither could tell a real submit refusal from a string that merely still appears
 It graded permissions and labels the same way, reading the shipped JSON rather than asking
 `frappe.has_permission` / `frappe.get_meta`. This version drives a real Facility Asset
 Movement through insert and submit, and asks the framework's own permission and metadata
-APIs the same questions a real caller meets. The behaviour of the sign-off endpoint itself
--- who may give it, who may not, and that it names the giver -- stays graded in
-`test_accounting_sign_off.py` beside this file; this file grades the submit-time gate above
-it and the schema shape around it.
+APIs the same questions a real caller meets.
+
+``TestTheAccountingSignOffCanBeGiven`` below grades the sign-off endpoint itself -- who may
+give it, who may not, and that it names the giver -- against its own fixture: a movement
+built ALREADY SUBMITTED (docstatus forced to 1), because the endpoint only ever acts on a
+submitted document. ``TestTheSubmitGateIsReal`` above it needs the opposite: a movement
+built and left UNSUBMITTED, with its category flipped to Permanent by a raw write after
+insert, so the submit-time gate itself still has something to refuse. The two fixtures
+cannot share one `setUp` without one of them losing its subject, so
+``TestTheAccountingSignOffCanBeGiven`` keeps its own.
 """
 
 from __future__ import annotations
@@ -38,6 +44,9 @@ from frappe.model import get_permitted_fields
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from apex.habitat.doctype.facility_asset_movement.facility_asset_movement import (
+    acknowledge_intercompany_movement,
+)
 from apex.tests._helpers import _user
 
 DOCTYPE = "Facility Asset Movement"
@@ -50,6 +59,14 @@ DESTINATION_COMPANY = "_Test Company 1"
 
 DOCUMENT_WRITERS = ("System Manager", "Accommodation Manager", "Resident Supervisor")
 SUBMITTERS = ("System Manager", "Accommodation Manager")
+
+# The pending-acknowledgement Number Card's own filter, reused by
+# TestTheAccountingSignOffCanBeGiven to prove a sign-off is what clears it.
+TILE_FILTERS = [
+    ["is_intercompany", "=", 1],
+    ["accounting_acknowledged", "=", 0],
+    ["docstatus", "=", 1],
+]
 
 
 def _h(n=12):
@@ -282,3 +299,204 @@ class TestLabelAndPermissionsAgree(FrappeTestCase):
                 field = meta.get_field(fieldname)
                 self.assertEqual(field.permlevel, 1)
                 self.assertTrue(field.allow_on_submit, "cannot be set after submit")
+
+
+class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
+    """The endpoint itself, driven against an ALREADY SUBMITTED intercompany movement —
+    the opposite starting state from ``TestTheSubmitGateIsReal`` above, which needs its
+    movement left unsubmitted so the submit-time gate still has something to refuse.
+    That is why this class keeps its own fixture rather than reusing ``_MovementFixture``.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.accountant = cls._user([ACCOUNTING_ROLE])
+        cls.preparer = cls._user(["Accommodation Manager"])
+        # The accountant who ALSO submitted: the self-acknowledgement case has to be a
+        # user who holds the role, or the role check would be what refuses it and the
+        # test would prove the wrong thing.
+        cls.accountant_preparer = cls._user([ACCOUNTING_ROLE, "Accommodation Manager"])
+
+    @classmethod
+    def _user(cls, roles):
+        doc = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": f"fam-{_h()}@example.com".lower(),
+                "first_name": "_T Fixture",
+                "send_welcome_email": 0,
+                "roles": [{"role": r} for r in roles],
+            }
+        ).insert(ignore_permissions=True)
+        cls.addClassCleanup(
+            frappe.delete_doc, "User", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.site = frappe.get_doc(
+            {"doctype": "Site", "site_name": "FAM " + _h()}
+        ).insert(ignore_permissions=True).name
+        self.addCleanup(
+            frappe.delete_doc, "Site", self.site, force=True, ignore_permissions=True
+        )
+        self.origin = self._building()
+        self.destination = self._building()
+        self.asset = self._asset(self.origin)
+
+    def _building(self):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Building",
+                "building_name": "FAM " + _h(),
+                "site": self.site,
+                "status": "Active",
+                "total_capacity": 2,
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc, "Building", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    def _asset(self, building):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Facility Asset",
+                "asset_name": "FAM " + _h(),
+                "asset_category": "Other",
+                "building": building,
+                "responsible_supervisor": "Administrator",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        self.addCleanup(
+            frappe.delete_doc, "Facility Asset", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def _submitted_movement(self, owner=None, category="Intercompany Temporary"):
+        doc = frappe.get_doc(
+            {
+                "doctype": DOCTYPE,
+                "movement_date": today(),
+                "movement_category": category,
+                "facility_asset": self.asset,
+                "from_building": self.origin,
+                "to_building": self.destination,
+                # is_intercompany is DERIVED from the two companies differing, never set
+                # by the caller, so the fixture has to make the movement genuinely
+                # intercompany rather than assert the flag.
+                "from_company": ORIGIN_COMPANY,
+                "to_company": DESTINATION_COMPANY,
+                "release_approved_by": "Administrator",
+                "receiving_confirmed_by": "Administrator",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        self.assertTrue(
+            doc.is_intercompany,
+            "the fixture must be a real intercompany movement, or it proves nothing",
+        )
+        if owner:
+            frappe.db.set_value(
+                DOCTYPE, doc.name, "owner", owner, update_modified=False
+            )
+        frappe.db.set_value(
+            DOCTYPE, doc.name, "docstatus", 1, update_modified=False
+        )
+        self.addCleanup(self._drop, doc.name)
+        doc.reload()
+        return doc
+
+    def _drop(self, name):
+        frappe.set_user("Administrator")
+        frappe.db.set_value(DOCTYPE, name, "docstatus", 0, update_modified=False)
+        frappe.delete_doc(DOCTYPE, name, force=True, ignore_permissions=True)
+
+    def _tile_count(self):
+        from frappe.client import get_count
+
+        return int(get_count(DOCTYPE, filters=TILE_FILTERS))
+
+    def test_accounting_can_sign_off_and_the_record_says_who(self):
+        doc = self._submitted_movement(owner=self.preparer)
+        before = self._tile_count()
+
+        frappe.set_user(self.accountant)
+        acknowledge_intercompany_movement(doc.name)
+
+        doc.reload()
+        self.assertTrue(doc.accounting_acknowledged)
+        self.assertEqual(
+            doc.accounting_acknowledged_by,
+            self.accountant,
+            "the sign-off must name the person who gave it",
+        )
+        frappe.set_user("Administrator")
+        self.assertEqual(
+            self._tile_count(), before - 1, "the pending tile did not come back down"
+        )
+
+    def test_a_caller_without_the_accounting_role_is_refused(self):
+        doc = self._submitted_movement(owner=self.preparer)
+        frappe.set_user(self.preparer)
+
+        with self.assertRaises(frappe.PermissionError):
+            acknowledge_intercompany_movement(doc.name)
+
+        frappe.set_user("Administrator")
+        doc.reload()
+        self.assertFalse(doc.accounting_acknowledged)
+
+    def test_the_submitter_cannot_acknowledge_their_own_movement(self):
+        """The refusal that makes it a control. This caller HOLDS the accounting role, so
+        only the self-check can be what refuses them."""
+        doc = self._submitted_movement(owner=self.accountant_preparer)
+        frappe.set_user(self.accountant_preparer)
+
+        with self.assertRaises(frappe.PermissionError):
+            acknowledge_intercompany_movement(doc.name)
+
+        frappe.set_user("Administrator")
+        doc.reload()
+        self.assertFalse(doc.accounting_acknowledged)
+
+    def test_a_second_call_does_not_change_who_signed(self):
+        doc = self._submitted_movement(owner=self.preparer)
+        frappe.set_user(self.accountant)
+        acknowledge_intercompany_movement(doc.name)
+        again = acknowledge_intercompany_movement(doc.name)
+
+        self.assertEqual(
+            again["acknowledged_by"],
+            self.accountant,
+            "a repeat call must not re-stamp the signature with a later caller",
+        )
+
+    def test_the_fields_are_reachable_after_submit_at_all(self):
+        """The root of the defect, held on the schema rather than on behaviour: without
+        allow_on_submit no path could set these on a submitted document, and without the
+        permlevel any writer could."""
+        meta = frappe.get_meta(DOCTYPE)
+        for fieldname in ("accounting_acknowledged", "accounting_acknowledged_by"):
+            field = meta.get_field(fieldname)
+            with self.subTest(field=fieldname):
+                self.assertTrue(field.allow_on_submit, "cannot be set after submit")
+                self.assertEqual(field.permlevel, 1, "any writer could set it")
+
+        writers = {
+            p.role
+            for p in meta.permissions
+            if p.permlevel == 1 and p.write
+        }
+        self.assertEqual(
+            writers, {ACCOUNTING_ROLE}, "permlevel-1 write must be Accounting alone"
+        )
