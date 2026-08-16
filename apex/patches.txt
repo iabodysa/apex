@@ -19,3 +19,5 @@ apex.patches.v2_6.converge_state_contracts
 apex.patches.v2_6.converge_native_support_and_recovery
 apex.patches.v2_6.repair_legacy_utility_number_card
 apex.patches.v2_6.repoint_linked_worker_custody_party
+apex.patches.v2_6.restrict_genders_to_two
+apex.patches.v2_6.dedupe_portal_push_endpoints

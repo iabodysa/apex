@@ -463,6 +463,11 @@ has_permission = {
 
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
+    # Driver is portal-only, so it needs desk_access 0 — and make_module_and_roles
+    # (frappe/core/doctype/doctype/doctype.py:1876-1882) creates every role named in a
+    # permissions block with desk_access 1. A fixture wins because migrate.py:120-145 runs
+    # sync_all before sync_fixtures, on install and on every migrate.
+    {"dt": "Role", "filters": [["name", "in", ["Driver"]]]},
     {
         "dt": "Issue Type",
         "filters": [["name", "in", ["Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"]]],
@@ -483,7 +488,6 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     "apex.apex_core.setup.salis_support.grant_issue_role_permissions",
     "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
-    "apex.apex_core.setup.seeders.salis_roles_seed.seed_salis_roles",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
@@ -498,7 +502,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
-    "apex.apex_core.setup.seeders.salis_roles_seed.seed_salis_roles",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",

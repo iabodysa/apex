@@ -30,6 +30,8 @@ ACCOMMODATION_ITEM_GROUPS = [
     "Accommodation Sanitary and Cleaning",
 ]
 
+KEPT_GENDERS = ("Male", "Female")
+
 def after_install():
     """Runs the after-install seed: roles, profiles, item defaults, custody masters, and policies."""
     create_roles()
@@ -44,6 +46,7 @@ def after_install():
     seed_workspace_roles()
     seed_letter_head()
     seed_portal_identities()
+    restrict_genders()
     frappe.clear_cache()
 
 
@@ -116,6 +119,34 @@ def create_accommodation_item_groups(item_group_root):
                     "is_group": 0,
                 }
             ).insert(ignore_permissions=True)
+
+
+def restrict_genders():
+    """Leave only Male and Female on the site, keeping any Gender a record still points at.
+
+    ``frappe.desk.page.setup_wizard.install_fixtures.update_genders`` creates seven Genders at
+    setup time. Apex offers two, so the surplus is removed once — at install for a new site and
+    by a patch for a site that already ran the wizard. It is deliberately absent from
+    ``after_migrate``: a Gender an operator adds later is theirs, and a migrate that deleted it
+    every run would be the app arguing with its own operator.
+
+    Deletion goes through ``frappe.delete_doc``, so the framework's own link check decides what
+    may go. A Gender still referenced by an Employee survives and is reported, rather than
+    being forced out from under the row that uses it.
+    """
+    surplus = [
+        name for name in frappe.get_all("Gender", pluck="name") if name not in KEPT_GENDERS
+    ]
+    removed, kept = [], []
+    for name in surplus:
+        try:
+            frappe.delete_doc("Gender", name, ignore_permissions=True)
+            removed.append(name)
+        except frappe.LinkExistsError:
+            kept.append(name)
+    if kept:
+        frappe.logger().info(f"apex: Gender still in use, left in place: {kept}")
+    return {"removed": removed, "in_use": kept}
 
 
 def create_accommodation_items():

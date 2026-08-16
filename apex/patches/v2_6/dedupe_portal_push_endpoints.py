@@ -1,0 +1,38 @@
+# Copyright (c) 2026, afmcoltd
+"""Leave one Portal Push Subscription per endpoint on a site that could never refuse a second.
+
+`endpoint` is declared unique in the DocType JSON, but its Small Text fieldtype maps to a MySQL
+`text` column and Frappe's schema builder skips a unique index on text (frappe/database/schema.py:212).
+So the declaration never reached the database, and a browser re-registering its push endpoint added
+a row instead of replacing one — every notification then arriving twice. The controller now refuses
+a duplicate; this clears the ones that landed before it did.
+
+The newest row wins: a re-registration carries the current keys, and the row it duplicated holds
+keys the browser has already replaced.
+"""
+
+import frappe
+
+
+def execute():
+    duplicated = frappe.db.sql(
+        """
+        select endpoint
+        from `tabPortal Push Subscription`
+        where endpoint is not null and endpoint != ''
+        group by endpoint
+        having count(*) > 1
+        """,
+        pluck=True,
+    )
+    for endpoint in duplicated:
+        rows = frappe.get_all(
+            "Portal Push Subscription",
+            filters={"endpoint": endpoint},
+            fields=["name"],
+            order_by="modified desc",
+        )
+        for stale in rows[1:]:
+            frappe.delete_doc(
+                "Portal Push Subscription", stale.name, force=True, ignore_permissions=True
+            )
