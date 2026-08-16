@@ -4637,7 +4637,7 @@ Telecom Cost Allocation,توزيع تكاليف الاتصالات
 Telecom Service Contract,عقد خدمة اتصالات
 Telecom Service Provider,مزوّد خدمة الاتصالات
 Telecom Supplier,مورّد الاتصالات
-Telecom contract expires soon,عقد اتصالات على وشك الانتهاء
+"Telecom contracts expiring soon: {0}",عقود اتصالات على وشك الانتهاء: {0}
 Telecom service — {0} — {1} ({2}),خدمة اتصالات — {0} — {1} ({2})
 "Telecom {0} — billing period {1} ({2}), settling {3}.",اتصالات {0} — فترة الفوترة {1} ({2})، سداداً للفاتورة {3}.
 Temp,مؤقت
