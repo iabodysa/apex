@@ -79,8 +79,7 @@
    "fieldname": "endpoint",
    "fieldtype": "Small Text",
    "label": "Endpoint",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "p256dh",
@@ -108,7 +107,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-08-13 16:51:00.000000",
+ "modified": "2026-08-16 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Portal Push Subscription",

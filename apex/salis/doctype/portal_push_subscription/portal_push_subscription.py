@@ -28,17 +28,15 @@ class PortalPushSubscription(Document):
     def _refuse_a_second_row_for_one_endpoint(self):
         """One endpoint belongs to one subscription, enforced here because the column cannot.
 
-        The field is declared ``unique`` in the DocType JSON, and that declaration is dropped in
-        silence: ``endpoint`` is a Small Text, which maps to a MySQL ``text`` column, and Frappe's
-        schema builder refuses a unique index on ``text``/``longtext``
-        (frappe/database/schema.py:212, :229, :241). ``SHOW INDEX`` on the table returns no row for
-        the column, so nothing at the database level ever refused a duplicate and
-        ``DuplicateEntryError`` could not fire.
+        ``endpoint`` is a Small Text, which maps to a MySQL ``text`` column, and Frappe's schema
+        builder refuses a unique index on ``text``/``longtext`` (frappe/database/schema.py:212,
+        :229, :241) — a ``unique`` flag on this field would be dropped in silence, so the JSON does
+        not declare one. ``SHOW INDEX`` on the table returns no row for the column, and nothing at
+        the database level refuses a duplicate on its own.
 
         The type cannot simply become ``Data``: a push endpoint is a service URL well past that
-        field's 140-character ceiling. So the guarantee moves to the controller, where the length
-        is not a constraint, and the JSON keeps its ``unique`` flag as the DECLARATION of intent
-        that this check honours.
+        field's 140-character ceiling. So the guarantee lives here instead, where length is not a
+        constraint.
 
         A browser that re-registers its push endpoint would otherwise create a second row instead
         of replacing the first, and every notification would arrive twice.

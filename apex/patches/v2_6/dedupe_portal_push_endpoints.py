@@ -1,11 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Leave one Portal Push Subscription per endpoint on a site that could never refuse a second.
 
-`endpoint` is declared unique in the DocType JSON, but its Small Text fieldtype maps to a MySQL
-`text` column and Frappe's schema builder skips a unique index on text (frappe/database/schema.py:212).
-So the declaration never reached the database, and a browser re-registering its push endpoint added
-a row instead of replacing one — every notification then arriving twice. The controller now refuses
-a duplicate; this clears the ones that landed before it did.
+`endpoint`'s Small Text fieldtype maps to a MySQL `text` column, and Frappe's schema builder skips a
+unique index on text (frappe/database/schema.py:212) even where one is declared. So a duplicate
+endpoint never reached a database refusal, and a browser re-registering its push endpoint added a
+row instead of replacing one — every notification then arriving twice. The controller now refuses a
+duplicate; this clears the ones that landed before it did.
 
 The newest row wins: a re-registration carries the current keys, and the row it duplicated holds
 keys the browser has already replaced.

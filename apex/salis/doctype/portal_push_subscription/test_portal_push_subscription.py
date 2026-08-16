@@ -52,9 +52,9 @@ class TestPortalPushSubscription(FrappeTestCase):
     def test_two_subscriptions_cannot_share_endpoint(self):
         """Two rows may not hold one endpoint, though no index enforces it.
 
-        The field is declared unique and the declaration is dropped in silence: Small Text
-        maps to a MySQL text column, and the schema builder skips a unique index on text
-        (frappe/database/schema.py:212). The controller carries the guarantee instead.
+        The field is Small Text, which maps to a MySQL text column, and the schema builder
+        skips a unique index on text (frappe/database/schema.py:212) even where one is
+        declared. The controller carries the guarantee instead.
         """
         shared = _endpoint()
         self._insert(self._sub(endpoint=shared))
