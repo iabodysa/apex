@@ -1,4 +1,6 @@
 # Copyright (c) 2026, AFMCO and contributors
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -137,3 +139,32 @@ class TestCleaningComplianceLedger(FrappeTestCase):
         again = reverse_cleaning_compliance(doc.name)
         self.assertEqual(again, 0)
         self.assertEqual(len(self._ledger_rows(doc.name)), 4)
+
+    def test_editing_a_posted_row_is_refused(self):
+        """A row posted by the engine is immutable outside its own insert."""
+        doc = self._make_log()
+        doc.submit()
+        row_name = self._ledger_rows(doc.name)[0].name
+        row = frappe.get_doc("Cleaning Compliance Ledger", row_name)
+        row.cleaned = 0
+        with self.assertRaises(frappe.ValidationError):
+            row.save(ignore_permissions=True)
+
+    def test_deleting_a_posted_row_without_system_manager_is_refused(self):
+        doc = self._make_log()
+        doc.submit()
+        row_name = self._ledger_rows(doc.name)[0].name
+        with patch("frappe.get_roles", return_value=["Employee"]):
+            with self.assertRaises(frappe.ValidationError):
+                frappe.delete_doc(
+                    "Cleaning Compliance Ledger", row_name, ignore_permissions=True
+                )
+        self.assertTrue(frappe.db.exists("Cleaning Compliance Ledger", row_name))
+
+    def test_deleting_a_posted_row_as_system_manager_is_allowed(self):
+        """Non-vacuity control: the guard is role-gated, not an absolute refusal."""
+        doc = self._make_log()
+        doc.submit()
+        row_name = self._ledger_rows(doc.name)[0].name
+        frappe.delete_doc("Cleaning Compliance Ledger", row_name, ignore_permissions=True)
+        self.assertFalse(frappe.db.exists("Cleaning Compliance Ledger", row_name))
