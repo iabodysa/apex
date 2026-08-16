@@ -1,8 +1,6 @@
 # Copyright (c) 2026, afmcoltd
 from frappe.utils import flt
 
-DEFAULT_RATE = 15.0
-
 
 def apply_vat(doc, base):
     """Fill ``tax_amount`` and ``grand_total`` from ``base`` and the document's ``tax_rate``.
