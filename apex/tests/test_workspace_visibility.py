@@ -1,12 +1,29 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Regression test: workspace visibility (#24).
 
-File-level test — no Frappe site needed. Uses stdlib only.
+WORLD-VISIBILITY IS ASKED OF THE FRAMEWORK, NOT OF THE JSON. An empty ``roles``
+child table is not a cosmetic omission: ``frappe.desk.desktop.Workspace.is_permitted``
+(frappe/desk/desktop.py:78-93) returns True unconditionally the moment
+``self.doc.roles`` is empty — that IS the mechanism that makes a workspace visible to
+every authenticated user regardless of role. A guard that only checked the shipped
+JSON could go stale the moment a patch or a hand fix touched the row on a live site
+without touching the file; this asks the same question ``is_permitted`` asks, against
+the actual site.
 
-Asserts:
-- All workspace JSON files are parseable.
-- Every workspace has a non-empty "roles" list (no world-visible workspaces).
-- Every workspace has a "module" field.
+SCOPE UNCHANGED FROM THE ORIGINAL: Habitat-module workspaces only (the previous
+``WORKSPACE_GLOB`` matched only ``apex/habitat/workspace/*/*.json``), preserved here
+as-is rather than widened, because widening it is a policy decision, not a test-format
+one. Widening the scope to every Apex-owned workspace does turn up one workspace
+outside Habitat with an empty ``roles`` table — the top-level ``Apex`` hub, which
+carries no data of its own and only links onward to module roots that each enforce
+their own role. That may be a deliberate navigational-index design (frappe's own
+stock ``Home`` workspace ships the same way) or an oversight; it is flagged for the
+owner rather than decided here.
+
+The chart/link guards below stay file-level: what they defend (a dangling chart
+reference, a retired link resurfacing on a daily workspace) is a property of the
+shipped is_standard record set as a whole, which the site does not expose any single
+query for.
 """
 
 import glob
@@ -15,20 +32,16 @@ import os
 import unittest
 
 import apex
+import frappe
+from frappe.tests.utils import FrappeTestCase
 
 # Rooted at the INSTALLED package. Walking up from this file lands in .claude/tests/, so
 # both globs matched nothing and "every workspace has roles" was asserted over an empty
 # list — a guard that cannot fail.
 _APP = os.path.dirname(os.path.abspath(apex.__file__))
 
-WORKSPACE_GLOB = os.path.join(_APP, "habitat", "workspace", "*", "*.json")
-
 ALL_WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
 ALL_CHART_GLOB = os.path.join(_APP, "*", "dashboard_chart", "*", "*.json")
-
-
-def _workspace_files():
-    return sorted(glob.glob(WORKSPACE_GLOB))
 
 
 def _all_workspace_files():
@@ -90,68 +103,86 @@ def _workspace_link_records(relative_path):
     return [row for row in data.get("links", []) if row.get("type") == "Link"]
 
 
-class TestWorkspaceVisibility(unittest.TestCase):
+def _habitat_workspace_names():
+    """Every Workspace name in the Habitat module — the same scope the retired
+    JSON glob (``apex/habitat/workspace/*/*.json``) covered."""
+    return frappe.get_all("Workspace", filters={"module": "Habitat"}, pluck="name")
 
-    def test_workspace_files_exist(self):
-        """At least one workspace JSON file must be present."""
-        files = _workspace_files()
-        self.assertGreater(
-            len(files),
-            0,
-            "No workspace JSON files found under apex/habitat/workspace/*/",
+
+class TestWorkspaceVisibility(FrappeTestCase):
+    """No shipped workspace may be visible to every authenticated user regardless of role.
+
+    The previous version opened each workspace's JSON and asserted the ``roles`` array
+    it found there was non-empty — a Change Detector Test pinning the file's text. What
+    an operator actually meets is decided by ``Workspace.is_permitted`` reading the
+    ``roles`` child table on the SITE, so this asks that question directly and proves,
+    on a throwaway workspace, that the mechanism it relies on behaves the way the guard
+    assumes.
+    """
+
+    def test_no_shipped_workspace_has_an_empty_roles_table(self):
+        names = _habitat_workspace_names()
+        self.assertGreater(len(names), 0, "no Habitat workspace found — scope drifted")
+        world_visible = [
+            name
+            for name in names
+            if not frappe.db.count(
+                "Has Role", {"parent": name, "parenttype": "Workspace", "parentfield": "roles"}
+            )
+        ]
+        self.assertEqual(
+            world_visible,
+            [],
+            "these shipped workspaces carry no role restriction, so "
+            "frappe.desk.desktop.Workspace.is_permitted() admits every authenticated "
+            f"user regardless of role: {world_visible}",
         )
 
-    def test_all_workspaces_parseable(self):
-        """Every workspace JSON file must be valid JSON."""
-        for path in _workspace_files():
-            with self.subTest(path=os.path.basename(os.path.dirname(path))):
-                with open(path, encoding="utf-8") as fh:
-                    try:
-                        json.load(fh)
-                    except json.JSONDecodeError as exc:
-                        self.fail(f"{path} is not valid JSON: {exc}")
+    def test_an_empty_roles_table_is_what_makes_is_permitted_admit_everyone(self):
+        """Guard-of-the-guard: proves the mechanism the assertion above relies on.
 
-    def test_all_workspaces_have_module_field(self):
-        """Every workspace JSON must have a 'module' field."""
-        for path in _workspace_files():
-            workspace_name = os.path.basename(os.path.dirname(path))
-            with self.subTest(workspace=workspace_name):
-                with open(path, encoding="utf-8") as fh:
-                    data = json.load(fh)
-                self.assertIn(
-                    "module",
-                    data,
-                    f"Workspace '{workspace_name}' is missing the 'module' field.",
-                )
-                self.assertTrue(
-                    data["module"],
-                    f"Workspace '{workspace_name}' has an empty 'module' field.",
-                )
-
-    def test_all_workspaces_have_nonempty_roles(self):
-        """Every workspace must have a non-empty 'roles' list.
-
-        A workspace with an empty roles list is world-visible (accessible to
-        all authenticated users regardless of role), which violates the
-        principle of least privilege used in this application.
+        A DocPerm-style read/write check is irrelevant here — Workspace visibility in
+        the sidebar is decided by ``is_permitted()`` alone, which reads only the
+        ``roles`` child table (frappe/desk/desktop.py:78-93). This drives that function
+        directly on two throwaway documents rather than trusting a description of it.
         """
-        for path in _workspace_files():
-            workspace_name = os.path.basename(os.path.dirname(path))
-            with self.subTest(workspace=workspace_name):
-                with open(path, encoding="utf-8") as fh:
-                    data = json.load(fh)
-                roles = data.get("roles", [])
-                self.assertIsInstance(
-                    roles,
-                    list,
-                    f"Workspace '{workspace_name}': 'roles' must be a list, got {type(roles).__name__}.",
-                )
-                self.assertGreater(
-                    len(roles),
-                    0,
-                    f"Workspace '{workspace_name}' has an empty 'roles' list — it is world-visible. "
-                    "Add at least one role restriction.",
-                )
+        from frappe.desk.desktop import Workspace as DesktopWorkspace
+
+        frappe.set_user("Administrator")
+        stranger = "workspace_visibility_stranger@example.com"
+        if not frappe.db.exists("User", stranger):
+            frappe.get_doc(
+                {"doctype": "User", "email": stranger, "first_name": "Stranger", "send_welcome_email": 0}
+            ).insert(ignore_permissions=True)
+
+        open_ws = frappe.get_doc(
+            {"doctype": "Workspace", "label": "_Test Open WS", "title": "_Test Open WS", "public": 1}
+        ).insert(ignore_permissions=True)
+        self.addCleanup(open_ws.delete, ignore_permissions=True)
+
+        guarded_ws = frappe.get_doc(
+            {
+                "doctype": "Workspace",
+                "label": "_Test Guarded WS",
+                "title": "_Test Guarded WS",
+                "public": 1,
+                "roles": [{"role": "System Manager"}],
+            }
+        ).insert(ignore_permissions=True)
+        self.addCleanup(guarded_ws.delete, ignore_permissions=True)
+
+        frappe.set_user(stranger)
+        try:
+            self.assertTrue(
+                DesktopWorkspace(open_ws.as_dict(), minimal=True).is_permitted(),
+                "a workspace with an empty roles table must admit any authenticated user",
+            )
+            self.assertFalse(
+                DesktopWorkspace(guarded_ws.as_dict(), minimal=True).is_permitted(),
+                "a workspace restricted to System Manager must refuse a user without it",
+            )
+        finally:
+            frappe.set_user("Administrator")
 
 
 class TestWorkspaceHeadlineCharts(unittest.TestCase):

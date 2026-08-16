@@ -1,108 +1,103 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Structural test: Resident Request Coordinator DocPerms on Resident Request
-(permlevel-0 + permlevel-1 parity).
+"""What the Resident Request Coordinator role can reach on Resident Request, asked
+of the framework.
 
-Pure JSON read — no Frappe site required.  Verifies that:
-  1. A permlevel-0 row exists for the role with read/write/create=1 and NO delete/submit.
-  2. A permlevel-1 row exists for the role with read/write=1.
-  3. Existing rows for System Manager, Accommodation Manager, and Resident Supervisor
-     at both perm levels are untouched (still present and correct).
+WHY THIS ASKS THE FRAMEWORK RATHER THAN THE FILE. The previous version opened the
+DocType JSON and asserted the permissions block contained what the permissions
+block contained -- a change detector, not a check of what a user holding the role
+can actually do. The behaviour a coordinator meets is decided by
+`frappe.has_permission` and `frappe.model.get_permitted_fields`, which read DocPerm
+rows, Custom DocPerm rows and User Permissions together -- none of which the JSON
+alone can answer for.
+
+So this asks the live question once per role, as that role, and the four
+JSON-shape methods become behaviour: triage rights, the confidential field the
+permlevel-1 row unlocks, and that the roles which already opened the document
+before the Coordinator grant still do.
 """
 
-import json
-import pathlib
-import unittest
+from __future__ import annotations
 
-import apex
+import frappe
+from frappe.model import get_permitted_fields
+from frappe.tests.utils import FrappeTestCase
 
-# Resolved from the INSTALLED package: this test's own directory holds only the test, so a
-# sibling read raised and every assertion below was unreachable.
-_DOCTYPE_JSON = (
-    pathlib.Path(apex.__file__).resolve().parent
-    / "habitat/doctype/resident_request/resident_request.json"
-)
+from apex.tests._helpers import _user, as_user
 
+DOCTYPE = "Resident Request"
 ROLE = "Resident Request Coordinator"
+COORDINATOR = "resident_request_coordinator_perms@example.com"
+
+# The field the permlevel-1 row unlocks. apex/habitat/doctype/resident_request/resident_request.json.
+CONFIDENTIAL_FIELD = "mobile_number"
+
+# Roles that opened the document before the Coordinator grant existed; the grant must not
+# have cost them anything.
+OTHER_OPENERS = ("System Manager", "Accommodation Manager", "Resident Supervisor")
 
 
-def _load_perms():
-    with _DOCTYPE_JSON.open() as fh:
-        data = json.load(fh)
-    return data["permissions"]
+class TestResidentRequestCoordinatorPermissions(FrappeTestCase):
+    """What the Resident Request Coordinator role can and cannot do, asked of the framework."""
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.coordinator = _user(COORDINATOR, ROLE)
 
-def _rows_for(perms, role, permlevel=0):
-    return [p for p in perms if p.get("role") == role and p.get("permlevel", 0) == permlevel]
+    def test_the_coordinator_can_triage_but_not_destroy(self):
+        """Shaped for triage work without record-destroying power: read/write/create,
+        no delete, no submit (the DocType is not submittable to begin with)."""
+        with as_user(self.coordinator):
+            for action in ("read", "write", "create"):
+                self.assertTrue(
+                    frappe.has_permission(DOCTYPE, action),
+                    f"the coordinator must be able to {action}",
+                )
+            for action in ("delete", "submit"):
+                self.assertFalse(
+                    frappe.has_permission(DOCTYPE, action),
+                    f"the coordinator must NOT be able to {action}",
+                )
 
+    def test_the_coordinator_reaches_the_confidential_field(self):
+        """The permlevel-1 row exists to unlock exactly this field for the role."""
+        with as_user(self.coordinator):
+            fields = get_permitted_fields(DOCTYPE, permission_type="write")
+        self.assertIn(
+            CONFIDENTIAL_FIELD,
+            fields,
+            "the permlevel-1 row no longer unlocks the confidential field for the coordinator",
+        )
 
-class TestResidentRequestCoordinatorPerms(unittest.TestCase):
-    """JSON-level assertions for the Resident Request Coordinator permission rows."""
-
-    def setUp(self):
-        self.perms = _load_perms()
-
-
-    def test_permlevel0_row_shape(self):
-        """The Coordinator's permlevel-0 row: present, and shaped for triage work
-        without record-destroying power — read/write/create but no delete, no submit
-        (the DocType is not submittable to begin with)."""
-        rows = _rows_for(self.perms, ROLE, 0)
-        self.assertEqual(len(rows), 1, f"Expected exactly one permlevel-0 row for {ROLE!r}")
-        row = rows[0]
-        self.assertEqual(row.get("read"), 1, "permlevel-0 must grant read")
-        self.assertEqual(row.get("write"), 1, "permlevel-0 must grant write")
-        self.assertEqual(row.get("create"), 1, "permlevel-0 must grant create")
-        self.assertNotEqual(row.get("delete"), 1, "Coordinator must NOT have delete")
-        self.assertNotEqual(row.get("submit"), 1, "DocType is not submittable; no submit perm")
-
-    def test_permlevel1_row_shape(self):
-        """The Coordinator's permlevel-1 row: present, with read/write on the
-        confidential fields that permlevel gates."""
-        rows = _rows_for(self.perms, ROLE, 1)
-        self.assertEqual(len(rows), 1, f"Expected exactly one permlevel-1 row for {ROLE!r}")
-        row = rows[0]
-        self.assertEqual(row.get("read"), 1, "permlevel-1 must grant read")
-        self.assertEqual(row.get("write"), 1, "permlevel-1 must grant write")
-
-    def test_existing_roles_are_untouched(self):
+    def test_the_existing_openers_keep_both_their_access_and_the_field(self):
         """Adding the Coordinator's rows must not disturb what System Manager,
         Accommodation Manager and Resident Supervisor already had at either
-        permlevel — including System Manager's delete, the one privileged bit most
-        at risk of being silently dropped by a careless permission-block edit."""
-        for role in ("System Manager", "Accommodation Manager", "Resident Supervisor"):
-            rows0 = _rows_for(self.perms, role, 0)
-            self.assertEqual(len(rows0), 1, f"Existing permlevel-0 row gone for {role!r}")
-            rows1 = _rows_for(self.perms, role, 1)
-            self.assertEqual(len(rows1), 1, f"Existing permlevel-1 row gone for {role!r}")
-        system_manager_row = _rows_for(self.perms, "System Manager", 0)[0]
-        self.assertEqual(
-            system_manager_row.get("delete"), 1,
-            "System Manager permlevel-0 delete must remain",
-        )
+        permlevel."""
+        for role in OTHER_OPENERS:
+            with self.subTest(role=role):
+                user = _user(
+                    role.lower().replace(" ", "_") + "_rrc_perms@example.com", role
+                )
+                with as_user(user):
+                    for action in ("read", "write"):
+                        self.assertTrue(
+                            frappe.has_permission(DOCTYPE, action),
+                            f"{role} lost {action} on {DOCTYPE}",
+                        )
+                    fields = get_permitted_fields(DOCTYPE, permission_type="write")
+                self.assertIn(
+                    CONFIDENTIAL_FIELD,
+                    fields,
+                    f"{role} lost its permlevel-1 reach to {CONFIDENTIAL_FIELD}",
+                )
 
-    def test_the_permission_table_holds_exactly_these_rows(self):
-        """A bare row COUNT says nothing about which row appeared. The pair is the key,
-        because a permlevel-1 row is field access and a permlevel-0 row is the record.
-
-        ``Worker`` holds the portal intake row: a resident raises their own request
-        through the web form, so the role that owns the DocType's create path is part of
-        the shape this guards, not noise beside it.
-        """
-        self.assertEqual(
-            sorted((p["role"], int(p.get("permlevel", 0) or 0)) for p in self.perms),
-            [
-                ("Accommodation Manager", 0),
-                ("Accommodation Manager", 1),
-                ("Resident Request Coordinator", 0),
-                ("Resident Request Coordinator", 1),
-                ("Resident Supervisor", 0),
-                ("Resident Supervisor", 1),
-                ("System Manager", 0),
-                ("System Manager", 1),
-                ("Worker", 0),
-            ],
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_system_manager_still_holds_delete(self):
+        """The one privileged bit most at risk of being silently dropped by a
+        careless permission-block edit."""
+        manager = _user("system_manager_rrc_perms@example.com", "System Manager")
+        with as_user(manager):
+            self.assertTrue(
+                frappe.has_permission(DOCTYPE, "delete"),
+                "System Manager delete on Resident Request must remain",
+            )

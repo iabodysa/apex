@@ -4,96 +4,97 @@
 The subject is the shipped Workspace RECORDS — apex/salis/workspace/salis/salis.json and
 fleet/fleet.json — not the ``__init__.py`` beside this file. Granting a persona read DocPerms on a
 child workspace is not enough on its own: the desk sidebar nests a child only under an
-already-rendered parent (``workspace.js`` ``make_sidebar``), so the root has to be granted too, and a
-root that holds nothing the persona can open is the third shape this guard exists to catch.
+already-rendered parent, so the root has to be granted too, and a root that holds nothing the
+persona can open is the third shape this guard exists to catch.
 
-``Workspace.is_item_allowed`` (frappe/desk/desktop.py:143-166) decides that per item:
+WHAT MOVED HERE AND WHY. This module used to reimplement ``Workspace.is_item_allowed``
+(frappe/desk/desktop.py) and ``build_permissions`` (frappe/utils/user.py) by hand, parsing the
+shipped JSON directly and unit-testing its own reimplementation with planted synthetic pages. Two
+whitelisted endpoints already ask the live question with no reimplementation needed:
 
-- ``doctype`` -> the name must be in the session user's ``can_read``, which
-  ``frappe/utils/user.py build_permissions`` builds from DocPerm rows and which SKIPS
-  every ``istable`` DocType, so a child table can never satisfy a workspace link;
-- ``report`` -> the name must be in ``get_allowed_reports``, i.e. a ``Has Role`` row
-  names one of the session roles (frappe/boot.py get_user_pages_or_reports), the same
-  rule test_report_role_coverage.py guards on the report side;
-- ``dashboard``, ``url`` and ``help`` -> ``True`` unconditionally.
+- ``get_workspace_sidebar_items()`` returns exactly the pages the session user's own sidebar
+  would list — reachability, asked of the framework.
+- ``get_desktop_page(json.dumps({"name": ...}))`` runs the real ``Workspace.build_workspace()``
+  and returns the real, permission-filtered cards and shortcuts for the session user — content,
+  asked of the framework.
 
-That last line is why "the page is not literally blank" was never the right test. The Salis root's
-Dashboards card rendered for a persona while every DocType and Report link on the page was filtered
-away, so it could navigate to two dashboards whose charts read records it has no permission on. This
-guard therefore counts only the OPENABLE items and requires each granted role to have at least one.
-
-SHORTCUTS ARE OPENABLE ITEMS TOO. ``get_shortcuts`` (frappe/desk/desktop.py:299) runs each one
-through the same ``is_item_allowed``, so a page whose links are all filtered away still renders its
-shortcut cards — and the roots are landing pages that carry their work as shortcuts, not links.
-Reading links alone reported TEN workspace/role pairs as empty pages a persona actually opens with
-cards on them. Dashboard and URL shortcuts stay excluded for the reason above.
-
-The Master Data card carries ``Salis Vehicle`` and ``Salis Driver`` deliberately: they are the two
-registries every other Salis record links to, and the only Salis DocTypes whose reader set matches
-the root's grant list exactly, so they fill the card for all seven granted roles.
-
-Nothing here widens access. ``is_item_allowed`` filters every link per user, so a link is only ever a
-shortcut to a list the user could already open by URL; the guards below assert that each added or
-retargeted link was already covered by an existing read DocPerm.
+Both are called below as real single-role test users, so the DocPerm resolution, module
+allow-list and everything else ``is_item_allowed`` weighs is the framework's own, not a hand-rolled
+copy that can drift from it. What is NOT replaced: whether a content block names a Card Break that
+exists, and whether a DocType link points at a child table. Neither has a live counterpart — the
+desk silently fails to render in both cases with no exception to catch — so those two stay as
+direct checks on the shipped JSON, each already a real (non-pinned) rule rather than a value pin.
 
 Lives beside the workspace package it fixes: ``apex/tests/`` is closed to new modules
 (test_colocation_ratchet.py) and a cross-workspace invariant owns no single record dir.
 """
 
+from __future__ import annotations
+
 import glob
 import json
 import os
-import unittest
 from pathlib import Path
 
+import frappe
+from frappe.desk.desktop import get_desktop_page, get_workspace_sidebar_items
+from frappe.tests.utils import FrappeTestCase
+
 import apex
+from apex.tests._helpers import _user, as_user
 
 _APP = str(Path(apex.__file__).resolve().parent)
 _WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
-_DOCTYPE_GLOB = os.path.join(_APP, "*", "doctype", "*", "*.json")
-_REPORT_GLOB = os.path.join(_APP, "*", "report", "*", "*.json")
-_PAGE_GLOB = os.path.join(_APP, "*", "page", "*", "*.json")
 
 GRO_ROLE = "Government Relations Officer"
 SALIS_ROOT = "Salis"
-
-# Both short-circuit is_item_allowed or hold read on every core DocType, so their absence
-# from a page is never the bug this guard hunts.
-_ALWAYS_PERMITTED = {"System Manager", "Administrator"}
-
-# An earlier change added these two to the Salis root's Master Data card. The root has since been
-# redesigned and the card is gone, so THE LINKS ARE NO LONGER ASSERTED — what survives is the
-# invariant they were added to satisfy, which the root still meets by other means. The names
-# stay because the two DocPerm guards below still hold: whatever the layout, the persona must
-# be able to READ what it is offered and must hold no write on it.
-ADDED_TO_SALIS_ROOT = ("Salis Vehicle", "Salis Driver")
-
 HABITAT_ROOT = "Habitat"
 
-# drained both ratchets below to empty. The Habitat root's Operations card gained
-# one operational record per stranded persona, and the Compliance card was retargeted off
-# the child table onto its embedding parent. Each entry left as it was fixed, which is what
-# keeps the exact-equality assertions honest.
+# Both short-circuit is_item_allowed (Administrator) or hold read on every core DocType
+# through means this scan cannot usefully vary (System Manager), so their absence from a
+# page is never the bug this guard hunts.
+_ALWAYS_PERMITTED = {"System Manager", "Administrator"}
+
+# Shortcut types get_shortcuts() lets through unconditionally (is_item_allowed returns True
+# without asking anything), so they render on a page holding nothing else the persona may
+# open. Excluding them keeps the guard measuring reachable WORK, not the always-present cards.
+_NOT_OPENABLE_SHORTCUT_TYPES = {"Dashboard", "URL"}
+
+ADDED_TO_SALIS_ROOT = ("Salis Vehicle", "Salis Driver")
 ADDED_TO_HABITAT_ROOT = {
     "Cleaning Supervisor": "Cleaning Log",
     "Safety Officer": "Safety Round",
     "SIM Operations User": "SIM Custody Assignment",
 }
 
-KNOWN_EMPTY_WORKSPACE_ROLES = {
-    # Frozen baseline of (workspace, role) -> reason. Exact equality: a NEW pair fails the
-    # build and a CLOSED pair fails until it is pruned from here. Empty since that change.
-}
+# Frozen baseline of (workspace, role) -> reason. Exact equality: a NEW pair fails the
+# build and a CLOSED pair fails until it is pruned from here. Empty since the fix.
+KNOWN_EMPTY_WORKSPACE_ROLES: dict[tuple[str, str], str] = {}
 
-KNOWN_CHILD_TABLE_LINKS = {
-    # A DocType link at an istable target is dead for everyone but Administrator, because
-    # build_permissions never puts a child table into can_read. Not permissionable — the
-    # link has to point at the embedding parent instead. Empty since that change.
-}
+# A DocType link at an istable target is dead for everyone but Administrator, because
+# build_permissions never puts a child table into can_read. Not permissionable — the
+# link has to point at the embedding parent instead. Empty since that change.
+KNOWN_CHILD_TABLE_LINKS: dict[tuple[str, str], str] = {}
 
 
-def _load(pattern, doctype):
-    """Every shipped is_standard record of one type, keyed by name."""
+def _load_workspaces():
+    """Every shipped is_standard Workspace, keyed by name."""
+    out = {}
+    for path in sorted(glob.glob(_WORKSPACE_GLOB)):
+        with open(path, encoding="utf-8") as fh:
+            try:
+                data = json.load(fh)
+            except json.JSONDecodeError:
+                continue
+        if isinstance(data, dict) and data.get("doctype") == "Workspace":
+            out[data["name"]] = data
+    return out
+
+
+def _load_doctypes():
+    """Every shipped is_standard DocType, keyed by name — used only by the child-table
+    link check below, which has no live counterpart to ask instead."""
+    pattern = os.path.join(_APP, "*", "doctype", "*", "*.json")
     out = {}
     for path in sorted(glob.glob(pattern)):
         with open(path, encoding="utf-8") as fh:
@@ -101,107 +102,41 @@ def _load(pattern, doctype):
                 data = json.load(fh)
             except json.JSONDecodeError:
                 continue
-        if isinstance(data, dict) and data.get("doctype") == doctype:
+        if isinstance(data, dict) and data.get("doctype") == "DocType":
             out[data["name"]] = data
     return out
 
 
-def _workspaces():
-    return _load(_WORKSPACE_GLOB, "Workspace")
-
-
-def _doctypes():
-    return _load(_DOCTYPE_GLOB, "DocType")
-
-
-def _reports():
-    """Report name -> the roles named in its child table."""
-    return {
-        name: {row["role"] for row in data.get("roles") or [] if row.get("role")}
-        for name, data in _load(_REPORT_GLOB, "Report").items()
-    }
-
-
-def _pages():
-    """Page name -> the roles named in its child table. An empty set means every role."""
-    return {
-        name: {row["role"] for row in data.get("roles") or [] if row.get("role")}
-        for name, data in _load(_PAGE_GLOB, "Page").items()
-    }
-
-
-def _can_read(role, doctypes):
-    """The role's can_read set, by frappe's own rule: permlevel-0 read rows, no istable."""
-    out = set()
-    for name, data in doctypes.items():
-        if data.get("istable"):
-            continue
-        for row in data.get("permissions") or []:
-            if row.get("role") == role and row.get("read") and not row.get("permlevel"):
-                out.add(name)
-                break
-    return out
-
-
-def _openable_items(workspace, role, doctypes, reports, pages):
-    """Everything on one workspace that survives is_item_allowed: links AND shortcuts.
-
-    Shortcuts count. `frappe/desk/desktop.py:299` runs them through the same
-    `is_item_allowed` as the link items and returns the survivors, so a page whose links are
-    all filtered away still renders its shortcut cards. Reading links alone reported ten
-    workspace/role pairs as empty pages that a persona actually opens with five cards on them.
-
-    Each shortcut type is graded by the rule `is_item_allowed` uses for it
-    (`frappe/desk/desktop.py:143-165`): a DocType by can_read, a Report by its role list, a
-    Page by ITS OWN role list — with `frappe/boot.py:274` letting a page that names no role
-    through for everyone.
-
-    Dashboard and URL shortcuts are counted by frappe and NOT by this guard, on the reasoning
-    the module docstring already sets out: `is_item_allowed` returns True for them without
-    asking anything, so they render on a page holding nothing else the persona may open, and
-    a dashboard whose charts read records the persona has no permission on is not something
-    it can open. Excluding them keeps the guard measuring reachable WORK.
-    """
-    readable = _can_read(role, doctypes)
-    items = []
-    for link in workspace.get("links") or []:
-        target = link.get("link_to")
-        if link.get("link_type") == "DocType" and target in readable:
-            items.append(target)
-        elif link.get("link_type") == "Report":
-            listed = reports.get(target)
-            if listed is None or not listed or role in listed:
-                items.append(target)
-    for shortcut in workspace.get("shortcuts") or []:
-        target = shortcut.get("link_to")
-        kind = shortcut.get("type")
-        if kind == "DocType" and target in readable:
-            items.append(target)
-        elif kind == "Report":
-            listed = reports.get(target)
-            if listed is None or not listed or role in listed:
-                items.append(target)
-        elif kind == "Page":
-            listed = pages.get(target)
-            if listed is not None and (not listed or role in listed):
-                items.append(target)
-    return items
-
-
-def _empty_pairs(workspaces, doctypes, reports, pages):
-    """{(workspace, role)} where a granted role can open nothing on the page.
-
-    Pure over its inputs so the self-test below can drive it with planted data.
-    """
-    found = set()
+def _shipped_role_grants(workspaces):
+    """[(workspace, role)] for every non-always-permitted role any shipped Workspace
+    grants, in file order."""
+    pairs = []
     for name, workspace in workspaces.items():
         for row in workspace.get("roles") or []:
             role = row.get("role")
-            if not role or role in _ALWAYS_PERMITTED:
-                continue
-            if not _openable_items(workspace, role, doctypes, reports, pages):
-                found.add((name, role))
-    return found
+            if role and role not in _ALWAYS_PERMITTED:
+                pairs.append((name, role))
+    return pairs
+
+
+def _reaches(workspace_name):
+    """True when the session user's OWN sidebar lists this workspace — the root-grant
+    half: a workspace with no roles row for this user never appears here at all."""
+    sidebar = get_workspace_sidebar_items()
+    return any(page.get("name") == workspace_name for page in sidebar.get("pages") or [])
+
+
+def _openable_items(workspace_name):
+    """(cards, shortcuts) the session user can actually open on the page, asked of
+    get_desktop_page — the same call the desk page itself makes on load."""
+    desktop = get_desktop_page(json.dumps({"name": workspace_name}))
+    cards = desktop.get("cards", {}).get("items") or []
+    shortcuts = [
+        item
+        for item in desktop.get("shortcuts", {}).get("items") or []
+        if item.get("type") not in _NOT_OPENABLE_SHORTCUT_TYPES
+    ]
+    return cards, shortcuts
 
 
 def _child_table_links(workspaces, doctypes):
@@ -216,107 +151,69 @@ def _child_table_links(workspaces, doctypes):
     }
 
 
-class TestNoGrantedRoleLandsOnAnEmptyPage(unittest.TestCase):
-    """The general invariant behind the regression."""
+class TestNoGrantedRoleLandsOnAnEmptyPage(FrappeTestCase):
+    """The general invariant behind the regression, asked of the live desk endpoints —
+    one real, single-role test user per role, reused across every workspace it is
+    granted on."""
 
-    def setUp(self):
-        self.workspaces = _workspaces()
-        self.doctypes = _doctypes()
-        self.reports = _reports()
-        self.pages = _pages()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.workspaces = _load_workspaces()
+        cls.doctypes = _load_doctypes()
+        cls.pairs = _shipped_role_grants(cls.workspaces)
+        cls.role_user = {}
+        for _workspace, role in cls.pairs:
+            if role not in cls.role_user:
+                slug = role.lower().replace(" ", "_")
+                cls.role_user[role] = _user(f"wsrole.{slug}@example.com", role)
 
     def test_scan_is_non_vacuous(self):
         self.assertIn(SALIS_ROOT, self.workspaces, "workspace glob broke")
-        self.assertTrue(self.doctypes, "doctype glob broke")
-        self.assertTrue(self.reports, "report glob broke")
+        self.assertIn(HABITAT_ROOT, self.workspaces, "workspace glob broke")
+        self.assertGreater(len(self.pairs), 10, "workspace/role grant scan found implausibly few")
+        for name in {workspace for workspace, _role in self.pairs}:
+            self.assertTrue(
+                frappe.db.exists("Workspace", name), f"{name} is granted in JSON but not on site"
+            )
 
-    def test_no_new_empty_workspace_role(self):
-        found = _empty_pairs(self.workspaces, self.doctypes, self.reports, self.pages)
+    def test_every_granted_role_reaches_its_workspace_and_can_open_something(self):
+        """Reachability from get_workspace_sidebar_items, content from
+        get_desktop_page, both asked as the actual granted role — real DocPerm
+        resolution, real module allow-list, no reimplementation to drift from either."""
+        unreachable = set()
+        empty = set()
+        for workspace, role in self.pairs:
+            with as_user(self.role_user[role]):
+                if not _reaches(workspace):
+                    unreachable.add((workspace, role))
+                    continue
+                cards, shortcuts = _openable_items(workspace)
+            if not cards and not shortcuts:
+                empty.add((workspace, role))
         self.assertEqual(
-            found,
+            unreachable,
+            set(),
+            "granted role(s) do not reach their own workspace root in the sidebar "
+            f"(get_workspace_sidebar_items): {sorted(unreachable)}",
+        )
+        self.assertEqual(
+            empty,
             set(KNOWN_EMPTY_WORKSPACE_ROLES),
-            "workspace/role pages with nothing openable changed. A NEW pair means that "
-            "persona reaches the page and every DocType and Report link on it is filtered "
-            "away by Workspace.is_item_allowed — give the workspace a link the role can "
-            "read, or freeze it here with a written reason. A MISSING pair means a gap was "
-            f"closed and the baseline must shrink. On disk: {sorted(found)}",
+            "granted role(s) reach a workspace with nothing openable on it "
+            f"(get_desktop_page): {sorted(empty)}. Give the workspace a link the role "
+            "can read, or freeze it above with a written reason.",
         )
-
-    def test_the_detector_flags_a_planted_role(self):
-        """Proof the guard can fail, driven with synthetic input so it proves the
-        DETECTOR rather than the current file contents.
-
-        The page is synthetic rather than a real root, because every shipped root carries an
-        `action-inbox` shortcut and that Page names no role, so frappe lets EVERY role open
-        it (`frappe/boot.py:274`). Planting a role on a real root therefore proves nothing:
-        the role is not stranded, and saying it is would be the false red that hides the true
-        one. The planted page holds one link and one shortcut, both permission-gated.
-        """
-        planted = dict(self.workspaces)
-        planted["_A172 Planted Page"] = {
-            "name": "_A172 Planted Page",
-            "roles": [{"role": "_A172 Planted Role"}],
-            "links": [{"link_type": "DocType", "link_to": "_A172 Unreadable DocType"}],
-            "shortcuts": [{"type": "DocType", "link_to": "_A172 Unreadable DocType"}],
-        }
-        found = _empty_pairs(planted, self.doctypes, self.reports, self.pages)
-        self.assertIn(
-            ("_A172 Planted Page", "_A172 Planted Role"),
-            found,
-            "the detector missed a role that can open nothing on the page",
-        )
-
-    def test_the_detector_clears_a_role_that_can_open_a_role_free_page(self):
-        """The other half of the control: a universal Page shortcut is genuinely openable."""
-        planted = dict(self.workspaces)
-        planted["_A172 Inbox Only Page"] = {
-            "name": "_A172 Inbox Only Page",
-            "roles": [{"role": "_A172 Planted Role"}],
-            "links": [],
-            "shortcuts": [{"type": "Page", "link_to": "action-inbox"}],
-        }
-        found = _empty_pairs(planted, self.doctypes, self.reports, self.pages)
-        self.assertNotIn(("_A172 Inbox Only Page", "_A172 Planted Role"), found)
 
     def test_every_frozen_pair_carries_a_reason(self):
         for pair, reason in KNOWN_EMPTY_WORKSPACE_ROLES.items():
             with self.subTest(pair=pair):
                 self.assertTrue(reason and reason.strip(), f"{pair} has no documented reason")
 
-    def test_child_table_links_stay_frozen(self):
-        """A link at an istable target is dead for every non-Administrator session."""
-        found = _child_table_links(self.workspaces, self.doctypes)
-        self.assertEqual(
-            found,
-            set(KNOWN_CHILD_TABLE_LINKS),
-            "workspace DocType links pointing at a child table changed. build_permissions "
-            "skips istable, so such a link can never render — point it at the embedding "
-            f"parent instead. On disk: {sorted(found)}",
-        )
-
-    def test_the_detector_flags_a_planted_child_table_link(self):
-        """Proof the istable detector can still fail once its baseline is empty.
-
-        A drained ratchet that asserts equality against an empty set passes just as well
-        when the scan is broken, so the detector is driven with a planted link here.
-        """
-        istable = next(n for n, d in self.doctypes.items() if d.get("istable"))
-        planted = dict(self.workspaces)
-        page = dict(planted[SALIS_ROOT])
-        page["links"] = [
-            *(page.get("links") or []),
-            {"type": "Link", "link_type": "DocType", "link_to": istable},
-        ]
-        planted[SALIS_ROOT] = page
-        found = _child_table_links(planted, self.doctypes)
-        self.assertIn(
-            (SALIS_ROOT, istable),
-            found,
-            "the detector missed a DocType link pointing at a child table",
-        )
-
     def test_every_card_block_names_a_card_break(self):
-        """A card renders only when a Card Break label equals the block's card_name."""
+        """A card renders only when a Card Break label equals the block's card_name.
+        No live counterpart: the desk silently omits the block, raising nothing."""
         mismatched = {}
         for name, workspace in self.workspaces.items():
             breaks = {
@@ -339,94 +236,109 @@ class TestNoGrantedRoleLandsOnAnEmptyPage(unittest.TestCase):
             "card silently does not render",
         )
 
-
-class TestGovernmentRelationsOfficerReachesTheSalisRoot(unittest.TestCase):
-    """'s own outcome, asserted by name so it cannot be ratcheted away."""
-
-    def setUp(self):
-        self.workspaces = _workspaces()
-        self.doctypes = _doctypes()
-        self.reports = _reports()
-        self.pages = _pages()
-
-    def test_the_persona_is_granted_the_root(self):
-        granted = {row.get("role") for row in self.workspaces[SALIS_ROOT].get("roles") or []}
-        self.assertIn(
-            GRO_ROLE,
-            granted,
-            "the root grant is what makes Compliance and Rentals reachable in the sidebar",
+    def test_child_table_links_stay_frozen(self):
+        """A link at an istable target is dead for every non-Administrator session —
+        build_permissions never puts a child table in can_read, so is_item_allowed
+        can never pass it, but get_desktop_page as Administrator would never show the
+        gap either. Kept as a direct JSON check for that reason."""
+        found = _child_table_links(self.workspaces, self.doctypes)
+        self.assertEqual(
+            found,
+            set(KNOWN_CHILD_TABLE_LINKS),
+            "workspace DocType links pointing at a child table changed. build_permissions "
+            "skips istable, so such a link can never render — point it at the embedding "
+            f"parent instead. On disk: {sorted(found)}",
         )
 
-    def test_the_persona_can_open_something_on_the_root(self):
-        items = _openable_items(
-            self.workspaces[SALIS_ROOT], GRO_ROLE, self.doctypes, self.reports, self.pages
-        )
-        self.assertTrue(items, f"{GRO_ROLE} lands on the Salis root with nothing to open")
+    def test_the_child_table_detector_flags_a_planted_link(self):
+        """Proof the istable detector can still fail once its baseline is empty."""
+        istable = next(n for n, d in self.doctypes.items() if d.get("istable"))
+        planted = dict(self.workspaces)
+        page = dict(planted[SALIS_ROOT])
+        page["links"] = [
+            *(page.get("links") or []),
+            {"type": "Link", "link_type": "DocType", "link_to": istable},
+        ]
+        planted[SALIS_ROOT] = page
+        found = _child_table_links(planted, self.doctypes)
+        self.assertIn((SALIS_ROOT, istable), found, "the detector missed a planted child-table link")
+
+
+class TestGovernmentRelationsOfficerReachesTheSalisRoot(FrappeTestCase):
+    """The named regression: GRO was granted the Salis root while every link on it was
+    filtered away, asked live so it cannot be ratcheted back without this failing."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.gro = _user("wsrole.gro_named.test@example.com", GRO_ROLE)
+
+    def test_the_persona_is_granted_the_root_and_can_open_something(self):
+        with as_user(self.gro):
+            self.assertTrue(_reaches(SALIS_ROOT), f"{GRO_ROLE} does not reach the Salis root")
+            cards, shortcuts = _openable_items(SALIS_ROOT)
+        self.assertTrue(cards or shortcuts, f"{GRO_ROLE} lands on the Salis root with nothing to open")
 
     def test_the_persona_is_never_frozen_into_the_baseline(self):
         for _workspace, role in KNOWN_EMPTY_WORKSPACE_ROLES:
             self.assertNotEqual(
                 role,
                 GRO_ROLE,
-                f"{GRO_ROLE} must stay fixed in the workspace JSON, never frozen "
-                "as a known gap",
+                f"{GRO_ROLE} must stay fixed in the workspace JSON, never frozen as a known gap",
             )
 
     def test_the_added_links_expose_nothing_new(self):
-        """Every added link was already covered by a read DocPerm the persona held, so the
-        link is a shortcut to a list it could already open by URL."""
-        readable = _can_read(GRO_ROLE, self.doctypes)
-        for target in ADDED_TO_SALIS_ROOT:
-            with self.subTest(link=target):
-                self.assertIn(
-                    target,
-                    readable,
-                    f"{target} was linked without a pre-existing read DocPerm — the link "
-                    "would be dead, and adding one would be a permission change",
-                )
+        """Every added link was already covered by a read DocPerm the persona held —
+        asked of frappe.has_permission, not the DocPerm JSON block."""
+        with as_user(self.gro):
+            for target in ADDED_TO_SALIS_ROOT:
+                with self.subTest(link=target):
+                    self.assertTrue(
+                        frappe.has_permission(target, "read"),
+                        f"{target} was linked without a pre-existing read grant — the "
+                        "link would be dead, and adding one would be a permission change",
+                    )
 
     def test_the_persona_holds_no_write_on_what_it_can_open(self):
         """The charter is a viewer charter; a navigation fix must not smuggle in rights."""
-        write_flags = ("write", "create", "delete", "submit", "cancel", "amend", "share")
-        for target in ADDED_TO_SALIS_ROOT:
-            rows = [
-                row
-                for row in self.doctypes[target].get("permissions") or []
-                if row.get("role") == GRO_ROLE
-            ]
-            self.assertTrue(rows, f"{target} has no {GRO_ROLE} DocPerm row")
-            for row in rows:
-                with self.subTest(link=target):
-                    granted = [flag for flag in write_flags if row.get(flag)]
-                    self.assertEqual(granted, [], f"{target} grants {GRO_ROLE} {granted}")
+        with as_user(self.gro):
+            for target in ADDED_TO_SALIS_ROOT:
+                for action in ("write", "create", "delete", "submit", "cancel", "amend", "share"):
+                    with self.subTest(link=target, action=action):
+                        self.assertFalse(
+                            frappe.has_permission(target, action),
+                            f"{GRO_ROLE} must not be able to {action} {target}",
+                        )
 
 
-class TestHabitatRootPersonasCanOpenSomething(unittest.TestCase):
-    """'s second half: three roles were granted the Habitat root while every link on
-    it was System-Manager-only framework metadata. The root is their gateway — the desk
-    sidebar nests a child workspace only under an already-rendered parent — so each needs
-    something openable there."""
+class TestHabitatRootPersonasCanOpenSomething(FrappeTestCase):
+    """Three roles were granted the Habitat root while every link on it was
+    System-Manager-only framework metadata; the root is their gateway, so each needs
+    something openable there — asked live, per persona."""
 
-    def setUp(self):
-        self.workspaces = _workspaces()
-        self.doctypes = _doctypes()
-        self.reports = _reports()
-        self.pages = _pages()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.role_user = {
+            role: _user(f"wsrole.habitat_named.{role.lower().replace(' ', '_')}@example.com", role)
+            for role in ADDED_TO_HABITAT_ROOT
+        }
 
-    def test_each_persona_is_still_granted_the_root(self):
-        granted = {row.get("role") for row in self.workspaces[HABITAT_ROOT].get("roles") or []}
-        for role in ADDED_TO_HABITAT_ROOT:
-            with self.subTest(role=role):
-                self.assertIn(role, granted)
-
-    def test_each_persona_can_open_something_on_the_root(self):
+    def test_each_persona_reaches_the_root_and_can_open_something(self):
         for role, target in ADDED_TO_HABITAT_ROOT.items():
             with self.subTest(role=role):
-                items = _openable_items(
-                    self.workspaces[HABITAT_ROOT], role, self.doctypes, self.reports, self.pages
-                )
-                self.assertTrue(items, f"{role} lands on the Habitat root with nothing to open")
-                self.assertIn(target, items)
+                with as_user(self.role_user[role]):
+                    self.assertTrue(_reaches(HABITAT_ROOT), f"{role} does not reach the Habitat root")
+                    cards, shortcuts = _openable_items(HABITAT_ROOT)
+                opened = {
+                    link.get("link_to")
+                    for card in cards
+                    for link in card.get("links") or []
+                } | {item.get("link_to") for item in shortcuts}
+                self.assertTrue(cards or shortcuts, f"{role} lands on the Habitat root with nothing to open")
+                self.assertIn(target, opened, f"{role} does not reach {target} on the Habitat root")
 
     def test_no_persona_is_frozen_into_the_baseline(self):
         for _workspace, role in KNOWN_EMPTY_WORKSPACE_ROLES:
@@ -441,13 +353,16 @@ class TestHabitatRootPersonasCanOpenSomething(unittest.TestCase):
         """Each added link was already covered by a read DocPerm the persona held."""
         for role, target in ADDED_TO_HABITAT_ROOT.items():
             with self.subTest(role=role):
-                self.assertIn(
-                    target,
-                    _can_read(role, self.doctypes),
-                    f"{target} was linked without a pre-existing read DocPerm for {role} — "
-                    "the link would be dead, and adding one would be a permission change",
-                )
+                with as_user(self.role_user[role]):
+                    self.assertTrue(
+                        frappe.has_permission(target, "read"),
+                        f"{target} was linked without a pre-existing read grant for "
+                        f"{role} — the link would be dead, and adding one would be a "
+                        "permission change",
+                    )
 
 
 if __name__ == "__main__":
+    import unittest
+
     unittest.main()

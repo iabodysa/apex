@@ -21,23 +21,33 @@ two different questions and both are needed to create a record with PII on it.
 
 The fix removed `create` rather than widening permlevel 1, because Freelancer's
 permlevel-1 set is deliberately narrow — Finance Manager and System Manager
-only, with even the Internal Auditor kept out (see the sibling
-`test_permlevel_pii_hidden_from_unprivileged_role`). Temporary Worker, the
-housing identity this record is explicitly NOT, gives every one of its create
-roles a matching permlevel-1 row; Freelancer is the payroll party, and housing
-does not originate one.
+only, with even the Internal Auditor kept out.
 
-Note the omission is the mechanism: `create` carries `default: 1` on DocPerm, but
-`_set_defaults` returns early while the framework is in import mode
-(document.py:833, the flag being set by frappe/modules/import_file.py:212), so a
-key left out of a shipped DocPerm row imports as 0. The runtime half lives in
-`test_freelancer.py::test_only_the_permlevel1_roles_can_create` — this module is
-structural only.
+WHAT MOVED HERE AND WHY. This module used to carry a second class asserting the
+Freelancer DocPerm JSON row by row (create present/omitted, permlevel-1 rows
+present/absent, per role) — a Change Detector Test pinning the file's text.
+Every one of those claims is now asked live, of the framework, and mostly by a
+sibling that already existed: `test_freelancer.py::test_only_the_permlevel1_roles_can_create`
+inserts as Finance Manager (succeeds) and as Accommodation Manager
+(`frappe.PermissionError`), checking `frappe.has_permission` and
+`get_permlevel_access` on a real document. That test is a strict superset of
+what the removed JSON-reading assertions covered for those two roles, so
+deleting the duplicate loses no coverage a reader could notice.
 
-The app-wide sweep rides here rather than in `apex/tests/` on purpose: it is the
-recurrence guard for the defect this module documents, it needs no site, and the
-colocation ratchet (apex/tests/test_colocation_ratchet.py) forbids a new central
-module. One offender existed app-wide when it was written — the one above.
+The one claim the sibling did NOT cover — that the read-only Internal Auditor
+never reaches Freelancer's permlevel-1 boundary either — is kept below, asked
+the same live way. A future widening of the auditor's grant is a real
+regression (PII exposed to a read-only role); it would not be caught by the
+app-wide sweep, because a role that CAN complete a create it now holds is not
+an "unusable create" by that sweep's definition.
+
+The app-wide sweep still rides here rather than in `apex/tests/` on purpose: it
+is the recurrence guard for the defect this module documents, it needs no
+site, and the colocation ratchet (apex/tests/test_colocation_ratchet.py)
+forbids a new central module. It has no per-DocType behavioural substitute —
+proving it live would mean inserting as every create-holding role against
+every one of the app's 50+ shipped DocTypes, most of which carry unrelated
+mandatory links this module has no business setting up.
 
 Run standalone (from the repo root):
   python3 -m unittest apex.logistay.doctype.freelancer.test_freelancer_create_permission -v
@@ -49,11 +59,14 @@ import json
 import unittest
 from pathlib import Path
 
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
 import apex
+from apex.tests._helpers import _user, as_user
 
 _HERE = Path(apex.__file__).resolve().parent / "logistay" / "doctype" / "freelancer"
 _APP_ROOT = _HERE.parents[2]
-_FREELANCER_JSON = _HERE / "freelancer.json"
 
 # Layout-only fieldtypes carry no value, so `reset_values_if_no_permlevel_access`
 # skips them (base_document.py:1270) and they can never block a create.
@@ -119,71 +132,10 @@ def _app_doctypes():
             yield jp, data
 
 
-class TestFreelancerCreateGrantIsUsable(unittest.TestCase):
-    """The shipped Freelancer DocPerm, read straight off disk."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.doctype = _load(_FREELANCER_JSON)
-        cls.perms = cls.doctype["permissions"]
-
-    def _rows(self, role, permlevel=0):
-        return [p for p in self.perms if p.get("role") == role and _permlevel(p) == permlevel]
-
-    def test_the_pii_field_is_still_the_reason_this_guard_exists(self):
-        """Guard-of-the-guard: an empty scan would pass every assertion below.
-
-        The second entry arrived when `monthly_salary` moved to permlevel 1 under the field
-        sensitivity model (per-person pay); it is `reqd` with no default, so it joins
-        `national_id_or_iqama` as a field a create must be able to write. That is precisely
-        why this guard is worth keeping — the move was only safe because every role holding
-        `create` here (Finance Manager, System Manager) also holds a permlevel-1 write row,
-        which `test_no_role_holds_a_create_it_can_never_complete` re-checks below.
-        """
-        blocking = _blocking_reqd_fields(self.doctype)
-        self.assertEqual(
-            [f["fieldname"] for f in blocking],
-            ["national_id_or_iqama", "monthly_salary"],
-            "Freelancer's mandatory-above-permlevel-0 set changed; re-derive who may create",
-        )
-
-    def test_no_role_holds_a_create_it_can_never_complete(self):
-        self.assertEqual(_unusable_create_grants(self.doctype), [])
-
-    def test_accommodation_manager_cannot_create_and_keeps_no_pii_row(self):
-        """The removed half: no create, and deliberately still outside permlevel 1."""
-        rows = self._rows("Accommodation Manager")
-        self.assertEqual(len(rows), 1, "expected exactly one permlevel-0 row")
-        self.assertNotIn("create", rows[0], "create must be OMITTED, not shipped as 0")
-        self.assertEqual(rows[0].get("read"), 1, "read must survive the create removal")
-        self.assertEqual(rows[0].get("write"), 1, "write must survive the create removal")
-        self.assertEqual(
-            self._rows("Accommodation Manager", permlevel=1),
-            [],
-            "granting permlevel 1 here would put housing inside the payroll-PII "
-            "boundary the Internal Auditor is deliberately kept out of",
-        )
-
-    def test_the_paying_roles_can_both_create_and_fill_the_pii(self):
-        """The kept half, asserted beside the refusal so the two cannot collapse."""
-        for role in ("Finance Manager", "System Manager"):
-            with self.subTest(role=role):
-                self.assertEqual(self._rows(role)[0].get("create"), 1)
-                high = self._rows(role, permlevel=1)
-                self.assertEqual(len(high), 1, f"{role}: expected one permlevel-1 row")
-                self.assertEqual(high[0].get("write"), 1, f"{role}: permlevel-1 write missing")
-
-    def test_internal_auditor_stays_read_only_at_permlevel_zero(self):
-        """Regression guard: this fix must not have widened the auditor's view."""
-        rows = self._rows("Internal Auditor")
-        self.assertEqual(len(rows), 1)
-        for flag in ("create", "write", "delete", "submit", "cancel", "amend"):
-            self.assertNotEqual(rows[0].get(flag), 1, f"Internal Auditor must not have {flag}")
-        self.assertEqual(self._rows("Internal Auditor", permlevel=1), [])
-
-
 class TestEveryAppDocTypeCreateGrantIsUsable(unittest.TestCase):
-    """The same invariant across every DocType the app ships."""
+    """The invariant across every DocType the app ships: a role with `create` can
+    always complete it. No per-DocType behavioural substitute scales to 50+
+    DocTypes and every role that holds `create` on each of them."""
 
     def test_scan_reaches_the_shipped_doctypes(self):
         names = {d["name"] for _, d in _app_doctypes()}
@@ -202,6 +154,45 @@ class TestEveryAppDocTypeCreateGrantIsUsable(unittest.TestCase):
             "permlevel 0 with no matching write row — the create button is on the "
             "form and every press raises MandatoryError:\n" + "\n".join(sorted(offenders)),
         )
+
+
+class TestInternalAuditorStaysOutOfFreelancerPii(FrappeTestCase):
+    """The read-only role never reaches the permlevel-1 boundary the paying
+    roles were given, asked live rather than off the DocPerm JSON.
+
+    Companion to `test_freelancer.py::test_only_the_permlevel1_roles_can_create`,
+    which proves who CAN create; this proves the read-only auditor can never
+    widen into it. `frappe.has_permission` reads DocPerm, Custom DocPerm, User
+    Permission and any `has_permission` hook together — a JSON read sees only
+    one of the four.
+    """
+
+    AUDITOR = "freelancer_create_permission_auditor@example.com"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.auditor = _user(cls.AUDITOR, "Internal Auditor")
+
+    def test_the_auditor_cannot_write_freelancer_and_reaches_no_permlevel_one_field(self):
+        with as_user(self.auditor):
+            self.assertTrue(
+                frappe.has_permission("Freelancer", "read"),
+                "Internal Auditor must still be able to read Freelancer",
+            )
+            for action in ("write", "create", "delete", "submit", "cancel", "amend"):
+                self.assertFalse(
+                    frappe.has_permission("Freelancer", action),
+                    f"Internal Auditor must not be able to {action} Freelancer",
+                )
+            probe = frappe.new_doc("Freelancer")
+            self.assertNotIn(
+                1,
+                probe.get_permlevel_access("write"),
+                "Internal Auditor must not reach Freelancer's permlevel-1 PII fields "
+                "— a role that cannot write at all must not appear to write PII either",
+            )
 
 
 if __name__ == "__main__":

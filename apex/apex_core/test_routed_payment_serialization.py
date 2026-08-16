@@ -39,8 +39,7 @@ loser takes once the winner stamps the link, on the submittable + auto-submit + 
 path that is the actual double-GL hazard (``test_idempotent_second_call_returns_same``
 covers only the non-submitting Note target, leaving the ledger-post leg otherwise
 untested). The ``for_update`` lock's structural presence is guarded separately by
-``test_routed_payment_lock_source_present`` below, mirroring
-``tests/test_bed_booking_concurrency.py``. Fixtures are self-contained and keyed off
+``test_routed_payment_lock_source_present`` below. Fixtures are self-contained and keyed off
 ``self._testMethodName`` so concurrent runs never collide on a shared source row.
 """
 
@@ -264,7 +263,7 @@ class TestRoutedPaymentSerialization(FrappeTestCase):
 
     def test_routed_payment_lock_source_present(self):
         """Structural guard: the FOR UPDATE row-lock on the source must remain in
-        ``route_payment`` (mirrors tests/test_bed_booking_concurrency.py).
+        ``route_payment``.
 
         The runtime tests above assert the GUARD'S invariant but cannot reproduce
         the DB row-lock that makes two real concurrent transactions serialize; this

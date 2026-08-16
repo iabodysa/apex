@@ -266,11 +266,22 @@ class TestTemporaryWorkerLink(unittest.TestCase):
             self.assertIn(emp_field, fields, f"{dt}: Employee mirror {emp_field} missing")
 
     def test_linker_registered_in_daily_scheduler(self):
-        with open(os.path.join(APP_ROOT, "hooks.py"), encoding="utf-8") as fh:
-            hooks = fh.read()
+        """Asks frappe's own hook loader, not a substring match on hooks.py.
+
+        The retired version grepped the raw text of hooks.py for the dotted path, which
+        is satisfied by the string sitting in a comment, a docstring, or the wrong bucket
+        (``cron`` instead of ``daily``) just as readily as by a real registration.
+        ``frappe.get_hooks`` is what the scheduler itself calls to decide what runs today
+        (frappe/utils/scheduler.py), so this reads the same parsed, bucketed structure.
+        """
+        if FRAPPE_IS_STUBBED:
+            self.skipTest(
+                "standalone run: the local frappe stub has no site, so get_hooks cannot resolve"
+            )
+        daily_jobs = frappe.get_hooks("scheduler_events", app_name="apex").get("daily", [])
         self.assertIn(
-            "temporary_worker_engine.link_temporary_workers", hooks,
-            "Batch 5 daily linker is not wired into scheduler_events",
+            "apex.habitat.temporary_worker_engine.link_temporary_workers", daily_jobs,
+            f"Batch 5 daily linker is not registered in hooks.py scheduler_events['daily']: {daily_jobs}",
         )
 
 

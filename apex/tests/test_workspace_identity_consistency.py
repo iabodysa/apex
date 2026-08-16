@@ -1,7 +1,5 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Every shipped Workspace keeps name == label == title.
-
-File-level test -- stdlib only, no Frappe site needed.
+"""Every shipped Workspace keeps name == label == title, on the site, not just on disk.
 
 Frappe reads a workspace's identity from three fields that must not drift:
 
@@ -21,50 +19,48 @@ Frappe reads a workspace's identity from three fields that must not drift:
 The failure mode is silent, which is why it needs a guard: a child declaring its
 parent by name renders nowhere, forever, with no error anywhere.
 
-Run standalone:  python3 -m unittest apex.tests.test_workspace_identity_consistency -v
+READS THE SITE, NOT THE JSON. What breaks is the row Desk actually resolves against
+at request time (``frappe.get_cached_doc("Workspace", name)`` -- desktop.py:48), and
+that row can legally differ from the shipped JSON the moment a patch, a hand fix, or
+a migrate re-import has run. Scoping to Apex's own workspaces uses the same table the
+framework itself uses to decide app ownership -- ``Module Def.app_name`` -- rather
+than a hand-kept list of module names or a directory glob.
 """
 
-import glob
-import json
-import os
-import unittest
-from pathlib import Path
+from __future__ import annotations
 
-import apex
+import frappe
+from frappe.tests.utils import FrappeTestCase
 
-APP_ROOT = str(Path(apex.__file__).resolve().parent)
-WORKSPACE_GLOB = os.path.join(APP_ROOT, "*", "workspace", "*", "*.json")
-
-# Workspaces allowed to break the name == label == title rule, by path relative
-# to apex/. DELIBERATELY EMPTY: every workspace the app ships is consistent.
-# Adding an entry here is an explicit, reviewable exemption -- it is not a
-# place to park a new violation.
+# Workspaces allowed to break the name == label == title rule, by Workspace name.
+# DELIBERATELY EMPTY: every workspace the app ships is consistent. Adding an entry
+# here is an explicit, reviewable exemption -- it is not a place to park a new
+# violation.
 KNOWN_INCONSISTENT: frozenset = frozenset()
 
 
-def _workspaces():
-    """(relative path, parsed record) for every is_standard Workspace JSON."""
-    out = []
-    for path in sorted(glob.glob(WORKSPACE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            out.append((os.path.relpath(path, APP_ROOT), json.load(fh)))
-    return out
+def _apex_workspaces():
+    """Every Workspace row belonging to a module Apex owns (Module Def.app_name)."""
+    modules = frappe.get_all("Module Def", filters={"app_name": "apex"}, pluck="name")
+    return frappe.get_all(
+        "Workspace",
+        filters={"module": ("in", modules)},
+        fields=["name", "label", "title", "parent_page"],
+    )
 
 
-class TestWorkspaceIdentityConsistency(unittest.TestCase):
+class TestWorkspaceIdentityConsistency(FrappeTestCase):
 
     def test_scan_is_non_vacuous(self):
-        """A glob that silently matches nothing would make every other assertion
+        """A filter that silently matched nothing would make every other assertion
         in this file pass for the wrong reason."""
-        found = _workspaces()
+        found = _apex_workspaces()
         self.assertGreaterEqual(
-            len(found), 9, f"workspace scan found only {len(found)} records -- glob drifted"
+            len(found), 9, f"workspace scan found only {len(found)} records -- scope drifted"
         )
-        # Probe by PATH, not by name -- a non-vacuity guard must not restate the
-        # assertion it is guarding.
         self.assertIn(
-            os.path.join("salis", "workspace", "fleet", "fleet.json"),
-            {rel for rel, _ in found},
+            "Fleet",
+            {row.name for row in found},
             "the Fleet workspace must be in scope of this scan",
         )
 
@@ -72,36 +68,33 @@ class TestWorkspaceIdentityConsistency(unittest.TestCase):
         """name drives the awesomebar label + its translation, label drives
         autoname, title drives parent_page resolution. All three must agree."""
         violations = {}
-        for rel, data in _workspaces():
-            if rel in KNOWN_INCONSISTENT:
+        for row in _apex_workspaces():
+            if row.name in KNOWN_INCONSISTENT:
                 continue
-            identity = (data.get("name"), data.get("label"), data.get("title"))
+            identity = (row.name, row.label, row.title)
             if len(set(identity)) != 1 or not identity[0]:
-                violations[rel] = identity
+                violations[row.name] = identity
         self.assertEqual(
             violations,
             {},
             "workspace name/label/title disagree (name, label, title):\n"
-            + "\n".join(f"  {rel}: {ids}" for rel, ids in sorted(violations.items())),
+            + "\n".join(f"  {name}: {ids}" for name, ids in sorted(violations.items())),
         )
 
     def test_every_parent_page_resolves_to_a_shipped_title(self):
         """A parent_page that matches no shipped title is a permanently orphaned
         child: Frappe compares it to the parent's title and simply renders nothing."""
-        records = _workspaces()
-        titles = {data.get("title") for _, data in records}
+        records = _apex_workspaces()
+        titles = {row.title for row in records}
         orphans = {
-            rel: data.get("parent_page")
-            for rel, data in records
-            if data.get("parent_page") and data["parent_page"] not in titles
+            row.name: row.parent_page
+            for row in records
+            if row.parent_page and row.parent_page not in titles
         }
         self.assertEqual(
             orphans,
             {},
             "workspace parent_page does not match any shipped workspace title -- "
             "these children would never render:\n"
-            + "\n".join(f"  {rel}: parent_page={pp!r}" for rel, pp in sorted(orphans.items())),
+            + "\n".join(f"  {name}: parent_page={pp!r}" for name, pp in sorted(orphans.items())),
         )
-
-if __name__ == "__main__":
-    unittest.main()
