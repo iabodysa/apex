@@ -493,7 +493,6 @@ after_install = [
     "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
-    "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
 ]
 
@@ -507,7 +506,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
-    "apex.apex_core.setup.seeders.habitat_core_link_perms_seed.seed_habitat_core_link_perms",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     "apex.setup.create_roles",
     "apex.setup.create_role_profiles",

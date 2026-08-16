@@ -1,31 +1,38 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""The core-master grant must stay a PICKER grant.
+"""The core-master grant must stay a PICKER grant, now declared metadata instead of a
+Python seeder: apex/habitat/custom/employee.json, project.json and cost_center.json
+carry the rows, imported by frappe's own ``sync_customizations`` on every migrate
+(frappe/migrate.py:145) — no hooks.py wiring, no seeder module.
 
-``add_permission(dt, role, ptype="select")`` does not produce a select-only rule.
 Custom DocPerm defaults ``read`` and ``export`` to 1 (``custom_docperm.json:81,170``),
-so the row is born granting the Habitat roles every Employee record and the right to
-export them — to reach a Link picker. Measured on a real migrate before this pinned it.
-
-The two cases below are the grant's floor and its ceiling: the roles must be able to
-resolve the Link, and must not gain anything beyond that. Without the ceiling case the
-widening is invisible, because the floor passes either way.
+so a row asked for with ptype="select" is born granting more than a Link picker needs
+unless the export explicitly clears them — which is what these tests grade, against
+the exported JSON directly and against the live DocPerm rows a migrate produces from it.
 
 Run standalone:
   bench --site <site> run-tests --module apex.apex_core.setup.seeders.test_habitat_core_link_perms_seed
 """
 
+import json
+import os
 import unittest
 
 import frappe
+from frappe import get_module_path, scrub
 from frappe.permissions import get_role_permissions
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.setup.seeders.habitat_core_link_perms_seed import (
-    CORE_LINK_MASTERS,
-    HABITAT_LINK_ROLES,
-    SALIS_LINK_MASTERS,
-    SALIS_LINK_ROLES,
-    seed_habitat_core_link_perms,
+CORE_LINK_MASTERS = ("Employee", "Project", "Cost Center")
+
+HABITAT_LINK_ROLES = ("Accommodation Manager", "Resident Supervisor", "Internal Auditor")
+
+SALIS_LINK_MASTERS = ("Project",)
+
+SALIS_LINK_ROLES = (
+    "Fleet Manager",
+    "Fleet Project Manager",
+    "Fleet Supervisor",
+    "Finance Manager",
 )
 
 # Everything a picker does NOT need. `read` is the important one: it is the difference
@@ -33,7 +40,22 @@ from apex.apex_core.setup.seeders.habitat_core_link_perms_seed import (
 FORBIDDEN = ("read", "write", "create", "delete", "report", "import", "share")
 
 
-def _rows(doctype, role):
+def _custom_perms(doctype):
+    path = os.path.join(get_module_path("Habitat"), "custom", scrub(doctype) + ".json")
+    with open(path) as f:
+        return json.load(f)["custom_perms"]
+
+
+def _exported_row(doctype, role):
+    rows = [
+        p
+        for p in _custom_perms(doctype)
+        if p.get("role") == role and not p.get("permlevel") and not p.get("if_owner")
+    ]
+    return rows[0] if rows else None
+
+
+def _db_rows(doctype, role):
     return frappe.get_all(
         "Custom DocPerm",
         filters={"parent": doctype, "role": role, "permlevel": 0, "if_owner": 0},
@@ -41,61 +63,57 @@ def _rows(doctype, role):
     )
 
 
-class TestHabitatCoreLinkPerms(FrappeTestCase):
-    def setUp(self):
-        frappe.set_user("Administrator")
-        seed_habitat_core_link_perms()
-        frappe.clear_cache()
+class TestHabitatCoreLinkPermsExport(unittest.TestCase):
+    """Reads the exported JSON directly -- no site needed."""
 
-    def test_the_habitat_roles_can_resolve_the_link(self):
+    def test_the_habitat_and_salis_roles_are_declared_select_only(self):
+        pairs = [(dt, role) for dt in CORE_LINK_MASTERS for role in HABITAT_LINK_ROLES]
+        pairs += [(dt, role) for dt in SALIS_LINK_MASTERS for role in SALIS_LINK_ROLES]
+        for doctype, role in pairs:
+            with self.subTest(doctype=doctype, role=role):
+                row = _exported_row(doctype, role)
+                self.assertIsNotNone(row, f"no exported row for {doctype}/{role}")
+                self.assertTrue(row.get("select"))
+                widened = [p for p in (*FORBIDDEN, "export") if row.get(p)]
+                self.assertEqual(
+                    widened, [], f"{doctype}/{role} widened past select: {widened}"
+                )
+
+    def test_sync_on_migrate_is_set(self):
         for doctype in CORE_LINK_MASTERS:
-            for role in HABITAT_LINK_ROLES:
-                with self.subTest(doctype=doctype, role=role):
-                    rows = _rows(doctype, role)
-                    self.assertEqual(len(rows), 1, "expected exactly one level-0 rule")
-                    self.assertTrue(rows[0]["select"])
-
-    def test_the_grant_carries_nothing_but_select(self):
-        """THE CEILING. A row created with the framework's defaults arrives carrying
-        read and export; a picker grant must carry neither."""
-        widened = []
-        for doctype in CORE_LINK_MASTERS:
-            for role in HABITAT_LINK_ROLES:
-                row = _rows(doctype, role)[0]
-                for ptype in (*FORBIDDEN, "export"):
-                    if row[ptype]:
-                        widened.append(f"{doctype}/{role}: {ptype}")
-        self.assertEqual(
-            widened,
-            [],
-            "the picker grant widened past select:\n  " + "\n  ".join(widened),
-        )
-
-    def test_the_salis_roles_can_resolve_project_and_gain_nothing_else(self):
-        """Salis anchors its movement documents on Project and scopes every list by a
-        Project User Permission, but no Salis role held a permlevel-0 rule on Project —
-        and permlevel 1 is discarded by get_role_permissions (frappe/permissions.py:284),
-        so the picker refused them. Floor and ceiling, same as the Habitat pair above."""
-        widened = []
-        for doctype in SALIS_LINK_MASTERS:
-            for role in SALIS_LINK_ROLES:
-                with self.subTest(doctype=doctype, role=role):
-                    rows = _rows(doctype, role)
-                    self.assertEqual(len(rows), 1, "expected exactly one level-0 rule")
-                    self.assertTrue(rows[0]["select"])
-                    for ptype in (*FORBIDDEN, "export"):
-                        if rows[0][ptype]:
-                            widened.append(f"{doctype}/{role}: {ptype}")
-        self.assertEqual(
-            widened, [], "the picker grant widened past select:\n  " + "\n  ".join(widened)
-        )
+            path = os.path.join(
+                get_module_path("Habitat"), "custom", scrub(doctype) + ".json"
+            )
+            with open(path) as f:
+                self.assertTrue(
+                    json.load(f).get("sync_on_migrate"),
+                    f"{doctype}.json must sync on every migrate, matching the seeder "
+                    "it replaced (wired into both after_install and after_migrate)",
+                )
 
     def test_the_platform_role_is_left_to_the_site_administrator(self):
         """System Manager writes the same Project-anchored documents and is deliberately
         not granted here — re-granting a core master to a platform role is a site
         decision, the same line the Habitat set already draws."""
         for doctype in SALIS_LINK_MASTERS:
-            self.assertEqual(_rows(doctype, "System Manager"), [])
+            self.assertIsNone(_exported_row(doctype, "System Manager"))
+
+
+class TestHabitatCoreLinkPermsLive(FrappeTestCase):
+    """The exported rows only matter if a migrate actually produced them on the site
+    and the permission layer honours them -- graded against the live DB, not re-run
+    through a seeder that no longer exists."""
+
+    def test_the_declared_rows_exist_on_the_site(self):
+        pairs = [(dt, role) for dt in CORE_LINK_MASTERS for role in HABITAT_LINK_ROLES]
+        pairs += [(dt, role) for dt in SALIS_LINK_MASTERS for role in SALIS_LINK_ROLES]
+        for doctype, role in pairs:
+            with self.subTest(doctype=doctype, role=role):
+                rows = _db_rows(doctype, role)
+                self.assertEqual(len(rows), 1, "expected exactly one level-0 rule")
+                self.assertTrue(rows[0]["select"])
+                widened = [p for p in (*FORBIDDEN, "export") if rows[0][p]]
+                self.assertEqual(widened, [], f"{doctype}/{role} widened past select")
 
     def test_select_is_what_the_permission_layer_reports(self):
         """The rule is only worth anything if ``get_role_permissions`` agrees — that is
