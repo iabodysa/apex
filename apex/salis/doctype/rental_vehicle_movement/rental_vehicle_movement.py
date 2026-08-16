@@ -107,7 +107,18 @@ class RentalVehicleMovement(Document):
         )
 
     def on_cancel(self):
-        """Adds a vehicle timeline note recording that the rental movement was cancelled."""
+        """Adds a vehicle timeline note and reverses any accrual this Receipt produced.
+
+        Only a Receipt ever names a Rental Accrual Ledger row's ``source_name`` (see
+        ``rental_engine._currently_received``), so a Return never has ledger rows to
+        reverse. Without this, the accrued days a cancelled Receipt justified would
+        outlive it and still be there for the next settlement to claim.
+        """
+        if self.movement_type == "Receipt":
+            from apex.salis.rental_engine import reverse_rental_accrual
+
+            reverse_rental_accrual("Rental Vehicle Movement", self.name)
+
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,

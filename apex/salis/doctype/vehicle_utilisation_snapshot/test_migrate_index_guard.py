@@ -67,7 +67,7 @@ GUARDED = [
     (
         rental_accrual_ledger,
         "Rental Accrual Ledger",
-        ["vehicle", "accrual_date"],
+        ["vehicle", "accrual_date", "reversal_of"],
         "unique_ral_vehicle_date",
     ),
     (

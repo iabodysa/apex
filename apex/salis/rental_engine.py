@@ -150,6 +150,58 @@ def daily_rental_accrual() -> None:
     logger.info("daily_rental_accrual: rental accrual memos written.")
 
 
+def reverse_rental_accrual(source_doctype: str, source_name: str) -> int:
+    """Reverse the ledgered accrual for a corrected/cancelled rental source.
+
+    When a Receipt Rental Vehicle Movement is cancelled, the daily accrual rows it
+    produced (every day the vehicle stayed in-service under that Receipt) must not
+    survive it — an accrued day whose Receipt no longer exists still gets settled
+    and paid otherwise. Mirrors ``fuel_engine.reverse_fuel_ledger``: a negative
+    mirror row per original, dated the SAME ``accrual_date`` as the row it negates
+    (a Receipt spans many days, so one shared date would misplace the reversal into
+    the wrong settlement period) and linked back via ``reversal_of``, so the source
+    nets to zero while the original rows are preserved for audit.
+
+    Idempotent: only an ORIGINAL row (``reversal_of`` unset) is ever mirrored, and a
+    row that already has a reversal pointing at it is skipped, so calling this twice
+    for the same source posts at most one reversal per original row. Returns the
+    number of reversal rows posted (0 if the source was never accrued or is already
+    fully reversed).
+    """
+    from frappe.utils import flt
+
+    originals = frappe.get_all(
+        LEDGER_DOCTYPE,
+        filters={
+            "source_doctype": source_doctype,
+            "source_name": source_name,
+            "reversal_of": ["is", "not set"],
+        },
+        fields=["name", "vehicle", "rental_office", "company", "accrual_date", "amount"],
+    )
+
+    posted = 0
+    for row in originals:
+        if frappe.db.exists(LEDGER_DOCTYPE, {"reversal_of": row.name}):
+            continue
+
+        frappe.get_doc(
+            {
+                "doctype": LEDGER_DOCTYPE,
+                "vehicle": row.vehicle,
+                "rental_office": row.rental_office,
+                "company": row.company,
+                "accrual_date": row.accrual_date,
+                "amount": -flt(row.amount),
+                "source_doctype": source_doctype,
+                "reversal_of": row.name,
+            }
+        ).insert(ignore_permissions=True)
+        posted += 1
+
+    return posted
+
+
 def _period_bounds(period_month: str) -> tuple[str, str] | None:
     """Return (first_day, last_day) as YYYY-MM-DD for a "YYYY-MM" period string,
     or None when the period is blank/unparseable. The accrual rows carry a full
