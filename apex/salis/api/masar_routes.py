@@ -345,16 +345,24 @@ def _route_destination_stop(stops, my_pickup):
     return last
 
 
+WORKER_TRANSPORT_HISTORY_DAYS = 90
+WORKER_TRANSPORT_ROW_LIMIT = 200
+
+
 def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee``, scoped via the
     child table.
 
     Rejected and Cancelled are excluded; Fulfilled is included. It is the caller that
     partitions these rows into the worker's upcoming and past rides, so dropping
-    Fulfilled would empty the past half of his screen. The list is unbounded and has
-    no date floor, which is a real cost on a long-tenured worker's 10-second poll —
-    recorded here rather than silently narrowed, because paging it changes what the
-    screen shows."""
+    Fulfilled would empty the past half of his screen.
+
+    Bounded two ways so a long-tenured worker's 10-second poll cannot grow without
+    limit: a floor of ``WORKER_TRANSPORT_HISTORY_DAYS`` on ``pickup_datetime`` (a
+    request with no ``pickup_datetime`` yet is kept regardless — it has nothing to
+    floor against and is usually the newest, unscheduled request), and a hard
+    ``WORKER_TRANSPORT_ROW_LIMIT`` backstop. The floor only trims the PAST half;
+    every upcoming ride is inside it by construction."""
     parents = frappe.get_all(
         "Transport Request Worker",
         filters={"employee": employee, "parenttype": "Transport Request"},
@@ -365,6 +373,7 @@ def _worker_transport_requests(employee):
         by_request.setdefault(p["parent"], p.get("pickup_point"))
     if not by_request:
         return []
+    since = frappe.utils.add_days(frappe.utils.today(), -WORKER_TRANSPORT_HISTORY_DAYS)
     rows = frappe.get_all(
         "Transport Request",
         filters={
@@ -372,6 +381,10 @@ def _worker_transport_requests(employee):
             "service_line": ["in", list(WORKER_SERVICE_LINES)],
             "status": ["not in", ["Rejected", "Cancelled"]],
         },
+        or_filters=[
+            ["pickup_datetime", ">=", since],
+            ["pickup_datetime", "is", "not set"],
+        ],
         fields=[
             "name",
             "service_line",
@@ -386,6 +399,7 @@ def _worker_transport_requests(employee):
             "dispatch_trip",
         ],
         order_by="pickup_datetime asc",
+        limit_page_length=WORKER_TRANSPORT_ROW_LIMIT,
     )
     for r in rows:
         r["pickup_point"] = by_request.get(r["name"])

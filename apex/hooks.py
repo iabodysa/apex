@@ -275,6 +275,7 @@ scheduler_events = {
         "apex.salis.tasks.alerts.reconcile_operations_alerts",
         "apex.salis.tasks.dispatch.daily_dispatch_trip_generation",
         "apex.logistay.tasks.sim_alerts.assigned_suspended_or_lost_watch",
+        "apex.logistay.tasks.contract_alerts.contract_expiry_watch",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
         "apex.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
