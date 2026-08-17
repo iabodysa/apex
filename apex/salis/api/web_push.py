@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import ipaddress
 from urllib.parse import urlparse
 
@@ -44,13 +45,29 @@ def is_allowed_push_endpoint(endpoint: str | None) -> bool:
     )
 
 
+def is_p256_point(key: str) -> bool:
+    """True when ``key`` base64url-decodes to the uncompressed P-256 point a browser needs.
+
+    ``PushManager.subscribe`` rejects anything but 65 bytes led by 0x04 with "Invalid raw
+    ECDSA P-256 public key". Reporting the feature as unconfigured beats handing the portal
+    a key that fails in the driver's browser, where nobody who can fix it will see it.
+    """
+    padded = key.strip().replace("-", "+").replace("_", "/")
+    padded += "=" * ((4 - len(padded) % 4) % 4)
+    try:
+        point = base64.b64decode(padded)
+    except (ValueError, TypeError):
+        return False
+    return len(point) == 65 and point[0] == 4
+
+
 def _vapid_config() -> dict | None:
     settings = frappe.get_single(_SETTINGS)
     if not settings.get("enable_web_push"):
         return None
     public = (settings.get("web_push_vapid_public_key") or "").strip()
     private = settings.get_password("web_push_vapid_private_key", raise_exception=False)
-    if not public or not private:
+    if not public or not private or not is_p256_point(public):
         return None
     return {
         "public_key": public,

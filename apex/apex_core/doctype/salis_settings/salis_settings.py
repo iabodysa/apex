@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import base64
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -36,6 +38,36 @@ class SalisSettings(Document):
             )
             if component_type != "Deduction":
                 frappe.throw(_("Recovery Salary Component must be a Deduction."))
+        self._validate_web_push_public_key()
+
+    def _validate_web_push_public_key(self):
+        """Refuse a VAPID public key the browser will reject at subscribe time.
+
+        ``PushManager.subscribe`` needs the uncompressed P-256 point: 65 bytes whose
+        first byte is 0x04. A truncated or re-encoded key decodes to some other length
+        and the browser answers "Invalid raw ECDSA P-256 public key" — to the driver
+        turning notifications on, never to the person who pasted the key. Checked here
+        so the refusal reaches whoever can fix it.
+        """
+        if not self.enable_web_push:
+            return
+        raw = (self.web_push_vapid_public_key or "").strip()
+        if not raw:
+            frappe.throw(_("A Web Push VAPID public key is required to enable web push."))
+        padded = raw.replace("-", "+").replace("_", "/")
+        padded += "=" * ((4 - len(padded) % 4) % 4)
+        try:
+            point = base64.b64decode(padded)
+        except (ValueError, TypeError):
+            frappe.throw(_("The Web Push VAPID public key is not valid base64url."))
+        if len(point) != 65 or point[0] != 4:
+            frappe.throw(
+                _(
+                    "The Web Push VAPID public key must decode to 65 bytes starting with 0x04; "
+                    "this one decodes to {0}. Paste the uncompressed public key, not a "
+                    "truncated or DER-encoded one."
+                ).format(len(point))
+            )
 
 
 def get_salis_int(field: str, default: int) -> int:
