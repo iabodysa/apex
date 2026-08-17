@@ -50,8 +50,6 @@ class OperationalDepreciationSnapshot(Document):
 
 def validate(doc, method=None):
     """Requires at least one asset line, computes each row's book value, and totals them."""
-    if not doc.items:
-        frappe.throw(_("At least one asset line is required."))
     _compute_book_values(doc)
     doc.total_book_value = sum(flt(row.book_value) for row in doc.items)
 

@@ -33,8 +33,6 @@ class CustodyDamageAssessment(Document):
 def validate(doc, method=None):
     """Syncs the party-employee link, requires a damaged item, totals the cost, and stamps sign-off."""
     sync_party_employee(doc)
-    if not doc.items:
-        frappe.throw(_("At least one damaged item is required."))
     doc.total_estimated_replacement_cost = sum(
         flt(row.estimated_replacement_cost) for row in doc.items
     )

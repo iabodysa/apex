@@ -46,8 +46,6 @@ class MaintenanceInspectionReport(Document):
 
 def validate(doc, method=None):
     """Blocks saving a Maintenance Inspection Report that records no findings."""
-    if not doc.findings:
-        frappe.throw(_("At least one finding is required on a Maintenance Inspection Report."))
 
 
 def before_cancel(doc, method=None):

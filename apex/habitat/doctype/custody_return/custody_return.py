@@ -18,8 +18,6 @@ class CustodyReturn(Document):
 def validate(doc, method=None):
     """Blocks a return with no items, a non-positive qty, bad serials, or qty over what was issued."""
     sync_party_employee(doc, employee_field="returned_by_employee")
-    if not doc.items:
-        frappe.throw(_("At least one item is required on a Custody Return."))
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))

@@ -18,8 +18,6 @@ def validate(doc, method=None):
     """Syncs holder user, requires positive-qty items, checks serials, and defaults return date."""
     sync_party_employee(doc, employee_field="issued_to_employee")
     _set_holder_user(doc)
-    if not doc.items:
-        frappe.throw(_("At least one item is required on a Custody Issue."))
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))

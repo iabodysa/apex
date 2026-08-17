@@ -140,7 +140,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Custody Issue Item"
+   "options": "Custody Issue Item",
+   "reqd": 1
   },
   {
    "fieldname": "custody_issue_sec_large_text",
@@ -257,7 +258,7 @@
    "link_fieldname": "custody_issue"
   }
  ],
- "modified": "2026-08-16 09:00:00.000000",
+ "modified": "2026-08-17 01:10:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Issue",

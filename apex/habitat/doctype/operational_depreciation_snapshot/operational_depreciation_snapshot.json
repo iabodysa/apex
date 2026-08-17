@@ -104,14 +104,15 @@
    "fieldtype": "Table",
    "idx": 11,
    "label": "Asset Lines",
-   "options": "Depreciation Snapshot Item"
+   "options": "Depreciation Snapshot Item",
+   "reqd": 1
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "issingle": 0,
  "istable": 0,
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-17 01:10:00.000000",
  "module": "Habitat",
  "name": "Operational Depreciation Snapshot",
  "naming_rule": "By \"Naming Series\" field",

@@ -97,7 +97,8 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Returned Items",
-   "options": "Custody Return Item"
+   "options": "Custody Return Item",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -143,7 +144,7 @@
    "link_fieldname": "custody_return"
   }
  ],
- "modified": "2026-08-16 09:00:00.000000",
+ "modified": "2026-08-17 01:10:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Custody Return",

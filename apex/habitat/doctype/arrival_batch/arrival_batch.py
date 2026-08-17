@@ -33,8 +33,6 @@ class ArrivalBatch(Document):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
         self.expected_count = len(self.expected_workers or [])
-        if not self.expected_count:
-            frappe.throw(_("Add at least one expected worker to the manifest."))
         if self.expected_count > _MAX_EXPECTED_WORKERS:
             frappe.throw(
                 _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)

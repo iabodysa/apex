@@ -125,7 +125,8 @@
    "fieldname": "findings",
    "fieldtype": "Table",
    "label": "Findings",
-   "options": "Inspection Finding Item"
+   "options": "Inspection Finding Item",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -161,7 +162,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-06 22:39:00.000000",
+ "modified": "2026-08-17 01:10:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Inspection Report",
