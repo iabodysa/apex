@@ -41,8 +41,13 @@ from apex.apex_core.payment_router import validate_target_doctype
 def setup_wizard_complete(args=None):
     """`setup_wizard_complete` hook — apply the operator's first-run choices."""
     apply_apex_setup(args)
+    from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
     from apex.setup import create_accommodation_item_defaults
 
+    # Held back until now: the portal capacity identities are System Users with no
+    # password, and offering them on the wizard's user slide is what lets an autofilled
+    # one reach a login the framework must refuse.
+    seed_portal_identities()
     create_accommodation_item_defaults()
 
 

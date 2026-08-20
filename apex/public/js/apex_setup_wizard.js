@@ -98,6 +98,11 @@ apex.setup.slides_settings = [
 				label: __("Recovery Salary Component"),
 				fieldtype: "Link",
 				options: "Salary Component",
+				// `after_install` seeds this component disabled, so the picker always has an
+				// answer and nobody has to create a record from inside the wizard. `only_select`
+				// removes the "Create a new" affordance, which loses wizard state when taken.
+				default: "Employee Advance Recovery",
+				only_select: 1,
 				get_query: () => ({ filters: { type: "Deduction" } }),
 				description: __("Native HRMS Deduction component used for Employee Advance installments."),
 			},

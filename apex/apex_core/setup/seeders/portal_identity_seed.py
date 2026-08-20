@@ -101,6 +101,16 @@ def seed_portal_identities() -> None:
     skipped: this runs from after_migrate, and an existing enabled row would otherwise
     stay open forever.
     """
+    if not frappe.is_setup_complete():
+        # These are System Users that exist only to be written AS, and they carry no
+        # password and never log in. Creating them before the Setup Wizard runs puts two
+        # more system accounts in front of the browser on the wizard's user slide, and an
+        # autofilled one reaches erpnext's login_as_first_user
+        # (erpnext/setup/setup_wizard/setup_wizard.py:74), which cannot open a session for
+        # a disabled user and fails the whole setup at its last step. The next migrate
+        # after setup completes creates them, and after_install already re-runs this.
+        return
+
     for email, role, capacity_role, first_name, last_name in CAPACITIES:
         _ensure_role(role)
         _ensure_role(capacity_role)
