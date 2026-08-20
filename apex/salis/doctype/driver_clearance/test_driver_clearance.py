@@ -8,7 +8,7 @@ import frappe
 from frappe.email.doctype.notification.notification import get_context
 from frappe.model.workflow import apply_workflow
 from frappe.tests.utils import FrappeTestCase
-from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
+from frappe.model.workflow import get_transitions, get_workflow_name
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     issue_driver_link,
     resolve_driver_token,

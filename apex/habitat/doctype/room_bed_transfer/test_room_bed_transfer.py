@@ -15,7 +15,6 @@ from frappe.tests.utils import FrappeTestCase
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from apex.habitat.doctype.room_bed_transfer import room_bed_transfer
-from unittest.mock import patch
 from apex.habitat import permissions as P
 from apex.habitat.api.transfer_board import transfer_occupant
 

@@ -15,8 +15,6 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
     post_stock_entry,
 )
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-    has_stock_entries,
-    post_stock_entry,
     reverse_stock_entries,
 )
 

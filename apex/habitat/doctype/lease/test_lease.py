@@ -10,7 +10,6 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
-from frappe.utils import today
 from apex.apex_core.utils import payable_allocation
 from apex.habitat.doctype.lease import lease_payment
 from apex.tests import factories

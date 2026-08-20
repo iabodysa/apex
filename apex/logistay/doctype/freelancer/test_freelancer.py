@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 import apex
 from apex.tests._helpers import _user, as_user
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import flt
 
 
 class TestFreelancer(FrappeTestCase):

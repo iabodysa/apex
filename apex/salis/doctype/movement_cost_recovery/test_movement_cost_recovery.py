@@ -16,7 +16,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_workflow_name
 from apex.tests._helpers import _grant_project, _user
 from apex.tests.factories import make_project, make_vehicle
-from frappe.model.workflow import apply_workflow, get_transitions
+from frappe.model.workflow import get_transitions
 
 
 WORKFLOW = "Movement Cost Recovery Workflow"

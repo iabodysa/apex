@@ -7,7 +7,7 @@ from apex.tests.factories import make_building
 from apex.habitat.doctype.building.building import (
     get_site_address,
 )
-from apex.tests.factories import make_building, make_company
+from apex.tests.factories import make_company
 import os
 import re
 from apex.habitat.doctype.building.building import generate_safety_setup

@@ -19,7 +19,6 @@ here would be a parallel path with no receivable behind it and nothing to revers
 from __future__ import annotations
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 

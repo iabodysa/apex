@@ -14,12 +14,10 @@ from apex.salis.doctype.dispatch_trip.dispatch_trip import (
     create_ad_hoc_trip,
 )
 from apex.salis.api import boarding_flow
-from apex.salis.doctype.dispatch_trip.dispatch_trip import assign_requests_to_trip
 from frappe.utils import today
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project, make_vehicle, purge_doc, purge_trip_request
-from unittest.mock import patch
 
 # No case in this module inserts a Dispatch Trip: every trip here is an in-memory
 # DispatchTrip/doc object exercising one controller method directly (aggregate
