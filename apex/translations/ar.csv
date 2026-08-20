@@ -187,7 +187,6 @@ Add a SIM Card,أضف شريحة اتصال
 Add a SIM card under the contract you just created.,أضف شريحة تحت العقد الذي أنشأته للتو.
 "Add any extra detail, then save to submit the request.",أضف أي تفاصيل إضافية، ثم احفظ لتقديم الطلب.
 Add at least one Transport Request to the ad-hoc trip.,أضف طلب نقل واحد على الأقل للرحلة الطارئة.
-Add at least one expected worker to the manifest.,أضف عاملاً واحداً متوقعاً على الأقل إلى كشف الوصول.
 Add at least one floor with rooms.,أضف طابقًا واحدًا على الأقل يحتوي على غرف.
 Add at least one item to the cart before issuing.,أضف صنفاً واحداً على الأقل قبل الصرف.
 Add at least one item to the cart before returning.,أضف بنداً واحداً على الأقل إلى السلة قبل الإرجاع.
@@ -459,11 +458,6 @@ Assigns a vehicle to a driver and project for a defined period.,يُسنِد م�
 Assumed Fleet Speed (km/h),السرعة المفترضة للأسطول (كم/س)
 Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position; blank or zero uses the built-in default.,متوسط سرعة الأسطول المفترض (كم/س) المستخدم لتقدير الوقت المتوقع لوصول رحلة العامل المباشرة من موقع السائق عبر تحديد المواقع؛ وتُستخدم القيمة الافتراضية المدمجة عند تركه فارغًا أو صفرًا.
 At,في
-At least one asset line is required.,يجب إدخال بند أصول واحد على الأقل.
-At least one damaged item is required.,يجب إدخال بند تالف واحد على الأقل.
-At least one finding is required on a Maintenance Inspection Report.,يجب تسجيل ملاحظة واحدة على الأقل في تقرير فحص الصيانة.
-At least one item is required on a Custody Issue.,يجب إدخال صنف واحد على الأقل لصرف العهدة.
-At least one item is required on a Custody Return.,يجب إدخال صنف واحد على الأقل لإرجاع العهدة.
 At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
 Attach a photograph of the damage,أرفق صورة للتلف
