@@ -58,8 +58,25 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
 )
 from apex.apex_core.utils import portal_identity as security
 from apex.salis.api import masar
+import inspect
+import json
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+import apex
+from apex.apex_core.doctype.masar_worker_token import masar_worker_token
+from apex.apex_core.utils.portal_identity import hash_token
+from apex.tests._helpers import _user
+from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
+    TOKEN_TTL_DAYS,
+    _hash_token,
+    issue_driver_link,
+    resolve_driver_token,
+    revoke_driver_link,
+)
+from apex.apex_core.utils.portal_identity import DRIVER
+from apex.tests._helpers import _grant_project, _user, as_user
+from apex.tests.factories import make_project
 
-test_dependencies = ["Employee", "Salis Driver", "User"]
 
 BLOCKED_STATUSES = ("Inactive", "Suspended", "Left")
 TOKEN_DOCTYPE = "Masar Worker Token"
@@ -858,3 +875,683 @@ class TestMasarIdentityContract(TestCase):
             self.assertEqual(security.revoke_subject_tokens(security.WORKER, "EMP-1"), 1)
 
         disable.assert_called_once_with(security.WORKER, "EMP-1")
+
+test_dependencies = ['Employee', 'Salis Driver', 'User']
+
+
+# --- merged from test_masar_worker_token_credential_permlevel.py ---
+_TOKEN_JSON = (
+    Path(apex.__file__).resolve().parent
+    / "apex_core"
+    / "doctype"
+    / "masar_worker_token"
+    / "masar_worker_token.json"
+)
+HOUSING_ROLE = "Accommodation Manager"
+PRIVILEGED_ROLE = "System Manager"
+CREDENTIAL_FIELDS = ("token", "token_enc")
+class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
+    """Site-bound. ``frappe.session.user`` is process state that no rollback restores."""
+
+    def setUp(self):
+        # Registered BEFORE anything mutates the session, so a mid-test failure still hands
+        # the next test an Administrator session.
+        self.addCleanup(frappe.set_user, "Administrator")
+        frappe.set_user("Administrator")
+        self.employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
+
+    def _token(self):
+        """An issued credential row. ``before_insert`` always mints, so the row carries a
+        real hash and a real ciphertext -- there is nothing to conceal otherwise."""
+        name = (
+            frappe.get_doc({"doctype": "Masar Worker Token", "employee": self.employee})
+            .insert(ignore_permissions=True)
+            .name
+        )
+        self.addCleanup(
+            frappe.delete_doc, "Masar Worker Token", name, force=True, ignore_permissions=True
+        )
+        return name
+
+    def test_housing_role_gets_none_where_system_manager_gets_the_credential(self):
+        """THE PAIR. Both verdicts in ONE method so they can never drift apart.
+
+        Split across two methods, a bug that concealed the credential from EVERYBODY would
+        satisfy the refusal half and read as correct. The final assertion states the
+        difference outright: same document, same two columns, two roles, two outcomes.
+        """
+        name = self._token()
+        housing = _user("cred_housing@example.com", HOUSING_ROLE)
+        privileged = _user("cred_privileged@example.com", PRIVILEGED_ROLE)
+
+        # Verdict A -- the withdrawn role receives nothing.
+        frappe.set_user(housing)
+        stripped = frappe.client.get("Masar Worker Token", name)
+        for fieldname in CREDENTIAL_FIELDS:
+            self.assertIsNone(
+                stripped.get(fieldname), f"{HOUSING_ROLE} can still read {fieldname}"
+            )
+        self.assertEqual(
+            stripped.get("employee"),
+            frappe.db.get_value("Masar Worker Token", name, "employee"),
+            "a level-0 field was stripped too -- the removal took the whole record",
+        )
+
+        # Verdict B -- the retained role still receives the credential. Note this runs as a
+        # REAL System Manager, never Administrator: the strip returns early for
+        # Administrator and the verdict would be vacuous.
+        frappe.set_user(privileged)
+        visible = frappe.client.get("Masar Worker Token", name)
+        for fieldname in CREDENTIAL_FIELDS:
+            self.assertIsNotNone(
+                visible.get(fieldname),
+                f"{PRIVILEGED_ROLE} lost {fieldname} -- level 1 is now unreachable by anyone",
+            )
+        self.assertEqual(
+            visible.get("token"),
+            frappe.db.get_value("Masar Worker Token", name, "token"),
+            f"{PRIVILEGED_ROLE} received something other than the stored hash",
+        )
+
+        # The pair, stated: the two roles must not have produced the same answer.
+        self.assertNotEqual(
+            [stripped.get(f) for f in CREDENTIAL_FIELDS],
+            [visible.get(f) for f in CREDENTIAL_FIELDS],
+            "both roles read the same values -- the permlevel is not being enforced",
+        )
+
+    def test_only_system_manager_holds_a_permlevel_one_row(self):
+        """The shipped JSON, checked rather than trusted. ``frappe.get_meta`` answers off
+        the DATABASE, so a green meta assertion on an un-migrated site would grade the old
+        row; this one grades the file that migrate will import."""
+        shipped = json.loads(_TOKEN_JSON.read_text(encoding="utf-8"))
+        high = {p["role"] for p in shipped["permissions"] if int(p.get("permlevel") or 0) == 1}
+        self.assertEqual(
+            high,
+            {PRIVILEGED_ROLE},
+            "the permlevel-1 role set changed -- only System Manager may hold level 1",
+        )
+        for fieldname in CREDENTIAL_FIELDS:
+            field = [f for f in shipped["fields"] if f["fieldname"] == fieldname][0]
+            self.assertEqual(
+                field.get("permlevel"),
+                1,
+                f"{fieldname} left permlevel 1 -- the row removal now conceals nothing",
+            )
+
+    def test_the_reshare_path_still_hands_the_raw_token_to_a_role_without_level_one(self):
+        """WHAT THE PERMLEVEL DOES NOT BUY, proven rather than asserted in prose.
+
+        The row above withholds the stored hash and ciphertext from the housing role. It
+        does NOT withhold the credential: ``reshare_worker_link`` returns a link carrying
+        the RAW token, because ``authorize_issuance`` gates that path on role and scope and
+        never reads a permlevel. Anyone tempted to read the permlevel row as full credential
+        protection should fail here first.
+
+        The token itself is never logged or asserted on directly -- only its hash is
+        compared, and the stored hash is re-read AFTER the call so the verdict holds on both
+        branches of ``recover_token`` (decrypt for an unscoped issuer, rotate for a scoped
+        one).
+        """
+        name = self._token()
+        housing = _user("cred_housing@example.com", HOUSING_ROLE)
+
+        frappe.set_user(housing)
+        link = masar_worker_token.reshare_worker_link(self.employee)
+        self.assertIsNotNone(link, "the issuer got no link at all -- the path changed")
+
+        raw = parse_qs(urlparse(link).query).get("w", [""])[0]
+        self.assertTrue(raw, "the link carries no token parameter")
+        self.assertEqual(
+            hash_token(raw),
+            frappe.db.get_value("Masar Worker Token", name, "token"),
+            f"{HOUSING_ROLE} received something that is not the live credential",
+        )
+
+    def test_the_reshare_docstring_still_names_that_exposure(self):
+        """The warning must survive a refactor, so assert it is there.
+
+        A reader who arrives at the permlevel row and stops looking draws the wrong
+        conclusion; the docstring on the re-share path is where they are told otherwise.
+        Keyed on the two load-bearing words rather than a whole sentence, so rewording is
+        free and DELETING the warning is not.
+        """
+        doc = (inspect.getdoc(masar_worker_token.reshare_worker_link) or "").lower()
+        for phrase in ("raw token", "permlevel"):
+            self.assertIn(
+                phrase,
+                doc,
+                "reshare_worker_link stopped documenting that every issuer role still "
+                f"obtains the raw token there (missing: {phrase!r})",
+            )
+
+    def test_the_level_zero_row_survived(self):
+        """The explicit non-change. Only a field-level read was withdrawn, not the housing
+        role's authority over the record."""
+        rows = json.loads(_TOKEN_JSON.read_text(encoding="utf-8"))["permissions"]
+        housing = [
+            p for p in rows if p["role"] == HOUSING_ROLE and int(p.get("permlevel") or 0) == 0
+        ]
+        self.assertEqual(len(housing), 1, f"{HOUSING_ROLE} lost or gained a permlevel-0 row")
+        for flag in ("read", "write", "create", "print", "report", "share"):
+            self.assertEqual(
+                housing[0].get(flag),
+                1,
+                f"{HOUSING_ROLE} permlevel-0 {flag} was collateral damage",
+            )
+
+
+# --- merged from test_masar_worker_token_desk_issuance.py ---
+TOKEN_DOCTYPE_masar_worker_token_desk_issuance = "Masar Worker Token"
+TOKEN_JSON = Path(apex.__file__).resolve().parent / "apex_core" / "doctype" / "masar_worker_token" / "masar_worker_token.json"
+DRIVER_ISSUER_ROLES = (
+    "System Manager",
+    "Fleet Manager",
+    "Fleet Project Manager",
+    "Fleet Supervisor",
+)
+PROJECT_MINE = "A267 Project Mine"
+PROJECT_THEIRS = "A267 Project Theirs"
+ISSUERS = {
+    ("Fleet Supervisor", PROJECT_MINE): "a267_sup_mine@example.com",
+    ("Fleet Supervisor", PROJECT_THEIRS): "a267_sup_theirs@example.com",
+    ("Fleet Manager", None): "a267_fleet_manager@example.com",
+    ("Accommodation Manager", None): "a267_housing@example.com",
+}
+class _DeskIssuanceCase(FrappeTestCase):
+    """Fixture plumbing for a desk-issuance case."""
+
+    #: Which shipped driver this class acts on. Overridden per class, never shared.
+    DRIVER = "_Test Driver"
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.addCleanup(frappe.set_user, "Administrator")
+        # The shipped DocPerms are the subject of these tests, but a long-lived site
+        # can carry hand-edited rows; pin the meta to the JSON this repo ships and
+        # put the site's own back afterwards.
+        meta = frappe.get_meta(TOKEN_DOCTYPE_masar_worker_token_desk_issuance)
+        self._meta_permissions = meta.permissions
+        self._meta_autoname = meta.autoname
+        self.addCleanup(self._restore_meta)
+        meta.permissions = [
+            frappe._dict(row) for row in self.shipped_metadata()["permissions"]
+        ]
+        meta.autoname = "hash"
+
+    def _restore_meta(self):
+        meta = frappe.get_meta(TOKEN_DOCTYPE_masar_worker_token_desk_issuance)
+        meta.permissions = self._meta_permissions
+        meta.autoname = self._meta_autoname
+
+    @staticmethod
+    def shipped_metadata():
+        return json.loads(TOKEN_JSON.read_text(encoding="utf-8"))
+
+    def _project(self, name):
+        return make_project(name)
+
+    def _driver(self, project=None, status="Active"):
+        """This class's shipped Salis Driver: no User, no Employee.
+
+        The shared driver factories build a User+Employee+Driver chain, which is the
+        opposite of the subject here — the whole point of the barcode is a driver with no
+        account at all, which is exactly what ``test_records.json`` ships.
+
+        Its project, its status and any credential it acquires are handed back, because the
+        row outlives the method.
+        """
+        name = frappe.db.get_value("Salis Driver", {"full_name": self.DRIVER})
+        self.addCleanup(self._drop_token, name)
+        for fieldname, value in (("project", project), ("status", status)):
+            self.addCleanup(
+                frappe.db.set_value,
+                "Salis Driver",
+                name,
+                fieldname,
+                frappe.db.get_value("Salis Driver", name, fieldname),
+            )
+            frappe.db.set_value("Salis Driver", name, fieldname, value)
+        return name
+
+    @staticmethod
+    def _drop_token(driver):
+        row = frappe.db.get_value(TOKEN_DOCTYPE_masar_worker_token_desk_issuance, {"driver": driver, "holder_type": DRIVER})
+        if row:
+            frappe.delete_doc(TOKEN_DOCTYPE_masar_worker_token_desk_issuance, row, force=True, ignore_permissions=True)
+
+    def _issuer(self, role, project=None):
+        """``project`` is the tenant LABEL; the User Permission needs the autonamed id, so
+        the label is resolved through the same idempotent get-or-create the cases use."""
+        user = _user(ISSUERS[(role, project)], role)
+        if project:
+            _grant_project(user, self._project(project))
+        return user
+
+    def _token_row(self, driver):
+        return frappe.db.get_value(
+            TOKEN_DOCTYPE_masar_worker_token_desk_issuance, {"driver": driver, "holder_type": DRIVER}, "name"
+        )
+
+    def _assert_link_dead(self, raw, note):
+        with self.assertRaises(frappe.PermissionError) as error:
+            resolve_driver_token(raw)
+        self.assertIn("invalid or inactive", str(error.exception), note)
+
+    def _audit_rows(self, driver):
+        return frappe.get_all(
+            "Activity Log",
+            filters={"link_doctype": "Salis Driver", "link_name": driver},
+            fields=["name", "user", "subject", "reference_doctype", "reference_name"],
+            order_by="creation asc",
+        )
+class TestDriverLinkDeskRevocation(_DeskIssuanceCase):
+    def test_out_of_scope_supervisor_cannot_revoke_while_the_owning_one_can(self):
+        """Project scope narrows revocation exactly as it narrows issuance.
+
+        Without the scope check, a Fleet Supervisor holding one project could
+        blank every driver's barcode in the fleet — a quiet, total denial of
+        service on the portal, from a role deliberately given only one project.
+
+        The refusal is proved to be REAL by re-resolving the link afterwards: a
+        revocation that threw but still disabled the row would satisfy an
+        assertRaises on its own."""
+        self._project(PROJECT_MINE)
+        theirs = self._project(PROJECT_THEIRS)
+        outsider = self._issuer("Fleet Supervisor", project=PROJECT_MINE)
+        owner = self._issuer("Fleet Supervisor", project=PROJECT_THEIRS)
+        driver = self._driver(project=theirs)
+
+        with as_user(owner):
+            raw = issue_driver_link(driver)["token"]
+        self.assertEqual(resolve_driver_token(raw), driver)
+
+        with as_user(outsider), self.assertRaises(frappe.PermissionError) as refused:
+            revoke_driver_link(driver)
+        self.assertIn("allowed Project", str(refused.exception))
+        self.assertEqual(
+            resolve_driver_token(raw),
+            driver,
+            "the refused revocation must not have disabled anything",
+        )
+
+        with as_user(owner):
+            result = revoke_driver_link(driver)
+        self.assertEqual(result["revoked"], 1)
+        self._assert_link_dead(raw, "the owning supervisor's revocation must land")
+
+    def test_a_role_outside_the_fleet_cannot_revoke_a_driver_link(self):
+        """Write permission on the token doctype is NOT authority over drivers.
+
+        Housing and HR roles hold write on Masar Worker Token because they issue
+        the worker credential from the same record. The doctype check alone would
+        therefore let an Accommodation Manager revoke any driver's barcode."""
+        driver = self._driver()
+        housing = self._issuer("Accommodation Manager")
+        fleet = self._issuer("Fleet Manager")
+
+        with as_user(fleet):
+            raw = issue_driver_link(driver)["token"]
+
+        with as_user(housing), self.assertRaises(frappe.PermissionError) as refused:
+            revoke_driver_link(driver)
+        self.assertIn("not permitted to issue", str(refused.exception))
+        self.assertEqual(resolve_driver_token(raw), driver)
+
+        with as_user(fleet):
+            self.assertEqual(revoke_driver_link(driver)["revoked"], 1)
+        self._assert_link_dead(raw, "a fleet manager's revocation must land")
+
+    def test_a_released_driver_can_be_revoked_but_never_issued(self):
+        """The two directions must part company once a driver is no longer Active.
+
+        Issuance to a cleared, suspended or released driver has to be refused —
+        that is the whole point of revoking on clearance. Revocation must stay
+        REACHABLE for exactly the same driver, because a released driver is the
+        normal state at the moment an operator reaches for the kill switch, and a
+        gate that demands Active would disarm it precisely then.
+
+        The status is written with db.set_value, which runs no document events
+        (frappe/database/database.py:942), so the automatic revocation hook does
+        not fire and this exercises the manual desk path alone."""
+        driver = self._driver()
+        fleet = self._issuer("Fleet Manager")
+
+        with as_user(fleet):
+            raw = issue_driver_link(driver)["token"]
+        self.assertEqual(resolve_driver_token(raw), driver)
+
+        frappe.db.set_value("Salis Driver", driver, "status", "Released")
+        self.assertEqual(
+            frappe.db.get_value(TOKEN_DOCTYPE_masar_worker_token_desk_issuance, self._token_row(driver), "enabled"),
+            1,
+            "fixture sanity: the raw status write must not have auto-revoked",
+        )
+
+        with as_user(fleet), self.assertRaises(frappe.PermissionError) as refused:
+            issue_driver_link(driver)
+        self.assertIn("not permitted to issue", str(refused.exception))
+
+        with as_user(fleet):
+            self.assertEqual(revoke_driver_link(driver)["revoked"], 1)
+        self.assertEqual(
+            frappe.db.get_value(TOKEN_DOCTYPE_masar_worker_token_desk_issuance, self._token_row(driver), "enabled"), 0
+        )
+
+    def test_revocation_is_idempotent_and_the_old_barcode_never_comes_back(self):
+        """What the withdrawn link can still do — the question the card asks last.
+
+        A second revocation must report 0 rather than throw, so an operator who
+        clicks twice is not told something failed. And a later re-issue must mint a
+        DIFFERENT credential: if reactivation restored the same token, every copy
+        of the old QR — printed, forwarded, photographed — would come back to life
+        with it."""
+        driver = self._driver()
+        fleet = self._issuer("Fleet Manager")
+
+        with as_user(fleet):
+            first = issue_driver_link(driver)["token"]
+            self.assertEqual(revoke_driver_link(driver)["revoked"], 1)
+            self.assertEqual(revoke_driver_link(driver)["revoked"], 0)
+        self._assert_link_dead(first, "a revoked barcode must stay dead")
+
+        with as_user(fleet):
+            second = issue_driver_link(driver)["token"]
+
+        self.assertNotEqual(second, first)
+        self.assertEqual(resolve_driver_token(second), driver)
+        self._assert_link_dead(first, "re-issuing must not revive the old barcode")
+
+    def test_a_desk_issued_link_expires_and_stays_revocable_once_it_has(self):
+        """An expiry that is stamped but not enforced is decoration.
+
+        Both halves are asserted together: the freshly issued link carries a future
+        expiry AND resolves, then the same link is refused the moment that expiry
+        is in the past. The revocation afterwards proves an expired-but-enabled row
+        is still withdrawable, so a lapsed link cannot be left enabled and
+        forgotten in the table."""
+        driver = self._driver()
+        fleet = self._issuer("Fleet Manager")
+
+        with as_user(fleet):
+            issued = issue_driver_link(driver)
+        raw = issued["token"]
+
+        expires_on = frappe.utils.get_datetime(issued["expires_on"])
+        self.assertGreater(expires_on, frappe.utils.now_datetime())
+        self.assertLessEqual(
+            expires_on,
+            frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS),
+        )
+        self.assertEqual(resolve_driver_token(raw), driver)
+
+        frappe.db.set_value(
+            TOKEN_DOCTYPE_masar_worker_token_desk_issuance,
+            self._token_row(driver),
+            "expires_on",
+            frappe.utils.add_to_date(frappe.utils.now_datetime(), days=-1),
+            update_modified=False,
+        )
+        self._assert_link_dead(raw, "an expired barcode must be refused on use")
+
+        with as_user(fleet):
+            self.assertEqual(revoke_driver_link(driver)["revoked"], 1)
+class TestDriverLinkIssuanceAudit(_DeskIssuanceCase):
+    # The second shipped driver: this class opens by asserting an EMPTY audit trail, which
+    # only holds for a subject the revocation class above never issued against.
+    DRIVER = "_Test Driver Two"
+
+    def test_every_desk_move_is_audited_by_actor_and_subject(self):
+        """An issuance nobody can attribute is an issuance nobody can investigate.
+
+        The token row keeps one ``last_generated_by`` slot, overwritten by the next
+        action, and revocation writes with update_modified=False — so before this
+        card the record could not say who had held a live credential when. Each of
+        the three moves must leave its own row naming the acting user, the token
+        record and the driver, and the three subjects must differ so a re-share is
+        distinguishable from a rotation."""
+        driver = self._driver()
+        fleet = self._issuer("Fleet Manager")
+        self.assertEqual(self._audit_rows(driver), [])
+
+        with as_user(fleet):
+            issue_driver_link(driver)
+            issue_driver_link(driver, regenerate=1)
+            revoke_driver_link(driver)
+
+        rows = self._audit_rows(driver)
+        token_row = self._token_row(driver)
+        self.assertGreaterEqual(len(rows), 3)
+        for row in rows:
+            self.assertEqual(row.user, fleet)
+            self.assertEqual(row.reference_doctype, TOKEN_DOCTYPE_masar_worker_token_desk_issuance)
+            self.assertEqual(row.reference_name, token_row)
+            self.assertIn(driver, row.subject)
+        self.assertGreaterEqual(
+            len({row.subject for row in rows}),
+            3,
+            "issue, rotate and revoke must be distinguishable in the trail",
+        )
+
+    def test_the_audit_trail_never_records_the_credential_itself(self):
+        """The trail is the one place a token could be re-read long after issuance.
+
+        Activity Log rows outlive the link and are exportable. Neither the raw
+        token nor its stored hash may appear in ANY field of any row — and the
+        desk revocation payload must not carry one either, since it is returned to
+        a browser that has no reason to receive a credential.
+
+        Asserted beside a positive count so the scan cannot pass by finding
+        nothing: the rows exist, and none of them holds the secret."""
+        driver = self._driver()
+        fleet = self._issuer("Fleet Manager")
+
+        with as_user(fleet):
+            first = issue_driver_link(driver)["token"]
+            second = issue_driver_link(driver, regenerate=1)["token"]
+            revoked = revoke_driver_link(driver)
+
+        secrets = {first, second, _hash_token(first), _hash_token(second)}
+        self.assertNotIn(None, secrets)
+
+        rows = frappe.get_all(
+            "Activity Log",
+            filters={"reference_doctype": TOKEN_DOCTYPE_masar_worker_token_desk_issuance},
+            fields=["*"],
+        )
+        self.assertTrue(rows, "the trail must exist before it can be judged clean")
+        haystack = json.dumps(rows, default=str)
+        for secret in secrets:
+            self.assertNotIn(secret, haystack, "a credential leaked into the audit trail")
+
+        self.assertNotIn("token", revoked)
+        for secret in secrets:
+            self.assertNotIn(secret, json.dumps(revoked, default=str))
+
+    def test_the_fleet_issuer_can_mint_a_link_but_never_read_a_stored_one(self):
+        """Issuing authority is not reading authority.
+
+        Every driver issuer role must be able to act, and none of them may hold the
+        permlevel-1 rows that expose the stored hash, nor export/email rights that
+        would carry a token record off the site. Paired with the System Manager row
+        so the negative assertions cannot pass on an empty permission scan."""
+        permissions = self.shipped_metadata()["permissions"]
+        base = {row["role"]: row for row in permissions if not row.get("permlevel")}
+        elevated = {
+            row["role"] for row in permissions if row.get("permlevel") == 1 and row.get("read")
+        }
+
+        self.assertIn("System Manager", elevated)
+        for role in DRIVER_ISSUER_ROLES:
+            self.assertTrue(base[role]["write"], f"{role} must be able to issue")
+            if role == "System Manager":
+                continue
+            self.assertNotIn(role, elevated, f"{role} must not read the stored hash")
+            self.assertFalse(base[role].get("export"), f"{role} must not export tokens")
+            self.assertFalse(base[role].get("email"), f"{role} must not email tokens")
+
+
+# --- merged from test_masar_worker_token_scope.py ---
+def _driver_clause(projects):
+    escaped = ", ".join(frappe.db.escape(v) for v in projects)
+    return (
+        "(`holder_type` = 'Driver' and `driver` in ("
+        "select `name` from `tabSalis Driver` where `project` in ({0})))"
+    ).format(escaped)
+def _worker_clause(buildings):
+    escaped = ", ".join(frappe.db.escape(v) for v in buildings)
+    return (
+        "(`holder_type` = 'Worker' and `employee` in ("
+        "select `employee` from `tabHousing Assignment` where `docstatus` = 1 "
+        "and `check_out_date` is null and `building` in ({0})))"
+    ).format(escaped)
+class TestMasarWorkerTokenScopeQuery(TestCase):
+    def test_administrator_is_unrestricted(self):
+        self.assertEqual(security.masar_worker_token_scope_query(user="Administrator"), "")
+
+    def test_a_role_holding_neither_issuer_set_sees_nothing(self):
+        with patch.object(security.frappe, "get_roles", return_value={"Employee"}):
+            self.assertEqual(
+                security.masar_worker_token_scope_query(user="nobody@example.com"), "1=0"
+            )
+
+    def test_fleet_manager_sees_every_driver_row_and_no_worker_row(self):
+        with patch.object(security.frappe, "get_roles", return_value={"Fleet Manager"}):
+            query = security.masar_worker_token_scope_query(user="fm@example.com")
+        self.assertEqual(query, "(`holder_type` = 'Driver')")
+
+    def test_hr_user_sees_every_worker_row_and_no_driver_row(self):
+        with patch.object(security.frappe, "get_roles", return_value={"HR User"}):
+            query = security.masar_worker_token_scope_query(user="hr@example.com")
+        self.assertEqual(query, "(`holder_type` = 'Worker')")
+
+    def test_a_role_in_both_issuer_sets_unions_both_unrestricted_clauses(self):
+        with patch.object(security.frappe, "get_roles", return_value={"System Manager"}):
+            query = security.masar_worker_token_scope_query(user="sm@example.com")
+        self.assertEqual(query, "(`holder_type` = 'Driver' or `holder_type` = 'Worker')")
+
+    def test_fleet_supervisor_is_confined_to_their_projects(self):
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Fleet Supervisor"}),
+            patch(
+                "apex.salis.permissions._allowed_projects",
+                return_value=["PROJ-A", "PROJ-B"],
+            ),
+        ):
+            query = security.masar_worker_token_scope_query(user="fs@example.com")
+        self.assertEqual(query, "({0})".format(_driver_clause(["PROJ-A", "PROJ-B"])))
+
+    def test_fleet_supervisor_with_no_project_sees_nothing(self):
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Fleet Supervisor"}),
+            patch("apex.salis.permissions._allowed_projects", return_value=[]),
+        ):
+            query = security.masar_worker_token_scope_query(user="fs@example.com")
+        self.assertEqual(query, "(1=0)")
+
+    def test_resident_supervisor_is_confined_to_their_buildings(self):
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Resident Supervisor"}),
+            patch("apex.habitat.permissions._allowed_buildings", return_value=["BLD-A"]),
+        ):
+            query = security.masar_worker_token_scope_query(user="rs@example.com")
+        self.assertEqual(query, "({0})".format(_worker_clause(["BLD-A"])))
+class TestMasarWorkerTokenHasPermission(TestCase):
+    def _doc(self, **fields):
+        return frappe._dict(fields)
+
+    def test_a_write_ptype_always_defers_regardless_of_role(self):
+        doc = self._doc(holder_type="Driver", driver="DRV-1")
+        with patch.object(security.frappe, "get_roles", return_value=set()):
+            for ptype in ("write", "create", "delete", "submit"):
+                with self.subTest(ptype=ptype):
+                    self.assertIsNone(
+                        security.masar_worker_token_has_permission(
+                            doc, ptype, user="anyone@example.com"
+                        )
+                    )
+
+    def test_administrator_may_read_everything(self):
+        doc = self._doc(holder_type="Worker", employee="EMP-1")
+        self.assertIsNone(
+            security.masar_worker_token_has_permission(doc, "read", user="Administrator")
+        )
+
+    def test_a_role_outside_the_docs_audience_issuer_set_is_denied(self):
+        doc = self._doc(holder_type="Worker", employee="EMP-1")
+        with patch.object(security.frappe, "get_roles", return_value={"Fleet Manager"}):
+            self.assertFalse(
+                security.masar_worker_token_has_permission(doc, "read", user="fm@example.com")
+            )
+
+    def test_an_unscoped_role_reads_a_row_without_resolving_its_project(self):
+        doc = self._doc(holder_type="Driver", driver="DRV-1")
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Fleet Manager"}),
+            patch.object(security.frappe.db, "get_value") as get_value,
+        ):
+            self.assertIsNone(
+                security.masar_worker_token_has_permission(doc, "read", user="fm@example.com")
+            )
+        get_value.assert_not_called()
+
+    def test_a_scoped_fleet_supervisor_is_admitted_when_the_drivers_project_is_allowed(self):
+        doc = self._doc(holder_type="Driver", driver="DRV-1")
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Fleet Supervisor"}),
+            patch.object(security.frappe.db, "get_value", return_value="PROJ-A"),
+            patch(
+                "apex.salis.permissions._allowed_projects",
+                return_value=["PROJ-A", "PROJ-B"],
+            ),
+        ):
+            self.assertIsNone(
+                security.masar_worker_token_has_permission(doc, "report", user="fs@example.com")
+            )
+
+    def test_a_scoped_fleet_supervisor_is_denied_when_the_drivers_project_is_not_allowed(self):
+        doc = self._doc(holder_type="Driver", driver="DRV-1")
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Fleet Supervisor"}),
+            patch.object(security.frappe.db, "get_value", return_value="PROJ-A"),
+            patch("apex.salis.permissions._allowed_projects", return_value=["PROJ-B"]),
+        ):
+            self.assertFalse(
+                security.masar_worker_token_has_permission(doc, "print", user="fs@example.com")
+            )
+
+    def test_a_resident_supervisor_is_admitted_when_every_live_building_is_allowed(self):
+        doc = self._doc(holder_type="Worker", employee="EMP-1")
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Resident Supervisor"}),
+            patch.object(security.frappe, "get_all", return_value=["BLD-A"]),
+            patch(
+                "apex.habitat.permissions._allowed_buildings",
+                return_value=["BLD-A", "BLD-B"],
+            ),
+        ):
+            self.assertIsNone(
+                security.masar_worker_token_has_permission(doc, "read", user="rs@example.com")
+            )
+
+    def test_a_resident_supervisor_is_denied_when_a_live_building_is_not_allowed(self):
+        doc = self._doc(holder_type="Worker", employee="EMP-1")
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Resident Supervisor"}),
+            patch.object(security.frappe, "get_all", return_value=["BLD-A", "BLD-C"]),
+            patch("apex.habitat.permissions._allowed_buildings", return_value=["BLD-A"]),
+        ):
+            self.assertFalse(
+                security.masar_worker_token_has_permission(doc, "read", user="rs@example.com")
+            )
+
+    def test_a_worker_doc_with_no_employee_link_is_denied_without_a_lookup(self):
+        doc = self._doc(holder_type="Worker", employee=None)
+        with (
+            patch.object(security.frappe, "get_roles", return_value={"Resident Supervisor"}),
+            patch.object(security.frappe, "get_all") as get_all,
+        ):
+            self.assertFalse(
+                security.masar_worker_token_has_permission(doc, "read", user="rs@example.com")
+            )
+        get_all.assert_not_called()

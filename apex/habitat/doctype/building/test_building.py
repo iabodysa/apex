@@ -1,26 +1,21 @@
 # Copyright (c) 2026, AFMCO and contributors
+from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.tests.factories import make_building
+from apex.habitat.doctype.building.building import (
+    get_site_address,
+)
+from apex.tests.factories import make_building, make_company
+import os
+import re
+from apex.habitat.doctype.building.building import generate_safety_setup
+from apex.tests.factories import ApexHabitatTestCase
+from apex.habitat.doctype.building.building import (
+    generate_rooms_and_beds,
+)
 
-test_ignore = [
-    "Additional Salary",
-    "Asset",
-    "Asset Movement",
-    "Company",
-    "Cost Center",
-    "Currency",
-    "Employee",
-    "Item",
-    "Payment Entry",
-    "Project",
-    "Purchase Invoice",
-    "Role",
-    "Salary Component",
-    "Supplier",
-    "User",
-]
 
 
 class TestAccommodationBuilding(FrappeTestCase):
@@ -364,3 +359,522 @@ class TestBuildingSupervisorPermission(FrappeTestCase):
         b.responsible_supervisor = None
         b.save(ignore_permissions=True)
         self.assertFalse(self._has_perm(sup_b, b.name))
+
+test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
+
+
+# --- merged from test_building_address_fallback.py ---
+def _ensure_site(name):
+    """Per-name idempotent Accommodation Site (re-runnable across test sessions)."""
+    if not frappe.db.exists("Site", name):
+        frappe.get_doc(
+            {"doctype": "Site", "site_name": name}
+        ).insert(ignore_permissions=True)
+    return name
+def _ensure_address(title, line1, city, link_doctype=None, link_name=None):
+    """Per-title idempotent Address; optionally Dynamic-Linked to a parent so it is
+    that parent's DEFAULT address (get_address_text resolves via get_default_address)."""
+    existing = frappe.db.get_value("Address", {"address_title": title})
+    if existing:
+        return existing
+    payload = {
+        "doctype": "Address",
+        "address_title": title,
+        "address_type": "Other",
+        "address_line1": line1,
+        "city": city,
+        "country": "Saudi Arabia",
+    }
+    if link_doctype and link_name:
+        payload["links"] = [{"link_doctype": link_doctype, "link_name": link_name}]
+    return frappe.get_doc(payload).insert(ignore_permissions=True).name
+class TestBuildingAddressFallback(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+        make_company()
+
+    def test_saved_site_address_when_no_own_address(self):
+        """No stored building_address but a stored site -> the SITE's address.
+
+        Drives the saved-record fallback with NO args (the controller reads the
+        stored `site` because both building_address and site are omitted).
+        """
+        site = _ensure_site("T143 Fallback Site A")
+        _ensure_address(
+            "T143 Fallback Site A Addr", "Site Street 5", "Riyadh",
+            link_doctype="Site", link_name=site,
+        )
+        bldg = make_building(name="T143 Fallback Bldg A", site=site).name
+
+        self.assertIn("Site Street 5", get_site_address(bldg))
+
+    def test_saved_own_address_precedes_saved_site(self):
+        """Both stored: the building's OWN address wins over the site's, resolved
+        purely from the saved record (no args passed)."""
+        site = _ensure_site("T143 Fallback Site B")
+        _ensure_address(
+            "T143 Fallback Site B Addr", "Site Street 7", "Riyadh",
+            link_doctype="Site", link_name=site,
+        )
+        own = _ensure_address("T143 Fallback Own B Addr", "Own Street 9", "Jeddah")
+        bldg = make_building(
+            name="T143 Fallback Bldg B", site=site, building_address=own
+        ).name
+
+        text = get_site_address(bldg)
+        self.assertIn("Own Street 9", text)
+        self.assertNotIn("Site Street 7", text)
+
+    def test_legacy_dynamic_link_own_address_precedes_site(self):
+        """A legacy own Address linked via Dynamic Link (the pre-Link-field native
+        widget) and NO stored building_address must still surface on the form,
+        winning over the site's address instead of being silently shadowed."""
+        site = _ensure_site("T139 Reconcile Site")
+        _ensure_address(
+            "T139 Reconcile Site Addr", "Site Street 21", "Riyadh",
+            link_doctype="Site", link_name=site,
+        )
+        bldg = make_building(name="T139 Reconcile Bldg", site=site).name
+        _ensure_address(
+            "T139 Reconcile Own Addr", "Legacy Own Street 23", "Jeddah",
+            link_doctype="Building", link_name=bldg,
+        )
+
+        text = get_site_address(bldg)
+        self.assertIn("Legacy Own Street 23", text)
+        self.assertNotIn("Site Street 21", text)
+
+    def test_clearing_saved_own_address_falls_back_to_site(self):
+        """Clearing the stored building_address on the record makes the next no-arg
+        resolution fall back to the stored site again (the live fallback path)."""
+        site = _ensure_site("T143 Fallback Site C")
+        _ensure_address(
+            "T143 Fallback Site C Addr", "Site Street 11", "Riyadh",
+            link_doctype="Site", link_name=site,
+        )
+        own = _ensure_address("T143 Fallback Own C Addr", "Own Street 13", "Jeddah")
+        bldg = make_building(
+            name="T143 Fallback Bldg C", site=site, building_address=own
+        ).name
+
+        self.assertIn("Own Street 13", get_site_address(bldg))
+
+        frappe.db.set_value("Building", bldg, "building_address", None)
+        cleared = get_site_address(bldg)
+        self.assertIn("Site Street 11", cleared)
+        self.assertNotIn("Own Street 13", cleared)
+class TestBuildingSiteAddress(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def test_passed_site_overrides_stored_site(self):
+        site_a = _ensure_site("T138 Site A")
+        site_b = _ensure_site("T138 Site B")
+        if not frappe.db.exists("Address", {"address_title": "T138 A"}):
+            frappe.get_doc(
+                {
+                    "doctype": "Address",
+                    "address_title": "T138 A",
+                    "address_type": "Other",
+                    "address_line1": "A Street 1",
+                    "city": "Riyadh", "country": "Saudi Arabia",
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
+                }
+            ).insert(ignore_permissions=True)
+        company = (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+        bldg = make_building(name="T138 Building", site=site_a, company=company).name
+
+        self.assertTrue(get_site_address(bldg))
+        self.assertEqual(get_site_address(bldg, site=site_b), "")
+
+    def test_building_address_overrides_site(self):
+        """the building's own selected Address wins over the Site's; clearing it
+        falls back to the Site."""
+        site_a = _ensure_site("T144 Site")
+        if not frappe.db.exists("Address", {"address_title": "T144 Site Addr"}):
+            frappe.get_doc(
+                {
+                    "doctype": "Address", "address_title": "T144 Site Addr",
+                    "address_type": "Other", "address_line1": "Site Street", "city": "Riyadh", "country": "Saudi Arabia",
+                    "links": [{"link_doctype": "Site", "link_name": site_a}],
+                }
+            ).insert(ignore_permissions=True)
+        own = frappe.db.get_value("Address", {"address_title": "T144 Own Addr"})
+        if not own:
+            own = frappe.get_doc(
+                {
+                    "doctype": "Address", "address_title": "T144 Own Addr",
+                    "address_type": "Other", "address_line1": "Own Street 9", "city": "Jeddah", "country": "Saudi Arabia",
+                }
+            ).insert(ignore_permissions=True).name
+        company = (
+            frappe.defaults.get_global_default("company")
+            or frappe.get_all("Company", limit=1)[0].name
+        )
+        bldg = make_building(name="T144 Building", site=site_a, company=company).name
+
+        own_text = get_site_address(bldg, site=site_a, building_address=own)
+        self.assertIn("Own Street 9", own_text)
+        self.assertNotIn("Site Street", own_text)
+        self.assertIn("Site Street", get_site_address(bldg, site=site_a, building_address=""))
+
+
+# --- merged from test_building_safety_setup.py ---
+def _rand(n: int = 12) -> str:
+    return frappe.generate_hash(length=n)
+def _make_catalog(code: str, frequency: str, all_buildings: int = 1) -> str:
+    """Get-or-create an active Safety Task Catalog with a given frequency; return name."""
+    existing = frappe.db.get_value("Safety Task Catalog", {"task_code": code}, "name")
+    if existing:
+        frappe.db.set_value("Safety Task Catalog", existing, {
+            "frequency": frequency,
+            "is_active": 1,
+            "applicable_to_all_buildings": all_buildings,
+        })
+        return existing
+    return frappe.get_doc({
+        "doctype": "Safety Task Catalog",
+        "naming_series": "STC-.####",
+        "task_title": f"A076 {code}",
+        "task_code": code,
+        "department": "Fire Safety",
+        "frequency": frequency,
+        "priority": "High",
+        "is_active": 1,
+        "applicable_to_all_buildings": all_buildings,
+    }).insert(ignore_permissions=True).name
+def _make_building(name: str) -> str:
+    existing = frappe.db.get_value("Building", {"building_name": name}, "name")
+    if existing:
+        return existing
+    return frappe.get_doc({
+        "doctype": "Building",
+        "building_name": name,
+        "status": "Active",
+        "total_capacity": 10,
+    }).insert(ignore_permissions=True).name
+def _template_for(catalog: str) -> str | None:
+    return frappe.db.get_value(
+        "Scheduled Task Template", {"safety_task_catalog": catalog}, "name"
+    )
+class TestGenerateSafetySetup(FrappeTestCase):
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def _cleanup(self, building: str, *catalogs: str):
+        frappe.set_user("Administrator")
+        # Assignments first (they link building -> template), then per-catalog
+        # template, then catalog, then the building. force bypasses link checks.
+        for sta in frappe.get_all(
+            "Scheduled Task Assignment", {"building": building}, pluck="name"
+        ):
+            frappe.delete_doc("Scheduled Task Assignment", sta, force=True, ignore_permissions=True)
+        for cat in catalogs:
+            tmpl = _template_for(cat)
+            if tmpl:
+                frappe.delete_doc("Scheduled Task Template", tmpl, force=True, ignore_permissions=True)
+            if frappe.db.exists("Safety Task Catalog", cat):
+                frappe.delete_doc("Safety Task Catalog", cat, force=True, ignore_permissions=True)
+        if frappe.db.exists("Building", building):
+            frappe.delete_doc("Building", building, force=True, ignore_permissions=True)
+
+    def test_creates_reusable_template_and_assignment(self):
+        cat = _make_catalog(f"A076-CRT-{_rand()}", "Monthly")
+        bld = _make_building(f"A076 CRT {_rand()}")
+        self.addCleanup(self._cleanup, bld, cat)
+
+        summary = generate_safety_setup(bld)
+
+        tmpl = _template_for(cat)
+        self.assertTrue(tmpl, "a reusable template must be created for the catalog task")
+
+        row = frappe.db.get_value(
+            "Scheduled Task Template", tmpl, ["task_type", "frequency"], as_dict=True
+        )
+        self.assertEqual(row.task_type, "Safety")
+        self.assertEqual(row.frequency, "Monthly")
+
+        # the catalog must be an active scheduling item (the generator iterates these)
+        self.assertTrue(
+            frappe.db.exists(
+                "Scheduled Task Template Item",
+                {"parent": tmpl, "task_catalog": cat, "is_active": 1},
+            ),
+            "catalog must be an active template_items row so the generator emits instances",
+        )
+        # the assignment binds the template to this building
+        self.assertTrue(
+            frappe.db.exists("Scheduled Task Assignment", {"template": tmpl, "building": bld}),
+            "an assignment must bind the reusable template to this building",
+        )
+        self.assertGreaterEqual(summary["created_assignments"], 1)
+        self.assertEqual(
+            frappe.db.get_value("Building", bld, "safety_setup_status"), "Completed"
+        )
+
+    def test_idempotent_rerun_creates_no_duplicate_assignment_or_template(self):
+        cat = _make_catalog(f"A076-IDEM-{_rand()}", "Quarterly")
+        bld = _make_building(f"A076 IDEM {_rand()}")
+        self.addCleanup(self._cleanup, bld, cat)
+
+        generate_safety_setup(bld)
+        second = generate_safety_setup(bld)
+
+        tmpl = _template_for(cat)
+        self.assertEqual(
+            frappe.db.count("Scheduled Task Assignment", {"template": tmpl, "building": bld}),
+            1,
+            "re-run must not duplicate the (template, building) assignment",
+        )
+        self.assertEqual(
+            frappe.db.count("Scheduled Task Template", {"safety_task_catalog": cat}),
+            1,
+            "re-run must reuse the single template, not create a second",
+        )
+        self.assertGreaterEqual(
+            second["skipped_assignments"], 1,
+            "the already-present assignment must be counted as skipped on re-run",
+        )
+
+    def test_annual_catalog_frequency_maps_to_annually(self):
+        cat = _make_catalog(f"A076-ANN-{_rand()}", "Annual")
+        bld = _make_building(f"A076 ANN {_rand()}")
+        self.addCleanup(self._cleanup, bld, cat)
+
+        generate_safety_setup(bld)
+
+        tmpl = _template_for(cat)
+        self.assertTrue(tmpl)
+        self.assertEqual(
+            frappe.db.get_value("Scheduled Task Template", tmpl, "frequency"),
+            "Annually",
+            "catalog 'Annual' must map to the template Select value 'Annually'",
+        )
+
+    def test_event_driven_frequency_is_excluded_not_scheduled(self):
+        for freq in ("As Needed", "On Entry"):
+            code = f"A076-EVT-{_rand()}"
+            cat = _make_catalog(code, freq)
+            bld = _make_building(f"A076 EVT {_rand()}")
+            self.addCleanup(self._cleanup, bld, cat)
+
+            summary = generate_safety_setup(bld)
+
+            self.assertFalse(
+                _template_for(cat),
+                f"an event-driven ({freq}) task must NOT get a scheduled template",
+            )
+            self.assertIn(
+                code, summary["event_driven_excluded"],
+                f"an event-driven ({freq}) task must be reported as excluded, not swallowed",
+            )
+
+    def test_reused_template_backfills_missing_scheduling_item(self):
+        """A pre-existing template linked to the catalog but WITHOUT items (as a
+        pre-redesign / migrated template is) must be reused (not duplicated) and the
+        generator must backfill the catalog as an active template_items row, otherwise
+        the daily generator would silently emit nothing for it."""
+        cat = _make_catalog(f"A076-LEG-{_rand()}", "Weekly")
+        bld = _make_building(f"A076 LEG {_rand()}")
+        self.addCleanup(self._cleanup, bld, cat)
+
+        legacy = frappe.get_doc({
+            "doctype": "Scheduled Task Template",
+            "template_name": f"Legacy STT {_rand()}",
+            "task_type": "Safety",
+            "frequency": "Weekly",
+            "safety_task_catalog": cat,
+            "is_active": 1,
+            # deliberately NO template_items -> inert for the scheduler
+        }).insert(ignore_permissions=True)
+
+        summary = generate_safety_setup(bld)
+
+        self.assertEqual(
+            frappe.db.count("Scheduled Task Template", {"safety_task_catalog": cat}),
+            1,
+            "must reuse the existing catalog template, not create a duplicate",
+        )
+        self.assertEqual(_template_for(cat), legacy.name)
+        self.assertTrue(
+            frappe.db.exists(
+                "Scheduled Task Template Item",
+                {"parent": legacy.name, "task_catalog": cat, "is_active": 1},
+            ),
+            "the reused template must be backfilled with the catalog scheduling item",
+        )
+        self.assertTrue(
+            frappe.db.exists(
+                "Scheduled Task Assignment", {"template": legacy.name, "building": bld}
+            ),
+        )
+        self.assertGreaterEqual(summary["reused_templates"], 1)
+
+    def test_no_scheduled_task_template_building_field_or_usage(self):
+        """The redesign dropped ``Scheduled Task Template.building``. Prove the
+        field is gone from the DocType AND that no product code constructs or queries a
+        Scheduled Task Template with a ``building`` key (the breakage)."""
+        # structural: the field is truly absent from the doctype
+        self.assertIsNone(
+            frappe.get_meta("Scheduled Task Template").get_field("building"),
+            "Scheduled Task Template must have no 'building' field; it was dropped "
+            "when the template stopped being building-scoped",
+        )
+
+        # source guard: grep the app tree for a Scheduled Task Template built or filtered
+        # by a `building` key. Only this test file is excluded; the migration patch that
+        # read the legacy column by raw SQL no longer ships.
+        import apex
+
+        apex_root = os.path.dirname(apex.__file__)
+        this_file = os.path.abspath(__file__)
+        allow = set()
+        construct_re = re.compile(r'"doctype":\s*"Scheduled Task Template"')
+        building_key_re = re.compile(r"""["']building["']\s*:""")
+        filter_re = re.compile(
+            r'"Scheduled Task Template"\s*,\s*\{[^}]*["\']building["\']'
+        )
+
+        offenders = []
+        for dirpath, _dirs, files in os.walk(apex_root):
+            for fn in files:
+                if not fn.endswith(".py"):
+                    continue
+                full = os.path.join(dirpath, fn)
+                if os.path.abspath(full) == this_file:
+                    continue
+                if os.path.relpath(full, apex_root) in allow:
+                    continue
+                with open(full, encoding="utf-8") as fh:
+                    text = fh.read()
+                for m in construct_re.finditer(text):
+                    # scan the dict body that follows the doctype key
+                    if building_key_re.search(text[m.start():m.start() + 400]):
+                        offenders.append(os.path.relpath(full, apex_root))
+                        break
+                if filter_re.search(text):
+                    offenders.append(os.path.relpath(full, apex_root))
+
+        self.assertEqual(
+            offenders, [],
+            f"Scheduled Task Template.building usage must be gone; found in: {offenders}",
+        )
+
+
+# --- merged from test_idempotency_guards.py ---
+class TestIdempotencyGuards(ApexHabitatTestCase):
+    def setUp(self):
+        self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({
+            "doctype": "Company", "company_name": "Test Company",
+            "default_currency": "SAR", "country": "Saudi Arabia",
+        }).insert(ignore_permissions=True).name
+        self.cost_center = (
+            frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.company})
+            or frappe.db.get_value("Cost Center", {"is_group": 0})
+        )
+        self.project = frappe.db.get_value("Project", {}) or frappe.get_doc({
+            "doctype": "Project", "project_name": "Test Project", "company": self.company,
+        }).insert(ignore_permissions=True).name
+        self.employee = frappe.get_doc({
+            "doctype": "Employee", "first_name": f"Test Emp {frappe.generate_hash(length=12)}",
+            "company": self.company, "gender": "Male",
+            "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01",
+        }).insert(ignore_permissions=True).name
+
+        self.site = frappe.get_doc({
+            "doctype": "Site", "site_name": frappe.generate_hash(length=12),
+        }).insert(ignore_permissions=True)
+
+    def _make_building(self, abbr):
+        b = frappe.get_doc({
+            "doctype": "Building",
+            "building_name": f"Bldg {abbr}",
+            "abbreviation": abbr,
+            "site": self.site.name,
+            "total_capacity": 50,
+            "default_cost_center": self.cost_center,
+        })
+        b.append("floor_plan", {
+            "floor_number": 1,
+            "starting_room_number": 1,
+            "room_count": 3,
+            "bed_capacity_per_room": 2,
+            "room_type": "Standard",
+            "generate_beds": 1,
+        })
+        b.insert(ignore_permissions=True)
+        return b
+
+    def test_room_generator_run_twice_creates_no_duplicates(self):
+        abbr = "T" + frappe.generate_hash(length=12).upper()
+        building = self._make_building(abbr)
+
+        first = generate_rooms_and_beds(building.name)
+        rooms_after_first = frappe.db.count("Room", {"building": building.name})
+        beds_after_first = frappe.db.count(
+            "Bed", {"room": ["in", frappe.get_all(
+                "Room", {"building": building.name}, pluck="name")]}
+        )
+
+        second = generate_rooms_and_beds(building.name)
+        rooms_after_second = frappe.db.count("Room", {"building": building.name})
+        beds_after_second = frappe.db.count(
+            "Bed", {"room": ["in", frappe.get_all(
+                "Room", {"building": building.name}, pluck="name")]}
+        )
+
+        self.assertEqual(first["created_rooms"], 3)
+        self.assertEqual(
+            second["created_rooms"], 0,
+            "Second run must create 0 rooms (all already exist).",
+        )
+        self.assertEqual(second["skipped_rooms"], 3)
+        self.assertEqual(
+            rooms_after_second, rooms_after_first,
+            f"Room count changed on re-run ({rooms_after_first} -> {rooms_after_second}): duplicates created.",
+        )
+        self.assertEqual(
+            beds_after_second, beds_after_first,
+            f"Bed count changed on re-run ({beds_after_first} -> {beds_after_second}): duplicate beds created.",
+        )
+
+    def _assignment(self, building, room, bed):
+        a = frappe.get_doc({
+            "doctype": "Housing Assignment",
+            "employee": self.employee, "project": self.project,
+            "cost_center": self.cost_center, "building": building,
+            "room": room, "bed": bed, "check_in_date": "2026-05-01",
+            "assignment_type": "New Assignment",
+        })
+        a.insert(ignore_permissions=True)
+        a.submit()
+        return a
+
+    def test_second_checkout_for_same_assignment_is_rejected(self):
+        abbr = "C" + frappe.generate_hash(length=12).upper()
+        building = self._make_building(abbr)
+        generate_rooms_and_beds(building.name)
+        room = frappe.get_all("Room", {"building": building.name}, pluck="name")[0]
+        bed = frappe.get_all("Bed", {"room": room}, pluck="name")[0]
+
+        assignment = self._assignment(building.name, room, bed)
+
+        checkout1 = frappe.get_doc({
+            "doctype": "Housing Checkout", "assignment": assignment.name,
+            "checkout_date": "2026-05-21", "checkout_reason": "Internal Transfer",
+        })
+        checkout1.insert(ignore_permissions=True)
+        checkout1.submit()
+
+        checkout2 = frappe.get_doc({
+            "doctype": "Housing Checkout", "assignment": assignment.name,
+            "checkout_date": "2026-05-22", "checkout_reason": "Internal Transfer",
+        })
+        with self.assertRaises(frappe.ValidationError,
+                               msg="A second checkout for the same assignment must be rejected."):
+            checkout2.insert(ignore_permissions=True)
+            checkout2.submit()

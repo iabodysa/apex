@@ -47,3 +47,37 @@ class TestWorkShift(FrappeTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             shift.validate()
+
+
+# --- merged from test_work_shift_naming.py ---
+class TestWorkShiftNaming(FrappeTestCase):
+    def _shift(self, **overrides):
+        """A Work Shift the controller accepts: ``applicable_days`` is mandatory, so a
+        shift with no day never reaches the naming series."""
+        values = {
+            "doctype": "Work Shift",
+            "shift_name": "Naming Morning Shift",
+            "start_time": "06:00:00",
+            "end_time": "14:00:00",
+            "applicable_days": [{"day_of_week": "Monday"}],
+        }
+        values.update(overrides)
+        return frappe.get_doc(values)
+
+    def _insert(self, doc):
+        doc.insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.delete_doc, "Work Shift", doc.name, ignore_permissions=True, force=True
+        )
+        return doc
+
+    def test_the_naming_series_mints_a_ws_name(self):
+        doc = self._insert(self._shift())
+        self.assertTrue(
+            doc.name.startswith("WS-"),
+            f"Expected the WS-.#### series to name the shift, got: {doc.name}",
+        )
+
+    def test_a_shift_with_no_name_is_refused(self):
+        with self.assertRaises(frappe.exceptions.MandatoryError):
+            self._shift(shift_name="").insert(ignore_permissions=True)

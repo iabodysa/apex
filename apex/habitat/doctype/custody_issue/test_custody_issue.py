@@ -45,16 +45,18 @@ class TestCustodyIssue(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_empty_items_raises(self):
-        from apex.habitat.doctype.custody_issue.custody_issue import validate
-
         doc = frappe.get_doc({
             "doctype": "Custody Issue",
             "issue_date": "2026-06-01",
             "building": "QA-BLDG",
             "items": [],
         })
-        with self.assertRaises(frappe.ValidationError):
-            validate(doc)
+        # Links are validated before mandatory (document.py:302 then :310), and the
+        # placeholder links below do not exist, so the link check is stood down to keep
+        # the assertion on the empty table this test is about.
+        doc.flags.ignore_links = True
+        with self.assertRaises(frappe.MandatoryError):
+            doc.insert(ignore_permissions=True)
 
 
 class TestCustodyIssueSerializedRules(FrappeTestCase):

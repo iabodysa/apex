@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
+from apex.tests._helpers import _user
+from apex.tests.factories import make_project, make_vehicle
 
-test_ignore = ["Payment Gateway"]
 
 
 class TestFuelExceptionCaseAmount(FrappeTestCase):
@@ -38,3 +40,201 @@ class TestFuelExceptionCaseAmount(FrappeTestCase):
         self.assertTrue(zero.name)
         positive = self._case(500).insert(ignore_permissions=True)
         self.assertTrue(positive.name)
+
+test_ignore = ['Payment Gateway']
+
+
+# --- merged from test_fuel_exception_case_workflow.py ---
+WORKFLOW = "Fuel Exception Case Workflow"
+def _actions(doc):
+    """The set of workflow action names currently available to the session user."""
+    return {t.action for t in get_transitions(doc)}
+class TestFuelExceptionCaseWorkflow(FrappeTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
+        # absence is a regression - FAIL, never skip.
+        if get_workflow_name("Fuel Exception Case") != WORKFLOW:
+            raise AssertionError(
+                f"Mandatory Salis workflow {WORKFLOW!r} not active for "
+                "'Fuel Exception Case' (salis_workflow_seed regression)"
+            )
+        frappe.set_user("Administrator")
+        cls.raiser = _user("fecw_raiser@example.com", "Fleet Project Manager")
+        cls.manager = _user("fecw_mgr@example.com", "Fleet Manager")
+        cls.manager_maker = _user("fecw_mgrmaker@example.com", "Fleet Manager")
+        frappe.get_doc("User", cls.manager_maker).add_roles("Fleet Project Manager")
+        cls.project = make_project("FEC Workflow Project")
+        cls.vehicle = make_vehicle("FEC-WF-1")
+        for u in (cls.raiser, cls.manager, cls.manager_maker):
+            if not frappe.db.exists(
+                "User Permission", {"user": u, "allow": "Project", "for_value": cls.project}
+            ):
+                frappe.get_doc({
+                    "doctype": "User Permission",
+                    "user": u,
+                    "allow": "Project",
+                    "for_value": cls.project,
+                }).insert(ignore_permissions=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        frappe.set_user("Administrator")
+        for u in (cls.raiser, cls.manager, cls.manager_maker):
+            frappe.db.delete("User Permission",
+                {"user": u, "allow": "Project", "for_value": cls.project})
+        if frappe.db.exists("Salis Vehicle", cls.vehicle):
+            frappe.delete_doc("Salis Vehicle", cls.vehicle, ignore_permissions=True, force=True)
+        if frappe.db.exists("Project", cls.project):
+            frappe.delete_doc("Project", cls.project, ignore_permissions=True, force=True)
+        frappe.db.commit()
+        super().tearDownClass()
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+
+    def _new(self, reported_by=None, with_evidence=True, **overrides):
+        """An Open Fuel Exception Case, raised by ``reported_by`` (defaults to the
+		standard raiser). Inserted as Administrator so ``owner`` is Administrator
+		and the SoD gate is exercised purely via reported_by. Evidence notes are
+		supplied by default so the controller's evidence-before-resolution gate
+		does not mask the workflow assertions."""
+        data = {
+            "doctype": "Fuel Exception Case",
+            "vehicle": self.vehicle,
+            "project": self.project,
+            "exception_type": "Over-Consumption",
+            "description": "Workflow test case.",
+            "reported_by": reported_by or self.raiser,
+            "status": "Open",
+        }
+        if with_evidence:
+            data["evidence_notes"] = "GPS log attached."
+        data.update(overrides)
+        doc = frappe.get_doc(data).insert(ignore_permissions=True)
+        self.addCleanup(lambda: self._purge(doc.name))
+        return doc
+
+    def _investigating(self, **kwargs):
+        """A case advanced to Under Investigation (still docstatus 0)."""
+        fec = self._new(**kwargs)
+        frappe.set_user(self.manager)
+        apply_workflow(fec, "Start Investigation")
+        frappe.set_user("Administrator")
+        fec.reload()
+        return fec
+
+    @staticmethod
+    def _purge(name):
+        frappe.set_user("Administrator")
+        if not frappe.db.exists("Fuel Exception Case", name):
+            return
+        doc = frappe.get_doc("Fuel Exception Case", name)
+        if doc.docstatus == 1:
+            try:
+                doc.cancel()
+            except Exception:
+                pass
+        frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
+
+
+    def test_workflow_is_seeded_and_active(self):
+        self.assertEqual(get_workflow_name("Fuel Exception Case"), WORKFLOW)
+        self.assertTrue(frappe.db.get_value("Workflow", WORKFLOW, "is_active"))
+        self.assertEqual(
+            frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
+        )
+
+
+    def test_investigate_resolve_then_close(self):
+        fec = self._new()
+        self.assertEqual(fec.docstatus, 0)
+
+        frappe.set_user(self.manager)
+        self.assertIn("Start Investigation", _actions(fec))
+        apply_workflow(fec, "Start Investigation")
+        fec.reload()
+        self.assertEqual(fec.status, "Under Investigation")
+        self.assertEqual(fec.docstatus, 0)
+
+        self.assertIn("Request Evidence", _actions(fec))
+        apply_workflow(fec, "Request Evidence")
+        fec.reload()
+        self.assertEqual(fec.status, "Evidence Required")
+
+        self.assertIn("Resume Investigation", _actions(fec))
+        apply_workflow(fec, "Resume Investigation")
+        fec.reload()
+        self.assertEqual(fec.status, "Under Investigation")
+
+        self.assertIn("Resolve", _actions(fec))
+        apply_workflow(fec, "Resolve")
+        fec.reload()
+        self.assertEqual(fec.status, "Resolved")
+        self.assertEqual(fec.docstatus, 1)
+        self.assertEqual(fec.closed_by, self.manager)
+
+        self.assertIn("Close", _actions(fec))
+        apply_workflow(fec, "Close")
+        fec.reload()
+        self.assertEqual(fec.status, "Closed")
+        self.assertEqual(fec.docstatus, 1)
+
+
+    def test_reject_then_close(self):
+        fec = self._investigating()
+        frappe.set_user(self.manager)
+        self.assertIn("Reject", _actions(fec))
+        apply_workflow(fec, "Reject")
+        fec.reload()
+        self.assertEqual(fec.status, "Rejected")
+        self.assertEqual(fec.docstatus, 1)
+
+        self.assertIn("Close", _actions(fec))
+        apply_workflow(fec, "Close")
+        fec.reload()
+        self.assertEqual(fec.status, "Closed")
+        self.assertEqual(fec.docstatus, 1)
+
+
+    def test_sod_raiser_cannot_resolve(self):
+        fec = self._investigating(reported_by=self.manager_maker)
+
+        frappe.set_user(self.manager_maker)
+        self.assertNotIn("Resolve", _actions(fec))
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(fec, "Resolve")
+
+        frappe.set_user(self.manager)
+        self.assertIn("Resolve", _actions(fec))
+        apply_workflow(fec, "Resolve")
+        fec.reload()
+        self.assertEqual(fec.status, "Resolved")
+        self.assertEqual(fec.docstatus, 1)
+
+
+    def test_resolve_succeeds_via_workflow_gate(self):
+        """Approval authority now lives in the native workflow's Resolve transition
+		(authorized role + SoD); the old controller-side Delegation-of-Authority
+		gate (ensure_approval / Approval Request) was removed, so an authorized
+		approver resolves straight through it (the separate evidence gate stays)."""
+        fec = self._investigating()
+        frappe.set_user(self.manager)
+        self.assertIn("Resolve", _actions(fec))
+        apply_workflow(fec, "Resolve")
+        fec.reload()
+        self.assertEqual(fec.docstatus, 1)
+
+
+    def test_resolve_blocked_without_evidence(self):
+        fec = self._investigating(with_evidence=False)
+        frappe.set_user(self.manager)
+        with self.assertRaises(frappe.ValidationError):
+            apply_workflow(fec, "Resolve")
+        fec.reload()
+        self.assertEqual(fec.docstatus, 0)

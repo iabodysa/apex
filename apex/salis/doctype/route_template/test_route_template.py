@@ -71,3 +71,33 @@ class TestRouteTemplate(FrappeTestCase):
 
         with self.assertRaises(frappe.ValidationError):
             route.validate()
+
+
+# --- merged from test_route_template_naming.py ---
+class TestRouteTemplateNaming(FrappeTestCase):
+    def _template(self, template_name):
+        """A Route Template the controller accepts: ``stops`` is mandatory, so a
+        stopless template never reaches the autoname."""
+        doc = frappe.get_doc(
+            {
+                "doctype": "Route Template",
+                "template_name": template_name,
+                "route_type": "Pickup",
+                "stops": [{"stop_name": "Housing"}],
+            }
+        )
+        doc.insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.delete_doc, "Route Template", doc.name, ignore_permissions=True, force=True
+        )
+        return doc
+
+    def test_the_autoname_mints_an_rt_name(self):
+        doc = self._template("Autoname Route")
+        self.assertTrue(
+            doc.name.startswith("RT-"),
+            f"Expected the RT-.#### series to name the template, got: {doc.name}",
+        )
+
+    def test_is_active_defaults_to_enabled(self):
+        self.assertEqual(self._template("Active Default Route").is_active, 1)

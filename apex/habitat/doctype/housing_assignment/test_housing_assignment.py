@@ -14,6 +14,7 @@
   proves the delegation itself; the DDL-based class proves the real index shape by
   dropping and re-declaring it against a live database.
 """
+from __future__ import annotations
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -22,24 +23,15 @@ import unittest
 from unittest import mock
 from apex.apex_core.utils import ledger_index
 from apex.habitat.doctype.housing_assignment import housing_assignment
+import json
+from pathlib import Path
+from frappe.desk.query_report import get_report_doc
+import apex
+import inspect
+import os
+from apex.apex_core.utils.ledger_index import _index_exists, add_index_guarded
+from apex.habitat.doctype.accommodation_stock_ledger import accommodation_stock_ledger
 
-test_ignore = [
-    "Additional Salary",
-    "Asset",
-    "Asset Movement",
-    "Company",
-    "Cost Center",
-    "Currency",
-    "Employee",
-    "Item",
-    "Payment Entry",
-    "Project",
-    "Purchase Invoice",
-    "Role",
-    "Salary Component",
-    "Supplier",
-    "User",
-]
 
 
 class TestAccommodationAssignment(FrappeTestCase):
@@ -333,3 +325,431 @@ def _indexes_covering(doctype, columns):
         if [r["Column_name"] for r in sorted(index_rows, key=lambda r: r["Seq_in_index"])]
         == list(columns)
     }
+
+test_dependencies = ['Bed', 'Employee']
+test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
+
+
+# --- merged from test_housing_assignment_auditor_access.py ---
+_HOUSING_ASSIGNMENT_JSON = Path(apex.__file__).resolve().parent / "habitat" / "doctype" / "housing_assignment" / "housing_assignment.json"
+AUDITOR_ROLE = "Internal Auditor"
+THE_GRANTED_REPORTS = (
+    "Accommodation Occupancy Summary",
+    "Idle Resident Detection",
+)
+class TestInternalAuditorHousingAccess(FrappeTestCase):
+    """Site-bound. `frappe.session.user` is process state that no rollback restores, so the
+    cleanup is registered BEFORE anything sets it."""
+
+    def setUp(self):
+        self.addCleanup(frappe.set_user, "Administrator")
+        frappe.set_user("Administrator")
+
+    def _auditor(self):
+        return frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": f"a216_{frappe.generate_hash(length=12)}@example.com",
+                "first_name": "Auditor",
+                "roles": [{"role": AUDITOR_ROLE}],
+            }
+        ).insert(ignore_permissions=True).name
+
+    def test_the_auditor_opens_the_report_and_is_refused_the_export(self):
+        """THE PAIR. Both halves in one method, asserted explicitly different at the end —
+        a bug that granted everything would satisfy the open, and a bug that granted
+        nothing would satisfy the refusal. Only the contrast proves the shape."""
+        auditor = self._auditor()
+        frappe.set_user(auditor)
+
+        # Half 1 — THE OPEN. get_report_doc carries both gates the role must clear:
+        # Report.is_permitted() at query_report.py:41 and has_permission(ref, "report")
+        # at :47. Calling it is the real open path, not a re-implementation of it.
+        opened = get_report_doc("Accommodation Occupancy Summary")
+        self.assertEqual(opened.ref_doctype, "Housing Assignment")
+        open_verdict = "opened"
+
+        # Half 2 — THE REFUSAL. Caught by NAME: frappe.PermissionError does not descend
+        # from ValidationError, so an unrelated validation failure cannot satisfy this.
+        with self.assertRaises(frappe.PermissionError) as caught:
+            frappe.permissions.can_export("Housing Assignment", raise_exception=True)
+        self.assertIn(
+            "Housing Assignment",
+            str(caught.exception),
+            "the export refusal does not name the DocType it refused",
+        )
+        export_verdict = "refused"
+
+        self.assertNotEqual(
+            open_verdict,
+            export_verdict,
+            "the two halves collapsed into one verdict — the grant is all-or-nothing",
+        )
+        # And the underlying rights, so the verdicts above cannot both be accidents.
+        self.assertIs(frappe.has_permission("Housing Assignment", "read", user=auditor), True)
+        self.assertIs(frappe.has_permission("Housing Assignment", "report", user=auditor), True)
+        self.assertFalse(
+            frappe.permissions.can_export("Housing Assignment"),
+            "export leaked back in",
+        )
+
+    def test_every_formerly_broken_report_now_opens(self):
+        """The baseline in test_report_role_guard drained them together, because they
+        turned on one row. If only one of them opens, that drain was wrong."""
+        frappe.set_user(self._auditor())
+        for report in THE_GRANTED_REPORTS:
+            with self.subTest(report=report):
+                doc = get_report_doc(report)
+                self.assertEqual(doc.ref_doctype, "Housing Assignment")
+
+    def test_a_role_without_the_row_still_cannot_open_them(self):
+        """The control. Without it, a test that passed because the reports stopped checking
+        anything would look identical to one that passed because the grant works."""
+        outsider = frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": f"a216x_{frappe.generate_hash(length=12)}@example.com",
+                "first_name": "Outsider",
+                "roles": [{"role": "Fleet Supervisor"}],
+            }
+        ).insert(ignore_permissions=True).name
+        frappe.set_user(outsider)
+        with self.assertRaises(frappe.PermissionError):
+            get_report_doc("Accommodation Occupancy Summary")
+
+    def test_the_row_grants_exactly_read_and_report(self):
+        """The shipped row: a right must be absent by OMISSION, not shipped as 0."""
+        shipped = json.loads(_HOUSING_ASSIGNMENT_JSON.read_text(encoding="utf-8"))
+        rows = [
+            p
+            for p in shipped["permissions"]
+            if p.get("role") == AUDITOR_ROLE and int(p.get("permlevel") or 0) == 0
+        ]
+        self.assertEqual(len(rows), 1, f"expected exactly one permlevel-0 {AUDITOR_ROLE} row")
+        row = rows[0]
+        self.assertEqual(row.get("read"), 1)
+        self.assertEqual(row.get("report"), 1)
+        for withheld in (
+            "export",
+            "write",
+            "create",
+            "delete",
+            "submit",
+            "cancel",
+            "amend",
+            "share",
+            "print",
+            "email",
+        ):
+            self.assertNotIn(
+                withheld,
+                row,
+                f"{withheld} must be OMITTED from the row, not shipped as 0 — an explicit "
+                "0 reads as a toggle someone meant to flip",
+            )
+
+    def test_the_grant_did_not_disturb_the_other_roles(self):
+        """A second plain read row for an existing role would silently disable an if_owner
+        constraint (permissions.py:286-287). Nothing else on this table may have moved.
+
+        Counted at permlevel 0 only. A permlevel-1 row is field access, not a second grant
+        of the record, and it cannot reach the if_owner path this guards -- so counting by
+        role alone would flag the signature concealment as a duplicate and push the next
+        author to delete the row that hides it.
+        """
+        shipped = json.loads(_HOUSING_ASSIGNMENT_JSON.read_text(encoding="utf-8"))
+        by_role = {}
+        for p in shipped["permissions"]:
+            if int(p.get("permlevel") or 0) == 0:
+                by_role.setdefault(p["role"], []).append(p)
+        self.assertEqual(
+            sorted(by_role),
+            ["Accommodation Manager", AUDITOR_ROLE, "Resident Supervisor", "System Manager"],
+            "the role set on Housing Assignment changed beyond the Internal Auditor grant",
+        )
+        for role, rows in by_role.items():
+            self.assertEqual(len(rows), 1, f"{role} gained a second permlevel-0 row — check if_owner")
+
+    def test_the_auditor_holds_no_write_authority(self):
+        """The read-only shape, proven at runtime rather than inferred from the JSON."""
+        auditor = self._auditor()
+        for right in ("write", "create", "delete", "submit", "cancel"):
+            with self.subTest(right=right):
+                self.assertIs(
+                    frappe.has_permission("Housing Assignment", right, user=auditor),
+                    False,
+                    f"the auditor grant leaked {right}",
+                )
+
+    def test_the_unscoped_exemption_now_has_a_row_to_apply_to(self):
+        """The contradiction, asserted directly: the role is in HOUSING_UNSCOPED_ROLES, and
+        it can now actually read the DocType that set was lifting a filter on."""
+        from apex.habitat import permissions
+
+        self.assertIn(AUDITOR_ROLE, permissions.HOUSING_UNSCOPED_ROLES)
+        auditor = self._auditor()
+        self.assertEqual(
+            permissions.building_scope_query(auditor, doctype="Housing Assignment"),
+            "",
+            "an unscoped role must get an empty row filter",
+        )
+        self.assertIs(frappe.has_permission("Housing Assignment", "read", user=auditor), True)
+
+
+# --- merged from test_housing_assignment_bed_index.py ---
+DOCTYPE_housing_assignment_bed_index = "Housing Assignment"
+BED_INDEX_housing_assignment_bed_index = "idx_asgn_bed"
+ACTIVE_INDEX_housing_assignment_bed_index = "idx_asgn_bed_active"
+LEGACY_PATCH_housing_assignment_bed_index = "apex.patches.v0_7.add_bed_assignment_index"
+def _index_columns_housing_assignment_bed_index(doctype, index_name):
+    """The ordered column list of one index, straight out of MariaDB."""
+    rows = frappe.db.sql(
+        f"SHOW INDEX FROM `tab{doctype}` WHERE Key_name = %s",
+        (index_name,),
+        as_dict=True,
+    )
+    return [row["Column_name"] for row in sorted(rows, key=lambda r: r["Seq_in_index"])]
+def _indexes_covering_housing_assignment_bed_index(doctype, columns):
+    """Every index name whose ordered column list equals ``columns``.
+
+    Assert on THIS, not on an index name, wherever the framework may already
+    have built an equivalent index of its own. ``bed`` is a Link carrying
+    ``search_index: 1``, so Frappe creates its own single-column index (named
+    ``bed`` at table creation, ``bed_index`` on a later alter). Since that change the
+    guarded helper recognises that equivalence and declines to add a duplicate
+    under our name, so ``idx_asgn_bed`` is present on some sites and absent on
+    others while the invariant the query planner needs — bed is indexed — holds
+    on both. A test that pinned the name would fail on exactly the sites where
+    the deduplication worked.
+    """
+    rows = frappe.db.sql(f"SHOW INDEX FROM `tab{doctype}`", as_dict=True)
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["Key_name"], []).append(row)
+    return {
+        name
+        for name, index_rows in grouped.items()
+        if [r["Column_name"] for r in sorted(index_rows, key=lambda r: r["Seq_in_index"])]
+        == list(columns)
+    }
+class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
+    def test_on_doctype_update_is_a_module_level_hook(self):
+        """Frappe's sync/migrate calls the DocType module's MODULE-LEVEL
+        ``on_doctype_update`` — a method on the controller class is never
+        invoked, so the declaration only reaches a fresh install in this shape."""
+        hook = getattr(housing_assignment, "on_doctype_update", None)
+        self.assertTrue(callable(hook), "housing_assignment declares no on_doctype_update")
+        self.assertTrue(inspect.isfunction(hook), "on_doctype_update must be a module-level function")
+        self.assertEqual(hook.__module__, housing_assignment.__name__)
+
+    def test_it_mirrors_the_accommodation_stock_ledger_declaration(self):
+        """Same fix, same effect: the sibling ledger's declaration also puts its
+        index on the table. Asserted by running it and inspecting the database,
+        not by reading either module's source."""
+        sibling = getattr(accommodation_stock_ledger, "on_doctype_update", None)
+        self.assertTrue(callable(sibling), "the mirrored ASL declaration disappeared")
+        sibling()
+        self.assertTrue(
+            _index_exists("Accommodation Stock Ledger", "idx_asl_cancel_type_emp"),
+            "the mirrored declaration must produce its index too",
+        )
+
+    def test_both_bed_indexes_are_declared_and_shaped_correctly(self):
+        """The state a freshly synced site must end up in."""
+        housing_assignment.on_doctype_update()
+        self.assertTrue(
+            _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, ["bed"]),
+            "no index covers the bed column alone — the occupancy lookup would "
+            "table-scan whether or not our own index name is the one present",
+        )
+        self.assertTrue(_index_exists(DOCTYPE_housing_assignment_bed_index, ACTIVE_INDEX_housing_assignment_bed_index))
+        self.assertEqual(
+            _index_columns_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, ACTIVE_INDEX_housing_assignment_bed_index),
+            ["bed", "docstatus", "check_out_date"],
+            "the composite index must serve the active-occupancy lookup "
+            '({"bed": ..., "docstatus": 1, "check_out_date": ["is", "not set"]})',
+        )
+
+    def _rebuild(self, index_name, fields):
+        add_index_guarded(DOCTYPE_housing_assignment_bed_index, fields, index_name)
+
+    def _prove_declaration_recreates(self, index_name, fields):
+        """Drop every index over these columns, prove none remain, then let the
+        declaration put coverage back.
+
+        This is what makes the test causal: without the drop, a green would only
+        show that SOME earlier migrate had created the index, which is exactly the
+        upgraded-site case is NOT about.
+
+        Every equivalent index goes, not just ours — leaving the framework's own
+        ``bed`` search index in place would make the declaration a legitimate
+        no-op and the test would prove nothing. The rebuild registered
+        first restores coverage under our name, which is the same invariant, not
+        necessarily the same index name the site started with.
+        """
+        # Make sure coverage is there to drop (and register the rebuild first, so
+        # the column is indexed again even if an assertion below fails).
+        housing_assignment.on_doctype_update()
+        self.addCleanup(self._rebuild, index_name, fields)
+        for existing in _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, fields):
+            frappe.db.sql(f"ALTER TABLE `tab{DOCTYPE_housing_assignment_bed_index}` DROP INDEX `{existing}`")
+        self.assertEqual(
+            _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, fields),
+            set(),
+            f"no index over {fields} should remain — this is the fresh-install "
+            "starting state",
+        )
+
+        housing_assignment.on_doctype_update()
+
+        self.assertIn(
+            index_name,
+            _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, fields),
+            f"on_doctype_update must create {index_name} on a site where nothing "
+            f"else indexes {fields}",
+        )
+        self.assertEqual(_index_columns_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, index_name), fields)
+
+    def test_a_site_without_the_bed_index_gets_it_from_the_declaration(self):
+        self._prove_declaration_recreates(BED_INDEX_housing_assignment_bed_index, ["bed"])
+
+    def test_a_site_without_the_active_index_gets_it_from_the_declaration(self):
+        self._prove_declaration_recreates(
+            ACTIVE_INDEX_housing_assignment_bed_index, ["bed", "docstatus", "check_out_date"]
+        )
+
+    def test_re_declaring_on_an_existing_site_is_an_idempotent_no_op(self):
+        """``on_doctype_update`` runs on EVERY migrate. A site that already has
+        the indexes must not grow a second copy under the same or a new name."""
+        housing_assignment.on_doctype_update()
+        before = {
+            row["Key_name"]
+            for row in frappe.db.sql(f"SHOW INDEX FROM `tab{DOCTYPE_housing_assignment_bed_index}`", as_dict=True)
+        }
+        housing_assignment.on_doctype_update()
+        housing_assignment.on_doctype_update()
+        after = {
+            row["Key_name"]
+            for row in frappe.db.sql(f"SHOW INDEX FROM `tab{DOCTYPE_housing_assignment_bed_index}`", as_dict=True)
+        }
+        self.assertEqual(after, before, "repeated declaration must add no new index")
+        self.assertTrue(
+            _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, ["bed"]),
+            "the bed column must stay indexed under some name across re-declaration",
+        )
+        self.assertIn(ACTIVE_INDEX_housing_assignment_bed_index, after)
+
+    def test_no_patch_is_still_claimed_for_the_bed_index(self):
+        """The declaration is the ONLY delivery path for the bed index, and the tree
+        must say so: the schema comes from the DocType JSON and
+        ``on_doctype_update``, so a legacy ``patches/v0_7/add_bed_assignment_index``
+        registration is not required for a site mid-upgrade to get the index. A
+        re-registered legacy patch would be the defect: it would race the
+        declaration and can only produce a second index for one path.
+        """
+        app_root = str(Path(apex.__file__).resolve().parent)
+        patch_path = os.path.join(
+            app_root, "patches", "v0_7", "add_bed_assignment_index.py"
+        )
+        self.assertFalse(
+            os.path.exists(patch_path),
+            "the legacy bed-index patch is back; the declaration already owns this index",
+        )
+        with open(os.path.join(app_root, "patches.txt"), encoding="utf-8") as fh:
+            registered = fh.read()
+        self.assertNotIn(
+            LEGACY_PATCH_housing_assignment_bed_index, registered, "the legacy bed-index patch is registered again"
+        )
+
+
+# --- merged from test_housing_assignment_bed_lock.py ---
+BUILDING = "_Test Building"
+ROOM = "_T-101"
+class TestHousingAssignmentBedLock(FrappeTestCase):
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.company = frappe.db.get_value("Building", BUILDING, "company")
+        # ERPNext's Project fixture is not idempotent (autoname mints a new name while
+        # project_name carries a unique index), so the one already on the site is read.
+        self.project = frappe.db.get_value("Project", {"project_name": "_Test Project"})
+        self.bed = frappe.db.get_value("Bed", {"room": ROOM, "status": "Available"})
+        self.assertTrue(self.bed, "the shipped Bed fixture must provide a free bed")
+        # Shared fixtures are handed back: FrappeTestCase rolls back once per CLASS
+        # (frappe/tests/utils.py:46), so a bed left Occupied outlives this method.
+        self.addCleanup(frappe.db.set_value, "Bed", self.bed, "status", "Available")
+
+    def _employee(self):
+        """A fresh Employee every time: the controller refuses a second live assignment
+        for the same worker, so a shared one makes this file's result depend on whatever
+        else on the bench is currently housing him."""
+        return frappe.get_doc({
+            "doctype": "Employee",
+            "first_name": "_T Bed Lock " + frappe.generate_hash(length=12),
+            "company": self.company,
+            "status": "Active",
+            "gender": "Male",
+            "date_of_birth": "1990-01-01",
+            "date_of_joining": "2020-01-01",
+        }).insert(ignore_permissions=True, ignore_mandatory=True).name
+
+    def _assignment(self, check_in="2026-05-01"):
+        doc = frappe.get_doc({
+            "doctype": "Housing Assignment",
+            "party_type": "Employee",
+            "party": self._employee(),
+            "building": BUILDING,
+            "room": ROOM,
+            "bed": self.bed,
+            "assignment_type": "New Assignment",
+            "stay_type": "Permanent",
+            "check_in_date": check_in,
+            "project": self.project,
+        })
+        doc.insert(ignore_permissions=True)
+        return doc
+
+    def _submit_capturing_sql(self, doc):
+        captured: list[str] = []
+        real_sql = frappe.db.sql
+
+        def _recording_sql(query, *args, **kwargs):
+            captured.append(str(query))
+            return real_sql(query, *args, **kwargs)
+
+        frappe.db.sql = _recording_sql
+        try:
+            doc.submit()
+        finally:
+            frappe.db.sql = real_sql
+        return captured
+
+    def test_the_bed_status_is_decided_by_a_locking_read(self):
+        captured = self._submit_capturing_sql(self._assignment())
+        locking = [
+            q for q in captured
+            if "`tabBed`" in q and "FOR UPDATE" in q.upper() and "SELECT" in q.upper()
+        ]
+        self.assertTrue(
+            locking,
+            "submitting an assignment must read Bed.status FOR UPDATE — a plain read "
+            f"answers from a snapshot taken before the lock. Captured: {captured}",
+        )
+
+    def test_a_bed_taken_after_validate_is_refused_at_submit(self):
+        """The other half: the lock is only worth taking if the decision refuses.
+
+        Both drafts are inserted while the bed is free, so the validate-time occupancy
+        check passes on both — exactly the window the race opens. Only the submit-time
+        locked read stands between them and a double allocation.
+        """
+        first = self._assignment()
+        second = self._assignment(check_in="2026-05-02")
+
+        first.submit()
+        self.assertEqual(frappe.db.get_value("Bed", self.bed, "status"), "Occupied")
+
+        with self.assertRaises(frappe.ValidationError) as caught:
+            second.submit()
+        message = str(caught.exception)
+        self.assertIn(self.bed, message)
+        self.assertIn(first.name, message)

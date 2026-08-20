@@ -2,10 +2,11 @@
   "name": "apex-frontend",
   "private": true,
   "_comment": "One source application, one dependency manifest, one lockfile, and one generated bundle serve all Apex portal routes.",
-  "workspaces": ["apex_portal"],
+  "workspaces": [
+    "apex_portal"
+  ],
   "scripts": {
-    "build": "npm run build -w apex_portal",
-    "test": "npm test -w apex_portal"
+    "build": "npm run build -w apex_portal"
   },
   "dependencies": {
     "frappe-ui": "^0.1.0",

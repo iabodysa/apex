@@ -46,16 +46,18 @@ class TestCustodyReturn(FrappeTestCase):
             doc.insert(ignore_permissions=True, ignore_links=True)
 
     def test_empty_items_raises(self):
-        from apex.habitat.doctype.custody_return.custody_return import validate
-
         doc = frappe.get_doc({
             "doctype": "Custody Return",
             "return_date": "2026-07-01",
             "custody_issue": "CUST-ISS-QA",
             "items": [],
         })
-        with self.assertRaises(frappe.ValidationError):
-            validate(doc)
+        # Links are validated before mandatory (document.py:302 then :310), and the
+        # placeholder links below do not exist, so the link check is stood down to keep
+        # the assertion on the empty table this test is about.
+        doc.flags.ignore_links = True
+        with self.assertRaises(frappe.MandatoryError):
+            doc.insert(ignore_permissions=True)
 
     def test_progress_partial_when_one_article_short(self):
         from apex.habitat.doctype.custody_return.custody_return import _progress_from

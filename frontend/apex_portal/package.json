@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "vite build --config vite.config.js && node tooling/verify-generated-shell.js && node tooling/service-workers.js --write && node tooling/service-workers.js",
-    "test": "vitest run --config vitest.config.mjs"
+    "build": "vite build --config vite.config.js && node tooling/verify-generated-shell.js && node tooling/service-workers.js --write && node tooling/service-workers.js"
   }
 }

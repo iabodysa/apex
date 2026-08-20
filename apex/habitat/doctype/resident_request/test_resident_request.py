@@ -47,6 +47,8 @@ from apex.habitat.web_form.accommodation_resident_request import (
 )
 from apex.tests.factories import ApexHabitatTestCase
 from apex.tests import factories
+from frappe.model import get_permitted_fields
+from apex.tests._helpers import _user, as_user
 
 test_ignore = factories.test_ignore
 
@@ -487,3 +489,76 @@ class TestNativeUnassignDoesNotWedgeTheRequest(TestCase):
             field.get("read_only"),
             "a second writer on assigned_to is what let status and assignment disagree",
         )
+
+
+# --- merged from test_resident_request_coordinator_perms.py ---
+DOCTYPE = "Resident Request"
+ROLE = "Resident Request Coordinator"
+COORDINATOR = "resident_request_coordinator_perms@example.com"
+CONFIDENTIAL_FIELD = "mobile_number"
+OTHER_OPENERS = ("System Manager", "Accommodation Manager", "Resident Supervisor")
+class TestResidentRequestCoordinatorPermissions(FrappeTestCase):
+    """What the Resident Request Coordinator role can and cannot do, asked of the framework."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        frappe.set_user("Administrator")
+        cls.coordinator = _user(COORDINATOR, ROLE)
+
+    def test_the_coordinator_can_triage_but_not_destroy(self):
+        """Shaped for triage work without record-destroying power: read/write/create,
+        no delete, no submit (the DocType is not submittable to begin with)."""
+        with as_user(self.coordinator):
+            for action in ("read", "write", "create"):
+                self.assertTrue(
+                    frappe.has_permission(DOCTYPE, action),
+                    f"the coordinator must be able to {action}",
+                )
+            for action in ("delete", "submit"):
+                self.assertFalse(
+                    frappe.has_permission(DOCTYPE, action),
+                    f"the coordinator must NOT be able to {action}",
+                )
+
+    def test_the_coordinator_reaches_the_confidential_field(self):
+        """The permlevel-1 row exists to unlock exactly this field for the role."""
+        with as_user(self.coordinator):
+            fields = get_permitted_fields(DOCTYPE, permission_type="write")
+        self.assertIn(
+            CONFIDENTIAL_FIELD,
+            fields,
+            "the permlevel-1 row no longer unlocks the confidential field for the coordinator",
+        )
+
+    def test_the_existing_openers_keep_both_their_access_and_the_field(self):
+        """Adding the Coordinator's rows must not disturb what System Manager,
+        Accommodation Manager and Resident Supervisor already had at either
+        permlevel."""
+        for role in OTHER_OPENERS:
+            with self.subTest(role=role):
+                user = _user(
+                    role.lower().replace(" ", "_") + "_rrc_perms@example.com", role
+                )
+                with as_user(user):
+                    for action in ("read", "write"):
+                        self.assertTrue(
+                            frappe.has_permission(DOCTYPE, action),
+                            f"{role} lost {action} on {DOCTYPE}",
+                        )
+                    fields = get_permitted_fields(DOCTYPE, permission_type="write")
+                self.assertIn(
+                    CONFIDENTIAL_FIELD,
+                    fields,
+                    f"{role} lost its permlevel-1 reach to {CONFIDENTIAL_FIELD}",
+                )
+
+    def test_system_manager_still_holds_delete(self):
+        """The one privileged bit most at risk of being silently dropped by a
+        careless permission-block edit."""
+        manager = _user("system_manager_rrc_perms@example.com", "System Manager")
+        with as_user(manager):
+            self.assertTrue(
+                frappe.has_permission(DOCTYPE, "delete"),
+                "System Manager delete on Resident Request must remain",
+            )

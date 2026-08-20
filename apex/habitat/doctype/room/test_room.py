@@ -10,8 +10,11 @@ from __future__ import annotations
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+import json
+from pathlib import Path
+from unittest import TestCase
+from apex.habitat.doctype.building import building
 
-test_dependencies = ["Building"]
 
 
 class TestRoom(FrappeTestCase):
@@ -39,3 +42,38 @@ class TestRoom(FrappeTestCase):
 
         with self.assertRaises(frappe.exceptions.MandatoryError):
             room.insert(ignore_permissions=True)
+
+test_dependencies = ['Building']
+
+
+# --- merged from test_room_inventory_stamp_is_gone.py ---
+class TestRoomSearchFieldsResolve(TestCase):
+    def _meta(self):
+        return json.loads(
+            (Path(__file__).with_name("room.json")).read_text(encoding="utf-8")
+        )
+
+    def test_every_search_field_is_a_field_of_room(self):
+        meta = self._meta()
+        fieldnames = {field["fieldname"] for field in meta["fields"]} | {"name"}
+        searched = [part.strip() for part in meta["search_fields"].split(",")]
+
+        self.assertTrue(searched, "the list view still searches on something")
+        self.assertEqual(
+            [name for name in searched if name not in fieldnames],
+            [],
+            "search_fields names a column the DocType does not have",
+        )
+
+    def test_no_write_only_inventory_stamp_survives(self):
+        self.assertNotIn(
+            "last_inventory_date",
+            {field["fieldname"] for field in self._meta()["fields"]},
+            "the field's only writer was deleted; a field nothing can write is not a record",
+        )
+
+    def test_building_publishes_no_second_room_readiness_writer(self):
+        self.assertFalse(
+            hasattr(building, "update_room_inventory"),
+            "readiness is set through front_desk.set_room_readiness, which has callers",
+        )
