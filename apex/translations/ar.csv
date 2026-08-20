@@ -4181,6 +4181,9 @@ Select the vehicle being handed over.,اختر المركبة الجاري تس�
 Select the vehicle for this trip.,اختر المركبة لهذه الرحلة.
 Select the vehicle to be fuelled.,اختر المركبة المراد تزويدها بالوقود.
 Select the vehicle to release.,اختر المركبة المراد فك ارتباطها بالسائق.
+A Web Push VAPID public key is required to enable web push.,مفتاح إشعارات الدفع العام مطلوب لتفعيل الإشعارات.
+The Web Push VAPID public key is not valid base64url.,مفتاح إشعارات الدفع العام ليس بترميز base64url صالح.
+"The Web Push VAPID public key must decode to 65 bytes starting with 0x04; this one decodes to {0}. Paste the uncompressed public key, not a truncated or DER-encoded one.","يجب أن يفكّ مفتاح إشعارات الدفع العام إلى ٦٥ بايت تبدأ بـ0x04، وهذا يفكّ إلى {0}. الصق المفتاح العام كاملًا غير المضغوط، لا مبتورًا ولا بترميز DER."
 Reassign the trips first,عيّن الرحلات لسائق آخر أولًا
 Planned trips still assigned to him ({0}),رحلات مخططة ما زالت باسمه ({0})
 "Still on the road at the time of the stop: {0}. Recall or close each one.","رحلات كانت جارية وقت الإيقاف: {0}. استدعِ كل واحدة أو أقفلها."
