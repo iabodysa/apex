@@ -472,7 +472,6 @@ has_permission = {
 
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
-    {"dt": "Role", "filters": [["name", "in", ["Driver"]]]},
     {
         "dt": "Issue Type",
         "filters": [["name", "in", ["Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"]]],
