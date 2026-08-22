@@ -388,7 +388,7 @@ def compute_recovery_installment(
     locked_advance=None,
     salary_preview=None,
 ) -> float:
-    """SAR recoverable from ONE pay period against ``advance``.
+    """The amount recoverable from ONE pay period against ``advance``, in company currency.
 
     The lowest of every binding limit, floored at zero:
 

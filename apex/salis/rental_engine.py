@@ -31,7 +31,9 @@ from __future__ import annotations
 
 import frappe
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import flt, today
+from frappe.utils import flt, fmt_money, today
+
+from apex.apex_core.utils.company import display_currency
 
 
 LEDGER_DOCTYPE = "Rental Accrual Ledger"
@@ -368,9 +370,13 @@ def monthly_rental_reconciliation() -> None:
             outstanding = flt(row.outstanding)
             message = frappe._(
                 "Rental accrual for office {0} in period {1} is unsettled: "
-                "{2} SAR outstanding with no submitted Rental Settlement. "
+                "{2} outstanding with no submitted Rental Settlement. "
                 "(office {0})"
-            ).format(rental_office, period_month, round(outstanding, 2))
+            ).format(
+                rental_office,
+                period_month,
+                fmt_money(outstanding, currency=display_currency("Salis")),
+            )
 
             _queue_document("Rental Office", rental_office, "Warning", message)
             still_unsettled.append(rental_office)

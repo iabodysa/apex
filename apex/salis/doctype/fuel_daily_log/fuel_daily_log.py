@@ -11,7 +11,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, fmt_money
+
+from apex.apex_core.utils.company import display_currency
 
 from apex.salis.utils import add_timeline_note
 
@@ -59,8 +61,10 @@ class FuelDailyLog(Document):
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
-            _("Fuel daily log {0}: {1} L, {2} SAR.").format(
-                self.name, self.litres, self.amount
+            _("Fuel daily log {0}: {1} L, {2}.").format(
+                self.name,
+                self.litres,
+                fmt_money(self.amount, currency=display_currency("Salis")),
             ),
         )
 

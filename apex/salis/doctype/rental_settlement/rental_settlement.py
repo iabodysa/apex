@@ -39,7 +39,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, now_datetime
+from frappe.utils import flt, fmt_money, now_datetime
+
+from apex.apex_core.utils.company import display_currency
 
 from apex.apex_core.utils.vat import apply_vat
 
@@ -258,6 +260,8 @@ class RentalSettlement(Document):
         self.db_set("payment_request", pr.name)
         self.add_comment(
             "Info",
-            _("Payment Request {0} raised for {1} SAR.").format(pr.name, pr.amount),
+            _("Payment Request {0} raised for {1}.").format(
+                pr.name, fmt_money(pr.amount, currency=display_currency("Salis"))
+            ),
         )
         return pr.name

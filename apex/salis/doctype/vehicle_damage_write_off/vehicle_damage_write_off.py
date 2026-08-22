@@ -21,7 +21,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, now_datetime
+from frappe.utils import flt, fmt_money, now_datetime
+
+from apex.apex_core.utils.company import display_currency
 
 from apex.salis.utils import add_timeline_note
 
@@ -69,8 +71,9 @@ class VehicleDamageWriteOff(Document):
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
-            _("Damage write-off {0} submitted (estimated {1} SAR).").format(
-                self.name, self.estimated_cost
+            _("Damage write-off {0} submitted (estimated {1}).").format(
+                self.name,
+                fmt_money(self.estimated_cost, currency=display_currency("Salis")),
             ),
         )
 
