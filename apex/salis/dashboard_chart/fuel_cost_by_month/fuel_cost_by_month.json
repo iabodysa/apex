@@ -12,11 +12,10 @@
  "timeseries": 1,
  "type": "Bar",
  "number_of_groups": 0,
- "currency": "SAR",
  "is_public": 1,
  "is_standard": 1,
  "module": "Salis",
  "use_report_chart": 0,
  "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-22 16:00:00.000000"
 }

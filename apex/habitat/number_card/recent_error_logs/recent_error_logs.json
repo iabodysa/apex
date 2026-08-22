@@ -1,6 +1,5 @@
 {
  "creation": "2026-05-25 01:38:02.133784",
- "currency": "SAR",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Error Log",
@@ -10,7 +9,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Recent Error Logs",
- "modified": "2026-06-02 13:30:00.000000",
+ "modified": "2026-08-22 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Recent Error Logs",

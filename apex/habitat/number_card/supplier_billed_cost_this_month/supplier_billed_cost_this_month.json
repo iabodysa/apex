@@ -1,7 +1,6 @@
 {
  "aggregate_function_based_on": "employee_daily_share",
  "creation": "2026-05-25 02:39:22.050221",
- "currency": "SAR",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Accommodation Ledger",
@@ -11,7 +10,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Supplier-Billed Cost This Month",
- "modified": "2026-06-02 13:30:00.000000",
+ "modified": "2026-08-22 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Supplier-Billed Cost This Month",

@@ -7,12 +7,11 @@
  "document_type": "Accommodation Stock Ledger",
  "type": "Bar",
  "number_of_groups": 0,
- "currency": "SAR",
  "is_public": 1,
  "is_standard": 1,
  "module": "Habitat",
  "timeseries": 0,
  "use_report_chart": 0,
  "filters_json": "{}",
- "modified": "2026-06-26 00:00:00.000000"
+ "modified": "2026-08-22 16:00:00.000000"
 }

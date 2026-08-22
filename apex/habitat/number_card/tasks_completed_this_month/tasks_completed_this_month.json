@@ -1,6 +1,5 @@
 {
  "creation": "2026-05-25 02:39:22.059003",
- "currency": "SAR",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Scheduled Task Instance",
@@ -10,7 +9,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Tasks Completed This Month",
- "modified": "2026-06-02 13:30:00.000000",
+ "modified": "2026-08-22 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Tasks Completed This Month",

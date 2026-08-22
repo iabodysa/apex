@@ -9,12 +9,11 @@
  "aggregate_function_based_on": "amount",
  "type": "Pie",
  "number_of_groups": 0,
- "currency": "SAR",
  "is_public": 1,
  "is_standard": 1,
  "module": "Salis",
  "timeseries": 0,
  "use_report_chart": 0,
  "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-22 16:00:00.000000"
 }

@@ -1,7 +1,6 @@
 {
  "aggregate_function_based_on": "total_book_value",
  "creation": "2026-05-25 02:39:22.055517",
- "currency": "SAR",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Operational Depreciation Snapshot",
@@ -11,7 +10,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Total Asset Book Value",
- "modified": "2026-07-10 07:15:17.110258",
+ "modified": "2026-08-22 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Total Asset Book Value",

@@ -6,7 +6,6 @@
  "function": "Sum",
  "aggregate_function_based_on": "amount",
  "report_function": "Sum",
- "currency": "SAR",
  "is_public": 1,
  "is_standard": 1,
  "show_full_number": 0,
@@ -15,5 +14,5 @@
  "type": "Document Type",
  "module": "Salis",
  "filters_json": "[[\"Fuel Request\", \"status\", \"=\", \"Done\"], [\"Fuel Request\", \"request_date\", \"Timespan\", \"this month\"]]",
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-22 16:00:00.000000"
 }
