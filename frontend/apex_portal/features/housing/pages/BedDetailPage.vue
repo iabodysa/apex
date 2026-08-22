@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, ErrorMessage, FormControl, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
@@ -45,6 +45,32 @@ watch(candidate, (value) => {
     ? { party_type: value.party_type, party: value.party, project: value.project }
     : { party_type: "Employee", party: "", project: "" });
 }, { immediate: true });
+
+const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
+let pollTimer;
+let unsubscribers = [];
+let liveBuilding = null;
+
+function stopLive() {
+  clearInterval(pollTimer);
+  liveBuilding = null;
+  while (unsubscribers.length) unsubscribers.pop()();
+}
+
+// Called whenever the loaded bed's building becomes known or changes, so it must be a no-op
+// while the room already holds it — otherwise a poll tick would tear the listener down and
+// rebuild it.
+function startLive(name) {
+  if (name === liveBuilding) return;
+  liveBuilding = name;
+  while (unsubscribers.length) unsubscribers.pop()();
+  if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => bed.reload()) || (() => {}));
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => bed.doc?.building && bed.reload(), 10000);
+}
+
+watch(() => bed.doc?.building, startLive, { immediate: true });
+onBeforeUnmount(stopLive);
 async function arrive() {
   error.value = "";
   try {
@@ -74,7 +100,7 @@ async function depart() {
 <template>
   <section class="feature-page">
     <h2>تفاصيل السرير</h2>
-    <PortalSkeleton v-if="bed.get.loading" :rows="3" label="جارٍ التحميل" />
+    <PortalSkeleton v-if="bed.get.loading && !bed.doc" :rows="3" label="جارٍ التحميل" />
     <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
     <template v-else-if="bed.doc">
       <article class="feature-card"><strong><bdi dir="auto" translate="no">{{ bed.doc.bed_code || bed.doc.name }}</bdi></strong><span><bdi dir="auto" translate="no">{{ bed.doc.room }}</bdi></span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>

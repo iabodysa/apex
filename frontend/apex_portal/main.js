@@ -4,7 +4,7 @@ import App from "./App.vue";
 import { createPortalRouter, getPortalContext } from "./core/router.js";
 import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./core/session.js";
 import { configurePortalApi } from "./core/api.js";
-import { createPortalSubscriber } from "./core/realtime.js";
+import { createDocSubscriber, createPortalSubscriber } from "./core/realtime.js";
 import { registerPortalWorker } from "./core/serviceWorker.js";
 import { createPortalPushController } from "./core/pushNotifications.js";
 import { createDraftStore } from "./core/offline.js";
@@ -84,6 +84,7 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     ? createPortalPushController({ entry: context.id, call })
     : null;
   application.provide("portalSubscribe", createPortalSubscriber({ settings: bootstrap }));
+  application.provide("portalBuildingSubscribe", createDocSubscriber({ settings: bootstrap, doctype: "Building" }));
   application.provide("portalPush", portalPush);
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));

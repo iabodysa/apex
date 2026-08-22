@@ -56,6 +56,58 @@ export function createPortalSubscriber({
   };
 }
 
+// Separate from createPortalSubscriber on purpose: that one emits task_subscribe, which the
+// server accepts with no permission check (correct for the Driver/Worker guest bearer-token
+// audience — see frappe_handlers.js task_subscribe). This one emits doc_subscribe, which the
+// server gates through frappe.has_permission(doctype, doc=docname, throw=True) before the
+// caller ever joins the room (frappe/realtime.py can_subscribe_doc). Merging the two behind a
+// flag would hide that the two calls carry different security guarantees from the call site.
+export function createDocSubscriber({
+  settings = {},
+  origin = globalThis.location?.origin || "",
+  ioFactory = io,
+  doctype,
+} = {}) {
+  if (!settings.site_name || !settings.socketio_port || !origin || !doctype) return () => () => {};
+  let socket;
+  let docname;
+  let listeners = 0;
+  let join;
+
+  return (nextDocname, event, callback) => {
+    if (!nextDocname || !event || typeof callback !== "function") return () => {};
+    if (docname && docname !== nextDocname) throw new TypeError("Portal doc realtime owns one document room");
+    if (!socket) {
+      docname = nextDocname;
+      socket = ioFactory(socketUrl(settings, origin), {
+        withCredentials: true,
+        reconnectionAttempts: 5,
+        secure: globalThis.location?.protocol === "https:",
+      });
+      join = () => socket?.emit("doc_subscribe", doctype, docname);
+      socket.on("connect", join);
+      socket.on("reconnect", join);
+    }
+    socket.on(event, callback);
+    listeners += 1;
+    let active = true;
+    return () => {
+      if (!active || !socket) return;
+      active = false;
+      socket.off(event, callback);
+      listeners -= 1;
+      if (listeners) return;
+      socket.emit("doc_unsubscribe", doctype, docname);
+      socket.off("connect", join);
+      socket.off("reconnect", join);
+      socket.disconnect();
+      socket = undefined;
+      docname = undefined;
+      join = undefined;
+    };
+  };
+}
+
 export function connectContextRooms({ socket, entry, rooms }) {
   if (!socket || typeof socket.emit !== "function") {
     throw new TypeError("A Frappe realtime socket is required");

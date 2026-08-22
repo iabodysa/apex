@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, ref, watch } from "vue";
 import { Badge, Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { useRouter } from "vue-router";
@@ -30,6 +30,28 @@ const error = ref("");
 
 function load() {
   if (building.value) arrivals.fetch();
+}
+
+const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
+let pollTimer;
+let unsubscribers = [];
+let liveBuilding = null;
+
+function stopLive() {
+  clearInterval(pollTimer);
+  liveBuilding = null;
+  while (unsubscribers.length) unsubscribers.pop()();
+}
+
+// Called on every building change, so it must be a no-op while the room already holds the
+// current building — otherwise a poll tick would tear the listener down and rebuild it.
+function startLive(name) {
+  if (name === liveBuilding) return;
+  liveBuilding = name;
+  while (unsubscribers.length) unsubscribers.pop()();
+  if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => arrivals.fetch()) || (() => {}));
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => building.value && arrivals.fetch(), 10000);
 }
 
 function candidateFrom(row) {
@@ -96,6 +118,8 @@ async function printSlip(row) {
 }
 
 watch(building, load, { immediate: true });
+watch(building, startLive, { immediate: true });
+onBeforeUnmount(stopLive);
 </script>
 
 <template>

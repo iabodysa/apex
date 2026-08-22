@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, ref, watch } from "vue";
 import { Button, ErrorMessage, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { RouterLink, useRoute } from "vue-router";
@@ -19,7 +19,35 @@ const error = ref("");
 const canSetReadiness = (globalThis.window?.apex_portal?.capabilities || []).includes("set_readiness");
 const rooms = computed(() => (grid.data?.floors || []).flatMap((floor) => floor.rooms.map((room) => ({ ...room, floor_label: floor.floor_label }))));
 const candidate = computed(() => housingCandidateFromQuery(route.query));
-watch(building, (value) => value && grid.fetch(), { immediate: true });
+
+const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
+let pollTimer;
+let unsubscribers = [];
+let liveBuilding = null;
+
+function stopLive() {
+  clearInterval(pollTimer);
+  liveBuilding = null;
+  while (unsubscribers.length) unsubscribers.pop()();
+}
+
+// Called on every building change, so it must be a no-op while the room already holds the
+// current building — otherwise a poll tick would tear the listener down and rebuild it.
+function startLive(name) {
+  if (name === liveBuilding) return;
+  liveBuilding = name;
+  while (unsubscribers.length) unsubscribers.pop()();
+  if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => grid.fetch({ building: name })) || (() => {}));
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => building.value && grid.fetch({ building: building.value }), 10000);
+}
+
+watch(building, (value) => {
+  if (value) grid.fetch();
+  startLive(value);
+}, { immediate: true });
+onBeforeUnmount(stopLive);
+
 async function setReady(room) {
   error.value = "";
   try {
@@ -37,7 +65,7 @@ async function setReady(room) {
       <div><span>اختر سريراً</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
       <RouterLink to="/arrivals">تغيير العامل</RouterLink>
     </article>
-    <PortalSkeleton v-if="grid.loading" :rows="3" label="جارٍ تحميل الأسرّة" />
+    <PortalSkeleton v-if="grid.loading && !grid.data" :rows="3" label="جارٍ تحميل الأسرّة" />
     <ErrorMessage v-else-if="grid.error" message="تعذر تحميل الأسرّة." />
     <p v-else-if="!rooms.length && building" class="feature-page__empty">لا توجد غرف في هذا المبنى.</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">

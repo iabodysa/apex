@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { ErrorMessage, createResource } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
@@ -36,6 +36,28 @@ const unavailableBeds = computed(() => ["blocked", "out_of_service"]
   .reduce((total, key) => total + Number(summary.value[key] || 0), 0));
 const dueRounds = computed(() => safety.data?.due?.length || 0);
 
+const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
+let pollTimer;
+let unsubscribers = [];
+let liveBuilding = null;
+
+function stopLive() {
+  clearInterval(pollTimer);
+  liveBuilding = null;
+  while (unsubscribers.length) unsubscribers.pop()();
+}
+
+// Called on every building change, so it must be a no-op while the room already holds the
+// current building — otherwise a poll tick would tear the listener down and rebuild it.
+function startLive(name) {
+  if (name === liveBuilding) return;
+  liveBuilding = name;
+  while (unsubscribers.length) unsubscribers.pop()();
+  if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => load()) || (() => {}));
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => building.value && load(), 10000);
+}
+
 async function load() {
   error.value = "";
   if (!building.value) return;
@@ -51,9 +73,11 @@ async function load() {
 }
 
 watch(building, load, { immediate: true });
+watch(building, startLive, { immediate: true });
 onMounted(() => {
   if (canSeePortfolio) buildings.fetch();
 });
+onBeforeUnmount(stopLive);
 </script>
 <template>
   <section class="feature-page today-page">

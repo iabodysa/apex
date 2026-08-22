@@ -75,7 +75,12 @@ def recalculate_room_occupancy(room_name: str) -> None:
     room.db_set("status", room_status(active, room.bed_capacity))
 
 def recalculate_building_occupancy(building_name: str) -> None:
-    """Recounts a building's active occupants and updates its occupant count and occupancy percentage."""
+    """Recounts a building's active occupants and updates its occupant count and occupancy
+    percentage, notifying watchers of the Building doc room. This is the choke point every
+    bed-occupancy transaction funnels through via ``recalculate_spatial`` — Housing Assignment
+    submit/cancel, Housing Checkout submit/cancel, and Room Bed Transfer submit/cancel all land
+    here — so a single ``notify=True`` on the occupant-count write is enough to tell every
+    portal viewer of this building that its bed picture just changed."""
     if not building_name:
         return
     building = frappe.get_doc("Building", building_name)
@@ -83,7 +88,7 @@ def recalculate_building_occupancy(building_name: str) -> None:
         "Housing Assignment",
         {"building": building_name, "docstatus": 1, "check_out_date": ["is", "not set"]},
     )
-    building.db_set("current_occupants", active)
+    building.db_set("current_occupants", active, notify=True)
     if building.total_capacity:
         building.db_set("occupancy_percent", (active / building.total_capacity) * 100)
 
