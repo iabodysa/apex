@@ -8,7 +8,10 @@ A patch is a one-time migration for sites that already exist; the defaults every
 needs belong beside the other seeders, which is why hooks.py runs this on both
 after_install and after_migrate.
 
-Only BLANK fields are filled, so an administrator's later edit is never clobbered.
+Only fields the Single has NEVER stored are filled, so an administrator's later edit is
+never clobbered. "Never stored" is not the same as falsy: a Check the administrator
+turned OFF stores a real ``0``, and a seeder that tests falsiness cannot tell that
+from silence, so it re-forces every deliberate off back on at the next migrate.
 ``default_company`` and ``default_cost_center`` are linked ONLY when exactly one candidate
 exists — with two or more there is no safe guess, and a wrong default on a money field is
 worse than an empty one the operator has to fill.
@@ -32,6 +35,18 @@ DEFAULTS = {
 }
 
 
+def _never_stored(field):
+    """True when the Single holds no row for ``field`` at all.
+
+    Frappe writes every field of a Single to ``tabSingles`` on save, including a Check
+    left at 0, so the presence of a row is what separates an answer from a silence.
+    """
+    return not frappe.db.sql(
+        "select 1 from tabSingles where doctype = %s and field = %s limit 1",
+        (DOCTYPE, field),
+    )
+
+
 def _sole(doctype, filters=None):
     """The only candidate of ``doctype``, or None when there are none or several."""
     rows = frappe.get_all(doctype, filters=filters or {}, pluck="name", limit=2)
@@ -48,17 +63,17 @@ def seed_salis_settings():
         filled = []
 
         for field, value in DEFAULTS.items():
-            if settings.meta.has_field(field) and not settings.get(field):
+            if settings.meta.has_field(field) and _never_stored(field):
                 settings.set(field, value)
                 filled.append(field)
 
-        if settings.meta.has_field("default_company") and not settings.get("default_company"):
+        if settings.meta.has_field("default_company") and _never_stored("default_company"):
             company = _sole("Company")
             if company:
                 settings.default_company = company
                 filled.append("default_company")
 
-        if settings.meta.has_field("default_cost_center") and not settings.get(
+        if settings.meta.has_field("default_cost_center") and _never_stored(
             "default_cost_center"
         ):
             filters = {"is_group": 0}

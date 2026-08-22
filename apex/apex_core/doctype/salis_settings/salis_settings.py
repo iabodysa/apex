@@ -9,6 +9,7 @@ import re
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 
@@ -46,6 +47,10 @@ class SalisSettings(Document):
                 frappe.throw(_("Recovery Salary Component must be a Deduction."))
         self._validate_web_push_public_key()
         self._validate_portal_appearance()
+
+    def on_update(self):
+        """Applies the approvals switch to the Salis workflows."""
+        apply_approval_switch()
 
     def _validate_portal_appearance(self):
         """Refuse an accent colour or brand logo that is unsafe to render.
@@ -92,6 +97,34 @@ class SalisSettings(Document):
                     "truncated or DER-encoded one."
                 ).format(len(point))
             )
+
+
+def apply_approval_switch():
+    """Activate or deactivate every Salis workflow to match ``enable_approvals``.
+
+    ``Workflow.is_active`` is the framework's own switch and the only one there is —
+    ``get_workflow_name`` reads it and returns nothing when it is 0, so a document then
+    saves with no state gate. A setting that does not reach this field decides nothing.
+
+    The workflows are found through their document type's module rather than a list, so a
+    new Salis workflow is covered on the day it ships.
+
+    CONTRACT: an administrator's own change to ``is_active`` on the Workflow list does not
+    survive a migrate, because the workflows ship in ``apex/fixtures/`` and a fixture is
+    reimported with ``force=True``. This function is what puts the setting's answer back;
+    without it the fixture's ``is_active`` of 1 is the only answer any site ever has.
+    """
+    if not frappe.db.exists("DocType", "Workflow"):
+        return
+    enabled = cint(frappe.db.get_single_value("Salis Settings", "enable_approvals"))
+    salis_doctypes = frappe.get_all("DocType", filters={"module": "Salis"}, pluck="name")
+    if not salis_doctypes:
+        return
+    for name in frappe.get_all(
+        "Workflow", filters={"document_type": ["in", salis_doctypes]}, pluck="name"
+    ):
+        if cint(frappe.db.get_value("Workflow", name, "is_active")) != enabled:
+            frappe.db.set_value("Workflow", name, "is_active", enabled)
 
 
 def get_salis_int(field: str, default: int) -> int:
