@@ -24,3 +24,4 @@ apex.patches.v2_6.dedupe_portal_push_endpoints
 apex.patches.v2_7.backfill_building_user_permissions
 apex.patches.v2_7.enable_expiry_alerts
 apex.patches.v2_8.drop_driver_attendance_image
+apex.patches.v2_8.fold_driver_portal_theme

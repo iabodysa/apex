@@ -53,3 +53,53 @@ class TestSalisSettingsHelpers(FrappeTestCase):
         self.assertAlmostEqual(get_overage_margin(), 0.05)
         frappe.db.set_single_value("Salis Settings", "fuel_overage_margin_percent", 10)
         self.assertAlmostEqual(get_overage_margin(), 0.10)
+
+
+class TestSalisSettingsPortalAppearance(FrappeTestCase):
+    """The two appearance values an operator can type, and what the guard refuses.
+
+    ``accent_color`` and ``brand_logo`` are rendered straight into the portal shell, so a
+    value that is not a CSS colour or not an uploaded ``/files/`` path is refused at save
+    rather than at render. The guard is exercised directly: the Color and Attach Image
+    fieldtypes do not validate their own content, so it is the only thing standing between
+    a typed value and the page, and calling it alone keeps this test independent of the
+    payroll and web-push checks that share ``validate``.
+    """
+
+    def setUp(self):
+        frappe.set_user("Administrator")
+        self.doc = frappe.get_single("Salis Settings")
+        self.doc.accent_color = ""
+        self.doc.brand_logo = ""
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+
+    def test_a_valid_accent_and_uploaded_logo_pass(self):
+        """Non-vacuity control for the refusals below."""
+        self.doc.accent_color = "#1B4D3E"
+        self.doc.brand_logo = "/files/apex-brand.png"
+        self.doc._validate_portal_appearance()
+
+    def test_blank_values_are_allowed_because_both_fields_are_optional(self):
+        self.doc._validate_portal_appearance()
+
+    def test_an_accent_that_is_not_a_css_colour_is_refused(self):
+        for accent in ("not a colour", "#12g4h5", "javascript:alert(1)", "url(evil)"):
+            with self.subTest(accent=accent):
+                self.doc.accent_color = accent
+                with self.assertRaises(frappe.ValidationError):
+                    self.doc._validate_portal_appearance()
+
+    def test_a_logo_that_is_not_an_uploaded_file_is_refused(self):
+        """The path is written into an ``img`` src, so an off-site or markup-bearing
+        value must not reach the shell."""
+        for logo in (
+            "https://evil.example/logo.png",
+            "/private/files/secret.png",
+            '/files/x"><script>',
+        ):
+            with self.subTest(logo=logo):
+                self.doc.brand_logo = logo
+                with self.assertRaises(frappe.ValidationError):
+                    self.doc._validate_portal_appearance()

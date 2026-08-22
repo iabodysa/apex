@@ -48,6 +48,11 @@
   "salis_settings_web_push_col",
   "web_push_vapid_public_key",
   "web_push_vapid_private_key",
+  "salis_settings_sec_portal_appearance",
+  "show_brand",
+  "salis_settings_portal_appearance_col",
+  "accent_color",
+  "brand_logo",
   "salis_settings_tab_approvals",
   "salis_settings_sec_approvals",
   "enable_approvals",
@@ -332,6 +337,34 @@
    "label": "VAPID Private Key"
   },
   {
+   "fieldname": "salis_settings_sec_portal_appearance",
+   "fieldtype": "Section Break",
+   "label": "Driver Portal Appearance"
+  },
+  {
+   "default": "1",
+   "description": "Show the optional tenant mark beside the Apex identity.",
+   "fieldname": "show_brand",
+   "fieldtype": "Check",
+   "label": "Show Brand"
+  },
+  {
+   "fieldname": "salis_settings_portal_appearance_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Optional primary accent colour override. Leave blank to use the Apex default.",
+   "fieldname": "accent_color",
+   "fieldtype": "Color",
+   "label": "Accent Color"
+  },
+  {
+   "description": "Optional logo shown in the portal header in place of the built-in brand mark.",
+   "fieldname": "brand_logo",
+   "fieldtype": "Attach Image",
+   "label": "Brand Logo"
+  },
+  {
    "fieldname": "salis_settings_tab_approvals",
    "fieldtype": "Tab Break",
    "label": "Approvals"
@@ -414,7 +447,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-22 21:00:00.000000",
+ "modified": "2026-08-22 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

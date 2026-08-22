@@ -409,14 +409,6 @@
    "link_type": "DocType",
    "link_to": "Salis Settings",
    "idx": 43
-  },
-  {
-   "doctype": "Workspace Link",
-   "type": "Link",
-   "label": "Driver Portal Theme",
-   "link_type": "DocType",
-   "link_to": "Driver Portal Theme",
-   "idx": 44
   }
  ],
  "charts": [],
@@ -502,5 +494,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:04.000000",
- "modified": "2026-08-22 19:30:00.000000"
+ "modified": "2026-08-22 22:00:00.000000"
 }

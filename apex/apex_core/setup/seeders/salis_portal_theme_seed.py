@@ -15,7 +15,7 @@ and a site whose DocType has not migrated yet is skipped rather than raising.
 import frappe
 
 
-DOCTYPE = "Driver Portal Theme"
+DOCTYPE = "Salis Settings"
 
 DEFAULTS = {
     "show_brand": 1,

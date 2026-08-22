@@ -4,12 +4,25 @@
 from __future__ import annotations
 
 import base64
+import re
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
+
+_CSS_COLOR_RE = re.compile(
+    r"""^(?:
+		\#[0-9A-Fa-f]{3,8}                      # #rgb / #rgba / #rrggbb / #rrggbbaa
+		| (?:rgb|rgba|hsl|hsla)\(               # functional notation …
+			[0-9.,%\s/deg]+ \)                  # … digits, %, commas, slash, deg, ws only
+		| [A-Za-z]+                             # a CSS colour keyword (red, transparent, …)
+	)$""",
+    re.VERBOSE,
+)
+
+_BRAND_LOGO_RE = re.compile(r"^/files/[^\"'<>\s]+$")
 
 
 class SalisSettings(Document):
@@ -32,6 +45,24 @@ class SalisSettings(Document):
             if component_type != "Deduction":
                 frappe.throw(_("Recovery Salary Component must be a Deduction."))
         self._validate_web_push_public_key()
+        self._validate_portal_appearance()
+
+    def _validate_portal_appearance(self):
+        """Refuse an accent colour or brand logo that is unsafe to render.
+
+        Both values are written straight into the portal shell — the accent into a CSS
+        custom property, the logo into an ``img`` src — and neither the Color nor the
+        Attach Image fieldtype validates its own content. This guard is the only thing
+        between a typed value and the page, so a non-CSS colour or an off-site,
+        markup-bearing or private-file path is refused at save rather than at render.
+        """
+        accent = (self.accent_color or "").strip()
+        if accent and not _CSS_COLOR_RE.match(accent):
+            frappe.throw(_("Accent Color must be a valid CSS colour."))
+
+        logo = (self.brand_logo or "").strip()
+        if logo and not _BRAND_LOGO_RE.match(logo):
+            frappe.throw(_("Brand Logo must be an uploaded file (a /files/ path)."))
 
     def _validate_web_push_public_key(self):
         """Refuse a VAPID public key the browser will reject at subscribe time.

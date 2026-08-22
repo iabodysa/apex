@@ -318,7 +318,6 @@ Apex — Accounting and Payment Defaults,أبكس — إعدادات المحا�
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
 Apex — Recovery and Support,أبكس: الاسترداد والدعم
 App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
-Appearance,المظهر
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
 Appliance,جهاز
 Applicable Days,الأيام السارية
@@ -1499,8 +1498,8 @@ Driver ID is required in salis_driver.csv.,معرّف السائق مطلوب ف
 Driver Latitude,خط عرض السائق
 Driver Longitude,خط طول السائق
 Driver Portal,بوابة السائق
+Driver Portal Appearance,مظهر بوابة السائق
 Driver Portal Link,رابط بوابة السائق
-Driver Portal Theme,مظهر بوابة السائق
 Driver Position Updated At,وقت آخر تحديث لموقع السائق
 Driver Record Status,حالة سجل السائق
 Driver Rejected,مرفوض من السائق
@@ -4327,7 +4326,6 @@ Signed on paper below,التوقيع على الورق أدناه
 "Signing records that the notice was served and read, not that its value is agreed.",التوقيع يثبت أن الإشعار سُلِّم وقُرئ، ولا يعني الموافقة على المبلغ.
 Single Bed Frame,هيكل سرير فردي
 "Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
-Single configuration record for optional Masar portal brand overrides.,سجل إعدادات واحد لتخصيص علامة بوابة مسار اختيارياً.
 Single configuration record for the Salis Fleet Management module.,سجل إعدادات واحد لوحدة إدارة أسطول ساليس.
 Single mattress for worker accommodation bed. Routinely purchased bedding item.,مرتبة مفردة لسرير سكن العمال. صنف مفروشات يُشترى دورياً.
 Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.,فاتورة مرافق شهرية مرتبطة بحساب مرافق. تُرحّل إلى سجل تكاليف السكن عند الاعتماد.
