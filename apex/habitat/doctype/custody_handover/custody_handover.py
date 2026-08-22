@@ -63,9 +63,9 @@ class CustodyHandover(Document):
         stamps docstatus 2, so a handover whose stock has already moved on is left
         submitted instead of reading as cancelled for the rest of the request."""
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            assert_reversal_allowed,
+            validate_reversal_allowed,
         )
-        assert_reversal_allowed(VOUCHER_TYPE, self.name)
+        validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
     def on_cancel(self):
         """Reverse every ledger row this handover posted (ship and, if any, receive)."""

@@ -33,7 +33,7 @@ LIVE_STATUS = "Active"
 def execute(filters=None):
     """Returns the columns, rows and summary cards for the Vehicle Assignment Register report."""
     filters = filters or {}
-    columns = _columns(filters)
+    columns = get_columns(filters)
 
     query_filters = {"docstatus": 1}
     if not filters.get("include_ended"):
@@ -47,7 +47,7 @@ def execute(filters=None):
     if restrict:
         chosen = query_filters.get("project")
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["project"] = ["in", allowed]
 
@@ -82,10 +82,10 @@ def execute(filters=None):
             }
         )
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than
     blank — a blank strip looks like a page that failed to load."""
     live = [r for r in data if r.get("is_held")]
@@ -99,7 +99,7 @@ def _summary(data):
     ]
 
 
-def _columns(filters):
+def get_columns(filters):
     """Returns the column definitions for the Vehicle Assignment Register, adding history columns."""
     columns = [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Assignment", "width": 150},

@@ -33,7 +33,7 @@ RETURNED_STATUSES = ("Returned",)
 def execute(filters=None):
     """Returns the rows and cards for the custody issue register, flagging overdue/unsigned issues."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     for field in ("building", "status"):
@@ -46,7 +46,7 @@ def execute(filters=None):
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["building"] = ["in", allowed]
 
@@ -84,10 +84,10 @@ def execute(filters=None):
     if filters.get("overdue_only"):
         data = [r for r in data if r["days_overdue"] > 0]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
     unsigned = [r for r in data if not r.get("is_acknowledged")]
@@ -100,7 +100,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the custody issue register."""
     return [
         {"label": _("Issue"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Issue", "width": 170},

@@ -48,7 +48,7 @@ def get_target_payment_doctype() -> str:
     """
     return get_target_doctype()
 
-def require_configured_target(built_doctype: str) -> None:
+def validate_configured_target(built_doctype: str) -> None:
     """Refuse when the deployment's configured payment target is not what the caller builds.
 
     For a surface that can route ANY target, :func:`route_payment` is the answer: it

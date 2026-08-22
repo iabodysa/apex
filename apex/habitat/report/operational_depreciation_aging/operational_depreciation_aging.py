@@ -54,7 +54,7 @@ def health_state(original_cost, book_value):
     return OVER_BUDGET
 
 
-def _columns():
+def get_columns():
     """The register's column set.
 
     A function, not a module constant: every label goes through ``frappe._()``, and a
@@ -132,7 +132,7 @@ def _columns():
 
 def execute(filters=None):
     """Returns the columns, rows and summary cards for the operational depreciation aging register."""
-    columns = _columns()
+    columns = get_columns()
 
     parent_filters = {"docstatus": 1}
     if filters:
@@ -165,7 +165,7 @@ def execute(filters=None):
     )
 
     if not snapshots:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     snapshot_names = [s["name"] for s in snapshots]
 
@@ -179,7 +179,7 @@ def execute(filters=None):
     )
 
     if not child_rows:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     unique_articles = list({row["article"] for row in child_rows if row.get("article")})
     article_category_map = {}
@@ -215,10 +215,10 @@ def execute(filters=None):
             }
         )
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Returns summary cards for asset count, original cost, book value, and fully-depreciated count."""
     return [
         count_card(frappe._("Assets"), data),

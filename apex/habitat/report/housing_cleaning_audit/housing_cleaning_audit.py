@@ -47,7 +47,7 @@ def execute(filters=None):
     if date_to < date_from:
         date_to = date_from
 
-    columns = _columns()
+    columns = get_columns()
 
     restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Cleaning Log")
     chosen_building = filters.get("building") or ""
@@ -82,7 +82,7 @@ def execute(filters=None):
               reverse=False)
     data.sort(key=lambda r: str(r["cleaning_date"] or ""), reverse=True)
 
-    return columns, data, None, None, _summary_cards(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
 def _supervisor_by_building(all_buildings):
@@ -208,7 +208,7 @@ def _missed_rows(date_from, date_to, building_supervisor, covered):
     return data
 
 
-def _summary_cards(data):
+def get_report_summary(data):
     """Builds the four summary cards; the labels stay inside _() so the language is per call."""
     missed_count = len([r for r in data if r.get("status") == "Missed"])
     return [
@@ -224,7 +224,7 @@ def _summary_cards(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the housing cleaning audit report."""
     return [
         {

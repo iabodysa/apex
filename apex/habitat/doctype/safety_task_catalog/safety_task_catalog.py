@@ -35,9 +35,9 @@ class SafetyTaskCatalog(Document):
         task_title: DF.Data
 
     def validate(self):
-        self.reject_source_provenance()
+        self.validate_source_provenance()
 
-    def reject_source_provenance(self):
+    def validate_source_provenance(self):
         for fieldname in WORKER_FACING_FIELDS:
             match = SOURCE_FILE_RE.search(self.get(fieldname) or "")
             if not match:

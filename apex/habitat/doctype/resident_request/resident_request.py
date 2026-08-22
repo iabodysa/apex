@@ -172,13 +172,9 @@ def _apply_priority_rules(doc):
 
     _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
 
-    def _is_ac_request():
-        """Returns whether the combined category and description text matches an air-conditioning pattern."""
-        return bool(_AC_PATTERN.search(text))
-
     if any(_matches(term) for term in critical_terms):
         doc.priority = "Critical"
-    elif (_is_ac_request() or any(_matches(term) for term in high_terms)) and doc.priority in (None, "", "Low", "Medium"):
+    elif (bool(_AC_PATTERN.search(text)) or any(_matches(term) for term in high_terms)) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
 
 @frappe.whitelist(methods=["POST"])

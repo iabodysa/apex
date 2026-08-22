@@ -29,7 +29,7 @@ CHARGEABLE_CONDITIONS = ("Damaged", "Lost")
 def execute(filters=None):
     """Returns the columns, rows and summary cards for submitted custody return item lines."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     for field in ("building", "returned_by_employee", "custody_issue"):
@@ -40,7 +40,7 @@ def execute(filters=None):
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["building"] = ["in", allowed]
 
@@ -57,7 +57,7 @@ def execute(filters=None):
         order_by="return_date desc",
     )
     if not returns:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     lines = frappe.get_all(
         "Custody Return Item",
@@ -92,10 +92,10 @@ def execute(filters=None):
     if filters.get("chargeable_only"):
         data = [r for r in data if r.get("is_chargeable")]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
     chargeable = [r for r in data if r.get("is_chargeable")]
@@ -112,7 +112,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the custody return register."""
     return [
         {"label": _("Return"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Return", "width": 170},

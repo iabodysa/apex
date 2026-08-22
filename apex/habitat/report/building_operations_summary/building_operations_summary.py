@@ -18,7 +18,7 @@ def execute(filters=None):
     date_to = getdate(filters.get("period_to") or today())
     building_filter = filters.get("building")
 
-    columns = _columns()
+    columns = get_columns()
     buildings = _get_buildings(building_filter)
     if not buildings:
         if _is_scope_gap(building_filter):
@@ -70,7 +70,7 @@ def execute(filters=None):
     return columns, data, None, None, summary
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the building operations summary report."""
     return [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link",

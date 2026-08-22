@@ -53,7 +53,7 @@ from frappe.utils import (
     nowdate,
 )
 
-from apex.habitat.permissions import assert_building_scope
+from apex.habitat.permissions import validate_building_scope
 
 _SCOPE_BASE = {"is_active": 1}
 
@@ -513,7 +513,7 @@ def submit_due_rounds(building, round_date, results):
 
     if not building:
         frappe.throw(_("A building is required to submit rounds."))
-    assert_building_scope(doctype="Safety Round")
+    validate_building_scope(doctype="Safety Round")
     frappe.has_permission("Building", "read", doc=building, throw=True)
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))

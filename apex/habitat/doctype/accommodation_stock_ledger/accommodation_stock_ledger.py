@@ -146,11 +146,11 @@ def _assert_policy_allows(item_type, item, qty, building, party_type, party, pos
     already lives in ``_assert_reversal_keeps_stock_positive``.
     """
     from apex.apex_core.doctype.apex_stock_settings.apex_stock_settings import (
-        assert_posting_allowed,
+        validate_posting_allowed,
         policy,
     )
 
-    assert_posting_allowed(building, posting_date)
+    validate_posting_allowed(building, posting_date)
 
     if flt(qty) >= 0 or policy()["allow_negative"]:
         return
@@ -243,7 +243,7 @@ def _live_rows(voucher_type: str, voucher_no: str):
                 "party_type", "party", "from_building", "to_building"],
     )
 
-def assert_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
+def validate_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
     """REFUSAL half of a stock voucher's cancel — call from ``before_cancel``.
 
     The RESTORATION half (writing the mirror rows) stays in reverse_stock_entries,
@@ -278,7 +278,7 @@ def reverse_and_mark_cancelled(doc, voucher_type: str) -> None:
     voucher_type/voucher_no only, so it never reads the doc and the two steps are
     order-independent.
 
-    Pair this with assert_reversal_allowed() in the voucher's before_cancel: that is
+    Pair this with validate_reversal_allowed() in the voucher's before_cancel: that is
     where a voucher whose stock has already moved on is refused, early enough that
     docstatus 2 is never written. The re-check inside reverse_stock_entries stays as
     the backstop for callers that reach the ledger without a cancel."""

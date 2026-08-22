@@ -14,7 +14,7 @@ from frappe.model.document import Document
 from apex.salis.utils import add_timeline_note, lock_vehicle, lock_driver, set_current_driver
 from apex.salis.utils.driver_availability import (
     dispatched_trips_for_driver,
-    refuse_to_stop_a_driver_who_still_holds_planned_trips,
+    validate_driver_has_no_planned_trips,
 )
 
 
@@ -25,7 +25,7 @@ class DriverSuspension(Document):
         The trip check runs here rather than on submit so the operator is told while
         he is still filling the form, not after he has asked for the stop to take effect.
         """
-        refuse_to_stop_a_driver_who_still_holds_planned_trips(self.driver)
+        validate_driver_has_no_planned_trips(self.driver)
         if self.release_vehicle and not self.related_vehicle:
             frappe.throw(_("Select the vehicle to release."))
 

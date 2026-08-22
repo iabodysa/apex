@@ -10,7 +10,7 @@ date predicate, so a posting dated before the goods arrived passed every write-t
 while the date-scoped balance report showed the store negative for that day.
 
 So the controls live here as settings rather than as three more checks scattered through
-the callers, and ``assert_posting_allowed`` is called from the ledger's WRITE path. A guard
+the callers, and ``validate_posting_allowed`` is called from the ledger's WRITE path. A guard
 in the write path is an invariant; a guard in the caller is a convention the next voucher
 type will not inherit.
 """
@@ -63,7 +63,7 @@ def policy() -> dict:
     }
 
 
-def assert_posting_allowed(building: str, posting_date=None) -> None:
+def validate_posting_allowed(building: str, posting_date=None) -> None:
     """Refuse a posting the policy does not allow, before any row is written.
 
     Three refusals, in the order that tells the operator the most: the engine is off, the

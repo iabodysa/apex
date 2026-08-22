@@ -611,7 +611,7 @@ def set_financial_defaults(doc):
     if not doc.cost_center:
         doc.cost_center = get_default_cost_center()
 
-def enforce_vehicle_compliance(doc):
+def validate_vehicle_compliance(doc):
     """Block (or warn) when the linked vehicle's compliance has expired.
 
 	Reads Salis Vehicle.compliance_status; if Expired, honours the

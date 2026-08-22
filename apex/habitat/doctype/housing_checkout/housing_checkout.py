@@ -400,11 +400,11 @@ def before_cancel(doc, method=None):
     """Blocks cancellation when no Cancellation Reason has been given, or when the
     custody this checkout returned has already moved on again."""
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        assert_reversal_allowed,
+        validate_reversal_allowed,
     )
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
-    assert_reversal_allowed("Housing Checkout", doc.name)
+    validate_reversal_allowed("Housing Checkout", doc.name)
 
 def on_cancel(doc, method=None):
     """Drops the clearance sign-off, cancels the draft damage assessment, puts the

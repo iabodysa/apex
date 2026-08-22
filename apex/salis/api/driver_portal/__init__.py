@@ -15,10 +15,6 @@ from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_
 from apex.salis.api.maps_links import _stop_waypoint
 from apex.salis.utils import get_driver_for_user
 
-def _portal_enabled():
-    """Returns True when the driver portal is enabled in Salis Settings."""
-    return bool(frappe.db.get_single_value("Salis Settings", "enable_driver_portal"))
-
 def _find_driver(user=None):
     """Resolve the presented driver credential, else a linked preview user.
 
@@ -52,7 +48,7 @@ def _require_enabled():
     own markup; this makes the API it calls agree.
     """
     render_in_arabic()
-    if not _portal_enabled():
+    if not frappe.db.get_single_value("Salis Settings", "enable_driver_portal"):
         frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
 
 def _label_trips(trips):

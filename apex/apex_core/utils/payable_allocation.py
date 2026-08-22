@@ -23,7 +23,7 @@ SETTLED = "Settled"
 REVERSED = "Payment Cancelled"
 
 
-def require_target(doctype: str) -> None:
+def validate_target(doctype: str) -> None:
     """Fail closed when the target DocType is not installed, or the caller lacks create
     permission on it."""
     if not frappe.db.exists("DocType", doctype):
@@ -126,7 +126,7 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
     return invoice
 
 
-def require_money_source(company: str) -> None:
+def validate_money_source(company: str) -> None:
     """Fail closed unless the company has a default Cash or Bank account.
 
     """
@@ -161,7 +161,7 @@ def build_allocated_payment(company: str, supplier: str, purchase_invoice: str |
     from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
     invoice = load_eligible_payable(company, supplier, purchase_invoice)
-    require_money_source(company)
+    validate_money_source(company)
 
     payment = get_payment_entry(PAYABLE_SOURCE_DOCTYPE, invoice.name)
     if allocated_total(payment) <= 0:

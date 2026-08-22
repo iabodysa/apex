@@ -26,7 +26,7 @@ OPEN_REPORT_STATUSES = ("Open", "Acknowledged")
 def execute(filters=None):
     """Returns the columns, rows and summary cards for housed employees whose project has ended."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
     data = _get_data(filters)
     summary = [
         count_card(_("Idle Residents"), data),
@@ -41,7 +41,7 @@ def execute(filters=None):
     return columns, data, None, None, summary
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the idle resident detection report."""
     return [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Housing Assignment", "width": 150},

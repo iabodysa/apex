@@ -203,9 +203,9 @@ def before_cancel(doc, method=None):
             )
         )
     from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        assert_reversal_allowed,
+        validate_reversal_allowed,
     )
-    assert_reversal_allowed("Custody Return", doc.name)
+    validate_reversal_allowed("Custody Return", doc.name)
 
 
 def on_cancel(doc, method=None):

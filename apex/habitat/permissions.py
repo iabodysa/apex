@@ -109,7 +109,7 @@ def _building_is_unscoped(user):
     return permission_scope.is_unscoped(user, HOUSING_UNSCOPED_ROLES)
 
 
-def assert_building_scope(user=None, doctype=None):
+def validate_building_scope(user=None, doctype=None):
     """Refuse a building-scoped user who holds NO building, naming that as the cause.
 
     An empty allowed set can never match any document, so every action fails with

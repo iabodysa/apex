@@ -25,7 +25,7 @@ from apex.salis.doctype.dispatch_trip.trip_manifest import (
 from apex.salis.utils import (
     add_timeline_note,
     drive_transport_request,
-    enforce_vehicle_compliance,
+    validate_vehicle_compliance,
     lock_vehicle,
     revert_transport_request,
 )
@@ -41,7 +41,7 @@ class DispatchTrip(Document):
         self._guard_initial_status()
         self._validate_odometer()
         self._validate_trip_times()
-        enforce_vehicle_compliance(self)
+        validate_vehicle_compliance(self)
         self._require_completion_notes()
         self._enforce_capacity()
 

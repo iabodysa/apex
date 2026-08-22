@@ -596,7 +596,7 @@ def worker_claim_boarded(token=None):
     dispatch_trip, request_name, stop_name, building = resolved
 
     window = boarding_window.resolve(dispatch_trip, request_name, building)
-    boarding_window.refuse_unless_open(window)
+    boarding_window.validate_window_is_open(window)
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 

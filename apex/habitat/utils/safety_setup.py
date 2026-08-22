@@ -50,12 +50,6 @@ class SafetySetupTally:
         self.failures: list = []
 
 
-def is_event_driven(frequency) -> bool:
-    """An event-driven catalog task runs on a trigger, not a calendar, so it has no
-    schedulable period and is reported rather than assigned."""
-    return frequency in EVENT_DRIVEN_FREQUENCIES
-
-
 def template_frequency(frequency):
     """The Scheduled Task Template Select value for a catalog period, or None when
     the catalog period has no scheduling equivalent."""
@@ -162,7 +156,7 @@ def apply_catalog(catalog, building_name, tally) -> None:
     if not catalog.applicable_to_all_buildings:
         _ensure_building_scope(catalog, building_name, tally)
 
-    if is_event_driven(catalog.frequency):
+    if catalog.frequency in EVENT_DRIVEN_FREQUENCIES:
         tally.event_driven_excluded.append(catalog.task_code or catalog.name)
         return
 

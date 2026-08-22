@@ -27,9 +27,9 @@ class MaterialTransfer(Document):
         controller, because Frappe dispatches it from the class with no hooks.py
         doc_events entry to add — this DocType has none registered for before_cancel."""
         from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            assert_reversal_allowed,
+            validate_reversal_allowed,
         )
-        assert_reversal_allowed(VOUCHER_TYPE, self.name)
+        validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
 
 def validate(doc, method=None):

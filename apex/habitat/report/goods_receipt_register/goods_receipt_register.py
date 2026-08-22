@@ -22,7 +22,7 @@ from apex.habitat import permissions
 def execute(filters=None):
     """Returns the columns, line rows and summary cards for the Goods Receipt Register report."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     if filters.get("building"):
@@ -40,7 +40,7 @@ def execute(filters=None):
     if restrict:
         chosen = query_filters.get("intake_building")
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["intake_building"] = ["in", allowed]
 
@@ -58,7 +58,7 @@ def execute(filters=None):
         order_by="receipt_date desc",
     )
     if not receipts:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     lines = frappe.get_all(
         "Material Transfer Item",
@@ -91,10 +91,10 @@ def execute(filters=None):
             }
         )
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Builds summary cards for receipt line count, receipt count and percent handed over."""
     receipts = {r.get("name") for r in data if r.get("name")}
     awaiting = [r for r in data if r.get("status") == "Received"]
@@ -107,7 +107,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the Goods Receipt Register report."""
     return [
         {"label": _("Receipt"), "fieldname": "name", "fieldtype": "Link", "options": "Goods Receipt", "width": 170},

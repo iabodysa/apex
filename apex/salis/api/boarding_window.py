@@ -284,7 +284,7 @@ def resolve(dispatch_trip, transport_request=None, building=None, now=None):
     return window
 
 
-def refuse_unless_open(window):
+def validate_window_is_open(window):
     """Refuse a boarding self-confirm outside the window, naming WHY.
 
     Raises the state's own exception class, so the caller — and the SPA, which reads

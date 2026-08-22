@@ -23,7 +23,7 @@ from apex.salis import permissions
 def execute(filters=None):
     """Returns the columns, rows and summary cards for the Vehicle Handover Register report."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     if filters.get("vehicle"):
@@ -39,7 +39,7 @@ def execute(filters=None):
         in_scope = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
         chosen = query_filters.get("vehicle")
         if not in_scope or (chosen and chosen not in in_scope):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["vehicle"] = ["in", in_scope]
 
@@ -63,7 +63,7 @@ def execute(filters=None):
         driver = filters["driver"]
         handovers = [h for h in handovers if driver in (h.from_driver, h.to_driver)]
     if not handovers:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     failed = {}
     for item in frappe.get_all(
@@ -98,10 +98,10 @@ def execute(filters=None):
     if filters.get("unsigned_only"):
         data = [r for r in data if not r.get("is_signed")]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
     unsigned = [r for r in data if not r.get("is_signed")]
@@ -114,7 +114,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the Vehicle Handover Register report."""
     return [
         {"label": _("Handover"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Handover", "width": 150},

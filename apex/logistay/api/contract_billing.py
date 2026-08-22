@@ -128,7 +128,7 @@ def _result(document_type, document_name, existing):
 def create_purchase_request(contract: str, billing_period: str):
     """Create (or return) a draft Material Request (Purchase) for one billing period."""
     contract_doc = _load_eligible_contract(contract)
-    payable_allocation.require_target(PURCHASE_REQUEST_DOCTYPE)
+    payable_allocation.validate_target(PURCHASE_REQUEST_DOCTYPE)
     billing_period = _normalize_period(billing_period)
 
     if not contract_doc.service_item:
@@ -197,7 +197,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     submits it.
     """
     contract_doc = _load_eligible_contract(contract)
-    payable_allocation.require_target(PAYMENT_ENTRY_DOCTYPE)
+    payable_allocation.validate_target(PAYMENT_ENTRY_DOCTYPE)
     billing_period = _normalize_period(billing_period)
 
     contract_doc = frappe.get_doc(CONTRACT_DOCTYPE, contract_doc.name, for_update=True)

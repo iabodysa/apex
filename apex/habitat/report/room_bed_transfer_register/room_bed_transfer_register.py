@@ -23,7 +23,7 @@ from apex.habitat import permissions
 def execute(filters=None):
     """Returns submitted Room Bed Transfers with building, scoped by permission, with summary cards."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     if filters.get("party_type"):
@@ -37,13 +37,13 @@ def execute(filters=None):
     restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Room Bed Transfer")
     if restrict:
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             scope_buildings = allowed
     if scope_buildings is not None:
         assignments = frappe.get_all("Housing Assignment", filters={"building": ["in", scope_buildings]}, pluck="name")
         if not assignments:
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         query_filters["assignment"] = ["in", assignments]
 
     rows = frappe.get_all(
@@ -63,7 +63,7 @@ def execute(filters=None):
         order_by="transfer_date desc",
     )
     if not rows:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     building_by_assignment = {
         a.name: a.building
@@ -78,10 +78,10 @@ def execute(filters=None):
         {**row, "building": building_by_assignment.get(row.assignment)} for row in rows
     ]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
     residents = {r.get("party") for r in data if r.get("party")}
@@ -95,7 +95,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the room bed transfer register."""
     return [
         {"label": _("Transfer"), "fieldname": "name", "fieldtype": "Link", "options": "Room Bed Transfer", "width": 160},

@@ -38,7 +38,7 @@ LEDGER_DOCTYPE = "Maintenance Cost Ledger"
 SOURCE_DOCTYPE = "Maintenance Work Order"
 
 
-def _ledger_row_exists(source_name: str, detail_no: int) -> bool:
+def _ledger_exists(source_name: str, detail_no: int) -> bool:
     """True if an ORIGINAL ledger row already exists for this Work Order + item
     row (idempotency key). Reversal rows carry reversal_of, so an original is
     keyed by reversal_of unset."""
@@ -101,7 +101,7 @@ def post_maintenance_cost(work_order) -> int:
         amount = flt(row.get("estimated_cost") or 0)
         if amount <= 0:
             continue
-        if _ledger_row_exists(work_order.name, detail_no):
+        if _ledger_exists(work_order.name, detail_no):
             continue
         _insert_ledger_row(work_order, company, row, detail_no)
         posted += 1

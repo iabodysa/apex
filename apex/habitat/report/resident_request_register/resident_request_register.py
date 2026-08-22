@@ -33,7 +33,7 @@ AGEING_DAYS = 7
 def execute(filters=None):
     """Returns the columns, rows and summary cards for the open resident request queue and wait times."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {}
     for field in ("building", "status", "priority", "assigned_to"):
@@ -46,7 +46,7 @@ def execute(filters=None):
     if restrict:
         chosen = query_filters.get("building")
         if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, _summary([])
+            return columns, [], None, None, get_report_summary([])
         if not chosen:
             query_filters["building"] = ["in", allowed]
 
@@ -85,10 +85,10 @@ def execute(filters=None):
     if filters.get("unassigned_only"):
         data = [r for r in data if not r.get("is_owner_taken")]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty queue reads 0 rather than a blank
     strip that looks like a page which failed to load."""
     unassigned = [r for r in data if not r.get("is_owner_taken")]
@@ -102,7 +102,7 @@ def _summary(data):
     ]
 
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the resident request register."""
     return [
         {"label": _("Request"), "fieldname": "name", "fieldtype": "Link", "options": "Resident Request", "width": 170},

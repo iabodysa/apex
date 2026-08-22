@@ -22,7 +22,7 @@ from apex.salis import permissions
 def execute(filters=None):
     """Returns the columns, per-passenger rows and summary cards for the Passenger Manifest Register."""
     filters = filters or {}
-    columns = _columns()
+    columns = get_columns()
 
     query_filters = {"docstatus": 1}
     for field in ("route_plan", "vehicle", "driver"):
@@ -65,7 +65,7 @@ def execute(filters=None):
 
             manifests = [m for m in manifests if _in_scope(m)]
     if not manifests:
-        return columns, [], None, None, _summary([])
+        return columns, [], None, None, get_report_summary([])
 
     passengers = frappe.get_all(
         "Passenger Manifest Item",
@@ -99,9 +99,9 @@ def execute(filters=None):
     if filters.get("not_boarded_only"):
         data = [r for r in data if not r["boarded"]]
 
-    return columns, data, None, None, _summary(data)
+    return columns, data, None, None, get_report_summary(data)
 
-def _summary(data):
+def get_report_summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
     manifests = {r.get("name") for r in data if r.get("name")}
@@ -113,7 +113,7 @@ def _summary(data):
         percent_card(_("Boarding Rate"), len(boarded), len(data)),
     ]
 
-def _columns():
+def get_columns():
     """Returns the column definitions for the Passenger Manifest Register report."""
     return [
         {"label": _("Manifest"), "fieldname": "name", "fieldtype": "Link", "options": "Passenger Manifest", "width": 150},

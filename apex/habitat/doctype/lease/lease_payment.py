@@ -43,7 +43,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate, today
 
-from apex.apex_core.payment_router import require_configured_target
+from apex.apex_core.payment_router import validate_configured_target
 from apex.apex_core.utils import payable_allocation
 
 
@@ -60,7 +60,7 @@ def _load_eligible_lease(lease: str):
     to the API cannot step around it.
 
     """
-    require_configured_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
+    validate_configured_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
     if not lease or not frappe.db.exists(LEASE_DOCTYPE, {"name": lease}):
         frappe.throw(_("Lease {0} does not exist.").format(lease))
     doc = frappe.get_doc(LEASE_DOCTYPE, lease)
@@ -150,7 +150,7 @@ def create_rent_payment(lease: str, due_date: str, purchase_invoice: str | None 
     """Create (or return) a draft Payment Entry ALLOCATED against ``purchase_invoice``
     for one rent instalment. Left in Draft — Apex posts no GL and never submits it."""
     lease_doc = _load_eligible_lease(lease)
-    payable_allocation.require_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
+    payable_allocation.validate_target(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
 
     frappe.db.get_value(LEASE_DOCTYPE, lease_doc.name, "name", for_update=True)
     lease_doc.reload()

@@ -26,7 +26,7 @@ from frappe import _
 from frappe.utils import getdate, today
 
 
-def refuse_to_stop_a_driver_who_still_holds_planned_trips(driver):
+def validate_driver_has_no_planned_trips(driver):
     """Refuse the stop while planned trips still name ``driver``, listing them.
 
     Only a PLANNED trip refuses. A Dispatched trip is a vehicle already in motion and a

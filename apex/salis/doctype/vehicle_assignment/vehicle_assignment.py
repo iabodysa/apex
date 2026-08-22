@@ -14,7 +14,7 @@ from frappe.model.document import Document
 
 from apex.salis.utils import (
     add_timeline_note,
-    enforce_vehicle_compliance,
+    validate_vehicle_compliance,
     lock_vehicle,
     lock_driver,
     rider_block_reason,
@@ -28,7 +28,7 @@ class VehicleAssignment(Document):
         """Validates dates, blocks an overlapping assignment, checks compliance and rider status."""
         self._validate_dates()
         self._validate_no_overlap()
-        enforce_vehicle_compliance(self)
+        validate_vehicle_compliance(self)
         self._enforce_rider_active()
 
     def _enforce_rider_active(self):

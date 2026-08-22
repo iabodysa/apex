@@ -51,11 +51,6 @@ def _require_receiving_side(doc):
     )
 
 
-def _otp_required() -> bool:
-    """Returns whether Habitat Settings currently requires an OTP to confirm a handover."""
-    return bool(frappe.db.get_single_value("Habitat Settings", "require_handover_otp"))
-
-
 @frappe.whitelist(methods=["POST"])
 def confirm_handover(handover: str, otp: str):
     """Confirm receipt and post the receive leg into the destination store.
@@ -83,7 +78,7 @@ def confirm_handover(handover: str, otp: str):
         return doc.name
 
     now = now_datetime()
-    otp_required = _otp_required()
+    otp_required = bool(frappe.db.get_single_value("Habitat Settings", "require_handover_otp"))
 
     if otp_required and is_locked_out(doc.doctype, doc.name, attempts=MAX_OTP_ATTEMPTS):
         frappe.throw(
