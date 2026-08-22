@@ -83,4 +83,3 @@ resident request target; the Bed and Room state changes through **Needs Cleaning
 - [Custody operations](custody.md)
 - [Maintenance operations](maintenance.md)
 - [Housing Operations track](tracks/housing-operations.md)
-- [Workspaces and routes](../reference/routes-workspaces.md)

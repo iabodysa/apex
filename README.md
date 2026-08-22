@@ -165,7 +165,7 @@ evaluation or controlled deployment of the current release:
 
 ```bash
 cd frappe-bench
-bench get-app --branch v2.5.0 https://github.com/iabodysa/apex.git
+bench get-app --branch v2.6.4 https://github.com/iabodysa/apex.git
 bench --site <site> install-app apex
 bench --site <site> migrate
 ```

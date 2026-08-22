@@ -20,10 +20,9 @@ case crosses that boundary.
    [Follow Work from Request to Proof](../foundations.md) and [Settings](../settings.md).
 3. Rehearse safe personal-link handling in
    [Worker and Driver Portals](../portals-masar-driver.md).
-4. Use [Installation](../../administration/installation.md) for service controls
-   and [Troubleshooting](../../reference/troubleshooting.md) for diagnosis.
-5. Use [Scheduled automation](../../reference/automation.md) to identify the
-   source and result of the selected background operation.
+4. Use Installation for service controls and Troubleshooting for diagnosis.
+5. Use Scheduled automation to identify the source and result of the selected
+   background operation.
 
 ## Capstone
 
@@ -48,5 +47,4 @@ cross-scope access appears.
 
 ## Related links
 
-- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
 - [Trainer Setup and Reset](../trainer-setup.md)

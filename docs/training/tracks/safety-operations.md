@@ -18,8 +18,7 @@ canonical guides.
 1. Restore the Safety baseline with [Trainer Setup and Reset](../trainer-setup.md).
 2. Complete the round, finding, and evidence rules in [Safety](../safety.md).
 3. Complete the generated-request handoff in [Maintenance](../maintenance.md).
-4. Review the scheduled source and expected result in
-   [Scheduled automation](../../reference/automation.md).
+4. Review the scheduled source and expected result in Scheduled automation.
 
 ## Capstone
 
@@ -37,8 +36,3 @@ Show one complete source chain with the correct Building, distinct maker and
 submitter, required evidence, generated maintenance handoff, and unchanged audit
 ledger. The existence of a Maintenance Request is not evidence that the repair is
 complete.
-
-## Related links
-
-- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
-- [Troubleshooting](../../reference/troubleshooting.md)

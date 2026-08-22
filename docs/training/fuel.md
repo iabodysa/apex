@@ -92,5 +92,3 @@ it becomes an unsupported payment or deduction.
 
 - [Fleet and movement](fleet-movement.md)
 - [Fleet compliance and financial handoffs](compliance.md)
-- [Scheduled automation](../reference/automation.md)
-- [Modules, workspaces, and routes](../reference/routes-workspaces.md)

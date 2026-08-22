@@ -44,9 +44,3 @@ Show one source-linked transport chain, its driver and worker evidence, the fuel
 and rental source records, the Finance handoff, distinct actors at approval gates,
 and the out-of-scope Project denial. System-written ledgers remain unchanged by
 hand, and no payment or payroll document is created.
-
-## Related links
-
-- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
-- [Scheduled automation](../../reference/automation.md)
-- [Troubleshooting](../../reference/troubleshooting.md)

@@ -219,4 +219,3 @@ learners. Never reset a site while another cohort is using it.
 - [Training home](README.md)
 - [Follow Work from Request to Proof](foundations.md)
 - [Worker and Driver Portals](portals-masar-driver.md)
-- [Troubleshooting](../reference/troubleshooting.md)

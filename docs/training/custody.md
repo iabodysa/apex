@@ -71,4 +71,3 @@ Employee balance changes.
 
 - [Accommodation operations](accommodation.md)
 - [Costs and leasing](costs.md)
-- [Scheduled automation](../reference/automation.md)

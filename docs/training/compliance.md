@@ -99,4 +99,3 @@ without confusing an operational memo with accounting or payroll.
 - [Fleet and movement](fleet-movement.md)
 - [Fuel operations](fuel.md)
 - [Rental fleet](rentals.md)
-- [Scheduled automation](../reference/automation.md)

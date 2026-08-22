@@ -67,5 +67,3 @@ photo where required, the generated maintenance link, and the matching
 
 - [Maintenance operations](maintenance.md)
 - [Safety Operations track](tracks/safety-operations.md)
-- [Scheduled automation](../reference/automation.md)
-- [Workspaces and routes](../reference/routes-workspaces.md)

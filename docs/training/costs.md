@@ -69,4 +69,3 @@ payment was created by the exercise.
 
 - [Accommodation operations](accommodation.md)
 - [Rentals](rentals.md)
-- [Scheduled automation](../reference/automation.md)

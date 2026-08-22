@@ -119,4 +119,3 @@ The learner can show:
 
 - [Telecom Operations track](tracks/telecom-operations.md)
 - [Costs and Leasing](costs.md)
-- [Modules, workspaces, and routes](../reference/routes-workspaces.md)

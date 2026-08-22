@@ -64,4 +64,3 @@ exercise created no General Ledger entry.
 
 - [Fleet and movement](fleet-movement.md)
 - [Fleet compliance and financial handoffs](compliance.md)
-- [Scheduled automation](../reference/automation.md)

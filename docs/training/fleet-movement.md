@@ -111,4 +111,3 @@ one `Trip Fulfilment Ledger` row.
 - [Fuel operations](fuel.md)
 - [Masar, driver, and supervisor journeys](portals-masar-driver.md)
 - [Fleet compliance and financial handoffs](compliance.md)
-- [Modules, workspaces, and routes](../reference/routes-workspaces.md)

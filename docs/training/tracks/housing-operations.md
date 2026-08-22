@@ -64,4 +64,3 @@ Room ready.
 
 - [Safety Operations](../safety.md)
 - [Costs and Leasing](../costs.md)
-- [Workspaces and routes](../../reference/routes-workspaces.md)

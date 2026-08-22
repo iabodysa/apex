@@ -101,4 +101,3 @@ action bound to the correct person or assigned route.
 - [Fleet and movement](fleet-movement.md)
 - [Fuel operations](fuel.md)
 - [Trainer setup and reset](trainer-setup.md)
-- [Portal routes and audiences](../reference/routes-workspaces.md#served-portal-routes)

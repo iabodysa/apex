@@ -19,8 +19,7 @@ only for training administration.
 2. Confirm the learner's Company scope with
    [Follow Work from Request to Proof](../foundations.md).
 3. Complete the operating and Finance procedures in [Telecom](../telecom.md).
-4. Use [Telecom troubleshooting](../../reference/troubleshooting.md#sim-state-looks-wrong)
-   only if the resulting state or Cost Center is unexpected.
+4. Use Telecom troubleshooting only if the resulting state or Cost Center is unexpected.
 
 ## Capstone
 
@@ -44,8 +43,3 @@ Show the submitted contract, both SIM identities, both valid custody chains, the
 Employee and Project Cost Center snapshots, the in-place number correction, the
 out-of-scope Company denial, and the two source-linked Finance drafts. A draft
 Payment Entry is a handoff, not proof of settlement.
-
-## Related links
-
-- [Modules, workspaces, and routes](../../reference/routes-workspaces.md)
-- [Scheduled automation](../../reference/automation.md)

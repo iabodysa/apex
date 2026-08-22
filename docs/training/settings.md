@@ -59,7 +59,7 @@ Do not use a production link or capture the training credential in evidence.
 
 ## Background follow-up
 
-Use the [scheduled automation reference](../reference/automation.md) to identify which Apex
+Use the scheduled automation reference to identify which Apex
 job follows a business condition, what enables it, and what record it may create or update.
 Check the source record and **Scheduled Job Log** before rerunning anything.
 
@@ -77,6 +77,3 @@ disabled, or the expected record may already exist.
 ## Related guides
 
 - [IT Operations track](tracks/it-operations.md)
-- [Installation](../administration/installation.md)
-- [Integration](../administration/integration.md)
-- [Scheduled automation](../reference/automation.md)
