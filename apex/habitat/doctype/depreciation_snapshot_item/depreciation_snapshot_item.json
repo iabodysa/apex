@@ -6,7 +6,7 @@
  "issingle": 0,
  "istable": 1,
  "engine": "InnoDB",
- "description": "Child: one asset line in a Non-Financial Depreciation Snapshot.",
+ "description": "Child: one asset line in an Operational Depreciation Snapshot.",
  "field_order": [
   "article",
   "original_cost",

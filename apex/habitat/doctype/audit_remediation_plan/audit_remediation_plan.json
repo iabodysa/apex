@@ -98,7 +98,7 @@
   {
    "doctype": "DocField",
    "fieldname": "buildings_in_scope",
-   "fieldtype": "Table",
+   "fieldtype": "Table MultiSelect",
    "label": "Buildings In Scope",
    "options": "Audit Remediation Building Scope"
   },
@@ -190,5 +190,5 @@
   "client_audit_remediation_plan_sec_system",
   "naming_series"
  ],
- "modified": "2026-07-26 09:03:55.752811"
+ "modified": "2026-08-22 20:00:00.000000"
 }

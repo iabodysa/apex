@@ -119,13 +119,20 @@ class TestAuditRemediationPlanScopeWiring(unittest.TestCase):
 
     def test_the_scope_table_the_subquery_reads_is_the_one_the_plan_declares(self):
         """A rename on either side would leave the subquery matching nothing --
-        silently blacking out every scoped user rather than leaking, but still wrong."""
+        silently blacking out every scoped user rather than leaking, but still wrong.
+
+        The fieldtype is asserted as a SET, not a value. ``_render_child`` selects on
+        ``parent``, ``parenttype`` and ``building`` in the child table, and both table
+        fieldtypes write those three columns identically — so which of the two the form
+        uses is a presentation choice the subquery cannot see. What it can see is a
+        field that stores no child rows at all, which is what this excludes.
+        """
         table = next(
             f
             for f in self.json[DOCTYPE]["fields"]
             if f.get("fieldname") == CHILD_FIELD
         )
-        self.assertEqual(table.get("fieldtype"), "Table")
+        self.assertIn(table.get("fieldtype"), {"Table", "Table MultiSelect"})
         self.assertEqual(table.get("options"), CHILD_DOCTYPE)
         child = self.json[CHILD_DOCTYPE]
         self.assertEqual(child.get("istable"), 1)

@@ -46,7 +46,7 @@
   },
   {
    "default": "730",
-   "description": "Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.",
+   "description": "Retention for submitted Operational Depreciation Snapshots (days). Default 730.",
    "fieldname": "depreciation_snapshot_retention_days",
    "fieldtype": "Int",
    "label": "Depreciation Snapshot Retention (Days)",

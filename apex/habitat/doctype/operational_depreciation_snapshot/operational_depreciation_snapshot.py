@@ -1,5 +1,5 @@
 # Copyright (c) 2026, afmcoltd
-"""Non-Financial Depreciation Snapshot controller."""
+"""Operational Depreciation Snapshot controller."""
 
 from __future__ import annotations
 
