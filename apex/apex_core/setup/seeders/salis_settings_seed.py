@@ -30,7 +30,6 @@ DOCTYPE = "Salis Settings"
 
 DEFAULTS = {
     "enable_approvals": 1,
-    "cross_project_needs_approval": 1,
     "fuel_request_approval_threshold_litres": 100,
     "alert_lead_days": 7,
     "enable_driver_portal": 0,

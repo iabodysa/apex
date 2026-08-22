@@ -56,7 +56,6 @@
   "salis_settings_tab_approvals",
   "salis_settings_sec_approvals",
   "enable_approvals",
-  "cross_project_needs_approval",
   "block_assignment_on_expired_compliance",
   "salis_settings_approvals_col",
   "fuel_request_approval_threshold_litres",
@@ -382,13 +381,6 @@
    "label": "Enable Approvals"
   },
   {
-   "default": "1",
-   "description": "Require approval when an assignment or transfer crosses project boundaries.",
-   "fieldname": "cross_project_needs_approval",
-   "fieldtype": "Check",
-   "label": "Cross-Project Needs Approval"
-  },
-  {
    "default": "0",
    "description": "Block vehicle assignment when the linked vehicle has expired compliance.",
    "fieldname": "block_assignment_on_expired_compliance",
@@ -447,7 +439,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-22 22:00:00.000000",
+ "modified": "2026-08-23 11:30:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

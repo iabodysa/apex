@@ -109,6 +109,14 @@ def apply_approval_switch():
     The workflows are found through their document type's module rather than a list, so a
     new Salis workflow is covered on the day it ships.
 
+    Each write is followed by ``frappe.clear_cache`` on the document type, because
+    ``get_workflow_name`` answers from ``frappe.cache.hget("workflow", doctype)``
+    (frappe/model/workflow.py:29-35) and ``db_set`` never invalidates it. Without that call
+    the row changes and the application keeps gating on the old answer until a restart —
+    the switch would appear to work in the database and do nothing on screen. ``"workflow"``
+    is one of ``doctype_cache_keys`` (frappe/cache_manager.py:68-75), so the one call clears
+    both that hash and the doctype meta.
+
     CONTRACT: an administrator's own change to ``is_active`` on the Workflow list does not
     survive a migrate, because the workflows ship in ``apex/fixtures/`` and a fixture is
     reimported with ``force=True``. This function is what puts the setting's answer back;
@@ -125,6 +133,7 @@ def apply_approval_switch():
     ):
         if cint(frappe.db.get_value("Workflow", name, "is_active")) != enabled:
             frappe.db.set_value("Workflow", name, "is_active", enabled)
+            frappe.clear_cache(doctype=frappe.db.get_value("Workflow", name, "document_type"))
 
 
 def get_salis_int(field: str, default: int) -> int:
