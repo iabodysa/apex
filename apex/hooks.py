@@ -25,11 +25,21 @@ app_license = "MIT"
 
 required_apps = ["frappe", "erpnext", "hrms"]
 
+# Every title here is distinct on purpose: the screen shows titles and nothing else, so
+# two tiles sharing one leaves the operator guessing which route he is opening. Each names
+# the audience its route serves, and each string is already translated in ar.csv.
 add_to_apps_screen = [
+    {
+        "name": "apex",
+        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "title": "Apex",
+        "route": "/app/apex",
+        "has_permission": "apex.check_app_permission",
+    },
     {
         "name": "apex-driver",
         "logo": "/assets/apex/images/apex-app-icon.svg",
-        "title": "Masar",
+        "title": "Driver",
         "route": "/driver",
     },
     {
@@ -48,14 +58,14 @@ add_to_apps_screen = [
     {
         "name": "apex-fleet-os",
         "logo": "/assets/apex/images/apex-app-icon.svg",
-        "title": "Salis",
+        "title": "Fleet Operations",
         "route": "/fleet-os",
         "has_permission": "apex.www.fleet_os.has_apps_screen_access",
     },
     {
         "name": "apex-fleet",
         "logo": "/assets/apex/images/apex-app-icon.svg",
-        "title": "Salis",
+        "title": "My Fleet",
         "route": "/fleet",
     },
     {
