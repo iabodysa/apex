@@ -1,1 +1,0 @@
-function l(){const e=new Map;return(r,o)=>{if(e.has(r))return e.get(r);let t;try{t=o()}catch(s){t=Promise.reject(s)}const n=Promise.resolve(t).finally(()=>e.delete(r));return e.set(r,n),n}}function a(e={}){return{disabled:e.allowed!==!0,reason:e.allowed?"":e.reason||"هذا الإجراء غير متاح."}}export{a,l as c};
