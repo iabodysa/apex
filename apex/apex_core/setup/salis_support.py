@@ -217,6 +217,21 @@ def configure_support_sla(
     doc.insert(ignore_permissions=True)
     return doc.name
 
+def refuse_shipped_issue_type_edit(doc, method=None, *args, **kwargs):
+    """Refuse renaming or editing an issue type the app ships.
+
+    ``Issue Type`` carries ``allow_rename: 1`` and its only field is ``description``, and
+    the fixture is reimported with ``force=True``, which deletes the row and re-inserts it
+    from a file that carries no description. So an annotation is wiped on the next migrate
+    and a rename leaves the shipped name recreated beside the renamed one. Both are silent.
+
+    Only the six shipped names are covered; an operator's own type is untouched. An Arabic
+    label belongs in the translation file, which is why renaming is refused rather than
+    accommodated.
+    """
+    _refuse_if_shipped(doc, _("renamed or edited"))
+
+
 def refuse_shipped_issue_type_deletion(doc, method=None):
     """Refuse deleting an issue type the app ships, because the next update restores it.
 
@@ -233,15 +248,20 @@ def refuse_shipped_issue_type_deletion(doc, method=None):
     Stands down while Frappe is installing, migrating or patching, so the fixture's own
     import still lands.
     """
+    _refuse_if_shipped(doc, _("deleted"))
+
+
+def _refuse_if_shipped(doc, attempted_action):
+    """Throw when ``doc`` is one of the six shipped types and a person is the one writing."""
     if doc.name not in ISSUE_TYPES:
         return
     if _frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(
-            "{0} is an issue type Apex ships, and every update puts it back. Deleting it"
-            " here would not last. Ask for it to be removed from the app instead."
-        ).format(_(doc.name)),
+            "{0} is an issue type Apex ships, and every update puts it back as the app"
+            " defines it. It cannot be {1} here. Ask for the change to ship with the app."
+        ).format(_(doc.name), attempted_action),
         frappe.PermissionError,
         title=_("Set by Apex"),
     )

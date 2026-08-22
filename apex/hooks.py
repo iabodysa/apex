@@ -120,6 +120,8 @@ override_doctype_class = {
 doc_events = {
     "Issue Type": {
         "on_trash": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_deletion",
+        "before_rename": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_edit",
+        "validate": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_edit",
     },
     "Custom DocPerm": {
         "validate": "apex.apex_core.utils.app_owned_permissions.refuse_app_owned_permission_edit",
