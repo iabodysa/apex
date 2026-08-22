@@ -14,6 +14,8 @@ and a site whose DocType has not migrated yet is skipped rather than raising.
 
 import frappe
 
+from apex.apex_core.setup.seeders import never_stored
+
 
 DOCTYPE = "Salis Settings"
 
@@ -30,7 +32,7 @@ def seed_salis_portal_theme():
     settings = frappe.get_single(DOCTYPE)
     filled = []
     for field, value in DEFAULTS.items():
-        if settings.meta.has_field(field) and not settings.get(field):
+        if settings.meta.has_field(field) and never_stored(DOCTYPE, field):
             settings.set(field, value)
             filled.append(field)
     if filled:

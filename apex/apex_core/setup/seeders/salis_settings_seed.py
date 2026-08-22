@@ -23,6 +23,8 @@ the last chance to fill these defaults. A seed with no such re-run must raise in
 
 import frappe
 
+from apex.apex_core.setup.seeders import never_stored
+
 
 DOCTYPE = "Salis Settings"
 
@@ -33,18 +35,6 @@ DEFAULTS = {
     "alert_lead_days": 7,
     "enable_driver_portal": 0,
 }
-
-
-def _never_stored(field):
-    """True when the Single holds no row for ``field`` at all.
-
-    Frappe writes every field of a Single to ``tabSingles`` on save, including a Check
-    left at 0, so the presence of a row is what separates an answer from a silence.
-    """
-    return not frappe.db.sql(
-        "select 1 from tabSingles where doctype = %s and field = %s limit 1",
-        (DOCTYPE, field),
-    )
 
 
 def _sole(doctype, filters=None):
@@ -63,18 +53,18 @@ def seed_salis_settings():
         filled = []
 
         for field, value in DEFAULTS.items():
-            if settings.meta.has_field(field) and _never_stored(field):
+            if settings.meta.has_field(field) and never_stored(DOCTYPE, field):
                 settings.set(field, value)
                 filled.append(field)
 
-        if settings.meta.has_field("default_company") and _never_stored("default_company"):
+        if settings.meta.has_field("default_company") and never_stored(DOCTYPE, "default_company"):
             company = _sole("Company")
             if company:
                 settings.default_company = company
                 filled.append("default_company")
 
-        if settings.meta.has_field("default_cost_center") and _never_stored(
-            "default_cost_center"
+        if settings.meta.has_field("default_cost_center") and never_stored(
+            DOCTYPE, "default_cost_center"
         ):
             filters = {"is_group": 0}
             if settings.get("default_company"):
