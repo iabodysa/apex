@@ -294,8 +294,9 @@ jobs:
           print(f"desk tree OK: {len(roots)} workspaces under Apex, none blank")
           print(f"landing page OK: {len(json.loads(apex.content))} blocks, {len(apex.shortcuts)} portal links")
           PY
-name: Run the apex test suite
-working-directory: frappe-bench
-env:
-CI: "true"
-run: bench --site test.localhost run-tests --app apex
+          
+      - name: Run the apex test suite
+        working-directory: frappe-bench
+        env:
+          CI: "true"
+        run: bench --site test.localhost run-tests --app apex
