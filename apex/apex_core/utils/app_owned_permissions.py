@@ -25,11 +25,27 @@ from frappe import _
 APP_OWNED_DOCTYPES = frozenset({"Employee", "Cost Center", "Project"})
 
 
+def _frappe_is_writing_its_own_records() -> bool:
+    """True while Frappe is applying shipped records rather than serving a person.
+
+    A refusal that cannot tell the two apart fails the customer's own upgrade. ``validate``
+    still runs during a fixture import — ``import_file.py:233`` sets ``ignore_validate``
+    only when ``data_import`` is false, and fixtures pass it true — so ``in_import`` has to
+    be in this test, not only the three that a migrate or an install would set.
+    """
+    return bool(
+        frappe.flags.in_migrate
+        or frappe.flags.in_install
+        or frappe.flags.in_patch
+        or frappe.flags.in_import
+    )
+
+
 def refuse_app_owned_permission_edit(doc, method=None):
     """Refuse a hand-made Custom DocPerm on a DocType whose permissions ship with Apex."""
     if doc.parent not in APP_OWNED_DOCTYPES:
         return
-    if frappe.flags.in_migrate or frappe.flags.in_install or frappe.flags.in_patch:
+    if _frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(

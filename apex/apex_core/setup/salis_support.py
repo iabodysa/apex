@@ -12,6 +12,8 @@ import frappe
 from frappe import _
 from frappe.utils import get_time, getdate
 
+from apex.apex_core.utils.app_owned_permissions import _frappe_is_writing_its_own_records
+
 SLA_NAME = "Salis Support SLA"
 SLA_PRIORITIES = (
     ("Urgent", 3600, 14400, 0),
@@ -233,7 +235,7 @@ def refuse_shipped_issue_type_deletion(doc, method=None):
     """
     if doc.name not in ISSUE_TYPES:
         return
-    if frappe.flags.in_migrate or frappe.flags.in_install or frappe.flags.in_patch:
+    if _frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(
