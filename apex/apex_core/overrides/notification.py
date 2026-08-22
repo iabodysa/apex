@@ -2,7 +2,18 @@
 """App-layer override of the core Notification channel dispatch.
 
 Registered via ``override_doctype_class`` in ``hooks.py`` (NOT a core
-monkey-patch). It changes ONE behaviour and nothing else:
+monkey-patch). It changes two behaviours and nothing else:
+
+FIRST, it is where the Habitat Settings email kill-switch reaches the DECLARATIVE
+send path. ``email_gate.email_enabled`` is asked by every explicit
+``frappe.sendmail`` call site in this app, and a Notification record reaches
+``frappe.sendmail`` through core rather than through any of them — so with the
+switch OFF the eighteen records this app ships with ``enabled: 1`` and
+``channel: Email`` would still send. This class is the one place all of them pass
+through. The in-app System Notification is deliberately NOT gated: the switch is
+named for outgoing email and says so.
+
+SECOND:
 
 Core ``Notification.send_notification_by_channel`` runs the primary channel
 (Email/Slack/SMS) inside a single ``try`` and only *afterwards* creates the
@@ -22,6 +33,8 @@ only ordering + error resilience differ.
 
 from frappe.email.doctype.notification.notification import Notification
 
+from apex.apex_core.utils.email_gate import email_enabled
+
 
 class ApexNotification(Notification):
     def send_notification_by_channel(self, doc, context):
@@ -36,6 +49,9 @@ class ApexNotification(Notification):
                 self.log_error("Failed to send Notification")
 
         if self.channel == "System Notification":
+            return
+
+        if self.channel == "Email" and not email_enabled():
             return
 
         try:
