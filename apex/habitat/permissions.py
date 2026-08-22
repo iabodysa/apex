@@ -313,6 +313,26 @@ def building_scope_query(user=None, doctype=None, scope_for=None):
     return _fragment(kind, spec, buildings)
 
 
+def refuse_a_supervisor_with_no_building(user=None, doctype=None):
+    """Close the list for a scoped user who holds no building, and let Frappe do the rest.
+
+    A DocType whose estate is its own ``building`` column needs no fragment from this app:
+    ``db_query.add_user_permissions`` (``db_query.py:1064``) already builds the identical
+    restriction from the User Permission rows ``Building.on_update`` maintains, for every
+    Link that points at Building.
+
+    What it does NOT do is fail closed. That code only filters when the user HAS rows
+    (``db_query.py:1082``), so a supervisor holding none is shown every estate — the exact
+    inversion this module's own invariant forbids. This hook supplies that one missing half
+    and nothing else: empty for oversight and for anyone Frappe will already narrow, and
+    ``1=0`` for a scoped user with no building at all.
+    """
+    user = _resolve_user(user)
+    if _building_is_unscoped(user):
+        return ""
+    return "" if _allowed_buildings(user) else "1=0"
+
+
 def _estate_from_anchor(doc, doctype):
     """Re-read the estate from the doc's own parent link.
 

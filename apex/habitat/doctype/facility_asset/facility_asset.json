@@ -231,7 +231,8 @@
    "options": "Building",
    "read_only": 1,
    "description": "The building this asset was located in before its current location.",
-   "idx": 20
+   "idx": 20,
+   "ignore_user_permissions": 1
   },
   {
    "doctype": "DocField",
@@ -374,5 +375,5 @@
   "movement_count",
   "last_movement_date"
  ],
- "modified": "2026-08-13 16:02:00.000000"
+ "modified": "2026-08-22 16:50:00.000000"
 }

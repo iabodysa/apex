@@ -158,7 +158,7 @@ test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost 
 
 # --- merged from test_maintenance_inspection_report_building_scope.py ---
 DOCTYPE = "Maintenance Inspection Report"
-QUERY_FN = "apex.habitat.permissions.building_scope_query"
+QUERY_FN = "apex.habitat.permissions.refuse_a_supervisor_with_no_building"
 HANDLER = "apex.habitat.permissions.building_scoped_has_permission"
 ANCHOR = ("maintenance_work_order", "Maintenance Work Order")
 BLD_A = "MIR-BLD-A"
@@ -417,51 +417,56 @@ class TestMaintenanceInspectionReportScopeRuntime(FrappeTestCase):
     def _pair(self):
         return self._report(self.b1), self._report(self.b2)
 
-    def _rows_the_fragment_returns(self, user):
-        """The names the desk list would return for ``user``.
+    def _readers(self):
+        """The roles this DocType grants read at permlevel 0, from the DocType itself."""
+        return {
+            p.role
+            for p in frappe.get_meta(DOCTYPE).permissions
+            if p.read and not p.permlevel
+        }
 
-        The fragment is exactly what `permission_query_conditions` AND-s into
-        `DatabaseQuery`'s WHERE clause, and it is built from `frappe.db.escape`d
-        values, so running it verbatim is the same read the list view performs.
+    def test_no_scoped_role_can_open_this_list_at_all(self):
+        """The estate rules below govern a list only `System Manager` can open.
+
+        `db_query._set_permission_map` (frappe/model/db_query.py:578) refuses the read
+        before any fragment is consulted, so every scoped role is stopped by the
+        DocPerm table rather than by the estate. Whether a supervisor SHOULD read the
+        inspections taken on their own building is an open product decision; until it
+        is answered this test states the reachable audience, so granting the DocPerm
+        fires here and calls for the estate tests that belong with it. The estate
+        behaviour itself is proven on `Facility Asset`, which scoped roles do read.
         """
-        fragment = P.building_scope_query(doctype=DOCTYPE, user=user)
-        if fragment == "1=0":
-            return set()
-        where = " where {0}".format(fragment) if fragment else ""
-        return set(
-            frappe.db.sql_list(
-                "select name from `tabMaintenance Inspection Report`" + where
-            )
-        )
+        self.assertEqual(self._readers(), {"System Manager"})
 
-    def test_the_scoped_list_keeps_this_estate_and_drops_the_other(self):
-        mine, theirs = self._pair()
-        names = self._rows_the_fragment_returns(self.scoped)
-        self.assertIn(mine, names, "the supervisor lost their own estate")
-        self.assertNotIn(theirs, names, "another estate's inspection leaked")
+        for user in (self.scoped, self.unpermitted, self.oversight):
+            with self.subTest(user=user):
+                frappe.set_user(user)
+                try:
+                    with self.assertRaises(frappe.PermissionError):
+                        frappe.get_list(DOCTYPE, fields=["name"], limit_page_length=0)
+                finally:
+                    frappe.set_user("Administrator")
 
-    def test_oversight_sees_both_estates(self):
-        """The control that stops a deny-everything fragment from passing."""
-        mine, theirs = self._pair()
-        names = self._rows_the_fragment_returns(self.oversight)
-        self.assertIn(mine, names)
-        self.assertIn(theirs, names)
-
-    def test_a_supervisor_with_no_building_permission_sees_nothing(self):
+    def test_a_supervisor_with_no_building_permission_is_refused_by_the_fragment(self):
         """The hole the fragment exists to close: frappe's native match adds NO
         condition for a user holding no Building User Permission."""
-        mine, theirs = self._pair()
-        self.assertEqual(P.building_scope_query(doctype=DOCTYPE, user=self.unpermitted), "1=0")
-        names = self._rows_the_fragment_returns(self.unpermitted)
-        self.assertNotIn(mine, names)
-        self.assertNotIn(theirs, names)
+        self.assertEqual(
+            P.refuse_a_supervisor_with_no_building(doctype=DOCTYPE, user=self.unpermitted), "1=0"
+        )
 
-    def test_the_fragment_names_the_building_column_and_only_this_estate(self):
-        fragment = P.building_scope_query(doctype=DOCTYPE, user=self.scoped)
-        self.assertIn("`building`", fragment)
-        self.assertIn(self.b1, fragment)
-        self.assertNotIn(self.b2, fragment)
-        self.assertEqual(P.building_scope_query(doctype=DOCTYPE, user=self.oversight), "")
+    def test_the_fragment_adds_nothing_where_frappe_already_narrows(self):
+        """The division of labour, asserted on the fragment itself.
+
+        The estate is `db_query.add_user_permissions`' job for both of these users,
+        so the hook must contribute an empty string to each — a hook that returned a
+        second `building in (...)` here would be the same restriction written twice,
+        and would silently disagree the day one of them changed.
+        """
+        for user in (self.scoped, self.oversight):
+            with self.subTest(user=user):
+                self.assertEqual(
+                    P.refuse_a_supervisor_with_no_building(doctype=DOCTYPE, user=user), ""
+                )
 
     def test_the_controller_hook_opens_this_estate_and_denies_the_other(self):
         """Isolates the hook from frappe's native check, which would deny the same

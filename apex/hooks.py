@@ -309,6 +309,9 @@ override_doctype_dashboards = {
 }
 
 _HABITAT_SCOPE_QUERY = "apex.habitat.permissions.building_scope_query"
+# A DocType whose estate is its own `building` column is filtered by Frappe from the same
+# User Permission rows; this hook only supplies the fail-closed half Frappe lacks.
+_HABITAT_NO_BUILDING_QUERY = "apex.habitat.permissions.refuse_a_supervisor_with_no_building"
 _SALIS_SCOPE_QUERY = "apex.salis.permissions.project_scope_query"
 _LOGISTAY_SCOPE_QUERY = "apex.logistay.permissions.company_scope_query"
 
@@ -318,15 +321,15 @@ _LOGISTAY_SCOPE_CHECK = "apex.logistay.permissions.company_scoped_has_permission
 
 permission_query_conditions = {
     "Maintenance Request": "apex.habitat.permissions.maintenance_request_query",
-    "Housing Assignment": _HABITAT_SCOPE_QUERY,
-    "Custody Issue": _HABITAT_SCOPE_QUERY,
-    "Cleaning Log": _HABITAT_SCOPE_QUERY,
-    "Building": _HABITAT_SCOPE_QUERY,
-    "Safety Round": _HABITAT_SCOPE_QUERY,
-    "Safety Task Execution": _HABITAT_SCOPE_QUERY,
-    "Scheduled Task Instance": _HABITAT_SCOPE_QUERY,
-    "Resident Request": _HABITAT_SCOPE_QUERY,
-    "Idle Resident Report": _HABITAT_SCOPE_QUERY,
+    "Housing Assignment": _HABITAT_NO_BUILDING_QUERY,
+    "Custody Issue": _HABITAT_NO_BUILDING_QUERY,
+    "Cleaning Log": _HABITAT_NO_BUILDING_QUERY,
+    "Building": _HABITAT_NO_BUILDING_QUERY,
+    "Safety Round": _HABITAT_NO_BUILDING_QUERY,
+    "Safety Task Execution": _HABITAT_NO_BUILDING_QUERY,
+    "Scheduled Task Instance": _HABITAT_NO_BUILDING_QUERY,
+    "Resident Request": _HABITAT_NO_BUILDING_QUERY,
+    "Idle Resident Report": _HABITAT_NO_BUILDING_QUERY,
     "Housing Checkout": _HABITAT_SCOPE_QUERY,
     "Room Bed Transfer": _HABITAT_SCOPE_QUERY,
     "Audit Remediation Plan": _HABITAT_SCOPE_QUERY,
@@ -346,26 +349,26 @@ permission_query_conditions = {
     "Salis Driver": _SALIS_SCOPE_QUERY,
     "Passenger Manifest": _SALIS_SCOPE_QUERY,
     "Masar Worker Token": "apex.apex_core.utils.portal_identity.masar_worker_token_scope_query",
-    "Facility Asset Custody Assignment": _HABITAT_SCOPE_QUERY,
-    "Operational Depreciation Snapshot": _HABITAT_SCOPE_QUERY,
-    "Custody Return": _HABITAT_SCOPE_QUERY,
-    "Custody Damage Assessment": _HABITAT_SCOPE_QUERY,
+    "Facility Asset Custody Assignment": _HABITAT_NO_BUILDING_QUERY,
+    "Operational Depreciation Snapshot": _HABITAT_NO_BUILDING_QUERY,
+    "Custody Return": _HABITAT_NO_BUILDING_QUERY,
+    "Custody Damage Assessment": _HABITAT_NO_BUILDING_QUERY,
     "Material Transfer": _HABITAT_SCOPE_QUERY,
     "Facility Asset Movement": _HABITAT_SCOPE_QUERY,
-    "Custody Acknowledgment": _HABITAT_SCOPE_QUERY,
+    "Custody Acknowledgment": _HABITAT_NO_BUILDING_QUERY,
     "Custody Handover": _HABITAT_SCOPE_QUERY,
     "Facility Asset Delivery": _HABITAT_SCOPE_QUERY,
-    "Facility Asset": _HABITAT_SCOPE_QUERY,
-    "Housing Inventory": _HABITAT_SCOPE_QUERY,
-    "Building License": _HABITAT_SCOPE_QUERY,
-    "Maintenance Work Order": _HABITAT_SCOPE_QUERY,
-    "Maintenance Inspection Report": _HABITAT_SCOPE_QUERY,
-    "Occupancy Snapshot": _HABITAT_SCOPE_QUERY,
-    "Temporary Worker": _HABITAT_SCOPE_QUERY,
-    "Arrival Batch": _HABITAT_SCOPE_QUERY,
-    "Room": _HABITAT_SCOPE_QUERY,
-    "Bed": _HABITAT_SCOPE_QUERY,
-    "Accommodation Stock Ledger": _HABITAT_SCOPE_QUERY,
+    "Facility Asset": _HABITAT_NO_BUILDING_QUERY,
+    "Housing Inventory": _HABITAT_NO_BUILDING_QUERY,
+    "Building License": _HABITAT_NO_BUILDING_QUERY,
+    "Maintenance Work Order": _HABITAT_NO_BUILDING_QUERY,
+    "Maintenance Inspection Report": _HABITAT_NO_BUILDING_QUERY,
+    "Occupancy Snapshot": _HABITAT_NO_BUILDING_QUERY,
+    "Temporary Worker": _HABITAT_NO_BUILDING_QUERY,
+    "Arrival Batch": _HABITAT_NO_BUILDING_QUERY,
+    "Room": _HABITAT_NO_BUILDING_QUERY,
+    "Bed": _HABITAT_NO_BUILDING_QUERY,
+    "Accommodation Stock Ledger": _HABITAT_NO_BUILDING_QUERY,
     "Driver Attendance": _SALIS_SCOPE_QUERY,
     "Driver Suspension": _SALIS_SCOPE_QUERY,
     "Boarding Scan Log": _SALIS_SCOPE_QUERY,
@@ -383,10 +386,10 @@ permission_query_conditions = {
     "Telecom Contract": _LOGISTAY_SCOPE_QUERY,
     "SIM Card": _LOGISTAY_SCOPE_QUERY,
     "SIM Custody Assignment": _LOGISTAY_SCOPE_QUERY,
-    "Safety Incident": _HABITAT_SCOPE_QUERY,
-    "Safety Inspection Report": _HABITAT_SCOPE_QUERY,
-    "Safety Finding Ledger": _HABITAT_SCOPE_QUERY,
-    "Cleaning Compliance Ledger": _HABITAT_SCOPE_QUERY,
+    "Safety Incident": _HABITAT_NO_BUILDING_QUERY,
+    "Safety Inspection Report": _HABITAT_NO_BUILDING_QUERY,
+    "Safety Finding Ledger": _HABITAT_NO_BUILDING_QUERY,
+    "Cleaning Compliance Ledger": _HABITAT_NO_BUILDING_QUERY,
 }
 
 has_permission = {

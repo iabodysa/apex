@@ -161,7 +161,8 @@
    "fieldname": "previous_building",
    "fieldtype": "Link",
    "label": "Previous Building",
-   "options": "Building"
+   "options": "Building",
+   "ignore_user_permissions": 1
   },
   {
    "fieldname": "accommodation_assignment_sec_stay",
@@ -413,7 +414,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",

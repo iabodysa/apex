@@ -11,6 +11,8 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.tests.factories import make_scoped_supervisor
+
 test_dependencies = ["Building"]
 
 # `linked_erpnext_asset` is the bridge to ERPNext Asset and no test record sets it, but
@@ -21,6 +23,7 @@ test_dependencies = ["Building"]
 test_ignore = ["Asset"]
 
 BUILDING = "_Test Building"
+OTHER_BUILDING = "_Test Building 2"
 
 
 class TestFacilityAsset(FrappeTestCase):
@@ -57,3 +60,74 @@ class TestFacilityAsset(FrappeTestCase):
 
         with self.assertRaises(frappe.exceptions.MandatoryError):
             asset.insert(ignore_permissions=True)
+
+
+class TestFacilityAssetEstateScope(FrappeTestCase):
+    """The supervisor's list read, performed the way the desk performs it.
+
+    `Facility Asset` is scoped by a Building User Permission rather than a SQL
+    fragment, and `db_query.add_user_permissions` (frappe/model/db_query.py:1067)
+    walks EVERY Link field whose target is permitted. `previous_building` is such a
+    field and `asset_movement_engine.set_previous_location` writes the counterparty
+    estate into it, so without `ignore_user_permissions` on that field the receiving
+    supervisor loses the asset they now hold.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.supervisor = make_scoped_supervisor(cls._user, BUILDING, cls.addClassCleanup)
+
+    @classmethod
+    def _user(cls, role):
+        email = "fac-scope-{0}@example.com".format(frappe.generate_hash(length=8)).lower()
+        frappe.get_doc(
+            {
+                "doctype": "User",
+                "email": email,
+                "first_name": "Scope",
+                "send_welcome_email": 0,
+                "roles": [{"role": role}],
+            }
+        ).insert(ignore_permissions=True)
+        cls.addClassCleanup(frappe.delete_doc, "User", email, force=True, ignore_permissions=True)
+        return email
+
+    def _insert(self, **overrides):
+        payload = {
+            "doctype": "Facility Asset",
+            "naming_series": "FAC-AST-.YYYY.-.####",
+            "asset_name": "_T Scope " + frappe.generate_hash(length=6),
+            "asset_category": "CCTV Camera",
+            "building": BUILDING,
+            "responsible_supervisor": "Administrator",
+        }
+        payload.update(overrides)
+        doc = frappe.get_doc(payload)
+        doc.insert(ignore_permissions=True)
+        self.addCleanup(
+            frappe.delete_doc, "Facility Asset", doc.name, force=True, ignore_permissions=True
+        )
+        return doc.name
+
+    def _visible_to_supervisor(self, name):
+        frappe.set_user(self.supervisor)
+        try:
+            return bool(frappe.get_list("Facility Asset", filters={"name": name}, limit=1))
+        finally:
+            frappe.set_user("Administrator")
+
+    def test_an_asset_moved_in_from_another_estate_stays_visible(self):
+        name = self._insert(previous_building=OTHER_BUILDING)
+
+        self.assertTrue(
+            self._visible_to_supervisor(name),
+            "the receiving supervisor lost an asset they hold, over where it used to be",
+        )
+
+    def test_another_estates_asset_is_still_hidden(self):
+        """The control: without it, a scoping that had stopped working entirely
+        would pass the test above."""
+        name = self._insert(building=OTHER_BUILDING)
+
+        self.assertFalse(self._visible_to_supervisor(name), "another estate's asset leaked")

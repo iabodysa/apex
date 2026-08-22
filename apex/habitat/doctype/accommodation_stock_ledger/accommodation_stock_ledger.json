@@ -198,14 +198,16 @@
    "fieldtype": "Link",
    "label": "From Building",
    "options": "Building",
-   "read_only": 1
+   "read_only": 1,
+   "ignore_user_permissions": 1
   },
   {
    "fieldname": "to_building",
    "fieldtype": "Link",
    "label": "To Building",
    "options": "Building",
-   "read_only": 1
+   "read_only": 1,
+   "ignore_user_permissions": 1
   },
   {
    "fieldname": "col_break_2",
@@ -270,7 +272,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-11 00:35:00.000000",
+ "modified": "2026-08-22 16:30:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Stock Ledger",
