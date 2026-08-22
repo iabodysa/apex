@@ -27,3 +27,4 @@ apex.patches.v2_8.drop_driver_attendance_image
 apex.patches.v2_8.fold_driver_portal_theme
 apex.patches.v2_8.fold_apex_settings
 apex.patches.v2_8.fold_payment_routing_settings
+apex.patches.v2_8.drop_salary_deduction_orphan_storage
