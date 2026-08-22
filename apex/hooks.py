@@ -118,6 +118,9 @@ override_doctype_class = {
 }
 
 doc_events = {
+    "Custom DocPerm": {
+        "validate": "apex.apex_core.utils.app_owned_permissions.refuse_app_owned_permission_edit",
+    },
     "Employee": {
         "on_change": "apex.apex_core.utils.portal_identity.on_employee_change",
     },
