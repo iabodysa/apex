@@ -139,7 +139,7 @@
   },
   {
    "default": "0",
-   "description": "Master kill-switch for all outgoing email from this app. When OFF (default), the app sends no email even if individual Notifications or Auto Email Reports are enabled. Turn ON only after the site's outgoing email (SMTP) is configured.",
+   "description": "Blocks every email this app would send, including its own Notification alerts, whatever those alerts are set to. Leave OFF until the site's outgoing email (SMTP) is configured. Turning it ON does not switch any alert on by itself — it stops holding them back, and each alert still sends only if it is enabled. Email from other apps on this site is not affected.",
    "fieldname": "enable_email_notifications",
    "fieldtype": "Check",
    "label": "Enable Email Notifications"
@@ -307,7 +307,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-07-10 09:22:42.696478",
+ "modified": "2026-08-22 18:40:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",
