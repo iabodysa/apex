@@ -417,35 +417,71 @@ class TestMaintenanceInspectionReportScopeRuntime(FrappeTestCase):
     def _pair(self):
         return self._report(self.b1), self._report(self.b2)
 
-    def _readers(self):
-        """The roles this DocType grants read at permlevel 0, from the DocType itself."""
-        return {
-            p.role
-            for p in frappe.get_meta(DOCTYPE).permissions
-            if p.read and not p.permlevel
+    def _rows_the_list_returns(self, user):
+        """The names the desk list actually returns for ``user``.
+
+        Read through `frappe.get_list` rather than by running this app's fragment by
+        hand: the DocPerm gate (`frappe/model/db_query.py:578`) and
+        `db_query.add_user_permissions` (`:1067`) both sit in front of the fragment, so
+        a read that skips either half stays green while the list is shut or wide open.
+        """
+        frappe.set_user(user)
+        try:
+            return {r.name for r in frappe.get_list(DOCTYPE, fields=["name"], limit_page_length=0)}
+        finally:
+            frappe.set_user("Administrator")
+
+    def test_the_two_roles_that_work_on_the_building_can_open_this_list(self):
+        """The audience, asserted where it is decided.
+
+        Read is granted to the supervisor who runs the building and the technician who
+        is sent to it, and to nobody else scoped — so the estate rules below have
+        someone to govern. The `Housing and Safety` workspace shows this DocType's link
+        to four scoped roles, and `desktop.py:150` hides a link the user cannot read,
+        which is how a shut list looked like an absent feature rather than a refusal.
+        """
+        readers = {
+            p.role for p in frappe.get_meta(DOCTYPE).permissions if p.read and not p.permlevel
         }
 
-    def test_no_scoped_role_can_open_this_list_at_all(self):
-        """The estate rules below govern a list only `System Manager` can open.
+        self.assertEqual(
+            readers,
+            {
+                "System Manager",
+                "Accommodation Manager",
+                "Resident Supervisor",
+                "Maintenance Technician",
+            },
+        )
 
-        `db_query._set_permission_map` (frappe/model/db_query.py:578) refuses the read
-        before any fragment is consulted, so every scoped role is stopped by the
-        DocPerm table rather than by the estate. Whether a supervisor SHOULD read the
-        inspections taken on their own building is an open product decision; until it
-        is answered this test states the reachable audience, so granting the DocPerm
-        fires here and calls for the estate tests that belong with it. The estate
-        behaviour itself is proven on `Facility Asset`, which scoped roles do read.
+    def test_the_scoped_list_keeps_this_estate_and_drops_the_other(self):
+        mine, theirs = self._pair()
+        names = self._rows_the_list_returns(self.scoped)
+        self.assertIn(mine, names, "the supervisor lost their own estate")
+        self.assertNotIn(theirs, names, "another estate's inspection leaked")
+
+    def test_oversight_sees_both_estates(self):
+        """The control that stops a deny-everything list from passing the test above.
+
+        Read as the `Accommodation Manager`, not as the Administrator: `db_query` and
+        `desktop.is_item_allowed` (`desktop.py:144`) both special-case the Administrator,
+        so a list proven open to it is proven open to nobody else.
         """
-        self.assertEqual(self._readers(), {"System Manager"})
+        mine, theirs = self._pair()
+        names = self._rows_the_list_returns(self.oversight)
+        self.assertIn(mine, names)
+        self.assertIn(theirs, names)
 
-        for user in (self.scoped, self.unpermitted, self.oversight):
-            with self.subTest(user=user):
-                frappe.set_user(user)
-                try:
-                    with self.assertRaises(frappe.PermissionError):
-                        frappe.get_list(DOCTYPE, fields=["name"], limit_page_length=0)
-                finally:
-                    frappe.set_user("Administrator")
+    def test_a_supervisor_with_no_building_permission_sees_nothing(self):
+        """The half `db_query.py:1085` leaves open: frappe adds NO condition for a user
+        holding no User Permission row, so the fragment must refuse them outright."""
+        mine, theirs = self._pair()
+        self.assertEqual(
+            P.refuse_a_supervisor_with_no_building(doctype=DOCTYPE, user=self.unpermitted), "1=0"
+        )
+        names = self._rows_the_list_returns(self.unpermitted)
+        self.assertNotIn(mine, names)
+        self.assertNotIn(theirs, names)
 
     def test_a_supervisor_with_no_building_permission_is_refused_by_the_fragment(self):
         """The hole the fragment exists to close: frappe's native match adds NO

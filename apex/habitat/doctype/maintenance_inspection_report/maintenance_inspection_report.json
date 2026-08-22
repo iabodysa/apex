@@ -162,13 +162,25 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-17 01:10:00.000000",
+ "modified": "2026-08-22 17:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Inspection Report",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
+  {
+   "read": 1,
+   "role": "Accommodation Manager"
+  },
+  {
+   "read": 1,
+   "role": "Maintenance Technician"
+  },
+  {
+   "read": 1,
+   "role": "Resident Supervisor"
+  },
   {
    "cancel": 1,
    "create": 1,
