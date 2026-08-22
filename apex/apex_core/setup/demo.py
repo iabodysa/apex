@@ -428,13 +428,18 @@ def _walk_workflow(doctype, name, actions):
         frappe.set_user(previous_user)
 
 def _build_partner_company(context):
-    """Creates the demo partner Company, reusing the real company's currency and country."""
+    """Creates the demo partner Company, reusing the real company's currency and country.
+
+    The fallback is the SITE's own default, never a pinned code: a demo built on a site
+    whose company trades in another currency would otherwise show every seeded figure in
+    one this operator does not use.
+    """
     context["company"] = _company()
     currency = (
         frappe.db.get_value("Company", context["company"], "default_currency")
         if context["company"]
         else None
-    )
+    ) or frappe.defaults.get_global_default("currency")
     country = (
         frappe.db.get_value("Company", context["company"], "country")
         if context["company"]
@@ -445,12 +450,12 @@ def _build_partner_company(context):
         {
             "company_name": _DEMO_PARTNER_COMPANY,
             "abbr": "DPCO",
-            "default_currency": currency or "SAR",
+            "default_currency": currency,
             "country": country or "Saudi Arabia",
         },
     )
     context["partner_company"] = partner.name
-    context["currency"] = currency or "SAR"
+    context["currency"] = currency
 
 def _build_supplier(context):
     """Creates the demo accommodation Supplier record."""

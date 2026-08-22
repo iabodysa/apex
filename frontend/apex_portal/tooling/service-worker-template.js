@@ -50,9 +50,15 @@ self.addEventListener("notificationclick", (event) => {
 const BUILD = ${JSON.stringify(params.build)};
 const NAV_PATH = ${JSON.stringify(params.navPath)};
 const OFFLINE_PATH = ${JSON.stringify(params.offlinePath)};
-const IMMUTABLE_ASSETS = Object.freeze(${JSON.stringify(params.immutableAssets)});
-const IMMUTABLE_ASSET_SET = new Set(IMMUTABLE_ASSETS);
+const DURABLE_ASSETS = Object.freeze(${JSON.stringify(params.durableAssets)});
+const VERSIONED_ASSETS = Object.freeze(${JSON.stringify(params.versionedAssets)});
+const DURABLE_ASSET_SET = new Set(DURABLE_ASSETS);
+const VERSIONED_ASSET_SET = new Set(VERSIONED_ASSETS);
 const CACHE_NAMESPACE = ${JSON.stringify(params.cacheNamespace)};
+// Two caches because the two lists retire on different events. A DURABLE_ASSETS URL carries its
+// own version, so it is correct until it stops being listed and this cache is keyed by nothing.
+// A VERSIONED_ASSETS URL is stable while its body is not, so only BUILD can retire it.
+const DURABLE_CACHE = CACHE_NAMESPACE + "durable";
 const CACHE_NAME = CACHE_NAMESPACE + BUILD;
 const CACHE_NAME_PATTERN = new RegExp(${JSON.stringify(`^${escapeRegex(params.cacheNamespace)}[a-f0-9]{12}$`)});
 const LEGACY_CACHE_PATTERNS = ${JSON.stringify(params.legacyCachePatterns || [])}.map((source) => new RegExp(source));
@@ -83,10 +89,23 @@ async function fetchAndCache(cache, pathname) {
   } catch (error) {}
 }
 
+// Requests a durable asset only when its URL is not already held. Skipping a hit is what makes a
+// deploy cheap: an unchanged chunk keeps its content-hashed URL, so the stored response is still
+// the right bytes and no request is issued for it.
+async function cacheOnce(cache, pathname) {
+  const target = new URL(pathname, self.location.origin);
+  if (await cache.match(target.href)) return;
+  await fetchAndCache(cache, pathname);
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil((async () => {
-    const cache = await caches.open(CACHE_NAME);
-    await Promise.all([OFFLINE_PATH, ...IMMUTABLE_ASSETS].map((path) => fetchAndCache(cache, path)));
+    const durable = await caches.open(DURABLE_CACHE);
+    const versioned = await caches.open(CACHE_NAME);
+    await Promise.all([
+      ...DURABLE_ASSETS.map((path) => cacheOnce(durable, path)),
+      ...[OFFLINE_PATH, ...VERSIONED_ASSETS].map((path) => fetchAndCache(versioned, path)),
+    ]);
 ${params.skipWaitingOnInstall ? "    await self.skipWaiting();" : ""}
   })());
 });
@@ -95,13 +114,24 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
+// Drops the durable entries this build stopped listing, so a superseded chunk does not accumulate.
+// Nothing else evicts them, because their cache name carries no build id.
+async function pruneDurableCache() {
+  const cache = await caches.open(DURABLE_CACHE);
+  const stored = await cache.keys();
+  await Promise.all(stored
+    .filter((request) => !DURABLE_ASSET_SET.has(new URL(request.url).pathname))
+    .map((request) => cache.delete(request)));
+}
+
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names
-      .filter((name) => name !== CACHE_NAME)
+      .filter((name) => name !== CACHE_NAME && name !== DURABLE_CACHE)
       .filter((name) => CACHE_NAME_PATTERN.test(name) || LEGACY_CACHE_PATTERNS.some((pattern) => pattern.test(name)))
       .map((name) => caches.delete(name)));
+    await pruneDurableCache();
     await self.clients.claim();
   })());
 });
@@ -118,7 +148,7 @@ async function navigationResponse(request) {
 }
 
 async function immutableResponse(request, pathname) {
-  const cache = await caches.open(CACHE_NAME);
+  const cache = await caches.open(DURABLE_ASSET_SET.has(pathname) ? DURABLE_CACHE : CACHE_NAME);
   const cached = await cache.match(request);
   if (cached) return cached;
   const response = await fetch(request, { cache: "reload", redirect: "error" });
@@ -139,7 +169,7 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(navigationResponse(request));
     return;
   }
-  if (IMMUTABLE_ASSET_SET.has(url.pathname)) {
+  if (DURABLE_ASSET_SET.has(url.pathname) || VERSIONED_ASSET_SET.has(url.pathname)) {
     event.respondWith(immutableResponse(request, url.pathname));
   }
 });
