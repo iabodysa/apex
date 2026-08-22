@@ -25,3 +25,5 @@ apex.patches.v2_7.backfill_building_user_permissions
 apex.patches.v2_7.enable_expiry_alerts
 apex.patches.v2_8.drop_driver_attendance_image
 apex.patches.v2_8.fold_driver_portal_theme
+apex.patches.v2_8.fold_apex_settings
+apex.patches.v2_8.fold_payment_routing_settings

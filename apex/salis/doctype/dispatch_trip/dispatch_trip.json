@@ -302,7 +302,7 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
+   "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_lat",
    "fieldtype": "Float",
    "label": "Driver Latitude",
@@ -313,7 +313,7 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
+   "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_lng",
    "fieldtype": "Float",
    "label": "Driver Longitude",
@@ -328,7 +328,7 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
+   "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_position_updated_at",
    "fieldtype": "Datetime",
    "label": "Driver Position Updated At",
@@ -413,7 +413,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-22 22:30:00.000000",
+ "modified": "2026-08-22 23:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

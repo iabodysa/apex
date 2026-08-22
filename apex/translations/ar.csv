@@ -88,7 +88,6 @@ AC Maintenance,صيانة المكيفات
 API Contract Version,إصدار عقد الواجهة البرمجية
 AR,عربي
 Abbreviation,الاختصار
-About,حول
 Absconding,هروب من العمل
 Absent,غائب
 Accent Color,لون التمييز
@@ -307,17 +306,15 @@ Apex,أبكس
 "Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization",أبكس 2.0.4 — إعداد أولي موجّه، وتجهيز مستلزمات السكن، والحفاظ على تنظيم مجموعات الأصناف
 Apex Core,نواة أبكس
 Apex Integration Settings,إعدادات تكامل أبكس
-Apex Settings,إعدادات أبكس
 Apex Setup,إعداد أبكس
 Apex Stock Settings,إعدادات مخزون أبيكس
 Apex is configured. Each module now has its own go-live list.,أبكس مُهيّأ. لكل وحدة الآن قائمة تشغيلها.
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة أبكس.
 "Apex runs accommodation, facilities and fleet operations. Field teams work in the portals below on their phones; supervisors and the back office work in the modules in the sidebar.",يدير أبكس عمليات الإسكان والمرافق والأسطول. تعمل الفرق الميدانية من البوابات أدناه على هواتفها، ويعمل المشرفون والإدارة من الوحدات في الشريط الجانبي.
-"Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings.",يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس وإعدادات توجيه الدفع.
+Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings and Salis Settings.,يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس.
 Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
 Apex — Recovery and Support,أبكس: الاسترداد والدعم
-App-wide Apex configuration shared by every module (Habitat and Salis). Holds settings that are not scoped to a single domain — for example the GL-posting finance gate and the data-retention windows that govern how long machine-written time-series records are kept.,إعدادات أبيكس العامة المشتركة بين كل الوحدات (هابيتات وساليس). تحمل الإعدادات غير المحصورة بنطاق واحد — مثل بوابة الترحيل المالي ونوافذ الاحتفاظ بالبيانات التي تحكم مدة بقاء السجلات الزمنية المكتوبة آلياً.
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
 Appliance,جهاز
 Applicable Days,الأيام السارية
@@ -948,7 +945,6 @@ Condition at Handover,الحالة عند التسليم
 "Condition of the item when handed back, compared against its issue condition to decide whether a damage or loss charge applies to the holder.",حالة الصنف عند إعادته مقارنة بحالته وقت الصرف، لتحديد ما إذا كان المستلم يتحمل تكلفة تلف أو فقدان.
 Condition on Issue,الحالة عند صرف العهدة
 Condition on Return,الحالة عند إرجاع العهدة
-"Configurable payment router. Per deployment, defines which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. Routes the payment record only; GL posting stays governed by enable_gl_posting.",موجّه مدفوعات قابل للضبط. لكل نشر، يحدد أي مستند دفع ينشئه إجراء الدفع وكيف تُطابَق حقول طلب دفع ساليس عليه. يوجّه سجل الدفع فقط؛ أما الترحيل المحاسبي فيظل محكوماً بـ enable_gl_posting.
 Configuration,التهيئة
 "Configuration and access: settings, users and roles.",التهيئة والصلاحيات: الإعدادات والمستخدمون والأدوار.
 Configuration for the whole application.,إعدادات التطبيق بأكمله.
@@ -2367,8 +2363,6 @@ Last day this vehicle was on rent in the period. Days alone cannot say which day
 Last printed,آخر طباعة
 Late,متأخر
 Latest,الأحدث
-"Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط عرض لموقع السائق، وترسله بوابة السائق أثناء تسيير الرحلة لحساب وقت وصول رحلة العامل. يحدّثه النظام تلقائيًا.
-"Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",أحدث خط طول لموقع السائق، وترسله بوابة السائق أثناء تسيير الرحلة لحساب وقت وصول رحلة العامل. يحدّثه النظام تلقائيًا.
 Latitude,خط العرض
 Launchpad,لوحة التطبيقات
 Laundry washing machine for worker accommodation. Durable appliance.,غسالة ملابس لسكن العمال. جهاز معمّر.
@@ -2827,6 +2821,7 @@ Not Returned,لم يُعَد
 Not Tracked,غير متتبَّع
 Not inspected; this clearance covers custody only,لم تُفحص؛ هذا الإخلاء يشمل العهدة فقط
 Not permitted,غير مسموح
+Not reported. No writer exists; kept so a future one has a column.,غير مُبلَّغ. لا يوجد ما يكتبه، ويبقى العمود لكاتب مستقبلي.
 Not yet counted on receipt,لم يُعد عند الاستلام
 Note,ملاحظة
 Note the Condition,دوّن الحالة
@@ -3176,7 +3171,6 @@ Payment Request {0} is linked to this settlement.,تم ربط طلب الدفع 
 Payment Request {0} raised for {1} SAR.,تم رفع طلب الدفع {0} بمبلغ {1} ريال.
 Payment Routing,توجيه المدفوعات
 Payment Routing Field Map,تعيين حقول توجيه الدفع
-Payment Routing Settings,إعدادات توجيه الدفع
 Payment Schedule,جدول الدفع
 Payment Target Mismatch,نوع مستند الدفع لا يطابق الإعداد
 Payment Terms (Days),مهلة السداد (أيام)
@@ -4858,7 +4852,7 @@ This resident request is waiting for supporting evidence,طلب الساكن ه�
 This resident's expected checkout date is approaching — please prepare the room and checkout,يقترب موعد المغادرة المتوقع لهذا الساكن — يرجى تجهيز الغرفة وإتمام إجراءات المغادرة
 This session,هذه الجلسة
 This site has no Apex demo data to remove.,لا توجد في هذا الموقع بيانات تجريبية لأبكس لإزالتها.
-"This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Payment Routing Settings.",هذا الموقع مضبوط على إصدار المدفوعات كـ {0}، وهذا الإجراء لا ينشئ إلا {1} مخصّصة على فاتورة المورّد. أصدر هذه الدفعة من {2} الذي يبني النوع المضبوط، أو اضبط نوع مستند الدفع على {1} في إعدادات توجيه المدفوعات.
+"This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Habitat Settings.",هذا الموقع مضبوط على إصدار المدفوعات كـ {0}، وهذا الإجراء لا ينشئ إلا {1} مخصّصة على فاتورة المورّد. أصدر هذه الدفعة من {2} الذي يبني النوع المضبوط، أو اضبط نوع مستند الدفع على {1} في إعدادات هابيتات.
 This temporary stay is ending soon — please arrange check-out,هذه الإقامة المؤقتة على وشك الانتهاء — يُرجى ترتيب المغادرة
 This temporary stay is overdue for check-out — the worker is still checked in,تجاوزت هذه الإقامة المؤقتة موعد المغادرة، وما زال العامل مقيمًا.
 This temporary top-up is past its revert due date ({0}) and has not been reverted.,تجاوزت هذه التعبئة الإضافية المؤقتة موعد عودتها إلى الوضع السابق ({0})، ولم تُعد بعد.
@@ -5305,7 +5299,6 @@ WhatsApp / SMS Gateway,بوابة واتساب / الرسائل النصية
 "When checked and the target DocType is submittable, the router submits the created payment document. Default off (leave the payment in Draft for review).",عند التفعيل، إذا كان المستند المستهدف قابلًا للاعتماد، يعتمد الموجه مستند الدفع الذي أنشأه. الخيار معطل افتراضيًا لترك الدفعة كمسودة للمراجعة.
 "When checked, the target field is set to the constant Static Value instead of copying from the request.",عند التحديد، يُضبط الحقل المستهدف على القيمة الثابتة بدلًا من نسخها من الطلب.
 When do you need pickup?,متى تريد أن نأتي لنقلك؟
-When the driver's GPS position was last refreshed. A stale timestamp lets the client suppress an out-of-date ETA.,وقت آخر تحديث لموقع GPS للسائق. الطابع الزمني القديم يتيح للتطبيق إخفاء وقت وصول متوقع غير محدَّث.
 "When the inspection is carried out relative to work, distinguishing pre-work and post-work checks from routine periodic rounds and unplanned emergency inspections.",توقيت إجراء التفتيش نسبةً إلى العمل، يميّز فحوص ما قبل العمل وما بعده عن الجولات الدورية الاعتيادية وعمليات التفتيش الطارئة غير المخططة.
 When the recipient acknowledged receipt at the kiosk.,وقت إقرار المستلم بالاستلام في الكشك.
 When the resident accepted the housing terms at the tablet.,وقت موافقة الساكن على شروط السكن عبر الجهاز اللوحي.
@@ -5320,6 +5313,7 @@ Where the vehicle physically changed hands.,المكان الذي سُلّمت �
 Where the written-off vehicle or part goes once it leaves service.,إلى أين تذهب المركبة أو القطعة المشطوبة بعد خروجها من الخدمة.
 Whether anybody was hurt. An insurer treats a bodily-injury accident under a different cover.,هل أُصيب أحد. تعامل شركة التأمين حادث الإصابات تحت تغطية أخرى.
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
+Which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. This routes the payment record only; General Ledger posting stays governed by Enable GL Entry Posting.,نوع مستند الدفع الذي ينشئه إجراء الدفع، وكيف تُطابَق حقول طلب دفع ساليس عليه. هذا يوجّه سجل الدفع فقط، ويبقى ترحيل دفتر الأستاذ العام محكوماً بتفعيل ترحيل قيود دفتر الأستاذ العام.
 "Which physical unit came back, for a serialised article.",أي قطعة رجعت، للصنف ذي الرقم التسلسلي.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
 Who answers for this building's store balance.,من يتحمّل مسؤولية رصيد مخزن هذا المبنى.
