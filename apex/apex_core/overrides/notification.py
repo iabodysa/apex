@@ -24,11 +24,12 @@ follows never runs — the bell stays silent even though it is the resilient
 fallback the notification opted into.
 
 This override delivers the in-app System Notification FIRST (independent of the
-email transport) and, when that in-app path succeeded, swallows a subsequent
-email/transport failure instead of logging it as a hard error. A notification
-with no System Notification fallback keeps the original error-logging behaviour.
-Recipients, conditions, and the notifications actually produced are unchanged —
-only ordering + error resilience differ.
+email transport) and, when that in-app path succeeded, a subsequent
+email/transport failure never blocks or reverts it — the bell stands regardless.
+The failure is still logged: silencing it would leave a broken SMTP/Slack/SMS
+transport with no record anywhere, which reads as delivered when nothing left
+the building. Recipients, conditions, and the notifications actually produced
+are unchanged — only ordering + error resilience differ.
 """
 
 from frappe.email.doctype.notification.notification import Notification
@@ -38,13 +39,12 @@ from apex.apex_core.utils.email_gate import email_enabled
 
 class ApexNotification(Notification):
     def send_notification_by_channel(self, doc, context):
-        """Sends the in-app notification first, swallowing a later channel failure once it landed."""
+        """Sends the in-app notification first; a later channel failure is always
+        logged but never reverts or blocks it once the in-app path landed."""
         system_path = self.channel == "System Notification" or self.send_system_notification
-        system_sent = False
         if system_path:
             try:
                 self.create_system_notification(doc, context)
-                system_sent = True
             except Exception:
                 self.log_error("Failed to send Notification")
 
@@ -62,6 +62,4 @@ class ApexNotification(Notification):
             elif self.channel == "SMS":
                 self.send_sms(doc, context)
         except Exception:
-            if system_sent:
-                return
             self.log_error("Failed to send Notification")

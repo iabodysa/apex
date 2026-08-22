@@ -5,6 +5,7 @@ The insert passes ``ignore_permissions`` because a seeder is installer context: 
 install and migrate as Administrator, with no session user whose roles could be consulted.
 """
 import frappe
+from frappe.utils import escape_html
 
 from apex.apex_core.utils.addresses import get_address_text
 from apex.apex_core.utils.company import resolve_company
@@ -27,15 +28,22 @@ def _company_identity(company):
 
 
 def _header_html(identity):
-    """Letterhead banner: company name, address line, and tax id when registered."""
-    lines = [f'<div style="font-size:15pt;font-weight:700;color:#072b1a">{identity.name}</div>']
+    """Letterhead banner: company name, address line, and tax id when registered.
+
+    Every value here is Company master data an admin typed, not a fixed
+    constant, so each one is escaped before it reaches this raw HTML sink —
+    an ampersand or an angle bracket in a company name or address must not
+    corrupt or inject into a banner every printed document renders.
+    """
+    name = escape_html(identity.name)
+    lines = [f'<div style="font-size:15pt;font-weight:700;color:#072b1a">{name}</div>']
     if identity.address:
         lines.append(
-            f'<div style="font-size:8.5pt;color:#47584f;margin-top:2px">{identity.address}</div>'
+            f'<div style="font-size:8.5pt;color:#47584f;margin-top:2px">{escape_html(identity.address)}</div>'
         )
     if identity.tax_id:
         lines.append(
-            f'<div style="font-size:8.5pt;color:#47584f">{frappe._("Tax ID")}: {identity.tax_id}</div>'
+            f'<div style="font-size:8.5pt;color:#47584f">{frappe._("Tax ID")}: {escape_html(identity.tax_id)}</div>'
         )
     body = "".join(lines)
     return (
@@ -46,7 +54,7 @@ def _header_html(identity):
 
 def _footer_html(identity):
     """Letterhead footer: how to reach the company, kept to one printed line."""
-    parts = [p for p in (identity.phone, identity.email) if p]
+    parts = [escape_html(p) for p in (identity.phone, identity.email) if p]
     contact = " · ".join(parts)
     return (
         '<div style="padding-top:6px;border-top:1px solid #ddd5c2;font-size:8pt;'

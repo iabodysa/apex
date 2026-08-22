@@ -305,6 +305,8 @@ def advance_triage_status(name, to_status):
 
 BULK_TRIAGE_SYNC_LIMIT = 50
 
+_BULK_TRIAGE_SAVEPOINT = "resident_request_bulk_triage_row"
+
 @frappe.whitelist(methods=["POST"])
 def bulk_triage(names):
     """Bulk-advance a selection of New requests to Triaged (the universal first
@@ -334,16 +336,32 @@ def bulk_triage(names):
 def _apply_bulk_triage(names):
     """Advance each New Resident Request in ``names`` to Triaged (per-row write
     permission checked); returns the count advanced. Shared body of the inline and
-    the background bulk-triage paths."""
+    the background bulk-triage paths.
+
+    Each row saves behind its own savepoint: without it, one row's failure (a
+    permission error, a validation error, a stale timestamp) raised past this
+    loop and the caller's transaction rolled back EVERY row already saved in the
+    same pass, while the caller had already been told the batch succeeded (the
+    sync path returns the advanced count only if nothing raised; the async path
+    reports ``queued`` before the job even runs). A row that fails is logged and
+    skipped so the rest of the selection still advances."""
     advanced = 0
     for name in names or []:
-        frappe.has_permission("Resident Request", "write", doc=name, throw=True)
-        doc = frappe.get_doc("Resident Request", name)
-        if doc.status not in (None, "", "New"):
-            continue
-        doc.status = "Triaged"
-        doc.save()
-        advanced += 1
+        frappe.db.savepoint(_BULK_TRIAGE_SAVEPOINT)
+        try:
+            frappe.has_permission("Resident Request", "write", doc=name, throw=True)
+            doc = frappe.get_doc("Resident Request", name)
+            if doc.status not in (None, "", "New"):
+                continue
+            doc.status = "Triaged"
+            doc.save()
+            advanced += 1
+        except Exception:
+            frappe.db.rollback(save_point=_BULK_TRIAGE_SAVEPOINT)
+            frappe.log_error(
+                message=frappe.get_traceback(),
+                title=f"Bulk triage failed for {name}"[:140],
+            )
     return {"advanced": advanced, "total": len(names or [])}
 
 def _bulk_triage_job(names):

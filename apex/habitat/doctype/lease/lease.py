@@ -83,7 +83,16 @@ def _maybe_build_schedule(doc):
 
 
 def _build_schedule(doc):
-    """Populate payment_schedule rows from first_payment_date + billing_cycle."""
+    """Populate payment_schedule rows from first_payment_date + billing_cycle.
+
+    Each due date is ``first_payment_date`` + n*step months, computed fresh from
+    the ORIGINAL anchor every time rather than by repeatedly advancing the
+    previous due date. ``add_months`` clamps a day that does not exist in the
+    target month (the 31st lands on Feb 28), and compounding from that clamped
+    result would carry the shorter day forward for every remaining instalment —
+    a lease starting on the 31st would keep billing on the 28th for its whole
+    term instead of returning to the 31st once a longer month is reached.
+    """
     if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount) > 0):
         return
 
@@ -91,16 +100,19 @@ def _build_schedule(doc):
     amount = flt(doc.rent_amount) * step
 
     doc.payment_schedule = []
-    due = getdate(doc.first_payment_date)
+    anchor = getdate(doc.first_payment_date)
     end = getdate(doc.lease_end_date)
 
+    n = 0
+    due = anchor
     while due <= end:
         doc.append("payment_schedule", {
             "due_date": due,
             "amount": amount,
             "status": "Unpaid",
         })
-        due = getdate(add_months(due, step))
+        n += 1
+        due = getdate(add_months(anchor, step * n))
 
 
 @frappe.whitelist(methods=["POST"])
