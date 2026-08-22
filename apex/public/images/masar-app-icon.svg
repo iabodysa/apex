@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Masar app icon</title>
+  <rect width="128" height="128" rx="28" fill="#072b1a"/>
+  <path d="M34 96c0-26 12-38 30-38s30-12 30-30" fill="none" stroke="#f8f5ee" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="34" cy="96" r="11" fill="#60d297"/>
+  <circle cx="94" cy="30" r="8" fill="#00844e"/>
+</svg>

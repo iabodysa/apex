@@ -38,46 +38,46 @@ add_to_apps_screen = [
     },
     {
         "name": "apex-driver",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/masar-app-icon.svg",
         "title": "Driver",
         "route": "/driver",
     },
     {
         "name": "apex-masar",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/masar-app-icon.svg",
         "title": "Masar",
         "route": "/masar",
     },
     {
         "name": "apex-masar-supervisor",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/masar-app-icon.svg",
         "title": "Masar Supervisor",
         "route": "/masar-supervisor",
         "has_permission": "apex.www.masar_supervisor.has_apps_screen_access",
     },
     {
         "name": "apex-fleet-os",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/salis-app-icon.svg",
         "title": "Fleet Operations",
         "route": "/fleet-os",
         "has_permission": "apex.www.fleet_os.has_apps_screen_access",
     },
     {
         "name": "apex-fleet",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/salis-app-icon.svg",
         "title": "My Fleet",
         "route": "/fleet",
     },
     {
         "name": "apex-housing",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/apex-secondary-icon.svg",
         "title": "Housing",
         "route": "/housing",
         "has_permission": "apex.www.housing.has_apps_screen_access",
     },
     {
         "name": "apex-safety",
-        "logo": "/assets/apex/images/apex-app-icon.svg",
+        "logo": "/assets/apex/images/apex-secondary-icon.svg",
         "title": "Safety Rounds",
         "route": "/safety",
         "has_permission": "apex.www.safety.has_apps_screen_access",
@@ -85,6 +85,8 @@ add_to_apps_screen = [
 ]
 
 export_python_type_annotations = True
+
+before_tests = "apex.tests.bootstrap.before_tests"
 
 app_include_js = [
     "masar_worker_link.bundle.js",

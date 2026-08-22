@@ -14,8 +14,6 @@
   "check_in",
   "check_out",
   "worked_hours",
-  "driver_attendance_sec_images",
-  "images",
   "driver_attendance_sec_system",
   "naming_series",
   "amended_from"
@@ -77,18 +75,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "driver_attendance_sec_images",
-   "fieldtype": "Section Break",
-   "label": "Attendance Images"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "images",
-   "fieldtype": "Table",
-   "label": "Attendance Images",
-   "options": "Driver Attendance Image"
-  },
-  {
    "collapsible": 1,
    "fieldname": "driver_attendance_sec_system",
    "fieldtype": "Section Break",
@@ -116,7 +102,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-22 20:30:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Attendance",

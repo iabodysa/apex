@@ -472,7 +472,6 @@ Attendance Check-In,وقت الحضور
 Attendance Check-Out,وقت الانصراف
 Attendance Date,تاريخ الحضور
 Attendance Details,تفاصيل الحضور
-Attendance Images,صور الحضور
 Attendance for {0} on {1} already exists.,حضور {0} في {1} موجود بالفعل.
 "Attendance outcome recorded for the driver on the day, distinguishing present and late from absent or approved leave for payroll and availability.",نتيجة حضور السائق المسجّلة لليوم، تميّز الحاضر والمتأخر عن الغائب أو الإجازة المعتمدة لأغراض الرواتب والجاهزية.
 Attending Parties,الأطراف الحاضرة
@@ -725,7 +724,6 @@ Capacity Policies,سياسات السعة
 Capacity and Occupancy,السعة والإشغال
 Capacity reductions blocked ({0} room(s) have occupied surplus beds):,تعذر خفض السعة لأن {0} غرفة تضم أسرّة زائدة مشغولة:
 Capital Item,أصل رأسمالي
-Caption,التعليق
 "Capture a movement need so it can be validated, scheduled, and dispatched.",سجّل حاجة حركة ليتسنى التحقق منها وجدولتها وتسييرها.
 Capture an incident with the guided Safety Incident form and save it for manager review.,سجّل حادثًا باستخدام نموذج حادث السلامة الإرشادي واحفظه لمراجعة المدير.
 Captured At,وقت الالتقاط
@@ -791,7 +789,7 @@ Checkout Reason,سبب مغادرة السكن
 Checkout date cannot be earlier than assignment check-in date.,لا يمكن أن يكون تاريخ المغادرة قبل تاريخ بدء التسكين.
 Child: one article line on a Custody Issue.,تابع: سطر صنف واحد في صرف عهدة.
 Child: one article line on a Custody Return.,تابع: سطر صنف واحد في إرجاع عهدة.
-Child: one asset line in a Non-Financial Depreciation Snapshot.,فرعي: سطر أصل واحد في لقطة إهلاك غير مالية.
+Child: one asset line in an Operational Depreciation Snapshot.,فرعي: سطر أصل واحد في لقطة إهلاك غير مالية.
 Child: one damaged article line on a Custody Damage Assessment.,تابع: سطر صنف تالف واحد في تقييم تلفيات العهدة.
 Child: one expected worker on a pre-arrival manifest.,جدول فرعي: عامل واحد متوقع في كشف الوصول المسبق.
 Chip,شريحة
@@ -1494,7 +1492,6 @@ Drawn against the quota so far,المسحوب من الحصة حتى الآن
 Drinking-water cooler / dispenser. Required corrective item from client safety audits.,مبرّد / موزّع مياه شرب. صنف تصحيحي مطلوب من تدقيقات سلامة العميل.
 Driver,سائق
 Driver Attendance,حضور السائق
-Driver Attendance Image,صورة حضور السائق
 Driver Attendance Summary,ملخص حضور السائقين
 Driver Availability,توفّر السائقين
 Driver Clearance,إخلاء طرف سائق
@@ -3253,7 +3250,6 @@ Photograph stored against this assignment,الصورة محفوظة على هذ�
 Photograph stored against this checkout,الصورة محفوظة على هذا الإخلاء
 Photographic Evidence,صور تثبت الحالة
 Photographic Evidence on File,يوجد إثبات بالصور
-Photographic evidence captured for a driver attendance record.,دليل مصوّر يُلتقط لسجل حضور سائق.
 Photos Attached,الصور المرفقة
 Physical Location,الموقع الفعلي
 Physical facility asset movement with intercompany approval controls.,نقل مادي لأصل مرفق مع ضوابط اعتماد بين الشركات.
@@ -3843,7 +3839,7 @@ Results must be valid JSON.,يجب أن تكون النتائج بصيغة JSON 
 Resume Investigation,استئناف التحقيق
 Retainer Value Over Twelve Months,قيمة الاشتراك على اثني عشر شهرًا
 Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.,مدة الاحتفاظ بلقطات الإشغال اليومية واستخدام المركبات الأسبوعية (أيام). الافتراضي 365.
-Retention for submitted Non-Financial Depreciation Snapshots (days). Default 730.,مدة الاحتفاظ بلقطات الإهلاك غير المالي المعتمدة (أيام). الافتراضي 730.
+Retention for submitted Operational Depreciation Snapshots (days). Default 730.,مدة الاحتفاظ بلقطات الإهلاك غير المالي المعتمدة (أيام). الافتراضي 730.
 Retry,إعادة المحاولة
 Return,إرجاع
 Return Custody,إرجاع العهدة

@@ -123,10 +123,20 @@ def _git_tracked_py_files():
 
 
 def all_py_files():
-    """Every apex/**/*.py except node_modules — production AND test."""
+    """Every apex/**/*.py except node_modules — production AND test.
+
+    Filtered to paths that EXIST. ``git ls-files`` reads the index, which still lists a
+    file deleted on disk until that deletion is staged — so between removing a DocType
+    folder and committing it, every caller parsing this list raises FileNotFoundError on
+    a file the tree no longer has. The corpus is meant to be the tree, not the index.
+    """
     tracked = _git_tracked_py_files()
     if tracked is not None:
-        return [path for path in tracked if "node_modules" not in path]
+        return [
+            path
+            for path in tracked
+            if "node_modules" not in path and os.path.exists(path)
+        ]
     # No git (an sdist, say): fall back to the walk rather than scanning nothing.
     return [
         path

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Salis app icon</title>
+  <rect width="128" height="128" rx="28" fill="#072b1a"/>
+  <circle cx="78" cy="64" r="26" fill="none" stroke="#f8f5ee" stroke-width="9"/>
+  <circle cx="78" cy="64" r="7" fill="#60d297"/>
+  <path d="M20 45h26M14 64h20M20 83h26" stroke="#00844e" stroke-width="9" stroke-linecap="round"/>
+</svg>
