@@ -39,17 +39,14 @@ SAFETY_ROLES = {
 
 PORTAL_ROLES = HOUSING_ROLES | SAFETY_ROLES
 
-
 def has_apps_screen_access() -> bool:
     """Gate for the /apps tiles — the same union check get_context applies, so a tile
     never advertises a page the portal would turn away."""
     return bool(PORTAL_ROLES & set(frappe.get_roles()))
 
-
 def _can(doctype: str, *ptypes: str) -> bool:
     """True only when the caller holds every named permission type on the doctype."""
     return all(frappe.has_permission(doctype, ptype) for ptype in ptypes)
-
 
 def _clearable_exits() -> list:
     """The exit numbers this caller may actually clear.
@@ -67,7 +64,6 @@ def _clearable_exits() -> list:
     if "System Manager" in roles:
         return sorted(EXIT_ROLES)
     return sorted(number for number, role in EXIT_ROLES.items() if role in roles)
-
 
 def portal_capabilities() -> dict:
     """The per-action grants a section needs, so a control can be disabled with a
@@ -103,7 +99,6 @@ def portal_capabilities() -> dict:
         or _can("Safety Task Execution", "submit"),
     }
 
-
 def portal_landing(capabilities: dict) -> str:
     """Choose the first useful route from server-derived capabilities."""
     if capabilities.get("estate_read") and capabilities.get("set_readiness"):
@@ -115,34 +110,6 @@ def portal_landing(capabilities: dict) -> str:
     if capabilities.get("safety_draft"):
         return "/rounds"
     return "/access-denied"
-
-
-def portal_sections() -> list[str]:
-    """The sections this user may actually work, in nav order.
-
-    Each test names the permission the section's own endpoints already enforce, so a
-    role reaches only screens it can use: Procurement Supervisor holds the delivery
-    and nothing else, Safety Officer holds the round and nothing else, and the three
-    shared roles get both halves at one address instead of two.
-    """
-    reads_estate = _can("Building", "read")
-    sections = []
-    if reads_estate and _can("Housing Inventory", "read"):
-        sections.append("count")
-    if _can("Facility Asset Delivery", "read"):
-        sections.append("delivery")
-    if reads_estate and _can("Room", "read") and _can("Bed", "read"):
-        sections.append("beds")
-    if reads_estate and _can("Housing Assignment", "create", "submit"):
-        sections.append("arrivals")
-    if _can("Custody Issue", "read") and _can("Custody Article", "read"):
-        sections.append("custody")
-    if reads_estate and _can("Room Bed Transfer", "create", "submit"):
-        sections.append("transfer")
-    if reads_estate and _can("Safety Task Catalog", "read"):
-        sections.append("safety")
-    return sections
-
 
 def bootstrap_portal_context(context, route: str, entry: str):
     """Redirect a guest to login, then publish the merged portal's gate and its
@@ -165,7 +132,6 @@ def bootstrap_portal_context(context, route: str, entry: str):
         capabilities=capabilities,
         subject=frappe.session.user,
     )
-
 
 def get_context(context):
     """Bootstraps the merged portal at its housing door."""

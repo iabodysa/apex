@@ -18,7 +18,7 @@ class OperationalDepreciationSnapshot(Document):
         ``default_log_clearing_doctypes`` and invoked by ``daily_maintenance``
         (run_log_clean_up). A two-year retention caps unbounded growth while keeping
         enough aging history; only SUBMITTED (docstatus=1) snapshots older than
-        ``days`` are purged — drafts are preserved. The window comes from Apex
+        ``days`` are purged — drafts are preserved. The window comes from Habitat
         Settings ``depreciation_snapshot_retention_days`` (default 730) when the
         caller does not pass ``days``. The child ``Depreciation Snapshot Item`` rows
         are deleted explicitly FIRST, because ``frappe.db.delete`` does not cascade
@@ -26,7 +26,7 @@ class OperationalDepreciationSnapshot(Document):
         from frappe.query_builder import Interval
         from frappe.query_builder.functions import Now
 
-        from apex.apex_core.doctype.apex_settings.apex_settings import (
+        from apex.apex_core.doctype.habitat_settings.habitat_settings import (
             effective_retention_days,
         )
 

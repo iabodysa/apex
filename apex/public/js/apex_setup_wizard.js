@@ -11,7 +11,7 @@ apex.setup.slides_settings = [
 		title: __("Apex — Accounting and Payment Defaults"),
 		icon: "fa fa-building",
 		help: __(
-			"Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings, Salis Settings, and Payment Routing Settings."
+			"Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings and Salis Settings."
 		),
 		fields: [
 			{ fieldname: "apex_gl_sb", fieldtype: "Section Break", label: __("Accounting") },

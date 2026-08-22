@@ -86,7 +86,7 @@ def assert_posting_allowed(building: str, posting_date=None) -> None:
         )
 
     earliest = frappe.utils.add_days(getdate(today()), -p["backdating_days"])
-    if date < earliest and not _may_backdate(p["backdating_role"]):
+    if date < earliest and not _holds_role(p["backdating_role"]):
         frappe.throw(
             _("A posting cannot be dated before {0}. Ask a {1} to post it.").format(
                 frappe.format(earliest, {"fieldtype": "Date"}),
@@ -99,8 +99,8 @@ def assert_posting_allowed(building: str, posting_date=None) -> None:
         )
 
 
-def _may_backdate(role) -> bool:
-    """True when the session may post outside the window. System Manager always may."""
+def _holds_role(role) -> bool:
+    """True when the session holds ``role``, or System Manager, which outranks every gate."""
     roles = frappe.get_roles(frappe.session.user)
     return "System Manager" in roles or (bool(role) and role in roles)
 

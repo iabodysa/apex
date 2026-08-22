@@ -49,7 +49,7 @@ frappe.ui.form.on("Salis Payment Request", {
 							frm.reload_doc();
 							frappe.db
 								.get_single_value(
-									"Payment Routing Settings",
+									"Habitat Settings",
 									"target_payment_doctype"
 								)
 								.then(function (target_doctype) {

@@ -16,7 +16,6 @@ from apex.apex_core.utils.portal_identity import (
     resolve_portal_subject,
 )
 
-
 def get_driver_for_user(user=None):
     """Return the Salis Driver for the caller, or None.
 
@@ -30,7 +29,6 @@ def get_driver_for_user(user=None):
         return resolve_portal_subject(DRIVER, raw, required=True)
     return get_driver_for_session_user(user)
 
-
 def get_driver_for_session_user(user=None):
     """Resolve only User -> Employee -> Salis Driver, ignoring portal cookies."""
     user = user or frappe.session.user
@@ -38,7 +36,6 @@ def get_driver_for_session_user(user=None):
     if not employee:
         return None
     return frappe.db.get_value("Salis Driver", {"employee": employee}, "name")
-
 
 def has_any_role(user, roles):
     """True when ``user`` holds any role in ``roles``; Administrator always True.
@@ -53,7 +50,6 @@ def has_any_role(user, roles):
         return True
     return bool(set(frappe.get_roles(user)) & set(roles))
 
-
 def bound_vehicle(driver):
     """The vehicle bound to ``driver`` (current_vehicle, else Active Assignment), or None.
 
@@ -65,7 +61,6 @@ def bound_vehicle(driver):
     return frappe.db.get_value(
         "Vehicle Assignment", {"driver": driver, "status": "Active", "docstatus": 1}, "vehicle"
     )
-
 
 def vehicle_is_held_out_of_service(vehicle):
     """The name of the record holding ``vehicle`` off the road, or None.
@@ -84,7 +79,6 @@ def vehicle_is_held_out_of_service(vehicle):
         "Vehicle Incident",
         {"vehicle": vehicle, "docstatus": 1, "status": ["in", ("Open", "Under Review")]},
     )
-
 
 def set_current_driver(vehicle, driver, update_modified=True, **extra_values):
     """Stamp the vehicle's driver pairing together with the login-user mirror beside it.
@@ -114,20 +108,17 @@ def set_current_driver(vehicle, driver, update_modified=True, **extra_values):
     values.update(extra_values)
     frappe.db.set_value("Salis Vehicle", vehicle, values, update_modified=update_modified)
 
-
 def lock_vehicle(name):
     """Row-lock a Salis Vehicle to prevent concurrent assignment/handover races."""
     if name:
         Vehicle = frappe.qb.DocType("Salis Vehicle")
         frappe.qb.from_(Vehicle).select(Vehicle.name).where(Vehicle.name == name).for_update().run()
 
-
 def lock_driver(name):
     """Row-lock a Salis Driver."""
     if name:
         Driver = frappe.qb.DocType("Salis Driver")
         frappe.qb.from_(Driver).select(Driver.name).where(Driver.name == name).for_update().run()
-
 
 def lock_fuel_quota(name):
     """Row-lock a Fuel Quota to serialize quota consumption/reversal."""
@@ -136,7 +127,6 @@ def lock_fuel_quota(name):
         frappe.qb.from_(FuelQuota).select(FuelQuota.name).where(
             FuelQuota.name == name
         ).for_update().run()
-
 
 def period_quota(vehicle, period_month, fields):
     """The live Fuel Quota row for ``vehicle`` in ``period_month``, or None.
@@ -162,7 +152,6 @@ def period_quota(vehicle, period_month, fields):
         as_dict=True,
     )
 
-
 def normalize_plate(plate):
     """Canonical plate key: strip all whitespace and upper-case.
 
@@ -170,19 +159,6 @@ def normalize_plate(plate):
 	plate lookup, so a plate written with different spacing/case still resolves
 	to one vehicle. Callers own their own None/empty guard before calling."""
     return "".join(str(plate).split()).upper()
-
-
-def expiry_state(expiry_date, warn_days):
-    """Signed days-to-expiry plus a near-/over-expiry state for an expiry date.
-
-	Returns ``(days, state)`` where ``days = date_diff(expiry_date, today)`` (a
-	signed int; negative = already expired) and ``state`` is ``expired`` (days <
-	0) | ``expiring`` (days <= ``warn_days``) | ``valid``. Computed server-side so
-	the driver/masar SPAs need no date math and both languages render identically."""
-    days = frappe.utils.date_diff(expiry_date, frappe.utils.getdate())
-    state = "expired" if days < 0 else ("expiring" if days <= warn_days else "valid")
-    return days, state
-
 
 def days_until(value):
     """Whole days from today until ``value`` (a date), or None.
@@ -196,7 +172,6 @@ def days_until(value):
         return frappe.utils.date_diff(value, frappe.utils.today())
     except Exception:
         return None
-
 
 def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver=False):
     """End the vehicle's open Active assignment(s) and start a new submitted one.
@@ -240,7 +215,6 @@ def reassign_vehicle_driver(vehicle, driver, start_date=None, reject_same_driver
     assignment.submit()
     return assignment.name
 
-
 def close_open_stop(stop_name, return_date=None):
     """Close an open submitted Vehicle Suspension through the native cancel lifecycle.
 
@@ -258,11 +232,9 @@ def close_open_stop(stop_name, return_date=None):
     )
     frappe.get_doc("Vehicle Suspension", stop_name).cancel()
 
-
 _TR_TERMINAL = {"Fulfilled", "Cancelled"}
 
 _CLEARANCE_SAVEPOINT = "apex_salis_rider_clearance"
-
 
 def _workflow_source_states(action):
     """The states the native Transport Request Workflow lists as sources for ``action``.
@@ -279,7 +251,6 @@ def _workflow_source_states(action):
         for row in frappe.get_doc("Workflow", workflow).transitions
         if row.action == action
     }
-
 
 def drive_transport_request(tr_name, action, target_state, extra_fields=None):
     """Advance a Transport Request from a related Movement document.
@@ -356,7 +327,6 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
     )
     return target_state
 
-
 def revert_transport_request(
     tr_name, from_state, to_state, dispatch_trip=None, clear_fields=None, reset_fields=None
 ):
@@ -400,11 +370,9 @@ def revert_transport_request(
     )
     return to_state
 
-
 INACTIVE_EMPLOYEE_STATUSES = ("Inactive", "Left", "Suspended")
 
 BLOCKING_DRIVER_STATUSES = ("Stopped", "Released")
-
 
 def rider_block_reason(driver, on_date=None):
     """Return a human-readable reason the rider must NOT receive a vehicle/fuel,
@@ -457,7 +425,6 @@ def rider_block_reason(driver, on_date=None):
 
     return None
 
-
 def _approved_leave_on(employee, on_date):
     """Return the name of an Approved, submitted Leave Application for ``employee``
 	whose period covers ``on_date``, else ``None``."""
@@ -476,7 +443,6 @@ def _approved_leave_on(employee, on_date):
         limit=1,
     )
     return rows[0] if rows else None
-
 
 def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source_name=None):
     """Open a clearance/settlement task for the Movement Supervisor to
@@ -564,7 +530,6 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
         frappe.log_error(frappe.get_traceback(), "Salis: rider clearance task failed")
         return []
 
-
 def _clearance_assignees(driver):
     """Resolve the Movement Supervisor user(s) for a driver's clearance task.
 
@@ -614,7 +579,6 @@ def _clearance_assignees(driver):
             seen.append(user)
     return seen
 
-
 def add_timeline_note(doctype, name, message):
     """Record a human-readable note on a related document's timeline.
 
@@ -634,7 +598,6 @@ def add_timeline_note(doctype, name, message):
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Salis: timeline note failed")
 
-
 def set_financial_defaults(doc):
     """Default company and cost center from Salis Settings for reporting and
 	financial context. Reference fields only - no GL/Payment Entry is posted."""
@@ -647,7 +610,6 @@ def set_financial_defaults(doc):
         doc.company = get_default_company()
     if not doc.cost_center:
         doc.cost_center = get_default_cost_center()
-
 
 def enforce_vehicle_compliance(doc):
     """Block (or warn) when the linked vehicle's compliance has expired.

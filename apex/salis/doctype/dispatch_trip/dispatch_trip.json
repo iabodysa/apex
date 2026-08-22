@@ -302,23 +302,25 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "Latest driver GPS latitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
    "fieldname": "driver_lat",
    "fieldtype": "Float",
    "label": "Driver Latitude",
    "permlevel": 1,
    "precision": "6",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "allow_on_submit": 1,
-   "description": "Latest driver GPS longitude, pushed by the driver portal while the trip is dispatched. Feeds the worker's live ride ETA. System-maintained.",
+   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
    "fieldname": "driver_lng",
    "fieldtype": "Float",
    "label": "Driver Longitude",
    "permlevel": 1,
    "precision": "6",
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "fieldname": "dispatch_trip_sec_live_position_col",
@@ -326,12 +328,13 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "When the driver's GPS position was last refreshed. A stale timestamp lets the client suppress an out-of-date ETA.",
+   "description": "No live position is reported. The only writer was removed with the legacy driver portal, and these are Float columns, which Frappe emits NOT NULL DEFAULT 0 — so a trip that never reported a fix reads back 0,0 and any consumer plotting it puts the driver off the coast of Africa. Kept as columns so a future reporter has somewhere to write; hidden so the form stops promising a figure nothing fills.",
    "fieldname": "driver_position_updated_at",
    "fieldtype": "Datetime",
    "label": "Driver Position Updated At",
    "permlevel": 1,
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "collapsible": 1,
@@ -410,7 +413,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 22:30:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

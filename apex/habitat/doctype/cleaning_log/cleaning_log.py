@@ -80,11 +80,11 @@ def on_doctype_update():
     """DB-level backstop for the app-level 'one non-cancelled log per (building,
     cleaning_date)' guard.
 
-    Two daily scheduler jobs write Cleaning Logs — ``daily_cleaning_log_generator``
-    and ``auto_create_cleaning_logs`` — each with only a check-then-insert
-    ``frappe.db.exists`` guard. They are enqueued as separate RQ jobs that can run
-    concurrently, so both can pass their 'not exists yet' check for the same
-    building/day before either commits and double-create. This composite UNIQUE
+    ``daily_cleaning_log_generator`` writes Cleaning Logs from the scheduler with only
+    a check-then-insert ``frappe.db.exists`` guard, and any second writer enqueued
+    beside it can pass its 'not exists yet' check for the same building/day before
+    either commits, and double-create. That is what a check-then-insert cannot prevent
+    and an index can, whatever the number of writers. This composite UNIQUE
     index makes the second insert fail at the DB instead. ``docstatus`` is part of
     the key (mirroring the app guard's ``docstatus != 2`` filter and the Scheduled
     Task Instance precedent) so a cancelled log never blocks re-logging the same

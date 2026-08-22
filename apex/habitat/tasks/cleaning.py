@@ -10,9 +10,7 @@ from __future__ import annotations
 
 import frappe
 
-
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
-
 
 def daily_cleaning_log_generator() -> None:
     """Auto-create today's draft Cleaning Log for every ACTIVE building, so
@@ -100,17 +98,3 @@ def daily_cleaning_log_generator() -> None:
 
     logger.info(f"daily_cleaning_log_generator: created {created} draft cleaning log(s).")
 
-
-def auto_create_cleaning_logs() -> None:
-    """The spec name for the daily cleaning log. One implementation, not two.
-
-    Their target sets also differed: this one took Active buildings with a
-    ``responsible_supervisor``, the other took Active buildings with at least one Room.
-    The generator now covers the union — every Active building, prefilled where there
-    are rooms to prefill — so delegating loses neither set.
-
-    Kept as a name rather than deleted because it is the name the spec uses; it is no
-    longer registered in ``hooks.py``, so the work runs once per day.
-
-    """
-    daily_cleaning_log_generator()

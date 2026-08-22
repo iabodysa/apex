@@ -17,6 +17,20 @@
   "auto_create_asset_movement_on_transfer",
   "habitat_settings_sec_housing",
   "housing_office_number",
+  "habitat_settings_sec_financial",
+  "enable_gl_posting",
+  "habitat_settings_sec_retention",
+  "snapshot_retention_days",
+  "habitat_settings_retention_col",
+  "depreciation_snapshot_retention_days",
+  "habitat_settings_tab_payment_routing",
+  "habitat_settings_sec_routing_target",
+  "target_payment_doctype",
+  "habitat_settings_routing_target_col",
+  "auto_submit_target",
+  "habitat_settings_sec_routing_map",
+  "field_map_help",
+  "field_map",
   "habitat_settings_tab_notifications",
   "operational_notifications_sec",
   "enable_email_notifications",
@@ -126,6 +140,93 @@
    "fieldtype": "Data",
    "label": "Housing Office Number",
    "options": "Phone"
+  },
+  {
+   "fieldname": "habitat_settings_sec_financial",
+   "fieldtype": "Section Break",
+   "label": "Financial Posting"
+  },
+  {
+   "default": "0",
+   "description": "When OFF, Accommodation Ledger rows are operational memos with no GL impact.",
+   "fieldname": "enable_gl_posting",
+   "fieldtype": "Check",
+   "label": "Enable GL Entry Posting"
+  },
+  {
+   "collapsible": 1,
+   "description": "How long machine-written time-series records are kept before the daily log cleanup purges old rows. Blank or 0 falls back to the built-in default for that record. Financial ledgers are never auto-purged.",
+   "fieldname": "habitat_settings_sec_retention",
+   "fieldtype": "Section Break",
+   "label": "Data Retention"
+  },
+  {
+   "default": "365",
+   "description": "Retention for daily occupancy and weekly vehicle-utilisation snapshots (days). Default 365.",
+   "fieldname": "snapshot_retention_days",
+   "fieldtype": "Int",
+   "label": "Snapshot Retention (Days)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "habitat_settings_retention_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "730",
+   "description": "Retention for submitted Operational Depreciation Snapshots (days). Default 730.",
+   "fieldname": "depreciation_snapshot_retention_days",
+   "fieldtype": "Int",
+   "label": "Depreciation Snapshot Retention (Days)",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "habitat_settings_tab_payment_routing",
+   "fieldtype": "Tab Break",
+   "label": "Payment Routing"
+  },
+  {
+   "description": "Which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. This routes the payment record only; General Ledger posting stays governed by Enable GL Entry Posting.",
+   "fieldname": "habitat_settings_sec_routing_target",
+   "fieldtype": "Section Break",
+   "label": "Target Payment Document"
+  },
+  {
+   "description": "The payment DocType the Create Payment action builds (for example Payment Entry, Payment Order, or a client's custom payment DocType). Leave blank to use the native Payment Request, the default target. A Single settings record or a child table is refused: neither can be created as a standalone payment.",
+   "fieldname": "target_payment_doctype",
+   "fieldtype": "Link",
+   "label": "Target Payment DocType",
+   "link_filters": "[[\"DocType\",\"issingle\",\"=\",0],[\"DocType\",\"istable\",\"=\",0]]",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "habitat_settings_routing_target_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "When checked and the target DocType is submittable, the router submits the created payment document. Default off (leave the payment in Draft for review).",
+   "fieldname": "auto_submit_target",
+   "fieldtype": "Check",
+   "label": "Auto-submit Target Payment"
+  },
+  {
+   "fieldname": "habitat_settings_sec_routing_map",
+   "fieldtype": "Section Break",
+   "label": "Field Map"
+  },
+  {
+   "fieldname": "field_map_help",
+   "fieldtype": "HTML",
+   "label": "Field Map Help",
+   "options": "<p>Each row sets one field on the target payment document. For a normal mapping, give the <b>Target Fieldname</b> (on the target DocType) and the <b>Source Fieldname</b> to copy from the Salis Payment Request (for example <code>amount</code>, <code>supplier</code>, <code>company</code>, <code>cost_center</code>, <code>project</code>, <code>remarks</code>). Check <b>Static</b> to write a constant <b>Static Value</b> instead (for example a fixed <code>payment_type</code> or <code>party_type</code>).</p>"
+  },
+  {
+   "description": "Mapping rows applied in order. Each: target field = static value (when Static) else the value of the source field on the request.",
+   "fieldname": "field_map",
+   "fieldtype": "Table",
+   "label": "Field Map",
+   "options": "Payment Routing Field Map"
   },
   {
    "fieldname": "habitat_settings_tab_notifications",
@@ -307,7 +408,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-22 18:40:00.000000",
+ "modified": "2026-08-22 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

@@ -11,12 +11,11 @@ The operator's choices flow into the wizard args and land here at completion
 (`setup_wizard_complete` hook), where they are applied — ONCE — across every
 re-engineered Apex Single:
 
-  - Apex Settings           — the app-wide GL-posting finance gate.
-  - Habitat Settings        — default company + the email/operational kill-switches.
+  - Habitat Settings        — default company, the email/operational kill-switches, the
+    app-wide GL-posting finance gate and the Pay-action target payment DocType.
   - Salis Settings          — default company, cost center, driver portal, approvals.
   - native Employee Advance recovery — disabled until payroll/account settings exist.
   - native ERPNext Issue SLA — created only with an operator-selected schedule.
-  - Payment Routing Settings — the Pay-action target payment DocType.
 
 The company and its cost center are NOT among the operator's answers. They are read
 from the records ERPNext's own stage created, which run before this hook.
@@ -57,7 +56,6 @@ def apply_apex_setup(args=None):
     cost_center = _created_cost_center(company)
 
     _apply_payment_routing(args)
-    _apply_apex_settings(args)
     _apply_habitat_settings(args, company)
     _apply_salis_settings(args, company, cost_center)
     _apply_employee_advance_recovery(args, company)
@@ -77,15 +75,10 @@ def _created_cost_center(company):
     """The default cost center ERPNext attached to that company."""
     return frappe.get_cached_value("Company", company, "cost_center") if company else None
 
-def _apply_apex_settings(args):
-    """Apex Settings — the app-wide GL-posting finance gate (default OFF)."""
-    apex = frappe.get_single("Apex Settings")
-    apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
-    apex.save(ignore_permissions=True)
-
 def _apply_habitat_settings(args, company):
-    """Habitat Settings — default company + the email/operational notification
-    kill-switches. Company is only written when one exists so the Single default holds."""
+    """Habitat Settings — default company, the email/operational notification
+    kill-switches and the app-wide GL-posting finance gate (default OFF). Company is
+    only written when one exists so the Single default holds."""
     habitat = frappe.get_single("Habitat Settings")
     if company:
         habitat.company = company
@@ -93,6 +86,7 @@ def _apply_habitat_settings(args, company):
     habitat.enable_operational_notifications = (
         1 if cint(args.get("apex_enable_operational_notifications")) else 0
     )
+    habitat.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     habitat.save(ignore_permissions=True)
 
 def _apply_salis_settings(args, company, cost_center):
@@ -108,7 +102,7 @@ def _apply_salis_settings(args, company, cost_center):
     salis.save(ignore_permissions=True)
 
 def _apply_payment_routing(args):
-    """Payment Routing Settings — route the operator's chosen payment DocType to the
+    """Habitat Settings — route the operator's chosen payment DocType to the
     Pay-action target, REFUSING anything that cannot be a payment document.
 
     Blank keeps the native Payment Request default. A named target is validated by
@@ -120,7 +114,7 @@ def _apply_payment_routing(args):
     if not payment_method:
         return
     validate_target_doctype(payment_method)
-    router = frappe.get_single("Payment Routing Settings")
+    router = frappe.get_single("Habitat Settings")
     router.target_payment_doctype = payment_method
     router.save(ignore_permissions=True)
 

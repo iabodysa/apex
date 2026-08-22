@@ -12,12 +12,12 @@ class VehicleUtilisationSnapshot(Document):
 		Registered in hooks ``default_log_clearing_doctypes`` and invoked by
 		``daily_maintenance`` (run_log_clean_up). It is a system-written time-series,
 		not a financial ledger, so a one-year retention is safe. The window comes
-		from Apex Settings ``snapshot_retention_days`` (default 365) when the caller
+		from Habitat Settings ``snapshot_retention_days`` (default 365) when the caller
 		does not pass ``days``."""
         from frappe.query_builder import Interval
         from frappe.query_builder.functions import Now
 
-        from apex.apex_core.doctype.apex_settings.apex_settings import (
+        from apex.apex_core.doctype.habitat_settings.habitat_settings import (
             effective_retention_days,
         )
 

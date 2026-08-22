@@ -41,7 +41,6 @@ from apex.habitat.tasks.occupancy import (
     weekly_occupancy_sync,
 )
 from apex.habitat.tasks.cleaning import (
-    auto_create_cleaning_logs,
     daily_cleaning_log_generator,
 )
 from apex.habitat.tasks.scheduled_tasks import (
@@ -55,7 +54,6 @@ __all__ = [
     "_notify_user_system",
     "allocate_building_accommodation_cost",
     "audit_remediation_deadline_watch",
-    "auto_create_cleaning_logs",
     "backdate_assignment_cost",
     "consumable_custody_expiry_watch",
     "daily_accommodation_cost_allocation",

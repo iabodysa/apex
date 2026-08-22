@@ -1,11 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Payment Router - build the configured target payment from a finance-approved
-Salis Payment Request via the Payment Routing Settings field map (config-time, no
+Salis Payment Request via the Habitat Settings field map (config-time, no
 hard-coded per-DocType branches); defaults to the native Payment Request when the
 target is unconfigured.
 
 Boundary: this layer routes only - it posts no GL itself. ``enable_gl_posting``
-(Apex Settings) gates the auto-submit step, because a native payment posts its
+(Habitat Settings) gates the auto-submit step, because a native payment posts its
 ledger from its own ``on_submit``; OFF leaves the routed doc in Draft.
 """
 
@@ -15,7 +15,9 @@ import frappe
 from frappe import _
 from frappe.model import default_fields
 
-from apex.apex_core.doctype.apex_settings.apex_settings import gl_posting_enabled
+from apex.apex_core.doctype.habitat_settings.habitat_settings import gl_posting_enabled
+
+SETTINGS_DOCTYPE = "Habitat Settings"
 
 SOURCE_DOCTYPE = "Salis Payment Request"
 
@@ -27,11 +29,11 @@ LINK_NAME_FIELD = "linked_payment_entry"
 def get_target_doctype(settings=None) -> str:
     """Resolve the payment DocType to build, defaulting to native Payment Request.
 
-    ``Payment Routing Settings.target_payment_doctype`` wins when set; otherwise
+    ``Habitat Settings.target_payment_doctype`` wins when set; otherwise
     the native ``Payment Request`` primitive is used so the flow works out of the
     box with no configuration.
     """
-    settings = settings or frappe.get_single("Payment Routing Settings")
+    settings = settings or frappe.get_single(SETTINGS_DOCTYPE)
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
 @frappe.whitelist()
@@ -40,7 +42,7 @@ def get_target_payment_doctype() -> str:
 
     The Accommodation Lease ``Generate Payment`` button reads this to decide which
     payment document to build, replacing the retired
-    ``Apex Settings.default_payment_method`` Select. Read-only and unparameterised,
+    ``Habitat Settings.default_payment_method`` Select. Read-only and unparameterised,
     so any desk user may call it. Returns the native ``Payment Request`` default
     when the router is unconfigured.
     """
@@ -64,7 +66,7 @@ def require_configured_target(built_doctype: str) -> None:
         return
     frappe.throw(
         _(
-            "This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Payment Routing Settings."
+            "This site is configured to raise payments as {0}, but this action can only create a {1} allocated against the supplier's invoice. Raise this payment from a {2}, which builds the configured target, or set Target Payment DocType to {1} in Habitat Settings."
         ).format(_(configured), _(built_doctype), _(SOURCE_DOCTYPE)),
         title=_("Payment Target Mismatch"),
     )
@@ -263,7 +265,7 @@ def route_payment(payment_request: str) -> str:
     Refusing is the desired outcome for a bad config - a payment that merely LOOKS
     right is worse, because it is never read a second time.
     """
-    settings = frappe.get_single("Payment Routing Settings")
+    settings = frappe.get_single(SETTINGS_DOCTYPE)
     target_doctype = get_target_doctype(settings)
 
     frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
