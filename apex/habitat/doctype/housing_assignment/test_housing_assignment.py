@@ -86,16 +86,35 @@ class TestHousingAssignment(FrappeTestCase):
         """A temporary stay with no end date is an assignment nobody will ever close."""
         assignment = _a_test_assignment()
         assignment.stay_type = "Temporary"
-        assignment.expected_check_out_date = None
-        self.assertRaises(frappe.ValidationError, assignment.insert)
+        assignment.expected_checkout_date = None
+        with self.assertRaisesRegex(frappe.ValidationError, "required for temporary stays"):
+            assignment.insert()
 
-    def test_an_expected_checkout_before_the_checkin_is_refused(self):
-        """A stay cannot end before it starts, and the refusal is here rather than in the UI."""
+    def test_a_temporary_stay_with_an_expected_checkout_is_accepted(self):
+        """The control for the two refusals beside it: neither may be refusing everything.
+
+        A guard proved only in the refusing direction can be a check that always throws.
+        """
         assignment = _a_test_assignment()
         assignment.stay_type = "Temporary"
         assignment.check_in_date = today()
-        assignment.expected_check_out_date = add_days(today(), -1)
-        self.assertRaises(frappe.ValidationError, assignment.insert)
+        assignment.expected_checkout_date = add_days(today(), 30)
+        assignment.insert()
+        self.assertTrue(frappe.db.exists("Housing Assignment", assignment.name))
+
+    def test_an_expected_checkout_before_the_checkin_is_refused(self):
+        """A stay cannot end before it starts, and the refusal is here rather than in the UI.
+
+        The message is matched, not merely the exception class: with the date field left
+        empty this same insert is refused for being empty, and a bare assertRaises would
+        pass without the ordering rule ever running.
+        """
+        assignment = _a_test_assignment()
+        assignment.stay_type = "Temporary"
+        assignment.check_in_date = today()
+        assignment.expected_checkout_date = add_days(today(), -1)
+        with self.assertRaisesRegex(frappe.ValidationError, "cannot be earlier than"):
+            assignment.insert()
 
     def test_an_assignment_without_a_project_is_refused(self):
         """Project carries the cost of the stay, so an assignment without one bills nobody."""
