@@ -19,6 +19,7 @@ SLA_PRIORITIES = (
     ("Medium", 14400, 86400, 1),
     ("Low", 28800, 259200, 0),
 )
+ISSUE_TYPES = ("Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other")
 ISSUE_ROLE_PERMISSIONS = (
     ("Driver", {"read": 1, "create": 1, "if_owner": 1}),
     ("Fleet Manager", {"read": 1, "write": 1}),
@@ -213,6 +214,25 @@ def configure_support_sla(
     frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
     doc.insert(ignore_permissions=True)
     return doc.name
+
+def seed_issue_types():
+    """Create the Salis issue types once, leaving an operator's own list alone.
+
+    Seeded here rather than shipped in ``apex/fixtures/`` because a fixture is
+    reimported with ``force=True`` on every migrate (data_import.py:288, and
+    import_file.py:130 puts the skip gate behind ``if not force``), which restores the
+    file's contents and destroys an operator's edits. Issue Type grants write to
+    Support Team as well as System Manager, so an operator is expected to extend it.
+    """
+    if not frappe.db.exists("DocType", "Issue Type"):
+        return
+    for issue_type in ISSUE_TYPES:
+        if frappe.db.exists("Issue Type", issue_type):
+            continue
+        doc = frappe.new_doc("Issue Type")
+        doc.name = issue_type
+        doc.insert(ignore_permissions=True)
+
 
 def grant_issue_role_permissions():
     """Create missing native Custom DocPerm rows without rewriting operator-owned rows."""

@@ -473,10 +473,6 @@ has_permission = {
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
     {
-        "dt": "Issue Type",
-        "filters": [["name", "in", ["Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"]]],
-    },
-    {
         "dt": "Issue Priority",
         "filters": [["name", "in", ["Low", "Medium", "High", "Urgent"]]],
     },
@@ -490,6 +486,7 @@ after_install = [
     "apex.apex_core.setup.seed.seed_all",
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
+    "apex.apex_core.setup.salis_support.seed_issue_types",
     "apex.apex_core.setup.salis_support.grant_issue_role_permissions",
     "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
