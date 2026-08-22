@@ -22,6 +22,7 @@ SLA_PRIORITIES = (
     ("Low", 28800, 259200, 0),
 )
 ISSUE_TYPES = ("Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other")
+ISSUE_PRIORITIES = ("Low", "Medium", "High", "Urgent")
 ISSUE_ROLE_PERMISSIONS = (
     ("Driver", {"read": 1, "create": 1, "if_owner": 1}),
     ("Fleet Manager", {"read": 1, "write": 1}),
@@ -229,7 +230,21 @@ def refuse_shipped_issue_type_edit(doc, method=None, *args, **kwargs):
     label belongs in the translation file, which is why renaming is refused rather than
     accommodated.
     """
-    _refuse_if_shipped(doc, _("renamed or edited"))
+    _refuse_if_shipped(doc, _("renamed or edited"), ISSUE_TYPES, _("issue type"))
+
+
+def refuse_shipped_issue_priority_deletion(doc, method=None):
+    """Refuse deleting a priority the app ships, because the next update restores it.
+
+    ``apex/fixtures/issue_priority.json`` travels the same ``force=True`` reimport as the
+    issue types three lines above it in the hooks list, so a deleted priority comes back
+    with nothing said. ``SLA_PRIORITIES`` names all four in the support contract this app
+    builds, so removing one also leaves that contract naming a priority that is gone until
+    the next migrate puts it back.
+
+    Only the four shipped names are covered; a priority the operator adds is untouched.
+    """
+    _refuse_if_shipped(doc, _("deleted"), ISSUE_PRIORITIES, _("issue priority"))
 
 
 def refuse_shipped_issue_type_deletion(doc, method=None):
@@ -248,20 +263,20 @@ def refuse_shipped_issue_type_deletion(doc, method=None):
     Stands down while Frappe is installing, migrating or patching, so the fixture's own
     import still lands.
     """
-    _refuse_if_shipped(doc, _("deleted"))
+    _refuse_if_shipped(doc, _("deleted"), ISSUE_TYPES, _("issue type"))
 
 
-def _refuse_if_shipped(doc, attempted_action):
-    """Throw when ``doc`` is one of the six shipped types and a person is the one writing."""
-    if doc.name not in ISSUE_TYPES:
+def _refuse_if_shipped(doc, attempted_action, shipped_names, family):
+    """Throw when ``doc`` is one the app ships and a person, not Frappe, is writing it."""
+    if doc.name not in shipped_names:
         return
     if _frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(
-            "{0} is an issue type Apex ships, and every update puts it back as the app"
-            " defines it. It cannot be {1} here. Ask for the change to ship with the app."
-        ).format(_(doc.name), attempted_action),
+            "{0} is an {1} Apex ships, and every update puts it back as the app defines"
+            " it. It cannot be {2} here. Ask for the change to ship with the app."
+        ).format(_(doc.name), family, attempted_action),
         frappe.PermissionError,
         title=_("Set by Apex"),
     )

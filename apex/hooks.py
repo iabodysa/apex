@@ -118,6 +118,9 @@ override_doctype_class = {
 }
 
 doc_events = {
+    "Issue Priority": {
+        "on_trash": "apex.apex_core.setup.salis_support.refuse_shipped_issue_priority_deletion",
+    },
     "Issue Type": {
         "on_trash": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_deletion",
         "before_rename": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_edit",
