@@ -215,23 +215,34 @@ def configure_support_sla(
     doc.insert(ignore_permissions=True)
     return doc.name
 
-def seed_issue_types():
-    """Create the Salis issue types once, leaving an operator's own list alone.
+def refuse_shipped_issue_type_deletion(doc, method=None):
+    """Refuse deleting an issue type the app ships, because the next update restores it.
 
-    Seeded here rather than shipped in ``apex/fixtures/`` because a fixture is
-    reimported with ``force=True`` on every migrate (data_import.py:288, and
-    import_file.py:130 puts the skip gate behind ``if not force``), which restores the
-    file's contents and destroys an operator's edits. Issue Type grants write to
-    Support Team as well as System Manager, so an operator is expected to extend it.
+    ``apex/fixtures/issue_type.json`` is reimported with ``force=True`` on every migrate
+    (data_import.py:288, and import_file.py:130 puts the skip gate behind ``if not
+    force``), so a deleted shipped type comes back with nothing said. ERPNext grants
+    Issue Type write to Support Team as well as System Manager, so an operator can make
+    that deletion, work on the assumption it held, and find the type back after an
+    update.
+
+    Only deletion of a SHIPPED name is refused. An added type is not in the file, so the
+    reimport never touches it and it survives — there is no surprise to prevent there.
+
+    Stands down while Frappe is installing, migrating or patching, so the fixture's own
+    import still lands.
     """
-    if not frappe.db.exists("DocType", "Issue Type"):
+    if doc.name not in ISSUE_TYPES:
         return
-    for issue_type in ISSUE_TYPES:
-        if frappe.db.exists("Issue Type", issue_type):
-            continue
-        doc = frappe.new_doc("Issue Type")
-        doc.name = issue_type
-        doc.insert(ignore_permissions=True)
+    if frappe.flags.in_migrate or frappe.flags.in_install or frappe.flags.in_patch:
+        return
+    frappe.throw(
+        _(
+            "{0} is an issue type Apex ships, and every update puts it back. Deleting it"
+            " here would not last. Ask for it to be removed from the app instead."
+        ).format(_(doc.name)),
+        frappe.PermissionError,
+        title=_("Set by Apex"),
+    )
 
 
 def grant_issue_role_permissions():
