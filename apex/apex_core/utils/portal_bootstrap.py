@@ -18,6 +18,7 @@ import frappe
 from frappe.sessions import get_csrf_token
 from frappe.translate import get_translations_from_csv
 from frappe.utils import cint
+from frappe.utils.password import get_encryption_key
 
 PORTAL_PUBLIC_PATHS = {
     "worker": frozenset({"/masar/"}),
@@ -117,15 +118,19 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
 
 
 def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
-    """Return a stable client storage namespace without exposing the subject."""
+    """Return a stable client storage namespace without exposing the subject.
+
+    Keyed through ``frappe.utils.password.get_encryption_key`` (frappe/utils/password.py:216),
+    which MINTS and persists the key on a site that has none. Reading
+    ``site_config.encryption_key`` directly cannot open a freshly installed site, because
+    nothing in frappe writes that key until something first asks for it — and on this app
+    the portal is that first caller.
+    """
     _validate_entry_path(entry, next(iter(PORTAL_PUBLIC_PATHS[entry])))
     material = "\x1f".join(
         (frappe.local.site or "site", entry, subject or "unauthenticated")
     ).encode()
-    encryption_key = frappe.get_site_config().get("encryption_key")
-    if not encryption_key:
-        raise RuntimeError("Site encryption_key is required for portal subject scope")
-    digest = hmac.new(str(encryption_key).encode(), material, hashlib.sha256).hexdigest()
+    digest = hmac.new(get_encryption_key().encode(), material, hashlib.sha256).hexdigest()
     return f"scope_{digest[:24]}"
 
 
