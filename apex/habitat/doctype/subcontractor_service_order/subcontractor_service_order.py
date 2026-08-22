@@ -19,7 +19,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 from apex.apex_core.utils.vat import apply_vat
 
@@ -140,7 +140,7 @@ def mark_missed(service_order):
         frappe.throw(_("Only Service Orders with status In Progress can be marked Missed."))
 
     scheduled_date = getattr(doc, "scheduled_date", None)
-    if scheduled_date and scheduled_date > nowdate():
+    if scheduled_date and getdate(scheduled_date) > getdate(nowdate()):
         frappe.throw(_("Cannot mark Missed before the scheduled date ({0}).").format(scheduled_date))
 
     doc.db_set("status", "Missed")
