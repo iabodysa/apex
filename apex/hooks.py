@@ -82,6 +82,7 @@ app_include_js = [
     "apex_desk.bundle.js",
     "apex_report_filters.bundle.js",
 ]
+app_include_css = ["habitat_desk.bundle.css"]
 web_include_js = ["/assets/apex/js/apex_web_form.js"]
 
 after_request = [

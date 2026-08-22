@@ -11,30 +11,6 @@ frappe.pages["transfer-board"].on_page_load = function (wrapper) {
 	tb.setup();
 };
 
-const TB_STYLE = {
-	help: "margin-block:var(--margin-sm,10px);font-size:var(--text-sm,12px);",
-	split: "display:flex;flex-wrap:wrap;gap:var(--margin-md,15px);align-items:flex-start;",
-	pane:
-		"flex:1 1 360px;min-inline-size:320px;border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-md,15px);background:var(--card-bg);",
-	pane_label: "font-weight:600;font-size:var(--text-md,14px);margin-block-end:var(--margin-sm,10px);",
-	summary:
-		"display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--margin-sm,10px);margin-block-end:var(--margin-sm,10px);padding-block-end:8px;border-block-end:1px solid var(--border-color);",
-	summary_title: "font-weight:600;font-size:var(--text-md,14px);",
-	summary_counts: "font-size:var(--text-sm,12px);color:var(--text-muted);",
-	floor: "margin-block-end:var(--margin-md,15px);",
-	floor_header: "font-size:var(--text-sm,12px);font-weight:600;color:var(--text-muted);margin-block-end:8px;",
-	rooms: "display:flex;flex-direction:column;gap:var(--margin-sm,10px);",
-	room: "border:1px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:var(--padding-sm,10px);",
-	room_header: "font-weight:600;font-size:var(--text-sm,12px);margin-block-end:8px;",
-	beds: "display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;",
-	bed:
-		"border:2px solid var(--border-color);border-radius:var(--border-radius-md,8px);padding:10px 8px;min-height:78px;display:flex;flex-direction:column;gap:3px;cursor:pointer;background:var(--card-bg);user-select:none;",
-	bed_code: "font-weight:700;font-size:var(--text-md,14px);",
-	bed_occupant: "font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;",
-	empty: "padding-block:var(--padding-lg,20px);text-align:center;font-size:var(--text-sm,12px);",
-	loading: "padding-block:var(--padding-lg,20px);text-align:center;",
-	error: "padding-block:var(--padding-lg,20px);text-align:center;",
-};
 
 class TransferBoard {
 	constructor(page) {
@@ -50,7 +26,6 @@ class TransferBoard {
 		this.$root = $('<div class="tb-board"></div>').appendTo(this.page.main);
 
 		$('<div class="tb-help text-muted"></div>')
-			.attr("style", TB_STYLE.help)
 			// The tap is named first because HTML5 drag-and-drop does not fire on touch at
 			// all, so on a tablet the drag this used to advertise is not a gesture that exists.
 			.text(
@@ -60,7 +35,7 @@ class TransferBoard {
 			)
 			.appendTo(this.$root);
 
-		this.$split = $('<div class="tb-split"></div>').attr("style", TB_STYLE.split).appendTo(this.$root);
+		this.$split = $('<div class="tb-split"></div>').appendTo(this.$root);
 		this.panes.left.$grid = this._make_pane("left", __("Building A"));
 		this.panes.right.$grid = this._make_pane("right", __("Building B"));
 
@@ -68,8 +43,8 @@ class TransferBoard {
 	}
 
 	_make_pane(side, label) {
-		const $pane = $(`<div class="tb-pane tb-pane--${side}"></div>`).attr("style", TB_STYLE.pane).appendTo(this.$split);
-		$(`<div class="tb-pane-label"></div>`).attr("style", TB_STYLE.pane_label).text(label).appendTo($pane);
+		const $pane = $(`<div class="tb-pane tb-pane--${side}"></div>`).appendTo(this.$split);
+		$(`<div class="tb-pane-label"></div>`).text(label).appendTo($pane);
 		const $grid = $('<div class="tb-grid"></div>').appendTo($pane);
 		this._render_empty($grid, __("Select a building to load the board."));
 		return $grid;
@@ -137,12 +112,12 @@ class TransferBoard {
 
 	_render_empty($grid, message) {
 		$grid.empty();
-		$('<div class="tb-empty text-muted"></div>').attr("style", TB_STYLE.empty).text(message).appendTo($grid);
+		$('<div class="tb-empty text-muted"></div>').text(message).appendTo($grid);
 	}
 
 	_render_loading($grid) {
 		$grid.empty();
-		const $wrap = $('<div class="tb-loading" aria-busy="true"></div>').attr("style", TB_STYLE.loading).appendTo($grid);
+		const $wrap = $('<div class="tb-loading" aria-busy="true"></div>').appendTo($grid);
 		$('<div class="tb-loading-text text-muted"></div>')
 			.css("margin-block-end", "var(--margin-sm, 10px)")
 			.text(__("Loading board…"))
@@ -157,7 +132,7 @@ class TransferBoard {
 		const pane = this.panes[side];
 		const $grid = pane.$grid;
 		$grid.empty();
-		const $err = $('<div class="tb-error"></div>').attr("style", TB_STYLE.error).appendTo($grid);
+		const $err = $('<div class="tb-error"></div>').appendTo($grid);
 		$('<div class="tb-error-msg"></div>')
 			.css("margin-block-end", "var(--margin-sm, 10px)")
 			.text(__("Could not load this building. Please try again."))
@@ -178,13 +153,11 @@ class TransferBoard {
 		$grid.empty();
 
 		const s = (data && data.summary) || {};
-		const $summary = $('<div class="tb-summary"></div>').attr("style", TB_STYLE.summary).appendTo($grid);
+		const $summary = $('<div class="tb-summary"></div>').appendTo($grid);
 		$('<span class="tb-summary-title"></span>')
-			.attr("style", TB_STYLE.summary_title)
 			.text(data.building_title || data.building)
 			.appendTo($summary);
 		$('<span class="tb-summary-counts"></span>')
-			.attr("style", TB_STYLE.summary_counts)
 			.text(__("{0} of {1} beds available", [s.available || 0, s.total_beds || 0]))
 			.appendTo($summary);
 
@@ -194,17 +167,16 @@ class TransferBoard {
 		}
 
 		data.floors.forEach((floor) => {
-			const $floor = $('<div class="tb-floor"></div>').attr("style", TB_STYLE.floor).appendTo($grid);
-			$('<div class="tb-floor-header"></div>').attr("style", TB_STYLE.floor_header).text(floor.floor_label).appendTo($floor);
-			const $rooms = $('<div class="tb-rooms"></div>').attr("style", TB_STYLE.rooms).appendTo($floor);
+			const $floor = $('<div class="tb-floor"></div>').appendTo($grid);
+			$('<div class="tb-floor-header"></div>').text(floor.floor_label).appendTo($floor);
+			const $rooms = $('<div class="tb-rooms"></div>').appendTo($floor);
 
 			(floor.rooms || []).forEach((room) => {
-				const $room = $('<div class="tb-room"></div>').attr("style", TB_STYLE.room).appendTo($rooms);
+				const $room = $('<div class="tb-room"></div>').appendTo($rooms);
 				$('<div class="tb-room-header"></div>')
-					.attr("style", TB_STYLE.room_header)
 					.text(`${__("Room")} ${room.room_number || room.room}`)
 					.appendTo($room);
-				const $beds = $('<div class="tb-beds"></div>').attr("style", TB_STYLE.beds).appendTo($room);
+				const $beds = $('<div class="tb-beds"></div>').appendTo($room);
 				(room.beds || []).forEach((bed) => {
 					this._render_bed_card(side, bed, room, data.building).appendTo($beds);
 				});
@@ -216,11 +188,12 @@ class TransferBoard {
 		const is_occupied = bed.bed_color === "red" && bed.occupant;
 		const is_available = bed.bed_color === "green";
 
-		const $card = $(`<div class="tb-bed" tabindex="0" role="button"></div>`);
-		$card.attr("style", apex.habitat.bed_style(bed.bed_color, TB_STYLE.bed));
+		const $card = $(
+			`<div class="tb-bed ${apex.habitat.bed_class(bed.bed_color)}" tabindex="0" role="button"></div>`
+		);
 		$card.data("ctx", { side, bed, room, building });
 
-		$('<div class="tb-bed-code"></div>').attr("style", TB_STYLE.bed_code).text(bed.bed_code || bed.bed).appendTo($card);
+		$('<div class="tb-bed-code"></div>').text(bed.bed_code || bed.bed).appendTo($card);
 
 		let badge = "";
 		if (is_available) badge = __("Available");
@@ -233,7 +206,6 @@ class TransferBoard {
 
 		if (is_occupied) {
 			$('<div class="tb-bed-occupant"></div>')
-				.attr("style", TB_STYLE.bed_occupant)
 				.text(bed.occupant.employee_name || bed.occupant.employee)
 				.appendTo($card);
 		}
@@ -356,7 +328,7 @@ class TransferBoard {
 				{
 					fieldname: "context",
 					fieldtype: "HTML",
-					options: `<div style="margin-bottom:8px">${frappe.utils.escape_html(
+					options: `<div class="tb-dialog-lede">${frappe.utils.escape_html(
 						__("Move {0} from {1} to {2}?", [occupant_label, from_label, to_label])
 					)}</div>`,
 				},

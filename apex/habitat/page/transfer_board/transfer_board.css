@@ -1,0 +1,126 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded by Page.load_assets (frappe/core/doctype/page/page.py:142) purely because this
+   file sits beside transfer_board.js and shares its name. No hooks.py entry and no bundle
+   step: renaming either file, or moving one out of this folder, silently unstyles the page.
+   The bed colours are NOT here — they are shared with the Front Desk and live in
+   habitat_desk.bundle.css. */
+
+.tb-help {
+	margin-block: var(--margin-sm, 10px);
+	font-size: var(--text-sm, 12px);
+}
+
+.tb-split {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--margin-md, 15px);
+	align-items: flex-start;
+}
+
+.tb-pane {
+	flex: 1 1 360px;
+	min-inline-size: 320px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-md, 15px);
+	background: var(--card-bg);
+}
+
+.tb-pane-label {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+	margin-block-end: var(--margin-sm, 10px);
+}
+
+.tb-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--margin-sm, 10px);
+	margin-block-end: var(--margin-sm, 10px);
+	padding-block-end: 8px;
+	border-block-end: 1px solid var(--border-color);
+}
+
+.tb-summary-title {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+}
+
+.tb-summary-counts {
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.tb-floor {
+	margin-block-end: var(--margin-md, 15px);
+}
+
+.tb-floor-header {
+	font-size: var(--text-sm, 12px);
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-block-end: 8px;
+}
+
+.tb-rooms {
+	display: flex;
+	flex-direction: column;
+	gap: var(--margin-sm, 10px);
+}
+
+.tb-room {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-sm, 10px);
+}
+
+.tb-room-header {
+	font-weight: 600;
+	font-size: var(--text-sm, 12px);
+	margin-block-end: 8px;
+}
+
+.tb-beds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+	gap: 8px;
+}
+
+.tb-bed {
+	padding: 10px 8px;
+	min-height: 78px;
+	gap: 3px;
+}
+
+.tb-bed-code {
+	font-weight: 700;
+	font-size: var(--text-md, 14px);
+}
+
+.tb-bed-occupant {
+	font-size: 11px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.tb-empty {
+	padding-block: var(--padding-lg, 20px);
+	text-align: center;
+	font-size: var(--text-sm, 12px);
+}
+
+.tb-loading,
+.tb-error {
+	padding-block: var(--padding-lg, 20px);
+	text-align: center;
+}
+
+/* The dialog this page opens; see the note in front_desk.css on why it is tb- prefixed. */
+
+.tb-dialog-lede {
+	margin-block-end: 8px;
+}

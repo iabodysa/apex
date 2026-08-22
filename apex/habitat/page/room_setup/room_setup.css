@@ -1,0 +1,188 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded by Page.load_assets (frappe/core/doctype/page/page.py:142) purely because this
+   file sits beside room_setup.js and shares its name. No hooks.py entry and no bundle
+   step: renaming either file, or moving one out of this folder, silently unstyles the page. */
+
+.rs-steps {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-block: var(--margin-sm, 10px) var(--margin-lg, 20px);
+}
+
+.rs-step {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border: 1px solid var(--border-color);
+	border-radius: 16px;
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+	background: var(--card-bg);
+}
+
+.rs-step.active {
+	border-color: var(--primary);
+	color: var(--text-on-blue, #fff);
+	background: var(--primary);
+	font-weight: 600;
+}
+
+.rs-step.done {
+	border-color: var(--green-500);
+	color: var(--green-700);
+	background: var(--green-100);
+}
+
+.rs-step-no {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	inline-size: 18px;
+	block-size: 18px;
+	border-radius: 50%;
+	background: var(--control-bg);
+	color: var(--text-color);
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.rs-stage {
+	display: flex;
+	flex-direction: column;
+	gap: var(--margin-sm, 10px);
+}
+
+.rs-floors {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	overflow: hidden;
+}
+
+.rs-frow {
+	display: grid;
+	grid-template-columns: 48px 1.4fr 0.8fr 1.4fr 0.8fr 48px;
+	gap: 8px;
+	align-items: center;
+	padding: 8px var(--padding-sm, 10px);
+	border-block-end: 1px solid var(--border-color);
+}
+
+.rs-fhead {
+	background: var(--subtle-fg, var(--control-bg));
+	font-weight: 600;
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.rs-fcell {
+	min-inline-size: 0;
+}
+
+.rs-fno {
+	font-weight: 600;
+}
+
+.rs-floor-block {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-md, 15px);
+	background: var(--card-bg);
+}
+
+.rs-floor-title {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+	margin-block-end: var(--margin-sm, 10px);
+}
+
+.rs-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: var(--margin-sm, 10px);
+}
+
+.rs-room {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-sm, 10px);
+	background: var(--fg-color, var(--card-bg));
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.rs-room-no {
+	font-weight: 600;
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.rs-stepper {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.rs-bed-val {
+	min-inline-size: 24px;
+	text-align: center;
+	font-weight: 700;
+}
+
+.rs-summary {
+	display: flex;
+	gap: var(--margin-md, 15px);
+	flex-wrap: wrap;
+}
+
+.rs-sum-card {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-md, 15px);
+	background: var(--card-bg);
+	text-align: center;
+	min-inline-size: 96px;
+}
+
+.rs-sum-n {
+	font-size: 24px;
+	font-weight: 700;
+}
+
+.rs-sum-l {
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.rs-review {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-md, 15px);
+	background: var(--card-bg);
+}
+
+.rs-review-row {
+	font-size: var(--text-sm, 12px);
+	padding-block: 2px;
+	border-block-end: 1px solid var(--border-color);
+}
+
+.rs-footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	margin-block-start: var(--margin-lg, 20px);
+	padding-block-start: var(--padding-md, 15px);
+	border-block-start: 1px solid var(--border-color);
+}
+
+.rs-fatal {
+	padding-block: var(--padding-xl, 30px);
+	text-align: center;
+}

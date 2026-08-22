@@ -1,28 +1,25 @@
 // Copyright (c) 2026, afmcoltd
 frappe.provide("apex.habitat");
 
-apex.habitat.BED_PALETTE = {
-	green: "background:var(--green-100);border-color:var(--green-500);color:var(--green-700);",
-	red: "background:var(--red-100);border-color:var(--red-500);color:var(--red-700);",
-	amber: "background:var(--yellow-100);border-color:var(--orange-500);color:var(--orange-700);cursor:not-allowed;",
-	grey: "background:var(--gray-100);border-color:var(--gray-400);color:var(--gray-600);cursor:not-allowed;",
-};
-
 /**
  * Map a bed colour to the framework's own indicator name.
  *
- * Three desk pages painted beds from their own copy of this table, two of them
- * byte-identical, so recolouring a bed state cost three edits and could drift.
+ * The desk pages that paint beds hold no copy of this table, so recolouring a bed state
+ * is one edit and cannot drift between them.
  */
 apex.habitat.indicator_color = function (bed_color) {
 	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
 };
 
 /**
- * The style attribute for one bed card, from its colour and the page's own base style.
+ * The class list for one bed card, from its colour.
+ *
+ * The colours themselves live in habitat_desk.bundle.css; an unknown colour falls back to
+ * the base class alone, which paints a neutral card rather than nothing.
  */
-apex.habitat.bed_style = function (bed_color, base) {
-	return (base || "") + (apex.habitat.BED_PALETTE[bed_color] || "");
+apex.habitat.bed_class = function (bed_color) {
+	const known = ["green", "red", "amber", "grey"].includes(bed_color);
+	return known ? `apex-bed apex-bed--${bed_color}` : "apex-bed";
 };
 
 /**

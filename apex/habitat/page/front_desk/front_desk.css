@@ -1,0 +1,345 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded by Page.load_assets (frappe/core/doctype/page/page.py:142) purely because this
+   file sits beside front_desk.js and shares its name. No hooks.py entry and no bundle
+   step: renaming either file, or moving one out of this folder, silently unstyles the page.
+   Unlike the sibling .js it is NOT passed through render_include, so a Jinja tag here
+   ships as literal text rather than being expanded.
+
+   The bed colours are NOT here — they are shared with the Transfer Board and live in
+   habitat_desk.bundle.css. */
+
+.fd-board {
+	padding-block: 8px 32px;
+	padding-inline: 4px;
+}
+
+.fd-buildings {
+	padding-inline: 4px;
+	padding-block-start: 8px;
+}
+
+.fd-buildings-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fd-building-chip {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 6px 12px;
+	border-radius: 16px;
+	border: 1px solid var(--border-color);
+	border-inline-start: 4px solid var(--border-color);
+	background: var(--card-bg);
+	cursor: pointer;
+	font-size: var(--text-sm, 13px);
+	max-inline-size: 280px;
+}
+
+/* Pressure is how full the building is; the chip's leading edge carries it. */
+.fd-building-chip--green {
+	border-inline-start-color: var(--green-500);
+}
+
+.fd-building-chip--red {
+	border-inline-start-color: var(--red-500);
+}
+
+.fd-building-chip--amber {
+	border-inline-start-color: var(--orange-500);
+}
+
+.fd-building-chip--grey {
+	border-inline-start-color: var(--gray-400);
+}
+
+.fd-building-chip--selected {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 1px var(--primary);
+}
+
+.fd-building-chip-name {
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fd-building-chip-counts {
+	font-weight: 700;
+}
+
+.fd-summary {
+	position: sticky;
+	inset-block-start: 0;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-block-end: 16px;
+	padding-block: 10px;
+	padding-inline: 4px;
+	background: var(--fg-color, var(--card-bg));
+	border-block-end: 1px solid var(--border-color);
+}
+
+.fd-summary-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 12px;
+}
+
+.fd-summary-title {
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.fd-summary-stats {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.fd-summary-stat {
+	display: flex;
+	align-items: baseline;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	border-inline-start: 4px solid var(--border-color);
+	background: var(--control-bg);
+	white-space: nowrap;
+}
+
+.fd-summary-stat--green {
+	border-inline-start-color: var(--green-500);
+}
+
+.fd-summary-stat--red {
+	border-inline-start-color: var(--red-500);
+}
+
+.fd-summary-stat--amber {
+	border-inline-start-color: var(--orange-500);
+}
+
+.fd-summary-stat--grey {
+	border-inline-start-color: var(--gray-400);
+}
+
+.fd-summary-stat-num {
+	font-size: 16px;
+	font-weight: 700;
+}
+
+.fd-summary-stat-label {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.fd-summary-meter {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.fd-summary-meter-track {
+	position: relative;
+	flex: 1 1 auto;
+	block-size: 6px;
+	border-radius: 3px;
+	background: var(--control-bg);
+	overflow: hidden;
+}
+
+/* inline-size is set from the occupancy percentage at render time. */
+.fd-summary-meter-fill {
+	block-size: 100%;
+	background: var(--primary);
+}
+
+.fd-summary-meter-label {
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.fd-summary-meter-caption {
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.fd-summary-requests {
+	cursor: pointer;
+	font-size: 13px;
+	padding: 2px 8px;
+	border-radius: 10px;
+	color: var(--text-muted);
+	background: var(--control-bg);
+}
+
+.fd-summary-requests--open {
+	color: var(--text-on-blue, #fff);
+	background: var(--primary);
+	font-weight: 600;
+}
+
+.fd-legend {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+	margin-block-end: 16px;
+}
+
+.fd-legend-key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.fd-legend-item {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.fd-legend-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.fd-legend-filter {
+	font-size: 12px;
+	padding: 4px 10px;
+	border-radius: 14px;
+	border: 1px solid var(--border-color);
+	background: var(--card-bg);
+	color: var(--text-color);
+	cursor: pointer;
+}
+
+.fd-legend-filter--active {
+	border-color: var(--primary);
+	background: var(--primary);
+	color: var(--text-on-blue, #fff);
+	font-weight: 600;
+}
+
+.fd-floor {
+	margin-block-end: 24px;
+}
+
+.fd-rooms,
+.fd-skeleton-rooms {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.fd-room {
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	padding: 12px;
+	min-inline-size: 240px;
+	flex: 1 1 260px;
+	background: var(--card-bg);
+}
+
+.fd-room-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-block-end: 10px;
+	gap: 8px;
+}
+
+.fd-room-number {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+}
+
+.fd-room-meta {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.fd-beds {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+	gap: 10px;
+}
+
+/* The border colour comes from the shared bed palette; only the geometry is the page's. */
+.fd-bed {
+	padding: 12px 10px;
+	min-block-size: 84px;
+	gap: 4px;
+}
+
+.fd-bed-code {
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.fd-bed-badge {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.fd-bed-occupant {
+	font-size: 12px;
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.fd-empty {
+	padding-block: 48px;
+	padding-inline: 16px;
+	text-align: center;
+	font-size: 15px;
+}
+
+.fd-error {
+	padding-block: 48px;
+	padding-inline: 16px;
+	text-align: center;
+}
+
+.fd-error-msg {
+	font-size: 15px;
+	margin-block-end: 12px;
+}
+
+/* The dialogs this page opens. frappe.dom.set_style (frappe/public/js/frappe/dom.js:84)
+   appends this stylesheet to the document, not to the page wrapper, so a dialog appended
+   to <body> is still in its scope — which is also why every class here is fd- prefixed. */
+
+.fd-dialog-lede {
+	margin-block-end: 8px;
+}
+
+.fd-dialog-note {
+	margin-block-start: 4px;
+}
+
+.fd-dialog-person {
+	margin-block: 6px;
+}
+
+.fd-dialog-photo {
+	inline-size: 84px;
+	block-size: 84px;
+	object-fit: cover;
+	border-radius: 6px;
+	border: 1px solid var(--border-color);
+}

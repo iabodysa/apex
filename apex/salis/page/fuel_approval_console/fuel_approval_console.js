@@ -11,49 +11,6 @@ frappe.pages["fuel-approval-console"].on_page_load = function (wrapper) {
 	fac.setup();
 };
 
-const FAC_STYLE = {
-	board: "padding-block:4px 24px;padding-inline:2px;",
-	grid: "display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;",
-	skel: "min-block-size:184px;border-radius:var(--border-radius-lg);background:var(--skeleton-bg);",
-	summary:
-		"display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-block:4px 16px;margin-inline:2px;",
-	summary_title: "font-size:1.1rem;font-weight:600;",
-	summary_counts: "color:var(--text-muted);font-size:0.85rem;",
-	over: "color:var(--red-600);font-weight:600;",
-	empty:
-		"text-align:center;padding-block:48px;padding-inline:16px;color:var(--text-muted);border:1px dashed var(--border-color);border-radius:var(--border-radius-lg);background:var(--card-bg);",
-	empty_icon: "font-size:2rem;line-height:1;margin-block-end:8px;opacity:0.6;",
-	error:
-		"text-align:center;padding-block:40px;padding-inline:16px;color:var(--text-muted);border:1px solid var(--red-300);border-radius:var(--border-radius-lg);background:var(--red-50);",
-	error_title: "color:var(--red-600);font-weight:600;margin-block-end:6px;",
-	error_detail: "font-size:0.85rem;margin-block-end:14px;overflow-wrap:anywhere;",
-	card:
-		"display:flex;flex-direction:column;gap:12px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:var(--border-radius-lg);padding:16px;box-shadow:var(--shadow-sm);",
-	card_over: "border-inline-start:4px solid var(--red-500);",
-	card_head: "display:flex;align-items:flex-start;justify-content:space-between;gap:8px;",
-	card_identity: "min-inline-size:0;",
-	card_name: "font-weight:600;font-size:0.98rem;line-height:1.25;overflow-wrap:anywhere;",
-	card_sub: "color:var(--text-muted);font-size:0.82rem;margin-block-start:2px;",
-	card_flag:
-		"flex:none;font-size:0.7rem;font-weight:600;color:var(--red-600);background:var(--red-100);border-radius:999px;padding-block:3px;padding-inline:8px;white-space:nowrap;",
-	metrics:
-		"display:flex;gap:20px;padding-block:10px;border-block-start:1px solid var(--border-color);border-block-end:1px solid var(--border-color);",
-	metric: "display:flex;flex-direction:column;gap:2px;",
-	metric_label: "font-size:0.72rem;color:var(--text-muted);",
-	metric_value: "font-size:1.05rem;font-weight:600;",
-	body: "display:flex;flex-direction:column;gap:6px;",
-	field: "display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:0.85rem;",
-	field_label: "color:var(--text-muted);flex:none;",
-	field_value: "text-align:end;overflow-wrap:anywhere;",
-	foot: "display:flex;align-items:center;justify-content:space-between;gap:8px;",
-	ref:
-		"font-family:var(--font-stack-mono);font-size:0.74rem;color:var(--text-muted);background:var(--control-bg);border-radius:6px;padding-block:2px;padding-inline:7px;",
-	actions: "display:flex;gap:8px;flex:none;",
-};
-function fac_upper() {
-	return frappe.utils.is_rtl() ? "" : "text-transform:uppercase;letter-spacing:0.03em;";
-}
-
 class FuelApprovalConsole {
 	constructor(page) {
 		this.page = page;
@@ -62,7 +19,6 @@ class FuelApprovalConsole {
 
 	setup() {
 		this.$container = $('<div class="fac-board"></div>')
-			.attr("style", FAC_STYLE.board)
 			.appendTo(this.page.main);
 		this._setup_controls();
 		this.refresh();
@@ -131,22 +87,20 @@ class FuelApprovalConsole {
 
 	_render_loading() {
 		this.$container.empty();
-		const $grid = $('<div class="fac-grid"></div>').attr("style", FAC_STYLE.grid).appendTo(this.$container);
+		const $grid = $('<div class="fac-grid"></div>').appendTo(this.$container);
 		for (let i = 0; i < 6; i++) {
-			$('<div class="fac-card fac-skeleton fac-skel-card"></div>').attr("style", FAC_STYLE.skel).appendTo($grid);
+			$('<div class="fac-card fac-skeleton fac-skel-card"></div>').appendTo($grid);
 		}
 	}
 
 	_render_error(detail) {
 		this.$container.empty();
 		const $box = $('<div class="fac-error" role="alert"></div>')
-			.attr("style", FAC_STYLE.error)
 			.appendTo(this.$container);
 		$('<div class="fac-error-title"></div>')
-			.attr("style", FAC_STYLE.error_title)
 			.text(__("Could not load the approval queue"))
 			.appendTo($box);
-		$('<div class="fac-error-detail"></div>').attr("style", FAC_STYLE.error_detail).text(detail).appendTo($box);
+		$('<div class="fac-error-detail"></div>').text(detail).appendTo($box);
 		$('<button class="btn btn-sm btn-default"></button>')
 			.text(__("Retry"))
 			.on("click", () => this.refresh())
@@ -161,26 +115,24 @@ class FuelApprovalConsole {
 			.sort((a, b) => (b.over_threshold ? 1 : 0) - (a.over_threshold ? 1 : 0));
 		const over = sorted.filter((r) => r.over_threshold).length;
 
-		const $summary = $('<div class="fac-summary"></div>').attr("style", FAC_STYLE.summary).appendTo(this.$container);
+		const $summary = $('<div class="fac-summary"></div>').appendTo(this.$container);
 		$('<span class="fac-summary-title"></span>')
-			.attr("style", FAC_STYLE.summary_title)
 			.text(__("Pending Fuel Requests"))
 			.appendTo($summary);
-		const $counts = $('<span class="fac-summary-counts"></span>').attr("style", FAC_STYLE.summary_counts).appendTo($summary);
+		const $counts = $('<span class="fac-summary-counts"></span>').appendTo($summary);
 		$counts.append(
 			document.createTextNode(__("{0} awaiting approval", [sorted.length]))
 		);
 		if (over) {
 			$counts.append(document.createTextNode("  ·  "));
-			$('<span class="fac-over"></span>')
-				.attr("style", FAC_STYLE.over)
+			$('<span class="fac-summary-over"></span>')
 				.text(__("{0} over threshold", [over]))
 				.appendTo($counts);
 		}
 
 		if (!sorted.length) {
-			const $empty = $('<div class="fac-empty"></div>').attr("style", FAC_STYLE.empty).appendTo(this.$container);
-			$('<div class="fac-empty-icon"></div>').attr("style", FAC_STYLE.empty_icon).text("✓").appendTo($empty);
+			const $empty = $('<div class="fac-empty"></div>').appendTo(this.$container);
+			$('<div class="fac-empty-icon"></div>').text("✓").appendTo($empty);
 			$('<div></div>')
 				.text(
 					this.project
@@ -191,7 +143,7 @@ class FuelApprovalConsole {
 			return;
 		}
 
-		const $grid = $('<div class="fac-grid"></div>').attr("style", FAC_STYLE.grid).appendTo(this.$container);
+		const $grid = $('<div class="fac-grid"></div>').appendTo(this.$container);
 		sorted.forEach((row) => {
 			this._render_card(row).appendTo($grid);
 		});
@@ -199,29 +151,23 @@ class FuelApprovalConsole {
 
 	_render_card(row) {
 		const cls = row.over_threshold ? "fac-card fac-card--over" : "fac-card";
-		const $card = $(`<div class="${cls}"></div>`).attr(
-			"style",
-			FAC_STYLE.card + (row.over_threshold ? FAC_STYLE.card_over : "")
-		);
+		const $card = $(`<div class="${cls}"></div>`);
 
-		const $head = $('<div class="fac-card-head"></div>').attr("style", FAC_STYLE.card_head).appendTo($card);
-		const $identity = $('<div class="fac-card-identity"></div>').attr("style", FAC_STYLE.card_identity).appendTo($head);
+		const $head = $('<div class="fac-card-head"></div>').appendTo($card);
+		const $identity = $('<div class="fac-card-identity"></div>').appendTo($head);
 		$('<div class="fac-card-name"></div>')
-			.attr("style", FAC_STYLE.card_name)
 			.text(row.driver_name || row.driver || "—")
 			.appendTo($identity);
 		$('<div class="fac-card-sub"></div>')
-			.attr("style", FAC_STYLE.card_sub)
 			.text(row.vehicle_plate || row.vehicle || "—")
 			.appendTo($identity);
 		if (row.over_threshold) {
 			$('<span class="fac-card-flag"></span>')
-				.attr("style", FAC_STYLE.card_flag + fac_upper())
 				.text(__("Over Threshold"))
 				.appendTo($head);
 		}
 
-		const $metrics = $('<div class="fac-card-metrics"></div>').attr("style", FAC_STYLE.metrics).appendTo($card);
+		const $metrics = $('<div class="fac-card-metrics"></div>').appendTo($card);
 		this._add_metric(
 			$metrics,
 			__("Litres"),
@@ -233,17 +179,17 @@ class FuelApprovalConsole {
 			frappe.format(row.amount, { fieldtype: "Currency" }, { inline: true })
 		);
 
-		const $body = $('<div class="fac-card-body"></div>').attr("style", FAC_STYLE.body).appendTo($card);
+		const $body = $('<div class="fac-card-body"></div>').appendTo($card);
 		this._add_row($body, __("Project"), row.project || "—");
 		this._add_row($body, __("Platform"), row.fuel_platform || "—");
 		if (row.age_days !== null && row.age_days !== undefined) {
 			this._add_row($body, __("Age"), __("{0} day(s)", [row.age_days]));
 		}
 
-		const $foot = $('<div class="fac-card-foot"></div>').attr("style", FAC_STYLE.foot).appendTo($card);
-		$('<span class="fac-card-ref"></span>').attr("style", FAC_STYLE.ref).text(row.name).appendTo($foot);
+		const $foot = $('<div class="fac-card-foot"></div>').appendTo($card);
+		$('<span class="fac-card-ref"></span>').text(row.name).appendTo($foot);
 
-		const $actions = $('<div class="fac-card-actions"></div>').attr("style", FAC_STYLE.actions).appendTo($foot);
+		const $actions = $('<div class="fac-card-actions"></div>').appendTo($foot);
 		$('<button class="btn btn-sm btn-success"></button>')
 			.text(__("Approve"))
 			.on("click", () => this._approve(row))
@@ -257,15 +203,15 @@ class FuelApprovalConsole {
 	}
 
 	_add_metric($parent, label, value) {
-		const $m = $('<div class="fac-metric"></div>').attr("style", FAC_STYLE.metric).appendTo($parent);
-		$('<span class="fac-metric-label"></span>').attr("style", FAC_STYLE.metric_label + fac_upper()).text(label).appendTo($m);
-		$('<span class="fac-metric-value"></span>').attr("style", FAC_STYLE.metric_value).text(value).appendTo($m);
+		const $m = $('<div class="fac-metric"></div>').appendTo($parent);
+		$('<span class="fac-metric-label"></span>').text(label).appendTo($m);
+		$('<span class="fac-metric-value"></span>').text(value).appendTo($m);
 	}
 
 	_add_row($body, label, value) {
-		const $r = $('<div class="fac-field"></div>').attr("style", FAC_STYLE.field).appendTo($body);
-		$('<span class="fac-field-label"></span>').attr("style", FAC_STYLE.field_label).text(label).appendTo($r);
-		$('<span class="fac-field-value"></span>').attr("style", FAC_STYLE.field_value).text(value).appendTo($r);
+		const $r = $('<div class="fac-field"></div>').appendTo($body);
+		$('<span class="fac-field-label"></span>').text(label).appendTo($r);
+		$('<span class="fac-field-value"></span>').text(value).appendTo($r);
 	}
 
 	_approve(row) {
@@ -304,7 +250,7 @@ class FuelApprovalConsole {
 				{
 					fieldname: "context",
 					fieldtype: "HTML",
-					options: `<div class="text-muted" style="margin-bottom:8px">${frappe.utils.escape_html(
+					options: `<div class="text-muted fac-dialog-lede">${frappe.utils.escape_html(
 						row.name
 					)}</div>`,
 				},

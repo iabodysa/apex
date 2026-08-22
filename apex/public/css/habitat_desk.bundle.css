@@ -1,0 +1,43 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded on every desk page through `app_include_css` in hooks.py, because the bed palette
+   is read by two pages that render bed cards — the Front Desk and the Transfer Board — and
+   a per-page stylesheet would hold two copies that drift the first time a state is
+   recoloured. The rest of each page's styling stays in its own sibling `.css`. */
+
+.apex-bed {
+	border: 2px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg);
+	display: flex;
+	flex-direction: column;
+	cursor: pointer;
+	user-select: none;
+}
+
+.apex-bed--green {
+	background: var(--green-100);
+	border-color: var(--green-500);
+	color: var(--green-700);
+}
+
+.apex-bed--red {
+	background: var(--red-100);
+	border-color: var(--red-500);
+	color: var(--red-700);
+}
+
+/* Amber and grey are states a bed cannot be assigned from, so the cursor says so. */
+.apex-bed--amber {
+	background: var(--yellow-100);
+	border-color: var(--orange-500);
+	color: var(--orange-700);
+	cursor: not-allowed;
+}
+
+.apex-bed--grey {
+	background: var(--gray-100);
+	border-color: var(--gray-400);
+	color: var(--gray-600);
+	cursor: not-allowed;
+}

@@ -1,0 +1,114 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded by Page.load_assets (frappe/core/doctype/page/page.py:142) purely because this
+   file sits beside salis_dispatch_board.js and shares its name. No hooks.py entry and no
+   bundle step: renaming either file, or moving one out of this folder, silently unstyles
+   the page. */
+
+.sdb-panes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: var(--margin-md, 15px);
+	margin-block-start: var(--margin-md, 15px);
+}
+
+.sdb-pane {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	background: var(--card-bg);
+	overflow: hidden;
+}
+
+.sdb-pane-head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--margin-sm, 10px);
+	padding: var(--padding-sm, 10px) var(--padding-md, 15px);
+	border-block-end: 1px solid var(--border-color);
+	background: var(--subtle-fg, var(--control-bg));
+}
+
+.sdb-pane-title {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+}
+
+.sdb-pane-count {
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.sdb-pane-body {
+	padding: var(--padding-md, 15px);
+	display: flex;
+	flex-direction: column;
+	gap: var(--margin-sm, 10px);
+}
+
+.sdb-group-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-block-end: 6px;
+}
+
+.sdb-group-count {
+	font-weight: 600;
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.sdb-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.sdb-card {
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-sm, 10px);
+	background: var(--fg-color, var(--card-bg));
+}
+
+.sdb-card-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-block-end: 6px;
+}
+
+.sdb-card-title {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+}
+
+.sdb-kv {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: var(--text-sm, 12px);
+	padding-block: 1px;
+}
+
+.sdb-kv-label {
+	color: var(--text-muted);
+}
+
+.sdb-kv-value {
+	text-align: end;
+}
+
+.sdb-driver-split {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--margin-md, 15px);
+}
+
+.sdb-empty {
+	padding: var(--padding-lg, 20px) 0;
+	text-align: center;
+	font-size: var(--text-sm, 12px);
+}

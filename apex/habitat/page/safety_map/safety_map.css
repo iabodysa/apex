@@ -1,0 +1,144 @@
+/* Copyright (c) 2026, afmcoltd */
+
+/* Loaded by Page.load_assets (frappe/core/doctype/page/page.py:142) purely because this
+   file sits beside safety_map.js and shares its name. No hooks.py entry and no bundle
+   step: renaming either file, or moving one out of this folder, silently unstyles the page. */
+
+.sm-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--margin-md, 15px);
+	margin-block: var(--margin-sm, 10px) var(--margin-md, 15px);
+}
+
+.sm-summary-title {
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.sm-summary-counts {
+	font-size: var(--text-sm, 12px);
+	color: var(--text-muted);
+}
+
+.sm-damage-banner {
+	background: var(--yellow-100);
+	border: 1px solid var(--orange-500);
+	color: var(--orange-700);
+	border-radius: var(--border-radius-md, 8px);
+	padding: var(--padding-sm, 10px) var(--padding-md, 15px);
+	margin-block-end: var(--margin-md, 15px);
+	font-size: var(--text-sm, 12px);
+}
+
+.sm-floor {
+	margin-block-end: var(--margin-lg, 20px);
+}
+
+.sm-floor-header {
+	font-size: var(--text-md, 14px);
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-block-end: var(--margin-sm, 10px);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+/* Arabic has no letter case, and letter-spacing breaks the joins between letters. */
+[dir="rtl"] .sm-floor-header {
+	text-transform: none;
+	letter-spacing: normal;
+}
+
+.sm-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	gap: var(--margin-sm, 10px);
+}
+
+.sm-room,
+.sm-zone {
+	border-radius: var(--border-radius-md, 8px);
+	padding: 14px 12px;
+	min-height: 86px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	cursor: pointer;
+}
+
+.sm-room {
+	border: 2px solid var(--border-color);
+	justify-content: space-between;
+	background: var(--card-bg);
+}
+
+.sm-room--red {
+	background: var(--red-100);
+	border-color: var(--red-500);
+	color: var(--red-700);
+	box-shadow: 0 0 0 2px var(--red-500);
+}
+
+.sm-room--amber {
+	background: var(--yellow-100);
+	border-color: var(--orange-500);
+	color: var(--orange-700);
+	box-shadow: 0 0 0 2px var(--orange-500);
+}
+
+.sm-room--green {
+	background: var(--green-100);
+	border-color: var(--green-500);
+	color: var(--green-700);
+}
+
+.sm-room-number {
+	font-weight: 600;
+	font-size: var(--text-md, 14px);
+}
+
+.sm-room-badge {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.sm-room-badge--ok {
+	opacity: 0.75;
+}
+
+.sm-zone {
+	border: 1px dashed var(--border-color);
+	align-items: center;
+	justify-content: center;
+	background: var(--subtle-fg, var(--control-bg));
+	color: var(--text-muted);
+}
+
+.sm-zone-icon {
+	font-size: 18px;
+}
+
+.sm-zone-label {
+	font-size: var(--text-sm, 12px);
+}
+
+.sm-empty {
+	padding-block: var(--padding-xl, 30px);
+	text-align: center;
+	font-size: var(--text-md, 14px);
+}
+
+.sm-skeleton .skeleton-block {
+	background: var(--skeleton-bg);
+	border-radius: 6px;
+	height: 20px;
+	margin-block: var(--margin-sm, 10px);
+}
+
+.sm-skeleton .sm-grid .skeleton-block {
+	height: 86px;
+	border-radius: 8px;
+	margin-block: 0;
+}
