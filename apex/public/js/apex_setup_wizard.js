@@ -75,10 +75,10 @@ apex.setup.slides_settings = [
 	},
 	{
 		name: "apex_recovery_support",
-		title: __("Apex — Recovery and Support"),
+		title: __("Apex — Recovery"),
 		icon: "fa fa-money",
 		help: __(
-			"Employee Advance recovery and the Salis support SLA are off by default. Enable them only after Payroll, Accounts, and Support have supplied the native records and schedule below."
+			"Employee Advance recovery is off by default. Enable it only after Payroll and Accounts have supplied the native records the recovery schedule needs."
 		),
 		fields: [
 			{
@@ -92,128 +92,6 @@ apex.setup.slides_settings = [
 				fieldtype: "Check",
 				default: 0,
 				description: __("Off by default — schedules draft HRMS Additional Salary installments only after native accounts and payroll are configured."),
-			},
-			{
-				fieldname: "apex_employee_advance_recovery_component",
-				label: __("Recovery Salary Component"),
-				fieldtype: "Link",
-				options: "Salary Component",
-				// `after_install` seeds this component disabled, so the picker always has an
-				// answer and nobody has to create a record from inside the wizard. `only_select`
-				// removes the "Create a new" affordance, which loses wizard state when taken.
-				default: "Employee Advance Recovery",
-				only_select: 1,
-				get_query: () => ({ filters: { type: "Deduction" } }),
-				description: __("Native HRMS Deduction component used for Employee Advance installments."),
-			},
-			{
-				fieldname: "apex_employee_advance_recovery_max_percent",
-				label: __("Maximum Recovery Percent"),
-				fieldtype: "Percent",
-				default: 50,
-				description: __("Per-installment scheduling limit. It cannot exceed 50% of actual pay-period gross pay from the native Salary Slip preview."),
-			},
-			{
-				fieldname: "apex_support_sb",
-				fieldtype: "Section Break",
-				label: __("Salis Support SLA"),
-			},
-			{
-				fieldname: "apex_enable_salis_support_sla",
-				label: __("Enable the Salis support SLA?"),
-				fieldtype: "Check",
-				default: 0,
-				description: __("Off by default — creates the native ERPNext Issue SLA only with a complete operating schedule."),
-			},
-			{
-				fieldname: "apex_salis_support_holiday_list",
-				label: __("Support Holiday List Name"),
-				fieldtype: "Data",
-				default: __("Salis Support"),
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-				description: __("Name for the native ERPNext Holiday List created during setup."),
-			},
-			{
-				fieldname: "apex_salis_support_weekly_off",
-				label: __("Weekly Off"),
-				fieldtype: "Select",
-				options: "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
-				default: "Friday",
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-			},
-			{ fieldname: "apex_support_dates_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
-			{
-				fieldname: "apex_salis_support_holiday_from_date",
-				label: __("Holiday Calendar From Date"),
-				fieldtype: "Date",
-				default: frappe.datetime.year_start(),
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-			},
-			{
-				fieldname: "apex_salis_support_holiday_to_date",
-				label: __("Holiday Calendar To Date"),
-				fieldtype: "Date",
-				default: frappe.datetime.year_end(),
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-			},
-			{ fieldname: "apex_support_country_sb", fieldtype: "Section Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
-			{
-				fieldname: "apex_salis_support_country",
-				label: __("Holiday Country Code"),
-				fieldtype: "Data",
-				default: "SA",
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-				description: __("Optional ISO country code used by ERPNext's native local-holiday generator."),
-			},
-			{ fieldname: "apex_support_sub_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
-			{
-				fieldname: "apex_salis_support_subdivision",
-				label: __("Holiday Subdivision Code"),
-				fieldtype: "Data",
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-				description: __("Optional subdivision code for the selected country."),
-			},
-			{ fieldname: "apex_support_hours_sb", fieldtype: "Section Break", label: __("Operating Hours"), depends_on: "eval:doc.apex_enable_salis_support_sla" },
-			{
-				fieldname: "apex_salis_support_workdays",
-				label: __("Support Workdays"),
-				fieldtype: "MultiCheck",
-				// A bare number is a fixed column count the narrow wizard slide cannot honour;
-				// "8rem 4" gives a minimum width AND a maximum, so the days wrap instead of
-				// stacking (frappe/public/js/frappe/form/controls/multicheck.js:17-23).
-				// sort_options defaults to true and would reorder the week alphabetically
-				// (:79-81), so it is turned off to keep Sunday first.
-				columns: "8rem 4",
-				sort_options: false,
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-				// No `default` here: FieldGroup.set_values routes a default through
-				// base_control.js:248 validate_and_set_in_model, and MultiCheck defines no
-				// validate, so a defaulted MultiCheck throws while the slide is being built
-				// and the slide never renders. The days are pre-ticked in `onload` instead.
-				options: [
-					"Sunday",
-					"Monday",
-					"Tuesday",
-					"Wednesday",
-					"Thursday",
-					"Friday",
-					"Saturday",
-				].map((day) => ({ label: __(day), value: day })),
-			},
-			{ fieldname: "apex_support_time_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
-			{
-				fieldname: "apex_salis_support_start_time",
-				label: __("Support Start Time"),
-				fieldtype: "Time",
-				default: "08:00:00",
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
-			},
-			{
-				fieldname: "apex_salis_support_end_time",
-				label: __("Support End Time"),
-				fieldtype: "Time",
-				default: "17:00:00",
-				depends_on: "eval:doc.apex_enable_salis_support_sla",
 			},
 		],
 	},

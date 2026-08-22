@@ -98,7 +98,8 @@ def _apply_salis_settings(args, company, cost_center):
     if cost_center:
         salis.default_cost_center = cost_center
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
-    salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
+    if "apex_enable_approvals" in args:
+        salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
     salis.save(ignore_permissions=True)
 
 def _apply_payment_routing(args):
