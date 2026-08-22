@@ -139,7 +139,8 @@
    "label": "Room",
    "options": "Room",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Room\",\"status\",\"!=\",\"Under Maintenance\"]]"
   },
   {
    "fieldname": "bed",
@@ -148,7 +149,8 @@
    "label": "Bed",
    "options": "Bed",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Bed\",\"status\",\"=\",\"Available\"]]"
   },
   {
    "fieldname": "accommodation_assignment_placement_col",
@@ -411,7 +413,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-08-17 01:10:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Assignment",

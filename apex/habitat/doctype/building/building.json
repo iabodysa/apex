@@ -138,7 +138,8 @@
    "in_standard_filter": 1,
    "label": "Site",
    "options": "Site",
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Site\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "default": "Active",
@@ -877,7 +878,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-08-16 07:10:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

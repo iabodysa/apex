@@ -44,7 +44,8 @@
    "in_list_view": 1,
    "label": "Wash Platform",
    "mandatory_depends_on": "eval:doc.status=='Approved'||doc.status=='Done'",
-   "options": "Wash Platform"
+   "options": "Wash Platform",
+   "link_filters": "[[\"Wash Platform\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "wash_request_request_col",
@@ -114,7 +115,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 05:23:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Wash Request",

@@ -64,7 +64,8 @@
    "fieldtype": "Link",
    "options": "Room",
    "reqd": 1,
-   "idx": 4
+   "idx": 4,
+   "link_filters": "[[\"Room\",\"status\",\"!=\",\"Under Maintenance\"]]"
   },
   {
    "doctype": "DocField",
@@ -74,7 +75,8 @@
    "options": "Bed",
    "reqd": 1,
    "depends_on": "eval:doc.to_room",
-   "idx": 5
+   "idx": 5,
+   "link_filters": "[[\"Bed\",\"status\",\"=\",\"Available\"]]"
   },
   {
    "doctype": "DocField",
@@ -222,5 +224,6 @@
    "idx": 2,
    "report": 1
   }
- ]
+ ],
+ "modified": "2026-08-22 15:00:00.000000"
 }

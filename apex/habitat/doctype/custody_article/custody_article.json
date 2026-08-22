@@ -35,7 +35,8 @@
    "label": "Category",
    "options": "Custody Asset Category",
    "reqd": 1,
-   "idx": 4
+   "idx": 4,
+   "link_filters": "[[\"Custody Asset Category\",\"is_active\",\"=\",1]]"
   },
   {
    "doctype": "DocField",
@@ -217,6 +218,6 @@
   "custody_article_sec_system",
   "naming_series"
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "search_fields": "article_name, consumable_lifespan_months"
 }

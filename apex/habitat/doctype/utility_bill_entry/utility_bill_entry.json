@@ -62,7 +62,8 @@
    "in_standard_filter": 1,
    "label": "Utility Account",
    "options": "Utility Account",
-   "reqd": 1
+   "reqd": 1,
+   "link_filters": "[[\"Utility Account\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "default": "Draft",
@@ -288,7 +289,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-26 09:03:55.752811",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Utility Bill Entry",

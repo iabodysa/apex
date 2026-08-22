@@ -71,7 +71,8 @@
    "label": "Rental Office",
    "options": "Rental Office",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Rental Office\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "rental_vehicle_movement_overview_col",
@@ -134,7 +135,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-11 04:09:36.115685",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Vehicle Movement",

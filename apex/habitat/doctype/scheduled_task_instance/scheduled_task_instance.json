@@ -43,7 +43,8 @@
    "in_list_view": 1,
    "label": "Template",
    "options": "Scheduled Task Template",
-   "reqd": 1
+   "reqd": 1,
+   "link_filters": "[[\"Scheduled Task Template\",\"is_active\",\"=\",1]]"
   },
   {
    "fieldname": "assignment",
@@ -58,7 +59,8 @@
    "fieldtype": "Link",
    "label": "Task Catalog",
    "options": "Safety Task Catalog",
-   "read_only": 1
+   "read_only": 1,
+   "link_filters": "[[\"Safety Task Catalog\",\"is_active\",\"=\",1]]"
   },
   {
    "fieldname": "due_date",
@@ -167,7 +169,7 @@
    "link_fieldname": "scheduled_task_instance"
   }
  ],
- "modified": "2026-08-07 05:23:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Instance",

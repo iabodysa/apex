@@ -120,7 +120,8 @@
    "fieldtype": "Link",
    "label": "Safety Task (from Catalog)",
    "options": "Safety Task Catalog",
-   "idx": 12
+   "idx": 12,
+   "link_filters": "[[\"Safety Task Catalog\",\"is_active\",\"=\",1]]"
   },
   {
    "doctype": "DocField",
@@ -130,7 +131,7 @@
    "idx": 13
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Scheduling",
    "link_doctype": "Scheduled Task Instance",
@@ -152,5 +153,6 @@
    "delete": 1
   }
  ],
- "search_fields": "template_name, task_type, frequency"
+ "search_fields": "template_name, task_type, frequency",
+ "modified": "2026-08-22 15:00:00.000000"
 }

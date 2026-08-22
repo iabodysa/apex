@@ -268,7 +268,7 @@
    "link_fieldname": "route_plan"
   }
  ],
- "modified": "2026-08-16 22:40:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Plan",
@@ -327,12 +327,36 @@
    "report": 1,
    "role": "Internal Auditor"
   },
-  {"permlevel": 1, "read": 1, "role": "Fleet Manager"},
-  {"permlevel": 1, "read": 1, "role": "Fleet Project Manager"},
-  {"permlevel": 1, "read": 1, "role": "Fleet Supervisor"},
-  {"permlevel": 1, "read": 1, "role": "System Manager"},
-  {"permlevel": 1, "read": 1, "role": "Finance Manager"},
-  {"permlevel": 1, "read": 1, "role": "Internal Auditor"}
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Project Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Fleet Supervisor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Finance Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Internal Auditor"
+  }
  ],
  "row_format": "Dynamic",
  "search_fields": "route_name, project, driver",

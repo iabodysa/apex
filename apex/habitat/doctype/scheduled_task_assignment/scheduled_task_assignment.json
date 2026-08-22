@@ -17,7 +17,8 @@
    "in_list_view": 1,
    "label": "Template",
    "options": "Scheduled Task Template",
-   "reqd": 1
+   "reqd": 1,
+   "link_filters": "[[\"Scheduled Task Template\",\"is_active\",\"=\",1]]"
   },
   {
    "fieldname": "building",
@@ -48,7 +49,7 @@
    "link_fieldname": "assignment"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Assignment",

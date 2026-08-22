@@ -109,7 +109,8 @@
    "fieldname": "rental_office",
    "fieldtype": "Link",
    "label": "Rental Office",
-   "options": "Rental Office"
+   "options": "Rental Office",
+   "link_filters": "[[\"Rental Office\",\"status\",\"=\",\"Active\"]]"
   },
   {
    "fieldname": "vehicle_status_col2",
@@ -411,7 +412,7 @@
    "link_fieldname": "vehicle"
   }
  ],
- "modified": "2026-08-16 22:10:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Vehicle",

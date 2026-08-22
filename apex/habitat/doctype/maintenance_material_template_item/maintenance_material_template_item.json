@@ -22,7 +22,8 @@
    "reqd": 1,
    "in_list_view": 1,
    "idx": 1,
-   "columns": 4
+   "columns": 4,
+   "link_filters": "[[\"Maintenance Material\",\"is_active\",\"=\",1]]"
   },
   {
    "doctype": "DocField",
@@ -53,5 +54,5 @@
    "idx": 4
   }
  ],
- "modified": "2026-06-09 10:00:00.000000"
+ "modified": "2026-08-22 15:00:00.000000"
 }

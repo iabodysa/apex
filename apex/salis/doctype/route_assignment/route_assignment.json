@@ -56,7 +56,8 @@
    "label": "Route Template",
    "options": "Route Template",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Route Template\",\"is_active\",\"=\",1]]"
   },
   {
    "fieldname": "work_shift",
@@ -66,7 +67,8 @@
    "label": "Work Shift",
    "options": "Work Shift",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Work Shift\",\"is_active\",\"=\",1]]"
   },
   {
    "fetch_from": "work_shift.shift_name",
@@ -216,7 +218,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-16 22:40:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",

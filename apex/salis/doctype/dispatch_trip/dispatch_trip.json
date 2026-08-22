@@ -92,7 +92,8 @@
    "label": "Route Template",
    "options": "Route Template",
    "permlevel": 1,
-   "search_index": 1
+   "search_index": 1,
+   "link_filters": "[[\"Route Template\",\"is_active\",\"=\",1]]"
   },
   {
    "fieldname": "project",
@@ -409,7 +410,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-16 22:40:00.000000",
+ "modified": "2026-08-22 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

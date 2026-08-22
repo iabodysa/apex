@@ -52,7 +52,8 @@
    "label": "Task",
    "options": "Safety Task Catalog",
    "reqd": 1,
-   "idx": 5
+   "idx": 5,
+   "link_filters": "[[\"Safety Task Catalog\",\"is_active\",\"=\",1]]"
   },
   {
    "doctype": "DocField",
@@ -295,5 +296,5 @@
    "link_fieldname": "source_execution"
   }
  ],
- "modified": "2026-08-07 20:24:00.000000"
+ "modified": "2026-08-22 15:00:00.000000"
 }
