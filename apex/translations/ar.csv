@@ -14,12 +14,13 @@ A Reason is required to record SIM {0} as {1}.,يلزم سبب لتسجيل ال
 A SIM Card asset belonging to one Telecom Contract. Its mobile number stays editable in place; custody state is projected from the latest submitted SIM Custody Assignment.,أصل شريحة اتصال يتبع عقد اتصالات واحداً. يبقى رقم جواله قابلاً للتعديل في مكانه، وتُشتق حالة العهدة من آخر إسناد عهدة شريحة مُعتمد.
 A SIM can only move to a contract within its own company.,لا يمكن نقل الشريحة إلا إلى عقد ضمن شركتها نفسها.
 A SIM can only move to a submitted contract.,لا يمكن نقل الشريحة إلا إلى عقد مُعتمد.
-"A SIM has been suspended: {0} (held by {1}).",تم تعليق شريحة: {0} (بحوزة {1}).
-"A SIM has been suspended: {0}.",تم تعليق شريحة: {0}.
+A SIM has been suspended: {0} (held by {1}).,تم تعليق شريحة: {0} (بحوزة {1}).
+A SIM has been suspended: {0}.,تم تعليق شريحة: {0}.
 A Salis Driver is required for a driver access token.,يلزم تحديد سائق ساليس لإصدار رمز دخول للسائق.
 A Security-category finding requires photo evidence before it can escalate. Please attach an Evidence Photo before submitting.,تتطلب ملاحظة فئة الأمن صورة إثبات قبل تصعيدها. أرفق صورة إثبات قبل الاعتماد.
 A Top-up request requires an active Fuel Quota.,يتطلب طلب زيادة الحصة وجود حصة وقود سارية.
 A Utility Bill Entry already overlaps this account's billing period: {0},يوجد سجل فاتورة خدمات يتداخل مع فترة فوترة هذا الحساب: {0}
+A Web Push VAPID public key is required to enable web push.,مفتاح إشعارات الدفع العام مطلوب لتفعيل الإشعارات.
 A Work Order already exists for this Maintenance Request: {0},يوجد بالفعل أمر عمل لطلب الصيانة هذا: {0}
 A backdating role has no effect while the window is zero days.,دور التأريخ الرجعي بلا أثر ما دامت النافذة صفر يوم.
 A building is required to build the checklist.,يلزم مبنى لبناء قائمة الفحص.
@@ -60,7 +61,7 @@ A posting cannot be dated in the future.,لا يمكن تأريخ الحركة �
 A reason is required to reject a handover.,يلزم سبب لرفض التسليم.
 A reason is required to reopen a Maintenance Request.,يلزم سبب لإعادة فتح طلب الصيانة.
 A reason is required to revoke a Building License.,يلزم سبب لسحب رخصة المبنى.
-A rent payment is due today and remains unpaid,دفعة إيجار مستحقة اليوم ولم تُسدد بعد
+A rent payment falls due in seven days and is still unpaid,دفعة إيجار تستحق بعد سبعة أيام ولم تُسدد بعد
 A request reference is required.,مرجع الطلب مطلوب.
 A resolution is required to close a Vehicle Incident.,يلزم توضيح نتيجة المعالجة لإغلاق بلاغ المركبة.
 A revoked Building License cannot be cancelled or reinstated.,لا يمكن إلغاء رخصة مبنى مسحوبة أو إعادتها إلى حالة سارية.
@@ -609,6 +610,7 @@ Block vehicle assignment when the linked vehicle has expired compliance.,منع 
 Blocked,محظور
 Blocked Driver Clearances,إخلاءات طرف السائقين المعلّقة
 Blocked by Outstanding Items,موقوف بسبب مستحقات قائمة
+"Blocks every email this app would send, including its own Notification alerts, whatever those alerts are set to. Leave OFF until the site's outgoing email (SMTP) is configured. Turning it ON does not switch any alert on by itself — it stops holding them back, and each alert still sends only if it is enabled. Email from other apps on this site is not affected.",يمنع كل بريد يرسله هذا التطبيق، بما في ذلك تنبيهاته هو، مهما كان ضبط تلك التنبيهات. اتركه مغلقاً حتى يُضبط البريد الصادر للموقع (SMTP). وتشغيله لا يفعّل أي تنبيه بنفسه — يرفع المنع فقط، ويبقى كل تنبيه يرسل إذا كان مفعّلاً. ولا يتأثر بريد التطبيقات الأخرى على هذا الموقع.
 Boarded,على متن
 Boarded At,وقت الصعود
 Boarded Count,عدد الصاعدين
@@ -911,6 +913,7 @@ Company & Currency,الشركة والعملة
 Company VAT Registration Number,الرقم الضريبي للشركة
 Company custody items have been returned,سلّم عهدة الشركة
 Company is required to enable Employee Advance recovery.,الشركة مطلوبة لتفعيل استرداد سلفة الموظف.
+Company {0} has no chart of accounts yet.,الشركة {0} ليس لها دليل حسابات بعد.
 Company's share (%) of shared utility bills for this building. Agreed with the property management office. Does not affect rent.,حصة الشركة (٪) من فواتير المرافق المشتركة لهذا المبنى. متفق عليها مع مكتب إدارة العقار. لا تؤثر على الإيجار.
 Complaint,شكوى
 Complaint not found.,الشكوى غير موجودة.
@@ -1175,7 +1178,6 @@ Create Vehicle Suspension,إنشاء إيقاف مركبة
 Create Work Order,إنشاء أمر عمل
 Create a Fuel Quota,إنشاء حصة وقود
 Create a Vehicle Category,أنشئ فئة مركبات
-Create demo data to explore Apex?,إنشاء بيانات تجريبية لاستكشاف أبكس؟
 Create one transport request,إنشاء طلب نقل واحد
 Create the first route plan so trips can be dispatched against it.,أنشئ أول خطة مسار حتى يمكن تسيير الرحلات وفقها.
 Create the payment document for this approved request?,هل تريد إنشاء مستند الدفعة لهذا الطلب المعتمد؟
@@ -1256,7 +1258,7 @@ Custody Return Overdue,إرجاع العهدة متأخر
 Custody Return Receipt,إيصال إرجاع عهدة
 Custody Return Register,سجل إرجاع العهد
 Custody Returned,تم إرجاع العهدة
-Custody Value (SAR),قيمة العهدة (ريال)
+Custody Value ({0}),قيمة العهدة ({0})
 Custody Value in Employee Hands (SAR),قيمة العهدة لدى الموظفين (ريال)
 Custody and Costs,العهد والتكاليف
 Custody and Costs Go-Live,تشغيل العهد والتكاليف
@@ -1378,7 +1380,6 @@ Delivered by,الجهة المسلِّمة
 "Delivers a tracked Facility Asset from a procurement intake store to an accommodation, gated behind a 3-exit transfer lock and an on-site code receipt.",يسلّم أصل منشأة خاضعًا للتتبع من مخزن استلام المشتريات إلى السكن، ولا يتم النقل إلا بعد اجتياز ثلاث نقاط تحقق للخروج وتأكيد الاستلام في الموقع بالرمز.
 Delivery,التسليم
 Delivery Date,تاريخ التسليم
-Demo Data,البيانات التجريبية
 Demo Data Partly Removed,أُزيلت البيانات التجريبية جزئيًا
 Demo Data Removed,تمت إزالة البيانات التجريبية
 Depart Time,وقت المغادرة
@@ -2573,7 +2574,6 @@ Masar Worker Token,رمز دخول مسار
 Master Data,البيانات الأساسية
 "Master agreement with an external subcontractor (pest control, sewage suction, deep cleaning, generator service, fire equipment service).",اتفاقية رئيسية مع مقاول خارجي لخدمات مكافحة الآفات، وشفط الصرف الصحي، والتنظيف العميق، وصيانة المولدات ومعدات الحريق.
 Master categories for issuable custody articles.,فئات أساسية لأصناف العهدة القابلة للصرف.
-"Master kill-switch for all outgoing email from this app. When OFF (default), the app sends no email even if individual Notifications or Auto Email Reports are enabled. Turn ON only after the site's outgoing email (SMTP) is configured.",مفتاح إيقاف رئيسي لكل البريد الصادر من هذا التطبيق. عند الإيقاف، وهو الوضع الافتراضي، لا يرسل التطبيق أي بريد حتى لو كانت الإشعارات أو تقارير البريد التلقائية مفعّلة. فعّله بعد ضبط البريد الصادر SMTP للموقع فقط.
 "Master switch for outbound WhatsApp/SMS messages (worker Masar links, ride and request status). When OFF (default), every send is a logged no-op. Turn ON only after the gateway URL and API key below are set.",المفتاح الرئيسي لرسائل واتساب والرسائل النصية الصادرة (روابط مسار للعمال، وحالة الرحلات والطلبات). عند الإيقاف، وهو الوضع الافتراضي، يُسجَّل الإرسال دون تنفيذ. فعّله بعد ضبط عنوان البوابة ومفتاح الواجهة البرمجية أدناه فقط.
 Master switch indicating that an external frontend is integrated with this backend. This is a documentation/coordination flag; it does not start or stop the API.,مفتاح رئيسي يشير إلى تكامل واجهة أمامية خارجية مع هذا الخادم الخلفي. وهو مؤشر توثيقي/تنسيقي فقط؛ لا يشغّل الواجهة البرمجية ولا يوقفها.
 Master switch to enable approval routing across Salis transactions.,المفتاح الرئيسي لتفعيل مسارات الاعتماد في معاملات ساليس.
@@ -2914,7 +2914,6 @@ Odometer on File,العداد المسجّل
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
 Odometer {0} is lower than the last reading for this vehicle ({1}).,قراءة العدّاد {0} أقل من آخر قراءة لهذه المركبة ({1}).
-"Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings.",معطّل افتراضيًا — ينشئ موقع سكن تجريبيًا يضم غرفًا وأسرّة وساكنًا وطلب صيانة مفتوحًا. يمكنك إزالة هذه البيانات لاحقًا من إعدادات أبكس.
 Off by default — creates the native ERPNext Issue SLA only with a complete operating schedule.,معطّلة افتراضيًا. لا تنشئ اتفاقية مستوى الخدمة للبلاغات في ERPNext إلا بعد اكتمال جدول العمل.
 Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
 "Off by default — operational memo only, no GL entries until you enable it.",معطّل افتراضيًا — مذكّرة تشغيلية فقط، بلا قيود في دفتر الأستاذ العام حتى تفعّله.
@@ -3049,6 +3048,7 @@ Open your personal worker portal (Masar): {0},افتح بوابتك الشخصي
 Operating Card,بطاقة التشغيل
 Operating Days This Month,أيام التشغيل هذا الشهر
 Operating Days Trend,اتجاه أيام التشغيل
+Operating Hours,ساعات العمل
 Operational,تشغيلي
 Operational Alert Windows,مدد التنبيهات التشغيلية
 Operational Depreciation Aging,أعمار الإهلاك التشغيلي
@@ -3302,6 +3302,7 @@ Planned Start,بداية الرحلة المخططة
 Planned Start Date,تاريخ البداية المخطط له
 Planned Time,الوقت المخطط
 Planned departure date for a temporary stay; supervisor is alerted as it approaches or if the worker is still checked in past it.,تاريخ المغادرة المخطط لإقامة مؤقتة؛ يُنبَّه المشرف عند اقترابه أو إذا ظل العامل مُسكَّنًا بعده.
+Planned trips still assigned to him ({0}),رحلات مخططة ما زالت باسمه ({0})
 Plans,الخطط
 Plate,اللوحة
 Plate (Normalized),اللوحة (مُنسَّقة)
@@ -3508,6 +3509,7 @@ Reason for the Result,سبب النتيجة
 Reason: {0},السبب: {0}
 Reassign,إعادة الإسناد
 Reassign driver,إعادة إسناد السائق
+Reassign the trips first,عيّن الرحلات لسائق آخر أولًا
 Receipt,استلام
 Receipt Confirmed On,تاريخ تأكيد الاستلام
 Receipt Date,تاريخ الاستلام
@@ -3595,11 +3597,11 @@ Recovery,الاسترداد
 Recovery Advance,سلفة الاسترداد
 Recovery Amount,مبلغ الاسترداد
 Recovery Details,تفاصيل الاسترداد
-Recovery is disabled,الاسترداد معطّل
 Recovery Salary Component,مكوّن راتب الاسترداد
 Recovery Salary Component is required to enable recovery.,مكوّن راتب الاسترداد مطلوب لتفعيل الاسترداد.
 Recovery Salary Component must be a Deduction.,يجب أن يكون مكوّن راتب الاسترداد من نوع «خصم».
 Recovery Type,نوع الاسترداد
+Recovery is disabled,الاسترداد معطّل
 "Recurrence interval used to generate task instances from this template, from daily through annually.",فترة التكرار المستخدمة لإنشاء سجلات تنفيذ المهام من هذا القالب، من يومي إلى سنوي.
 Recurring Amount,المبلغ الدوري
 Recurring Amount Including VAT,المبلغ الدوري شامل الضريبة
@@ -3692,7 +3694,7 @@ Renews Automatically,يتجدد تلقائيًا
 Rent,الإيجار
 Rent & Billing,الإيجار والفوترة
 Rent (SAR),الإيجار (ريال)
-Rent Payment Due (Unpaid),دفعة إيجار مستحقة (غير مسددة)
+Rent Payment Due,دفعة إيجار مستحقة
 Rent Payment Schedule,جدول سداد الإيجارات
 "Rent for {0} — instalment due {1} ({2}), settling {3}.",إيجار {0} — قسط مستحق في {1} ({2})، تسديد {3}.
 Rent payment generated for building: {0} under lease {1},أُنشئت دفعة الإيجار للمبنى: {0} ضمن عقد الإيجار {1}
@@ -3987,7 +3989,7 @@ SIM Exceptions,استثناءات الشرائح
 SIM Lines Covered,عدد الشرائح المشمولة
 SIM Lines Held Under This Contract,الشرائح المسجّلة على هذا العقد
 SIM Suspended,شريحة موقوفة
-"SIM Suspended: {0}",تعليق شريحة: {0}
+SIM Suspended: {0},تعليق شريحة: {0}
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
 SIM details,تفاصيل الشريحة
 SIMs,الشرائح
@@ -4059,6 +4061,7 @@ Salis Payment Request,طلب دفع ساليس
 Salis Rentals Costs Settlements Pending Approval,تسويات تكاليف إيجار ساليس بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات أسطول مندوبي ساليس الموقوفة
 Salis Settings,إعدادات ساليس
+Salis Support,دعم ساليس
 Salis Support SLA,اتفاقية مستوى دعم ساليس
 Salis Vehicle,مركبة ساليس
 Salis Vehicle Compliance,امتثال مركبات ساليس
@@ -4175,13 +4178,6 @@ Select the vehicle being handed over.,اختر المركبة الجاري تس�
 Select the vehicle for this trip.,اختر المركبة لهذه الرحلة.
 Select the vehicle to be fuelled.,اختر المركبة المراد تزويدها بالوقود.
 Select the vehicle to release.,اختر المركبة المراد فك ارتباطها بالسائق.
-A Web Push VAPID public key is required to enable web push.,مفتاح إشعارات الدفع العام مطلوب لتفعيل الإشعارات.
-The Web Push VAPID public key is not valid base64url.,مفتاح إشعارات الدفع العام ليس بترميز base64url صالح.
-"The Web Push VAPID public key must decode to 65 bytes starting with 0x04; this one decodes to {0}. Paste the uncompressed public key, not a truncated or DER-encoded one.","يجب أن يفكّ مفتاح إشعارات الدفع العام إلى ٦٥ بايت تبدأ بـ0x04، وهذا يفكّ إلى {0}. الصق المفتاح العام كاملًا غير المضغوط، لا مبتورًا ولا بترميز DER."
-Reassign the trips first,عيّن الرحلات لسائق آخر أولًا
-Planned trips still assigned to him ({0}),رحلات مخططة ما زالت باسمه ({0})
-"Still on the road at the time of the stop: {0}. Recall or close each one.","رحلات كانت جارية وقت الإيقاف: {0}. استدعِ كل واحدة أو أقفلها."
-"{0} still has {1} planned trip(s): {2}. Assign another driver to them first.","{0} عنده {1} رحلة مخططة: {2}. عيّن لها سائقًا آخر أولًا."
 Select the {0} this payment settles. A payment with no invoice behind it settles nothing in the ledger.,اختر {0} التي تسددها هذه الدفعة. لا تسوي الدفعة أي مبلغ في الدفتر دون فاتورة مرتبطة بها.
 "Select this building's address, or a Site, to show it here.",اختر عنوانَ هذا المبنى، أو موقعًا، لعرضه هنا.
 Selected Bed {0} does not belong to Room {1},السرير المحدد {0} لا ينتمي إلى الغرفة {1}
@@ -4242,7 +4238,6 @@ Set only when the request concerns a specific bed.,يُحدَّد فقط عند�
 Set the Cadence,حدّد تكرار الجولة
 Set the Check-in Date,حدّد تاريخ التسكين
 Set the Checkout Date,حدّد تاريخ المغادرة
-Set the Company's Default Employee Advance Account before enabling recovery.,اضبط حساب سلفة الموظف الافتراضي في الشركة قبل تفعيل الاسترداد.
 Set the Departure Time,حدّد وقت المغادرة
 Set the Handover Date,حدّد تاريخ التسليم
 Set the Incident Time,حدّد وقت الحادث
@@ -4476,6 +4471,7 @@ Stay Type,نوع الإقامة
 Sticker Requested,تم طلب الملصق
 Still Held,لا تزال بالحيازة
 Still Outstanding,المتبقي
+Still on the road at the time of the stop: {0}. Recall or close each one.,رحلات كانت جارية وقت الإيقاف: {0}. استدعِ كل واحدة أو أقفلها.
 Still open on the resident's account,ما زالت مفتوحة على الساكن
 Stock Engine,محرّك المخزون
 Stock Entry,حركة المخزون
@@ -4637,7 +4633,7 @@ Telecom Cost Allocation,توزيع تكاليف الاتصالات
 Telecom Service Contract,عقد خدمة اتصالات
 Telecom Service Provider,مزوّد خدمة الاتصالات
 Telecom Supplier,مورّد الاتصالات
-"Telecom contracts expiring soon: {0}",عقود اتصالات على وشك الانتهاء: {0}
+Telecom contracts expiring soon: {0},عقود اتصالات على وشك الانتهاء: {0}
 Telecom service — {0} — {1} ({2}),خدمة اتصالات — {0} — {1} ({2})
 "Telecom {0} — billing period {1} ({2}), settling {3}.",اتصالات {0} — فترة الفوترة {1} ({2})، سداداً للفاتورة {3}.
 Temp,مؤقت
@@ -4676,7 +4672,6 @@ That did not go through.,ما تمت العملية.
 That vehicle assignment does not belong to your account.,إسناد المركبة هذا ما يخص حسابك.
 That vehicle is not assigned to you. You can only request fuel for your own vehicle.,تلك المركبة غير مسندة إليك. يمكنك طلب الوقود لمركبتك فقط.
 The Apex demo data could not be built. It stopped at {0}; the Error Log has why.,ما قدر يبني بيانات أبكس التجريبية. وقف عند {0}، والسبب في سجل الأخطاء.
-The Default Employee Advance Account must be Receivable.,يجب أن يكون حساب سلفة الموظف الافتراضي حساب ذمم مدينة.
 The Dispatch Trip being executed; its linked Transport Request carries the worker manifest this log records boarding against.,رحلة التسيير الجاري تنفيذها؛ ويحمل طلب النقل المرتبط بها كشف الركاب الذي يسجل هذا السجل صعودهم.
 The Dispatch Trip the scanned pass was issued against.,رحلة التسيير التي صدر التصريح الممسوح مقابلها.
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.
@@ -4686,6 +4681,8 @@ The Other Party,الطرف الآخر
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا دخول البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة دون حساب مستخدم في فرابي.
 The Trip Start Log this scan boarded onto (set only when a boarding row was created).,سجل بدء الرحلة الذي أضاف إليه هذا المسح عملية الصعود. يُحدد فقط عند إنشاء صف صعود.
+The Web Push VAPID public key is not valid base64url.,مفتاح إشعارات الدفع العام ليس بترميز base64url صالح.
+"The Web Push VAPID public key must decode to 65 bytes starting with 0x04; this one decodes to {0}. Paste the uncompressed public key, not a truncated or DER-encoded one.",يجب أن يفكّ مفتاح إشعارات الدفع العام إلى ٦٥ بايت تبدأ بـ0x04، وهذا يفكّ إلى {0}. الصق المفتاح العام كاملًا غير المضغوط، لا مبتورًا ولا بترميز DER.
 "The accrual was taken from the rental ledger, not typed by hand",المستحق مأخوذ من سجل الإيجار، ما هو مدخل يدوي
 The approval carries the moment it was given,الاعتماد يحمل وقت صدوره
 The article's standard cost frozen at issue; a later change to the master does not move it.,تكلفة الصنف القياسية مثبّتة وقت الصرف؛ تعديلها لاحقاً في بطاقة الصنف لا يغيّرها.
@@ -4859,6 +4856,7 @@ This fuel request has been pending approval for too long,ظل طلب الوقو�
 "This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.",هذا أمر مؤقت. ترجع المركبة لحصتها الثابتة في تاريخ الرجوع المبين أعلاه، وأي لتر يُسحب بعد هذا التاريخ يُعد استثناء.
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",هذه الرخصة معتمدة. لتجديدها، ألغها ثم عدلها وأدخل تاريخ الانتهاء الجديد.
 This notification device belongs to another portal holder.,جهاز التنبيهات مرتبط بمستخدم آخر.
+This notification endpoint is already registered as {0}.,نقطة الإشعارات هذه مسجّلة بالفعل باسم {0}.
 This payment request is not finance-approved yet; it cannot be paid.,طلب الدفع هذا لم يُعتمد ماليًا بعد؛ لا يمكن دفعه.
 This portal access token is invalid or inactive.,رمز الوصول إلى البوابة غير صالح أو غير نشط.
 This portal is for route supervisors.,هذه البوابة مخصصة لمشرفي المسارات.
@@ -5574,6 +5572,7 @@ workshop status,حالة الورشة
 "{0} rooms — {1} red, {2} amber",{0} غرفة — {1} حمراء، {2} كهرمانية
 {0} since {1},{0} منذ {1}
 {0} snoozed,تم تأجيل {0}
+{0} still has {1} planned trip(s): {2}. Assign another driver to them first.,{0} عنده {1} رحلة مخططة: {2}. عيّن لها سائقًا آخر أولًا.
 {0} surplus bed(s) retired (Out of Service).,تم إخراج {0} من الأسرّة الزائدة من الخدمة.
 {0} total,{0} الإجمالي
 {0} vehicles,{0} مركبة
@@ -5585,4 +5584,3 @@ workshop status,حالة الورشة
 {0} {1} is not a stop on this trip.,{0}: المحطة {1} ليست ضمن هذه الرحلة.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 {0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
-This notification endpoint is already registered as {0}.,نقطة الإشعارات هذه مسجّلة بالفعل باسم {0}.

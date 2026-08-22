@@ -1,26 +1,26 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Rent Payment Schedule: the lease's rent grid, and the rent-reminder scaffolding.
 
-The reminder is DELIBERATELY INERT and is not a gap to close. Three pieces
-of it ship: this child table, the ``Habitat - Rent Payment Due`` Notification, and
-the Lease ``supplier`` field whose description names it as the payee for rent due
-reminders. The Notification is complete — Days Before on ``due_date``, condition
+Three pieces ship: this child table, the ``Habitat - Rent Payment Due`` Notification,
+and the Lease ``supplier`` field whose description names it as the payee for rent due
+reminders. The Notification is Days Before on ``due_date`` with condition
 ``doc.status == 'Unpaid'``, addressed to the Accommodation Manager and the Finance
-Manager — but ships ``enabled: 0``, so nothing sends until a site turns it on.
+Manager, and it warns a week ahead.
 
-That is the intended shape. Rent is paid externally with no GL leg, so the app
-cannot know a payment cleared; only a human flipping the row's Status to Paid stops
-the reminder. Enabling it by default would mail two managers every unpaid row on
-every lease, daily. Shipping it off makes turning it on a site decision, and
-docs/training/costs.md documents the row as tracked by hand.
+Rent is paid externally with no GL leg, so the app never learns that a payment cleared
+— a person marks the row Paid. That is what the reminder is FOR: it reaches the two
+managers while there is still a week to pay and to record it. It cannot nag, because
+``get_documents_for_today`` (frappe/email/doctype/notification/notification.py:157-167)
+selects only rows whose ``due_date`` falls on the single day ``today + days_in_advance``,
+so each row is mailed once and a row left unpaid is never mailed again.
 
 The table is NOT dead code: ``lease.js`` reads ``payment_schedule`` to pick the
 outstanding row behind the Generate Payment button. There is no server-side writer,
 which is why the controller is a bare ``Document``.
 
-``test_the_rent_reminder_ships_disabled`` pins the decision, so enabling the
-Notification has to be a deliberate edit to a failing assertion rather than a quiet
-default flip.
+The two tests below pin the parts that make the alert safe rather than noisy: a notice
+period greater than zero, and an amount formatted rather than prefixed with a fixed
+currency code.
 """
 
 import json
@@ -58,11 +58,16 @@ class TestRentPaymentSchedule(FrappeTestCase):
         self.assertIn("status", field_names)
         self.assertTrue(len(field_names) > 0)
 
-    def test_the_rent_reminder_ships_disabled(self):
-        """The scaffolding is inert by decision; read the shipped JSON, not the DB.
+    def test_the_rent_reminder_warns_once_and_ahead_of_the_due_date(self):
+        """Read the shipped JSON, not the DB: a site may legitimately switch this off,
+        and asserting the installed record would fail on exactly those sites.
 
-        A site may legitimately enable the Notification, so asserting the installed
-        record would fail on exactly the sites that adopted it.
+        ``days_in_advance`` is the whole safety of this alert. ``get_documents_for_today``
+        (frappe/email/doctype/notification/notification.py:157-167) computes ONE reference
+        date, ``today + days_in_advance``, and selects rows whose ``due_date`` falls inside
+        that single day — so each row is mailed once, on one day, and a row left unpaid is
+        never mailed again. Set this back to 0 and the warning arrives on the due date
+        itself, which tells the manager a payment is due the day it is due.
         """
         path = os.path.join(
             frappe.get_app_path("apex"),
@@ -72,11 +77,29 @@ class TestRentPaymentSchedule(FrappeTestCase):
         with open(path, encoding="utf-8") as handle:
             shipped = json.load(handle)
         self.assertEqual(shipped["document_type"], "Rent Payment Schedule")
-        self.assertEqual(
-            shipped["enabled"],
+        self.assertEqual(shipped["event"], "Days Before")
+        self.assertEqual(shipped["condition"], "doc.status == 'Unpaid'")
+        self.assertGreater(
+            shipped["days_in_advance"],
             0,
-            "Habitat - Rent Payment Due ships enabled. Rent clears outside the app, so "
-            "nothing marks a row Paid automatically and every unpaid row would mail the "
-            "Accommodation and Finance Managers daily. Build the paid-detection side "
-            "before flipping this, and update the module docstring above.",
+            "Habitat - Rent Payment Due warns on the due date itself, leaving no time to "
+            "act. Every other dated alert in this app warns ahead.",
         )
+
+    def test_the_rent_reminder_names_no_currency_of_its_own(self):
+        """The amount is formatted, never prefixed with a fixed currency code.
+
+        A hardcoded code is wrong on any site whose company does not use it, and the
+        subject and message of a Notification are the two places it hides from a form.
+        """
+        path = os.path.join(
+            frappe.get_app_path("apex"),
+            "habitat", "notification", "habitat___rent_payment_due",
+            "habitat___rent_payment_due.json",
+        )
+        with open(path, encoding="utf-8") as handle:
+            shipped = json.load(handle)
+        for field in ("subject", "message"):
+            with self.subTest(field=field):
+                self.assertIn("frappe.format_value", shipped[field])
+                self.assertNotIn("SAR", shipped[field])

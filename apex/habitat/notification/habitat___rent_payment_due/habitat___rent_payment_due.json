@@ -3,15 +3,15 @@
  "channel": "Email",
  "condition": "doc.status == 'Unpaid'",
  "date_changed": "due_date",
- "days_in_advance": 0,
+ "days_in_advance": 7,
  "docstatus": 0,
  "doctype": "Notification",
  "document_type": "Rent Payment Schedule",
- "enabled": 0,
+ "enabled": 1,
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "{{ _(\"A rent payment is due today and remains unpaid\") }}: SAR {{ doc.amount }} ({{ doc.due_date }}). {{ _(\"Please process this payment.\") }}",
+ "message": "{{ _(\"A rent payment falls due in seven days and is still unpaid\") }}: {{ frappe.format_value(doc.amount, {\"fieldtype\": \"Currency\"}) }} ({{ doc.due_date }}). {{ _(\"Please process this payment.\") }}",
  "message_type": "HTML",
  "module": "Habitat",
  "name": "Habitat - Rent Payment Due",
@@ -25,6 +25,6 @@
  ],
  "send_system_notification": 0,
  "send_to_all_assignees": 0,
- "subject": "{{ _(\"Rent Payment Due (Unpaid)\") }}: SAR {{ doc.amount }}",
- "modified": "2026-08-15 09:00:00.000000"
+ "subject": "{{ _(\"Rent Payment Due\") }}: {{ frappe.format_value(doc.amount, {\"fieldtype\": \"Currency\"}) }}",
+ "modified": "2026-08-22 19:40:00.000000"
 }

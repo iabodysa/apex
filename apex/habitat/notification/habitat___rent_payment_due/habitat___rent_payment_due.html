@@ -1,1 +1,1 @@
-{{ _("A rent payment is due today and remains unpaid") }}: SAR {{ doc.amount }} ({{ doc.due_date }}). {{ _("Please process this payment.") }}
+{{ _("A rent payment falls due in seven days and is still unpaid") }}: {{ frappe.format_value(doc.amount, {"fieldtype": "Currency"}) }} ({{ doc.due_date }}). {{ _("Please process this payment.") }}

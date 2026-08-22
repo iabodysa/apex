@@ -4,7 +4,7 @@
  "label": "Salis",
  "title": "Salis",
  "module": "Salis",
- "icon": "tool",
+ "icon": "map",
  "public": 1,
  "is_hidden": 0,
  "sequence_id": 3.0,
@@ -502,5 +502,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:04.000000",
- "modified": "2026-08-07 20:53:00.000000"
+ "modified": "2026-08-22 19:30:00.000000"
 }
