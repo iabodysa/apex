@@ -16,11 +16,13 @@ class HabitatSettings(Document):
 
 
 def before_save(doc, method=None):
-    """Blocks a non-System Manager from saving and stamps the editor's top role on the document."""
-    if "System Manager" not in frappe.get_roles(frappe.session.user):
-        frappe.throw("Only System Manager can modify Habitat Settings.")
+    """Stamp the editor's top role on the document.
 
-
+    Who may write is the DocPerm's answer — System Manager alone holds write here — and
+    repeating it in Python refuses the installer too, because the setup wizard writes
+    these settings through ``ignore_permissions`` and a hand-written role check does not
+    honour that flag.
+    """
     roles = frappe.get_roles(frappe.session.user)
     doc.last_modified_by_role = roles[0] if roles else ""
 

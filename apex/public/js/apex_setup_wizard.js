@@ -129,41 +129,67 @@ apex.setup.slides_settings = [
 				fieldname: "apex_salis_support_holiday_list",
 				label: __("Support Holiday List Name"),
 				fieldtype: "Data",
+				default: __("Salis Support"),
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 				description: __("Name for the native ERPNext Holiday List created during setup."),
-			},
-			{
-				fieldname: "apex_salis_support_holiday_from_date",
-				label: __("Holiday Calendar From Date"),
-				fieldtype: "Date",
-			},
-			{
-				fieldname: "apex_salis_support_holiday_to_date",
-				label: __("Holiday Calendar To Date"),
-				fieldtype: "Date",
 			},
 			{
 				fieldname: "apex_salis_support_weekly_off",
 				label: __("Weekly Off"),
 				fieldtype: "Select",
 				options: "\nSunday\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday",
+				default: "Friday",
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 			},
+			{ fieldname: "apex_support_dates_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
+			{
+				fieldname: "apex_salis_support_holiday_from_date",
+				label: __("Holiday Calendar From Date"),
+				fieldtype: "Date",
+				default: frappe.datetime.year_start(),
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
+			},
+			{
+				fieldname: "apex_salis_support_holiday_to_date",
+				label: __("Holiday Calendar To Date"),
+				fieldtype: "Date",
+				default: frappe.datetime.year_end(),
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
+			},
+			{ fieldname: "apex_support_country_sb", fieldtype: "Section Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
 			{
 				fieldname: "apex_salis_support_country",
 				label: __("Holiday Country Code"),
 				fieldtype: "Data",
+				default: "SA",
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 				description: __("Optional ISO country code used by ERPNext's native local-holiday generator."),
 			},
+			{ fieldname: "apex_support_sub_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
 			{
 				fieldname: "apex_salis_support_subdivision",
 				label: __("Holiday Subdivision Code"),
 				fieldtype: "Data",
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 				description: __("Optional subdivision code for the selected country."),
 			},
+			{ fieldname: "apex_support_hours_sb", fieldtype: "Section Break", label: __("Operating Hours"), depends_on: "eval:doc.apex_enable_salis_support_sla" },
 			{
 				fieldname: "apex_salis_support_workdays",
 				label: __("Support Workdays"),
 				fieldtype: "MultiCheck",
-				columns: 4,
+				// A bare number is a fixed column count the narrow wizard slide cannot honour;
+				// "8rem 4" gives a minimum width AND a maximum, so the days wrap instead of
+				// stacking (frappe/public/js/frappe/form/controls/multicheck.js:17-23).
+				// sort_options defaults to true and would reorder the week alphabetically
+				// (:79-81), so it is turned off to keep Sunday first.
+				columns: "8rem 4",
+				sort_options: false,
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
+				// No `default` here: FieldGroup.set_values routes a default through
+				// base_control.js:248 validate_and_set_in_model, and MultiCheck defines no
+				// validate, so a defaulted MultiCheck throws while the slide is being built
+				// and the slide never renders. The days are pre-ticked in `onload` instead.
 				options: [
 					"Sunday",
 					"Monday",
@@ -174,26 +200,20 @@ apex.setup.slides_settings = [
 					"Saturday",
 				].map((day) => ({ label: __(day), value: day })),
 			},
-			{ fieldname: "apex_support_time_col", fieldtype: "Column Break" },
+			{ fieldname: "apex_support_time_col", fieldtype: "Column Break", depends_on: "eval:doc.apex_enable_salis_support_sla" },
 			{
 				fieldname: "apex_salis_support_start_time",
 				label: __("Support Start Time"),
 				fieldtype: "Time",
+				default: "08:00:00",
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 			},
 			{
 				fieldname: "apex_salis_support_end_time",
 				label: __("Support End Time"),
 				fieldtype: "Time",
-			},
-			{ fieldname: "apex_demo_sb", fieldtype: "Section Break", label: __("Demo Data") },
-			{
-				fieldname: "apex_setup_demo",
-				label: __("Create demo data to explore Apex?"),
-				fieldtype: "Check",
-				default: 0,
-				description: __(
-					"Off by default — builds one sample accommodation site with rooms, beds, a resident and an open maintenance request. You can remove all of it later from Apex Settings."
-				),
+				default: "17:00:00",
+				depends_on: "eval:doc.apex_enable_salis_support_sla",
 			},
 		],
 	},

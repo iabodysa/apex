@@ -37,6 +37,63 @@ def seed_recovery_component():
     return component.name
 
 
+def ensure_advance_account(company: str) -> str:
+    """The company's Receivable employee-advance account, created if it is not there yet.
+
+    An advance is money the company paid and expects back, so the account has to be
+    Receivable for the ledger to read the right way round. Two things make that account
+    absent on every new site: erpnext's standard chart creates "Employee Advances" as
+    Payable (standard_chart_of_accounts.py:16), and nothing in erpnext ever writes
+    Company.default_employee_advance_account — the field ships empty and waits for an
+    accountant. Demanding it instead of creating it made the requirement unsatisfiable on
+    a first install, which is what stopped the Setup Wizard finishing.
+    """
+    existing = frappe.db.get_value("Company", company, "default_employee_advance_account")
+    if existing and frappe.db.get_value("Account", existing, "account_type") == "Receivable":
+        return existing
+
+    # Only an account that is ABOUT advances qualifies. The first Receivable account in
+    # the standard chart is Debtors, which is customer money: posting an employee advance
+    # there mixes a staff balance into accounts receivable and the aging report reads a
+    # worker as a customer.
+    match = frappe.db.get_value(
+        "Account",
+        {
+            "company": company,
+            "account_type": "Receivable",
+            "is_group": 0,
+            "disabled": 0,
+            "account_name": ("like", "%Advance%"),
+        },
+        "name",
+    )
+    if not match:
+        parent = frappe.db.get_value(
+            "Account",
+            {"company": company, "account_name": "Current Assets", "is_group": 1},
+            "name",
+        ) or frappe.db.get_value("Account", {"company": company, "is_group": 1}, "name")
+        if not parent:
+            frappe.throw(
+                _("Company {0} has no chart of accounts yet.").format(company)
+            )
+        account = frappe.get_doc(
+            {
+                "doctype": "Account",
+                "account_name": "Employee Advances (Receivable)",
+                "parent_account": parent,
+                "account_type": "Receivable",
+                "company": company,
+                "is_group": 0,
+            }
+        )
+        account.insert(ignore_permissions=True)
+        match = account.name
+
+    frappe.db.set_value("Company", company, "default_employee_advance_account", match)
+    return match
+
+
 def configure_recovery(*, enabled=False, company=None, salary_component=None, max_percent=None):
     """Apply setup-wizard recovery choices without bypassing native HRMS validation."""
     settings = frappe.get_single("Salis Settings")
@@ -64,15 +121,7 @@ def configure_recovery(*, enabled=False, company=None, salary_component=None, ma
 
     if not company:
         frappe.throw(_("Company is required to enable Employee Advance recovery."))
-    advance_account = frappe.db.get_value(
-        "Company", company, "default_employee_advance_account"
-    )
-    if not advance_account:
-        frappe.throw(
-            _("Set the Company's Default Employee Advance Account before enabling recovery.")
-        )
-    if frappe.db.get_value("Account", advance_account, "account_type") != "Receivable":
-        frappe.throw(_("The Default Employee Advance Account must be Receivable."))
+    advance_account = ensure_advance_account(company)
 
     salary_component = salary_component or seed_recovery_component()
     if not salary_component:

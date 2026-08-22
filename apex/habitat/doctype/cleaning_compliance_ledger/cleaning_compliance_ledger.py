@@ -25,6 +25,12 @@ class CleaningComplianceLedger(Document):
             )
 
     def on_trash(self):
-        """Blocks deleting a Cleaning Compliance Ledger row unless the user holds System Manager."""
+        """Refuse the delete for anyone but a System Manager, bypass or no bypass.
+
+        The DocPerm grants delete to System Manager alone, but a caller passing
+        ``ignore_permissions`` skips DocPerm entirely, and this is a machine-written
+        ledger whose rows must survive that path too. The role is read here rather than
+        left to the permission layer for exactly that reason.
+        """
         if "System Manager" not in frappe.get_roles(frappe.session.user):
             frappe.throw(_("Cleaning Compliance Ledger rows cannot be deleted."))
