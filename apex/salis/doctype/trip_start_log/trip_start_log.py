@@ -63,8 +63,6 @@ class TripStartLog(Document):
         supervisor portals also save this log via their own token audiences; those
         present no DRIVER credential, so they too keep passing.
         """
-        if frappe.session.user == "Administrator":
-            return
         driver = get_driver_for_user()
         if not driver:
             return
