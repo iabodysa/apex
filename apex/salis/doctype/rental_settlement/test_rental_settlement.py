@@ -12,8 +12,6 @@ from apex.salis import rental_engine
 from apex.tests._helpers import _user, approve_rental_settlement
 from apex.tests.factories import make_rental_office, make_vehicle
 
-
-
 class TestRentalSettlement(FrappeTestCase):
     def test_draft_line_amount_is_derived_from_days_and_rate(self):
         settlement = RentalSettlement(
@@ -76,7 +74,6 @@ class TestRentalSettlement(FrappeTestCase):
             settlement.validate()
 
         self.assertEqual(settlement.vehicles[0].amount, 175)
-
 
 class TestATypedZeroSurvives(FrappeTestCase):
     """A settlement line typed as zero and a line left blank are two different facts.
@@ -208,8 +205,6 @@ class TestATypedZeroSurvives(FrappeTestCase):
 test_dependencies = ['Salis Vehicle']
 test_ignore = ['Company', 'Cost Center', 'Employee', 'Mode of Payment', 'Payment Entry', 'Payment Gateway', 'Project', 'Salis Payment Request', 'Salis Vehicle', 'Role', 'Supplier', 'User']
 
-
-# --- merged from test_rental_settlement_workflow.py ---
 WORKFLOW = "Rental Settlement Workflow"
 LEDGER = "Rental Accrual Ledger"
 def _actions(doc):
@@ -219,8 +214,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Rental Settlement") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -302,7 +295,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs.reload()
         return rs
 
-
     def test_payment_request_only_on_approved_settlement(self):
         rs = self._approved()
         pr = rs.create_payment_request()
@@ -312,7 +304,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs2.reload()
         with self.assertRaises(frappe.ValidationError):
             rs2.create_payment_request()
-
 
     def test_legal_reconcile_then_approve_submits(self):
         rs = self._new_settlement()
@@ -331,7 +322,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertEqual(rs.status, "Approved")
         self.assertEqual(rs.docstatus, 1)
 
-
     def test_wrong_role_cannot_approve_or_pay(self):
         rs = self._reconciled()
         frappe.set_user(self.requester)
@@ -339,7 +329,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         self.assertNotIn("Approve", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Approve")
-
 
     def test_mark_paid_is_finance_only(self):
         rs = self._approved()
@@ -356,7 +345,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs.reload()
         self.assertEqual(rs.status, "Paid")
         self.assertEqual(rs.docstatus, 1)
-
 
     def test_sod_requester_cannot_mark_paid(self):
         rs = self._approved(requested_by=self.finance_maker)
@@ -380,7 +368,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(rs, "Approve")
 
-
     def test_post_submit_mark_paid_reachable(self):
         rs = self._approved()
         self.assertEqual(rs.docstatus, 1)
@@ -391,7 +378,6 @@ class TestRentalSettlementWorkflow(FrappeTestCase):
         rs.reload()
         self.assertEqual(rs.status, "Paid")
         self.assertEqual(rs.docstatus, 1)
-
 
     def test_mark_paid_posts_no_gl(self):
         rs = self._approved()

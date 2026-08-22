@@ -15,9 +15,6 @@ from apex.habitat.doctype.lease import lease_payment
 from apex.tests import factories
 from apex.tests.factories import service_item
 
-
-
-
 class TestAccommodationLease(FrappeTestCase):
 
     def test_create_valid_lease(self):
@@ -78,7 +75,6 @@ class TestAccommodationLease(FrappeTestCase):
         _build_schedule(doc)
         self.assertTrue(doc.payment_schedule)
         self.assertTrue(all(r.status == "Unpaid" for r in doc.payment_schedule))
-
 
 class TestRegenerateScheduleFailure(FrappeTestCase):
     """What a REFUSED ``regenerate_schedule`` costs the rest of the request.
@@ -147,13 +143,10 @@ class TestRegenerateScheduleFailure(FrappeTestCase):
             "the overlapping lease that caused the refusal must survive it",
         )
 
-
 WORKFLOW = "Lease Workflow"
-
 
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
-
 
 class TestTheWorkflowOwnsEveryStatusItIsGiven(FrappeTestCase):
     """the scheduler must not write a status the Workflow cannot validate.
@@ -262,8 +255,6 @@ class TestTheWorkflowOwnsEveryStatusItIsGiven(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_lease_payment.py ---
 FIRST_DUE = "2026-01-01"
 SECOND_DUE = "2026-02-01"
 RENT = 8000
@@ -289,9 +280,6 @@ class _RentPaymentCase(FrappeTestCase):
     def setUp(self):
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.db.savepoint("lease_payment_test")
-        # The rent surface refuses unless the deployment routes payments to a Payment
-        # Entry, so every case below states that configuration rather than inheriting
-        # whatever this site happens to hold.
         self.route_payments_to(payable_allocation.PAYMENT_ENTRY_DOCTYPE)
 
     def tearDown(self):
@@ -311,8 +299,6 @@ class _RentPaymentCase(FrappeTestCase):
         original = frappe.db.get_single_value(ROUTING_SETTINGS, TARGET_FIELD) or ""
         self.addCleanup(frappe.db.set_single_value, ROUTING_SETTINGS, TARGET_FIELD, original)
         frappe.db.set_single_value(ROUTING_SETTINGS, TARGET_FIELD, target_doctype)
-
-    # Fixtures
 
     def building(self):
         suffix = frappe.generate_hash(length=12).upper()
@@ -365,8 +351,6 @@ class _RentPaymentCase(FrappeTestCase):
                 "item_code": self.item,
                 "qty": 1,
                 "rate": total,
-                # The cost center must belong to the INVOICE's company, or the
-                # cross-company case fails inside ERPNext instead of at the guard.
                 "cost_center": frappe.db.get_value("Company", company, "cost_center"),
             },
         )
@@ -430,7 +414,6 @@ class TestARentPaymentIsAllocatedToItsInvoice(_RentPaymentCase):
 
         self.assertTrue(again["existing"])
         self.assertEqual(again["document_name"], first["document_name"])
-        # Idempotent means NO second document, not merely the same name returned.
         self.assertEqual(self.payment_count(self.landlord), before)
 
     def test_a_different_instalment_is_a_different_payment(self):
@@ -450,8 +433,6 @@ class TestARentPaymentWithoutAPayableIsRefused(_RentPaymentCase):
             self.assertIn(expected_fragment, str(caught.exception), facet)
             self.assertEqual(self.payment_count(self.landlord), before, facet)
         else:
-            # Assert the MESSAGE: a link check raises the same ValidationError class and
-            # would satisfy a bare assertRaises while proving nothing about the guard.
             self.assertIn(expected_fragment, str(caught.exception))
             self.assertEqual(self.payment_count(self.landlord), before)
 
@@ -542,7 +523,6 @@ class TestRentSettlementFollowsTheLedger(_RentPaymentCase):
         status = lease_payment.get_rent_payment_status(lease.name, FIRST_DUE)
         self.assertEqual(status["settlement"], payable_allocation.SETTLED)
         self.assertGreater(status["allocated_amount"], 0)
-        # The ledger agrees: the invoice it settled is no longer outstanding.
         self.assertEqual(
             frappe.db.get_value("Purchase Invoice", invoice.name, "outstanding_amount"), 0
         )
@@ -632,7 +612,6 @@ class TestTheRentSurfaceObeysTheConfiguredPaymentTarget(_RentPaymentCase):
             lease_payment.create_rent_payment, self.lease().name, FIRST_DUE, self.invoice().name
         )
         self.assertIn("Payment Order", message)
-        # Actionable, not merely correct: the operator is told which setting to change.
         self.assertIn(ROUTING_SETTINGS, message)
 
     def test_a_mismatched_target_stops_the_action_before_the_dialog_opens(self):

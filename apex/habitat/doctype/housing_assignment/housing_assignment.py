@@ -16,10 +16,8 @@ from frappe.model.document import Document
 from apex.apex_core.utils.party_link import sync_party_employee
 from apex.habitat.utils.occupancy import room_status
 
-
 class HousingAssignment(Document):
     pass
-
 
 def on_doctype_update():
     """Bed-occupancy performance indexes, added here — not only via the legacy
@@ -39,7 +37,6 @@ def on_doctype_update():
         ["bed", "docstatus", "check_out_date"],
         "idx_asgn_bed_active",
     )
-
 
 def _flag_temporary_worker_past_expiry(doc) -> None:
     """Soft-flag housing a Temporary Worker whose passport-only window has lapsed.
@@ -63,7 +60,6 @@ def _flag_temporary_worker_past_expiry(doc) -> None:
             alert=True,
         )
 
-
 def recalculate_room_occupancy(room_name: str) -> None:
     """Recounts a room's active assignments and updates its occupancy count and status accordingly."""
     if not room_name:
@@ -78,7 +74,6 @@ def recalculate_room_occupancy(room_name: str) -> None:
     room.db_set("current_occupancy", active)
     room.db_set("status", room_status(active, room.bed_capacity))
 
-
 def recalculate_building_occupancy(building_name: str) -> None:
     """Recounts a building's active occupants and updates its occupant count and occupancy percentage."""
     if not building_name:
@@ -92,12 +87,10 @@ def recalculate_building_occupancy(building_name: str) -> None:
     if building.total_capacity:
         building.db_set("occupancy_percent", (active / building.total_capacity) * 100)
 
-
 def recalculate_spatial(room_name: str, building_name: str) -> None:
     """Refreshes both the room's and the building's occupancy figures after a bed change."""
     recalculate_room_occupancy(room_name)
     recalculate_building_occupancy(building_name)
-
 
 def _snapshot_agreed_rate(doc, building):
     """Fill the agreed monthly rate from the building's cost per bed, the first time only.
@@ -108,7 +101,6 @@ def _snapshot_agreed_rate(doc, building):
     """
     if not doc.agreed_monthly_rate:
         doc.agreed_monthly_rate = building.monthly_cost_per_capacity or 0
-
 
 def validate(doc, method=None):
     """Derives the cost center and rate, and blocks duplicate occupancy, mismatches, and over-capacity."""
@@ -244,15 +236,8 @@ def validate(doc, method=None):
                 alert=True,
             )
 
-
 def on_submit(doc, method=None):
     """Occupies the bed and refreshes occupancy without creating a payroll deduction."""
-    # The lock and the decision have to be the SAME statement. A FOR UPDATE whose
-    # result is discarded takes the row lock, but the plain read that follows still
-    # answers from this transaction's REPEATABLE READ snapshot — so the row the
-    # winner committed while we waited is invisible, and both assignments take the
-    # bed. Reading with for_update=True is a locking read: it returns the latest
-    # committed value, which is the one being decided on.
     current_status = frappe.db.get_value("Bed", doc.bed, "status", for_update=True)
     if current_status == "Occupied":
         occupying_asg = frappe.db.get_value(
@@ -278,7 +263,6 @@ def on_submit(doc, method=None):
 
     _post_checkin_custody(doc)
 
-
 def _post_checkin_custody(doc):
     """Post the items handed over at check-in to the stock ledger, so a resident who
     holds a mattress and a locker key shows a custody balance the checkout gate, the
@@ -295,10 +279,6 @@ def _post_checkin_custody(doc):
     if has_stock_entries("Housing Assignment", doc.name):
         return
 
-    # Same gate Custody Issue applies before it moves anything: handing over what the
-    # building store does not hold would post a negative balance. Aggregated per article
-    # so duplicate rows cannot each pass on their own, and read for update so two
-    # concurrent check-ins cannot both clear the same last unit.
     needed: dict[str, float] = {}
     for row in doc.custody_items:
         if row.article and (row.quantity or 0):
@@ -324,7 +304,6 @@ def _post_checkin_custody(doc):
                          voucher_type="Housing Assignment",
                          voucher_no=doc.name, voucher_detail_no=row.name,
                          posting_date=doc.check_in_date)
-
 
 def on_cancel(doc, method=None):
     """Frees the bed if no other active assignment holds it and refreshes occupancy counts."""

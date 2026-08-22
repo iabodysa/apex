@@ -22,7 +22,6 @@ from apex.salis import permissions
 
 OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
-
 def _bucket(days):
     """Returns which aging bucket a recovery falls into based on its days elapsed."""
     if days <= 30:
@@ -32,7 +31,6 @@ def _bucket(days):
     if days <= 90:
         return "b_61_90"
     return "b_90_plus"
-
 
 def execute(filters=None):
     """Returns the columns, aged rows, chart and summary cards for the Cost Recovery Aging report."""
@@ -68,9 +66,6 @@ def execute(filters=None):
     else:
         query_filters["status"] = ["in", list(OPEN_STATUSES)]
 
-    # Movement Cost Recovery is row-scoped through its vehicle, but a Script Report builds
-    # its own query and permission_query_conditions never runs — so the scope is applied
-    # here or not at all.
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Movement Cost Recovery")
     if restrict:
         if not allowed:
@@ -147,7 +142,6 @@ def execute(filters=None):
     if data:
         data.append(totals)
     return columns, data, None, _build_chart(totals if data else None), summary
-
 
 def _build_chart(totals):
     """Bar chart of open recovery exposure across the four aging buckets."""

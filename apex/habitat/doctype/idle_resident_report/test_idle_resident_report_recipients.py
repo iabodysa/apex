@@ -30,8 +30,7 @@ from apex.habitat.doctype.idle_resident_report import idle_resident_report as IR
 from apex.tests import factories
 from apex.tests._helpers import _user
 
-ROLE = "Accommodation Manager"  # holds read on Idle Resident Report; HR Manager does not.
-
+ROLE = "Accommodation Manager"
 
 class TestIdleResidentReportRecipients(FrappeTestCase):
     @classmethod
@@ -46,17 +45,9 @@ class TestIdleResidentReportRecipients(FrappeTestCase):
         cls.duplicated = _user("irr_dup@example.com", ROLE)
         cls.plain = _user("irr_plain@example.com", ROLE)
         cls.disabled = _user("irr_disabled@example.com", ROLE)
-        # These emails are reused across runs by _user()'s own idempotent design, and an
-        # earlier version of this file granted them HR Manager -- strip it so the "queued
-        # to nobody" case below is not accidentally satisfied by a role these users
-        # should not hold.
         for user in (cls.duplicated, cls.plain, cls.disabled):
             frappe.db.delete("Has Role", {"parent": user, "role": "HR Manager"})
 
-        # A SECOND Has Role row for the same (user, role): the shape the hand-rolled
-        # query counted twice. Written with db_insert, which is the only way such a row
-        # exists — Has Role.before_insert (frappe/core/doctype/has_role/has_role.py:25)
-        # rejects the duplicate, so a live one is legacy data that predates that guard.
         duplicate = frappe.get_doc(
             {
                 "doctype": "Has Role",

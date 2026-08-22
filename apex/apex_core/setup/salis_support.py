@@ -12,7 +12,6 @@ import frappe
 from frappe import _
 from frappe.utils import get_time, getdate
 
-
 SLA_NAME = "Salis Support SLA"
 SLA_PRIORITIES = (
     ("Urgent", 3600, 14400, 0),
@@ -29,7 +28,6 @@ ISSUE_ROLE_PERMISSIONS = (
     ("Internal Auditor", {"read": 1}),
 )
 
-
 def _parse_workdays(value) -> list[str]:
     if isinstance(value, str):
         value = value.strip()
@@ -40,7 +38,6 @@ def _parse_workdays(value) -> list[str]:
         except json.JSONDecodeError:
             value = [part.strip() for part in value.split(",")]
     return [str(day).strip() for day in (value or []) if str(day).strip()]
-
 
 def ensure_support_holiday_list(
     *,
@@ -101,7 +98,6 @@ def ensure_support_holiday_list(
     holiday_list.insert(ignore_permissions=True)
     return holiday_list.name
 
-
 def _sla_contract(doc):
     priorities = {
         (
@@ -122,7 +118,6 @@ def _sla_contract(doc):
     }
     fulfilled = {row.status for row in doc.sla_fulfilled_on}
     return priorities, schedule, fulfilled
-
 
 def _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time):
     priorities, schedule, fulfilled = _sla_contract(doc)
@@ -153,7 +148,6 @@ def _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time):
                 "Service Level Agreement {0} already exists with an incompatible contract."
             ).format(doc.name)
         )
-
 
 def configure_support_sla(
     *, enabled=False, holiday_list=None, workdays=None, start_time=None, end_time=None
@@ -216,11 +210,9 @@ def configure_support_sla(
         )
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
-    # ERPNext's Service Level Agreement validator requires this native switch.
     frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
     doc.insert(ignore_permissions=True)
     return doc.name
-
 
 def grant_issue_role_permissions():
     """Create missing native Custom DocPerm rows without rewriting operator-owned rows."""

@@ -6,8 +6,6 @@ import json
 from pathlib import Path
 import apex
 
-
-
 class TestCameraAccessGrant(FrappeTestCase):
 
     def test_create_valid_grant(self):
@@ -41,8 +39,6 @@ class TestCameraAccessGrant(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_camera_access_grant_authorization_text.py ---
 _HERE = Path(apex.__file__).resolve().parent / "habitat" / "doctype" / "camera_access_grant"
 _GRANT_JSON = _HERE / "camera_access_grant.json"
 _GRANT_PY = _HERE / "camera_access_grant.py"
@@ -86,9 +82,6 @@ class TestCameraAccessGrantAuthorizationText(FrappeTestCase):
             "stays as it is; re-decide before adding one",
         )
 
-        # The other place a gate could hide: a doc_events entry. The DocType is present
-        # in hooks with an EMPTY mapping, so assert the mapping is still empty rather
-        # than assuming absence.
         hooks = _HOOKS_PY.read_text(encoding="utf-8")
         self.assertIn(
             '"Camera Access Grant": {}',

@@ -42,7 +42,6 @@ class DriverClearance(Document):
         """Recomputes the driver's open fuel-exception and recovery counts and blocks marking Cleared."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
-        self._capture_assigned_vehicle()
         self._compute_outstanding()
         self._guard_cleared_status()
         self._stamp_clearance_date()
@@ -56,14 +55,6 @@ class DriverClearance(Document):
         """Restores a Released driver back to Active when a Cleared clearance is cancelled."""
         if self.status == "Cleared":
             self._restore_driver()
-
-
-    def _capture_assigned_vehicle(self):
-        """Snapshot the driver's current vehicle for reference (read-only field)."""
-        if self.driver and not self.assigned_vehicle:
-            self.assigned_vehicle = frappe.db.get_value(
-                "Salis Driver", self.driver, "current_vehicle"
-            )
 
     def _compute_outstanding(self):
         """Recompute the outstanding open-case counters for the driver."""

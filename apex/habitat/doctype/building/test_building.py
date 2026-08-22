@@ -16,8 +16,6 @@ from apex.habitat.doctype.building.building import (
     generate_rooms_and_beds,
 )
 
-
-
 class TestAccommodationBuilding(FrappeTestCase):
 
     def test_create_valid_building(self):
@@ -85,7 +83,6 @@ class TestAccommodationBuilding(FrappeTestCase):
             b.save(ignore_permissions=True)
         frappe.delete_doc("Room", room.name, force=True, ignore_permissions=True)
         frappe.delete_doc("Building", b.name, force=True, ignore_permissions=True)
-
 
     def test_total_capacity_derives_from_beds(self):
         """total_capacity is the TRUE physical capacity: it must equal the count of the
@@ -311,7 +308,6 @@ class TestAccommodationBuilding(FrappeTestCase):
                 frappe.delete_doc("Room", room, force=True, ignore_permissions=True)
             frappe.delete_doc("Building", b.name, force=True, ignore_permissions=True)
 
-
 class TestBuildingSupervisorPermission(FrappeTestCase):
     """The building's responsible_supervisor is the single source of truth for
     the building-scoped User Permission — on_update keeps the permission in sync."""
@@ -362,8 +358,6 @@ class TestBuildingSupervisorPermission(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_building_address_fallback.py ---
 def _ensure_site(name):
     """Per-name idempotent Accommodation Site (re-runnable across test sessions)."""
     if not frappe.db.exists("Site", name):
@@ -521,8 +515,6 @@ class TestBuildingSiteAddress(FrappeTestCase):
         self.assertNotIn("Site Street", own_text)
         self.assertIn("Site Street", get_site_address(bldg, site=site_a, building_address=""))
 
-
-# --- merged from test_building_safety_setup.py ---
 def _rand(n: int = 12) -> str:
     return frappe.generate_hash(length=n)
 def _make_catalog(code: str, frequency: str, all_buildings: int = 1) -> str:
@@ -567,8 +559,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
 
     def _cleanup(self, building: str, *catalogs: str):
         frappe.set_user("Administrator")
-        # Assignments first (they link building -> template), then per-catalog
-        # template, then catalog, then the building. force bypasses link checks.
         for sta in frappe.get_all(
             "Scheduled Task Assignment", {"building": building}, pluck="name"
         ):
@@ -598,7 +588,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
         self.assertEqual(row.task_type, "Safety")
         self.assertEqual(row.frequency, "Monthly")
 
-        # the catalog must be an active scheduling item (the generator iterates these)
         self.assertTrue(
             frappe.db.exists(
                 "Scheduled Task Template Item",
@@ -606,7 +595,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
             ),
             "catalog must be an active template_items row so the generator emits instances",
         )
-        # the assignment binds the template to this building
         self.assertTrue(
             frappe.db.exists("Scheduled Task Assignment", {"template": tmpl, "building": bld}),
             "an assignment must bind the reusable template to this building",
@@ -689,7 +677,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
             "frequency": "Weekly",
             "safety_task_catalog": cat,
             "is_active": 1,
-            # deliberately NO template_items -> inert for the scheduler
         }).insert(ignore_permissions=True)
 
         summary = generate_safety_setup(bld)
@@ -718,16 +705,12 @@ class TestGenerateSafetySetup(FrappeTestCase):
         """The redesign dropped ``Scheduled Task Template.building``. Prove the
         field is gone from the DocType AND that no product code constructs or queries a
         Scheduled Task Template with a ``building`` key (the breakage)."""
-        # structural: the field is truly absent from the doctype
         self.assertIsNone(
             frappe.get_meta("Scheduled Task Template").get_field("building"),
             "Scheduled Task Template must have no 'building' field; it was dropped "
             "when the template stopped being building-scoped",
         )
 
-        # source guard: grep the app tree for a Scheduled Task Template built or filtered
-        # by a `building` key. Only this test file is excluded; the migration patch that
-        # read the legacy column by raw SQL no longer ships.
         import apex
 
         apex_root = os.path.dirname(apex.__file__)
@@ -752,7 +735,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
                 with open(full, encoding="utf-8") as fh:
                     text = fh.read()
                 for m in construct_re.finditer(text):
-                    # scan the dict body that follows the doctype key
                     if building_key_re.search(text[m.start():m.start() + 400]):
                         offenders.append(os.path.relpath(full, apex_root))
                         break
@@ -764,8 +746,6 @@ class TestGenerateSafetySetup(FrappeTestCase):
             f"Scheduled Task Template.building usage must be gone; found in: {offenders}",
         )
 
-
-# --- merged from test_idempotency_guards.py ---
 class TestIdempotencyGuards(ApexHabitatTestCase):
     def setUp(self):
         self.company = frappe.db.get_value("Company", {}) or frappe.get_doc({

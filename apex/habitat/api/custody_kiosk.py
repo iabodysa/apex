@@ -41,13 +41,11 @@ from apex.apex_core.utils.party_link import (
 )
 from apex.habitat import permissions
 
-
 def _row_exists(doctype: str, name: str) -> bool:
     """True only when a REAL row of ``doctype`` is named ``name``.
 
     """
     return bool(frappe.db.exists(doctype, {"name": name}))
-
 
 @frappe.whitelist()
 def get_kiosk_catalog(building: str | None = None) -> dict:
@@ -92,10 +90,6 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             .where(Ledger.item_type == "Custody Article")
             .where(Ledger.building == building)
             .where(Ledger.is_cancelled == 0)
-            # The store leg is the row with NO party, which is how get_store_balance
-            # identifies it. Filtering on `employee` instead counts a Temporary Worker's
-            # custody as shelf stock — his rows carry `party` with `employee` left NULL —
-            # so the kiosk offers articles that are already in somebody's hands.
             .where(Ledger.party.isnull())
             .run(as_dict=True)
         )
@@ -113,7 +107,6 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         "building": building,
         "articles": articles,
     }
-
 
 @frappe.whitelist()
 def resolve_scan(code: str, party_type: str | None = None, building: str | None = None) -> dict:
@@ -161,7 +154,6 @@ def resolve_scan(code: str, party_type: str | None = None, building: str | None 
 
     return {"kind": "none"}
 
-
 def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
     """Match a scanned token to an Employee / Temporary Worker docname.
 
@@ -188,7 +180,6 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
                 "party_name": party_name or code,
             }
     return None
-
 
 def _resolve_article_scan(code: str, building: str | None) -> dict | None:
     """Match a scanned token to a Custody Article and shape it as a catalog tile.
@@ -230,7 +221,6 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
     match["store_balance"] = _article_store_balance(match["article"], building)
     return {"kind": "article", "article": match}
 
-
 def _article_store_balance(article: str, building: str | None) -> float | None:
     """Live store balance (employee unset) for one article in one building.
 
@@ -254,7 +244,6 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
         .run(as_dict=True)
     )
     return flt(sum(flt(r.signed_qty) for r in rows))
-
 
 @frappe.whitelist(methods=["POST"])
 def issue_cart(
@@ -358,16 +347,13 @@ def issue_cart(
     doc.submit()
     return {"custody_issue": doc.name}
 
-
 _OPEN_ISSUE_STATUSES = ("Issued", "Partially Returned")
-
 
 def _return_condition_options() -> list[str]:
     """The Custody Return Item condition values, read from the field's own Select so a
     kiosk cannot post one the DocType does not offer."""
     options = frappe.get_meta("Custody Return Item").get_field("condition_on_return").options or ""
     return [o for o in (opt.strip() for opt in options.split("\n")) if o]
-
 
 def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, str]:
     """Validate the (party_type, party) pair and return it normalized.
@@ -385,7 +371,6 @@ def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, st
     if not _row_exists(party_type, party):
         frappe.throw(_("{0} {1} does not exist.").format(_(party_type), party))
     return party_type, party
-
 
 def _open_party_custody(party_type: str, party: str) -> list[dict]:
     """Compute what one party still holds, per source Custody Issue.
@@ -493,7 +478,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
             )
     return lines
 
-
 @frappe.whitelist()
 def get_party_custody(party_type: str, party: str) -> dict:
     """Return the articles a party currently holds, as returnable kiosk lines.
@@ -522,7 +506,6 @@ def get_party_custody(party_type: str, party: str) -> dict:
         "party": party,
         "lines": _open_party_custody(party_type, party),
     }
-
 
 @frappe.whitelist(methods=["POST"])
 def return_cart(party_type: str, party: str, items_json: str) -> dict:

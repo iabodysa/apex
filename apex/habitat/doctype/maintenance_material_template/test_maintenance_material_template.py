@@ -38,10 +38,8 @@ test_ignore = [
     "User",
 ]
 
-
 def _hash():
     return frappe.generate_hash(length=12).upper()
-
 
 class TestMaintenanceMaterialTemplateLoad(FrappeTestCase):
     """A Site row is the witness: one mandatory Data field, no links, and nothing
@@ -100,9 +98,6 @@ class TestMaintenanceMaterialTemplateLoad(FrappeTestCase):
         witness = self._witness_row()
         template = self._candidate_template("Plumbing")
         request = self._draft_request("Plumbing")
-        # Reaches a state the request's own validate refuses, without going through
-        # validate to get there: _validate_status_rules (maintenance_request.py:66)
-        # refuses a Resolved request that carries no resolution notes.
         frappe.db.set_value("Maintenance Request", request.name, "status", "Resolved")
 
         with self.assertRaises(frappe.ValidationError) as caught:

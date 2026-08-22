@@ -15,7 +15,6 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-
 class TestPaymentRoutingSettings(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -45,7 +44,7 @@ class TestPaymentRoutingSettings(FrappeTestCase):
     def test_save_with_a_valid_target_and_empty_field_map_is_accepted(self):
         self.doc.target_payment_doctype = "Note"
         self.doc.set("field_map", [])
-        self.doc.save(ignore_permissions=True)  # must not raise
+        self.doc.save(ignore_permissions=True)
         self.assertEqual(self.doc.target_payment_doctype, "Note")
 
     def test_save_with_a_field_map_row_naming_a_nonexistent_target_field_is_refused(self):

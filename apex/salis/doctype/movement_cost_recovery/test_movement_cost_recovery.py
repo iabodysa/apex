@@ -18,9 +18,7 @@ from apex.tests._helpers import _grant_project, _user
 from apex.tests.factories import make_project, make_vehicle
 from frappe.model.workflow import get_transitions
 
-
 WORKFLOW = "Movement Cost Recovery Workflow"
-
 
 def setUpModule():
     """this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
@@ -38,7 +36,6 @@ def setUpModule():
             f"Mandatory Salis workflow {WORKFLOW!r} not active for "
             f"'Movement Cost Recovery' (got {active!r}) — salis_workflow_seed regression"
         )
-
 
 class TestMovementCostRecoveryAck(FrappeTestCase):
     @classmethod
@@ -101,7 +98,6 @@ class TestMovementCostRecoveryAck(FrappeTestCase):
         rec.reload()
         self.assertEqual(rec.status, "Approved")
 
-
 class TestMovementCostRecoverySelfApproval(FrappeTestCase):
     """The Approve transition is the money decision that gates the downstream
     Salis Payment Request against a driver's salary, so it must enforce
@@ -158,7 +154,6 @@ class TestMovementCostRecoverySelfApproval(FrappeTestCase):
         rec.reload()
         self.assertEqual(rec.docstatus, 1)
         self.assertEqual(rec.status, "Approved")
-
 
 class TestMovementCostRecoveryDoA(FrappeTestCase):
     """Delegation-of-Authority tier gate: a recovery at/above the Cost Recovery
@@ -253,8 +248,6 @@ class TestMovementCostRecoveryDoA(FrappeTestCase):
 
 test_ignore = ['Mode of Payment', 'Payment Entry', 'Payment Gateway', 'Salis Payment Request']
 
-
-# --- merged from test_rejected_has_a_way_out.py ---
 WORKFLOW_rejected_has_a_way_out = "Movement Cost Recovery Workflow"
 MANAGER_ROLE = "Fleet Manager"
 def _h(n=12):

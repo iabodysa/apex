@@ -3,8 +3,11 @@
 
 The arithmetic here takes plain numbers and returns numbers, so the rent
 annualisation and the cost-per-capacity rules can be exercised without a bench.
-``ANNUAL_COST_FIELDS`` is the one list of cost columns: the non-negative guard, the
-total, and the rollup trigger set all read it, so adding a cost column is one edit.
+``ANNUAL_COST_FIELDS`` is the one list of cost columns: the total and the rollup trigger
+set both read it, so adding a cost column is one edit. Refusing a negative is NOT here —
+each column carries ``non_negative`` in the DocType JSON, which frappe enforces in
+``Document._validate_non_negative`` after ``before_save``, so the derived value is what
+gets tested rather than the stored one.
 """
 
 from __future__ import annotations

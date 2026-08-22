@@ -19,7 +19,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, today
+from frappe.utils import today
 
 from apex.habitat.utils import building_rollup, occupancy, room_generator, safety_setup
 from apex.habitat.utils.room_generator import room_number as _room_number  # noqa: F401
@@ -178,19 +178,9 @@ def _recompute_occupancy_and_structure(doc):
     )
 
 
-def _guard_non_negative_costs(doc):
-    """Blocks the save when any annual cost field on the building is negative."""
-    for field in building_rollup.ANNUAL_COST_FIELDS:
-        if flt(doc.get(field)) < 0:
-            frappe.throw(
-                _("{0} cannot be negative.").format(_(doc.meta.get_label(field)))
-            )
-
-
 def before_save(doc, method=None):
-    """Guards abbreviation lock and costs, defaults company, and recomputes capacity and occupancy."""
+    """Guards the abbreviation lock, defaults company, and recomputes capacity and occupancy."""
     _guard_abbreviation_lock(doc)
-    _guard_non_negative_costs(doc)
     if not doc.company:
         from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
         doc.company = get_default_company()

@@ -17,7 +17,6 @@ from apex.habitat.doctype.audit_remediation_plan.audit_remediation_plan import (
 )
 from apex.habitat.doctype.building_license.building_license import derive_license_status
 
-
 def driver_status(status):
     if status in (None, "", "On Leave"):
         return "Stopped"
@@ -25,14 +24,12 @@ def driver_status(status):
         return status
     raise ValueError(f"Unexpected Salis Driver status: {status!r}")
 
-
 def maintenance_status(status):
     if status in (None, "", "Assigned", "Reopened"):
         return "Open"
     if status in ("Open", "In Progress", "Resolved", "Closed"):
         return status
     raise ValueError(f"Unexpected Maintenance Request status: {status!r}")
-
 
 def incident_status(status, docstatus):
     if docstatus not in (0, 1, 2):
@@ -44,7 +41,6 @@ def incident_status(status, docstatus):
     if docstatus == 2:
         return "Closed"
     return "Closed" if status == "Closed" else "Under Review"
-
 
 def remediation_item_status(status):
     if status in (None, ""):
@@ -59,11 +55,9 @@ def remediation_item_status(status):
         return status
     raise ValueError(f"Unexpected Audit Remediation Item status: {status!r}")
 
-
 def execute():
     _preflight()
     _converge_rows()
-
 
 def _preflight():
     for status in frappe.get_all("Salis Driver", pluck="status"):
@@ -121,7 +115,6 @@ def _preflight():
                 f"Unexpected Audit Remediation Plan status: {row.overall_status!r}"
             )
 
-
 def _set_status(doctype, name, current, target, fieldname="status"):
     if current != target:
         frappe.db.set_value(
@@ -132,7 +125,6 @@ def _set_status(doctype, name, current, target, fieldname="status"):
             update_modified=False,
         )
 
-
 def _converge_rows():
     _converge_drivers()
     _converge_maintenance_requests()
@@ -142,11 +134,9 @@ def _converge_rows():
     _retire_assignment_notification()
     _converge_maintenance_kanban()
 
-
 def _converge_drivers():
     for row in frappe.get_all("Salis Driver", fields=["name", "status"]):
         _set_status("Salis Driver", row.name, row.status, driver_status(row.status))
-
 
 def _converge_maintenance_requests():
     for row in frappe.get_all(
@@ -163,16 +153,8 @@ def _converge_maintenance_requests():
             row.name, target, row.docstatus, row.assigned_to
         )
 
-
 def _converge_maintenance_assignment(name, status, docstatus, assigned_to):
     if status == "Closed" or docstatus == 2:
-        # Retire the live ToDo and nothing else. Frappe's own set_status already clears
-        # assigned_to for any DocType carrying the field once the ToDo goes Closed
-        # (frappe/desk/form/assign_to.py:228-230), so a second erase here changes exactly
-        # one population: legacy rows that carry an assignee with no ToDo behind them. For
-        # those it deletes the only record of who worked the ticket — db.set_value runs no
-        # ORM trigger (frappe/database/database.py:942-945) so no Version is written, and
-        # with no ToDo there is nothing left to read the name back from.
         close_all_assignments("Maintenance Request", name, ignore_permissions=True)
         return
     if not assigned_to:
@@ -196,7 +178,6 @@ def _converge_maintenance_assignment(name, status, docstatus, assigned_to):
         ignore_permissions=True,
     )
 
-
 def _converge_vehicle_incidents():
     for row in frappe.get_all(
         "Vehicle Incident", fields=["name", "status", "docstatus"]
@@ -207,7 +188,6 @@ def _converge_vehicle_incidents():
             row.status,
             incident_status(row.status, row.docstatus),
         )
-
 
 def _converge_building_licenses():
     as_of = today()
@@ -226,7 +206,6 @@ def _converge_building_licenses():
             lead_days = default_lead
         target = derive_license_status(row.expiry_date, lead_days, as_of)
         _set_status("Building License", row.name, row.status, target)
-
 
 def _converge_audit_plans():
     as_of = today()
@@ -261,12 +240,10 @@ def _converge_audit_plans():
             fieldname="overall_status",
         )
 
-
 def _retire_assignment_notification():
     name = "Habitat - Maintenance Request Assigned"
     if frappe.db.exists("Notification", {"name": name}):
         frappe.delete_doc("Notification", name, ignore_permissions=True, force=True)
-
 
 def _converge_maintenance_kanban():
     name = "Maintenance Requests"

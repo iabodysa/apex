@@ -41,28 +41,18 @@ from apex.salis.doctype.transport_request.transport_request import (
 _REQUEST_JSON = Path(apex.__file__).resolve().parent / "salis" / "doctype" / "transport_request" / "transport_request.json"
 
 FLEET_MANAGER = "Fleet Manager"
-# Read + report at level 0, no write anywhere, and in salis/permissions.py UNSCOPED_ROLES —
-# so it reaches every row and any refusal it hits is a FIELD verdict, not a row filter.
 INTERNAL_AUDITOR = "Internal Auditor"
 
-# Both halves of the pair must be stated: validate (transport_request.py:81-91) throws when
-# they disagree, and request_type declares no `default`, so naming only the transport type
-# leaves Frappe seeding the other half with the Select's FIRST option, which contradicts it.
-# The manifest-free type (transport_request.py:42) needs no Building, Project or worker rows,
-# so it is the lightest valid document. Derived from the controller's own constants, and
-# asserted single below so a third manifest-free type is reported, not silently picked.
 _MANIFEST_FREE_SERVICE_LINES = sorted(
     set(SERVICE_LINE_REQUEST_TYPE) - set(WORKER_MANIFEST_SERVICE_LINES)
 )
 FIXTURE_SERVICE_LINE = _MANIFEST_FREE_SERVICE_LINES[0]
 FIXTURE_REQUEST_TYPE = SERVICE_LINE_REQUEST_TYPE[FIXTURE_SERVICE_LINE]
 
-
 class TestTransportRequestPiiPermlevel(FrappeTestCase):
     """Site-bound. Fixtures are minted per METHOD: rollback covers rows only."""
 
     def setUp(self):
-        # frappe.session.user is process state — no rollback restores it.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
 
@@ -213,7 +203,6 @@ class TestTransportRequestPiiPermlevel(FrappeTestCase):
                 self.assertEqual(row.get("read"), 1, f"{row['role']}: level-1 read missing")
                 self.assertEqual(row.get("write"), 1, f"{row['role']}: level-1 write missing")
 
-        # The explicit non-change: the auditor stays read-only, at level 0 only.
         auditor = [p for p in rows if p["role"] == INTERNAL_AUDITOR]
         self.assertEqual(len(auditor), 1, "Internal Auditor must keep exactly one row")
         self.assertEqual(int(auditor[0].get("permlevel") or 0), 0)

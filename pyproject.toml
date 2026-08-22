@@ -62,7 +62,12 @@ typing-modules = ["frappe.types.DF"]
 # tracked .py sits outside it since setup.py was deleted (2026-08-16).
 extend-select = ["W191"]
 
-# Package __init__.py files re-export their split submodules for back-compat
-# (the P-179/P-180 god-file splits); those imports are unused-by-design.
+# A package __init__ re-exports its split submodules, so its imports are unused by
+# design. The two E402 entries are the same shape one layer up: those submodules import
+# FROM the package, so the package importing them at the top is a circular import and the
+# imports sit at the foot of the file. Declared here rather than suppressed inline,
+# because a config entry is read by the tool while a comment only explains it away.
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["F401"]
+"apex/salis/api/driver_portal/__init__.py" = ["E402"]
+"apex/salis/api/fleet_employee.py" = ["E402"]

@@ -3,8 +3,8 @@
 
 No live driver position is served. ``Dispatch Trip.driver_lat`` / ``driver_lng`` /
 ``driver_position_updated_at`` still exist as columns, but their only writer —
-``driver_portal.push_driver_position`` — was removed with the legacy portal, and
-``apex/www/test_portal_shell_contract.py`` now asserts it stays removed. They are Float
+``driver_portal.push_driver_position`` — was removed with the legacy portal, and no
+endpoint has written them since. They are Float
 columns, which Frappe emits NOT NULL DEFAULT 0, so a trip that has never reported a fix
 reads back 0.0 and any ``is not None`` test on them answers True forever. Reporting a
 position nobody wrote is worse than reporting none: the supervisor map states the driver

@@ -59,11 +59,9 @@ _PWA_META = {
 
 _OPAQUE_SUBJECT_SCOPE = re.compile(r"^[A-Za-z0-9_-]{8,128}$")
 
-
 def _validate_entry_path(entry: str, public_path: str) -> None:
     if public_path not in PORTAL_PUBLIC_PATHS.get(entry, ()):
         raise ValueError(f"Unknown Apex portal entry/path pair: {entry!r}, {public_path!r}")
-
 
 def build_portal_bootstrap(
     *,
@@ -101,7 +99,6 @@ def build_portal_bootstrap(
         "subject_scope": subject_scope,
     }
 
-
 def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     """Return presentation and PWA metadata without authorization state."""
     _validate_entry_path(entry, public_path)
@@ -115,7 +112,6 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
         "service_worker_url": pwa.get("service_worker_url"),
         "service_worker_scope": pwa.get("service_worker_scope"),
     }
-
 
 def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
     """Return a stable client storage namespace without exposing the subject.
@@ -133,7 +129,6 @@ def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
     digest = hmac.new(get_encryption_key().encode(), material, hashlib.sha256).hexdigest()
     return f"scope_{digest[:24]}"
 
-
 def publish_portal_context(
     context,
     *,
@@ -147,17 +142,7 @@ def publish_portal_context(
     conf = frappe.get_site_config()
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
-    # Resolved once, so the dictionary the page receives and the language it declares can
-    # never disagree — a portal announcing "ar" while carrying the English dictionary would
-    # look correct in both halves and be wrong.
     language = getattr(frappe.local, "lang", None) or "ar"
-    # Apex's own CSV, and only apex's. get_all_translations merges every installed app for
-    # the desk boot; that dictionary is an order of magnitude larger than anything this
-    # phone shell renders. The portal is a standalone document (it closes its own </body>,
-    # so template_page.py:199-204 never wraps it in Frappe's chrome) and therefore receives
-    # no bootinfo and no frappe._messages — this contract is how the strings arrive at all.
-    # A language apex ships no CSV for yields {}, and {} is the correct answer: __() then
-    # returns its own English argument, which is what an English session should see.
     context.portal_messages = get_translations_from_csv(language, "apex")
     context.shell_meta = build_portal_shell_meta(
         entry=entry,
@@ -177,7 +162,6 @@ def publish_portal_context(
         )
     }
     return context
-
 
 def guest_redirect(path: str) -> None:
     """Redirect an unauthenticated visitor to /login then back to ``path``.

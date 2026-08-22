@@ -56,13 +56,15 @@ SETTLED_STATUSES = ("Approved", "Paid")
 
 
 class RentalSettlement(Document):
-    def before_insert(self):
-        """Defaults the requester to the current session user when not already set."""
-        if not self.requested_by:
-            self.requested_by = frappe.session.user
-
     def validate(self):
-        """Recomputes accrued and variance totals against the linked rental accrual ledger."""
+        """Recomputes accrued and variance totals against the linked rental accrual ledger.
+
+        The requester re-stamp here outlives the field's ``__user`` default: that default
+        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
+        and fills a field only when it is None (``frappe/model/document.py:836``), so it
+        covers neither a later save nor a request body carrying ``requested_by = ""``. A
+        blank requester silently satisfies every ``requested_by != session.user`` gate.
+        """
         self._guard_duplicate()
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
@@ -83,10 +85,6 @@ class RentalSettlement(Document):
             computed = flt(row.days) * flt(row.daily_rate)
             if derive_line_amounts and self._amount_was_derived(row, stored_rows):
                 row.amount = computed
-            if flt(row.days) < 0 or flt(row.daily_rate) < 0 or flt(row.amount) < 0:
-                frappe.throw(
-                    _("Row {0}: Days, Daily Rate and Amount cannot be negative.").format(row.idx)
-                )
             accrued += flt(row.amount)
 
         from apex.salis.rental_engine import linked_accrued_total
@@ -103,11 +101,6 @@ class RentalSettlement(Document):
 
         self.ledger_variance = flt(self.accrued_total) - flt(ledger_total)
         self.variance = flt(self.claimed_total) - flt(self.accrued_total)
-
-        if flt(self.claimed_total) < 0 or flt(self.accrued_total) < 0:
-            frappe.throw(
-                _("Claimed Total and Accrued Total cannot be negative.")
-            )
 
         apply_vat(self, self.claimed_total)
         self._stamp_approval()

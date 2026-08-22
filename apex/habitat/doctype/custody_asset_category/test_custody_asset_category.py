@@ -14,7 +14,6 @@ from frappe.tests.utils import FrappeTestCase
 
 test_dependencies = ["Custody Asset Category"]
 
-
 class TestCustodyAssetCategory(FrappeTestCase):
     def test_a_category_is_named_by_its_category_name(self):
         category = frappe.get_doc({
@@ -36,7 +35,6 @@ class TestCustodyAssetCategory(FrappeTestCase):
             category.insert(ignore_permissions=True)
 
     def test_a_second_category_cannot_take_a_name_already_in_use(self):
-        # _Test Custody Category comes from test_records.json, so the collision needs no arranging.
         duplicate = frappe.get_doc({
             "doctype": "Custody Asset Category",
             "category_name": "_Test Custody Category",

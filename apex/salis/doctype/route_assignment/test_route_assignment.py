@@ -9,7 +9,6 @@ from unittest import mock
 from apex.salis.doctype.route_assignment.route_assignment import RouteAssignment
 from apex.tests._helpers import _user
 
-
 class TestRouteAssignmentContract(FrappeTestCase):
     @patch("apex.salis.doctype.route_assignment.route_assignment.frappe.db.get_value")
     def test_assignment_derives_display_name_without_moving_project_to_shift(self, get_value):
@@ -75,8 +74,6 @@ class TestRouteAssignmentContract(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             assignment.before_submit()
 
-
-# --- merged from test_route_assignment_cancel.py ---
 ASSIGNMENT = "RA-1"
 def _cancel(generated=("DT-1", "DT-2")):
     """Run ``on_cancel`` on a stand-in and report what it asked frappe to do."""
@@ -123,8 +120,6 @@ class TestRouteAssignmentCancel(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
-
-# --- merged from test_route_assignment_fetch_chain.py ---
 class TestRouteAssignmentFetchChain(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -187,8 +182,6 @@ class TestRouteAssignmentFetchChain(FrappeTestCase):
         with self.assertRaises(frappe.exceptions.MandatoryError):
             self._assignment(work_shift=None).insert(ignore_permissions=True)
 
-
-# --- merged from test_route_assignment_workflow_cancel_permission.py ---
 class TestRouteAssignmentCancelPermission(FrappeTestCase):
     def test_fleet_manager_holds_cancel_the_workflow_offers_him(self):
         frappe.set_user("Administrator")

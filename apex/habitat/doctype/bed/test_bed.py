@@ -13,7 +13,6 @@ from frappe.tests.utils import FrappeTestCase
 
 test_dependencies = ["Room"]
 
-
 class TestBed(FrappeTestCase):
     def test_a_bed_takes_the_code_it_is_given(self):
         bed = frappe.get_doc({
@@ -39,9 +38,6 @@ class TestBed(FrappeTestCase):
             bed.insert(ignore_permissions=True)
 
     def test_a_bed_without_a_code_is_refused(self):
-        # The controller checks this itself and throws "Bed Code is required" before Frappe's own
-        # mandatory pass runs, so the error is a plain ValidationError, not MandatoryError. The
-        # previous form of this test asserted MandatoryError and had never run to find out.
         bed = frappe.get_doc({
             "doctype": "Bed",
             "naming_series": "BED-.####",

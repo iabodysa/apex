@@ -80,6 +80,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "__user",
    "description": "Defaults to the session user on creation.",
    "fieldname": "requested_by",
    "fieldtype": "Link",
@@ -272,7 +273,7 @@
    "link_fieldname": "payment_request"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 21:05:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Salis Payment Request",

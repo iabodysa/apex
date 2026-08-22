@@ -14,8 +14,6 @@ import apex
 from apex.habitat import permissions as P
 from apex.tests.factories import make_scoped_supervisor
 
-
-
 class TestMaintenanceInspectionReport(FrappeTestCase):
 
     def test_create_valid_report(self):
@@ -50,13 +48,9 @@ class TestMaintenanceInspectionReport(FrappeTestCase):
             "inspector": "EMP-QA-001",
             "findings": [],
         })
-        # Links are validated before mandatory (document.py:302 then :310), and the
-        # placeholder links below do not exist, so the link check is stood down to keep
-        # the assertion on the empty table this test is about.
         doc.flags.ignore_links = True
         with self.assertRaises(frappe.MandatoryError):
             doc.insert(ignore_permissions=True)
-
 
 class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
     """on_submit stamps the linked Facility Asset's last_inspection_date (most-recent
@@ -155,8 +149,6 @@ class TestMaintenanceInspectionAssetStamp(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_maintenance_inspection_report_building_scope.py ---
 DOCTYPE = "Maintenance Inspection Report"
 QUERY_FN = "apex.habitat.permissions.refuse_a_supervisor_with_no_building"
 HANDLER = "apex.habitat.permissions.building_scoped_has_permission"
@@ -285,8 +277,6 @@ class TestMaintenanceInspectionReportScopeWiring(unittest.TestCase):
             if (dt, field) == (ANCHOR[1], "building")
             else None
         )
-        # `patch.object` restores the real connection on exit, exception or not --
-        # `frappe.db` is a process global that no test rollback would put back.
         with outer, inner, patch.object(frappe, "db", db):
             allowed = P.building_scoped_has_permission(
                 SimpleNamespace(
@@ -354,8 +344,6 @@ class TestMaintenanceInspectionReportScopeRuntime(FrappeTestCase):
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = make_scoped_supervisor(cls._user, cls.b1, cls.addClassCleanup)
-        # Same role, NO Building User Permission -- the user frappe's native match
-        # leaves completely unrestricted.
         cls.unpermitted = cls._user("Resident Supervisor")
         cls.oversight = cls._user("Accommodation Manager")
 

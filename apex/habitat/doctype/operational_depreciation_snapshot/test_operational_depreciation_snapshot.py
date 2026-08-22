@@ -21,7 +21,6 @@ test_ignore = [
     "User",
 ]
 
-
 class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
 
     def test_create_valid_snapshot(self):
@@ -53,9 +52,6 @@ class TestNonFinancialDepreciationSnapshot(FrappeTestCase):
             "building": "QA-BLDG",
             "items": [],
         })
-        # Links are validated before mandatory (document.py:302 then :310), and the
-        # placeholder links below do not exist, so the link check is stood down to keep
-        # the assertion on the empty table this test is about.
         doc.flags.ignore_links = True
         with self.assertRaises(frappe.MandatoryError):
             doc.insert(ignore_permissions=True)

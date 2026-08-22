@@ -9,8 +9,9 @@ access is resolved from permlevel-0 rows only, field access is resolved separate
 unions every permlevel across the user's roles, so the two are independent grants --
 the row activates the moment one user holds both roles, with no DocPerm edit. No
 shipped role profile bundles them today, so this overlay is dormant until an
-administrator does. Proof and the framework citations are in
-``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+administrator does. The framework's rule, written here rather than pointed at: permlevel access is the UNION
+of the caller's roles (frappe/permissions.py get_role_permissions), so a user holding both
+roles reads the union of both field sets and no DocPerm edit is needed to widen him.
 """
 
 from __future__ import annotations

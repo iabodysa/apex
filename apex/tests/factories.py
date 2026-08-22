@@ -20,19 +20,15 @@ from frappe.utils import today
 try:
     from frappe.tests.utils import FrappeTestCase
     _UnitTestCase = FrappeTestCase
-except Exception:  # pragma: no cover — frappe absent (static analysis / non-bench)
-    FrappeTestCase = object  # type: ignore
-    _UnitTestCase = object  # type: ignore
+except Exception:
+    FrappeTestCase = object
+    _UnitTestCase = object
 
-
-# [#2gr8f9]
 class ApexHabitatTestCase(FrappeTestCase):
     """Base test case for apex integration tests."""
 
-
 class ApexHabitatUnitTestCase(_UnitTestCase):
     """Base test case for apex unit tests (no database)."""
-
 
 class ExistsShortCircuitDB:
     """A site-free ``frappe.db`` that reproduces the ``exists`` short-circuit.
@@ -68,8 +64,6 @@ class ExistsShortCircuitDB:
             return next((value for value in key.values() if value in rows), None)
         return key if key in rows else None
 
-
-# [#8evoal]
 test_ignore = [
     "Additional Salary",
     "Asset",
@@ -88,7 +82,6 @@ test_ignore = [
     "User",
 ]
 
-
 def make_company(name="Test AFMCO", **kwargs):
     if frappe.db.exists("Company", name):
         return frappe.get_doc("Company", name)
@@ -97,14 +90,11 @@ def make_company(name="Test AFMCO", **kwargs):
         "company_name": name,
         "abbr": "TAFM",
         "default_currency": "SAR",
-        # Company.country is mandatory. The old dev site already carried this record, so the
-        # insert branch never ran there and the omission stayed invisible until a fresh site.
         "country": frappe.defaults.get_global_default("country") or "Saudi Arabia",
         **kwargs,
     })
     doc.insert(ignore_permissions=True)
     return doc
-
 
 def make_building(name=None, company=None, **kwargs):
     name = name or "Test Building"
@@ -122,7 +112,6 @@ def make_building(name=None, company=None, **kwargs):
     _register_building(doc.name)
     return doc
 
-
 def make_room(building, room_number=None, **kwargs):
     room_number = room_number or f"{building}-R01"
     if frappe.db.exists("Room", room_number):
@@ -138,7 +127,6 @@ def make_room(building, room_number=None, **kwargs):
     doc.insert(ignore_permissions=True)
     return doc
 
-
 def make_bed(room, bed_code=None, **kwargs):
     bed_code = bed_code or f"{room}-B01"
     if frappe.db.exists("Bed", bed_code):
@@ -152,7 +140,6 @@ def make_bed(room, bed_code=None, **kwargs):
     })
     doc.insert(ignore_permissions=True)
     return doc
-
 
 def make_employee(name=None, company=None, **kwargs):
     name = name or "Test Employee"
@@ -172,10 +159,6 @@ def make_employee(name=None, company=None, **kwargs):
     doc.insert(ignore_permissions=True)
     return doc
 
-
-# [#cglp6s]
-
-
 def make_supplier(name, **kwargs):
     """Get-or-create a Supplier by name (named by supplier_name on a default
     ERPNext site); return its name. Idempotent — a re-run never duplicates."""
@@ -190,7 +173,6 @@ def make_supplier(name, **kwargs):
         }
     ).insert(ignore_permissions=True)
     return name
-
 
 def service_item(name):
     """Get-or-create the non-stock service Item a telecom contract bills through.
@@ -214,14 +196,12 @@ def service_item(name):
     ).insert(ignore_permissions=True)
     return name
 
-
 def default_company():
     """The site's default company name (global default, else the first Company)."""
     return (
         frappe.defaults.get_global_default("company")
         or frappe.get_all("Company", limit=1)[0].name
     )
-
 
 def make_project(name):
     """Get-or-create a Project by ``project_name``; return its name."""
@@ -231,7 +211,6 @@ def make_project(name):
             {"doctype": "Project", "project_name": name}
         ).insert(ignore_permissions=True).name
     return p
-
 
 def purge_doc(doctype, name):
     """Cancel (if submitted) then force-delete ``name`` as Administrator; a no-op
@@ -249,16 +228,8 @@ def purge_doc(doctype, name):
         try:
             doc.cancel()
         except Exception:
-            # A workflow-governed document refuses a cancel to EVERY session, not just an
-            # unprivileged one: `ignore_permissions` never reaches `validate_workflow`
-            # (frappe/model/document.py:693) and `get_transitions` filters on the session
-            # user's roles (frappe/model/workflow.py:64). A teardown that had to hold a
-            # business role to clean up would tie every fixture to the approval matrix, so
-            # the docstatus is written directly here — in test teardown only, where the row
-            # is about to be deleted anyway and no hook may observe the intermediate state.
             frappe.db.set_value(doctype, name, "docstatus", 2, update_modified=False)
     frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
-
 
 def purge_trip_request(tr_name, rp_name):
     """Tear down a Transport Request together with its Route Plan.
@@ -276,7 +247,6 @@ def purge_trip_request(tr_name, rp_name):
     purge_doc("Route Plan", rp_name)
     purge_doc("Transport Request", tr_name)
 
-
 def make_rental_office(name):
     """Get-or-create an Active Rental Office by ``office_name``; return its name."""
     office = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
@@ -285,7 +255,6 @@ def make_rental_office(name):
             {"doctype": "Rental Office", "office_name": name, "status": "Active"}
         ).insert(ignore_permissions=True).name
     return office
-
 
 def make_vehicle(plate, odometer=None, project=None, ownership=None):
     """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
@@ -318,22 +287,10 @@ def make_vehicle(plate, odometer=None, project=None, ownership=None):
         frappe.db.set_value("Salis Vehicle", name, values)
     return name
 
-
-
-
-
-
-
-
-
-
 def driver_user(driver):
     """The login user behind a Salis Driver (via its Employee.user_id)."""
     emp = frappe.db.get_value("Salis Driver", driver, "employee")
     return frappe.db.get_value("Employee", emp, "user_id")
-
-
-
 
 def make_test_driver():
     """Get-or-create the canonical portal-test driver (User+Employee+Salis Driver
@@ -347,7 +304,6 @@ def make_test_driver():
             u.add_roles("Driver")
             u.insert(ignore_permissions=True)
         except frappe.DuplicateEntryError:
-            # [#hxpd3j]
             pass
     emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
     if not emp:
@@ -374,11 +330,6 @@ def make_test_driver():
         frappe.db.set_value("Salis Driver", drv, "current_vehicle", veh)
     return drv
 
-
-
-
-
-
 def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
     """A SUBMITTED Goods Receipt bringing ``qty`` of ``article`` into
     ``intake_building``; returns the document. Submitted because the custody tests
@@ -396,7 +347,6 @@ def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
     gr.insert(ignore_permissions=True)
     gr.submit()
     return gr
-
 
 def make_maintenance_request(building, room):
     """A SUBMITTED Maintenance Request against ``building``/``room``; returns the
@@ -417,7 +367,6 @@ def make_maintenance_request(building, room):
     mr.submit()
     return mr
 
-
 def make_safety_round(building, **overrides):
     """A draft Weekly Safety Round on ``building`` dated today; returns the
     document. ``overrides`` replace any of those defaults (the re-inspection tests
@@ -430,9 +379,6 @@ def make_safety_round(building, **overrides):
     }
     data.update(overrides)
     return frappe.get_doc(data).insert(ignore_permissions=True)
-
-
-
 
 def make_scoped_supervisor(make_user, building, add_cleanup):
     """A Resident Supervisor scoped to ``building`` by a Building User Permission;
@@ -455,7 +401,6 @@ def make_scoped_supervisor(make_user, building, add_cleanup):
         frappe.delete_doc, "User Permission", up.name, force=True, ignore_permissions=True
     )
     return email
-
 
 def make_assignment(employee, building, project, room_number=None, bed_code=None, stay_type="Permanent"):
     """A submitted Accommodation Assignment placing ``employee`` in ``building``
@@ -499,9 +444,6 @@ def make_assignment(employee, building, project, room_number=None, bed_code=None
     doc.insert(ignore_permissions=True)
     doc.submit()
     return doc.name
-
-
-
 
 def make_worker_trip(
     driver,
@@ -549,7 +491,6 @@ def make_worker_trip(
     if pickup_datetime is not None:
         tr_fields["pickup_datetime"] = pickup_datetime
     tr = frappe.get_doc(tr_fields).insert(ignore_permissions=True)
-    # [#aj1ze2]
     tr.reload()
 
     rp = frappe.get_doc(
@@ -595,7 +536,6 @@ def make_worker_trip(
         dt.reload()
     return tr, rp, dt
 
-
 class WorkerTripMixin:
     """Builds a complete Workers-line trip for a given driver and returns the
     handle records, registering cleanup. Record creation is delegated to
@@ -628,9 +568,7 @@ class WorkerTripMixin:
                         pass
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
 
-
 _CREATED_BUILDINGS: set[str] = set()
-
 
 def _register_building(name):
     """Note that a builder above INSERTED ``name``, and hand it straight back.
@@ -643,21 +581,10 @@ def _register_building(name):
     _CREATED_BUILDINGS.add(name)
     return name
 
-
-
-
-# [#a140fx] Accounting / payroll chain fixtures. Site-wide masters (Company, Account)
-# are get-or-create, since a second copy would change what "the site's company" means
-# for every other test; class-private records (Employee, Salary Component, Salary
-# Structure) are always NEW, because borrowing what an earlier test left behind is
-# exactly the order-dependence these builders exist to remove.
-
-
 def fixture_tag():
-    """A collision-free fixture suffix (>=12 random characters — the floor
-    ``apex/tests/test_fixture_identifier_entropy.py`` enforces)."""
+    """A collision-free fixture suffix: at least 12 random characters, because a
+    shorter one collides across a parallel run and reads as a logic bug."""
     return frappe.generate_hash(length=12)
-
 
 def ensure_company(name_prefix="Apex Test"):
     """The site's Company, created when the site has none. Returns its name.
@@ -674,14 +601,11 @@ def ensure_company(name_prefix="Apex Test"):
         {
             "doctype": "Company",
             "company_name": f"{name_prefix} {tag}",
-            # Full hash, never a slice — a narrowed random identifier is exactly
-            # what the fixture-entropy guard forbids.
             "abbr": f"AT{tag}",
             "default_currency": "SAR",
             "country": "Saudi Arabia",
         }
     ).insert(ignore_permissions=True).name
-
 
 def ensure_account(company, account_type, root_type, account_currency=None):
     """A non-group Account of ``account_type`` on ``company``; created under the
@@ -718,13 +642,6 @@ def ensure_account(company, account_type, root_type, account_currency=None):
     if account_currency:
         values["account_currency"] = account_currency
     return frappe.get_doc(values).insert(ignore_permissions=True).name
-
-
-
-
-
-
-
 
 def make_submitted_custody_issue():
     """A submitted Custody Issue for the QA building, the anchor an acknowledgment needs.

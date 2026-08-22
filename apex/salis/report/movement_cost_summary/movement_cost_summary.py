@@ -8,7 +8,6 @@ from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import percent_card, total_card
 from apex.salis import permissions
 
-
 def execute(filters=None):
     """Returns the columns, per-recovery-type totals and summary cards for the report."""
     columns = [
@@ -30,9 +29,6 @@ def execute(filters=None):
         if date_condition is not None:
             query_filters["request_date"] = date_condition
 
-    # Movement Cost Recovery is row-scoped through its vehicle, but a Script Report builds
-    # its own query and permission_query_conditions never runs — so the scope is applied
-    # here or not at all.
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Movement Cost Recovery")
     if restrict:
         if not allowed:

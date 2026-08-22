@@ -32,27 +32,16 @@ import apex
 from apex.tests.factories import ApexHabitatTestCase
 from apex.tests.source_tree import func_source
 
-
 SOURCE = "_Test Building"
 DESTINATION = "_Test Building 2"
-# The memo is addressed to a PERSON, not a string: email_gate.mailable drops anyone who is not an
-# enabled User with email notifications on, so a made-up address silently sends nothing. This one
-# comes from Frappe's own User test_records.json.
 FINANCE_RECIPIENT = "test@example.com"
-
 
 class TestMaterialTransfer(FrappeTestCase):
     def setUp(self):
         self.article = frappe.db.get_value("Custody Article", {"article_name": "_Test Blanket"})
         self.source_cost_center = frappe.db.get_value("Building", SOURCE, "default_cost_center")
         self.destination_cost_center = frappe.db.get_value("Building", DESTINATION, "default_cost_center")
-        # Habitat Settings is a Single, so a case that flips a toggle would otherwise hand the
-        # next one a cached document that no longer matches the rolled-back row.
         self.addCleanup(frappe.clear_document_cache, "Habitat Settings", "Habitat Settings")
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so stock a case
-        # leaves in a shared fixture store would become the next case's opening balance. A
-        # savepoint is the framework's own way to hand the store back exactly as it was found.
         frappe.db.savepoint("apex_material_transfer_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_material_transfer_case")
 
@@ -143,7 +132,6 @@ class TestMaterialTransfer(FrappeTestCase):
         sendmail.assert_not_called()
 
     def test_no_memo_is_sent_when_both_stores_share_a_cost_centre(self):
-        # The destination's cost centre is borrowed from the fixture, so it is handed back.
         self.addCleanup(
             frappe.db.set_value, "Building", DESTINATION,
             "default_cost_center", self.destination_cost_center,
@@ -174,8 +162,6 @@ class TestMaterialTransfer(FrappeTestCase):
 
 test_dependencies = ['Building', 'Custody Article', 'User']
 
-
-# --- merged from test_stock_source_locking.py ---
 _HERE = os.path.join(str(Path(apex.__file__).resolve().parent), "habitat", "doctype", "material_transfer")
 _TRANSFER_CTL = os.path.normpath(os.path.join(_HERE, "material_transfer.py"))
 _HANDOVER_CTL = os.path.normpath(

@@ -10,11 +10,9 @@ from frappe.rate_limiter import rate_limit as _frappe_rate_limit
 
 _ABSENT = object()
 
-
 def canonical_command(fn) -> str:
     """The single ``cmd`` ``fn`` is metered under, whatever the caller spelled."""
     return f"{fn.__module__}.{fn.__name__}"
-
 
 def rate_limit(
     key: str | None = None,
@@ -58,13 +56,6 @@ def rate_limit(
                     form_dict["cmd"] = spelled
             return fn(*args, **kwargs)
 
-        # A positive marker rather than reusing __wrapped__: functools.wraps stamps
-        # __wrapped__ on every decorator that wraps a function, including the plain
-        # frappe.whitelist() a caller may apply with no rate_limit() at all -- so
-        # hasattr(fn, "__wrapped__") is true whether or not this decorator ever ran.
-        # This attribute exists only when this decorator does, and (via
-        # functools.wraps' __dict__ update) survives every further @wraps layer a
-        # caller stacks on top, so a test can still find it on the exported name.
         wrapper._apex_rate_limit = (limit, seconds)
         return wrapper
 

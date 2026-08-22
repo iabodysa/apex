@@ -18,18 +18,13 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
-# resolves against wherever this module's copy sits, so a source scan rooted there
-# would grade whatever directory holds the copy rather than the app.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
 
-
 def rel(path):
     """``path`` relative to the app root (``apex/``)."""
     return os.path.relpath(path, APP_ROOT)
-
 
 def parse(path):
     """The file's AST, or None when it does not parse — a static guard reports
@@ -40,13 +35,11 @@ def parse(path):
         except SyntaxError:
             return None
 
-
 def is_test_file(relpath):
     """A central ``tests/`` module or a colocated ``test_*.py`` beside its unit."""
     return relpath.startswith("tests" + os.sep) or os.path.basename(relpath).startswith(
         "test_"
     )
-
 
 def _git_tracked_py_files():
     """Every apex/**/*.py git would ship OR is about to, or None when git cannot answer.
@@ -76,7 +69,6 @@ def _git_tracked_py_files():
         if entry.startswith(prefix)
     )
 
-
 def all_py_files():
     """Every apex/**/*.py except node_modules — production AND test.
 
@@ -92,22 +84,15 @@ def all_py_files():
             for path in tracked
             if "node_modules" not in path and os.path.exists(path)
         ]
-    # No git (an sdist, say): fall back to the walk rather than scanning nothing.
     return [
         path
         for path in sorted(glob.glob(os.path.join(APP_ROOT, "**", "*.py"), recursive=True))
         if "node_modules" not in path
     ]
 
-
 def production_py_files():
     """Every apex/**/*.py except tests/ (central or colocated) and node_modules."""
     return [path for path in all_py_files() if not is_test_file(rel(path))]
-
-
-
-
-
 
 def translations():
     """``{source: translation}`` from the shipped ar.csv.
@@ -123,7 +108,6 @@ def translations():
                 rows[row[0]] = row[1]
     return rows
 
-
 def func_source(src, path, name):
     """The verbatim source lines of the function ``name`` in ``src``.
 
@@ -137,5 +121,4 @@ def func_source(src, path, name):
             lines = src.splitlines()
             return "\n".join(lines[node.lineno - 1:node.end_lineno])
     raise AssertionError(f"{name} not found in {path}")
-
 

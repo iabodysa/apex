@@ -47,15 +47,21 @@ VALID_STATUSES = (
 
 class SalisPaymentRequest(Document):
     def before_insert(self):
-        """Defaults the requester and clears any carried-over payment reference on an amendment."""
-        if not self.requested_by:
-            self.requested_by = frappe.session.user
+        """Clears any carried-over payment reference on an amendment."""
         if self.amended_from:
             self.linked_payment_doctype = None
             self.linked_payment_entry = None
 
     def validate(self):
-        """Validates the amount and enforces the finance-only approval gate and approver stamp."""
+        """Validates the amount and enforces the finance-only approval gate and approver stamp.
+
+        The requester re-stamp here outlives the field's ``__user`` default: that default
+        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
+        and fills a field only when it is None (``frappe/model/document.py:836``), so it
+        covers neither a later save nor a request body carrying ``requested_by = ""``. A
+        blank requester makes both maker-checker gates below pass — ``_enforce_finance_gate``
+        and ``permissions.payment_sod_has_permission`` each test the requester truthily.
+        """
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 

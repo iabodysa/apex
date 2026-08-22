@@ -378,6 +378,7 @@
    "label": "Actors"
   },
   {
+   "default": "__user",
    "description": "Defaults to the session user. The workflow approval transition is SoD-gated on this field (approver ≠ requester).",
    "fieldname": "requested_by",
    "fieldtype": "Link",
@@ -489,7 +490,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 21:05:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

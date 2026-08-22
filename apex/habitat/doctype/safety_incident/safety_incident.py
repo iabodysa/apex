@@ -19,12 +19,9 @@ from frappe.model.document import Document
 
 class SafetyIncident(Document):
     def validate(self):
-        """Defaults reported_by, blocks negative casualties, and requires notes to close the incident."""
+        """Defaults reported_by and requires notes to close the incident."""
         if not self.reported_by:
             self.reported_by = frappe.session.user
-
-        if self.casualties is not None and self.casualties < 0:
-            frappe.throw(_("Casualties cannot be negative."))
 
         if self.status == "Closed" and not (self.resolution_notes or "").strip():
             frappe.throw(_("Resolution Notes are required to close a Safety Incident."))

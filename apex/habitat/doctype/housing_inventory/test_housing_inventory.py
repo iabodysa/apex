@@ -21,7 +21,6 @@ test_dependencies = ["Room"]
 BUILDING = "_Test Building"
 ROOM = "_T-101"
 
-
 class TestHousingInventory(FrappeTestCase):
     def _item(self, **overrides):
         payload = {
@@ -77,15 +76,11 @@ class TestHousingInventory(FrappeTestCase):
 
         self.assertEqual(item.quantity_variance, -3)
 
-
 class TestHousingInventoryMaintenanceReflection(FrappeTestCase):
     """A completed Maintenance Work Order for a linked Facility Asset advances the housing item's
     maintenance stamps and clears a maintenance condition and status."""
 
     def setUp(self):
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so the stamps one
-        # case writes onto the item would still be there when the next case asserts they are not.
         frappe.db.savepoint("apex_housing_inventory_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_housing_inventory_case")
 

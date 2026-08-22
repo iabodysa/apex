@@ -72,18 +72,14 @@ DESTINATION_COMPANY = "_Test Company 1"
 DOCUMENT_WRITERS = ("System Manager", "Accommodation Manager", "Resident Supervisor")
 SUBMITTERS = ("System Manager", "Accommodation Manager")
 
-# The pending-acknowledgement Number Card's own filter, reused by
-# TestTheAccountingSignOffCanBeGiven to prove a sign-off is what clears it.
 TILE_FILTERS = [
     ["is_intercompany", "=", 1],
     ["accounting_acknowledged", "=", 0],
     ["docstatus", "=", 1],
 ]
 
-
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
-
 
 class _MovementFixture(FrappeTestCase):
     """Shared builder for a genuine intercompany movement, kept out of
@@ -147,9 +143,6 @@ class _MovementFixture(FrappeTestCase):
                 "facility_asset": self.asset,
                 "from_building": self.origin,
                 "to_building": self.destination,
-                # is_intercompany is DERIVED from the two companies differing, never set
-                # by the caller, so the fixture has to make the movement genuinely
-                # intercompany or the gate under test never triggers.
                 "from_company": ORIGIN_COMPANY,
                 "to_company": DESTINATION_COMPANY,
                 "release_approved_by": "Administrator",
@@ -174,7 +167,6 @@ class _MovementFixture(FrappeTestCase):
         frappe.set_user("Administrator")
         frappe.db.set_value(DOCTYPE, name, "docstatus", 0, update_modified=False)
         frappe.delete_doc(DOCTYPE, name, force=True, ignore_permissions=True)
-
 
 class TestTheSubmitGateIsReal(_MovementFixture):
     """The premise, driven through a real insert-then-submit rather than assumed from
@@ -206,7 +198,6 @@ class TestTheSubmitGateIsReal(_MovementFixture):
 
         doc.reload()
         self.assertEqual(doc.docstatus, 1)
-
 
 class TestPermissionsMatchTheGate(FrappeTestCase):
     @classmethod
@@ -285,7 +276,6 @@ class TestPermissionsMatchTheGate(FrappeTestCase):
                         f"{role} can write {fieldname}; only Finance Manager may",
                     )
 
-
 class TestLabelAndPermissionsAgree(FrappeTestCase):
     def test_the_label_no_longer_names_a_role(self):
         """The regression this file exists to prevent: any parenthetical naming an org
@@ -312,7 +302,6 @@ class TestLabelAndPermissionsAgree(FrappeTestCase):
                 self.assertEqual(field.permlevel, 1)
                 self.assertTrue(field.allow_on_submit, "cannot be set after submit")
 
-
 class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
     """The endpoint itself, driven against an ALREADY SUBMITTED intercompany movement —
     the opposite starting state from ``TestTheSubmitGateIsReal`` above, which needs its
@@ -326,9 +315,6 @@ class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
         frappe.set_user("Administrator")
         cls.accountant = cls._user([ACCOUNTING_ROLE])
         cls.preparer = cls._user(["Accommodation Manager"])
-        # The accountant who ALSO submitted: the self-acknowledgement case has to be a
-        # user who holds the role, or the role check would be what refuses it and the
-        # test would prove the wrong thing.
         cls.accountant_preparer = cls._user([ACCOUNTING_ROLE, "Accommodation Manager"])
 
     @classmethod
@@ -403,9 +389,6 @@ class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
                 "facility_asset": self.asset,
                 "from_building": self.origin,
                 "to_building": self.destination,
-                # is_intercompany is DERIVED from the two companies differing, never set
-                # by the caller, so the fixture has to make the movement genuinely
-                # intercompany rather than assert the flag.
                 "from_company": ORIGIN_COMPANY,
                 "to_company": DESTINATION_COMPANY,
                 "release_approved_by": "Administrator",
@@ -515,8 +498,6 @@ class TestTheAccountingSignOffCanBeGiven(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_facility_asset_movement_acknowledgement_rules.py ---
 ENDPOINT = "acknowledge_intercompany_movement"
 def _raising_frappe(user="accountant@example.com") -> MagicMock:
     fake = MagicMock()
@@ -663,8 +644,6 @@ class TestFacilityAssetMovementAcknowledgement(TestCase):
 
         movement.db_set.assert_not_called()
 
-
-# --- merged from test_facility_asset_movement_effects.py ---
 _MOVEMENT_HOOKS = ("on_submit", "on_cancel")
 class TestFacilityAssetMovementEffects(FrappeTestCase):
     def setUp(self):
@@ -783,8 +762,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
         self.assertEqual(asset.movement_count, 0, "cancel must decrement movement_count back to 0")
 
-    # A delivered room that is not a Room record must survive the next movement, not be erased.
-
     FREE_TEXT_ROOM = "Storage Annex B"
 
     def test_movement_round_trip_preserves_a_room_that_is_not_a_room_record(self):
@@ -802,10 +779,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         its shape; the origin is kept there and read back on cancel, the same way
         Facility Asset Delivery.on_cancel already does through ledgered_origin.
         """
-        # The state a delivery leaves behind: its destination room is Data, and
-        # move_asset_on_delivery copies it verbatim onto the asset's Data room. Asserted
-        # on the meta rather than staged through a whole 3-exit delivery, so this stays a
-        # movement test -- but it is why a non-Room string can be there at all.
         for doctype, field in (
             ("Facility Asset Delivery", "to_location_in_building"),
             ("Facility Asset", "location_in_building"),
@@ -839,7 +812,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         )
         mv.submit()
 
-        # The room the asset actually left survives in the ledger, not in from_room.
         self.assertEqual(
             frappe.db.get_value(
                 "Facility Asset Movement Ledger",
@@ -878,7 +850,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         date of a move that no longer exists. The audit PAIR must survive or vanish
         together with the movement it describes."""
         before = self._audit_trail()
-        # A never-moved asset carries no trail; that is the value cancel must return to.
         self.assertFalse(before.previous_building, "seed asset must carry no previous building")
         self.assertFalse(before.last_movement_date, "seed asset must carry no movement date")
 
@@ -896,7 +867,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
 
         after = self._audit_trail()
         for field in self._AUDIT_TRAIL:
-            # NULL and "" both read as blank; compare on that axis, not on identity.
             self.assertEqual(
                 after.get(field) or None,
                 before.get(field) or None,
@@ -907,9 +877,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
             self.bldg_a,
             "an asset back at A must not also claim it was previously at A",
         )
-
-    # An out-of-order cancel must not restore from_* blindly: that would drag an asset that has
-    # already moved on back to a building it has physically left.
 
     def _second_leg(self):
         """Building C + room L2, and a SUBMITTED second movement B -> C on the same
@@ -950,8 +917,6 @@ class TestFacilityAssetMovementEffects(FrappeTestCase):
         mv1.reload()
         with self.assertRaises(frappe.ValidationError) as caught:
             mv1.cancel()
-        # Every framework pre-cancel check subclasses ValidationError too, so a bare
-        # assertRaises would pass on a link or timestamp failure instead of the guard.
         self.assertNotIsInstance(
             caught.exception,
             (frappe.LinkValidationError, frappe.TimestampMismatchError),
@@ -1201,8 +1166,6 @@ class TestFacilityAssetMovementLedger(FrappeTestCase):
         )
         self.assertEqual(len(rows), 1)
 
-
-# --- merged from test_facility_asset_movement_reachability.py ---
 MOVEMENT = "Facility Asset Movement"
 LEDGER = "Facility Asset Movement Ledger"
 WRITER_ROLES = ("System Manager", "Accommodation Manager", "Resident Supervisor")
@@ -1235,31 +1198,21 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
     def setUpClass(cls):
         super().setUpClass()
         frappe.set_user("Administrator")
-        # Two estates: the supervisor is permitted on `b_in` only, so `b_out` exercises the
-        # scope refusal with a doc that is otherwise perfectly valid.
         cls.b_in = cls._building()
         cls.b_out = cls._building()
         cls.room_from = cls._room(cls.b_in)
         cls.room_to = cls._room(cls.b_in)
         cls.room_out_from = cls._room(cls.b_out)
         cls.room_out_to = cls._room(cls.b_out)
-        # Never submitted (its every create is refused), so it cannot drift between methods.
         cls.asset_out = cls._asset(cls.b_out, cls.room_out_from)
 
         cls.supervisor = make_scoped_supervisor(cls._user, cls.b_in, cls.addClassCleanup)
         cls.manager = cls._user("Accommodation Manager")
-        # Finance Manager ships an explicit all-zero DocPerm row on this DocType: read and
-        # report only. It is the persona for "holds a role on the record but may not write".
         cls.outsider = cls._user("Finance Manager")
 
     def setUp(self):
-        # frappe.session.user is a PROCESS GLOBAL that the row rollback does not restore.
-        # Pin it before and after every method so a refusal cannot leak a half-switched
-        # session into the next test.
         frappe.set_user("Administrator")
         self.addCleanup(frappe.set_user, "Administrator")
-        # Minted per METHOD: on_submit rewrites this asset's building/location/movement_count
-        # and the class-scoped rollback would not undo that between sibling methods.
         self.asset_in = self._asset(self.b_in, self.room_from)
 
     @classmethod
@@ -1285,8 +1238,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
                 "asset_name": "REACH Asset " + _h_facility_asset_movement_reachability(),
                 "asset_category": "Other",
                 "building": building,
-                # Data field carrying a Room name; _reconcile_origin resolves from_room
-                # from it, so the movement's origin must match what is seeded here.
                 "location_in_building": room,
                 "responsible_supervisor": "Administrator",
             }
@@ -1336,8 +1287,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         with as_user(user):
             return frappe.get_doc(payload).insert()
 
-    # ---- clause 0: the shipped route exists and a role behind it can use it ----
-
     def test_workspace_link_is_backed_by_a_role_that_can_create(self):
         """A workspace link to a DocType nobody on that workspace can create is a dead
         end: the list view opens and its primary Add action never renders.
@@ -1369,16 +1318,12 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
                 % (title, MOVEMENT, sorted(roles), sorted(creators)),
             )
 
-        # The creator set is the controller's own three permlevel-0 writers, and the two
-        # read-only personas must never drift into it.
         self.assertEqual(
             creators,
             set(WRITER_ROLES),
             "the roles that may CREATE a movement must stay exactly the permlevel-0 "
             "writers; Finance Manager and Internal Auditor are read-only here by design",
         )
-
-    # ---- clauses 1 + 2: allowed and refused, asserted as one non-collapsing pair ----
 
     def test_in_scope_create_allowed_and_out_of_scope_refused(self):
         """The authorised in-scope supervisor CAN create; the SAME supervisor CANNOT
@@ -1391,18 +1336,12 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         allowed_doc = self._create_as(self.supervisor, self._in_scope_payload())
         self.assertTrue(allowed_doc.name, "in-scope supervisor must get a named draft")
         self.assertEqual(allowed_doc.docstatus, 0)
-        # Prove it reached the database rather than only the in-memory document, and that
-        # authorship is recorded against the real operator.
         self.assertTrue(frappe.db.exists(MOVEMENT, allowed_doc.name))
         self.assertEqual(
             frappe.db.get_value(MOVEMENT, allowed_doc.name, "owner"), self.supervisor
         )
 
         before = frappe.db.count(MOVEMENT)
-        # frappe.PermissionError by NAME. A link or mandatory failure raises
-        # ValidationError instead, and check_permission("create") runs at
-        # document.py:300 — before run_before_save_methods — so a validation error
-        # cannot stand in for the permission refusal being asserted here.
         with self.assertRaises(frappe.PermissionError):
             self._create_as(self.supervisor, self._out_of_scope_payload())
         self.assertEqual(
@@ -1411,7 +1350,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
             "a refused create must not leave a row behind",
         )
 
-        # The anti-collapse clause: the two verdicts must be different values.
         in_scope_verdict = frappe.has_permission(
             MOVEMENT,
             "create",
@@ -1444,8 +1382,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
             self._create_as(self.outsider, self._in_scope_payload())
         self.assertEqual(frappe.db.count(MOVEMENT), before)
 
-        # ...and the refusal is the DocPerm, not the scope hook: the hook defers (None),
-        # which frappe reads as "no opinion" (has_controller_permissions, permissions.py:456).
         self.assertIsNone(
             P.building_scoped_has_permission(
                 frappe.get_doc(self._in_scope_payload()), "create", user=self.outsider
@@ -1454,15 +1390,12 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
             "proving the refusal above came from the read-only DocPerm",
         )
 
-    # ---- clause 3: submission posts EXACTLY ONE ledger effect ----
-
     def test_submit_posts_exactly_one_ledger_effect(self):
         """Count the ledger before and after. "A row exists" is also true of a double
         post, and the engine carries an idempotency key precisely because a double post
         was possible."""
         movement = self._create_as(self.supervisor, self._in_scope_payload())
 
-        # The supervisor initiates but may not submit — submission is the manager's gate.
         self.assertFalse(
             frappe.has_permission(
                 MOVEMENT, "submit", doc=movement, user=self.supervisor, throw=False
@@ -1496,8 +1429,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         self.assertFalse(rows[0].reversal_of, "the posting row is an original, not a reversal")
         self.assertFalse(rows[0].is_cancelled)
 
-    # ---- clause 4: cancellation preserves the audit trail ----
-
     def test_cancel_preserves_the_audit_trail(self):
         """Assert what SURVIVES the cancellation, not that ``cancel()`` returned.
 
@@ -1518,18 +1449,12 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         original = posted[0]
         total_before = frappe.db.count(LEDGER)
 
-        # cancellation_reason is allow_on_submit, but a save() after submit would re-run
-        # validate() -> _reconcile_origin against an asset that has ALREADY moved, which
-        # throws. db_set is the shipped pattern for landing it (see the sibling effects
-        # test), and the subject here is cancellation, not the reason's own write path.
         frappe.db.set_value(
             MOVEMENT, movement.name, "cancellation_reason", "Reachability audit-trail check"
         )
         with as_user(self.manager):
             frappe.get_doc(MOVEMENT, movement.name).cancel()
 
-        # 1. The source document survives — cancelled, not deleted, reason retained, and
-        #    still attributed to the supervisor who initiated it.
         self.assertTrue(
             frappe.db.exists(MOVEMENT, movement.name),
             "cancellation must not delete the movement — the record IS the audit trail",
@@ -1550,8 +1475,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         self.assertEqual(survivor.from_building, self.b_in)
         self.assertEqual(survivor.to_building, self.b_in)
 
-        # 2. The ORIGINAL ledger row survives field-for-field — the reversal is a NEW row,
-        #    never an edit of the posting it reverses.
         self.assertTrue(frappe.db.exists(LEDGER, original.name))
         kept = frappe.db.get_value(
             LEDGER,
@@ -1573,7 +1496,6 @@ class TestFacilityAssetMovementReachability(FrappeTestCase):
         self.assertFalse(kept.is_cancelled, "the original posting must not be restamped")
         self.assertFalse(kept.reversal_of, "the original posting must not become a reversal")
 
-        # 3. Exactly one reversal was added, and it points back at the original.
         self.assertEqual(
             frappe.db.count(LEDGER) - total_before,
             1,

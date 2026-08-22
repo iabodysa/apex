@@ -10,13 +10,18 @@ so there is one copy of them; SAFETY_ROLES is re-exported here because that is w
 readers of this route look for it.
 """
 
-from apex.www.housing import (  # noqa: F401
+from apex.www.housing import (
     PORTAL_ROLES,
     SAFETY_ROLES,
     bootstrap_portal_context,
     has_apps_screen_access,
 )
 
+__all__ = [
+    "PORTAL_ROLES",
+    "SAFETY_ROLES",
+    "has_apps_screen_access",
+]
 
 def get_context(context):
     """Bootstraps the merged portal at its safety door."""

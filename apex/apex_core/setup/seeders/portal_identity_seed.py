@@ -27,11 +27,6 @@ DRIVER_USER = "driver@apex.internal"
 WORKER_ROLE = "Worker"
 DRIVER_ROLE = "Driver"
 
-# A DocPerm that lets a capacity WRITE names one of these, never ``Worker``/``Driver``.
-# Real people hold Worker and Driver — twelve users hold Driver on this bench — so a
-# create/write grant to those roles reaches every one of them, which is the wider hole
-# the capacity identity exists to avoid. Nobody but the two seeded identities below ever
-# holds a capacity role, so a grant to it reaches exactly the token-resolved portal path.
 WORKER_CAPACITY_ROLE = "Portal Worker Capacity"
 DRIVER_CAPACITY_ROLE = "Portal Driver Capacity"
 
@@ -39,7 +34,6 @@ CAPACITIES = (
     (WORKER_USER, WORKER_ROLE, WORKER_CAPACITY_ROLE, "Worker", "Portal"),
     (DRIVER_USER, DRIVER_ROLE, DRIVER_CAPACITY_ROLE, "Driver", "Portal"),
 )
-
 
 def _ensure_role(role: str) -> None:
     """A capacity needs a role before it can hold one."""
@@ -49,7 +43,6 @@ def _ensure_role(role: str) -> None:
             "role_name": role,
             "desk_access": 0,
         }).insert(ignore_permissions=True)
-
 
 def _close_login(email: str) -> None:
     """Disable an identity seeded before login was closed, through the User document.
@@ -65,7 +58,6 @@ def _close_login(email: str) -> None:
     user.enabled = 0
     user.save()
 
-
 def _grant_role(email: str, role: str) -> None:
     """Add ``role`` to an already-seeded identity, once.
 
@@ -80,7 +72,6 @@ def _grant_role(email: str, role: str) -> None:
     user = frappe.get_doc("User", email)
     user.append("roles", {"role": role})
     user.save(ignore_permissions=True)
-
 
 def seed_portal_identities() -> None:
     """Create the two capacity users, idempotently, with login closed.
@@ -102,13 +93,6 @@ def seed_portal_identities() -> None:
     stay open forever.
     """
     if not frappe.is_setup_complete():
-        # These are System Users that exist only to be written AS, and they carry no
-        # password and never log in. Creating them before the Setup Wizard runs puts two
-        # more system accounts in front of the browser on the wizard's user slide, and an
-        # autofilled one reaches erpnext's login_as_first_user
-        # (erpnext/setup/setup_wizard/setup_wizard.py:74), which cannot open a session for
-        # a disabled user and fails the whole setup at its last step. The next migrate
-        # after setup completes creates them, and after_install already re-runs this.
         return
 
     for email, role, capacity_role, first_name, last_name in CAPACITIES:

@@ -49,21 +49,21 @@ VALID_STATUSES = (
 
 
 class FuelClaim(Document):
-    def before_insert(self):
-        """Defaults the requester to the current session user when not already set."""
-        if not self.requested_by:
-            self.requested_by = frappe.session.user
-
     def validate(self):
-        """Validates the claimed amounts and recomputes consumption against the fuel ledger."""
+        """Validates the claimed litres and recomputes consumption against the fuel ledger.
+
+        The requester re-stamp here outlives the field's ``__user`` default: that default
+        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
+        and fills a field only when it is None (``frappe/model/document.py:836``), so it
+        covers neither a later save nor a request body carrying ``requested_by = ""``. A
+        blank requester silently satisfies every ``requested_by != session.user`` gate.
+        """
         if not self.requested_by:
             self.requested_by = frappe.session.user
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
         if (self.claimed_litres or 0) <= 0:
             frappe.throw(_("Claimed Litres must be greater than zero."))
-        if (self.claimed_amount or 0) < 0:
-            frappe.throw(_("Claimed Amount cannot be negative."))
         set_financial_defaults(self)
         self._compute_consumption()
         self._compute_unit_price()

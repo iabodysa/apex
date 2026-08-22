@@ -14,8 +14,6 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 from apex.habitat.doctype.audit_remediation_plan import audit_remediation_plan
 
-
-
 class TestClientAuditRemediationPlan(FrappeTestCase):
 
     def test_create_valid_plan(self):
@@ -52,8 +50,6 @@ class TestClientAuditRemediationPlan(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_audit_remediation_plan_building_scope.py ---
 DOCTYPE = "Audit Remediation Plan"
 CHILD_DOCTYPE = "Audit Remediation Building Scope"
 CHILD_FIELD = "buildings_in_scope"
@@ -233,8 +229,6 @@ class TestAuditRemediationPlanScopeRuntime(FrappeTestCase):
         cls.b1 = cls._building()
         cls.b2 = cls._building()
         cls.scoped = make_scoped_supervisor(cls._user, cls.b1, cls.addClassCleanup)
-        # Same role, NO Building User Permission -- the user frappe's native match
-        # leaves completely unrestricted.
         cls.unpermitted = cls._user("Resident Supervisor")
         cls.oversight = cls._user("Accommodation Manager")
 
@@ -368,8 +362,6 @@ class TestAuditRemediationPlanScopeRuntime(FrappeTestCase):
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 
-
-# --- merged from test_audit_remediation_state_contract.py ---
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
 

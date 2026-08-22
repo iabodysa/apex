@@ -16,7 +16,6 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project, purge_doc, make_vehicle
 
-
 class TestDriverClearance(TestCase):
     @patch.object(driver_clearance, "add_timeline_note")
     @patch.object(driver_clearance, "set_current_driver")
@@ -121,8 +120,6 @@ class TestDriverClearance(TestCase):
 
 test_dependencies = ['Salis Driver', 'Employee']
 
-
-# --- merged from test_driver_clearance_notification.py ---
 DRIVER_NAME = "_Test Driver"
 WORKER = "_Test Employee"
 PORTAL_USER = "test@example.com"
@@ -183,8 +180,6 @@ class TestDriverClearanceNotification(FrappeTestCase):
             "the blocked driver must receive a Notification Log for their clearance",
         )
 
-
-# --- merged from test_driver_clearance_workflow.py ---
 WORKFLOW = "Driver Clearance Workflow"
 def _actions(doc):
     """The set of workflow action names currently available to the session user."""
@@ -193,8 +188,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Driver Clearance") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -234,7 +227,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
                 {"doctype": "User Permission", "allow": "Project",
                  "for_value": project, "user": user}
             ).insert(ignore_permissions=True)
-
 
     def _driver(self, name, vehicle=None):
         """A driver of this run's own, deleted when the test that asked for it ends.
@@ -293,7 +285,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.addCleanup(purge_doc, "Fuel Exception Case", fec.name)
         return fec
 
-
     def test_legal_start_then_clear(self):
         driver = self._driver("DC Driver Legal")
         dc = self._new_clearance(driver)
@@ -312,7 +303,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(dc.status, "Cleared")
         self.assertEqual(dc.docstatus, 1)
 
-
     def test_supervisor_cannot_clear(self):
         driver = self._driver("DC Driver WrongRole")
         dc = self._new_clearance(driver)
@@ -324,7 +314,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertNotIn("Clear", _actions(dc))
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dc, "Clear")
-
 
     def test_clear_blocked_while_open_case_then_allowed(self):
         driver = self._driver("DC Driver OpenCase " + frappe.generate_hash(length=12))
@@ -364,7 +353,6 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         frappe.set_user(self.manager)
         self.assertNotIn("Clear", _actions(dc))
 
-
     def test_clear_releases_driver_and_clears_vehicle(self):
         vehicle = make_vehicle("DC-REL-1")
         driver = self._driver("DC Driver Release", vehicle=vehicle)
@@ -386,16 +374,12 @@ class TestDriverClearanceWorkflow(FrappeTestCase):
         self.assertEqual(driver_row.status, "Released")
         self.assertIsNone(driver_row.current_vehicle)
 
-
     def test_post_submit_cancel_reachable(self):
         driver = self._driver(
             "DC Driver PostSubmit " + frappe.generate_hash(length=12)
         )
         frappe.set_user("Administrator")
         issued = issue_driver_link(driver)
-        # The token's name is the driver's own name (one token per driver, reissued in
-        # place), left behind with no cleanup: a later run's purge_doc on that same driver
-        # name found the token still pointing at it and could not delete the driver either.
         self.addCleanup(purge_doc, "Masar Worker Token", driver)
         dc = self._new_clearance(driver)
         frappe.set_user(self.manager)

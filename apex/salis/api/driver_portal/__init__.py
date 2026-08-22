@@ -12,7 +12,7 @@ from frappe import _
 
 from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
-from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401
+from apex.salis.api.maps_links import _stop_waypoint
 from apex.salis.utils import get_driver_for_user
 
 def _portal_enabled():
@@ -166,7 +166,6 @@ def _resolve_my_trip(dispatch_trip, driver):
         frappe.throw(_("This trip is not today's."))
     return trip
 
-
 def _resolve_trip_route_stop(trip, route_stop):
     """Return a stop from the actual trip; permit legacy rows only when needed."""
     stop = None
@@ -205,7 +204,6 @@ def _resolve_trip_route_stop(trip, route_stop):
             frappe.PermissionError,
         )
     return stop
-
 
 def _open_trip_log(dispatch_trip, driver):
     """The driver's open (draft) Trip Start Log doc for a trip, or None. Stop progress
@@ -248,17 +246,16 @@ def _attach_stop_progress(stops, dispatch_trip, driver):
         stop["arrived"] = bool(state and state.get("arrived"))
         stop["arrived_at"] = state.get("arrived_at") if state else None
 
-
-from apex.salis.api.driver_portal.profile import (  # noqa: E402
+from apex.salis.api.driver_portal.profile import (
     get_driver_profile,
 )
-from apex.salis.api.driver_portal.trips import (  # noqa: E402
+from apex.salis.api.driver_portal.trips import (
     my_trips_today,
     my_trips_recent,
     my_worker_route_today,
     my_trip_route,
 )
-from apex.salis.api.driver_portal.execution import (  # noqa: E402
+from apex.salis.api.driver_portal.execution import (
     start_my_trip,
     complete_my_trip,
     mark_arrived,

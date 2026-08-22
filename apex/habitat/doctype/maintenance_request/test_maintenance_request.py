@@ -16,8 +16,6 @@ from apex.habitat.doctype.maintenance_work_order import maintenance_work_order
 from apex.habitat.report.maintenance_aging import maintenance_aging
 from apex.apex_core.worklist.my_work_center import WORKLIST_REGISTRY
 
-
-
 class TestMaintenanceRequest(FrappeTestCase):
 
     def test_create_valid_request(self):
@@ -122,7 +120,6 @@ class TestMaintenanceRequest(FrappeTestCase):
             self.assertEqual(doc.cost_of_repair, cost)
             frappe.delete_doc("Maintenance Request", doc.name, force=True, ignore_permissions=True)
 
-
     def _get_perms_by_role(self):
         """Return a dict mapping role name -> document-level (permlevel 0) perm row.
 
@@ -217,7 +214,6 @@ class TestMaintenanceRequest(FrappeTestCase):
             self.assertEqual(p.read, 1, f"{role} must have permlevel-1 read")
             self.assertEqual(p.write, 1, f"{role} must have permlevel-1 write")
 
-
 class TestMakeWorkOrder(FrappeTestCase):
     """make_work_order must carry the context the Maintenance Work Order model
     actually holds (request link, building, issue_type, Planned status) and must
@@ -263,8 +259,6 @@ class TestMakeWorkOrder(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_maintenance_request_state_contract.py ---
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
     fake.PermissionError = frappe.PermissionError

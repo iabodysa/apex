@@ -9,8 +9,6 @@ from unittest import TestCase
 from unittest.mock import patch
 from apex.habitat.doctype.utility_bill_entry import utility_bill_entry
 
-
-
 class TestUtilityBillEntry(FrappeTestCase):
 
     def test_create_valid_bill(self):
@@ -193,7 +191,6 @@ class TestUtilityBillEntry(FrappeTestCase):
         doc.cancellation_reason = "QA reversal test"
         _post_ledger_row(doc)
 
-        # The refusal hook is read-only: passing it writes nothing at all.
         before_cancel(doc)
         self.assertEqual(self._ledger_count(src, reversal=True), 0)
 
@@ -207,8 +204,6 @@ class TestUtilityBillEntry(FrappeTestCase):
         )
         self.assertEqual(rev, -300)
 
-        # Idempotent: the posting is keyed on the LIVE original, and the first
-        # mirror already reversed it.
         _post_reversal_row(doc)
         self.assertEqual(self._ledger_count(src, reversal=True), 1)
         frappe.delete_doc("Building", bld.name, force=True, ignore_permissions=True)
@@ -229,8 +224,6 @@ class TestUtilityBillEntry(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Mode of Payment', 'Payment Entry', 'Payment Gateway', 'Project', 'Salis Payment Request', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_utility_bill_ledger_posting.py ---
 def _hash(n: int = 12) -> str:
     return frappe.generate_hash(length=n).upper()
 _NOT_REVERSAL = ["is", "not set"]
@@ -270,7 +263,6 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
 
     def _bill(self, **overrides):
         """Build a Utility Bill Entry on this test's account.
@@ -317,7 +309,6 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         if reversal is True:
             return [r for r in rows if r.reversal_of]
         return rows
-
 
     def test_seed_is_present(self):
         self.assertTrue(
@@ -486,10 +477,6 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             bill.cancel()
 
-        # docstatus is NOT evidence of a refusal: Document._cancel() assigns
-        # self.docstatus = 2 (frappe/model/document.py:1085) before save() is
-        # ever called, so the in-memory attribute reads 2 whichever hook
-        # refused. Grade the stored row, then a reload.
         self.assertEqual(
             frappe.db.get_value("Utility Bill Entry", bill.name, "docstatus"), 1,
             "a refused cancel must leave the bill submitted, not cancelled-in-the-row",
@@ -528,8 +515,6 @@ class TestUtilityBillLedgerPosting(FrappeTestCase):
             "the ledger must carry the building's share, not the full invoice",
         )
 
-
-# --- merged from test_utility_bill_share_note_is_translatable.py ---
 class TestBillShareNoteIsTranslated(TestCase):
     def _compute(self, pct):
         doc = SimpleNamespace(
@@ -544,8 +529,6 @@ class TestBillShareNoteIsTranslated(TestCase):
             seen.append(message)
             return message
 
-        # fmt_money reads the site's currency format; the note's wording, not its number
-        # formatting, is what is graded here.
         with (
             patch.object(utility_bill_entry, "_", side_effect=gettext),
             patch.object(

@@ -24,7 +24,6 @@ test_ignore = [
     "Role",
 ]
 
-
 def _make_route_plan(stops):
     """Return an unsaved Route Plan doc with the given stop rows.
 
@@ -38,7 +37,6 @@ def _make_route_plan(stops):
         }
     )
     return doc
-
 
 class TestRoutePlanP035(FrappeTestCase):
     def test_sequence_field_removed(self):
@@ -95,7 +93,6 @@ class TestRoutePlanP035(FrappeTestCase):
         self.assertEqual(idx_by_name["Beta Block"], 3)
         self.assertEqual(idx_by_name["Gamma Hall"], 1)
 
-
 class TestRoutePlanFulfilmentStamp(FrappeTestCase):
     """on_submit must PERSIST movement_planner.
 
@@ -110,9 +107,6 @@ class TestRoutePlanFulfilmentStamp(FrappeTestCase):
             {
                 "doctype": "Route Plan",
                 "route_name": "_T Persist Check",
-                # RoutePlan._require_project_on_a_new_plan refuses a NEW plan with
-                # no project, so the trips it carries stay visible to a
-                # project-scoped supervisor.
                 "project": make_project("_T Persist Project"),
                 "stops": [{"stop_name": "Alpha Gate"}],
             }

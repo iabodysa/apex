@@ -330,6 +330,7 @@
    "fieldname": "annual_rent",
    "fieldtype": "Currency",
    "label": "Annual Rent (SAR)",
+   "non_negative": 1,
    "read_only": 1
   },
   {
@@ -375,17 +376,20 @@
   {
    "fieldname": "annual_electricity",
    "fieldtype": "Currency",
-   "label": "Annual Electricity (SAR)"
+   "label": "Annual Electricity (SAR)",
+   "non_negative": 1
   },
   {
    "fieldname": "annual_water",
    "fieldtype": "Currency",
-   "label": "Annual Water (SAR)"
+   "label": "Annual Water (SAR)",
+   "non_negative": 1
   },
   {
    "fieldname": "annual_cleaning_staff",
    "fieldtype": "Currency",
-   "label": "Annual Cleaning Staff Cost (SAR)"
+   "label": "Annual Cleaning Staff Cost (SAR)",
+   "non_negative": 1
   },
   {
    "fieldname": "accommodation_building_financials_expenses_col",
@@ -394,12 +398,14 @@
   {
    "fieldname": "annual_supervision",
    "fieldtype": "Currency",
-   "label": "Annual Supervision Cost (SAR)"
+   "label": "Annual Supervision Cost (SAR)",
+   "non_negative": 1
   },
   {
    "fieldname": "annual_other_expenses",
    "fieldtype": "Currency",
-   "label": "Annual Other Expenses (SAR)"
+   "label": "Annual Other Expenses (SAR)",
+   "non_negative": 1
   },
   {
    "collapsible": 1,
@@ -878,7 +884,7 @@
    "link_fieldname": "building"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Building",

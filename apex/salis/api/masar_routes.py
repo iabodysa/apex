@@ -26,7 +26,6 @@ WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
 _FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
 
-
 def _fmt_time(value):
     """Render a Time field as a clean zero-padded ``HH:MM:SS`` string (or None).
 
@@ -41,7 +40,6 @@ def _fmt_time(value):
     except Exception:
         return frappe.utils.cstr(value)
 
-
 def _trip_date_window():
     """The trip_date filter window for "boardable now" — today AND yesterday.
 
@@ -52,7 +50,6 @@ def _trip_date_window():
     already finished (see ``_drop_finished_yesterday``), so today's completed trips
     stay visible while only an in-motion night run carries over — no double-count."""
     return ["in", [frappe.utils.add_days(frappe.utils.today(), -1), frappe.utils.today()]]
-
 
 def _drop_finished_yesterday(trips):
     """Drop carried-over YESTERDAY trips that are already finished.
@@ -71,7 +68,6 @@ def _drop_finished_yesterday(trips):
             and t.get("status") in _FINISHED_TRIP_STATUSES
         )
     ]
-
 
 def _today_worker_trips(driver):
     """Today's (and an in-progress night shift's) Dispatch Trips for ``driver``
@@ -171,7 +167,6 @@ def _today_worker_trips(driver):
             result.append(trip)
     return result
 
-
 def _registered_workers(transport_request):
     """The registered worker manifest for a Transport Request: each row's Employee
     plus the human-readable pickup point recorded on the request."""
@@ -206,7 +201,6 @@ def _registered_workers(transport_request):
         )
     return workers
 
-
 def _registered_trip_workers(dispatch_trip, transport_request=None):
     """Return the de-duplicated worker manifest across all trip requests."""
     from apex.salis.api.boarding_flow import _manifest_request_names
@@ -222,7 +216,6 @@ def _registered_trip_workers(dispatch_trip, transport_request=None):
             seen.add(key)
             workers.append(worker)
     return workers
-
 
 def _ordered_stops(parent, parenttype="Route Plan"):
     """Return ordered stops for one route-bearing document."""
@@ -288,7 +281,6 @@ def _ordered_stops(parent, parenttype="Route Plan"):
         )
     return stops
 
-
 def _ordered_trip_stops(dispatch_trip, route_plan=None):
     """Read the immutable trip copy; use Route Plan only for legacy trips."""
     stops = _ordered_stops(dispatch_trip, "Dispatch Trip")
@@ -297,7 +289,6 @@ def _ordered_trip_stops(dispatch_trip, route_plan=None):
     if not route_plan and dispatch_trip:
         route_plan = frappe.db.get_value("Dispatch Trip", dispatch_trip, "route_plan")
     return _ordered_stops(route_plan, "Route Plan")
-
 
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
     """True when ``pickup_datetime`` (a backend string or datetime) is at or after
@@ -310,7 +301,6 @@ def _is_upcoming_pickup(pickup_datetime, now_dt=None):
         return frappe.utils.get_datetime(pickup_datetime) >= now_dt
     except Exception:
         return True
-
 
 def _worker_pickup_stop(stops, my_building):
     """The worker's OWN pickup stop from the ordered route stops.
@@ -330,7 +320,6 @@ def _worker_pickup_stop(stops, my_building):
             return s
     return stops[0]
 
-
 def _route_destination_stop(stops, my_pickup):
     """The route's destination (final drop-off) stop.
 
@@ -344,10 +333,8 @@ def _route_destination_stop(stops, my_pickup):
         return None
     return last
 
-
 WORKER_TRANSPORT_HISTORY_DAYS = 90
 WORKER_TRANSPORT_ROW_LIMIT = 200
-
 
 def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee``, scoped via the
@@ -405,7 +392,6 @@ def _worker_transport_requests(employee):
         r["pickup_point"] = by_request.get(r["name"])
     return rows
 
-
 def _worker_today_dispatch_trip(employee, transport_request=None):
     """Resolve the ONE today's Dispatch Trip this worker may confirm boarding on.
 
@@ -460,9 +446,6 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
         )
     }
 
-    # Each clause is added only when it has values: frappe renders an empty ``in``
-    # list as ``ifnull(col, '') in ('')`` (frappe/model/db_query.py:842-862), which
-    # would match every trip whose column is NULL — the opposite of narrowing.
     reachable = [["transport_request", "in", own_requests]]
     if assigned_by_trip:
         reachable.append(["name", "in", list(assigned_by_trip)])

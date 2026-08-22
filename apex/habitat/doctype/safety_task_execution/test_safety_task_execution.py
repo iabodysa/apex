@@ -6,8 +6,6 @@ from frappe.utils import today
 
 from apex.tests.factories import make_building, make_company, make_room
 
-
-
 class TestSafetyTaskExecution(FrappeTestCase):
 
     def test_docperm_safety_officer(self):
@@ -33,7 +31,6 @@ class TestSafetyTaskExecution(FrappeTestCase):
         doc.insert(ignore_permissions=True, ignore_links=True)
         self.assertEqual(doc.execution_status, "Good")
         frappe.delete_doc("Safety Task Execution", doc.name, force=True, ignore_permissions=True)
-
 
     def _evidence_task(self, evidence_required):
         """Create a Safety Task Catalog row with the given evidence flag."""
@@ -122,7 +119,6 @@ class TestSafetyTaskExecution(FrappeTestCase):
         frappe.delete_doc(
             "Safety Task Execution", doc.name, force=True, ignore_permissions=True
         )
-
 
     def _exec_task(self):
         """A catalog task with no photo requirement so a failed execution can be
@@ -229,8 +225,6 @@ class TestSafetyTaskExecution(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_cancel_retracts_its_tickets.py ---
 FAILING_RESULT = "Poor"
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
@@ -266,11 +260,6 @@ class TestCancellingAnExecutionRetractsItsTickets(FrappeTestCase):
                 "evidence_required": 0,
             }
         ).insert(ignore_permissions=True, ignore_mandatory=True).name
-        # The fixture is COMMITTED so the cancel path, which commits, cannot leave half
-        # of it behind. That puts it past the class rollback, so the class owns its
-        # removal outright. Class cleanups run LIFO and FrappeTestCase registered its
-        # rollback first (so it runs last), which means this commit — registered BEFORE
-        # the deletes — runs AFTER them and is what makes the removal stick.
         cls.addClassCleanup(frappe.db.commit)
         for doctype, name in (
             ("Safety Task Catalog", cls.task),

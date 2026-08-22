@@ -20,7 +20,6 @@ test_ignore = [
     "Department",
 ]
 
-
 class TestSIMCard(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -58,9 +57,6 @@ class TestSIMCard(FrappeTestCase):
         return doc
 
     def setUp(self):
-        # Per-test savepoint so a test's rollback keeps the setUpClass company /
-        # contract fixtures alive: a bare rollback wiped them on the first test,
-        # which is why sim_count read None and later tests lost their contract.
         frappe.db.savepoint("sim_card_test")
 
     def tearDown(self):
@@ -81,7 +77,7 @@ class TestSIMCard(FrappeTestCase):
     def test_duplicate_mobile_by_layout_rejected(self):
         self._sim("0551234567")
         with self.assertRaises(frappe.ValidationError):
-            self._sim("055 123 4567")  # same digits, different layout
+            self._sim("055 123 4567")
 
     def test_mobile_editable_in_place_keeps_name(self):
         sim = self._sim("0559999999")
@@ -94,10 +90,8 @@ class TestSIMCard(FrappeTestCase):
     def test_iccid_unique_when_present_but_blanks_allowed(self):
         iccid = "8996 1100 0000 0000 001"
         self._sim("0551110001", iccid=iccid)
-        # Same ICCID, different separators collides (uniqueness is on a digit key).
         with self.assertRaises(frappe.ValidationError):
             self._sim("0551110002", iccid=iccid.replace(" ", "-"))
-        # Two SIMs without an ICCID are both fine.
         self._sim("0551110003")
         self._sim("0551110004")
 
@@ -134,7 +128,6 @@ class TestSIMCard(FrappeTestCase):
             "the contract still counts a SIM that no longer exists",
         )
 
-
 class TestSIMCardContractBinding(unittest.TestCase):
     """The contract a SIM hangs off must be IN FORCE, checked on the server.
 
@@ -157,13 +150,6 @@ class TestSIMCardContractBinding(unittest.TestCase):
         get_value.return_value = frappe._dict(company="CO-A", docstatus=2)
         with self.assertRaises(frappe.ValidationError):
             SIMCard._enforce_contract_binding(self._sim())
-
-    @patch.object(sim_card_module.frappe.db, "get_value")
-    def test_a_submitted_contract_is_accepted_and_lends_its_company(self, get_value):
-        get_value.return_value = frappe._dict(company="CO-A", docstatus=1)
-        sim = self._sim()
-        SIMCard._enforce_contract_binding(sim)
-        self.assertEqual(sim.company, "CO-A")
 
     @patch.object(sim_card_module.frappe.db, "get_value")
     def test_a_mismatched_company_is_still_refused(self, get_value):

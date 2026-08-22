@@ -19,7 +19,6 @@ PLATE = "_T ABC 1001"
 DRIVER_NAME = "_Test Driver"
 FROM_DRIVER_NAME = "_Test Driver Two"
 
-
 class TestVehicleHandoverChecklistTemplate(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -42,9 +41,6 @@ class TestVehicleHandoverChecklistTemplate(FrappeTestCase):
             }
         ).insert(ignore_permissions=True).name
 
-        # A Transfer is the direction that stands on its own: a Receipt or a Return is
-        # serialized against a Vehicle Assignment the controller insists on, and that
-        # assignment is not what loading a checklist is about.
         self.handover = frappe.get_doc(
             {
                 "doctype": "Vehicle Handover",

@@ -12,8 +12,6 @@ import glob
 import unittest
 from apex.tests.source_tree import APP_ROOT, parse, production_py_files, rel
 
-
-
 class TestSafetyInspectionReport(FrappeTestCase):
 
     def test_docperm_safety_officer(self):
@@ -54,13 +52,8 @@ class TestSafetyInspectionReport(FrappeTestCase):
         the boot payload is not simply empty and the absence below is about this DocType.
         """
         user = self._user_with_role("Safety Officer")
-        # Process state, and no rollback restores it: register the undo before the change.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user(user)
-        # Built for the SESSION user: build_perm_map resolves roles through get_valid_perms,
-        # which falls back to frappe.session.user (frappe/permissions.py:467-469). Asking
-        # for another user's payload while Administrator holds the session returns
-        # Administrator's rights under that user's name.
         boot = frappe.get_user().load_user()
 
         self.assertIn(
@@ -119,7 +112,6 @@ class TestSafetyInspectionReport(FrappeTestCase):
         })
         with self.assertRaises(frappe.exceptions.MandatoryError):
             doc.insert(ignore_permissions=True, ignore_links=True)
-
 
     def _ensure_location(self):
         """Create real Accommodation Building + Room records so the Maintenance
@@ -250,7 +242,6 @@ class TestSafetyInspectionReport(FrappeTestCase):
         finally:
             self._cleanup_report(report.name)
 
-
 class TestSafetyInspectionReportDeprecation(FrappeTestCase):
     """Safety Inspection Report is deprecated in place (not renamed or
     deleted) in favour of Safety Round + the Safety Task Compliance Summary report.
@@ -258,8 +249,6 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
     not the running site has migrated the schema."""
 
     def _schema(self):
-        # The suite lives outside the app, so the DocType JSON is no longer beside this
-        # file; it is resolved from the installed package instead.
         path = os.path.join(
             os.path.dirname(apex.__file__),
             "habitat",
@@ -298,8 +287,6 @@ class TestSafetyInspectionReportDeprecation(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_safety_inspection_report_retired.py ---
 DEPRECATED = "Safety Inspection Report"
 REPLACEMENT = "Safety Round"
 SAFETY_MAP_PY = os.path.join(APP_ROOT, "habitat", "api", "safety_map.py")

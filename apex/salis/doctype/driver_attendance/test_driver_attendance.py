@@ -12,9 +12,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 from apex.tests.factories import make_test_driver as _ensure_test_driver
 
-
 DRIVER_NAME = "_Test Driver"
-
 
 class TestDriverAttendanceHours(FrappeTestCase):
     def setUp(self):
@@ -44,8 +42,6 @@ class TestDriverAttendanceHours(FrappeTestCase):
 
 test_dependencies = ['Salis Driver']
 
-
-# --- merged from test_driver_attendance_uniqueness.py ---
 class TestDriverAttendanceUniqueness(FrappeTestCase):
     @classmethod
     def setUpClass(cls):

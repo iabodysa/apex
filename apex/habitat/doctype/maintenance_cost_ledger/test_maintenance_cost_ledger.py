@@ -13,7 +13,6 @@ test_ignore = [
 
 SOURCE_DOCTYPE = "Maintenance Work Order"
 
-
 class TestMaintenanceCostLedger(FrappeTestCase):
     """Completing a Maintenance Work Order posts one immutable Maintenance Cost
     Ledger row per priced procurement item; re-completion is idempotent (no
@@ -47,8 +46,6 @@ class TestMaintenanceCostLedger(FrappeTestCase):
             "actual_start_date": "2026-06-11",
             "actual_end_date": "2026-06-12",
             "completion_photo": "/files/done.png",
-            # mark_completed refuses without both evidence fields; completion_notes is
-            # not allow_on_submit, so the draft is where it can still be set.
             "completion_notes": "Worn parts replaced and the line pressure tested",
             "procurement_items": [
                 {"item_description": "Tap washer", "quantity": 2, "estimated_cost": 25},
@@ -58,8 +55,6 @@ class TestMaintenanceCostLedger(FrappeTestCase):
         })
         wo.insert(ignore_permissions=True, ignore_links=True)
         wo.submit()
-        # Completion is only legal from In Progress, so the ledger fixtures walk the
-        # real lifecycle rather than jumping a submitted Work Order straight to done.
         from apex.habitat.doctype.maintenance_work_order.maintenance_work_order import start_work
 
         start_work(wo.name)

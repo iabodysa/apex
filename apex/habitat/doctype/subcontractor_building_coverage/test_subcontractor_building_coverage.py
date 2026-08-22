@@ -23,13 +23,11 @@ from apex.habitat.doctype.subcontractor_building_coverage.subcontractor_building
     SubcontractorBuildingCoverage,
 )
 
-
 class TestSubcontractorBuildingCoverageBeforeSave(FrappeTestCase):
     def test_matching_doctype_saves_without_error(self):
         doc = SubcontractorBuildingCoverage(
             {"doctype": "Subcontractor Building Coverage", "building": None, "specific_rate": 0}
         )
-        # Must not raise.
         doc.before_save()
 
     def test_mismatched_doctype_is_blocked(self):

@@ -60,8 +60,6 @@ _INITIAL_STATE = {
 class SIMCustodyAssignment(Document):
     def validate(self):
         """Runs custodian, retirement, company, cost-center, and prior-status checks before saving."""
-        if self.sim_card and not self.company:
-            self.company = frappe.db.get_value("SIM Card", self.sim_card, "company")
         self._validate_custodian_inputs()
         self._require_retirement_reason()
         self._reject_back_dated_event()

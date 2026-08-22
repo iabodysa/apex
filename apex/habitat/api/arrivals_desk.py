@@ -38,12 +38,17 @@ from apex.apex_core.utils.portal_identity import (
 from apex.habitat import permissions
 from apex.habitat.utils import arrival_slips, occupancy
 from apex.habitat.utils.arrival_slips import (
-    ARRIVAL_SLIP_TEMPLATE,  # noqa: F401
-    CHECKIN_SLIP_TEMPLATE,  # noqa: F401
-    CUSTODY_HANDOVER_SLIP_TEMPLATE,  # noqa: F401
+    ARRIVAL_SLIP_TEMPLATE,
+    CHECKIN_SLIP_TEMPLATE,
+    CUSTODY_HANDOVER_SLIP_TEMPLATE,
 )
 from apex.habitat.utils.housing_scope import active_building_scope
 
+__all__ = [
+    "ARRIVAL_SLIP_TEMPLATE",
+    "CHECKIN_SLIP_TEMPLATE",
+    "CUSTODY_HANDOVER_SLIP_TEMPLATE",
+]
 
 def _expiry_days(expiry_date) -> int | None:
     """Whole days from today until a Temporary Worker's window expiry.
@@ -54,7 +59,6 @@ def _expiry_days(expiry_date) -> int | None:
     if not expiry_date:
         return None
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
-
 
 def _assert_party_in_scope(party_type, party) -> None:
     """Enforce per-doc BUILDING scope before any party PII / identity is returned.
@@ -106,7 +110,6 @@ def _assert_party_in_scope(party_type, party) -> None:
             )
         return
 
-
 @frappe.whitelist()
 def get_intake_settings() -> dict:
     """The Arrivals Desk feature flags, answered without exposing Habitat Settings.
@@ -130,7 +133,6 @@ def get_intake_settings() -> dict:
             frappe.db.get_single_value("Habitat Settings", "enable_passport_mrz_ocr")
         )
     }
-
 
 @frappe.whitelist(methods=["POST"])
 def send_masar_link_message(employee, phone=None) -> dict:
@@ -189,7 +191,6 @@ def send_masar_link_message(employee, phone=None) -> dict:
         frappe.db.rollback(save_point=savepoint)
         raise
 
-
 def _arrival_identity(party_type, party):
     """``(worker_name, image, expiry_date)`` for one party, permission- and
     scope-gated before any identity leaves the server. Only a Temporary Worker has
@@ -214,7 +215,6 @@ def _arrival_identity(party_type, party):
 
     frappe.throw(_("Unknown party type: {0}").format(party_type))
 
-
 def _custody_balance(party) -> int:
     """Net custody articles still on a worker: issues less returns, cancelled rows
     excluded."""
@@ -224,7 +224,6 @@ def _custody_balance(party) -> int:
         fields=["signed_qty"],
     )
     return int(sum(int(r.signed_qty or 0) for r in rows))
-
 
 def _masar_is_enabled(party_type, party) -> bool:
     """True only when the worker holds a token AND it is still enabled."""
@@ -236,7 +235,6 @@ def _masar_is_enabled(party_type, party) -> bool:
         or {}
     )
     return bool(token.get("token")) and bool(token.get("enabled"))
-
 
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
@@ -288,7 +286,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
         "expiry_days": _expiry_days(tw_expiry),
     }
 
-
 def _housed_employees() -> set:
     """Every Employee holding a live bed, in any building.
 
@@ -304,7 +301,6 @@ def _housed_employees() -> set:
     )
     return {h.employee for h in housed if h.employee}
 
-
 def _housed_temporary_workers(restrict, allowed) -> set:
     """Temporary Workers holding a live bed inside the caller's estate.
 
@@ -317,7 +313,6 @@ def _housed_temporary_workers(restrict, allowed) -> set:
         filters["building"] = ["in", allowed]
     housed = frappe.get_all("Housing Assignment", filters=filters, fields=["party"])
     return {h.party for h in housed if h.party}
-
 
 def _employee_matches(txt, excluded) -> list:
     """Active Employees matching the typed text who are not already housed.
@@ -347,7 +342,6 @@ def _employee_matches(txt, excluded) -> list:
         }
         for e in emps
     ]
-
 
 def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
     """Active Temporary Workers matching the typed text (name, passport or id) who
@@ -389,7 +383,6 @@ def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
         for t in tws
     ]
 
-
 @frappe.whitelist()
 def search_arrivals_workers(building=None, txt=None) -> list:
     """Combined worker lookup for the desk: registered Employees first, then active
@@ -416,7 +409,6 @@ def search_arrivals_workers(building=None, txt=None) -> list:
         )
 
     return results
-
 
 @frappe.whitelist(methods=["POST"])
 def register_temporary_worker(
@@ -461,7 +453,6 @@ def register_temporary_worker(
         "expiry_date": frappe.utils.formatdate(doc.expiry_date) if doc.expiry_date else None,
     }
 
-
 def _link_manifest_row(batch_row, temporary_worker) -> None:
     """Tick a tapped Arrival Batch manifest line by linking it to the registered
     Temporary Worker. Permission-gated on the parent Arrival Batch; best-effort
@@ -474,7 +465,6 @@ def _link_manifest_row(batch_row, temporary_worker) -> None:
     if not frappe.has_permission("Arrival Batch", "write", doc=parent):
         return
     frappe.db.set_value("Arrival Batch Worker", batch_row, "temporary_worker", temporary_worker)
-
 
 _MRZ_NATIONALITY = {
     "IND": "Indian",
@@ -492,7 +482,6 @@ _MRZ_NATIONALITY = {
     "UGA": "Ugandan",
     "SAU": "Saudi",
 }
-
 
 def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
     """Convert an MRZ ``YYMMDD`` field to an ISO ``YYYY-MM-DD`` date, or None.
@@ -518,7 +507,6 @@ def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
         return datetime.date(century + yy, mm, dd).isoformat()
     except ValueError:
         return None
-
 
 def parse_mrz_text(text: str) -> dict:
     """Parse passport MRZ text into ``{worker_name, passport_number, nationality,
@@ -570,7 +558,6 @@ def parse_mrz_text(text: str) -> dict:
             out["expiry_date"] = expiry
     return out
 
-
 def _ocr_image_to_text(image: str) -> str | None:
     """Best-effort OCR of a base64 passport image to raw text, or None.
 
@@ -596,7 +583,6 @@ def _ocr_image_to_text(image: str) -> str | None:
         return pytesseract.image_to_string(img)
     except Exception:
         return None
-
 
 @frappe.whitelist(methods=["POST"])
 def parse_passport(image) -> dict:
@@ -631,7 +617,6 @@ def parse_passport(image) -> dict:
         if fields.get(k)
     }
     return {"ok": bool(parsed), "fields": parsed}
-
 
 @frappe.whitelist(methods=["POST"])
 def house_over_capacity(room, party_type, party, project, check_in_date=None) -> dict:
@@ -674,7 +659,6 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     )
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
-
 def _arrival_supplier(arrival, tw_supplier):
     """Who supplied this arrival: a Temporary Worker's own labour supplier, or the
     supplier an externally-billed Employee is charged to. Neither means direct hire."""
@@ -683,7 +667,6 @@ def _arrival_supplier(arrival, tw_supplier):
     if arrival.is_external_supplier:
         return arrival.billed_to_supplier
     return None
-
 
 def _supplier_breakdown(arrivals) -> list:
     """Today's arrivals counted per supplier, biggest first, each named. Two bounded
@@ -724,13 +707,11 @@ def _supplier_breakdown(arrivals) -> list:
         reverse=True,
     )
 
-
 def _over_capacity_count(bed_ids) -> int:
     """How many of today's placements went onto a virtual over-capacity bed."""
     if not bed_ids:
         return 0
     return frappe.db.count("Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1})
-
 
 def _empty_arrival_summary(date, building):
     """The summary a scoped supervisor holding no building sees: zeroes, not the estate."""
@@ -743,7 +724,6 @@ def _empty_arrival_summary(date, building):
         "manifest_expected": None,
         "manifest_completion_pct": None,
     }
-
 
 def _manifest_progress(date, building_filter, housed_count):
     """``(expected, completion_pct)`` against the day's Arrival Batch manifests.
@@ -763,7 +743,6 @@ def _manifest_progress(date, building_filter, housed_count):
     if not expected:
         return expected, None
     return expected, round(min(housed_count, expected) / expected * 100, 1)
-
 
 @frappe.whitelist()
 def get_arrival_summary(date=None, building=None) -> dict:
@@ -825,7 +804,6 @@ def get_arrival_summary(date=None, building=None) -> dict:
         "manifest_completion_pct": manifest_completion_pct,
     }
 
-
 def _empty_manifest(date, building=None):
     """The manifest with nothing on it: no Arrival Batch DocType, or no building in scope."""
     return {
@@ -837,7 +815,6 @@ def _empty_manifest(date, building=None):
         "housed": 0,
         "pending": 0,
     }
-
 
 @frappe.whitelist()
 def get_expected_arrivals(date=None, building=None) -> dict:
@@ -932,7 +909,6 @@ def get_expected_arrivals(date=None, building=None) -> dict:
         "pending": total - arrived,
     }
 
-
 @frappe.whitelist(methods=["POST"])
 def get_arrival_slip(party_type, party) -> dict:
     """Render the on-demand arrival slip (HTML) for a housed worker. Reuses the
@@ -983,7 +959,6 @@ def get_arrival_slip(party_type, party) -> dict:
         "card": ctx,
     }
 
-
 @frappe.whitelist()
 def get_checkin_slip(party_type, party) -> dict:
     """Render the accommodation check-in acknowledgment slip (HTML) for a housed
@@ -1021,7 +996,6 @@ def get_checkin_slip(party_type, party) -> dict:
         "title": ctx["worker_name"],
     }
 
-
 def _custody_slip_items(doc):
     """``(items, show_uom)`` for the handover table. Article names and UOMs come
     from the master in ONE lookup; a line keeps its own captured name when the
@@ -1047,7 +1021,6 @@ def _custody_slip_items(doc):
             }
         )
     return items, any(it["uom"] for it in items)
-
 
 @frappe.whitelist()
 def get_custody_handover_slip(custody_issue) -> dict:
@@ -1080,7 +1053,6 @@ def get_custody_handover_slip(custody_issue) -> dict:
         "html": frappe.render_template(arrival_slips.CUSTODY_HANDOVER_SLIP_TEMPLATE, ctx),
         "title": worker_name,
     }
-
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

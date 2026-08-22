@@ -25,17 +25,11 @@ from frappe.utils import add_to_date, now_datetime
 import apex
 from apex.tests.factories import ApexHabitatTestCase
 
-
 INTAKE = "_Test Building 2"
 DESTINATION = "_Test Building"
 
-
 class TestCustodyHandover(FrappeTestCase):
     def setUp(self):
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so stock and OTP
-        # state one case leaves in a shared fixture store would be the next case's opening
-        # position. A savepoint hands both stores back exactly as they were found.
         frappe.db.savepoint("apex_custody_handover_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_custody_handover_case")
         self.addCleanup(frappe.clear_document_cache, "Habitat Settings", "Habitat Settings")
@@ -69,8 +63,6 @@ class TestCustodyHandover(FrappeTestCase):
         doc = frappe.get_doc({
             "doctype": "Custody Handover",
             "naming_series": "ACC-HND-.YYYY.-.#####",
-            # Today, not a fixed past date: the receiving supervisor is not a System Manager, and
-            # the posting gate refuses a backdated leg from anyone who is not one.
             "handover_date": today(),
             "from_building": INTAKE,
             "to_building": DESTINATION,
@@ -145,15 +137,10 @@ class TestCustodyHandover(FrappeTestCase):
         handover.reload()
         self.assertNotEqual(handover.status, "Confirmed")
         self.assertTrue(handover.otp_hash, "a miss leaves the code live, it does not consume it")
-        # The miss is not counted on the document at all: charge_wrong_code keys its window on
-        # the document name in the cache (apex/apex_core/utils/otp_lockout.py:38), so
-        # otp_attempts stays 0 here.
         self.assertEqual(self._store_balance(DESTINATION), 0.0)
 
 test_dependencies = ['Building', 'Custody Article']
 
-
-# --- merged from test_custody_handover_otp_permlevel.py ---
 _HANDOVER_JSON = Path(apex.__file__).resolve().parent / "habitat" / "doctype" / "custody_handover" / "custody_handover.json"
 _DELIVERY_JSON = (
     Path(apex.__file__).resolve().parent / "habitat" / "doctype" / "facility_asset_delivery" / "facility_asset_delivery.json"
@@ -171,7 +158,6 @@ class TestCustodyHandoverOtpPermlevel(ApexHabitatTestCase):
     so the schema half of this proof covers both shipped files from the mechanism's home."""
 
     def setUp(self):
-        # frappe.session.user is process state; no rollback restores it.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
 

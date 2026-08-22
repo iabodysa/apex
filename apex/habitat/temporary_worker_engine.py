@@ -25,10 +25,6 @@ _ROW_SAVEPOINT = "temporary_worker_row"
 
 _BATCH_SIZE = 500
 
-# Every doctype carrying party_type/party, with the Employee mirror each one names. The
-# set is not a judgement call: it is the twelve results of
-# `grep -l '"fieldname": "party_type"' apex/*/doctype/*/*.json`, and a doctype missing
-# from here keeps pointing at a Temporary Worker no other document names any more.
 PARTY_DOCTYPES = {
     "Housing Assignment": "employee",
     "Housing Checkout": "employee",
@@ -40,13 +36,9 @@ PARTY_DOCTYPES = {
     "Custody Issue": "issued_to_employee",
     "Custody Return": "returned_by_employee",
     "Custody Damage Assessment": "employee",
-    # The custody BALANCE lives here. Leaving it behind strands the worker's stock: the
-    # checkout clearance gate reads the Employee leg and finds nothing to clear, and a
-    # later Custody Return posts against a holder whose balance is zero and is refused.
     "Accommodation Stock Ledger": "employee",
     "Custody Acknowledgment": "acknowledged_by_employee",
 }
-
 
 def link_temporary_workers() -> None:
     """Daily scheduler: link matured Temporary Workers to Employees; expire lapsed ones.
@@ -93,7 +85,6 @@ def link_temporary_workers() -> None:
                 )
         cursor = workers[-1].name
 
-
 def _match_employee(tw) -> str | None:
     """Find an active Employee carrying the same passport number, if any."""
     if not tw.passport_number:
@@ -101,7 +92,6 @@ def _match_employee(tw) -> str | None:
     return frappe.db.get_value(
         "Employee", {"passport_number": tw.passport_number, "status": "Active"}, "name"
     )
-
 
 def _repoint_party(tw_name: str, employee: str) -> None:
     """Re-point party_type/party (and the legacy Employee mirror) from the Temporary
@@ -127,7 +117,6 @@ def _repoint_party(tw_name: str, employee: str) -> None:
             .where(tbl.party_type == PARTY_TEMPORARY_WORKER)
             .where(tbl.party == tw_name)
         ).run()
-
 
 def _link(tw, employee: str) -> None:
     """Link a Temporary Worker to an Employee: re-point party across docs, back-date the
@@ -160,7 +149,6 @@ def _link(tw, employee: str) -> None:
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Temporary Worker link: comment failed")
 
-
 def _expire(tw) -> None:
     """Mark a lapsed Temporary Worker Expired and notify HR."""
     frappe.db.set_value("Temporary Worker", tw.name, "status", "Expired")
@@ -169,7 +157,6 @@ def _expire(tw) -> None:
             tw.name, tw.worker_name or tw.name
         )
     )
-
 
 def _notify_hr(message: str) -> None:
     """Post an in-app Notification Log to HR Manager users (fallback System Manager).
@@ -181,7 +168,6 @@ def _notify_hr(message: str) -> None:
 
     for user in _hr_recipients():
         notify_user_system(user, message)
-
 
 def _hr_recipients() -> list:
     """Enabled users holding HR Manager (fallback: System Manager)."""

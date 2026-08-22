@@ -19,12 +19,6 @@ from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project, make_vehicle, purge_doc, purge_trip_request
 
-# No case in this module inserts a Dispatch Trip: every trip here is an in-memory
-# DispatchTrip/doc object exercising one controller method directly (aggregate
-# logic under mocks, or a single validate-time guard), so the module needs none
-# of the usual link-fixture auto-dependencies.
-
-
 def _times_trip(status, depart, ret):
     """An unsaved Dispatch Trip carrying only what ``_validate_trip_times`` reads."""
     return frappe.get_doc(
@@ -35,7 +29,6 @@ def _times_trip(status, depart, ret):
             "return_time": ret,
         }
     )
-
 
 class TestDispatchTripAggregate(FrappeTestCase):
     def setUp(self):
@@ -504,10 +497,6 @@ class TestDispatchTripAggregate(FrappeTestCase):
 
         get_doc.assert_not_called()
         savepoint.assert_not_called()
-    # Frappe stores an empty Int field as 0, so an odometer_end set while
-    # odometer_start is left at its 0 default would pass a naive `if not start`
-    # check and silently break distance/odometer-advance accounting on submit.
-    # _validate_odometer requires both-or-neither and end >= start.
 
     def _odometer_trip(self, start, end):
         doc = frappe.new_doc("Dispatch Trip")
@@ -537,10 +526,6 @@ class TestDispatchTripAggregate(FrappeTestCase):
     def test_odometer_valid_pair_passes(self):
         doc = self._odometer_trip(100, 250)
         doc._validate_odometer()
-    # The guard only fires on a Completed trip with BOTH times set; a return
-    # earlier than the depart is rejected, equal/later is accepted. Planned
-    # trips are exempt (a freshly created trip carries an auto-filled nowtime
-    # that would false-positive).
 
     def test_times_completed_return_before_depart_is_rejected(self):
         with self.assertRaises(frappe.ValidationError):
@@ -561,8 +546,6 @@ class TestDispatchTripAggregate(FrappeTestCase):
 test_dependencies = ['Salis Vehicle', 'Salis Driver', 'Employee']
 test_ignore = ['Salis Vehicle', 'Salis Driver', 'Route Plan', 'Transport Request', 'Payment Gateway', 'Employee', 'Company', 'Project', 'User', 'Role']
 
-
-# --- merged from test_boarding_state_permlevel.py ---
 RIDER = "rider-permlevel@apex.test"
 class TestBoardingStatePermlevel(FrappeTestCase):
     @classmethod
@@ -577,9 +560,6 @@ class TestBoardingStatePermlevel(FrappeTestCase):
                 "roles": [{"role": "Driver"}],
             })
             user.insert(ignore_permissions=True)
-        # Dispatch Trip is project-scoped by a has_permission hook, so the rider needs the scope
-        # before permlevel is even reached. Without it the save fails on document access and the
-        # field-level wall is never exercised.
         if not frappe.db.exists("Project", {"project_name": "Permlevel Scope"}):
             frappe.get_doc({"doctype": "Project", "project_name": "Permlevel Scope"}).insert(
                 ignore_permissions=True
@@ -630,8 +610,6 @@ class TestBoardingStatePermlevel(FrappeTestCase):
         ]
         self.assertEqual(open_fields, ["boarding_state"])
 
-
-# --- merged from test_dispatch_trip_assignment.py ---
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
 class TestDispatchTripAssignment(FrappeTestCase):
@@ -666,10 +644,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
                 "vehicle": self.vehicle.name,
                 "trip_date": "2026-06-20",
                 "status": "Planned",
-                # A row's pickup/drop-off is derived from the trip's own stops, and
-                # only while the trip carries at most two of them
-                # (dispatch_trip._normalise_request_assignments); a stop-less trip is
-                # refused before any request is read.
                 "stops": [
                     {"stop_key": "pickup", "stop_name": "Housing Gate"},
                     {"stop_key": "dropoff", "stop_name": "Project Site"},
@@ -685,7 +659,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
         for dt, name in reversed(self._cleanup):
             frappe.delete_doc(dt, name, force=True, ignore_permissions=True)
 
-
     def _employee(self):
         emp = frappe.get_doc(
             {"doctype": "Employee", "first_name": "ASG-" + _h(), "naming_series": "HR-EMP-"}
@@ -700,11 +673,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
             req.append("workers", {"employee": w})
         req.flags.ignore_validate = True
         req.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-        # Written after the insert because the bypassed validate is what would
-        # otherwise derive worker_count. Scheduled is required: assign_requests_to_trip
-        # refuses anything outside Approved/Scheduled, and Scheduled is the branch that
-        # stamps the assignment fields directly instead of driving the request's own
-        # workflow (which would need the request submitted).
         frappe.db.set_value(
             "Transport Request",
             req.name,
@@ -713,7 +681,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
         )
         self._cleanup.append(("Transport Request", req.name))
         return req.name
-
 
     def test_assign_two_requests_unions_the_manifest(self):
         assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
@@ -734,11 +701,8 @@ class TestDispatchTripAssignment(FrappeTestCase):
             "boarding state carries one row per union worker (w2 not doubled)",
         )
 
-        # sync_passengers already rebuilt boarding_state during the assignment save,
-        # so the trip-start top-up finds every union worker present and adds none.
         added = boarding_flow.ensure_trip_boarding_state(self.trip.name)
         self.assertEqual(added, 0)
-
 
     def test_assign_flags_each_request(self):
         assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
@@ -748,7 +712,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
             )
             self.assertTrue(row.is_assigned, f"{req} is flagged assigned")
             self.assertEqual(row.assigned_to_trip, self.trip.name)
-
 
     def test_capacity_guard_throws_on_exceed(self):
         frappe.db.set_value("Salis Vehicle", self.vehicle.name, "seat_capacity", 2)
@@ -764,13 +727,11 @@ class TestDispatchTripAssignment(FrappeTestCase):
         result = assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
         self.assertEqual(set(result), {self.req_a, self.req_b})
 
-
     def test_assign_is_idempotent(self):
         assign_requests_to_trip(self.trip.name, [self.req_a])
         result = assign_requests_to_trip(self.trip.name, [self.req_a, self.req_b])
         self.assertEqual(result.count(self.req_a), 1, "a re-assigned request is not duplicated")
         self.assertEqual(set(result), {self.req_a, self.req_b})
-
 
     def test_assign_unknown_request_throws_with_that_id(self):
         """A non-existent request id is rejected by name. Each row is loaded with
@@ -780,7 +741,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError) as ctx:
             assign_requests_to_trip(self.trip.name, [self.req_a, missing])
         self.assertIn(missing, str(ctx.exception))
-
 
     def test_terminal_request_is_refused_by_name(self):
         """A Cancelled request is refused, named in the message: only Approved or
@@ -797,8 +757,6 @@ class TestDispatchTripAssignment(FrappeTestCase):
                 f"{req} stays unflagged when the selection is refused",
             )
 
-
-# --- merged from test_dispatch_trip_releases_requests.py ---
 class TestATripReleasesItsRequests(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -840,8 +798,6 @@ class TestATripReleasesItsRequests(FrappeTestCase):
             project=self.project,
             status="New",
         )
-        # Placed in the state the workflow would have put it in; the helper under test
-        # only accepts an Approved or Scheduled request.
         frappe.db.set_value(
             "Transport Request", doc.name, {"status": "Approved", "docstatus": 1}
         )
@@ -943,8 +899,6 @@ class TestATripReleasesItsRequests(FrappeTestCase):
 
         self.assertEqual(self._claim().assigned_to_trip, successor)
 
-
-# --- merged from test_dispatch_trip_workflow.py ---
 WORKFLOW = "Dispatch Trip Workflow"
 def _h_dispatch_trip_workflow(n=12):
     """Short random hash suffix for unique fixture names."""
@@ -956,8 +910,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Dispatch Trip") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -996,7 +948,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
 
     @staticmethod
     def _driver(name):
@@ -1144,9 +1095,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         return dt
 
-
-    # --- native workflow: seeding, lifecycle, cancel reversal, illegal jumps ----
-
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Dispatch Trip"), WORKFLOW)
         self.assertTrue(frappe.db.get_value("Workflow", WORKFLOW, "is_active"))
@@ -1161,7 +1109,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(states["Dispatched"], "0")
         self.assertEqual(states["Completed"], "1")
         self.assertEqual(states["Cancelled"], "2")
-
 
     def test_walk_to_completed_drives_tr_to_fulfilled_and_updates_odometer(self):
         tr, rp = self._scheduled_tr()
@@ -1210,7 +1157,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": dt.name})
         )
 
-
     def test_cancel_completed_trip_reverses_fulfilment(self):
         tr, rp = self._scheduled_tr()
         vehicle = make_vehicle("DT-WF-2", odometer=500)
@@ -1247,7 +1193,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
             frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": dt.name})
         )
 
-
     def test_illegal_jump_planned_to_completed_blocked(self):
         tr, rp = self._scheduled_tr()
         vehicle = make_vehicle("DT-WF-3", odometer=0)
@@ -1277,9 +1222,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         frappe.set_user(self.manager)
         self.assertNotIn("Cancel", _actions(dt))
 
-
-    # --- controller-level state guards, independent of the workflow record -----
-
     def test_insert_at_non_planned_status_blocked(self):
         """Controller rejects a direct insert at any non-initial status — only
         the workflow may move a trip past Planned (Dispatched, Cancelled) or
@@ -1301,7 +1243,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.addCleanup(lambda: purge_doc("Dispatch Trip", dt.name))
         self.assertEqual(dt.status, "Planned")
         self.assertEqual(dt.docstatus, 0)
-
 
     def test_happy_path_lifecycle(self):
         """A trip walks Planned → Dispatched → Completed via apply_workflow.
@@ -1339,7 +1280,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertEqual(dt.status, "Completed")
         self.assertEqual(dt.docstatus, 1)
 
-
     def test_invalid_transition_from_planned_to_completed_blocked(self):
         """Workflow blocks the Complete action when the trip is still Planned.
 
@@ -1360,7 +1300,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertNotIn("Complete", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Complete")
-
 
     def test_invalid_transition_from_completed_to_dispatched_blocked(self):
         """Once a trip is Completed (submitted), the only legal next action is
@@ -1390,7 +1329,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Dispatch")
 
-
     def test_idempotent_transition_dispatch_twice_raises(self):
         """Applying the same Dispatch action twice must raise on the second call.
 
@@ -1414,7 +1352,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         dt.reload()
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(dt, "Dispatch")
-
 
     def test_submit_without_vehicle_blocked(self):
         """before_submit enforces dispatch readiness: vehicle is required.
@@ -1453,7 +1390,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         self.assertIn("Dispatch readiness", str(ctx.exception))
         self.assertIn("Vehicle", str(ctx.exception))
 
-
     def test_completion_notes_required_when_status_completed(self):
         """Saving a trip with status=Completed but no completion_notes raises.
 
@@ -1473,7 +1409,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         bare.completion_notes = ""
         with self.assertRaises(frappe.ValidationError):
             bare.save(ignore_permissions=True)
-
 
     def test_odometer_end_less_than_start_blocked(self):
         """Odometer end reading below start reading is rejected at validate.
@@ -1515,8 +1450,6 @@ class TestDispatchTripWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             bare.save(ignore_permissions=True)
 
-
-# --- merged from test_driver_user_fetch.py ---
 DRIVER_NAME = "_Test Driver"
 PLATE = "_T ABC 1001"
 PORTAL_USER = "test@example.com"

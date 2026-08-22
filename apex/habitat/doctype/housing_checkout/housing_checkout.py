@@ -13,8 +13,9 @@ resolved from permlevel-0 rows only, field access is resolved separately and uni
 every permlevel across the user's roles, so the two are independent grants -- the row
 activates the moment one user holds both roles, with no DocPerm edit. No shipped role
 profile bundles them today, so this overlay is dormant until an administrator does.
-Proof and the framework citations are in
-``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+The framework's rule, written here rather than pointed at: permlevel access is the UNION
+of the caller's roles (frappe/permissions.py get_role_permissions), so a user holding both
+roles reads the union of both field sets and no DocPerm edit is needed to widen him.
 
 The three writes pass ``ignore_permissions`` because they are consequences of a submit, not
 actions the operator took. Submitting a checkout spawns the damage assessment, withdraws it again
@@ -34,15 +35,12 @@ from frappe.utils import getdate
 from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 from apex.apex_core.utils.party_link import sync_party_employee
 
-
 DEPARTURE_REASONS = ("Final Exit", "End of Contract")
-
 
 class HousingCheckout(Document):
     def before_submit(self):
         """Blocks submission while the resident still holds custody not Returned, Lost, or Damaged."""
         before_submit(self)
-
 
 def validate(doc, method=None):
     """Blocks an invalid or duplicate checkout and autofills its employee, bed, and custody rows."""
@@ -89,7 +87,6 @@ def validate(doc, method=None):
         all_returned = all(r.return_status == "Returned" for r in doc.custody_return_items)
         doc.custody_cleared = 1 if all_returned else 0
 
-
 def before_submit(doc, method=None):
     """Custody-clearance gate: the checkout cannot submit while the resident still
     holds custody that has not been resolved. An article is resolved when its row
@@ -116,7 +113,6 @@ def before_submit(doc, method=None):
                 ", ".join(sorted(unresolved))
             )
         )
-
 
 def _issued_quantities_for_employee(employee):
     """Total quantity issued per Custody Article to an employee, summed across all
@@ -148,7 +144,6 @@ def _issued_quantities_for_employee(employee):
         issued[r.article] = issued.get(r.article, 0) + (r.qty or 0)
     return issued
 
-
 def _issued_quantities_for_party(party_type, party, employee=None):
     """Return issued quantities for either supported resident identity."""
     if party_type == "Employee" and employee:
@@ -175,7 +170,6 @@ def _issued_quantities_for_party(party_type, party, employee=None):
         issued[row.article] = issued.get(row.article, 0) + (row.qty or 0)
     return issued
 
-
 def _populate_issued_quantities(doc):
     """Stamp each custody-return row's read-only quantity_issued with the total
     quantity of that article issued to the resident employee (the original
@@ -189,7 +183,6 @@ def _populate_issued_quantities(doc):
     for row in doc.custody_return_items:
         if row.article:
             row.quantity_issued = issued.get(row.article, 0)
-
 
 def _outstanding_custody_for_employee(employee):
     """Net quantity of each Custody Article still in the employee's hands, taken
@@ -216,7 +209,6 @@ def _outstanding_custody_for_employee(employee):
         outstanding[r.item] = outstanding.get(r.item, 0) + (r.signed_qty or 0)
     return {article: qty for article, qty in outstanding.items() if qty > 0}
 
-
 def _outstanding_custody_for_party(party_type, party, employee=None):
     """Return canonical held quantities for Employee or Temporary Worker."""
     if party_type == "Employee" and employee:
@@ -231,7 +223,6 @@ def _outstanding_custody_for_party(party_type, party, employee=None):
         article = line.get("article")
         outstanding[article] = outstanding.get(article, 0) + (line.get("qty") or 0)
     return {article: qty for article, qty in outstanding.items() if qty > 0}
-
 
 def _autofetch_outstanding_custody(doc):
     """Add a custody-return row for every article the resident still holds that is
@@ -252,7 +243,6 @@ def _autofetch_outstanding_custody(doc):
             {"article": article, "quantity_returned": 0, "return_status": "Returned"},
         )
 
-
 def _roll_up_damage_deduction(doc):
     """Parent damage_deduction_amount is the server-authoritative sum of the child
     rows' deduction_amount — never hand-entered, so it always reconciles to the
@@ -260,7 +250,6 @@ def _roll_up_damage_deduction(doc):
     doc.damage_deduction_amount = sum(
         (row.deduction_amount or 0) for row in (doc.custody_return_items or [])
     )
-
 
 def resolve_damage_assessment_building(assignment, bed):
     """Building for the auto-created Custody Damage Assessment.
@@ -277,7 +266,6 @@ def resolve_damage_assessment_building(assignment, bed):
         or None
     )
 
-
 def _stamp_clearance(doc, clear=False):
     """Name the person who inspected and released the resident, and unname him on cancel.
 
@@ -290,7 +278,6 @@ def _stamp_clearance(doc, clear=False):
         "cleared_by": None if clear else frappe.session.user,
         "cleared_on": None if clear else frappe.utils.nowdate(),
     })
-
 
 def on_submit(doc, method=None):
     """Closes the assignment, frees the bed, stamps the clearance, and drafts any damage assessment."""
@@ -341,7 +328,6 @@ def on_submit(doc, method=None):
 
     _post_return_stock(doc, assignment)
 
-
 def _post_return_stock(doc, assignment):
     """Move the resident's custody off their name on the Accommodation Stock Ledger.
 
@@ -365,11 +351,6 @@ def _post_return_stock(doc, assignment):
     if not doc.custody_return_items or has_stock_entries("Housing Checkout", doc.name):
         return
 
-    # Only a stay whose check-in actually posted has a holder balance to move.
-    # ``_post_checkin_custody`` shipped after this app had live assignments and
-    # deliberately left those alone, so their residents hold nothing on the ledger;
-    # draining them would refuse the checkout outright — ``_assert_policy_allows``
-    # rejects moving more than the holder has — and strand a resident who is leaving.
     if not has_stock_entries("Housing Assignment", doc.assignment):
         return
 
@@ -379,11 +360,6 @@ def _post_return_stock(doc, assignment):
         return
 
     building = assignment.building
-    # What the resident actually holds, read from the ledger itself. The row's
-    # quantity_issued cannot be used: _populate_issued_quantities stamps it from Custody
-    # Issue records only, so it reads 0 for custody handed over at check-in — which is
-    # exactly the custody this drain exists to move. Capping on the held balance also
-    # means a row can never drain more than the resident has.
     held = _outstanding_custody_for_party(party_type, party, doc.employee)
     for row in doc.custody_return_items:
         if not row.article:
@@ -407,7 +383,6 @@ def _post_return_stock(doc, assignment):
                              voucher_type="Housing Checkout", voucher_no=doc.name,
                              voucher_detail_no=row.name, posting_date=doc.checkout_date)
 
-
 def _cancel_orphan_damage_assessment(doc):
     """Reverse the on_submit side-effect: the auto-created Custody Damage Assessment
     (linked back via source_checkout) is orphaned when the checkout is cancelled.
@@ -421,7 +396,6 @@ def _cancel_orphan_damage_assessment(doc):
     ):
         frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)
 
-
 def before_cancel(doc, method=None):
     """Blocks cancellation when no Cancellation Reason has been given, or when the
     custody this checkout returned has already moved on again."""
@@ -431,7 +405,6 @@ def before_cancel(doc, method=None):
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
     assert_reversal_allowed("Housing Checkout", doc.name)
-
 
 def on_cancel(doc, method=None):
     """Drops the clearance sign-off, cancels the draft damage assessment, puts the
@@ -467,7 +440,6 @@ def on_cancel(doc, method=None):
 
         recalculate_spatial(assignment.room, assignment.building)
 
-
 def _build_departure_transport(checkout, assignment):
     """Construct (not yet inserted) the departure Transport Request for a checkout.
 
@@ -492,7 +464,6 @@ def _build_departure_transport(checkout, assignment):
         ),
         "workers": [{"employee": checkout.employee, "pickup_point": building}],
     })
-
 
 @frappe.whitelist(methods=["POST"])
 def create_departure_transport(checkout):

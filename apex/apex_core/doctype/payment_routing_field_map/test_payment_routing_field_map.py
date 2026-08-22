@@ -19,39 +19,21 @@ from frappe.tests.utils import FrappeTestCase
 
 SETTINGS = "Payment Routing Settings"
 
-
 class TestPaymentRoutingFieldMap(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         settings = frappe.get_single(SETTINGS)
-        # The parent is deployment config, so snapshot it and restore on teardown:
-        # this test owns only the field_map rows and must leave the rest untouched.
         self._target = settings.target_payment_doctype
         self._auto_submit = settings.auto_submit_target
-        # Snapshot the WHOLE row rather than a hand-picked field list, which would
-        # silently stop restoring any column added to the child later.
         self._rows = [
             row.as_dict(no_default_fields=True, no_child_table_fields=True)
             for row in settings.field_map
         ]
-        # _validate_links runs BEFORE validate (document.py _save), so a stale target
-        # Link — another test's throwaway DocType, already deleted — would abort every
-        # save here and mask the parent guard behind a LinkValidationError (itself a
-        # ValidationError). Clear it so the field map is what is actually under test.
         if self._target and not frappe.db.exists("DocType", self._target):
             self._target = None
-            # A map only means anything against the target it was written for, so the
-            # rows go with it: restoring stub fieldnames against the default Payment
-            # Request would be refused by the parent's existence guard.
             self._rows = []
-        # Register the restore BEFORE the first mutating save: if this very save
-        # throws, an un-registered cleanup would leave the Single wiped for good.
         self.addCleanup(self._restore_settings)
         settings.target_payment_doctype = None
-        # Clear the incoming rows in the SAME save. They were written for whatever
-        # target was configured, and this save re-points the router at the default —
-        # leaving them would validate another module's fieldnames against Payment
-        # Request and abort here, far from the module that actually left them.
         settings.set("field_map", [])
         settings.save(ignore_permissions=True)
 
@@ -73,12 +55,10 @@ class TestPaymentRoutingFieldMap(FrappeTestCase):
         """
         settings = frappe.get_single(SETTINGS)
         settings.set("field_map", [])
-        # A non-static row copies from a source field ...
         settings.append(
             "field_map",
             {"target_fieldname": "party", "source_fieldname": "supplier", "is_static": 0},
         )
-        # ... a static row carries a literal value (and no source).
         settings.append(
             "field_map",
             {"target_fieldname": "subject", "is_static": 1, "static_value": "Routed by Apex"},
@@ -126,8 +106,6 @@ class TestPaymentRoutingFieldMap(FrappeTestCase):
     def test_static_row_with_a_source_field_is_rejected_by_parent(self):
         settings = frappe.get_single(SETTINGS)
         settings.set("field_map", [])
-        # Both fieldnames are real, so the existence guards pass and the static/source
-        # integrity guard is provably the one that fires.
         settings.append(
             "field_map",
             {"target_fieldname": "party", "source_fieldname": "supplier", "is_static": 1},

@@ -124,6 +124,7 @@
    "fieldname": "claimed_total",
    "fieldtype": "Currency",
    "label": "Claimed Total (SAR)",
+   "non_negative": 1,
    "permlevel": 1
   },
   {
@@ -135,6 +136,7 @@
    "fieldname": "accrued_total",
    "fieldtype": "Currency",
    "label": "Accrued Total (SAR)",
+   "non_negative": 1,
    "permlevel": 1,
    "read_only": 1
   },
@@ -315,6 +317,7 @@
    "read_only": 1
   },
   {
+   "default": "__user",
    "description": "Set to the session user on creation; read-only so the segregation-of-duties gate cannot be spoofed.",
    "fieldname": "requested_by",
    "fieldtype": "Link",
@@ -345,7 +348,7 @@
    "link_fieldname": "rental_settlement"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-22 21:05:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Rental Settlement",

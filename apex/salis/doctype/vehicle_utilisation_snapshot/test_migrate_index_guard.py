@@ -50,7 +50,6 @@ from apex.salis.doctype.transport_trip_rating import transport_trip_rating
 from apex.salis.doctype.trip_boarding_ledger import trip_boarding_ledger
 from apex.salis.doctype.vehicle_utilisation_snapshot import vehicle_utilisation_snapshot
 
-# (controller module, DocType, constraint columns, constraint name)
 GUARDED = [
     (
         fuel_consumption_ledger,
@@ -90,20 +89,16 @@ GUARDED = [
     ),
 ]
 
-# The exact shape MariaDB raises when the target columns already hold duplicates.
 DUPLICATE_ENTRY = (
     "(1062, \"Duplicate entry 'VEH-0001-2026-06-20' for key 'uq_probe'\")"
 )
 
-
 HOOK = "on_doctype_update"
 SALIS_ROOT = os.path.join(str(Path(apex.__file__).resolve().parent), "salis")
-
 
 def _source(module):
     with open(module.__file__, encoding="utf-8") as fh:
         return fh.read()
-
 
 def _declares_hook(path):
     """True when the file defines ``on_doctype_update`` anywhere.
@@ -123,7 +118,6 @@ def _declares_hook(path):
         for node in ast.walk(tree)
     )
 
-
 def salis_modules_declaring_hook():
     """Absolute paths of every non-test ``salis/**/*.py`` that declares the hook."""
     return {
@@ -132,7 +126,6 @@ def salis_modules_declaring_hook():
         if not os.path.basename(path).startswith("test_")
         and _declares_hook(path)
     }
-
 
 class TestSalisLedgerMigrateGuard(unittest.TestCase):
     def test_no_controller_calls_raw_add_unique(self):
@@ -167,18 +160,11 @@ class TestSalisLedgerMigrateGuard(unittest.TestCase):
                      mock.patch.object(ledger_index, "frappe") as mf:
                     mf.db.add_unique.side_effect = Exception(DUPLICATE_ENTRY)
 
-                    module.on_doctype_update()  # must not raise
+                    module.on_doctype_update()
 
                     mf.db.add_unique.assert_called_once_with(
                         doctype, cols, constraint_name=constraint
                     )
-                    # Nothing is rolled back. frappe.db.add_unique commits before it
-                    # runs its own ALTER TABLE (frappe/database/mariadb/database.py:447),
-                    # so the caller's work is committed and its savepoints released
-                    # before this except can be reached: a bare rollback would undo
-                    # nothing while resetting the caller's commit hooks, and a scoped
-                    # one would raise 1305 SAVEPOINT ... does not exist and abort the
-                    # migrate this guard exists to survive.
                     mf.db.rollback.assert_not_called()
                     logged.assert_called_once_with(doctype, cols, constraint)
 
@@ -240,7 +226,6 @@ class TestSalisLedgerMigrateGuard(unittest.TestCase):
         found = salis_modules_declaring_hook()
         self.assertGreaterEqual(len(found), 4, "hook scan returned implausibly few files")
         self.assertIn(os.path.realpath(vehicle_utilisation_snapshot.__file__), found)
-
 
 if __name__ == "__main__":
     unittest.main()

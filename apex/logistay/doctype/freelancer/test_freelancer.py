@@ -16,7 +16,6 @@ import apex
 from apex.tests._helpers import _user, as_user
 from frappe.utils import flt
 
-
 class TestFreelancer(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -120,11 +119,8 @@ class TestFreelancer(FrappeTestCase):
         finance = self._user_with_role("Finance Manager")
         housing = self._user_with_role("Accommodation Manager")
 
-        # `has_permission` returns bool(perm) (frappe/permissions.py:193), so `assertIs`
-        # is safe and 1 would not pass for True.
         self.assertIs(frappe.has_permission("Freelancer", "create", user=finance), True)
         self.assertIs(frappe.has_permission("Freelancer", "create", user=housing), False)
-        # Only create was withdrawn — the housing role still maintains what exists.
         self.assertIs(frappe.has_permission("Freelancer", "read", user=housing), True)
         self.assertIs(frappe.has_permission("Freelancer", "write", user=housing), True)
 
@@ -155,12 +151,6 @@ class TestFreelancer(FrappeTestCase):
         with self.assertRaises(frappe.PermissionError):
             refused.insert()
 
-    # The housing role's restore-on-update path for national_id_or_iqama is not asserted
-    # here: it is a subTest of test_freelancer_salary_permlevel.py::
-    # test_the_housing_role_can_still_save_with_every_level1_field_intact, which carries
-    # both permlevel-1 fields beside the mechanism note (document.py:412 before :414,
-    # base_document.py:1288,1291).
-
     def test_freelance_is_an_accounting_party(self):
         """The core proof: with the custom Party Type registered, a Journal Entry
         can carry party_type='Freelancer' + party=<a freelance>.
@@ -178,14 +168,11 @@ class TestFreelancer(FrappeTestCase):
         )
         self.assertTrue(
             frappe.db.exists("Party Type", "Freelancer"),
-            "the Freelancer Party Type must be registered — see apex/fixtures/party_type.json",
+            "the Freelancer Party Type must be registered, or every Freelancer payment entry is refused at link validation",
         )
 
         freelance = self._doc().insert(ignore_permissions=True)
 
-        # Built, not skipped on: a fresh CI site's chart is not guaranteed
-        # to carry a non-group Payable and Cash account in the company's base
-        # currency, and without both there is no Journal Entry to hang the party on.
         company = factories.ensure_company()
         base_currency = frappe.db.get_value("Company", company, "default_currency")
         payable = factories.ensure_account(company, "Payable", "Liability", base_currency)
@@ -213,8 +200,6 @@ class TestFreelancer(FrappeTestCase):
         self.assertEqual(je.accounts[0].party_type, "Freelancer")
         self.assertEqual(je.accounts[0].party, freelance.name)
 
-
-# --- merged from test_freelancer_create_permission.py ---
 _HERE = Path(apex.__file__).resolve().parent / "logistay" / "doctype" / "freelancer"
 _APP_ROOT = _HERE.parents[2]
 _DISPLAY_FIELDTYPES = frozenset(
@@ -329,8 +314,6 @@ class TestInternalAuditorStaysOutOfFreelancerPii(FrappeTestCase):
 if __name__ == "__main__":
     unittest.main()
 
-
-# --- merged from test_freelancer_salary_permlevel.py ---
 _FREELANCER_JSON = Path(apex.__file__).resolve().parent / "logistay" / "doctype" / "freelancer" / "freelancer.json"
 FINANCE_ROLE = "Finance Manager"
 HOUSING_ROLE = "Accommodation Manager"
@@ -339,8 +322,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
     so a doc reused across methods would carry the previous method's mutations."""
 
     def setUp(self):
-        # Restore the session BEFORE anything mutates it — frappe.session.user is process
-        # state and no rollback touches it.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
 
@@ -379,8 +360,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         finance = self._user_with_role(FINANCE_ROLE)
         housing = self._user_with_role(HOUSING_ROLE)
 
-        # The access itself, before either write: 1 must be reachable for one and not the
-        # other, or the two outcomes below would prove nothing about permlevels.
         frappe.set_user(finance)
         self.assertIn(
             1,
@@ -394,18 +373,16 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             f"{HOUSING_ROLE} must not reach permlevel 1",
         )
 
-        # Verdict A — the privileged write PERSISTS.
         frappe.set_user(finance)
         privileged = frappe.get_doc("Freelancer", doc.name)
         privileged.monthly_salary = 7777
         privileged.save()
         finance_stored = frappe.db.get_value("Freelancer", doc.name, "monthly_salary")
 
-        # Verdict B — the unprivileged write is REVERTED, silently, with no exception.
         frappe.set_user(housing)
         unprivileged = frappe.get_doc("Freelancer", doc.name)
         unprivileged.monthly_salary = 1
-        unprivileged.save()  # must NOT raise: the framework reverts, it does not refuse
+        unprivileged.save()
         housing_stored = frappe.db.get_value("Freelancer", doc.name, "monthly_salary")
 
         self.assertEqual(float(finance_stored), 7777.0, f"{FINANCE_ROLE} could not set the salary")
@@ -419,11 +396,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
             1.0,
             "the unprivileged value landed — the permlevel is not being enforced on write",
         )
-        # The explicit difference the card asked for: same field, same document, two roles,
-        # two outcomes. Compare the VERDICTS alone. An earlier form compared
-        # (role, value, verdict) triples, which could never be equal — the role names are
-        # different literals — so it passed even when both verdicts read "persisted",
-        # which is the one state it claimed to catch.
         finance_verdict = "persisted" if float(finance_stored) == 7777.0 else "reverted"
         housing_verdict = "persisted" if float(housing_stored) == 1.0 else "reverted"
         self.assertNotEqual(
@@ -568,8 +540,6 @@ class TestFreelancerSalaryPermlevel(FrappeTestCase):
         self.assertEqual(salary.get("permlevel"), 1, "monthly_salary is not at permlevel 1")
         described = (salary.get("description") or "").lower()
         for role in sorted(high):
-            # The role's leading word, not its full name: the tooltip says "Finance",
-            # which is how a clerk names the department that keeps the column.
             self.assertIn(
                 role.split()[0].lower(),
                 described,

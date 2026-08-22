@@ -38,10 +38,6 @@ from apex.habitat.doctype.resident_request.resident_request import (
     advance_triage_status,
     bulk_triage,
 )
-# The MODULE, never the endpoint itself. frappe resolves a request's `cmd` by attribute
-# lookup on the module the string names (handler.py:294-303), so importing the function
-# here would publish a second dotted path to it -- and the rate-limit window is named
-# after the caller's spelling (rate_limiter.py:155), so a second path is a second window.
 from apex.habitat.web_form.accommodation_resident_request import (
     accommodation_resident_request as intake,
 )
@@ -52,12 +48,10 @@ from apex.tests._helpers import _user, as_user
 
 test_ignore = factories.test_ignore
 
-
 def _open_todos(name, user="Administrator"):
     return frappe.get_all("ToDo", filters={
         "reference_type": "Resident Request", "reference_name": name,
         "allocated_to": user, "status": "Open"})
-
 
 class TestAccommodationResidentRequest(FrappeTestCase):
     def _request(self, status="New", **kwargs):
@@ -160,7 +154,6 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         self.assertEqual(frappe.db.get_value("Resident Request", a.name, "status"), "Triaged")
         self.assertEqual(frappe.db.get_value("Resident Request", b.name, "status"), "In Progress")
 
-
     def _active_qr(self):
         """An active QR location whose token resolves to a real building."""
         building = frappe.get_doc({
@@ -196,7 +189,6 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             doc.save(ignore_permissions=True)
 
-
     def test_priority_substring_does_not_false_bump(self):
         """A description that only contains 'ac' as a substring of an ordinary word
         (contact) must not be bumped to High — the bare-substring match was the bug."""
@@ -216,7 +208,6 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         phrase = frappe._dict(request_category="Other", description="air conditioning not working", priority=None)
         _apply_priority_rules(phrase)
         self.assertEqual(phrase.priority, "High", "the 'air conditioning' phrase must bump to High")
-
 
     def test_honeypot_filled_is_rejected(self):
         """A non-empty honeypot field is treated as spam: the call short-circuits
@@ -265,9 +256,6 @@ class TestAccommodationResidentRequest(FrappeTestCase):
             "the insert must roll back with the transaction; a manual commit would defeat this",
         )
 
-
-    # --- v0.8.4: assignment creates a native ToDo; resolving/closing closes it -----
-
     def _new_request(self):
         doc = frappe.get_doc({
             "doctype": "Resident Request",
@@ -297,7 +285,6 @@ class TestAccommodationResidentRequest(FrappeTestCase):
         doc.resolution_notes = "Done"
         doc.save(ignore_permissions=True)
         self.assertEqual(len(_open_todos(doc.name)), 0, "resolving must close the ToDo")
-
 
 class TestResidentRequestConvert(ApexHabitatTestCase):
     """Converting a triaged Accommodation Resident Request into the operational
@@ -396,7 +383,6 @@ class TestResidentRequestConvert(ApexHabitatTestCase):
         self.assertEqual(req.status, "Resolved")
         self.assertEqual(req.target_document, res["target_document"])
 
-
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
 
@@ -407,7 +393,6 @@ def _raising_frappe() -> MagicMock:
     fake.as_json.side_effect = json.dumps
     return fake
 
-
 def _mock_request(status, assigned_to=None, priority="Medium"):
     doc = MagicMock(
         doctype="Resident Request",
@@ -417,7 +402,6 @@ def _mock_request(status, assigned_to=None, priority="Medium"):
     )
     doc.name = "RR-1"
     return doc
-
 
 class TestResidentRequestUsesNativeAssignment(TestCase):
     def _sync(self, doc):
@@ -461,7 +445,6 @@ class TestResidentRequestUsesNativeAssignment(TestCase):
             "the ToDo is inserted by assign_to.add, not by this module",
         )
 
-
 class TestNativeUnassignDoesNotWedgeTheRequest(TestCase):
     def _validate_status(self, doc):
         fake = _raising_frappe()
@@ -490,8 +473,6 @@ class TestNativeUnassignDoesNotWedgeTheRequest(TestCase):
             "a second writer on assigned_to is what let status and assignment disagree",
         )
 
-
-# --- merged from test_resident_request_coordinator_perms.py ---
 DOCTYPE = "Resident Request"
 ROLE = "Resident Request Coordinator"
 COORDINATOR = "resident_request_coordinator_perms@example.com"

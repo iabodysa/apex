@@ -44,10 +44,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
-
 class AccommodationStockLedger(Document):
     pass
-
 
 def on_doctype_update():
     """Composite index (is_cancelled, item_type, employee) serving the custody /
@@ -67,12 +65,10 @@ def on_doctype_update():
         "idx_asl_cancel_type_party",
     )
 
-
 _MASTER_FIELDS = {
     "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost"),
     "Maintenance Material": ("material_name", "default_uom", "estimated_unit_cost"),
 }
-
 
 def _resolve_item(item_type: str, item: str):
     """Looks up an item's display name, unit of measure and standard cost from its master doctype."""
@@ -81,7 +77,6 @@ def _resolve_item(item_type: str, item: str):
         return (item, "", 0.0)
     vals = frappe.db.get_value(item_type, item, list(fields), as_dict=True) or {}
     return (vals.get(fields[0]) or item, vals.get(fields[1]) or "", flt(vals.get(fields[2])))
-
 
 def _resolve_holder(employee, party_type, party):
     """The holder of a row as the (party_type, party, employee) triple every column
@@ -98,7 +93,6 @@ def _resolve_holder(employee, party_type, party):
     elif party:
         employee = None
     return party_type or None, party or None, employee or None
-
 
 def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no,
                      voucher_detail_no=None, employee=None, party_type=None, party=None,
@@ -139,7 +133,6 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     doc.insert(ignore_permissions=True)
     return doc.name
 
-
 def _assert_policy_allows(item_type, item, qty, building, party_type, party, posting_date) -> None:
     """The engine's policy, applied where the row is WRITTEN rather than in each caller.
 
@@ -172,7 +165,6 @@ def _assert_policy_allows(item_type, item, qty, building, party_type, party, pos
             )
         )
 
-
 def get_store_balance(item_type: str, item: str, building: str, employee=None,
                       for_update: bool = False, party_type=None, party=None) -> float:
     """Live signed-quantity balance for one item in a building's store (employee
@@ -195,8 +187,6 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     )
     holder_type, holder, _ = _resolve_holder(employee, party_type, party)
     if holder:
-        # Both halves of the holder, never the name alone: an Employee and a Temporary
-        # Worker whose docnames collide would otherwise share one balance.
         q = q.where(Ledger.party == holder).where(Ledger.party_type == holder_type)
     else:
         q = q.where(Ledger.party.isnull())
@@ -205,14 +195,12 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     rows = q.run(as_dict=True)
     return flt(sum(flt(r.signed_qty) for r in rows))
 
-
 def has_stock_entries(voucher_type: str, voucher_no: str) -> bool:
     """Idempotency guard: True if this voucher already has live (non-cancelled) rows."""
     return bool(frappe.db.exists(
         "Accommodation Stock Ledger",
         {"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
     ))
-
 
 def _assert_reversal_keeps_stock_positive(rows) -> None:
     """A reversal moves real stock, it does not erase history: withdrawing a voucher
@@ -245,7 +233,6 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
             ).format(flt(qty), item, building, available)
         )
 
-
 def _live_rows(voucher_type: str, voucher_no: str):
     """The rows a reversal of this voucher would mirror: its not-yet-cancelled
     entries. One query shape shared by the refusal check and the reversal itself."""
@@ -256,7 +243,6 @@ def _live_rows(voucher_type: str, voucher_no: str):
                 "party_type", "party", "from_building", "to_building"],
     )
 
-
 def assert_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
     """REFUSAL half of a stock voucher's cancel — call from ``before_cancel``.
 
@@ -264,7 +250,6 @@ def assert_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
     which on_cancel still runs.
     """
     _assert_reversal_keeps_stock_positive(_live_rows(voucher_type, voucher_no))
-
 
 def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     """RESTORATION half: reverse (do not delete) all live rows of a voucher — post
@@ -286,7 +271,6 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
         )
         frappe.db.set_value("Accommodation Stock Ledger", r.name, "is_cancelled", 1)
         frappe.db.set_value("Accommodation Stock Ledger", rev, "is_cancelled", 1)
-
 
 def reverse_and_mark_cancelled(doc, voucher_type: str) -> None:
     """The whole on_cancel routine every stock voucher shares: reverse each ledger

@@ -10,9 +10,7 @@ from __future__ import annotations
 
 import frappe
 
-
 _ROW_SAVEPOINT = "scheduled_task_row"
-
 
 def daily_scheduled_task_instance_generator() -> None:
     """Generate Scheduled Task Instance records using the Assignment × Item pattern.
@@ -119,7 +117,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         item.task_catalog,
                         due_date,
                     )
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                     logger.error(
                         "daily_scheduled_task_instance_generator: failed for "

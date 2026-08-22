@@ -47,9 +47,6 @@ WORKER = "Worker"
 DRIVER = "Driver"
 TOKEN_COOKIES = {WORKER: "masar_wt", DRIVER: "masar_dt"}
 
-# One login-disabled user per capacity, seeded by portal_identity_seed. A token carries WHO; these
-# carry WHAT THAT CAPACITY MAY DO, so a portal write can be graded by a DocPerm instead of skipping
-# permissions entirely.
 CAPACITY_USERS = {WORKER: "worker@apex.internal", DRIVER: "driver@apex.internal"}
 
 ISSUER_ROLES = {
@@ -87,7 +84,6 @@ BAD_TOKEN_WINDOW_SECONDS = 60
 
 BAD_TOKEN_WINDOW_KEY = "rl:apex-portal-bad-token:{0}"
 
-
 def _throttle_bad_token_attempt() -> None:
     """Charge one failed portal-token attempt against this address's window; the
     (N+1)th raises RateLimitExceededError (HTTP 429). A caller with no request or no
@@ -110,7 +106,6 @@ def _throttle_bad_token_attempt() -> None:
         BAD_TOKEN_ATTEMPTS_PER_MINUTE,
     )
 
-
 def _require_audience(audience: str) -> None:
     """Blocks an audience value that is neither Worker nor Driver."""
     if audience not in TOKEN_COOKIES:
@@ -119,14 +114,11 @@ def _require_audience(audience: str) -> None:
             frappe.ValidationError,
         )
 
-
 def hash_token(raw: str) -> str:
     """Return the SHA-256 digest persisted for a raw bearer token."""
     return hashlib.sha256((raw or "").encode("utf-8")).hexdigest()
 
-
 PORTAL_ROOM_PREFIX = "apex-portal-"
-
 
 def portal_room(audience: str, token=None) -> str:
     """The realtime room this portal session may join, or "" when it has no token.
@@ -148,7 +140,6 @@ def portal_room(audience: str, token=None) -> str:
         return ""
     return PORTAL_ROOM_PREFIX + hash_token(raw)
 
-
 def portal_rooms_for_subject(audience: str, subject: str) -> list:
     """Every live room belonging to one driver or employee.
 
@@ -168,14 +159,12 @@ def portal_rooms_for_subject(audience: str, subject: str) -> list:
     )
     return [PORTAL_ROOM_PREFIX + h for h in hashes if h]
 
-
 def publish_to_portal_subject(audience: str, subject: str, event: str, message=None) -> int:
     """Ring one subject's own rooms. Returns how many were rung."""
     rooms = portal_rooms_for_subject(audience, subject)
     for room in rooms:
         frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
     return len(rooms)
-
 
 def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
     """Return the audience credential and whether the request presented one."""
@@ -192,7 +181,6 @@ def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
     if cookie_name in cookies:
         return (cookies.get(cookie_name) or "").strip(), True
     return "", False
-
 
 def validate_subject_binding(
     row,
@@ -227,7 +215,6 @@ def validate_subject_binding(
         frappe.throw(_("Portal token subject binding is invalid."), exception)
     return subject
 
-
 def _reject_invalid_token() -> None:
     """Throttles the failed attempt and raises a permission error for an invalid or inactive token."""
     _throttle_bad_token_attempt()
@@ -235,7 +222,6 @@ def _reject_invalid_token() -> None:
         _("This portal access token is invalid or inactive."),
         frappe.PermissionError,
     )
-
 
 @contextmanager
 def as_capacity(audience: str, subject: str | None = None):
@@ -269,7 +255,6 @@ def as_capacity(audience: str, subject: str | None = None):
         frappe.set_user(previous)
         frappe.local.apex_capacity_subject = previous_subject
 
-
 def capacity_subject(audience: str) -> str | None:
     """The Employee/Salis Driver bound to the open ``as_capacity(audience, subject=...)``
     block, or None outside one, for a mismatched audience, or when none was passed.
@@ -284,7 +269,6 @@ def capacity_subject(audience: str) -> str | None:
         return None
     bound_audience, subject = current
     return subject if bound_audience == audience else None
-
 
 def resolve_portal_subject(audience: str, token=None, required=False):
     """Resolve a valid audience token to its active Employee or Salis Driver."""
@@ -334,7 +318,6 @@ def resolve_portal_subject(audience: str, token=None, required=False):
         _reject_invalid_token()
     return subject
 
-
 def _deny_issuance(audience: str) -> None:
     """Raises a permission error naming the audience whose portal credential issuance is denied."""
     frappe.throw(
@@ -343,7 +326,6 @@ def _deny_issuance(audience: str) -> None:
         ),
         frappe.PermissionError,
     )
-
 
 def _lock_subject_row(audience: str, subject: str, *, require_active=False):
     """Lock and return one portal subject row."""
@@ -361,7 +343,6 @@ def _lock_subject_row(audience: str, subject: str, *, require_active=False):
         _deny_issuance(audience)
     return row
 
-
 def _lock_subject_token_rows(audience: str, subject: str):
     """Lock exact-audience token rows in a stable order."""
     Token = frappe.qb.DocType("Masar Worker Token")
@@ -378,13 +359,11 @@ def _lock_subject_token_rows(audience: str, subject: str):
         .run(as_dict=True)
     )
 
-
 ISSUED = "Issued"
 REISSUED = "Reissued"
 RESHARED = "Re-shared"
 ROTATED = "Rotated"
 REVOKED = "Revoked"
-
 
 def _credential_event_subject(action: str, audience: str, subject: str) -> str:
     """The Activity Log sentence for one credential action.
@@ -402,7 +381,6 @@ def _credential_event_subject(action: str, audience: str, subject: str) -> str:
         ROTATED: _("Portal credential rotated for {0} {1}"),
         REVOKED: _("Portal credential revoked for {0} {1}"),
     }[action].format(_(audience), subject)
-
 
 def log_credential_event(
     audience: str,
@@ -441,7 +419,6 @@ def log_credential_event(
         }
     ).insert(ignore_permissions=True, ignore_links=True).name
 
-
 def revoke_subject_tokens(audience: str, subject: str) -> int:
     """Disable enabled credentials for one exact audience and subject."""
     _require_audience(audience)
@@ -467,7 +444,6 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
         disable_subject_subscriptions(audience, subject)
     return disabled
 
-
 def on_employee_change(doc, method=None) -> int:
     """Revoke worker and linked-driver credentials for a non-active Employee."""
     if not doc.name or doc.status == "Active":
@@ -484,18 +460,15 @@ def on_employee_change(doc, method=None) -> int:
         disabled += revoke_subject_tokens(DRIVER, driver)
     return disabled
 
-
 def on_salis_driver_change(doc, method=None) -> int:
     """Revoke driver credentials whenever a driver is not Active."""
     if not doc.name or doc.status == "Active":
         return 0
     return revoke_subject_tokens(DRIVER, doc.name)
 
-
 def on_driver_suspension_submit(doc, method=None) -> int:
     """Revoke credentials after Driver Suspension performs its raw status write."""
     return revoke_subject_tokens(DRIVER, getattr(doc, "driver", None))
-
 
 def authorize_issuance(
     audience: str,
@@ -561,7 +534,6 @@ def authorize_issuance(
 
     _deny_issuance(audience)
 
-
 def authorize_revocation(audience: str, subject: str, user=None) -> bool:
     """Authorize a MANUAL revocation: same issuer roles, same project/building scope.
 
@@ -583,7 +555,6 @@ def authorize_revocation(audience: str, subject: str, user=None) -> bool:
     branch needs its own carve-out before this is offered for WORKER.
     """
     return authorize_issuance(audience, subject, user, require_active=False)
-
 
 def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
     """The ``holder_type``-guarded WHERE fragment for one audience the caller may issue for.
@@ -620,7 +591,6 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
         "and `check_out_date` is null and `building` in ({0})))"
     ).format(escaped)
 
-
 def masar_worker_token_scope_query(user=None, doctype=None) -> str:
     """WHERE fragment scoping the Masar Worker Token list/report view.
 
@@ -655,7 +625,6 @@ def masar_worker_token_scope_query(user=None, doctype=None) -> str:
     if not clauses:
         return "1=0"
     return "({0})".format(" or ".join(clauses))
-
 
 def masar_worker_token_has_permission(doc, ptype, user=None):
     """Deny reading, reporting or printing a Masar Worker Token row outside issuer scope.
@@ -706,7 +675,6 @@ def masar_worker_token_has_permission(doc, ptype, user=None):
     allowed = set(habitat_permissions._allowed_buildings(user))
     return None if buildings and buildings.issubset(allowed) else False
 
-
 def credential_delivery_destination(
     audience: str,
     subject: str,
@@ -727,9 +695,7 @@ def credential_delivery_destination(
         )
     return stored
 
-
 _PUSH_SUBSCRIPTION_SUBJECT_FIELDS = {WORKER: "employee", DRIVER: "driver"}
-
 
 def portal_push_subscription_has_permission(doc, ptype, user=None):
     """Deny a portal capacity from touching another subject's push registration.

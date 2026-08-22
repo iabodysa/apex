@@ -17,14 +17,12 @@ from frappe.model import default_fields
 
 from apex.apex_core.doctype.apex_settings.apex_settings import gl_posting_enabled
 
-
 SOURCE_DOCTYPE = "Salis Payment Request"
 
 DEFAULT_TARGET_DOCTYPE = "Payment Request"
 
 LINK_DOCTYPE_FIELD = "linked_payment_doctype"
 LINK_NAME_FIELD = "linked_payment_entry"
-
 
 def get_target_doctype(settings=None) -> str:
     """Resolve the payment DocType to build, defaulting to native Payment Request.
@@ -35,7 +33,6 @@ def get_target_doctype(settings=None) -> str:
     """
     settings = settings or frappe.get_single("Payment Routing Settings")
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
-
 
 @frappe.whitelist()
 def get_target_payment_doctype() -> str:
@@ -48,7 +45,6 @@ def get_target_payment_doctype() -> str:
     when the router is unconfigured.
     """
     return get_target_doctype()
-
 
 def require_configured_target(built_doctype: str) -> None:
     """Refuse when the deployment's configured payment target is not what the caller builds.
@@ -72,7 +68,6 @@ def require_configured_target(built_doctype: str) -> None:
         ).format(_(configured), _(built_doctype), _(SOURCE_DOCTYPE)),
         title=_("Payment Target Mismatch"),
     )
-
 
 def validate_target_doctype(target_doctype) -> None:
     """Refuse a structurally impossible payment target BEFORE anything is built.
@@ -121,7 +116,6 @@ def validate_target_doctype(target_doctype) -> None:
             ).format(target_doctype),
             title=_("Invalid Payment Target"),
         )
-
 
 def validate_field_map(target_doctype, field_map) -> None:
     """Refuse a field map that cannot build the target, BEFORE any insert.
@@ -186,9 +180,7 @@ def validate_field_map(target_doctype, field_map) -> None:
                 title=_("Invalid Payment Field Map"),
             )
 
-
 _FALLBACK_CURRENCY = "SAR"
-
 
 def _default_currency(source) -> str:
     """Resolve the transaction currency for the routed target.
@@ -206,7 +198,6 @@ def _default_currency(source) -> str:
             return currency
     return _FALLBACK_CURRENCY
 
-
 def _ensure_target_currency(target, source) -> None:
     """Stamp a transaction ``currency`` on the target if it has the field unset.
 
@@ -223,7 +214,6 @@ def _ensure_target_currency(target, source) -> None:
         return
     target.currency = _default_currency(source)
 
-
 def _is_finance_approved(source) -> bool:
     """True when the request has cleared the Finance approval gate.
 
@@ -238,7 +228,6 @@ def _is_finance_approved(source) -> bool:
     request never routes.
     """
     return bool(source.get("finance_approved_by"))
-
 
 def _apply_field_map(target, source, field_map) -> None:
     """Populate ``target`` from ``source`` using the configured rows.
@@ -260,7 +249,6 @@ def _apply_field_map(target, source, field_map) -> None:
             source_field = (row.source_fieldname or "").strip()
             value = source.get(source_field) if source_field else None
         target.set(target_field, value)
-
 
 def route_payment(payment_request: str) -> str:
     """Build (and optionally submit) the configured target payment from a submitted,
@@ -289,11 +277,6 @@ def route_payment(payment_request: str) -> str:
             _("This payment request is not finance-approved yet; it cannot be paid.")
         )
 
-    # The stamp says the request WAS approved; docstatus says it is still live. The two
-    # are independent: cancelling a finance-approved request leaves the stamp untouched
-    # (the controller's _guard_finance_stamp carries the stored value forward and the
-    # cancel path never clears it), so the stamp alone would still route - and
-    # auto-submit a real payment - off a request the business voided.
     if not source.docstatus.is_submitted():
         frappe.throw(
             _("Payment request {0} is {1}; only a submitted, finance-approved request can be paid.").format(
@@ -320,7 +303,6 @@ def route_payment(payment_request: str) -> str:
     )
 
     return target.name
-
 
 @frappe.whitelist(methods=["POST"])
 def create_routed_payment(payment_request: str) -> str:

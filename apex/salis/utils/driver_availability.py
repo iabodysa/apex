@@ -11,8 +11,9 @@ A Link field that asks WHO WILL DO THIS WORK carries ``link_filters`` pinning it
 Active, on Salis Driver and on Salis Vehicle alike, because offering a stopped record there
 offers a choice the flow refuses later. A field that NAMES a record rather than books it —
 the clearance about him, the incident that stopped him, the ledger row he already earned, a
-case that outlives the stop — stays unfiltered. ``apex/salis/test_driver_pickers_are_filtered.py``
-carries both graded sets, so the split is data a reader can diff rather than prose.
+case that outlives the stop — stays unfiltered. The split is decided by that question and
+by nothing else, so a new Link field is graded by asking it rather than by copying a
+neighbour.
 
 ``link_filters`` shapes the PICKER and nothing else: ``link.js:600`` applies it inside the
 form control, so no API path is narrowed by it and every server-side refusal stays where it is.

@@ -31,10 +31,6 @@ from apex.apex_core.utils.portal_identity import (
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
-# Read from the same table the reader answers from — ``masar_worker._token_from_request``
-# resolves the cookie name through ``TOKEN_COOKIES[WORKER]``. A literal here would let a
-# rename of that entry pass silently, leaving this page writing one cookie name and the
-# endpoint reading another. ``www/driver.py`` already derives its own the same way.
 MASAR_TOKEN_COOKIE = TOKEN_COOKIES[WORKER]
 _COOKIE_MAX_AGE_SECONDS = 180 * 24 * 60 * 60
 WORKER_CAPABILITIES = (
@@ -46,7 +42,6 @@ WORKER_CAPABILITIES = (
     "worker.request.create",
     "worker.request.read",
 )
-
 
 def get_context(context):
     """Validates a worker token in the URL, cookies it and redirects, or bootstraps the guest SPA."""
@@ -78,7 +73,6 @@ def get_context(context):
         subject=subject,
     )
 
-
 def _token_resolves(token: str) -> bool:
     """Whether the credential still names an active worker."""
     try:
@@ -86,13 +80,11 @@ def _token_resolves(token: str) -> bool:
     except frappe.PermissionError:
         return False
 
-
 def _resolve_token_subject(token: str) -> str | None:
     try:
         return resolve_portal_subject(WORKER, token, required=True)
     except frappe.PermissionError:
         return None
-
 
 def _set_token_cookie(token: str) -> None:
     """Persist the validated token in the httpOnly site cookie (best-effort).
@@ -111,12 +103,10 @@ def _set_token_cookie(token: str) -> None:
         max_age=_COOKIE_MAX_AGE_SECONDS,
     )
 
-
 def _delete_cookie(name: str) -> None:
     cm = getattr(frappe.local, "cookie_manager", None)
     if cm is not None:
         cm.delete_cookie(name)
-
 
 def _request_token_cookie() -> str:
     """The token already stored in the request's httpOnly cookie, or ''."""

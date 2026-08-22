@@ -21,7 +21,6 @@ test_ignore = [
     "User",
 ]
 
-
 class TestCustodyReturn(FrappeTestCase):
 
     def test_create_valid_return(self):
@@ -52,9 +51,6 @@ class TestCustodyReturn(FrappeTestCase):
             "custody_issue": "CUST-ISS-QA",
             "items": [],
         })
-        # Links are validated before mandatory (document.py:302 then :310), and the
-        # placeholder links below do not exist, so the link check is stood down to keep
-        # the assertion on the empty table this test is about.
         doc.flags.ignore_links = True
         with self.assertRaises(frappe.MandatoryError):
             doc.insert(ignore_permissions=True)
@@ -75,7 +71,6 @@ class TestCustodyReturn(FrappeTestCase):
     def test_progress_issued_when_nothing_returned(self):
         from apex.habitat.doctype.custody_return.custody_return import _progress_from
         self.assertEqual(_progress_from({"A": 5}, {}), "Issued")
-
 
     def test_partially_returned_status_in_custody_issue_options(self):
         """Custody Issue status field must carry the 'Partially Returned' option
@@ -103,7 +98,6 @@ class TestCustodyReturn(FrappeTestCase):
         from apex.habitat.doctype.custody_return.custody_return import _progress_from
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5}), "Partially Returned")
         self.assertEqual(_progress_from({"A": 5, "B": 5}, {"A": 5, "B": 5}), "Returned")
-
 
 class TestCustodyReturnDamageAssessment(FrappeTestCase):
     """The 'Create Damage Assessment' action maps only Damaged/Lost rows from a
@@ -195,7 +189,6 @@ class TestCustodyReturnDamageAssessment(FrappeTestCase):
         self.assertIn("Damaged", js)
         self.assertIn("Lost", js)
         self.assertIn("make_damage_assessment", js)
-
 
 class TestCustodyReturnSerializedRules(FrappeTestCase):
     """The serialized-article guard is enforced on return as well as issue."""

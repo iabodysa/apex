@@ -32,18 +32,14 @@ from apex.tests.factories import make_project, make_vehicle
 
 WORKFLOW = "Fuel Claim Workflow"
 
-
 def _actions(doc):
     """The set of workflow action names currently available to the session user."""
     return {t.action for t in get_transitions(doc)}
-
 
 class TestFuelClaimWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Fuel Claim") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -86,7 +82,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-
     def _new(self, requested_by=None, **overrides):
         """A draft Fuel Claim at Draft, stamped to ``requested_by`` (defaults to the
 		standard requester). Inserted as Administrator so ``owner`` is
@@ -128,14 +123,12 @@ class TestFuelClaimWorkflow(FrappeTestCase):
                 pass
         frappe.delete_doc("Fuel Claim", name, ignore_permissions=True, force=True)
 
-
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Fuel Claim"), WORKFLOW)
         self.assertTrue(frappe.db.get_value("Workflow", WORKFLOW, "is_active"))
         self.assertEqual(
             frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
         )
-
 
     def test_reconcile_approve_then_close(self):
         fc = self._new()
@@ -166,7 +159,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
         self.assertEqual(fc.status, "Closed")
         self.assertEqual(fc.docstatus, 1)
 
-
     def test_dispute_then_resubmit(self):
         fc = self._reconciled()
         frappe.set_user(self.manager)
@@ -181,7 +173,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
         fc.reload()
         self.assertEqual(fc.status, "Submitted to Movement")
         self.assertEqual(fc.docstatus, 0)
-
 
     def test_sod_requester_cannot_approve(self):
         fc = self._reconciled(requested_by=self.manager_maker)
@@ -198,7 +189,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
         self.assertEqual(fc.status, "Approved")
         self.assertEqual(fc.docstatus, 1)
 
-
     def test_approve_succeeds_via_workflow_gate(self):
         """Approval authority now lives entirely in the native workflow's Approve
 		transition (authorized role + SoD); the old controller-side Delegation-of-
@@ -211,7 +201,6 @@ class TestFuelClaimWorkflow(FrappeTestCase):
         fc.reload()
         self.assertEqual(fc.docstatus, 1)
         self.assertEqual(fc.status, "Approved")
-
 
     def test_approve_and_close_post_no_gl(self):
         fc = self._reconciled()

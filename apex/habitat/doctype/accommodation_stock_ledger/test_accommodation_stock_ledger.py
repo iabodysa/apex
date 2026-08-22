@@ -18,15 +18,12 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
     reverse_stock_entries,
 )
 
-# The suite lives outside the app, so the shipped JSON is no longer beside this file;
-# it is resolved from the installed package instead.
 _DOCTYPES = Path(apex.__file__).resolve().parent / "habitat" / "doctype"
 _LEDGER_JSON = _DOCTYPES / "accommodation_stock_ledger" / "accommodation_stock_ledger.json"
 _SNAPSHOT_JSON = _DOCTYPES / "occupancy_snapshot" / "occupancy_snapshot.json"
 
 OVERSIGHT_ROLES = ("Finance Manager", "Internal Auditor")
 OVERSIGHT_FLAGS = ("read", "report", "export", "print", "email", "share")
-
 
 def _rows(path, role):
     """The role's permlevel-0 DocPerm rows off the SHIPPED JSON.
@@ -38,7 +35,6 @@ def _rows(path, role):
     """
     perms = json.loads(path.read_text(encoding="utf-8"))["permissions"]
     return [p for p in perms if p["role"] == role and int(p.get("permlevel") or 0) == 0]
-
 
 class TestTheEstateWideOversightGrantIsDeliberate(FrappeTestCase):
     """The owner decision recorded in this module's controller docstring, made falsifiable.
@@ -108,7 +104,6 @@ class TestTheEstateWideOversightGrantIsDeliberate(FrappeTestCase):
             "a permlevel-1 DocPerm row appeared on a record with no level-1 fields",
         )
 
-
 class TestAccommodationStockLedger(FrappeTestCase):
     def test_insert_minimal_ledger_row(self):
         """Smoke test: a minimal valid Stock Ledger row (all mandatory fields set)
@@ -131,18 +126,12 @@ class TestAccommodationStockLedger(FrappeTestCase):
 
 test_dependencies = ['Building', 'Custody Article', 'Employee']
 
-
-# --- merged from test_custody_stock_integration.py ---
 BUILDING = "_Test Building"
 PROCUREMENT_STORE = "_Test Building 2"
 class TestCustodyStockIntegration(FrappeTestCase):
     def setUp(self):
         self.article = frappe.db.get_value("Custody Article", {"article_name": "_Test Blanket"})
         self.employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so stock a case
-        # leaves in a shared fixture store would become the next case's opening balance. A
-        # savepoint is the framework's own way to hand the store back exactly as it was found.
         frappe.db.savepoint("apex_custody_stock_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_custody_stock_case")
 
@@ -226,12 +215,6 @@ class TestCustodyStockIntegration(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             receipt.cancel()
 
-        # The refusal fires in before_cancel, which Frappe runs from run_before_save_methods()
-        # BEFORE db_update() stamps docstatus 2. Raised from on_cancel instead, the 2 is already
-        # written in the open transaction and every read for the rest of the request sees the
-        # receipt as cancelled. Reading the row, not the in-memory object: Document._cancel()
-        # assigns self.docstatus = 2 before save() is ever called, so the Python attribute is 2
-        # either way and proves nothing.
         self.assertEqual(
             frappe.db.get_value("Goods Receipt", receipt.name, "docstatus"), 1,
             "a refused cancel must leave the receipt submitted, not cancelled-in-the-row",
@@ -254,8 +237,6 @@ class TestCustodyStockIntegration(FrappeTestCase):
             "a refused reversal must write no mirror row for the cancelled voucher",
         )
 
-
-# --- merged from test_stock_ledger_engine.py ---
 BUILDING_stock_ledger_engine = "_Test Building"
 class TestAccommodationStockLedger_stock_ledger_engine(FrappeTestCase):
     def setUp(self):
@@ -297,9 +278,6 @@ class TestAccommodationStockLedger_stock_ledger_engine(FrappeTestCase):
         self.assertFalse(has_stock_entries("Test Voucher", "TV-2"), "no live entries remain after reversal")
 
     def test_a_drain_entry_carries_a_negative_signed_quantity(self):
-        # The engine refuses to move more out of a holder than the holder has, so the custody the
-        # drain empties is filled first: posting the -3 straight against an employee holding
-        # nothing would be refused by that policy instead of exercised.
         post_stock_entry(
             item_type="Custody Article", item=self.article, qty=3, building=BUILDING_stock_ledger_engine,
             employee=self.employee, voucher_type="Test Voucher", voucher_no="TV-NEG-0",

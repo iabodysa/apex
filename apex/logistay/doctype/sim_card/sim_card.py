@@ -63,9 +63,7 @@ class SIMCard(Document):
                     self.telecom_contract
                 )
             )
-        if not self.company:
-            self.company = contract.company
-        elif contract.company and self.company != contract.company:
+        if contract.company and self.company != contract.company:
             frappe.throw(
                 _("SIM company {0} must match its contract's company {1}.").format(
                     self.company, contract.company

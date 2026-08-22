@@ -30,25 +30,15 @@ from apex.salis.doctype.vehicle_incident import vehicle_incident
 
 _INCIDENT_JSON = Path(apex.__file__).resolve().parent / "salis" / "doctype" / "vehicle_incident" / "vehicle_incident.json"
 
-
 PLATE = "_T ABC 1001"
 DRIVER_NAME = "_Test Driver"
 
-# The roles that OPEN and handle an incident, and therefore capture the consent, against
-# the two that only read the file afterwards.
 OPERATING_ROLES = {"Fleet Supervisor", "Fleet Project Manager", "Fleet Manager", "System Manager"}
 AUDIT_ROLES = {"Internal Auditor", "Government Relations Officer"}
-# Fleet Manager rather than Fleet Supervisor as the worked example, and the choice is
-# load-bearing: reading an incident also passes vehicle_incident_has_permission, which
-# denies any role outside salis.permissions.UNSCOPED_ROLES that holds no User Permission
-# for the driver's project. Fleet Manager and Internal Auditor are BOTH unscoped there, so
-# the permlevel-1 row is the only thing left separating them. Pairing a scoped role
-# against an unscoped one would prove project scope and say nothing about the level.
 OPERATING_ROLE = "Fleet Manager"
 AUDIT_ROLE = "Internal Auditor"
 
 _CONSENT = "data:image/png;base64,iVBORw0KGgo="
-
 
 class TestVehicleIncident(FrappeTestCase):
     def setUp(self):
@@ -126,8 +116,6 @@ class TestVehicleIncident(FrappeTestCase):
 
         inc = self._incident("Theft")
         inc.submit()
-        # on_submit moves the case to Under Review, which is the state close_incident_internal
-        # requires and which both dashboard cards count alongside Open.
         self.assertEqual(
             inc.status, "Under Review", "a submitted theft opens as a case under review"
         )
@@ -196,8 +184,6 @@ class TestVehicleIncident(FrappeTestCase):
             {
                 "doctype": "Company",
                 "company_name": f"Incident Recovery {tag}",
-                # Full hash, never a slice: a narrowed random identifier is what
-                # apex/tests/test_fixture_identifier_entropy.py forbids.
                 "abbr": f"IR{tag}",
                 "default_currency": "SAR",
                 "country": "Saudi Arabia",
@@ -340,7 +326,6 @@ class TestVehicleIncident(FrappeTestCase):
         self.assertEqual(inc.signed_on, today(), "the consent date must be stamped on signing")
 
     def test_public_intake_cannot_self_declare_a_recovery(self):
-        # A Guest report is an event, never a wage-deduction decision.
         _company, employee = self._employee()
         frappe.set_user("Guest")
         try:
@@ -363,9 +348,6 @@ class TestVehicleIncident(FrappeTestCase):
         self.assertFalse(inc.recovery_amount)
 
     def test_signed_recovery_maps_once_to_one_employee_advance(self):
-        # The Receivable Employee Advance Account is BUILT here rather than
-        # skipped over: an earlier version called skipTest when the chart of
-        # accounts had none, which reported green while proving nothing.
         self._configure_advance_account()
 
         inc = self._recovery_incident(worker_signature="data:image/png;base64,SIGNED")
@@ -381,7 +363,6 @@ class TestVehicleIncident(FrappeTestCase):
             "the advance must be marked as recovered from salary",
         )
 
-        # Maps ONCE: the source link is the idempotency key, on both sides.
         self.assertEqual(find_recovery_advance("Vehicle Incident", inc.name), advance.name)
         self.assertEqual(
             raise_recovery_advance(
@@ -518,16 +499,8 @@ class TestVehicleIncident(FrappeTestCase):
         original_advance = inc.recovery_advance
         inc.cancel()
 
-        # ignore_no_copy=False, deliberately: frappe.copy_doc defaults it to TRUE
-        # (frappe/__init__.py:1865), i.e. the default COPIES no_copy fields. The Desk
-        # amend path does honour them, so a test using the default would model a
-        # document no user can produce — and would pass while proving the opposite of
-        # what it claims.
         amended = frappe.copy_doc(inc, ignore_no_copy=False)
         amended.amended_from = inc.name
-        # copy_doc carries docstatus across, so the copy of a cancelled document
-        # arrives as docstatus 2 and insert() refuses the 0 -> 2 transition. The
-        # Desk amend action resets it; a server-side amendment must do the same.
         amended.docstatus = 0
         self.assertFalse(
             amended.recovery_advance,
@@ -597,8 +570,6 @@ class TestVehicleIncident(FrappeTestCase):
         for role in sorted(high):
             row = [p for p in rows if p["role"] == role and int(p.get("permlevel") or 0) == 1]
             self.assertEqual(len(row), 1, f"{role}: expected exactly one permlevel-1 row")
-            # Checked explicitly, never by omission: an absent DocPerm flag ships as 0
-            # rather than as its default, so a row written by omission grants nothing.
             self.assertEqual(row[0].get("read"), 1, f"{role}: permlevel-1 read missing")
             self.assertEqual(
                 row[0].get("write"), 1,
@@ -636,8 +607,6 @@ class TestVehicleIncident(FrappeTestCase):
         auditor = self._user_with_role(AUDIT_ROLE)
         fleet = self._user_with_role(OPERATING_ROLE)
 
-        # The access itself, before either read: level 1 must be reachable for one and not
-        # the other, or the two outcomes below say nothing about permlevels.
         frappe.set_user(fleet)
         self.assertIn(
             1, frappe.get_doc("Vehicle Incident", inc.name).get_permlevel_access("read"),
@@ -655,10 +624,6 @@ class TestVehicleIncident(FrappeTestCase):
         frappe.set_user(fleet)
         at_desk = frappe.client.get("Vehicle Incident", inc.name)
 
-        # assertFalse, not assertIsNone: the strip deletes the attribute
-        # (frappe/model/document.py:771) but as_dict rebuilds every column and coerces it
-        # by fieldtype (frappe/model/base_document.py:402), so what comes back depends on
-        # the fieldtype rather than on whether the strip worked.
         self.assertFalse(
             audited.get("worker_signature"),
             f"{AUDIT_ROLE} can still read the worker's captured consent mark",
@@ -713,11 +678,6 @@ class TestVehicleIncident(FrappeTestCase):
                 "recovery_amount": 1200,
                 "worker_signature": _CONSENT,
             })
-            # `insert` sets this at frappe/model/document.py:295, eleven lines before it
-            # calls validate_higher_perm_levels at :306, and is_new() reads exactly that
-            # flag (base_document.py:465). Setting it is what makes this the CREATE path:
-            # without it the reset resolves from get_latest() -- a stored row that does
-            # not exist yet -- and the test would silently be about updates instead.
             fresh.set("__islocal", True)
             self.assertTrue(fresh.is_new(), "precondition: the create path needs a NEW doc")
             fresh.validate_higher_perm_levels()
@@ -746,8 +706,6 @@ class TestVehicleIncident(FrappeTestCase):
 
 test_dependencies = ['Salis Vehicle', 'Salis Driver']
 
-
-# --- merged from test_vehicle_incident_state_contract.py ---
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
     fake.PermissionError = frappe.PermissionError

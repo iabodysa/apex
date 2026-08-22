@@ -19,15 +19,8 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
-# resolves against wherever this module's copy sits, and the maintainer mirror at
-# `.claude/tests/apex` (source_tree.py's SUITE_PACKAGE) holds no JSON at all — a glob
-# rooted there goes quiet and every guard reading through here grades an empty set while
-# still reporting green. Rooting on the imported package also means a run that imported
-# apex from another worktree scans the code it actually imported.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 DOCTYPE_GLOB = os.path.join(APP_ROOT, "*", "doctype", "*", "*.json")
-
 
 def shipped_doctypes():
     """DocType name -> its shipped JSON, for every DocType in the app.

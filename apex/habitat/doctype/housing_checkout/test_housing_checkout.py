@@ -32,23 +32,14 @@ from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger 
     post_stock_entry,
 )
 
-# Project is deliberately NOT a dependency. ERPNext's Project fixture is not idempotent — its
-# autoname mints a new name while project_name carries a unique index, so a second build attempt
-# collides instead of being skipped.
-
 BUILDING = "_Test Building"
 ROOM = "_T-101"
 BED = "_T-101-A"
-
 
 class TestHousingCheckoutContract(FrappeTestCase):
     """What a checkout refuses to be created without, and what it does with outstanding custody."""
 
     def setUp(self):
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so the resident a
-        # case houses would still hold the fixture bed when the next case tries to house one. A
-        # savepoint is the framework's own way to hand the bed back.
         frappe.db.savepoint("apex_housing_checkout_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_housing_checkout_case")
 
@@ -219,7 +210,6 @@ class TestHousingCheckoutContract(FrappeTestCase):
 
         self.assertEqual(checkout.damage_deduction_amount, 75)
 
-
 class TestHousingCheckoutUnits(FrappeTestCase):
     """No database: the module is driven against a recording stub."""
 
@@ -275,7 +265,6 @@ class TestHousingCheckoutUnits(FrappeTestCase):
             name="ACC-CHKOUT-QA", assignment="ACC-ASGN-QA", checkout_date="2026-07-05"
         )
 
-        # `_` is swapped for identity so the run needs no translation cache.
         with patch.object(mod, "frappe", stub), patch.object(mod, "_", lambda text: text):
             with self.assertRaises(frappe.ValidationError):
                 mod.on_submit(doc)
@@ -296,7 +285,6 @@ class TestHousingCheckoutUnits(FrappeTestCase):
         assessment = MagicMock()
         assessment.append.side_effect = lambda table, row: appended.append((table, row))
         stub = MagicMock()
-        # Not yet checked out, so on_submit proceeds to the custody hand-off.
         stub.db.get_value.return_value = None
         stub.get_doc.side_effect = lambda *args: (
             assessment if args and isinstance(args[0], dict) else MagicMock()
@@ -309,13 +297,9 @@ class TestHousingCheckoutUnits(FrappeTestCase):
                 frappe._dict(article="QA-ART-RETURNED", return_status="Returned"),
             ],
             add_comment=lambda *args, **kwargs: None,
-            # on_submit stamps the clearance through db_set after the hand-off, so the stub
-            # must provide a callable db_set or the run dies on `'NoneType' object is not
-            # callable`.
             db_set=lambda *args, **kwargs: None,
         )
 
-        # `_` is swapped for identity so the run needs no translation cache.
         with patch.object(mod, "frappe", stub), patch.object(mod, "_", lambda text: text), \
                 patch.object(mod, "recalculate_spatial", lambda *args: None):
             mod.on_submit(doc)
@@ -343,8 +327,6 @@ class TestHousingCheckoutUnits(FrappeTestCase):
 
 test_dependencies = ['Bed', 'Custody Article', 'Employee']
 
-
-# --- merged from test_housing_checkout_custody_ledger.py ---
 BUILDING_housing_checkout_custody_ledger = "_Test Building"
 ROOM_housing_checkout_custody_ledger = "_T-101"
 ARTICLE = "_T-Custody Article-00001"
@@ -366,14 +348,8 @@ class TestHousingCheckoutCustodyLedger(FrappeTestCase):
         self.employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
         self.project = frappe.db.get_value("Project", {"project_name": "_Test Project"})
         self.bed = frappe.db.get_value("Bed", {"room": ROOM_housing_checkout_custody_ledger, "status": "Available"})
-        # FrappeTestCase rolls the database back once per CLASS, not per method
-        # (frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup), and a
-        # checkout leaves the room Needs Cleaning — which the next check-in refuses. The
-        # room and bed are shared fixtures, so they are handed back as they were found.
         self.addCleanup(frappe.db.set_value, "Room", ROOM_housing_checkout_custody_ledger, "readiness_status", "Ready")
         self.addCleanup(frappe.db.set_value, "Bed", self.bed, "status", "Available")
-        # The store has to hold the article before it can be handed over — the check-in
-        # gate refuses moving more than the building has.
         post_stock_entry(
             item_type="Custody Article", item=ARTICLE, qty=5, building=BUILDING_housing_checkout_custody_ledger,
             voucher_type="Goods Receipt", voucher_no=f"_T-SEED-{frappe.generate_hash(length=12)}",
@@ -395,8 +371,6 @@ class TestHousingCheckoutCustodyLedger(FrappeTestCase):
         })
         assignment.insert(ignore_permissions=True)
         assignment.submit()
-        # The drain is gated on this leg existing, so a failure here means the test never
-        # reached the behaviour it exists to check — not that the behaviour is wrong.
         self.assertTrue(
             has_stock_entries("Housing Assignment", assignment.name),
             "check-in must post the holder leg, or there is nothing for check-out to debit",
@@ -419,10 +393,6 @@ class TestHousingCheckoutCustodyLedger(FrappeTestCase):
         checkout.insert(ignore_permissions=True)
         checkout.submit()
         return checkout
-
-    # Both cases measure a DELTA, never an absolute. FrappeTestCase rolls back once per
-    # class, so the first case's ledger rows are still standing when the second runs, and
-    # an absolute balance would read the sum of both.
 
     def test_returned_custody_leaves_the_resident_and_re_enters_the_store(self):
         holder_before = _holder_balance("Employee", self.employee, ARTICLE)

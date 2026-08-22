@@ -8,7 +8,6 @@ from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
-
 def execute(filters=None):
     """Returns the columns, rows and summary cards for the Trip Start Register report."""
     columns = [
@@ -35,10 +34,6 @@ def execute(filters=None):
 
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Trip Start Log")
     if restrict:
-        # Scoped on Dispatch Trip.project, matching the list view's own hook
-        # (SALIS_SCOPE["Trip Start Log"] projects through the trip, not the driver) --
-        # a borrowed driver running an in-scope trip must stay visible here, and an
-        # in-scope driver running an out-of-scope trip must stay hidden.
         in_scope_trips = frappe.get_all("Dispatch Trip", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
         if not in_scope_trips:
             return columns, []

@@ -26,13 +26,8 @@ class DriverSuspension(Document):
         he is still filling the form, not after he has asked for the stop to take effect.
         """
         refuse_to_stop_a_driver_who_still_holds_planned_trips(self.driver)
-        if self.release_vehicle:
-            if not self.related_vehicle and self.driver:
-                self.related_vehicle = frappe.db.get_value(
-                    "Salis Driver", self.driver, "current_vehicle"
-                )
-            if not self.related_vehicle:
-                frappe.throw(_("Select the vehicle to release."))
+        if self.release_vehicle and not self.related_vehicle:
+            frappe.throw(_("Select the vehicle to release."))
 
     def before_submit(self):
         """Requires evidence before a stop for Violation or Termination can be submitted."""

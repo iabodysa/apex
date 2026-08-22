@@ -21,7 +21,6 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, today
 
-
 DEMO_ARG = "apex_setup_demo"
 
 _GENDER_WAIT_SECONDS = 60
@@ -85,9 +84,6 @@ DEMO_DOCTYPES = (
     "Rental Settlement",
 )
 
-# Machine-readable build/clear audit. ``target_scenarios`` preserves the board's
-# three-record acceptance basis; a lower observed count is recorded as an open gap,
-# not waived by this inventory.
 _DEMO_SCENARIO_COUNTS = {
     "Project": 2,
     "Building": 2,
@@ -149,14 +145,12 @@ _DEMO_ARTICLE = "Demo Custody Article"
 _DEMO_RENTAL_OFFICE = "Demo Rental Office"
 _DEMO_ROOMS = ("DEMO-101", "DEMO-102")
 
-
 def setup_demo(args=None):
     """`setup_wizard_complete` hook — queue the demo build if the operator asked."""
     args = frappe._dict(args or {})
     if not args.get(DEMO_ARG):
         return
     frappe.enqueue(build_demo_data, enqueue_after_commit=True, at_front=True)
-
 
 def boot_demo(bootinfo):
     """`extend_bootinfo` hook — flag whether this site carries removable demo data.
@@ -166,7 +160,6 @@ def boot_demo(bootinfo):
     build creates that user and the removal deletes it, which sets and clears the
     flag with no third place to keep in step."""
     bootinfo.apex_demo_data = bool(frappe.db.exists("User", DEMO_OWNER))
-
 
 def build_demo_data():
     """Build the demo scenario as the demo user. Background job — never inline.
@@ -209,7 +202,6 @@ def build_demo_data():
     frappe.cache.delete_keys("bootinfo")
     return {"built": True, "stopped_at": None}
 
-
 def _report_build_failure(operator, doctype, traceback):
     """Names the step that failed to the operator who ticked the demo box.
 
@@ -226,7 +218,6 @@ def _report_build_failure(operator, doctype, traceback):
         ),
         user=operator,
     )
-
 
 @frappe.whitelist()
 def clear_demo_data():
@@ -258,7 +249,6 @@ def clear_demo_data():
     _report(deleted, residue)
     return {"deleted": deleted, "residue": residue}
 
-
 def _remove_one(doctype, name):
     """Cancel-then-delete one record inside its own savepoint.
 
@@ -282,7 +272,6 @@ def _remove_one(doctype, name):
     _release(save_point)
     return None
 
-
 def _release(save_point, undo=False):
     """Discard a savepoint, tolerating one that is already gone.
 
@@ -297,7 +286,6 @@ def _release(save_point, undo=False):
     except Exception:
         frappe.clear_last_message()
 
-
 def _remove_user_permissions(deleted, residue):
     """Drop the demo users' User Permissions before the records they point at."""
     for permission in frappe.get_all(
@@ -311,7 +299,6 @@ def _remove_user_permissions(deleted, residue):
         else:
             deleted += 1
     return deleted, residue
-
 
 def _remove_demo_users(deleted, residue):
     """Delete the demo users, last of all.
@@ -350,7 +337,6 @@ def _remove_demo_users(deleted, residue):
             deleted += 1
     return deleted, residue
 
-
 def _report(deleted, residue):
     """Shows a success message when nothing is left, or lists residue rows on partial removal."""
     if not residue:
@@ -373,7 +359,6 @@ def _report(deleted, residue):
         title=_("Demo Data Partly Removed"),
         indicator="orange",
     )
-
 
 def _create_demo_users():
     """The owner key and the scoped persona. Created as the installing user, so
@@ -399,7 +384,6 @@ def _create_demo_users():
         if installed:
             user.add_roles(*installed)
 
-
 def _scope_supervisor(building):
     """The demo supervisor sees the demo estate only — the scope axis every
     building-scoped role reads (apex/habitat/permissions.py)."""
@@ -414,7 +398,6 @@ def _scope_supervisor(building):
         }
     ).insert(ignore_permissions=True)
 
-
 def _create(doctype, payload):
     """Insert one demo record, refusing any DocType the removal would not reach."""
     if doctype not in set(DEMO_DOCTYPES):
@@ -427,11 +410,9 @@ def _create(doctype, payload):
     doc.insert(ignore_permissions=True)
     return doc
 
-
 def _company():
     """Returns the global default company, or any existing company as a fallback."""
     return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
-
 
 def _walk_workflow(doctype, name, actions):
     """Applies a sequence of workflow actions to a document while impersonating the demo approver."""
@@ -445,7 +426,6 @@ def _walk_workflow(doctype, name, actions):
             apply_workflow(doc, action)
     finally:
         frappe.set_user(previous_user)
-
 
 def _build_partner_company(context):
     """Creates the demo partner Company, reusing the real company's currency and country."""
@@ -472,7 +452,6 @@ def _build_partner_company(context):
     context["partner_company"] = partner.name
     context["currency"] = currency or "SAR"
 
-
 def _build_supplier(context):
     """Creates the demo accommodation Supplier record."""
     group = frappe.db.get_value(
@@ -482,7 +461,6 @@ def _build_supplier(context):
     if group:
         payload["supplier_group"] = group
     context["supplier"] = _create("Supplier", payload).name
-
 
 def _build_project(context):
     """Creates the demo active Project and a demo completed Project."""
@@ -498,13 +476,11 @@ def _build_project(context):
         },
     ).name
 
-
 def _build_site(context):
     """Creates the demo housing Site."""
     context["site"] = _create(
         "Site", {"site_name": _DEMO_SITE, "status": "Active"}
     ).name
-
 
 def _build_building(context):
     """Creates the demo building and its partner-company counterpart building."""
@@ -542,7 +518,6 @@ def _build_building(context):
         partner_payload["default_cost_center"] = partner_cost_center
     context["partner_building"] = _create("Building", partner_payload).name
 
-
 def _build_rooms(context):
     """Creates the two demo rooms inside the demo building."""
     context["rooms"] = [
@@ -561,7 +536,6 @@ def _build_rooms(context):
         for number in _DEMO_ROOMS
     ]
 
-
 def _build_beds(context):
     """Creates two demo beds for each demo room."""
     context["beds"] = [
@@ -578,7 +552,6 @@ def _build_beds(context):
         for room in context["rooms"]
         for suffix in ("A", "B")
     ]
-
 
 def _demo_gender():
     """Returns a Gender that exists on THIS site, creating one only if none ever arrives.
@@ -607,7 +580,6 @@ def _demo_gender():
     doc.insert(ignore_if_duplicate=True)
     return doc.name
 
-
 def _build_employee(context):
     """Creates the demo resident, supplier-worker, and leaver Employee records."""
     gender = context["gender"]
@@ -627,13 +599,11 @@ def _build_employee(context):
     ]
     context["employee"] = context["employees"][0]
 
-
 def _build_custody_category(context):
     """Creates the demo Custody Asset Category."""
     context["custody_category"] = _create(
         "Custody Asset Category", {"category_name": _DEMO_CATEGORY}
     ).name
-
 
 def _build_custody_article(context):
     """Creates the demo Custody Article under the demo category."""
@@ -641,7 +611,6 @@ def _build_custody_article(context):
         "Custody Article",
         {"article_name": _DEMO_ARTICLE, "category": context["custody_category"]},
     ).name
-
 
 def _build_utility_account(context):
     """Creates the demo electricity Utility Account for the demo building."""
@@ -654,7 +623,6 @@ def _build_utility_account(context):
             "status": "Active",
         },
     ).name
-
 
 def _build_facility_asset(context):
     """Creates the demo CCTV Facility Asset for the demo building."""
@@ -669,20 +637,17 @@ def _build_facility_asset(context):
         },
     ).name
 
-
 def _build_driver(context):
     """Creates the demo Salis Driver."""
     context["driver"] = _create(
         "Salis Driver", {"full_name": "Demo Driver", "status": "Active"}
     ).name
 
-
 def _build_vehicle(context):
     """Creates the demo Salis Vehicle."""
     context["vehicle"] = _create(
         "Salis Vehicle", {"plate_number": "DEMO-1234", "status": "Active"}
     ).name
-
 
 def _build_telecom_contract(context):
     """Creates and submits the demo Telecom Contract for the demo supplier.
@@ -704,7 +669,6 @@ def _build_telecom_contract(context):
     )
     contract.submit()
     context["telecom_contract"] = contract.name
-
 
 def _build_sim_cards(context):
     """Creates two assigned SIM Cards and one suspended SIM Card for the demo employee."""
@@ -730,7 +694,6 @@ def _build_sim_cards(context):
             ("0550000003", None, "Suspended", "Unassigned", None, None),
         )
     ]
-
 
 def _build_assignment(context):
     """The one SUBMITTED row. on_submit marks the bed Occupied and recalculates
@@ -789,7 +752,6 @@ def _build_assignment(context):
     leaver_assignment.submit()
     context["leaver_assignment"] = leaver_assignment.name
 
-
 def _build_maintenance_request(context):
     """Creates the demo open Maintenance Request for an air conditioning issue."""
     context["maintenance_request"] = _create(
@@ -805,7 +767,6 @@ def _build_maintenance_request(context):
             "company": context["company"],
         },
     ).name
-
 
 def _build_cleaning_log(context):
     """Creates the demo Cleaning Log with one room cleaned and one skipped."""
@@ -827,7 +788,6 @@ def _build_cleaning_log(context):
         },
     ).name
 
-
 def _build_lease(context):
     """Creates the demo Lease and drives it through Submit for Approval and Approve."""
     lease = _create(
@@ -844,7 +804,6 @@ def _build_lease(context):
     )
     _walk_workflow("Lease", lease.name, ("Submit for Approval", "Approve"))
     context["lease"] = lease.name
-
 
 def _build_utility_bill(context):
     """Creates the demo Utility Bill Entry and drives it through Submit for Approval and Approve."""
@@ -865,7 +824,6 @@ def _build_utility_bill(context):
     )
     context["utility_bill"] = bill.name
 
-
 def _build_damage_assessment(context):
     """Creates the demo Custody Damage Assessment for a damaged mattress."""
     context["damage_assessment"] = _create(
@@ -885,7 +843,6 @@ def _build_damage_assessment(context):
             ],
         },
     ).name
-
 
 def _build_audit_plan(context):
     """Creates the demo Audit Remediation Plan with two open findings."""
@@ -913,7 +870,6 @@ def _build_audit_plan(context):
         },
     ).name
 
-
 def _build_asset_movement(context):
     """Creates the demo intercompany Facility Asset Movement between the demo buildings."""
     context["asset_movement"] = _create(
@@ -928,7 +884,6 @@ def _build_asset_movement(context):
             "receiving_confirmed_by": DEMO_SUPERVISOR,
         },
     ).name
-
 
 def _build_depreciation_snapshot(context):
     """Creates and submits the demo Operational Depreciation Snapshot."""
@@ -948,7 +903,6 @@ def _build_depreciation_snapshot(context):
     )
     snapshot.submit()
     context["depreciation_snapshot"] = snapshot.name
-
 
 def _build_checkout(context):
     """Creates and submits the demo Housing Checkout with one damaged custody item."""
@@ -970,7 +924,6 @@ def _build_checkout(context):
     checkout.submit()
     context["checkout"] = checkout.name
 
-
 def _build_driver_attendance(context):
     """Creates the demo present Driver Attendance record."""
     context["driver_attendance"] = _create(
@@ -983,7 +936,6 @@ def _build_driver_attendance(context):
         },
     ).name
 
-
 def _build_driver_clearance(context):
     """Creates the demo open Driver Clearance record."""
     context["driver_clearance"] = _create(
@@ -995,20 +947,17 @@ def _build_driver_clearance(context):
         },
     ).name
 
-
 def _build_vehicle_snapshots(context):
     """Runs the weekly vehicle utilisation snapshot job to populate demo data."""
     from apex.salis.utilisation_engine import weekly_vehicle_utilisation_snapshot
 
     weekly_vehicle_utilisation_snapshot()
 
-
 def _build_accommodation_ledger(context):
     """Allocates today's accommodation cost for the demo building."""
     from apex.habitat.tasks.cost import allocate_building_accommodation_cost
 
     allocate_building_accommodation_cost(context["building"], today())
-
 
 def _build_qr_location(context):
     """Creates the demo QR poster for the building entrance."""
@@ -1022,7 +971,6 @@ def _build_qr_location(context):
             "room": context["rooms"][0],
         },
     ).name
-
 
 def _build_custody_handover(context):
     """Creates the demo custody handover between the two demo buildings."""
@@ -1045,9 +993,7 @@ def _build_custody_handover(context):
         },
     ).name
 
-
 _HANDOVER_CHECKS = ("Spare tyre", "Jack and wrench", "First aid kit", "Fire extinguisher")
-
 
 def _build_handover_checklist_template(context):
     """Creates the active checklist a receipt must be raised against.
@@ -1064,7 +1010,6 @@ def _build_handover_checklist_template(context):
             "items": [{"check_item": item} for item in _HANDOVER_CHECKS],
         },
     ).name
-
 
 def _build_vehicle_assignment(context):
     """Creates the demo vehicle assignment the handover receipt is raised against.
@@ -1083,7 +1028,6 @@ def _build_vehicle_assignment(context):
     )
     assignment.submit()
     context["vehicle_assignment"] = assignment.name
-
 
 def _build_vehicle_handover(context):
     """Creates the demo vehicle handover receipt with its inspection checklist.
@@ -1104,14 +1048,11 @@ def _build_vehicle_handover(context):
             "handover_date": today(),
             "fuel_level": "Half",
             "discrepancy_status": "Clean",
-            # ok=1 on every row: vehicle_handover.py:119-120 demands a remark on any row
-            # left unchecked, and a clean receipt is the scenario this demo shows.
             "handover_check_items": [
                 {"check_item": item, "ok": 1} for item in _HANDOVER_CHECKS
             ],
         },
     ).name
-
 
 def _build_vehicle_incident(context):
     """Creates the demo open vehicle incident."""
@@ -1127,7 +1068,6 @@ def _build_vehicle_incident(context):
             "No third party involved and the vehicle remained drivable.",
         },
     ).name
-
 
 def _build_vehicle_write_off(context):
     """Creates the demo damage write-off in its initial workflow state.
@@ -1159,7 +1099,6 @@ def _build_vehicle_write_off(context):
     )
     context["vehicle_write_off"] = name
 
-
 def _build_subcontractor_contract(context):
     """Creates the demo pest-control contract and walks it to Active through its workflow."""
     name = _create(
@@ -1177,7 +1116,6 @@ def _build_subcontractor_contract(context):
     _walk_workflow("Subcontractor Service Contract", name, ("Submit for Approval", "Approve"))
     context["subcontractor_contract"] = name
 
-
 def _build_subcontractor_order(context):
     """Creates the demo service order against the demo contract."""
     context["subcontractor_order"] = _create(
@@ -1193,14 +1131,12 @@ def _build_subcontractor_order(context):
         },
     ).name
 
-
 def _build_rental_office(context):
     """Creates the demo rental office that the settlement is raised against."""
     context["rental_office"] = _create(
         "Rental Office",
         {"office_name": _DEMO_RENTAL_OFFICE, "status": "Active"},
     ).name
-
 
 def _build_goods_receipt(context):
     """Creates the demo goods receipt into the building store, left in Draft.
@@ -1228,7 +1164,6 @@ def _build_goods_receipt(context):
     )
     context["goods_receipt"] = receipt.name
 
-
 def _build_material_transfer(context):
     """Creates the demo transfer between the two demo buildings."""
     context["material_transfer"] = _create(
@@ -1248,7 +1183,6 @@ def _build_material_transfer(context):
             ],
         },
     ).name
-
 
 def _build_custody_issue(context):
     """Issues two demo articles to the demo employee, left in Draft.
@@ -1271,7 +1205,6 @@ def _build_custody_issue(context):
         },
     ).name
 
-
 def _build_work_order(context):
     """Creates the demo work order against the demo maintenance request."""
     context["work_order"] = _create(
@@ -1284,7 +1217,6 @@ def _build_work_order(context):
             "circuit before handing the room back.</p>",
         },
     ).name
-
 
 def _build_safety_incident(context):
     """Creates the demo open safety incident."""
@@ -1301,7 +1233,6 @@ def _build_safety_incident(context):
         },
     ).name
 
-
 def _build_safety_round(context):
     """Creates the demo weekly safety round for the building."""
     context["safety_round"] = _create(
@@ -1313,7 +1244,6 @@ def _build_safety_round(context):
             "overall_result": "Needs Attention",
         },
     ).name
-
 
 def _build_fuel_request(context):
     """Creates the demo fuel request in its initial workflow state."""
@@ -1328,7 +1258,6 @@ def _build_fuel_request(context):
         },
     ).name
 
-
 def _build_fuel_claim(context):
     """Creates the demo monthly fuel claim in its initial workflow state."""
     context["fuel_claim"] = _create(
@@ -1342,7 +1271,6 @@ def _build_fuel_claim(context):
         },
     ).name
 
-
 def _build_passenger_manifest(context):
     """Creates the demo passenger manifest with the demo employee on board."""
     context["passenger_manifest"] = _create(
@@ -1351,7 +1279,6 @@ def _build_passenger_manifest(context):
             "passengers": [{"employee": context["employee"]}],
         },
     ).name
-
 
 def _build_rental_settlement(context):
     """Creates the demo monthly rental settlement in its initial workflow state."""
@@ -1364,7 +1291,6 @@ def _build_rental_settlement(context):
             "vehicles": [{"vehicle": context["vehicle"]}],
         },
     ).name
-
 
 _BUILD_STEPS = (
     ("Company", _build_partner_company),

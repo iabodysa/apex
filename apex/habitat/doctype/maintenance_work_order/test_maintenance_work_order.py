@@ -50,7 +50,6 @@ test_ignore = [
     "User",
 ]
 
-
 class TestMaintenanceWorkOrder(FrappeTestCase):
 
     def test_docperm_maintenance_technician(self):
@@ -143,7 +142,6 @@ class TestMaintenanceWorkOrder(FrappeTestCase):
             validate(doc)
         self.assertIn("Actual End Date", str(caught.exception))
 
-
 class MaintenanceWorkOrderPersonas(FrappeTestCase):
     """Shared personas and per-method fixtures for the lifecycle suites.
 
@@ -161,23 +159,17 @@ class MaintenanceWorkOrderPersonas(FrappeTestCase):
         from apex.setup import create_roles
 
         create_roles()
-        # make_employee defaults its company to this one and does not create it.
         make_company()
         cls.building = cls._building("A271-HOME")
         cls.other_building = cls._building("A271-AWAY")
         cls.room = cls._room(cls.building, "A271-HOME-R1")
 
-        # System Manager is the only role holding create/submit on this DocType today,
-        # so it is the issuing persona the shipped DocPerms actually permit.
         cls.manager = _user("a271_manager@example.com", "System Manager")
         cls.tech = cls._scoped_technician("a271_tech@example.com", cls.building)
         cls.away_tech = cls._scoped_technician("a271_away@example.com", cls.other_building)
-        # Holds no Maintenance Work Order DocPerm at all — the unauthorized caller.
         cls.bystander = _user("a271_bystander@example.com", "Cleaning Supervisor")
 
     def tearDown(self):
-        # The session user is a process global; the rows-only rollback never restores it,
-        # so a method that dies inside a persona would hand the next one that persona.
         frappe.set_user("Administrator")
 
     @classmethod
@@ -297,7 +289,6 @@ class MaintenanceWorkOrderPersonas(FrappeTestCase):
     def _side_effect_counts(self, wo_name):
         """(accommodation memo rows, cost ledger rows) for this Work Order."""
         return len(self._accommodation_rows(wo_name)), len(self._cost_rows(wo_name))
-
 
 class TestMaintenanceWorkOrderLifecycle(MaintenanceWorkOrderPersonas):
     """Create, assign, start, complete — each step taken by a role that can reach it."""
@@ -518,7 +509,6 @@ class TestMaintenanceWorkOrderLifecycle(MaintenanceWorkOrderPersonas):
 
         wo.reload()
         self.assertEqual(wo.docstatus, 1, "the order must survive the refused cancel")
-
 
 class TestMaintenanceWorkOrderSideEffects(MaintenanceWorkOrderPersonas):
     """Completion posts its memos exactly once; cancellation reverses without erasing."""

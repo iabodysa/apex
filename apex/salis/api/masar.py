@@ -53,16 +53,16 @@ from apex.salis.api import boarding_window
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
 from apex.salis.api.maps_links import _full_route_maps_url
-from apex.salis.api.maps_links import _stop_waypoint  # noqa: F401
+from apex.salis.api.maps_links import _stop_waypoint
 from apex.salis.api.masar_routes import (
-    WORKER_SERVICE_LINES,  # noqa: F401
-    _drop_finished_yesterday,  # noqa: F401
+    WORKER_SERVICE_LINES,
+    _drop_finished_yesterday,
     _fmt_time,
     _is_upcoming_pickup,
     _ordered_stops,
     _ordered_trip_stops,
     _registered_trip_workers,
-    _registered_workers,  # noqa: F401
+    _registered_workers,
     _route_destination_stop,
     _today_worker_trips,
     _worker_pickup_stop,
@@ -70,7 +70,7 @@ from apex.salis.api.masar_routes import (
     _worker_transport_requests,
 )
 from apex.salis.api.masar_worker import (
-    MASAR_TOKEN_COOKIE,  # noqa: F401
+    MASAR_TOKEN_COOKIE,
     _active_assignment,
     _attach_worker_photo,
     _building_in_charge,
@@ -84,10 +84,18 @@ from apex.salis.api.masar_worker import (
     _request_status_timeline,
     _resolve_worker,
     _today_driver,
-    _token_from_request,  # noqa: F401
+    _token_from_request,
     _worker_documents,
 )
 
+__all__ = [
+    "MASAR_TOKEN_COOKIE",
+    "WORKER_SERVICE_LINES",
+    "_drop_finished_yesterday",
+    "_registered_workers",
+    "_stop_waypoint",
+    "_token_from_request",
+]
 
 @frappe.whitelist()
 def get_my_worker_route_today():
@@ -150,7 +158,6 @@ def get_my_worker_route_today():
             }
         )
     return {"driver": driver, "date": frappe.utils.today(), "trips": trips}
-
 
 @frappe.whitelist()
 def get_my_worker_route_summary() -> dict:
@@ -215,7 +222,6 @@ def get_my_worker_route_summary() -> dict:
         "next_pickup": next_pickup,
     }
 
-
 WORKER_REQUEST_CATEGORIES = (
     "Maintenance",
     "Cleaning",
@@ -243,7 +249,6 @@ WORKER_ISSUE_LOCATIONS = (
 
 WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
 
-
 _ENUM_SOURCES = {
     "status": ("Employee", "status"),
     "stayType": ("Housing Assignment", "stay_type"),
@@ -254,7 +259,6 @@ _ENUM_SOURCES = {
     "priority": ("Resident Request", "priority"),
     "issueLocation": ("Resident Request", "issue_location"),
 }
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=30, seconds=60)
@@ -293,7 +297,6 @@ def get_enum_labels(lang="ar"):
             out[ns] = labels
     return out
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_context(token=None):
@@ -323,7 +326,6 @@ def get_worker_context(token=None):
         "documents": documents,
         "realtime_room": portal_room(WORKER, token),
     }
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
@@ -412,7 +414,6 @@ def get_worker_accommodation(token=None):
         "bed": bed,
     }
 
-
 def _live_trips_by_request(request_names, status_map):
     """The dispatched trip for each request that has no stored link yet, in ONE read.
 
@@ -441,7 +442,6 @@ def _live_trips_by_request(request_names, status_map):
         status_map[dt["name"]] = dt["status"]
     return live
 
-
 def _trip_status(dispatch_trip, status_map):
     """The Dispatch Trip status, taken from the batches the caller already fetched.
 
@@ -455,7 +455,6 @@ def _trip_status(dispatch_trip, status_map):
     if dispatch_trip in status_map:
         return status_map[dispatch_trip]
     return frappe.db.get_value("Dispatch Trip", dispatch_trip, "status")
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
@@ -500,7 +499,6 @@ def get_worker_transport(token=None):
         "past": past,
         "trips": upcoming,
     }
-
 
 def _transport_lookups(requests, employee):
     """Reads every vehicle, driver, trip and rating the request list refers to, in one pass each."""
@@ -558,7 +556,6 @@ def _transport_lookups(requests, employee):
         "rated": rated_trips,
     }
 
-
 def _transport_trip(req, lookups, my_building, now_dt):
     """Shapes one Transport Request into the trip the Transport screen renders."""
     is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
@@ -609,7 +606,6 @@ def _transport_trip(req, lookups, my_building, now_dt):
         ),
     }
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def list_worker_requests(token=None):
@@ -641,7 +637,6 @@ def list_worker_requests(token=None):
     for r in rows:
         r["creation"] = frappe.utils.cstr(r.get("creation"))
     return rows
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
@@ -715,7 +710,6 @@ def get_worker_request_detail(token=None, name=None):
         "timeline": _request_status_timeline(req),
     }
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_custody(token=None):
@@ -763,7 +757,6 @@ def get_worker_custody(token=None):
 
     items.sort(key=lambda d: (d["item_name"] or d["item"] or "", d["building"] or ""))
     return {"items": items}
-
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60 * 60)
@@ -847,11 +840,9 @@ def create_worker_request(
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
 
-
 _DOCUMENT_ALERT_LEAD_DAYS = 60
 
 _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
@@ -935,7 +926,6 @@ def get_worker_home(token=None):
         "iqama_days_left": iqama_days_left,
     }
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_contacts(token=None):
@@ -956,9 +946,7 @@ def get_worker_contacts(token=None):
         or None,
     }
 
-
 _IQAMA_NOTIFY_HR_LEAD_DAYS = 30
-
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=6, seconds=60 * 60)
@@ -1013,9 +1001,7 @@ def notify_hr_iqama_expiring(token=None):
 
     return {"notified": True, "days_left": days_left, "recipients": len(recipients)}
 
-
 _WORKER_BOARDING_METHOD = "Worker"
-
 
 def _get_or_create_trip_log(dispatch_trip, employee=None):
     """The trip's open (draft) Trip Start Log, created if none exists yet — the
@@ -1048,7 +1034,6 @@ def _get_or_create_trip_log(dispatch_trip, employee=None):
     ensure_trip_boarding_state(dispatch_trip)
     return log
 
-
 def _already_boarded(log, employee):
     """True when this registered worker already has a boarding row on the log —
     so a re-confirm is idempotent (no duplicate headcount)."""
@@ -1056,7 +1041,6 @@ def _already_boarded(log, employee):
         (row.worker == employee and not row.is_unregistered)
         for row in (log.boarding_events or [])
     )
-
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=12, seconds=60 * 60)
@@ -1136,7 +1120,6 @@ def confirm_boarding(token=None, transport_request=None):
         "boarding_window": window,
     }
 
-
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_boarding_pass(token=None, transport_request=None):
@@ -1193,12 +1176,10 @@ def get_worker_boarding_pass(token=None, transport_request=None):
         }
     }
 
-
 _WORKER_TRANSPORT_SERVICE_REQUEST_TYPE = {
     "Site Transport": "Accommodation to Project Shuttle",
     "Inter-City Relocation": "Inter-City Relocation",
 }
-
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=6, seconds=60 * 60)
@@ -1278,7 +1259,6 @@ def create_worker_transport_request(
         doc.insert()
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
-
 def _worker_was_on_trip(employee, dispatch_trip):
     """True when ``employee`` actually rode ``dispatch_trip``.
 
@@ -1296,11 +1276,6 @@ def _worker_was_on_trip(employee, dispatch_trip):
     if not (employee and dispatch_trip):
         return False
 
-    # Where the trip tracks boarding at all, that record is authoritative and being on
-    # the manifest is not enough — a rating is about the ride, and a worker marked
-    # Absent or Driver Rejected did not take it. A trip with no boarding rows falls
-    # through to the two links below, which is how a trip tracked another way still
-    # accepts its riders.
     boarding = frappe.get_all(
         "Trip Boarding State",
         filters={"parent": dispatch_trip, "parenttype": "Dispatch Trip"},
@@ -1334,7 +1309,6 @@ def _worker_was_on_trip(employee, dispatch_trip):
     ):
         return True
     return False
-
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
@@ -1385,9 +1359,7 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
         frappe.throw(_("You have already rated this trip."))
     return {"status": "success", "name": doc.name}
 
-
 _PUBLIC_TRIP_FIELDS = ["name", "route_plan", "vehicle", "depart_time", "status"]
-
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=30, seconds=60)

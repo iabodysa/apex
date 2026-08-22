@@ -74,13 +74,9 @@ from apex.apex_core.utils.portal_identity import DRIVER
 from apex.tests._helpers import _grant_project, as_user
 from apex.tests.factories import make_project
 
-
 BLOCKED_STATUSES = ("Inactive", "Suspended", "Left")
 TOKEN_DOCTYPE = "Masar Worker Token"
 
-# ERPNext ships exactly three workers; apex ships two drivers; frappe ships the four
-# unprivileged Users. Indexed rather than named at the call site so a case that needs "a
-# different one from the one next door" says so.
 FIXTURE_WORKERS = ("_Test Employee", "_Test Employee 1", "_Test Employee 2")
 FIXTURE_DRIVER = "_Test Driver"
 LEGACY_WEBSITE_USER = "test1@example.com"
@@ -88,13 +84,10 @@ LEGACY_SYSTEM_USER = "test2@example.com"
 HR_ENABLED_USER = "test3@example.com"
 HR_DISABLED_USER = "test4@example.com"
 
-
 class _TokenCase(FrappeTestCase):
     """Fixture plumbing shared by every class in this file — one copy, not six."""
 
     def setUp(self):
-        # Registered first so a mid-test failure still hands the next case an
-        # Administrator session.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
 
@@ -135,14 +128,11 @@ class _TokenCase(FrappeTestCase):
         self.addCleanup(self.drop_token, doc.name)
         return doc
 
-
 class TestDriverBarcodeCutover(_TokenCase):
     """The driver barcode replaces a Website-User login, and must never touch a real one."""
 
     def setUp(self):
         super().setUp()
-        # A driver token names itself after the driver, so the field-based autoname the
-        # worker side uses does not apply; pin the meta and put the site's own back.
         meta = frappe.get_meta(TOKEN_DOCTYPE)
         self.addCleanup(setattr, meta, "autoname", meta.autoname)
         meta.autoname = "hash"
@@ -247,7 +237,6 @@ class TestDriverBarcodeCutover(_TokenCase):
         second = issue_driver_link(self.subject)
         self.assertEqual(resolve_driver_token(second["token"]), self.subject)
 
-
 class TestMasarWorkerTokenAuth(_TokenCase):
     def test_token_resolves_to_only_its_own_employee(self):
         """Two workers, two tokens: token A resolves to A and ONLY A — never B. This is the
@@ -326,8 +315,6 @@ class TestMasarWorkerTokenAuth(_TokenCase):
                     masar._resolve_worker(doc._plaintext_token)
                 with self.assertRaises(frappe.PermissionError):
                     masar.get_worker_context(token=doc._plaintext_token)
-                # Both back before the next pass: issuance refuses a non-Active subject, so
-                # a status left behind would break the NEXT mint rather than this assertion.
                 self.drop_token(doc.name)
                 frappe.db.set_value("Employee", emp, "status", "Active")
 
@@ -346,11 +333,6 @@ class TestMasarWorkerTokenAuth(_TokenCase):
         with self.assertRaises(frappe.PermissionError):
             masar._resolve_worker(first["token"])
         self.assertEqual(masar._resolve_worker(second["token"]), employee)
-
-    # -- Hashed at rest -- the raw personal token must never be stored in clear: a
-    # direct read of the row must expose ZERO usable secret. The row keeps only a
-    # SHA-256 hash (what the resolver matches) plus a site-key-encrypted recoverable
-    # copy (``token_enc``) so the desk can re-share the SAME link without rotating.
 
     def test_minted_row_stores_the_hash_not_the_raw_token(self):
         """A minted token exposes the RAW value once (via the controller), but the
@@ -404,7 +386,6 @@ class TestMasarWorkerTokenAuth(_TokenCase):
         stored = frappe.db.get_value(TOKEN_DOCTYPE, {"employee": emp}, "token")
         self.assertEqual(stored, _hash_token(raw), "the row must store only the hash")
         self.assertNotEqual(stored, raw)
-
 
 class TestMasarWorkerTokenSecurityHardening(_TokenCase):
     """The 2026 token-hardening contract.
@@ -509,8 +490,6 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
         self.assertEqual(field.permlevel, 1, "token must be at permlevel 1")
 
         high = {p.role for p in meta.permissions if getattr(p, "permlevel", 0) == 1 and p.read}
-        # System Manager is the only role with a permlevel-1 read row
-        # (masar_worker_token.json:235-238); no housing or fleet role may gain one.
         self.assertEqual(high, {"System Manager"}, "permlevel-1 read must be System Manager alone")
         for low in (
             "Accommodation Manager",
@@ -521,7 +500,6 @@ class TestMasarWorkerTokenSecurityHardening(_TokenCase):
             "Fleet Project Manager",
         ):
             self.assertNotIn(low, high, f"{low} must NOT have permlevel-1 read on the token field")
-
 
 class TestMasarTokenTransport(_TokenCase):
     """The httpOnly-cookie transport.
@@ -561,7 +539,6 @@ class TestMasarTokenTransport(_TokenCase):
         token = self.mint(emp)._plaintext_token
         frappe.local.request = self._Req({"masar_wt": token})
         self.assertEqual(masar._resolve_worker(None), emp)
-
 
 class TestMasarNotifyHrIqamaExpiring(_TokenCase):
     """The one-tap 'notify HR my Iqama is expiring' contract.
@@ -649,21 +626,18 @@ class TestMasarNotifyHrIqamaExpiring(_TokenCase):
             res = masar.notify_hr_iqama_expiring(token=token)
 
         self.assertTrue(res["notified"])
-        # the enabled recipient receives exactly one row scoped to this worker
         self.assertEqual(
             frappe.db.count(
                 "Notification Log", {"for_user": enabled_user, "document_name": employee}
             ),
             1,
         )
-        # the disabled recipient receives NONE — the redirect's enabled-check (the fix)
         self.assertEqual(
             frappe.db.count(
                 "Notification Log", {"for_user": disabled_user, "document_name": employee}
             ),
             0,
         )
-
 
 class TestMasarEmployeeOnlyDecision(_TokenCase):
     """Masar Worker credentials bind exclusively to Employee records.
@@ -739,7 +713,6 @@ class TestMasarEmployeeOnlyDecision(_TokenCase):
         with self.assertRaises(frappe.PermissionError):
             masar.get_worker_context(token=forced_token)
 
-
 class TestMasarWorkerTokenAutoname(_TokenCase):
     """A token created with ONLY the Employee link must name + validate.
 
@@ -779,7 +752,6 @@ class TestMasarWorkerTokenAutoname(_TokenCase):
         self.assertTrue(frappe.db.exists(TOKEN_DOCTYPE, {"employee": emp}))
         again = get_or_create_for_employee(emp)
         self.assertEqual(again.name, doc.name)
-
 
 class TestMasarIdentityContract(TestCase):
     """The worker/driver audience-exclusivity contract, proven under mocks.
@@ -875,8 +847,6 @@ class TestMasarIdentityContract(TestCase):
 
 test_dependencies = ['Employee', 'Salis Driver', 'User']
 
-
-# --- merged from test_masar_worker_token_credential_permlevel.py ---
 _TOKEN_JSON = (
     Path(apex.__file__).resolve().parent
     / "apex_core"
@@ -891,8 +861,6 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
     """Site-bound. ``frappe.session.user`` is process state that no rollback restores."""
 
     def setUp(self):
-        # Registered BEFORE anything mutates the session, so a mid-test failure still hands
-        # the next test an Administrator session.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
         self.employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
@@ -921,7 +889,6 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
         housing = _user("cred_housing@example.com", HOUSING_ROLE)
         privileged = _user("cred_privileged@example.com", PRIVILEGED_ROLE)
 
-        # Verdict A -- the withdrawn role receives nothing.
         frappe.set_user(housing)
         stripped = frappe.client.get("Masar Worker Token", name)
         for fieldname in CREDENTIAL_FIELDS:
@@ -934,9 +901,6 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
             "a level-0 field was stripped too -- the removal took the whole record",
         )
 
-        # Verdict B -- the retained role still receives the credential. Note this runs as a
-        # REAL System Manager, never Administrator: the strip returns early for
-        # Administrator and the verdict would be vacuous.
         frappe.set_user(privileged)
         visible = frappe.client.get("Masar Worker Token", name)
         for fieldname in CREDENTIAL_FIELDS:
@@ -950,7 +914,6 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
             f"{PRIVILEGED_ROLE} received something other than the stored hash",
         )
 
-        # The pair, stated: the two roles must not have produced the same answer.
         self.assertNotEqual(
             [stripped.get(f) for f in CREDENTIAL_FIELDS],
             [visible.get(f) for f in CREDENTIAL_FIELDS],
@@ -1037,8 +1000,6 @@ class TestMasarWorkerTokenCredentialPermlevel(FrappeTestCase):
                 f"{HOUSING_ROLE} permlevel-0 {flag} was collateral damage",
             )
 
-
-# --- merged from test_masar_worker_token_desk_issuance.py ---
 TOKEN_DOCTYPE_masar_worker_token_desk_issuance = "Masar Worker Token"
 TOKEN_JSON = Path(apex.__file__).resolve().parent / "apex_core" / "doctype" / "masar_worker_token" / "masar_worker_token.json"
 DRIVER_ISSUER_ROLES = (
@@ -1058,15 +1019,11 @@ ISSUERS = {
 class _DeskIssuanceCase(FrappeTestCase):
     """Fixture plumbing for a desk-issuance case."""
 
-    #: Which shipped driver this class acts on. Overridden per class, never shared.
     DRIVER = "_Test Driver"
 
     def setUp(self):
         frappe.set_user("Administrator")
         self.addCleanup(frappe.set_user, "Administrator")
-        # The shipped DocPerms are the subject of these tests, but a long-lived site
-        # can carry hand-edited rows; pin the meta to the JSON this repo ships and
-        # put the site's own back afterwards.
         meta = frappe.get_meta(TOKEN_DOCTYPE_masar_worker_token_desk_issuance)
         self._meta_permissions = meta.permissions
         self._meta_autoname = meta.autoname
@@ -1294,8 +1251,6 @@ class TestDriverLinkDeskRevocation(_DeskIssuanceCase):
         with as_user(fleet):
             self.assertEqual(revoke_driver_link(driver)["revoked"], 1)
 class TestDriverLinkIssuanceAudit(_DeskIssuanceCase):
-    # The second shipped driver: this class opens by asserting an EMPTY audit trail, which
-    # only holds for a subject the revocation class above never issued against.
     DRIVER = "_Test Driver Two"
 
     def test_every_desk_move_is_audited_by_actor_and_subject(self):
@@ -1387,8 +1342,6 @@ class TestDriverLinkIssuanceAudit(_DeskIssuanceCase):
             self.assertFalse(base[role].get("export"), f"{role} must not export tokens")
             self.assertFalse(base[role].get("email"), f"{role} must not email tokens")
 
-
-# --- merged from test_masar_worker_token_scope.py ---
 def _driver_clause(projects):
     escaped = ", ".join(frappe.db.escape(v) for v in projects)
     return (

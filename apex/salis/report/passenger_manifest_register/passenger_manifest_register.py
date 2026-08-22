@@ -19,7 +19,6 @@ from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import count_card, percent_card
 from apex.salis import permissions
 
-
 def execute(filters=None):
     """Returns the columns, per-passenger rows and summary cards for the Passenger Manifest Register."""
     filters = filters or {}
@@ -42,10 +41,6 @@ def execute(filters=None):
         order_by="dispatch_date desc",
     )
     if restrict:
-        # SALIS_SCOPE["Passenger Manifest"] projects through the actual trip, with a
-        # Route Plan fallback (permissions.py _manifest()) -- so this must scope the
-        # same way, or an out-of-scope trip on an in-scope route plan (or the reverse)
-        # disagrees between the desk list and this register.
         if not allowed:
             manifests = []
         else:
@@ -106,7 +101,6 @@ def execute(filters=None):
 
     return columns, data, None, None, _summary(data)
 
-
 def _summary(data):
     """Built for any result including none, so an empty register reads 0 rather than a
     blank strip that looks like a page which failed to load."""
@@ -118,7 +112,6 @@ def _summary(data):
         count_card(_("Boarded"), boarded, indicator="Green" if boarded else None),
         percent_card(_("Boarding Rate"), len(boarded), len(data)),
     ]
-
 
 def _columns():
     """Returns the column definitions for the Passenger Manifest Register report."""

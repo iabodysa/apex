@@ -18,11 +18,7 @@ from apex.salis.utils import add_timeline_note
 
 class FuelDailyLog(Document):
     def validate(self):
-        """Rejects a negative litres or odometer reading, and one that runs backwards."""
-        if self.litres is not None and self.litres < 0:
-            frappe.throw(_("Litres cannot be negative."))
-        if self.odometer is not None and self.odometer < 0:
-            frappe.throw(_("Odometer cannot be negative."))
+        """Rejects an odometer reading that runs backwards."""
         self._refuse_an_odometer_that_runs_backwards()
 
     def _refuse_an_odometer_that_runs_backwards(self):

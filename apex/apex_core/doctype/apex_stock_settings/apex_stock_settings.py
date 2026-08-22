@@ -40,8 +40,6 @@ class ApexStockSettings(Document):
         stock_frozen_upto: DF.Date | None
 
     def validate(self):
-        if cint(self.backdating_days) < 0:
-            frappe.throw(_("Backdating days cannot be negative."))
         if self.backdating_role and not cint(self.backdating_days):
             frappe.msgprint(
                 _("A backdating role has no effect while the window is zero days."),

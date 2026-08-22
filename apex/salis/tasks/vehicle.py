@@ -16,7 +16,6 @@ from apex.salis.tasks.common import (
 
 _ROW_SAVEPOINT = "salis_vehicle_row"
 
-
 def idle_vehicle_watch() -> None:
     """Flag Active vehicles with no dispatch trip in the last ``idle_vehicle_days``.
 
@@ -91,7 +90,6 @@ def idle_vehicle_watch() -> None:
 
         start += BATCH_SIZE
 
-
 def vehicle_compliance_expiry_watch() -> None:
     """Alert on vehicle compliance documents at or past their expiry window.
 
@@ -132,9 +130,6 @@ def vehicle_compliance_expiry_watch() -> None:
                 log_msg = (f"vehicle_compliance_expiry_watch: vehicle {c.parent} "
                            f"{c.compliance_type} compliance {state} {c.expiry_date}.")
                 logger.warning(log_msg)
-                # Two whole sentences rather than one with a spliced "expired on" /
-                # "expires on": a translator receives a fragment with no tense, no
-                # subject and no way to know where it lands in the target word order.
                 template = (
                     _("Vehicle {0}: {1} compliance expired on {2}.")
                     if expired
@@ -157,7 +152,6 @@ def vehicle_compliance_expiry_watch() -> None:
                 )
 
         start += BATCH_SIZE
-
 
 def vehicle_utilization_summary() -> None:
     """Write a trailing-7-day utilisation summary per Active vehicle.

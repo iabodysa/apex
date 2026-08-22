@@ -16,9 +16,7 @@ from apex.salis.tasks.common import (
     _notify_fleet_role,
 )
 
-
 _ROW_SAVEPOINT = "salis_fuel_row"
-
 
 def unreverted_topup_watch() -> None:
     """Auto-revert temporary fuel top-ups that are past their revert-due date,
@@ -49,10 +47,6 @@ def unreverted_topup_watch() -> None:
                 "request_type": "Top-up",
                 "is_temporary": 1,
                 "reverted": 0,
-                # Done is the only state the workflow can leave for Reverted. Selecting Approved
-                # as well raised WorkflowPermissionError on every such row, and the per-row
-                # savepoint swallowed it into the Error Log, so an approved-but-undispensed
-                # top-up was reported as handled on every run and never was.
                 "status": "Done",
                 "revert_due_date": ["<", today_str],
                 "name": [">", cursor],
@@ -70,10 +64,6 @@ def unreverted_topup_watch() -> None:
                 doc = frappe.get_doc("Fuel Request", t.name)
                 doc.reverted = 1
                 doc.status = "Reverted"
-                # ignore_permissions does not reach validate_workflow (document.py:693) and
-                # get_transitions filters on the SESSION user's roles (workflow.py:64), so
-                # Done -> Reverted needs Fleet Manager. The owner raised the request and
-                # holds no such transition, so the actor is stated rather than inherited.
                 actor = frappe.session.user
                 frappe.set_user("Administrator")
                 try:
@@ -107,7 +97,6 @@ def unreverted_topup_watch() -> None:
         cursor = topups[-1].name
 
     _flag_overdue_approved_topups(today_str, logger)
-
 
 def _flag_overdue_approved_topups(today_str: str, logger) -> None:
     """Tell the fleet about overdue temporary top-ups still sitting at Approved.

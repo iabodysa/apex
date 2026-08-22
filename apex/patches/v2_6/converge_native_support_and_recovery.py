@@ -20,7 +20,6 @@ from apex.apex_core.setup.salis_support import (
     grant_issue_role_permissions,
 )
 
-
 _LEGACY_HOLIDAY_LIST = "Apex Support 24x7"
 _LEGACY_DAYS = {
     "Monday",
@@ -50,7 +49,6 @@ _CANONICAL_UTILITY_CARD_VALUES = {
     "filters_json": '[["Utility Bill Entry", "status", "=", "Rejected"]]',
 }
 
-
 def execute():
     """Converge upgraded sites on native fixtures, Issue SLA, and Employee Advance recovery."""
     grant_issue_role_permissions()
@@ -60,7 +58,6 @@ def execute():
     _repair_demo_import_residue()
     _retire_untouched_legacy_utility_card()
     _assert_select_consistency()
-
 
 def _retire_untouched_legacy_sla():
     name = frappe.db.get_value(
@@ -118,7 +115,6 @@ def _retire_untouched_legacy_sla():
         return
     _delete_unused_legacy_holiday_list()
 
-
 def _delete_unused_legacy_holiday_list():
     if not frappe.db.exists("Holiday List", _LEGACY_HOLIDAY_LIST):
         return
@@ -135,13 +131,7 @@ def _delete_unused_legacy_holiday_list():
         "Holiday List", _LEGACY_HOLIDAY_LIST, ignore_permissions=True, force=True
     )
 
-
 def _migrate_deduction_policy():
-    # The legacy policy is a Single, and Frappe never creates a `tab<DocType>` table for
-    # one (database/mariadb/database.py:460-468 syncs a table only when `issingle` is
-    # falsy), while table_exists is a pure table-name lookup (database/database.py:1220).
-    # So a table_exists guard here is unconditionally False and the whole migration is
-    # dead. Ask for the DocType record instead, exactly as line 176 below already does.
     if not frappe.db.exists("DocType", "Salary Deduction Policy"):
         return
     enabled = frappe.db.get_single_value(
@@ -181,7 +171,6 @@ def _migrate_deduction_policy():
         if frappe.db.exists("DocType", doctype):
             frappe.delete_doc("DocType", doctype, ignore_permissions=True, force=True)
 
-
 def _repair_demo_import_residue():
     if frappe.db.table_exists("Dispatch Trip"):
         frappe.db.set_value(
@@ -208,7 +197,6 @@ def _repair_demo_import_residue():
             "Occupied" if occupied else "Available",
             update_modified=False,
         )
-
 
 def _retire_untouched_legacy_utility_card():
     if not frappe.db.exists("Number Card", _LEGACY_UTILITY_CARD):
@@ -244,7 +232,6 @@ def _retire_untouched_legacy_utility_card():
             _CANONICAL_UTILITY_CARD_VALUES,
             update_modified=False,
         )
-
 
 def _assert_select_consistency():
     problems = []

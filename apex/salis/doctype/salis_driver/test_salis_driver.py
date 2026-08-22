@@ -37,7 +37,6 @@ PICK_A_WORKING_VEHICLE = {
     ("Vehicle Handover", "vehicle"),
 }
 
-# A checkbox master carries no judgement: inactive means unpickable, on every field.
 IS_ACTIVE_MASTERS = (
     "Safety Task Catalog",
     "Maintenance Material",
@@ -48,11 +47,7 @@ IS_ACTIVE_MASTERS = (
     "Vehicle Handover Checklist Template",
 )
 
-
-# A ledger row names the material a cost was already incurred on, and that material may have
-# been retired since. Filtering it would hide history from the person reading the ledger.
 HISTORICAL = {("Maintenance Cost Ledger", "material")}
-
 
 class TestSalisDriver(FrappeTestCase):
     def test_every_driver_link_field_is_either_filtered_or_named_as_historical(self):

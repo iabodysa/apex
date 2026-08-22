@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import unittest
 from contextlib import contextmanager
-from unittest.mock import patch
 
 import frappe
 from frappe.exceptions import PermissionError as FrappePermissionError
@@ -320,48 +319,3 @@ class TestTripStartLogBoardingDedup(unittest.TestCase):
         )
         with self.assertRaises(frappe.ValidationError):
             doc._validate_boarding_rows()
-
-
-class TestTripStartLogTripContext(unittest.TestCase):
-    """_resolve_trip_context backfills both fields from the SAME Dispatch
-    Trip row in exactly ONE db.get_value call (no N+1 of two sequential reads)."""
-
-    def _make_log(self, **fields):
-        doc = frappe.new_doc("Trip Start Log")
-        for k, v in fields.items():
-            setattr(doc, k, v)
-        return doc
-
-    def test_single_db_call_populates_both_fields(self):
-        doc = self._make_log(dispatch_trip="DT-001")
-        captured = {}
-
-        def _fake_get_value(doctype, name, fieldname, **kwargs):
-            captured["doctype"] = doctype
-            captured["fieldname"] = fieldname
-            captured["as_dict"] = kwargs.get("as_dict")
-            return frappe._dict(transport_request="TR-7", route_plan="RP-3")
-
-        with patch(
-            "apex.salis.doctype.trip_start_log.trip_start_log.frappe.db.get_value",
-            side_effect=_fake_get_value,
-        ) as mocked:
-            doc._resolve_trip_context()
-
-        self.assertEqual(mocked.call_count, 1)
-        self.assertEqual(captured["doctype"], "Dispatch Trip")
-        self.assertEqual(captured["fieldname"], ["transport_request", "route_plan"])
-        self.assertTrue(captured["as_dict"])
-        self.assertEqual(doc.transport_request, "TR-7")
-        self.assertEqual(doc.route_plan, "RP-3")
-
-    def test_no_db_call_when_both_already_set(self):
-        doc = self._make_log(
-            dispatch_trip="DT-001", transport_request="TR-7", route_plan="RP-3"
-        )
-        with patch(
-            "apex.salis.doctype.trip_start_log.trip_start_log.frappe.db.get_value",
-            side_effect=AssertionError("must not query when both fields are set"),
-        ) as mocked:
-            doc._resolve_trip_context()
-        mocked.assert_not_called()

@@ -16,7 +16,6 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-
 class TestDispatchTripAssignedRequest(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -38,8 +37,6 @@ class TestDispatchTripAssignedRequest(FrappeTestCase):
                 "purpose": "Site shuttle",
             },
         )
-        # Vehicle-less draft: capacity guard is skipped; ignore_links lets the
-        # placeholder transport_request stand in without a real linked record.
         trip.insert(ignore_permissions=True, ignore_links=True)
 
         reloaded = frappe.get_doc("Dispatch Trip", trip.name)

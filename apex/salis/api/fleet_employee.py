@@ -37,7 +37,6 @@ from apex.salis.utils import (
     period_quota,
 )
 
-
 _VEHICLE_STATUS_KEY = {
     "Active": "assigned",
     "Under Maintenance": "workshop",
@@ -47,7 +46,6 @@ _VEHICLE_STATUS_KEY = {
 
 _REGISTRATION_TYPE = "Registration (Istimara)"
 
-
 def _session_driver(required=False):
     """Resolve only the signed-in user's driver record."""
     driver = get_driver_for_session_user(frappe.session.user)
@@ -55,14 +53,11 @@ def _session_driver(required=False):
         frappe.throw(_("Your account is not linked to a fleet representative."), frappe.PermissionError)
     return driver
 
-
 def _driver_project(driver):
     return frappe.db.get_value("Salis Driver", driver, "project") if driver else None
 
-
 def _session_vehicle(driver):
     return bound_vehicle(driver) if driver else None
-
 
 @frappe.whitelist()
 def get_context():
@@ -96,7 +91,6 @@ def get_context():
         },
     }
 
-
 def _registration_expiry(vehicle):
     """The vehicle's registration (Istimara) expiry, else its next rolled-up expiry.
 
@@ -111,7 +105,6 @@ def _registration_expiry(vehicle):
     )
     reg = reg or frappe.db.get_value("Salis Vehicle", vehicle, "next_expiry_date")
     return frappe.utils.cstr(reg) if reg else None
-
 
 @frappe.whitelist()
 def get_my_vehicle():
@@ -151,7 +144,6 @@ def get_my_vehicle():
         }
     }
 
-
 @frappe.whitelist()
 def get_fuel_stations():
     """The active Fuel Platforms to pick as the fuel-request station (read).
@@ -164,7 +156,6 @@ def get_fuel_stations():
         pluck="name",
         order_by="platform_name asc",
     )
-
 
 @frappe.whitelist(methods=["POST"])
 def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, notes=None):
@@ -242,7 +233,6 @@ def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, not
 
     return {"name": doc.name}
 
-
 _FUEL_STATUS_KEY = {
     "Pending": "pending",
     "Approved": "approved",
@@ -251,7 +241,6 @@ _FUEL_STATUS_KEY = {
     "Reverted": "failed",
     "Cancelled": "cancelled",
 }
-
 
 @frappe.whitelist()
 def get_my_fuel_requests(days=90, limit=30):
@@ -309,8 +298,7 @@ def get_my_fuel_requests(days=90, limit=30):
         for r in rows
     ]
 
-
-from apex.salis.api.fleet_employee_services import (  # noqa: E402,F401
+from apex.salis.api.fleet_employee_services import (
     create_complaint,
     get_complaint,
     get_handover_checklist,
@@ -324,3 +312,18 @@ from apex.salis.api.fleet_employee_services import (  # noqa: E402,F401
     return_vehicle,
     submit_additional_fuel_request,
 )
+
+__all__ = [
+    "create_complaint",
+    "get_complaint",
+    "get_handover_checklist",
+    "get_my_complaints",
+    "get_my_fuel_quota",
+    "get_my_handovers",
+    "get_my_incidents",
+    "receive_vehicle",
+    "reply_to_complaint",
+    "report_incident",
+    "return_vehicle",
+    "submit_additional_fuel_request",
+]

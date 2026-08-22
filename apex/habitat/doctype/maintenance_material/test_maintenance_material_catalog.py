@@ -13,7 +13,6 @@ from apex.habitat.doctype.maintenance_material.maintenance_material_catalog impo
     seed_catalog,
 )
 
-
 class TestSeedCatalog(FrappeTestCase):
     def test_seeds_every_catalog_entry(self):
         seed_catalog()
@@ -44,10 +43,6 @@ class TestSeedCatalog(FrappeTestCase):
         self.assertEqual(before, after)
 
     def test_does_not_overwrite_a_pre_existing_row(self):
-        # seed_catalog() commits (it is an install-time seeder, run outside any
-        # request transaction), so a mutation made here survives the test's own
-        # rollback. Restore the canonical seeded value afterwards, and commit that
-        # restoration too, or this row stays permanently altered on the site.
         sample_name = MAINTENANCE_MATERIAL_CATALOG[0]["material_name"]
         if not frappe.db.exists("Maintenance Material", sample_name):
             frappe.get_doc(

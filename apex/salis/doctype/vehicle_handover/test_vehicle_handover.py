@@ -12,13 +12,8 @@ from apex.salis.doctype.vehicle_handover import vehicle_handover
 
 _UNSET = object()
 
-
 class TestVehicleHandoverChecklist(unittest.TestCase):
     def setUp(self):
-        # frappe.db and frappe.flags are LocalProxy objects over frappe.local, so
-        # assigning here replaces them for the entire process, not just this test.
-        # Restore them or the next test inherits a mock database and a flags dict
-        # that has lost the keys frappe.init seeded.
         saved = {
             name: getattr(frappe.local, name, _UNSET)
             for name in ("flags", "request", "db")
@@ -345,7 +340,6 @@ class TestVehicleHandoverChecklist(unittest.TestCase):
         )
 
         vehicle_handover.VehicleHandover._validate_native_checklist(self._doc())
-
 
 if __name__ == "__main__":
     unittest.main()

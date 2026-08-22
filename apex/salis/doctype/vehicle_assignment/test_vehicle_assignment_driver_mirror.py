@@ -26,11 +26,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-
 WORKER = "_Test Employee"
-# The portal account ERPNext's _Test Employee fixture carries in user_id.
 PORTAL_USER = "test@example.com"
-
 
 class TestVehicleAssignmentDriverMirror(FrappeTestCase):
     def setUp(self):
@@ -122,8 +119,6 @@ class TestVehicleAssignmentDriverMirror(FrappeTestCase):
 
 test_dependencies = ['Employee']
 
-
-# --- merged from test_vehicle_assignment_keeps_a_stop.py ---
 class TestAnAssignmentKeepsAnOpenStop(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")

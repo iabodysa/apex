@@ -15,16 +15,10 @@ from apex.tests.factories import make_scoped_supervisor
 
 test_dependencies = ["Building"]
 
-# `linked_erpnext_asset` is the bridge to ERPNext Asset and no test record sets it, but
-# `get_dependencies` (frappe/test_runner.py:358-380) walks every Link field regardless. Walking
-# Asset drags in ERPNext's purchase chain, which ends at `Payment Gateway` — a DocType that ships
-# with the separate `payments` app and is absent from a frappe/erpnext/hrms bench, so the walk
-# raises DoesNotExistError before a single Facility Asset is created.
 test_ignore = ["Asset"]
 
 BUILDING = "_Test Building"
 OTHER_BUILDING = "_Test Building 2"
-
 
 class TestFacilityAsset(FrappeTestCase):
     def _asset(self, **overrides):
@@ -60,7 +54,6 @@ class TestFacilityAsset(FrappeTestCase):
 
         with self.assertRaises(frappe.exceptions.MandatoryError):
             asset.insert(ignore_permissions=True)
-
 
 class TestFacilityAssetEstateScope(FrappeTestCase):
     """The supervisor's list read, performed the way the desk performs it.

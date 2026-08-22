@@ -9,8 +9,6 @@ from unittest.mock import MagicMock, patch
 from apex.habitat.doctype.building_license import building_license
 from apex.habitat.tasks import maintenance
 
-
-
 class TestBuildingLicense(FrappeTestCase):
 
     def test_create_valid_license(self):
@@ -204,8 +202,6 @@ class TestBuildingLicense(FrappeTestCase):
 
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_building_license_state_contract.py ---
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
 

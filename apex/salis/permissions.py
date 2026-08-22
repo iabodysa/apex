@@ -55,11 +55,9 @@ UNSCOPED_ROLES = {
 
 PROJECT = "project"
 
-
 def _resolve_user(user=None):
     """Return the effective user, defaulting to the session user."""
     return permission_scope.resolve_user(user)
-
 
 def _allowed_projects(user):
     """Project names the given user has an explicit User Permission for (cached).
@@ -74,7 +72,6 @@ def _allowed_projects(user):
     """
     return permission_scope.allowed_for(user, "Project", "apex_allowed_projects")
 
-
 def _allowed_projects_for(user, doctype):
     """``_allowed_projects`` narrowed to the permissions that apply to ``doctype``.
 
@@ -84,11 +81,9 @@ def _allowed_projects_for(user, doctype):
     """
     return permission_scope.for_doctype(user, "Project", doctype, _allowed_projects(user))
 
-
 def _is_unscoped(user):
     """True when the user holds any oversight role that sees all projects."""
     return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
-
 
 def report_project_scope(user=None, doctype=None):
     """Return ``(restrict, allowed_projects)`` for report-side project scoping.
@@ -102,11 +97,9 @@ def report_project_scope(user=None, doctype=None):
         user, _is_unscoped, _allowed_projects, allow="Project", doctype=doctype
     )
 
-
 def _column(rule="scoped", own=None):
     """Project stored on the doc itself."""
     return ("column", {"field": PROJECT, "own": own, "rule": rule})
-
 
 def _dual():
     """Project at either of two endpoints."""
@@ -115,19 +108,15 @@ def _dual():
         {"first": "from_project", "second": "to_project", "own": None, "rule": "dual"},
     )
 
-
 def _hop(field, doctype, rule, own=None):
     """Project one link away, reached through ``field`` -> ``doctype``.``project``."""
     return ("hop", {"field": field, "doctype": doctype, "own": own, "rule": rule})
 
-
 def _trip(rule="dispatch_trip", own="trip_actor"):
     return ("trip", {"own": own, "rule": rule})
 
-
 def _trip_child(rule="owner_or_project", own="owner"):
     return ("trip_child", {"own": own, "rule": rule})
-
 
 def _trip_link(rule="scoped"):
     """Project through a ``dispatch_trip`` link ALONE — no ``route_plan`` column.
@@ -139,21 +128,17 @@ def _trip_link(rule="scoped"):
     """
     return ("trip_link", {"own": None, "rule": rule})
 
-
 def _manifest():
     """Project through the actual trip, with a historical Route Plan fallback."""
     return ("manifest", {"own": None, "rule": "scoped"})
-
 
 def _driver(field="driver", own=None):
     """Project hanging off a Salis Driver link."""
     return ("driver", {"field": field, "own": own, "rule": "driver_chain"})
 
-
 def _quote(field):
     """Backtick-quote one column name. The only place this module writes a quote."""
     return "`{0}`".format(field)
-
 
 SALIS_SCOPE = {
     "Vehicle Assignment": _column(),
@@ -197,7 +182,6 @@ INDIRECT_PROJECT_SCOPED = frozenset(
 
 PROJECT_MANDATORY_ON_CREATE = frozenset({"Fuel Claim"})
 
-
 def _own_driver_trips_condition(user):
     """SQL fragment matching rows whose ``driver`` is the acting user's own.
 
@@ -212,7 +196,6 @@ def _own_driver_trips_condition(user):
         "))".format(user=frappe.db.escape(user))
     )
 
-
 def _own_trip_actor_condition(user):
     escaped_user = frappe.db.escape(user)
     return (
@@ -221,7 +204,6 @@ def _own_trip_actor_condition(user):
         ") or (coalesce(`route_assignment`, '') = '' and `route_plan` in ("
         "select `name` from `tabRoute Plan` where `route_supervisor` = {user})))"
     ).format(driver=_own_driver_trips_condition(user), user=escaped_user)
-
 
 def _own_clause(spec, user):
     """SQL fragment for the DocType's own-row basis, or None when it has none.
@@ -242,11 +224,9 @@ def _own_clause(spec, user):
         return "`route_supervisor` = {0}".format(frappe.db.escape(user))
     return None
 
-
 def _render_column(spec, escaped):
     """``project in (...)`` — the project stored on the row."""
     return "{column} in ({values})".format(column=_quote(spec["field"]), values=escaped)
-
 
 def _render_dual(spec, escaped):
     """Either endpoint in scope, as ONE fragment (Frappe AND-joins separate ones)."""
@@ -254,19 +234,16 @@ def _render_dual(spec, escaped):
         first=_quote(spec["first"]), second=_quote(spec["second"]), values=escaped
     )
 
-
 def _render_hop(spec, escaped):
     """The project one link away, as a subquery on the linked DocType."""
     return "{column} in (select `name` from `tab{doctype}` where `project` in ({values}))".format(
         column=_quote(spec["field"]), doctype=spec["doctype"], values=escaped
     )
 
-
 def _route_plan_scope(escaped):
     return "select `name` from `tabRoute Plan` where `project` in ({0})".format(
         escaped
     )
-
 
 def _trip_scope(escaped):
     route_plans = _route_plan_scope(escaped)
@@ -276,7 +253,6 @@ def _trip_scope(escaped):
         "`route_plan` in ({route_plans})))"
     ).format(values=escaped, route_plans=route_plans)
 
-
 def _render_trip(spec, escaped):
     del spec
     route_plans = _route_plan_scope(escaped)
@@ -284,7 +260,6 @@ def _render_trip(spec, escaped):
         "(`project` in ({values}) or (coalesce(`project`, '') = '' and "
         "`route_plan` in ({route_plans})))"
     ).format(values=escaped, route_plans=route_plans)
-
 
 def _render_trip_child(spec, escaped):
     del spec
@@ -295,12 +270,10 @@ def _render_trip_child(spec, escaped):
         "(coalesce(`dispatch_trip`, '') = '' and `route_plan` in ({route_plans})))"
     ).format(trips=trips, route_plans=route_plans)
 
-
 def _render_trip_link(spec, escaped):
     """The project through the row's Dispatch Trip, historical fallback included."""
     del spec
     return "`dispatch_trip` in ({0})".format(_trip_scope(escaped))
-
 
 def _render_driver(spec, escaped):
     """The project hanging off the row's Salis Driver link."""
@@ -309,7 +282,6 @@ def _render_driver(spec, escaped):
         "select `name` from `tabSalis Driver` where `project` in ({values})"
         ")".format(column=_quote(spec["field"]), values=escaped)
     )
-
 
 def _render_manifest(spec, escaped):
     """Prefer the actual trip; use Route Plan only for historical rows without one."""
@@ -321,7 +293,6 @@ def _render_manifest(spec, escaped):
         "(coalesce(`dispatch_trip`, '') = '' and `route_plan` in ({route_plans})))"
     ).format(trips=trips, route_plans=route_plans)
 
-
 FRAGMENTS = {
     "column": _render_column,
     "dual": _render_dual,
@@ -332,7 +303,6 @@ FRAGMENTS = {
     "driver": _render_driver,
     "manifest": _render_manifest,
 }
-
 
 def _fragment(kind, spec, values):
     """Render one scope strategy against the user's allowed projects.
@@ -346,7 +316,6 @@ def _fragment(kind, spec, values):
     if not render:
         return "1=0"
     return render(spec, ", ".join(frappe.db.escape(value) for value in values))
-
 
 def project_scope_query(user=None, doctype=None, scope_for=None):
     """WHERE fragment scoping ``doctype``'s list/report view to the user's projects.
@@ -375,8 +344,6 @@ def project_scope_query(user=None, doctype=None, scope_for=None):
     if _is_unscoped(user):
         return ""
 
-    # A portal capacity enumerates nothing. Its own-row clauses would resolve to
-    # ``owner = <the capacity>``, i.e. every row the portal ever wrote in every project.
     if permission_scope.is_portal_capacity(user):
         return "1=0"
 
@@ -392,7 +359,6 @@ def project_scope_query(user=None, doctype=None, scope_for=None):
         return "({in_scope} or {own})".format(in_scope=in_scope, own=own)
     return in_scope
 
-
 def _dispatch_trip_project(dispatch_trip):
     trip = frappe.db.get_value(
         "Dispatch Trip",
@@ -407,7 +373,6 @@ def _dispatch_trip_project(dispatch_trip):
     if trip.route_plan:
         return frappe.db.get_value("Route Plan", trip.route_plan, PROJECT)
     return None
-
 
 def _doc_project(doc):
     """Resolve direct project first, then one historical parent.
@@ -446,7 +411,6 @@ def _doc_project(doc):
 
     return None
 
-
 def _driver_chain_project(doc, driver_field="driver"):
     """Resolve a doc's project through its Salis Driver link, or None.
 
@@ -471,7 +435,6 @@ def _driver_chain_project(doc, driver_field="driver"):
         return _dispatch_trip_project(dispatch_trip)
     return None
 
-
 def _is_unsaved(doc):
     """True when ``doc`` does not exist yet — i.e. this IS the create check.
 
@@ -483,7 +446,6 @@ def _is_unsaved(doc):
 
     """
     return bool(getattr(doc, "__islocal", False))
-
 
 def _own_driver_basis(doc, user, driver_field="driver"):
     """True when the doc's driver — its own link, else its parent trip's — is ``user``'s.
@@ -505,7 +467,6 @@ def _own_driver_basis(doc, user, driver_field="driver"):
         return frappe.db.get_value("Dispatch Trip", dispatch_trip, "driver") == own_driver
     return False
 
-
 def _unanchored_create_is_denied(doc):
     """True when ``doc`` is an UNSAVED row of a DocType that cannot be project-less.
 
@@ -523,7 +484,6 @@ def _unanchored_create_is_denied(doc):
 
     """
     return getattr(doc, "doctype", None) in PROJECT_MANDATORY_ON_CREATE and _is_unsaved(doc)
-
 
 def scoped_has_permission(doc, ptype, user=None):
     """Deny a scoped user acting on a doc outside their allowed projects.
@@ -552,7 +512,6 @@ def scoped_has_permission(doc, ptype, user=None):
         return False
 
     return None
-
 
 def _owner_or_project_has_permission(doc, user=None):
     """Project-scope a doc, treating OWNERSHIP as an independent access basis ON A ROW
@@ -592,7 +551,6 @@ def _owner_or_project_has_permission(doc, user=None):
 
     return False
 
-
 def _dispatch_trip_has_permission(doc, user=None):
     """Allow the assigned driver; otherwise enforce the trip's project."""
     user = _resolve_user(user)
@@ -627,7 +585,6 @@ def _dispatch_trip_has_permission(doc, user=None):
 
     return None
 
-
 def _route_assignment_has_permission(doc, user=None):
     """Allow the named supervisor; otherwise enforce the assignment's project."""
     user = _resolve_user(user)
@@ -643,7 +600,6 @@ def _route_assignment_has_permission(doc, user=None):
     if project not in _allowed_projects_for(user, doc.doctype):
         return False
     return None
-
 
 def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_owner=False):
     """Deny a scoped user acting on a ``driver``-linked doc outside their projects.
@@ -682,7 +638,6 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
 
     return False
 
-
 def movement_cost_transfer_has_permission(doc, ptype, user=None):
     """Allow a transfer whose from- OR to-project is in the scoped user's set.
 
@@ -705,12 +660,10 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
         return None
     return False
 
-
 FINANCE_EXCLUSIVE_STATES = {
     "Approved by Finance",
     "Paid",
 }
-
 
 def payment_sod_has_permission(doc, ptype, user=None):
     """Project-scope a payment request AND block self-approval of it.
@@ -757,13 +710,11 @@ def payment_sod_has_permission(doc, ptype, user=None):
 
     return None
 
-
 def _rule_driver_chain(doc, ptype, user, spec):
     """Apply the driver-chain rule with the DocType's own link field and owner basis."""
     return _driver_chain_has_permission(
         doc, user=user, driver_field=spec["field"], with_owner=spec.get("own") == "owner"
     )
-
 
 DOCUMENT_RULES = {
     "scoped": lambda doc, ptype, user, spec: scoped_has_permission(doc, ptype, user=user),
@@ -776,7 +727,6 @@ DOCUMENT_RULES = {
     "dual": lambda doc, ptype, user, spec: movement_cost_transfer_has_permission(doc, ptype, user),
     "payment_sod": lambda doc, ptype, user, spec: payment_sod_has_permission(doc, ptype, user),
 }
-
 
 def _trip_start_log_capacity_verdict(doc, ptype):
     """The document verdict for a portal capacity writing Trip Start Log.
@@ -820,7 +770,6 @@ def _trip_start_log_capacity_verdict(doc, ptype):
             return verdict
 
     return False
-
 
 def project_scoped_has_permission(doc, ptype, user=None):
     """Dispatch the document check for ``doc``'s DocType to its rule in ``SALIS_SCOPE``.

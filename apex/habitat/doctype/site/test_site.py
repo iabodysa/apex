@@ -12,7 +12,6 @@ from frappe.tests.utils import FrappeTestCase
 
 test_dependencies = ["Site"]
 
-
 class TestSite(FrappeTestCase):
     def test_a_site_is_named_by_its_site_name(self):
         site = frappe.get_doc({
@@ -33,7 +32,6 @@ class TestSite(FrappeTestCase):
             site.insert(ignore_permissions=True)
 
     def test_a_second_site_cannot_take_a_name_already_in_use(self):
-        # _Test Site comes from test_records.json, so the collision needs no arrangement.
         duplicate = frappe.get_doc({"doctype": "Site", "site_name": "_Test Site"})
 
         with self.assertRaises(frappe.DuplicateEntryError):

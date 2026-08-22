@@ -15,11 +15,6 @@ from apex.salis.utils import add_timeline_note, lock_vehicle
 
 
 class VehicleSuspension(Document):
-    def validate(self):
-        """Defaults the ownership-at-stop snapshot from the vehicle's current ownership."""
-        if self.vehicle and not self.ownership_at_stop:
-            self.ownership_at_stop = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
-
     def before_submit(self):
         """Requires evidence before an Accident or Violation stop can be submitted."""
         if self.stop_reason in ("Accident", "Violation") and not self.evidence:

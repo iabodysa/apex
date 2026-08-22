@@ -1,9 +1,10 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Tests for the Fuel Exception Case amount-recovered guard.
 
-The negative-amount guard runs unconditionally in validate(), before the
-status-dependent closure controls, so it is exercised here on a plain Open
-draft in isolation from the evidence/non-raiser-closer requirements.
+``amount_recovered`` carries ``non_negative`` in the DocType JSON, so frappe refuses a
+negative in ``Document._validate_non_negative`` — which runs AFTER this controller's
+validate, not before it. The case below is a plain Open draft, so the status-dependent
+closure controls never fire and the refusal reaching the caller is the framework's.
 """
 
 from __future__ import annotations
@@ -13,8 +14,6 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 from apex.tests._helpers import _user
 from apex.tests.factories import make_project, make_vehicle
-
-
 
 class TestFuelExceptionCaseAmount(FrappeTestCase):
     def setUp(self):
@@ -43,8 +42,6 @@ class TestFuelExceptionCaseAmount(FrappeTestCase):
 
 test_ignore = ['Payment Gateway']
 
-
-# --- merged from test_fuel_exception_case_workflow.py ---
 WORKFLOW = "Fuel Exception Case Workflow"
 def _actions(doc):
     """The set of workflow action names currently available to the session user."""
@@ -53,8 +50,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Fuel Exception Case") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -96,7 +91,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
 
     def tearDown(self):
         frappe.set_user("Administrator")
-
 
     def _new(self, reported_by=None, with_evidence=True, **overrides):
         """An Open Fuel Exception Case, raised by ``reported_by`` (defaults to the
@@ -142,14 +136,12 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
                 pass
         frappe.delete_doc("Fuel Exception Case", name, ignore_permissions=True, force=True)
 
-
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Fuel Exception Case"), WORKFLOW)
         self.assertTrue(frappe.db.get_value("Workflow", WORKFLOW, "is_active"))
         self.assertEqual(
             frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
         )
-
 
     def test_investigate_resolve_then_close(self):
         fec = self._new()
@@ -185,7 +177,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
         self.assertEqual(fec.status, "Closed")
         self.assertEqual(fec.docstatus, 1)
 
-
     def test_reject_then_close(self):
         fec = self._investigating()
         frappe.set_user(self.manager)
@@ -200,7 +191,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
         fec.reload()
         self.assertEqual(fec.status, "Closed")
         self.assertEqual(fec.docstatus, 1)
-
 
     def test_sod_raiser_cannot_resolve(self):
         fec = self._investigating(reported_by=self.manager_maker)
@@ -217,7 +207,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
         self.assertEqual(fec.status, "Resolved")
         self.assertEqual(fec.docstatus, 1)
 
-
     def test_resolve_succeeds_via_workflow_gate(self):
         """Approval authority now lives in the native workflow's Resolve transition
 		(authorized role + SoD); the old controller-side Delegation-of-Authority
@@ -229,7 +218,6 @@ class TestFuelExceptionCaseWorkflow(FrappeTestCase):
         apply_workflow(fec, "Resolve")
         fec.reload()
         self.assertEqual(fec.docstatus, 1)
-
 
     def test_resolve_blocked_without_evidence(self):
         fec = self._investigating(with_evidence=False)

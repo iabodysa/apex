@@ -20,7 +20,6 @@ test_ignore = [
     "User",
 ]
 
-
 class TestCustodyIssue(FrappeTestCase):
 
     def test_create_valid_issue(self):
@@ -51,13 +50,9 @@ class TestCustodyIssue(FrappeTestCase):
             "building": "QA-BLDG",
             "items": [],
         })
-        # Links are validated before mandatory (document.py:302 then :310), and the
-        # placeholder links below do not exist, so the link check is stood down to keep
-        # the assertion on the empty table this test is about.
         doc.flags.ignore_links = True
         with self.assertRaises(frappe.MandatoryError):
             doc.insert(ignore_permissions=True)
-
 
 class TestCustodyIssueSerializedRules(FrappeTestCase):
     """A serialized article must carry a serial_no and qty==1 on every line."""
@@ -98,9 +93,7 @@ class TestCustodyIssueSerializedRules(FrappeTestCase):
         self.assertEqual(row.qty, 1, "qty must remain 1 after validate")
         self.assertEqual(row.serial_no, "SN-1", "serial_no must be preserved by validate")
 
-
 ACK_NOTIFICATION = "Habitat - Custody Acknowledgment Requested"
-
 
 class TestCustodyAcknowledgmentNotification(FrappeTestCase):
     """The submit-time alert that makes the My Custody Acknowledgment Web Form
@@ -119,9 +112,7 @@ class TestCustodyAcknowledgmentNotification(FrappeTestCase):
         self.assertIn("/my-custody-acknowledgment", rendered)
         self.assertIn("custody_issue=CUST-ISS-QA", rendered)
 
-
 OVERDUE_NOTIFICATION = "Habitat - Custody Return Overdue"
-
 
 class TestCustodyReturnOverdueNotification(FrappeTestCase):
     """The Days-After alert must reach the holder at a real address: the recipient

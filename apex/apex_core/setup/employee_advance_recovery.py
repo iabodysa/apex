@@ -11,10 +11,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-
 RECOVERY_COMPONENT = "Employee Advance Recovery"
 MAX_RECOVERY_PERCENT = 50.0
-
 
 def seed_recovery_component():
     """Create the native HRMS deduction component in a safe disabled state."""
@@ -36,7 +34,6 @@ def seed_recovery_component():
     component.insert(ignore_permissions=True)
     return component.name
 
-
 def ensure_advance_account(company: str) -> str:
     """The company's Receivable employee-advance account, created if it is not there yet.
 
@@ -52,10 +49,6 @@ def ensure_advance_account(company: str) -> str:
     if existing and frappe.db.get_value("Account", existing, "account_type") == "Receivable":
         return existing
 
-    # Only an account that is ABOUT advances qualifies. The first Receivable account in
-    # the standard chart is Debtors, which is customer money: posting an employee advance
-    # there mixes a staff balance into accounts receivable and the aging report reads a
-    # worker as a customer.
     match = frappe.db.get_value(
         "Account",
         {
@@ -92,7 +85,6 @@ def ensure_advance_account(company: str) -> str:
 
     frappe.db.set_value("Company", company, "default_employee_advance_account", match)
     return match
-
 
 def configure_recovery(*, enabled=False, company=None, salary_component=None, max_percent=None):
     """Apply setup-wizard recovery choices without bypassing native HRMS validation."""

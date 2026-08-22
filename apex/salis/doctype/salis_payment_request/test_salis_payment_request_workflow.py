@@ -42,18 +42,14 @@ from apex.tests.factories import make_project, purge_doc
 WORKFLOW = "Salis Payment Request Workflow"
 ROUTING_SETTINGS = "Payment Routing Settings"
 
-
 def _actions(doc):
     """The set of workflow action names currently available to the session user."""
     return {t.action for t in get_transitions(doc)}
-
 
 class TestSalisPaymentRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Salis Payment Request") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -114,10 +110,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         }
         data.update(overrides)
         request = frappe.get_doc(data).insert(ignore_permissions=True)
-        # The class deletes its Project on the way out, but a request left behind holds a link
-        # to it and blocks that delete. The residue then outlives the run: a later Project — the
-        # demo builder's, in the case that raised this — inherits the same block and its own
-        # teardown reports a row nothing on the site can account for.
         self.addCleanup(purge_doc, "Salis Payment Request", request.name)
         return request
 
@@ -136,7 +128,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         frappe.set_user("Administrator")
         pr.reload()
         return pr
-
 
     def test_legal_submit_then_approve_submits(self):
         pr = self._new_request()
@@ -157,7 +148,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.docstatus, 1)
         self.assertEqual(pr.finance_approved_by, self.finance)
 
-
     def test_wrong_role_cannot_approve_or_pay(self):
         pr = self._pending()
         frappe.set_user(self.manager)
@@ -165,7 +155,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertNotIn("Approve (Finance)", offered)
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(pr, "Approve (Finance)")
-
 
     def test_approve_and_pay_are_finance_only(self):
         pr = self._pending()
@@ -187,7 +176,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
-
 
     def test_sod_requester_cannot_approve(self):
         pr = self._pending(requested_by=self.finance_maker)
@@ -218,7 +206,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Paid")
 
-
     def test_post_submit_mark_paid_reachable(self):
         pr = self._approved()
         self.assertEqual(pr.docstatus, 1)
@@ -230,7 +217,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         self.assertEqual(pr.status, "Paid")
         self.assertEqual(pr.docstatus, 1)
         self.assertEqual(pr.finance_approved_by, self.finance)
-
 
     def test_mark_paid_posts_no_gl(self):
         pr = self._approved()
@@ -249,10 +235,7 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
             self.assertEqual(gl, [])
         self.assertFalse(pr.linked_payment_entry)
 
-
     def test_rejected_request_can_be_revised_to_draft(self):
-        # An earlier finding: a Finance rejection is not a dead end - the maker
-        # revises the request back to Draft to correct and resubmit.
         pr = self._pending()
         frappe.set_user(self.finance)
         self.assertIn("Reject", _actions(pr))
@@ -267,7 +250,6 @@ class TestSalisPaymentRequestWorkflow(FrappeTestCase):
         pr.reload()
         self.assertEqual(pr.status, "Draft")
         self.assertEqual(pr.docstatus, 0)
-
 
 class TestAmendedRequestRoutesANewPayment(FrappeTestCase):
     """An amendment is a NEW payable and must route its OWN payment.
@@ -287,8 +269,6 @@ class TestAmendedRequestRoutesANewPayment(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         settings = frappe.get_single(ROUTING_SETTINGS)
-        # A Single does NOT roll back with the test transaction — restore it by hand,
-        # registered BEFORE the mutation so a mid-test failure still restores.
         self.addCleanup(
             self._restore,
             settings.target_payment_doctype,
@@ -303,7 +283,6 @@ class TestAmendedRequestRoutesANewPayment(FrappeTestCase):
             ],
         )
         settings.target_payment_doctype = "Note"
-        # Draft target only: auto-submit is a separate concern and would drag in the GL gate.
         settings.auto_submit_target = 0
         settings.set("field_map", [{"target_fieldname": "title", "source_fieldname": "name"}])
         settings.save(ignore_permissions=True)
@@ -344,15 +323,9 @@ class TestAmendedRequestRoutesANewPayment(FrappeTestCase):
         self.assertEqual(original.linked_payment_entry, first)
 
         original.cancel()
-        # The desk amend copies every field (no_copy included) and clears only
-        # name/amended_from/amendment_date, which is what frappe.copy_doc does by
-        # default. docstatus survives copy_doc under in_test, so reset it explicitly.
         amended = frappe.copy_doc(original)
         amended.amended_from = original.name
         amended.docstatus = 0
-        # An amendment re-enters the flow as a draft. Carrying the cancelled doc's
-        # "Approved by Finance" status instead would trip the SoD gate on insert —
-        # a different behaviour, already covered above, and not the subject here.
         amended.status = "Draft"
         amended.insert(ignore_permissions=True)
         self.assertFalse(

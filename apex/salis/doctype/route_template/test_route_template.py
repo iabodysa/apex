@@ -3,7 +3,6 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-
 class TestRouteTemplate(FrappeTestCase):
     def test_template_assigns_stable_stop_keys(self):
         route = frappe.get_doc(
@@ -72,8 +71,6 @@ class TestRouteTemplate(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             route.validate()
 
-
-# --- merged from test_route_template_naming.py ---
 class TestRouteTemplateNaming(FrappeTestCase):
     def _template(self, template_name):
         """A Route Template the controller accepts: ``stops`` is mandatory, so a

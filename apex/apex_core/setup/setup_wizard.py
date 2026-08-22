@@ -37,19 +37,14 @@ from frappe.utils import cint
 
 from apex.apex_core.payment_router import validate_target_doctype
 
-
 def setup_wizard_complete(args=None):
     """`setup_wizard_complete` hook — apply the operator's first-run choices."""
     apply_apex_setup(args)
     from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
     from apex.setup import create_accommodation_item_defaults
 
-    # Held back until now: the portal capacity identities are System Users with no
-    # password, and offering them on the wizard's user slide is what lets an autofilled
-    # one reach a login the framework must refuse.
     seed_portal_identities()
     create_accommodation_item_defaults()
-
 
 def apply_apex_setup(args=None):
     """Write the operator's Setup-Wizard choices across every Apex Single.
@@ -68,7 +63,6 @@ def apply_apex_setup(args=None):
     _apply_employee_advance_recovery(args, company)
     _apply_salis_support(args)
 
-
 def _created_company():
     """The company this wizard has just created, read rather than asked for.
 
@@ -79,18 +73,15 @@ def _created_company():
     hook, so both values already exist here."""
     return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
 
-
 def _created_cost_center(company):
     """The default cost center ERPNext attached to that company."""
     return frappe.get_cached_value("Company", company, "cost_center") if company else None
-
 
 def _apply_apex_settings(args):
     """Apex Settings — the app-wide GL-posting finance gate (default OFF)."""
     apex = frappe.get_single("Apex Settings")
     apex.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
     apex.save(ignore_permissions=True)
-
 
 def _apply_habitat_settings(args, company):
     """Habitat Settings — default company + the email/operational notification
@@ -104,7 +95,6 @@ def _apply_habitat_settings(args, company):
     )
     habitat.save(ignore_permissions=True)
 
-
 def _apply_salis_settings(args, company, cost_center):
     """Salis Settings — default company + cost center and the driver-portal /
     approvals switches."""
@@ -116,7 +106,6 @@ def _apply_salis_settings(args, company, cost_center):
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
     salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
     salis.save(ignore_permissions=True)
-
 
 def _apply_payment_routing(args):
     """Payment Routing Settings — route the operator's chosen payment DocType to the
@@ -135,7 +124,6 @@ def _apply_payment_routing(args):
     router.target_payment_doctype = payment_method
     router.save(ignore_permissions=True)
 
-
 def _apply_employee_advance_recovery(args, company):
     """Enable the Apex scheduler only after native HRMS accounts and component exist."""
     from apex.apex_core.setup.employee_advance_recovery import configure_recovery
@@ -146,7 +134,6 @@ def _apply_employee_advance_recovery(args, company):
         salary_component=args.get("apex_employee_advance_recovery_component"),
         max_percent=args.get("apex_employee_advance_recovery_max_percent"),
     )
-
 
 def _apply_salis_support(args):
     """Create an Issue SLA only when the setup answers include a complete schedule."""

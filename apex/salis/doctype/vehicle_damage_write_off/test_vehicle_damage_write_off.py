@@ -8,7 +8,6 @@ cancelling clears it, keeping the Incident<->Write-Off link bidirectional.
 
 from __future__ import annotations
 
-
 from unittest.mock import patch
 
 import frappe
@@ -19,7 +18,6 @@ from frappe.utils import today
 from apex.tests._helpers import _grant_project, _project, _user, submit_via_workflow
 
 WORKFLOW = "Vehicle Damage Write-Off Workflow"
-
 
 def _make_vehicle(prefix):
     """Create a Salis Vehicle with a per-run-unique plate and return its name.
@@ -39,7 +37,6 @@ def _make_vehicle(prefix):
             "status": "Active",
         }
     ).insert(ignore_permissions=True).name
-
 
 def _purge_fixtures(vehicles, incidents=()):
     """Delete the vehicles/incidents a test class committed. Call from tearDownClass.
@@ -63,7 +60,6 @@ def _purge_fixtures(vehicles, incidents=()):
             frappe.delete_doc("Salis Vehicle", vehicle, force=True, ignore_permissions=True)
     frappe.db.commit()
 
-
 class TestVehicleDamageWriteOff(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -73,7 +69,6 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Fixtures escape savepoint rollback (submit/cancel commit); clear them.
         _purge_fixtures(cls._vehicles, cls._incidents)
         super().tearDownClass()
 
@@ -168,7 +163,6 @@ class TestVehicleDamageWriteOff(FrappeTestCase):
         at = self._write_off(estimated_cost=2000)
         self.assertEqual(at.needs_operations, 1)
 
-
 def setUpModule():
     """this is a MANDATORY Salis workflow, seeded by salis_workflow_seed on every
     install and migrate. Its absence is a regression — FAIL, never skip.
@@ -186,7 +180,6 @@ def setUpModule():
             f"Mandatory Salis workflow {WORKFLOW!r} not active for "
             f"'Vehicle Damage Write-Off' (got {active!r}) — salis_workflow_seed regression"
         )
-
 
 class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     """Delegation-of-Authority tier gate: a write-off whose estimated cost reaches
@@ -212,7 +205,6 @@ class TestVehicleDamageWriteOffDoA(FrappeTestCase):
     @classmethod
     def tearDownClass(cls):
         frappe.set_user("Administrator")
-        # Clear committed write-offs + vehicles first so the driver delete is unblocked.
         _purge_fixtures(cls._vehicles)
         frappe.db.delete("User Permission",
                          {"allow": "Project", "for_value": cls.project, "user": cls.supervisor})

@@ -25,9 +25,6 @@ app_license = "MIT"
 
 required_apps = ["frappe", "erpnext", "hrms"]
 
-# Every title here is distinct on purpose: the screen shows titles and nothing else, so
-# two tiles sharing one leaves the operator guessing which route he is opening. Each names
-# the audience its route serves, and each string is already translated in ar.csv.
 add_to_apps_screen = [
     {
         "name": "apex",
@@ -115,7 +112,6 @@ company_data_to_be_ignored = [
     "Telecom Contract",
     "SIM Custody Assignment",
 ]
-
 
 override_doctype_class = {
     "Notification": "apex.apex_core.overrides.notification.ApexNotification",
@@ -310,9 +306,6 @@ default_log_clearing_doctypes = {
     "Occupancy Snapshot": 365,
     "Vehicle Utilisation Snapshot": 365,
     "Operational Depreciation Snapshot": 730,
-    # Neither frappe's own default_log_clearing_doctypes (frappe/hooks.py:564-576) nor this
-    # dict named it, so the size-based clearing cron only ever swept rows over 1MB and an
-    # ordinary audit row accumulated forever. 90 days matches frappe's own Activity Log entry.
     "Access Log": 90,
 }
 
@@ -322,8 +315,6 @@ override_doctype_dashboards = {
 }
 
 _HABITAT_SCOPE_QUERY = "apex.habitat.permissions.building_scope_query"
-# A DocType whose estate is its own `building` column is filtered by Frappe from the same
-# User Permission rows; this hook only supplies the fail-closed half Frappe lacks.
 _HABITAT_NO_BUILDING_QUERY = "apex.habitat.permissions.refuse_a_supervisor_with_no_building"
 _SALIS_SCOPE_QUERY = "apex.salis.permissions.project_scope_query"
 _LOGISTAY_SCOPE_QUERY = "apex.logistay.permissions.company_scope_query"
@@ -481,10 +472,6 @@ has_permission = {
 
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
-    # Driver is portal-only, so it needs desk_access 0 — and make_module_and_roles
-    # (frappe/core/doctype/doctype/doctype.py:1876-1882) creates every role named in a
-    # permissions block with desk_access 1. A fixture wins because migrate.py:120-145 runs
-    # sync_all before sync_fixtures, on install and on every migrate.
     {"dt": "Role", "filters": [["name", "in", ["Driver"]]]},
     {
         "dt": "Issue Type",

@@ -18,22 +18,13 @@ from apex.habitat.doctype.room_bed_transfer import room_bed_transfer
 from apex.habitat import permissions as P
 from apex.habitat.api.transfer_board import transfer_occupant
 
-# Project is deliberately NOT a dependency. ERPNext's Project fixture is not idempotent — its
-# autoname mints a new name while project_name carries a unique index, so a second build attempt
-# collides instead of being skipped.
-
 BUILDING = "_Test Building"
 ROOM = "_T-101"
 ORIGIN_BED = "_T-101-A"
 TARGET_BED = "_T-101-B"
 
-
 class TestRoomBedTransfer(FrappeTestCase):
     def setUp(self):
-        # FrappeTestCase rolls the database back once per CLASS, not once per method —
-        # frappe/tests/utils.py:46 registers _rollback_db with addClassCleanup — so the bed one
-        # case houses a resident in would still be occupied when the next case tries. A savepoint
-        # is the framework's own way to hand the fixture beds back.
         frappe.db.savepoint("apex_room_bed_transfer_case")
         self.addCleanup(frappe.db.rollback, save_point="apex_room_bed_transfer_case")
 
@@ -124,8 +115,6 @@ class TestRoomBedTransfer(FrappeTestCase):
 test_dependencies = ['Bed', 'Employee']
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_room_bed_transfer_bed_swap.py ---
 class TestRoomBedTransferBedSwap(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -377,8 +366,6 @@ class TestRoomBedTransferBedSwap(FrappeTestCase):
             self._counters(fx), before, "cancel must return the counters to their pre-move values"
         )
 
-
-# --- merged from test_room_bed_transfer_cancel_origin.py ---
 def _raising_frappe() -> MagicMock:
     fake = MagicMock()
 
@@ -421,8 +408,6 @@ class TestRoomBedTransferCancelChecksOrigin(TestCase):
                 with self.assertRaises(frappe.ValidationError):
                     self._run(origin_status)
 
-
-# --- merged from test_room_bed_transfer_cross_building.py ---
 class TestRoomBedTransferCrossBuilding(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -582,8 +567,6 @@ class TestRoomBedTransferCrossBuilding(FrappeTestCase):
         doc = self._draft_transfer(asg.name, fx.b_room, fx.b_bed)
         with self.assertRaises(frappe.ValidationError) as caught:
             doc.insert(ignore_permissions=True)
-        # Assert the MESSAGE, not just the type: a link check raises the very same
-        # exception class before validate() ever runs.
         self.assertIn("Cross-building", str(caught.exception))
 
         self.assertEqual(

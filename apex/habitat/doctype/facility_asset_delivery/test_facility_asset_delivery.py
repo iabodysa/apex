@@ -29,10 +29,8 @@ from apex.habitat.api.facility_asset_delivery import (
 )
 from apex.tests.factories import ApexHabitatTestCase
 
-
 def _h(n=12):
     return frappe.generate_hash(length=n).upper()
-
 
 class TestFacilityAssetDelivery(ApexHabitatTestCase):
     def setUp(self):
@@ -109,7 +107,6 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         d.submit()
         return d
 
-
     def test_submit_opens_pending_exits_without_a_code(self):
         d = self._delivery()
         self.assertEqual(d.status, "Pending Exits")
@@ -166,7 +163,6 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         d.reload()
         self.assertNotEqual(d.status, "Delivered")
         self.assertEqual(frappe.db.get_value("Facility Asset", self.asset, "building"), self.intake)
-
 
     def _release(self, d):
         """Pass both exits (admin) and return the freshly issued code."""
@@ -298,7 +294,6 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
 
         after = self._audit_trail()
         for field in self._AUDIT_TRAIL:
-            # NULL and "" both read as blank; compare on that axis, not on identity.
             self.assertEqual(
                 after.get(field) or None,
                 before.get(field) or None,
@@ -353,8 +348,6 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
         d.reload()
         with self.assertRaises(frappe.ValidationError) as caught:
             d.cancel()
-        # Every framework pre-cancel check subclasses ValidationError too, so a bare
-        # assertRaises would pass on a link or timestamp failure instead of the guard.
         self.assertNotIsInstance(
             caught.exception,
             (frappe.LinkValidationError, frappe.TimestampMismatchError),
@@ -383,9 +376,6 @@ class TestFacilityAssetDelivery(ApexHabitatTestCase):
             frappe.set_user("Administrator")
         d.reload()
         self.assertNotEqual(d.status, "Delivered")
-        # The miss is counted in a Redis window keyed on the delivery, never on the
-        # document: a db_set before frappe.throw inside a POST is rolled back with the
-        # request (apex_core/utils/otp_lockout.py), so `otp_attempts` stays 0 forever.
         self.assertEqual(
             peek_window(f"otp-miss:{d.doctype}:{d.name}"),
             1,

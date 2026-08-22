@@ -61,13 +61,16 @@ VALID_STATUSES = ("Pending", "Approved", "Done", "Failed", "Reverted", "Cancelle
 
 class FuelRequest(Document):
 
-    def before_insert(self):
-        """Defaults the requester to the current session user when not already set."""
-        if not self.requested_by:
-            self.requested_by = frappe.session.user
-
     def validate(self):
-        """Runs the per-type field checks and blocks a request from a rider who is inactive."""
+        """Runs the per-type field checks and blocks a request from a rider who is inactive.
+
+        The requester re-stamp here outlives the field's ``__user`` default: that default
+        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
+        and fills a field only when it is None (``frappe/model/document.py:836``), so it
+        covers neither a later save nor a request body carrying ``requested_by = ""``. A
+        blank requester silently satisfies the workflow's ``requested_by != session.user``
+        approval gate.
+        """
         if self.request_type not in REQUEST_TYPES:
             frappe.throw(_("Invalid Request Type: {0}").format(self.request_type))
 

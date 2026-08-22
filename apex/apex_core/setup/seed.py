@@ -42,15 +42,12 @@ that actually write.
 import json
 import os
 
-
 DATA_ROOT = os.path.join(os.path.dirname(__file__), "data")
 
 _REQUIRED_KEYS = ("doctype", "key", "records")
 
-
 class SeedDataError(ValueError):
     """A seed JSON file is missing a required key or is malformed."""
-
 
 def load_specs(module_dir, only=None, data_root=None):
     """Read and validate every seed JSON file for one module.
@@ -97,7 +94,6 @@ def load_specs(module_dir, only=None, data_root=None):
         })
     return specs
 
-
 def _record_key_value(spec, record):
     """The natural-key value used for the existence guard."""
     key = spec["key"]
@@ -107,7 +103,6 @@ def _record_key_value(spec, record):
         )
     return record[key]
 
-
 def _exists(frappe, doctype, key, value):
     """True only when a real row already carries this natural key.
 
@@ -115,7 +110,6 @@ def _exists(frappe, doctype, key, value):
     if key == "name" and value != doctype:
         return bool(frappe.db.exists(doctype, value))
     return bool(frappe.db.exists(doctype, {key: value}))
-
 
 def _unresolved_link(frappe, doctype, record):
     """Name the first Link target this record cannot resolve, or None if all resolve.
@@ -145,7 +139,6 @@ def _unresolved_link(frappe, doctype, record):
                     )
     return None
 
-
 def _linked_doctypes(frappe, doctype):
     """Every DocType this one points at through a Link, its own and its child rows'.
 
@@ -160,7 +153,6 @@ def _linked_doctypes(frappe, doctype):
         child = frappe.get_meta(table.options)
         targets |= {f.options for f in child.get("fields", {"fieldtype": "Link"}) if f.options}
     return targets - {doctype}
-
 
 def order_specs(frappe, specs):
     """Sort specs so a DocType is seeded after everything it links to.
@@ -187,7 +179,6 @@ def order_specs(frappe, specs):
             placed.add(dt)
     cyclic = [spec for dt, spec in provided.items() if dt not in placed]
     return ordered, cyclic
-
 
 def apply_spec(spec):
     """Create the records for one spec. Returns ``{created, skipped, failed}``.
@@ -222,13 +213,12 @@ def apply_spec(spec):
             doc = frappe.get_doc({"doctype": doctype, **record})
             doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
             created += 1
-        except Exception:  # noqa: BLE001
+        except Exception:
             frappe.db.rollback(save_point=savepoint)
             frappe.log_error(title=f"seed: failed to create {doctype} '{value}'")
             failed += 1
 
     return {"created": created, "skipped": skipped, "failed": failed}
-
 
 def seed(module_dir, only=None):
     """Load and apply every seed spec for one module. Safe to re-run.
@@ -264,8 +254,6 @@ def seed(module_dir, only=None):
                 progressed = True
             if result["skipped"] or result["failed"]:
                 still_pending.append(spec)
-        # The last round's numbers are the true ones: an earlier round's skip may have
-        # become this round's create, so accumulating every round would double-count.
         totals = round_totals
         if not progressed:
             break
@@ -273,9 +261,7 @@ def seed(module_dir, only=None):
     frappe.db.commit()
     return totals
 
-
 _MODULES = ("habitat", "salis")
-
 
 def seed_all():
     """Seed every module's data files. Zero-arg hook entry for ``hooks.py``

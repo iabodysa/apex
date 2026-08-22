@@ -32,8 +32,6 @@ import os
 from apex.apex_core.utils.ledger_index import _index_exists, add_index_guarded
 from apex.habitat.doctype.accommodation_stock_ledger import accommodation_stock_ledger
 
-
-
 class TestAccommodationAssignment(FrappeTestCase):
 
     def test_create_valid_assignment(self):
@@ -247,13 +245,6 @@ class TestAccommodationAssignment(FrappeTestCase):
             data_uri,
         )
 
-
-# `on_doctype_update` is the one delivery path reaching BOTH a fresh site and an upgraded
-# one: a fresh install marks every registered patch complete WITHOUT running it, so an index
-# delivered by a patch alone would exist only on upgraded sites. The legacy v0_7 patch stays
-# registered and uses the SAME index names, so a migrated site grows no duplicates.
-
-
 DOCTYPE = "Housing Assignment"
 BED_INDEX = "idx_asgn_bed"
 ACTIVE_INDEX = "idx_asgn_bed_active"
@@ -264,7 +255,6 @@ _EXPECTED_INDEXES = {
     "idx_asgn_bed_active": ["bed", "docstatus", "check_out_date"],
 }
 
-
 def _index_calls(add_index_mock):
     """{index_name: [column, ...]} recorded off the mocked helper, so an assertion
     reads as the index contract rather than as call plumbing."""
@@ -274,7 +264,6 @@ def _index_calls(add_index_mock):
         assert doctype == "Housing Assignment", f"unexpected doctype {doctype!r}"
         calls[index_name] = list(fields)
     return calls
-
 
 class TestFreshInstallHookDeclaresTheIndexes(unittest.TestCase):
     """No live site or DB is needed: the DDL boundary (``add_index_guarded``) is
@@ -291,7 +280,6 @@ class TestFreshInstallHookDeclaresTheIndexes(unittest.TestCase):
 
         self.assertEqual(_index_calls(add_index), _EXPECTED_INDEXES)
 
-
 def _index_columns(doctype, index_name):
     """The ordered column list of one index, straight out of MariaDB."""
     rows = frappe.db.sql(
@@ -300,7 +288,6 @@ def _index_columns(doctype, index_name):
         as_dict=True,
     )
     return [row["Column_name"] for row in sorted(rows, key=lambda r: r["Seq_in_index"])]
-
 
 def _indexes_covering(doctype, columns):
     """Every index name whose ordered column list equals ``columns``.
@@ -329,8 +316,6 @@ def _indexes_covering(doctype, columns):
 test_dependencies = ['Bed', 'Employee']
 test_ignore = ['Additional Salary', 'Asset', 'Asset Movement', 'Company', 'Cost Center', 'Currency', 'Employee', 'Item', 'Payment Entry', 'Project', 'Purchase Invoice', 'Role', 'Salary Component', 'Supplier', 'User']
 
-
-# --- merged from test_housing_assignment_auditor_access.py ---
 _HOUSING_ASSIGNMENT_JSON = Path(apex.__file__).resolve().parent / "habitat" / "doctype" / "housing_assignment" / "housing_assignment.json"
 AUDITOR_ROLE = "Internal Auditor"
 THE_GRANTED_REPORTS = (
@@ -362,15 +347,10 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
         auditor = self._auditor()
         frappe.set_user(auditor)
 
-        # Half 1 — THE OPEN. get_report_doc carries both gates the role must clear:
-        # Report.is_permitted() at query_report.py:41 and has_permission(ref, "report")
-        # at :47. Calling it is the real open path, not a re-implementation of it.
         opened = get_report_doc("Accommodation Occupancy Summary")
         self.assertEqual(opened.ref_doctype, "Housing Assignment")
         open_verdict = "opened"
 
-        # Half 2 — THE REFUSAL. Caught by NAME: frappe.PermissionError does not descend
-        # from ValidationError, so an unrelated validation failure cannot satisfy this.
         with self.assertRaises(frappe.PermissionError) as caught:
             frappe.permissions.can_export("Housing Assignment", raise_exception=True)
         self.assertIn(
@@ -385,7 +365,6 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
             export_verdict,
             "the two halves collapsed into one verdict — the grant is all-or-nothing",
         )
-        # And the underlying rights, so the verdicts above cannot both be accidents.
         self.assertIs(frappe.has_permission("Housing Assignment", "read", user=auditor), True)
         self.assertIs(frappe.has_permission("Housing Assignment", "report", user=auditor), True)
         self.assertFalse(
@@ -495,8 +474,6 @@ class TestInternalAuditorHousingAccess(FrappeTestCase):
         )
         self.assertIs(frappe.has_permission("Housing Assignment", "read", user=auditor), True)
 
-
-# --- merged from test_housing_assignment_bed_index.py ---
 DOCTYPE_housing_assignment_bed_index = "Housing Assignment"
 BED_INDEX_housing_assignment_bed_index = "idx_asgn_bed"
 ACTIVE_INDEX_housing_assignment_bed_index = "idx_asgn_bed_active"
@@ -587,8 +564,6 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
         first restores coverage under our name, which is the same invariant, not
         necessarily the same index name the site started with.
         """
-        # Make sure coverage is there to drop (and register the rebuild first, so
-        # the column is indexed again even if an assertion below fails).
         housing_assignment.on_doctype_update()
         self.addCleanup(self._rebuild, index_name, fields)
         for existing in _indexes_covering_housing_assignment_bed_index(DOCTYPE_housing_assignment_bed_index, fields):
@@ -661,21 +636,15 @@ class TestHousingAssignmentBedIndexDeclaration(FrappeTestCase):
             LEGACY_PATCH_housing_assignment_bed_index, registered, "the legacy bed-index patch is registered again"
         )
 
-
-# --- merged from test_housing_assignment_bed_lock.py ---
 BUILDING = "_Test Building"
 ROOM = "_T-101"
 class TestHousingAssignmentBedLock(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         self.company = frappe.db.get_value("Building", BUILDING, "company")
-        # ERPNext's Project fixture is not idempotent (autoname mints a new name while
-        # project_name carries a unique index), so the one already on the site is read.
         self.project = frappe.db.get_value("Project", {"project_name": "_Test Project"})
         self.bed = frappe.db.get_value("Bed", {"room": ROOM, "status": "Available"})
         self.assertTrue(self.bed, "the shipped Bed fixture must provide a free bed")
-        # Shared fixtures are handed back: FrappeTestCase rolls back once per CLASS
-        # (frappe/tests/utils.py:46), so a bed left Occupied outlives this method.
         self.addCleanup(frappe.db.set_value, "Bed", self.bed, "status", "Available")
 
     def _employee(self):

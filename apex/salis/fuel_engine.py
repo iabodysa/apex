@@ -35,13 +35,11 @@ from frappe.query_builder.functions import Coalesce, Sum
 
 from apex.apex_core.utils.company import company_for_vehicle
 
-
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 BATCH_SIZE = 500
 
 OVERAGE_MARGIN = 0.05
 OVERAGE_MARGIN_DEFAULT_PERCENT = 5
-
 
 def get_overage_margin() -> float:
     """Return the fuel-quota overage margin as a fraction (e.g. 0.05 for 5%).
@@ -53,11 +51,9 @@ def get_overage_margin() -> float:
     percent = get_salis_int("fuel_overage_margin_percent", OVERAGE_MARGIN_DEFAULT_PERCENT)
     return percent / 100.0
 
-
 def _period_month(date_value) -> str:
     """Return the YYYY-MM period string for a date/datetime value."""
     return str(date_value)[:7]
-
 
 def _ledger_exists(source_type: str, source_name: str) -> bool:
     """True if a ledger row already exists for this source (idempotency key)."""
@@ -67,7 +63,6 @@ def _ledger_exists(source_type: str, source_name: str) -> bool:
             {"source_type": source_type, "source_name": source_name},
         )
     )
-
 
 def _insert_ledger_row(
     vehicle: str,
@@ -100,7 +95,6 @@ def _insert_ledger_row(
             "logged_at": logged_at,
         }
     ).insert(ignore_permissions=True)
-
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     """Reverse the ledgered consumption for a corrected/cancelled fuel source.
@@ -165,7 +159,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
         posted += 1
 
     return posted
-
 
 def accrue_fuel_consumption() -> None:
     """Accrue Fuel Consumption Ledger rows for recent fuel activity.
@@ -234,8 +227,6 @@ def accrue_fuel_consumption() -> None:
                     title=f"Fuel accrual failed for Daily Log {log.name}"[:140],
                 )
 
-        # A page that moved nothing would be re-read forever: the flag is what
-        # advances the cursor, so a page of only failures ends the pass.
         if not progressed:
             break
 
@@ -301,7 +292,6 @@ def accrue_fuel_consumption() -> None:
             break
 
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
-
 
 def monthly_fuel_reconciliation() -> None:
     """Reconcile each active Fuel Quota's allocation against ledgered consumption.

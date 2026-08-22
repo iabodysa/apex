@@ -17,24 +17,12 @@ carry plain names), and it keeps the colocation ratchet — which counts
 ``test_*.py`` under ``tests/`` — unmoved.
 """
 
-import glob
-import json
 import os
 from pathlib import Path
 
 import apex
 
-# The INSTALLED package, for the reason spelled out in shipped_doctypes.py: this file's
-# own parent, in the maintainer mirror (`.claude/tests/apex`, source_tree.py's
-# SUITE_PACKAGE), holds no notification JSON, so a root taken from `__file__` would make
-# every reader of this loader grade nothing and still pass.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 
-# One level of module dir, then `notification/<slug>/<slug>.json`. NOT recursive:
-# the recursive form also swept `node_modules`, which is why the older scanner
-# carried an explicit exclusion for it.
 NOTIFICATION_GLOB = os.path.join(APP_ROOT, "*", "notification", "*", "*.json")
-
-
-
 

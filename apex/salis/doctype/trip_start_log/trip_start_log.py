@@ -27,8 +27,7 @@ from apex.salis.utils import get_driver_for_user
 
 class TripStartLog(Document):
     def validate(self):
-        """Backfills trip context, validates boarding, derives counts, and checks driver ownership."""
-        self._resolve_trip_context()
+        """Validates boarding, derives counts, and checks driver ownership."""
         self._validate_boarding_rows()
         self._derive_counts()
         self._validate_times()
@@ -71,28 +70,6 @@ class TripStartLog(Document):
                 _("You can only save Trip Start Logs assigned to your own driver record."),
                 frappe.PermissionError,
             )
-
-    def _resolve_trip_context(self):
-        """Backfill Transport Request / Route Plan from the Dispatch Trip when the
-        fetch did not populate them (e.g. a row built in code), so the manifest
-        and project-scoping chain stay intact.
-
-        Both fields come from the SAME Dispatch Trip, so fetch them in one query
-        rather than two sequential round-trips per validate."""
-        if not self.dispatch_trip:
-            return
-        if self.transport_request and self.route_plan:
-            return
-        trip = frappe.db.get_value(
-            "Dispatch Trip",
-            self.dispatch_trip,
-            ["transport_request", "route_plan"],
-            as_dict=True,
-        ) or {}
-        if not self.transport_request:
-            self.transport_request = trip.get("transport_request")
-        if not self.route_plan:
-            self.route_plan = trip.get("route_plan")
 
     def _validate_boarding_rows(self):
         """Each boarding row identifies exactly one worker: a registered Employee

@@ -234,7 +234,6 @@ Agreed amount to deduct per pay period. Leave blank to recover as fast as the st
 Air Conditioning,تكييف الهواء
 Alert Aging SLA (Hours),مهلة بقاء التنبيه مفتوحًا (بالساعات)
 Alert Lead Days,أيام التنبيه المسبق
-Alert Lead Days cannot be negative.,لا يمكن أن تكون أيام التنبيه المسبق سالبة.
 Alert acknowledged,تم الإقرار بالتنبيه
 Alert queue,قائمة التنبيهات
 Alert resolved,تمت معالجة التنبيه
@@ -271,7 +270,6 @@ Amount claimed by the rental office.,المبلغ المطالب به من مك�
 Amount due for loss or damage,مبلغ مستحق عن فقد أو تلف
 Amount in words,المبلغ كتابةً
 Amount must be greater than zero.,يجب أن يكون المبلغ أكبر من صفر.
-Amount recovered cannot be negative.,لا يمكن أن يكون المبلغ المسترد سالبًا.
 Amount to Recover,المبلغ المطلوب استرداده
 Amount to Recover (SAR),المبلغ المطلوب استرداده (ريال)
 Amount to Recover cannot exceed the estimated cost.,لا يمكن أن يتجاوز المبلغ المطلوب استرداده التكلفة التقديرية.
@@ -540,7 +538,6 @@ Back-Dated Custody Event,حركة عهدة بتاريخ سابق
 Back-link to the Maintenance Request spawned from this finding. Presence makes the fan-out idempotent: a linked finding is never re-spawned. Intentionally copyable (no no_copy) so the link carries into an amended report and prevents duplicate tickets on amend.,رابط لطلب الصيانة الذي أُنشئ من هذه الملاحظة. وجوده يمنع إنشاء طلب مكرر، فالملاحظة المرتبطة لا يُعاد توليد طلب لها. والحقل قابل للنسخ عمداً لينتقل الرابط إلى التقرير المعدّل ويمنع تكرار التذاكر عند التعديل.
 Backdating Days,أيام التأريخ الرجعي
 Backdating Role,دور التأريخ الرجعي
-Backdating days cannot be negative.,لا يمكن أن تكون أيام التأريخ الرجعي سالبة.
 Background notification devices registered by the worker and driver portals.,أجهزة مسجلة لاستقبال تنبيهات بوابتي العامل والسائق في الخلفية.
 Background notifications are not configured.,إعدادات التنبيهات غير مكتملة.
 Balady Certificate,شهادة بلدي
@@ -743,7 +740,6 @@ Case Closed,تم إغلاق الحالة
 Case Details,تفاصيل الحالة
 Case Status,حالة القضية
 Casualties,الإصابات
-Casualties cannot be negative.,لا يمكن أن تكون الإصابات سالبة.
 Catalog master for individual issuable articles.,السجل الرئيسي لدليل الأصناف القابلة للصرف.
 Category,الفئة
 Category Details,تفاصيل الفئة
@@ -818,13 +814,11 @@ Claim Identification,بيانات المطالبة
 Claim Status,حالة المطالبة
 Claim period in YYYY-MM format (e.g. 2026-05).,فترة المطالبة بصيغة YYYY-MM (مثال: 2026-05).
 Claimed Amount (SAR),المبلغ المطالب به (ريال)
-Claimed Amount cannot be negative.,لا يمكن أن يكون المبلغ المُطالب به سالبًا.
 Claimed By,المشروع المطالِب
 Claimed Litres,اللترات المطالب بها
 Claimed Litres must be greater than zero.,يجب أن تكون اللترات المطالب بها أكبر من صفر.
 Claimed Total,إجمالي المطالب به
 Claimed Total (SAR),إجمالي المطالب به (ريال)
-Claimed Total and Accrued Total cannot be negative.,لا يمكن أن يكون الإجمالي المُطالب به وإجمالي الاستحقاق سالبين.
 Claimed Total minus Accrued Total.,إجمالي المطالب به ناقص إجمالي المستحق.
 "Claimed amount divided by claimed litres. Finance checks a claim against the pump price, which a total and a quantity alone do not state.",المبلغ المطالب به مقسوماً على اللترات المطالب بها. تراجع المالية المطالبة أمام سعر المضخة، والإجمالي مع الكمية وحدهما لا يبيّنان هذا السعر.
 Claimed by the Office,مطالبة المكتب
@@ -1928,7 +1922,6 @@ Fuel Quota {0} is exhausted ({1} of {2} L already consumed). Raise a Top-up requ
 Fuel Reconciliation,مطابقة الوقود
 Fuel Request,طلب وقود
 Fuel Request Approval Threshold (L),حد اعتماد طلب الوقود (لتر)
-Fuel Request Approval Threshold cannot be negative.,لا يمكن أن يكون حد اعتماد طلب الوقود سالباً.
 Fuel Request Awaiting Approval,طلب وقود بانتظار الاعتماد
 Fuel Request Decision,قرار طلب الوقود
 Fuel Request Pending Max Days,الحد الأقصى لأيام انتظار طلب الوقود
@@ -2469,7 +2462,6 @@ List the Returned Items,أدرج الأصناف المُرجعة
 Litres,اللترات
 Litres Actually Dispensed,اللترات المصروفة فعلاً
 Litres authorised for dispensing,اللترات المصرّح بصرفها
-Litres cannot be negative.,لا يمكن أن تكون اللترات سالبة.
 "Litres the pump actually delivered, which may differ from what the voucher authorised.",اللترات التي ضختها المضخة فعلاً، وقد تختلف عمّا صرّح به السند.
 Live Driver Position,موقع السائق لحظيًا
 Live View + Playback,بث مباشر + إعادة تشغيل
@@ -2906,7 +2898,6 @@ Odometer Start,عداد المسافة (البداية)
 Odometer at Handover,العداد وقت التسليم
 Odometer at the Fill,قراءة العداد عند التعبئة
 Odometer at the Incident,قراءة العداد عند الحادث
-Odometer cannot be negative.,لا يمكن أن تكون قراءة عداد المسافة سالبة.
 Odometer on File,العداد المسجّل
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
@@ -3965,7 +3956,6 @@ Route stop keys must be unique.,يجب ألا يتكرر مفتاح المحطة
 Router,راوتر
 Routing,التوجيه
 Routing & Tracking,التوجيه والتتبع
-"Row {0}: Days, Daily Rate and Amount cannot be negative.",الصف {0}: عدد الأيام والسعر اليومي والمبلغ لا يمكن أن تكون سالبة.
 Row {0}: Qty must be 1 for serialized article {1}.,الصف {0}: يجب أن تكون الكمية 1 للصنف ذي الرقم التسلسلي {1}.
 Row {0}: Qty must be greater than zero.,الصف {0}: يجب أن تكون الكمية أكبر من صفر.
 Row {0}: Serial No is required for serialized article {1}.,الصف {0}: الرقم التسلسلي مطلوب للصنف ذي الرقم التسلسلي {1}.
@@ -5535,7 +5525,6 @@ workshop status,حالة الورشة
 {0} article line(s) still outstanding,{0} سطر ما زال متبقيًا
 {0} assigned,تم إسناد {0}
 {0} awaiting approval,{0} بانتظار الاعتماد
-{0} cannot be negative.,لا يمكن أن يكون {0} سالبًا.
 "{0} carries the file it was imported from ({1}). The worker walking the round reads this field, so write the method of inspection here or leave it empty.",{0} يحمل اسم الملف الذي استُورد منه ({1}). العامل الذي يمشي الجولة يقرأ هذا الحقل، فاكتب فيه طريقة الفحص أو اتركه فارغاً.
 {0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
 "{0} custody line(s) came back short, lost or damaged.",{0} سطر عهدة رجع ناقصًا أو مفقودًا أو تالفًا.

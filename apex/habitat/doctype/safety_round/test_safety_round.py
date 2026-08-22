@@ -35,7 +35,6 @@ import os
 import unittest
 import apex
 
-
 class TestSafetyRound(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
@@ -137,12 +136,10 @@ class TestSafetyRound(FrappeTestCase):
         self.assertTrue(kwargs.get("after_commit"))
         self.assertEqual(args[1].get("action"), "cancel")
 
-
 def _h(n=12):
     """A collision-proof fixture suffix. Twelve chars, not the four a short hash
     gives: a per-method fixture set that collides reads as a duplicate-guard bug."""
     return frappe.generate_hash(length=n).upper()
-
 
 class TestSafetyRoundMakerChecker(FrappeTestCase):
     """The maker/checker pair, driven as the real roles through the desk surface.
@@ -434,9 +431,6 @@ class TestSafetyRoundMakerChecker(FrappeTestCase):
         self.assertEqual(rnd.docstatus, 1)
         self.assertEqual(rnd.overall_result, "Pass")
 
-
-
-# --- merged from test_safety_round_surface.py ---
 WORKSPACE_GLOB = os.path.join(
     os.path.dirname(os.path.abspath(apex.__file__)), "*", "workspace", "*", "*.json"
 )
@@ -465,8 +459,6 @@ class TestNoDeprecatedInspectionReportSurface(unittest.TestCase):
         self.assertGreaterEqual(
             len(self.links), 50, "the workspace JSON scan found almost nothing — glob broke"
         )
-        # The workspace is "Housing and Safety"; a sentinel naming the retired "Safety"
-        # workspace would fail for the wrong reason and hide whether the scan works.
         self.assertIn(
             ("Housing and Safety", "link", "Safety Round"),
             self.links,

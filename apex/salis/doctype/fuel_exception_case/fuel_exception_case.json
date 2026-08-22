@@ -152,7 +152,8 @@
    "depends_on": "eval:doc.status=='Resolved'||doc.status=='Closed'",
    "fieldname": "amount_recovered",
    "fieldtype": "Currency",
-   "label": "Amount Recovered (SAR)"
+   "label": "Amount Recovered (SAR)",
+   "non_negative": 1
   },
   {
    "fieldname": "fec_sec_system",
@@ -161,6 +162,7 @@
    "collapsible": 1
   },
   {
+   "default": "__user",
    "description": "The user who raised this case. Set automatically.",
    "fieldname": "reported_by",
    "fieldtype": "Link",
@@ -202,7 +204,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-24 03:53:04.208692",
+ "modified": "2026-08-22 21:05:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Exception Case",

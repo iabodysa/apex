@@ -45,22 +45,15 @@ from apex.salis.doctype.salis_driver import salis_driver
 _DRIVER_JSON = Path(apex.__file__).resolve().parent / "salis" / "doctype" / "salis_driver" / "salis_driver.json"
 
 FLEET_MANAGER = "Fleet Manager"
-# Holds permlevel-0 write on Salis Driver and NO permlevel-1 row — the counter-case that
-# keeps the positive verdict from being vacuous. Project-scoped, so it needs a User
-# Permission or it would fail at the row check instead of the field check.
 FLEET_SUPERVISOR = "Fleet Supervisor"
 
-# The four fields the level-1 section actually holds. Asserted as a set below so a field
-# quietly leaving the section is caught rather than silently narrowing this proof.
 PII_FIELDS = {"national_id", "driver_id", "phone", "license_number"}
-
 
 class TestSalisDriverPiiPermlevel(FrappeTestCase):
     """Site-bound. Fixtures are minted per METHOD: rollback covers rows only, so a doc
     reused across methods would carry the previous method's mutations."""
 
     def setUp(self):
-        # frappe.session.user is process state — no rollback restores it.
         self.addCleanup(frappe.set_user, "Administrator")
         frappe.set_user("Administrator")
         self.project = _project("S005 Driver PII Project")
@@ -108,8 +101,6 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
         supervisor = self._user_with_role(FLEET_SUPERVISOR)
         _grant_project(supervisor, self.project)
 
-        # The access itself, before either write — or neither outcome below would be
-        # evidence about permlevels.
         frappe.set_user(manager)
         self.assertIn(
             1,
@@ -123,7 +114,6 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
             f"{FLEET_SUPERVISOR} must not reach permlevel 1",
         )
 
-        # Verdict A — the privileged write PERSISTS.
         frappe.set_user(manager)
         privileged = frappe.get_doc("Salis Driver", doc.name)
         privileged.national_id = "1099887766"
@@ -141,11 +131,10 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
             f"{FLEET_MANAGER}'s license_number edit was discarded",
         )
 
-        # Verdict B — the unprivileged write is REVERTED, silently, with no exception.
         frappe.set_user(supervisor)
         unprivileged = frappe.get_doc("Salis Driver", doc.name)
         unprivileged.national_id = "2000000000"
-        unprivileged.save()  # must NOT raise: the framework reverts, it does not refuse
+        unprivileged.save()
         self.assertEqual(
             frappe.db.get_value("Salis Driver", doc.name, "national_id"),
             "1099887766",
@@ -176,8 +165,6 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
                 "license_number": "LIC-S005-CREATE",
             }
         ).insert()
-        # No addCleanup: the row was inserted inside the test transaction, and FrappeTestCase
-        # rolls rows back. Only non-row state (session user, Singles, files) needs a cleanup.
 
         stored = frappe.db.get_value(
             "Salis Driver", created.name, list(PII_FIELDS), as_dict=True
@@ -227,7 +214,6 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
                 self.assertEqual(row.get("read"), 1, f"{row['role']}: level-1 read missing")
                 self.assertEqual(row.get("write"), 1, f"{row['role']}: level-1 write missing")
 
-        # The explicit non-change: no level-0 authority moved.
         supervisor = [
             p
             for p in rows
@@ -243,8 +229,6 @@ class TestSalisDriverPiiPermlevel(FrappeTestCase):
             "Fleet Supervisor gained level-1 access it was never granted",
         )
 
-
-# --- merged from test_salis_driver_portal_actions.py ---
 APP_ROOT = Path(apex.__file__).resolve().parent
 DRIVER_JS = Path(apex.__file__).resolve().parent / "salis" / "doctype" / "salis_driver" / "salis_driver.js"
 TOKEN_DIR = APP_ROOT / "apex_core" / "doctype" / "masar_worker_token"
@@ -369,8 +353,6 @@ class TestSalisDriverPortalActions(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 
-
-# --- merged from test_salis_driver_state_contract.py ---
 class TestSalisDriverStateContract(TestCase):
     def test_approved_current_hrms_leave_blocks_an_active_driver(self):
         driver = frappe._dict(

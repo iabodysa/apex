@@ -34,14 +34,8 @@ from pathlib import Path
 
 import apex
 
-# The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
-# resolves against wherever this module's copy sits, and the maintainer mirror at
-# `.claude/tests/apex` (source_tree.py's SUITE_PACKAGE) holds no workspace JSON at all —
-# a glob rooted there goes quiet and every sidebar guard reading through here grades an
-# empty set while reporting green.
 _APP = str(Path(apex.__file__).resolve().parent)
 _WORKSPACE_GLOB = os.path.join(_APP, "*", "workspace", "*", "*.json")
-
 
 def workspaces():
     """title -> {roles, parent, hidden, path} for every is_standard workspace on disk."""
@@ -58,11 +52,6 @@ def workspaces():
         }
     return pages
 
-
-
-
-
-
 def blocks(forebear, role):
     """True if this ancestor stops a holder of ``role`` from ever seeing the child.
 
@@ -71,7 +60,4 @@ def blocks(forebear, role):
     it is never rendered and its children never get nested under it. An EMPTY roles
     list is world-visible and blocks nobody."""
     return forebear["hidden"] or (bool(forebear["roles"]) and role not in forebear["roles"])
-
-
-
 

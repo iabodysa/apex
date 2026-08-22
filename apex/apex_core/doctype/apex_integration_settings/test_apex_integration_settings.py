@@ -23,14 +23,10 @@ from frappe.tests.utils import FrappeTestCase
 
 LIST_ITEM = re.compile(r"<li>(.*?)</li>", re.S)
 
-
 class TestApexIntegrationSettings(FrappeTestCase):
     def setUp(self):
         frappe.set_user("Administrator")
         self.doc = frappe.get_single("Apex Integration Settings")
-        # A Single lives in tabSingles, outside any row this test created, and
-        # FrappeTestCase only rolls back once per CLASS — so snapshot the deployment
-        # value and register the restore BEFORE the first mutating save below.
         self._frontend_base_url = self.doc.frontend_base_url
         self.addCleanup(self._restore_settings)
 
@@ -51,7 +47,7 @@ class TestApexIntegrationSettings(FrappeTestCase):
 
     def test_blank_url_is_allowed(self):
         self.doc.frontend_base_url = ""
-        self.doc.save(ignore_permissions=True)  # must not raise
+        self.doc.save(ignore_permissions=True)
 
     def test_scheme_less_url_is_rejected(self):
         self.doc.frontend_base_url = "salis-fleet.com"

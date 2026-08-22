@@ -9,8 +9,6 @@ from apex.tests import factories
 from apex.tests._helpers import _user
 from apex.logistay.api import sim_actions
 
-
-
 class TestSIMCustodyAssignment(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
@@ -89,7 +87,6 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         )
         self.assertEqual(projection.current_custodian_employee, self.employee)
         self.assertEqual(projection.current_assignment, event.name)
-        # Cost center resolved from the employee and frozen on the event.
         self.assertEqual(event.cost_center, self.cost_center)
         self.assertEqual(projection.current_cost_center, self.cost_center)
 
@@ -146,7 +143,6 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         self._event(sim, "Return")
         self.assertEqual(self._status(sim), "Available")
         self.assertIsNone(frappe.db.get_value("SIM Card", sim.name, "current_custodian_employee"))
-        # Suspend an Available SIM, then Reactivate back to Available.
         self._event(sim, "Suspend")
         self._event(sim, "Reactivate")
         self.assertEqual(self._status(sim), "Available")
@@ -225,7 +221,6 @@ class TestSIMCustodyAssignment(FrappeTestCase):
         first = self._event(sim, "Assign", custodian_type="Employee", employee=self.employee)
         self._event(sim, "Return")
         self.assertEqual(self._status(sim), "Available")
-        # Cancelling the Return rolls the SIM back to the Assigned state it had.
         returns = frappe.get_all(
             "SIM Custody Assignment",
             filters={"sim_card": sim.name, "action": "Return", "docstatus": 1},
@@ -239,8 +234,6 @@ class TestSIMCustodyAssignment(FrappeTestCase):
 
 test_ignore = ['Company', 'Supplier', 'Currency', 'Cost Center', 'Project', 'Item', 'Employee', 'Department']
 
-
-# --- merged from test_sim_retirement.py ---
 REASON = "Handset stolen on site; police report filed."
 class _RetirementCase(FrappeTestCase):
     @classmethod
@@ -267,9 +260,6 @@ class _RetirementCase(FrappeTestCase):
         cls.contract.submit()
 
     def setUp(self):
-        # frappe.session.user is a process global and does NOT roll back; restore it
-        # before anything can change it, so a failure mid-test cannot leak the
-        # identity into the next test in this process.
         self.addCleanup(frappe.set_user, "Administrator")
         self._seq = 0
         frappe.db.savepoint("sim_retirement")
@@ -319,11 +309,9 @@ class TestRetirementClosesCustodyWithoutDeleting(_RetirementCase):
             as_dict=True,
         )
         self.assertEqual(projection.status, "Lost")
-        # Custody is CLOSED, not left dangling on a SIM nobody can hand back.
         self.assertEqual(projection.current_custodian_type, "Unassigned")
         self.assertIsNone(projection.current_custodian_employee)
         self.assertIsNone(projection.current_assignment)
-        # Nothing was deleted: the SIM row and both events survive.
         self.assertTrue(frappe.db.exists("SIM Card", sim.name))
         self.assertEqual(self.events(sim), 2)
 
@@ -360,7 +348,6 @@ class TestRetirementClosesCustodyWithoutDeleting(_RetirementCase):
         with self.assertRaises(frappe.ValidationError) as caught:
             self.act(sim, "Lost", reason=REASON)
         self.assertIn("expected", str(caught.exception))
-        # The refusal left no second event behind.
         self.assertEqual(self.events(sim), 1)
 class TestRetirementDemandsAReason(_RetirementCase):
     """``mandatory_depends_on`` on the Reason field is a CLIENT-side hint only —
@@ -372,12 +359,9 @@ class TestRetirementDemandsAReason(_RetirementCase):
         sim = self.sim()
         with self.assertRaises(frappe.ValidationError) as caught:
             self.act(sim, action, reason=None)
-        # Assert the MESSAGE, not the type: a link check or a mandatory-field error
-        # raises the same ValidationError and would satisfy a bare assertRaises.
         message = str(caught.exception)
         self.assertIn("Reason", message)
         self.assertIn(sim.name, message)
-        # Refused means nothing persisted and the SIM never moved.
         self.assertEqual(self.events(sim), 0)
         self.assertEqual(self.status(sim), "Available")
 
@@ -501,7 +485,6 @@ class TestRetirementIsReversible(_RetirementCase):
         self.assertEqual(projection.status, "Assigned")
         self.assertEqual(projection.current_custodian_employee, self.employee)
         self.assertEqual(projection.current_assignment, assign["assignment"])
-        # The cancelled event is retained as a cancelled document, not removed.
         self.assertTrue(frappe.db.exists("SIM Custody Assignment", retirement["assignment"]))
         self.assertEqual(self.events(sim), 1)
 
@@ -543,12 +526,7 @@ class TestARealOperatorCanRetireASim(_RetirementCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Restore the identity FIRST: frappe.session.user is a process global that no
-        # rollback touches, and the class teardown below runs DB work of its own.
         frappe.set_user("Administrator")
-        # Deliberately no db.commit() here — committing would also make this class's
-        # SIM and contract rows permanent on the shared test site by emptying the
-        # transaction FrappeTestCase.tearDownClass is about to roll back.
         frappe.db.delete(
             "User Permission",
             {"allow": "Company", "for_value": cls.company, "user": cls.operator},
@@ -560,7 +538,6 @@ class TestARealOperatorCanRetireASim(_RetirementCase):
         frappe.set_user(self.operator)
         result = sim_actions.perform_custody_action(sim.name, "Lost", reason=REASON)
         self.assertEqual(result["status"], "Lost")
-        # The event was authored by the operator, not silently by Administrator.
         self.assertEqual(
             frappe.db.get_value("SIM Custody Assignment", result["assignment"], "owner"),
             self.operator,

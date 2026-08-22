@@ -12,10 +12,8 @@ from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
 from apex.apex_core.utils.party_link import sync_party_employee
 
-
 class ResidentRequest(Document):
     pass
-
 
 _CATEGORY_TARGET = {
     "Maintenance": "Maintenance Request",
@@ -42,7 +40,6 @@ _CATEGORY_TO_ISSUE_TYPE = {
     "Safety": "Fire Safety",
 }
 
-
 def before_insert(doc, method=None):
     """Generates a tracking code, defaults channel and status, resolves location, sets priority."""
     if not doc.anonymous_tracking_code:
@@ -56,7 +53,6 @@ def before_insert(doc, method=None):
 
     _populate_location_from_token(doc)
     _apply_priority_rules(doc)
-
 
 def validate(doc, method=None):
     """Resolves the location token, syncs the employee, blocks a bad token, and checks status rules.
@@ -75,13 +71,11 @@ def validate(doc, method=None):
 
     _validate_status_transition(doc)
 
-
 def on_update(doc, method=None):
     """Native ToDo follow-up: when a request is Assigned to a user, put it in that
     user's desk queue; when it ends (Resolved/Rejected/Closed), close the open
     ToDos. Idempotent — never creates a duplicate ToDo for the same assignee."""
     _sync_assignment_todo(doc)
-
 
 def _sync_assignment_todo(doc):
     """Drive Frappe's own assignment API rather than the records behind it.
@@ -118,16 +112,11 @@ def _sync_assignment_todo(doc):
     })
     doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
 
-
 def _validate_status_transition(doc):
     """Enforce role-based state transition rules without a full Frappe Workflow."""
     status = doc.status or "New"
 
     if status == "Assigned" and not doc.assigned_to:
-        # A native unassign clears `assigned_to` behind the document
-        # (frappe/desk/form/assign_to.py:228-230) and leaves `status` alone. Refusing
-        # here instead wedged every later save of a request nobody is assigned to any
-        # more; `assigned_to` is read-only, so nothing else can reach this state.
         doc.status = status = "New"
 
     if status in ("Resolved", "Closed") and not doc.resolution_notes:
@@ -138,7 +127,6 @@ def _validate_status_transition(doc):
 
     if status == "Closed" and not doc.closed_by:
         doc.closed_by = frappe.session.user
-
 
 def _populate_location_from_token(doc):
     """Sets the accommodation site, building and room from the active QR Location matching the token."""
@@ -157,7 +145,6 @@ def _populate_location_from_token(doc):
     doc.accommodation_site = qr[0].accommodation_site
     doc.building = qr[0].building
     doc.room = qr[0].room
-
 
 def _apply_priority_rules(doc):
     """Sets priority to Critical for hazard keywords, or to High for AC and other urgent keywords."""
@@ -193,7 +180,6 @@ def _apply_priority_rules(doc):
         doc.priority = "Critical"
     elif (_is_ac_request() or any(_matches(term) for term in high_terms)) and doc.priority in (None, "", "Low", "Medium"):
         doc.priority = "High"
-
 
 @frappe.whitelist(methods=["POST"])
 def convert_request(source_name):
@@ -239,7 +225,6 @@ def convert_request(source_name):
         "already_converted": False,
     }
 
-
 def _link_target_to_request(source, target_doctype, target_name):
     """Stamp the read-only traceability fields and advance status. Uses
     db.set_value (not a full save) so the read_only target_* fields are written
@@ -250,14 +235,12 @@ def _link_target_to_request(source, target_doctype, target_name):
         updates["status"] = "In Progress"
     frappe.db.set_value("Resident Request", source.name, updates)
 
-
 def _common_location(source, target):
     """Copies the building, room and bed from the source request onto the new target document."""
     target.building = source.building
     target.room = source.room
     if source.bed:
         target.bed = source.bed
-
 
 def _build_maintenance_request(source):
     """Builds an unsaved Maintenance Request from the request's location, category and description."""
@@ -269,7 +252,6 @@ def _build_maintenance_request(source):
     target.reported_by = frappe.session.user
     target.status = "Open"
     return target
-
 
 def _build_safety_incident(source):
     """Builds an unsaved Safety Incident from the request's location, severity and description."""
@@ -283,7 +265,6 @@ def _build_safety_incident(source):
     target.reported_by = frappe.session.user
     return target
 
-
 def _build_custody_issue(source):
     """Builds an unsaved Custody Issue from the resident request's building, party and description."""
     target = frappe.new_doc("Custody Issue")
@@ -295,14 +276,12 @@ def _build_custody_issue(source):
     target.remarks = source.description or _("Converted from resident request {0}").format(source.name)
     return target
 
-
 _TRIAGE_NEXT = {
     "New": "Triaged",
     "Triaged": "In Progress",
     "In Progress": "Waiting Evidence",
     "Waiting Evidence": "In Progress",
 }
-
 
 @frappe.whitelist(methods=["POST"])
 def advance_triage_status(name, to_status):
@@ -328,9 +307,7 @@ def advance_triage_status(name, to_status):
     doc.save()
     return {"name": doc.name, "status": doc.status, "changed": True}
 
-
 BULK_TRIAGE_SYNC_LIMIT = 50
-
 
 @frappe.whitelist(methods=["POST"])
 def bulk_triage(names):
@@ -358,7 +335,6 @@ def bulk_triage(names):
 
     return _apply_bulk_triage(names)
 
-
 def _apply_bulk_triage(names):
     """Advance each New Resident Request in ``names`` to Triaged (per-row write
     permission checked); returns the count advanced. Shared body of the inline and
@@ -373,7 +349,6 @@ def _apply_bulk_triage(names):
         doc.save()
         advanced += 1
     return {"advanced": advanced, "total": len(names or [])}
-
 
 def _bulk_triage_job(names):
     """Background runner for a large bulk_triage selection (queued by ``bulk_triage``).

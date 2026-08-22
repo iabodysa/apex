@@ -41,15 +41,10 @@ test_dependencies = ["Company"]
 
 COMPANY = "_Test Company"
 
-# One representative retention key rather than a literal field name: the pre-conversion
-# form of this file named ``alert_retention_days``, which the controller no longer defines,
-# so four cases raised KeyError the moment the file was first actually run.
 RETENTION_KEY = "snapshot_retention_days"
-
 
 def _set_single(doctype, field, value):
     frappe.db.set_single_value(doctype, field, value)
-
 
 class TestRetentionSetting(FrappeTestCase):
     def setUp(self):
@@ -86,9 +81,6 @@ class TestRetentionSetting(FrappeTestCase):
             45,
             "nothing passed falls through to the stored Apex Settings value",
         )
-        # The hook seed is the built-in default itself, read from the module rather than
-        # written out, so a changed default cannot silently turn this case into the
-        # operator-override case below.
         self.assertEqual(
             effective_retention_days(RETENTION_KEY, RETENTION_DEFAULTS[RETENTION_KEY]),
             45,
@@ -103,7 +95,6 @@ class TestRetentionSetting(FrappeTestCase):
     def test_unknown_key_raises(self):
         with self.assertRaises(KeyError):
             retention_days("not_a_field")
-
 
 class TestPaymentTargetResolution(FrappeTestCase):
     def setUp(self):
@@ -121,7 +112,6 @@ class TestPaymentTargetResolution(FrappeTestCase):
     def test_resolves_configured_target(self):
         _set_single("Payment Routing Settings", "target_payment_doctype", "Payment Order")
         self.assertEqual(get_target_payment_doctype(), "Payment Order")
-
 
 class TestResolveCompany(FrappeTestCase):
     def setUp(self):

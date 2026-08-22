@@ -11,10 +11,8 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-
 def _endpoint():
     return f"https://fcm.googleapis.com/fcm/send/{frappe.generate_hash(length=16)}"
-
 
 class TestPortalPushSubscription(FrappeTestCase):
     def setUp(self):
@@ -66,25 +64,19 @@ class TestPortalPushSubscription(FrappeTestCase):
             self._insert(second)
 
     def test_worker_subscription_resolves_to_employee_only(self):
-        # Worker with a driver ALSO set must be refused — not two holders at once.
         with self.assertRaises(frappe.ValidationError):
             self._sub(driver=self.driver).insert(ignore_permissions=True)
-        # Worker with no employee must be refused — not zero holders either.
         with self.assertRaises(frappe.ValidationError):
             self._sub(employee=None).insert(ignore_permissions=True)
-        # Exactly one holder (employee only) is accepted.
         ok = self._insert(self._sub())
         self.assertEqual(ok.employee, self.employee)
         self.assertFalse(ok.driver)
 
     def test_driver_subscription_resolves_to_driver_only(self):
-        # Driver with an employee ALSO set must be refused — not two holders at once.
         with self.assertRaises(frappe.ValidationError):
             self._sub(holder_type="Driver", driver=self.driver).insert(ignore_permissions=True)
-        # Driver with no driver set must be refused — not zero holders either.
         with self.assertRaises(frappe.ValidationError):
             self._sub(holder_type="Driver", employee=None).insert(ignore_permissions=True)
-        # Exactly one holder (driver only) is accepted.
         ok = self._insert(self._sub(holder_type="Driver", employee=None, driver=self.driver))
         self.assertEqual(ok.driver, self.driver)
         self.assertFalse(ok.employee)

@@ -3,7 +3,6 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-
 class TestWorkShift(FrappeTestCase):
     def _shift(self, *, start_time="20:00:00", end_time="05:00:00", days=None):
         return frappe.get_doc(
@@ -48,8 +47,6 @@ class TestWorkShift(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             shift.validate()
 
-
-# --- merged from test_work_shift_naming.py ---
 class TestWorkShiftNaming(FrappeTestCase):
     def _shift(self, **overrides):
         """A Work Shift the controller accepts: ``applicable_days`` is mandatory, so a

@@ -31,7 +31,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
 
 VALID_STATUSES = (
     "Open",
@@ -46,25 +45,22 @@ _CLOSING_STATUSES = {"Resolved", "Closed"}
 
 
 class FuelExceptionCase(Document):
-    def before_insert(self):
-        """Defaults the reporter to the current session user when not already set."""
-        self._default_reporter()
-
     def validate(self):
-        """Validates the recovered amount and enforces the initial status and closure controls."""
-        self._default_reporter()
-        if flt(self.amount_recovered) < 0:
-            frappe.throw(_("Amount recovered cannot be negative."))
+        """Validates the status and enforces the initial status and closure controls.
+
+        The reporter re-stamp here outlives the field's ``__user`` default: that default
+        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
+        and fills a field only when it is None (``frappe/model/document.py:836``), so it
+        covers neither a later save nor a request body carrying ``reported_by = ""``. A
+        blank reporter can never equal ``closed_by``, so the non-raiser gate below would
+        pass for the very user who raised the case.
+        """
+        if not self.reported_by:
+            self.reported_by = frappe.session.user
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
         self._guard_initial_status()
         self._enforce_closure_controls()
-
-
-    def _default_reporter(self):
-        """Default the raiser to the current session user when blank."""
-        if not self.reported_by:
-            self.reported_by = frappe.session.user
 
     def _guard_initial_status(self):
         """A new case must be created at the initial state (Open). Later states are

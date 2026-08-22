@@ -133,7 +133,8 @@
    "description": "Number of days before an expiry or due date to start raising alerts.",
    "fieldname": "alert_lead_days",
    "fieldtype": "Int",
-   "label": "Alert Lead Days"
+   "label": "Alert Lead Days",
+   "non_negative": 1
   },
   {
    "default": "30",
@@ -370,7 +371,8 @@
    "description": "Fuel requests above this litre amount require approval.",
    "fieldname": "fuel_request_approval_threshold_litres",
    "fieldtype": "Float",
-   "label": "Fuel Request Approval Threshold (L)"
+   "label": "Fuel Request Approval Threshold (L)",
+   "non_negative": 1
   },
   {
    "default": "20",
@@ -412,7 +414,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-14 01:30:00.000000",
+ "modified": "2026-08-22 21:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

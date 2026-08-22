@@ -15,8 +15,6 @@ from pathlib import Path
 from unittest import TestCase
 from apex.habitat.doctype.building import building
 
-
-
 class TestRoom(FrappeTestCase):
     def test_a_room_takes_the_number_it_is_given(self):
         room = frappe.get_doc({
@@ -45,8 +43,6 @@ class TestRoom(FrappeTestCase):
 
 test_dependencies = ['Building']
 
-
-# --- merged from test_room_inventory_stamp_is_gone.py ---
 class TestRoomSearchFieldsResolve(TestCase):
     def _meta(self):
         return json.loads(

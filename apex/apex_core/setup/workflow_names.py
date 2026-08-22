@@ -15,8 +15,9 @@ A Workflow here earns its approval machinery only where a transition REFUSES —
 ``Dispute``, ``Block``, ``Return``, ``Revise`` or ``Reopen``; ``Cancel`` is abandonment and
 grades nothing. Fuel Claim and Rental Settlement refuse through ``Dispute`` rather than
 ``Reject``, so a scanner watching only for Reject grades both of them wrongly.
-``apex/tests/test_workflow_state_governance.py`` holds the graded population and names the one
-Decisionless Workflow, so the grade is re-checked against the fixtures rather than re-argued.
+The invariant, written here rather than pointed at: a Workflow whose transitions carry no
+refusing action is a **Decisionless Workflow** and earns no approval machinery, and the
+grade is re-derived from WORKFLOWS below rather than trusted from a previous reading.
 
 Dispatch Trip is that one, and it keeps its Workflow: ``Completed`` carries ``doc_status 1``
 and ``apex/salis/utilisation_engine.py:61`` counts only a SUBMITTED Completed trip, so a plain

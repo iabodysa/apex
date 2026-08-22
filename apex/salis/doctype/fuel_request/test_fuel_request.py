@@ -16,7 +16,6 @@ from apex.salis.utils import (
 )
 from apex.tests import factories
 
-
 class TestFuelRequest(FrappeTestCase):
     def test_explicit_blank_request_type_is_not_silently_defaulted(self):
         request = FuelRequest(
@@ -40,8 +39,6 @@ class TestFuelRequest(FrappeTestCase):
 
 test_ignore = ['Employee', 'Company', 'Project', 'Salis Vehicle', 'Salis Driver', 'User', 'Role', 'Leave Application', 'Leave Type', 'Holiday List']
 
-
-# --- merged from test_fuel_request_workflow.py ---
 WORKFLOW = "Fuel Request Workflow"
 def _actions(doc):
     """The set of workflow action names currently available to the session user."""
@@ -50,8 +47,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # mandatory Salis workflow (salis_workflow_seed, every install/migrate);
-        # absence is a regression - FAIL, never skip.
         if get_workflow_name("Fuel Request") != WORKFLOW:
             raise AssertionError(
                 f"Mandatory Salis workflow {WORKFLOW!r} not active for "
@@ -94,7 +89,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-
     def _quota(self, monthly_litres=100):
         """A fresh Active Fuel Quota for the test vehicle/project."""
         q = frappe.get_doc({
@@ -132,14 +126,12 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         if frappe.db.exists("Fuel Quota", name):
             frappe.delete_doc("Fuel Quota", name, ignore_permissions=True, force=True)
 
-
     def test_workflow_is_seeded_and_active(self):
         self.assertEqual(get_workflow_name("Fuel Request"), WORKFLOW)
         self.assertTrue(frappe.db.get_value("Workflow", WORKFLOW, "is_active"))
         self.assertEqual(
             frappe.db.get_value("Workflow", WORKFLOW, "workflow_state_field"), "status"
         )
-
 
     def test_standard_post_submit_pending_approved_done(self):
         fr = self._new("Standard", requested_litres=8, amount=120)
@@ -160,8 +152,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         self.assertEqual(fr.docstatus, 1)
 
     def test_topup_post_submit_then_revert(self):
-        # A Top-up raises the ceiling of a specific allocation, so
-        # FuelRequest._validate_topup refuses one that names no Fuel Quota.
         q = self._quota()
         fr = self._new(
             "Top-up", topup_litres=12, is_temporary=1,
@@ -194,7 +184,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         self.assertEqual(fr.status, "Done")
         self.assertEqual(fr.docstatus, 1)
 
-
     def test_sod_requester_cannot_approve(self):
         fr = self._new("Standard", requested_by=self.manager_maker, requested_litres=5)
 
@@ -208,7 +197,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         apply_workflow(fr, "Approve")
         fr.reload()
         self.assertEqual(fr.status, "Approved")
-
 
     def test_revert_is_topup_only(self):
         """A Standard request, once Done, is NOT offered Revert (Top-up only)."""
@@ -240,7 +228,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         std.reload()
         self.assertEqual(std.status, "Failed")
         self.assertEqual(std.docstatus, 1)
-
 
     def test_standard_quota_applied_on_post_submit_done(self):
         q = self._quota()
@@ -281,7 +268,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "status"), "Exhausted")
 
-        # The exhausted quota must refuse the next Standard draw and stay at 10 L.
         frappe.set_user("Administrator")
         second = self._new("Standard", requested_litres=5, amount=75, fuel_quota=q.name)
         frappe.set_user(self.manager)
@@ -291,7 +277,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "docstatus"), 0)
         self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "quota_applied"), 0)
 
-        # A Top-up against the very same exhausted quota still goes through.
         frappe.set_user("Administrator")
         topup = self._new("Top-up", topup_litres=5, fuel_quota=q.name)
         frappe.set_user(self.manager)
@@ -301,7 +286,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         topup.reload()
         self.assertEqual(topup.status, "Done")
         self.assertEqual(topup.docstatus, 1)
-        # A Top-up posts no quota consumption, so the quota is untouched.
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 10)
 
     def test_oversized_first_standard_draw_is_refused(self):
@@ -320,13 +304,11 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(oversized, "Approve")
 
-        # Refused before submit: nothing consumed, nothing submitted, no flag set.
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 0)
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "status"), "Active")
         self.assertEqual(frappe.db.get_value("Fuel Request", oversized.name, "docstatus"), 0)
         self.assertEqual(frappe.db.get_value("Fuel Request", oversized.name, "quota_applied"), 0)
 
-        # The same size as a Top-up is the sanctioned route and stays open.
         frappe.set_user("Administrator")
         topup = self._new("Top-up", topup_litres=15, fuel_quota=q.name)
         frappe.set_user(self.manager)
@@ -358,7 +340,6 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         first.reload()
         apply_workflow(second, "Approve")
         second.reload()
-        # Both fit the allocation on their own, so both reach Approved.
         self.assertEqual(first.docstatus, 1)
         self.assertEqual(second.docstatus, 1)
 
@@ -367,14 +348,11 @@ class TestFuelRequestWorkflow(FrappeTestCase):
         self.assertEqual(first.status, "Done")
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 6)
 
-        # 6 + 6 > 10: the locked read refuses the second draw at Complete.
         with self.assertRaises(frappe.ValidationError):
             apply_workflow(second, "Complete")
         self.assertEqual(frappe.db.get_value("Fuel Quota", q.name, "consumed_litres"), 6)
         self.assertEqual(frappe.db.get_value("Fuel Request", second.name, "quota_applied"), 0)
 
-
-# --- merged from test_rider_leave_guard.py ---
 def _driver(full_name, status="Active", employee=None, supervisor=None, project=None):
     """Get-or-create a Salis Driver carrying ``status``.
 
@@ -493,7 +471,6 @@ class TestRiderLeaveGuard(FrappeTestCase):
     def tearDown(self):
         frappe.set_user("Administrator")
 
-
     def test_active_rider_is_not_blocked(self):
         driver = _driver("T119 Active Rider", status="Active")
         self.assertIsNone(
@@ -539,7 +516,6 @@ class TestRiderLeaveGuard(FrappeTestCase):
         self.assertTrue(
             reason, "A rider linked to a Left Employee must be blocked."
         )
-
 
     def test_fuel_request_rejected_for_onleave_rider(self):
         """The rejection, and the clearance task that must OUTLIVE it.
@@ -689,15 +665,12 @@ class TestRiderLeaveGuard(FrappeTestCase):
         )
         self.addCleanup(lambda: self._purge_todos(driver))
 
-
     @staticmethod
     def _left_employee(name):
         emp = frappe.db.get_value("Employee", {"employee_name": name}, "name")
         if emp:
             frappe.db.set_value("Employee", emp, "status", "Left")
             return emp
-        # Built, not assumed: an Employee needs a Company, and nothing in
-        # before_tests guarantees one on a site that was never wizard-bootstrapped.
         company = factories.ensure_company()
         doc = frappe.get_doc(
             {

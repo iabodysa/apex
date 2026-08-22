@@ -34,7 +34,6 @@ FIELDS = (
     "stock_frozen_upto",
 )
 
-
 class TestApexStockSettings(FrappeTestCase):
     def setUp(self):
         make_company()
@@ -111,7 +110,6 @@ class TestApexStockSettings(FrappeTestCase):
             backdating_days=5,
             require_active_store=0,
         )
-        # Must not raise.
         assert_posting_allowed(None, posting_date=today())
 
     def test_assert_posting_allowed_throws_on_backdating_for_unprivileged_user(self):
@@ -132,7 +130,6 @@ class TestApexStockSettings(FrappeTestCase):
         self._set(enable_stock_engine=1, stock_frozen_upto=None, backdating_days=5, require_active_store=1)
         assert_posting_allowed(building.name, posting_date=today())
     def test_may_backdate_true_for_system_manager(self):
-        # Administrator always carries System Manager.
         self.assertTrue(_may_backdate("Some Role That Does Not Exist"))
 
     def test_may_backdate_false_for_unprivileged_user_without_role(self):

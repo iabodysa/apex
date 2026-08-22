@@ -14,8 +14,9 @@ if_owner), and every logged-in user holds ``All``. ``if_owner`` never restricts
 permlevel-1 row keeps the cost they enter instead of resetting it. They still cannot
 edit or submit it. Elsewhere in the five the overlay needs a second role; here it is
 already live, so do not reason about this DocType from the other four.
-Proof and the framework citations are in
-``apex/habitat/doctype/custody_damage_assessment/test_finance_manager_field_overlay.py``.
+The framework's rule, written here rather than pointed at: permlevel access is the UNION
+of the caller's roles (frappe/permissions.py get_role_permissions), so a user holding both
+roles reads the union of both field sets and no DocPerm edit is needed to widen him.
 """
 
 from __future__ import annotations
