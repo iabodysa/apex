@@ -82,3 +82,19 @@ def resolve_company_or_any(module: str | None = None) -> str | None:
     return resolve_company(module) or (
         frappe.get_all("Company", pluck="name", limit=1) or [None]
     )[0]
+
+
+def display_currency(module: str = "Habitat") -> str:
+    """The currency a money figure is shown in, taken from the configured company.
+
+    The operator answers currency once, on erpnext's own wizard slide, and it lands on
+    the Company. Writing a literal here instead shows every site the same currency
+    whatever it actually trades in. Falls back to the site default, then to the global
+    default, so a report still renders before a company is configured.
+    """
+    company = resolve_company(module)
+    if company:
+        currency = frappe.get_cached_value("Company", company, "default_currency")
+        if currency:
+            return currency
+    return frappe.db.get_default("currency") or frappe.defaults.get_global_default("currency") or ""

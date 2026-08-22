@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import frappe
 
+from apex.apex_core.utils.company import display_currency
+
 from apex.habitat.tasks.common import _notify_operational
 
 _ROW_SAVEPOINT = "residency_row"
@@ -114,7 +116,7 @@ def idle_resident_aging() -> None:
                     _notify_operational(
                         "Idle Resident Report", r.name,
                         f"idle_resident_aging: {worker} has now been a cost bleed for {days} days "
-                        f"(estimated accommodation cost {cost} SAR).",
+                        f"(estimated accommodation cost {cost} {display_currency()}).",
                     )
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)

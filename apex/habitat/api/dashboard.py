@@ -1,5 +1,7 @@
 # Copyright (c) 2026, afmcoltd
 import frappe
+
+from apex.apex_core.utils.company import display_currency
 from frappe.utils import add_days, flt, today
 from frappe.query_builder.functions import Coalesce, Count
 from pypika.functions import NullIf
@@ -125,7 +127,7 @@ def get_pending_on_manifest(filters=None):
 
 @frappe.whitelist()
 def get_custody_value_in_employee_hands(filters=None):
-    """Value-at-risk: SAR currently held in employee custody.
+    """Value-at-risk: the amount currently held in employee custody.
 
     Sums signed (qty * unit_cost) over non-cancelled Custody Article rows of
     the Accommodation Stock Ledger where an employee is set — issue rows add,
@@ -144,7 +146,7 @@ def get_custody_value_in_employee_hands(filters=None):
           {extra}
         """
     )
-    return {"value": flt(total[0][0]) if total else 0.0, "fieldtype": "Currency", "options": "SAR"}
+    return {"value": flt(total[0][0]) if total else 0.0, "fieldtype": "Currency", "options": display_currency()}
 
 
 def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:

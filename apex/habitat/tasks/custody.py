@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import frappe
+
+from apex.apex_core.utils.company import display_currency
 from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
 from pypika.functions import Min
@@ -103,7 +105,7 @@ def weekly_custody_digest() -> None:
     """Email each building's responsible supervisor a weekly custody roll-up.
 
     Per building: open custody issues (Issued / Partially Returned), of those the
-    count already past ``expected_return_date``, the SAR value still in worker
+    count already past ``expected_return_date``, the value still in worker
     hands (net signed ledger value, the same definition as the value-in-hands
     card), and damage assessed month-to-date. Buildings are grouped by their
     ``responsible_supervisor`` so each supervisor receives only their own
@@ -193,14 +195,15 @@ def weekly_custody_digest() -> None:
         try:
             if not mailable([supervisor]):
                 continue
+            currency = display_currency()
             rows = "".join(
                 "<tr><td>{b}</td><td>{open_}</td><td>{overdue}</td>"
                 "<td>{value}</td><td>{damage}</td></tr>".format(
                     b=escape_html(name),
                     open_=open_counts.get(name, 0),
                     overdue=overdue_counts.get(name, 0),
-                    value=fmt_money(value_by_building.get(name, 0.0), currency="SAR"),
-                    damage=fmt_money(damage_mtd.get(name, 0.0), currency="SAR"),
+                    value=fmt_money(value_by_building.get(name, 0.0), currency=currency),
+                    damage=fmt_money(damage_mtd.get(name, 0.0), currency=currency),
                 )
                 for name in names
             )

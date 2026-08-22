@@ -8,6 +8,8 @@ grouped per employee and capped at the top holders by value.
 """
 
 import frappe
+
+from apex.apex_core.utils.company import display_currency
 from frappe import _
 from frappe.utils import flt
 from frappe.utils.dashboard import cache_source
@@ -32,7 +34,7 @@ def get(
     frappe.has_permission("Accommodation Stock Ledger", "read", throw=True)
     rows = get_top_custody_holders_by_value(limit=10)
     if not rows:
-        return {"labels": [], "datasets": [{"name": _("Custody Value (SAR)"), "values": []}], "type": "bar"}
+        return {"labels": [], "datasets": [{"name": _("Custody Value ({0})").format(display_currency()), "values": []}], "type": "bar"}
 
     employees = [r["employee"] for r in rows]
     name_map = dict(
@@ -46,6 +48,6 @@ def get(
 
     return {
         "labels": [name_map.get(r["employee"]) or r["employee"] for r in rows],
-        "datasets": [{"name": _("Custody Value (SAR)"), "values": [flt(r["value"]) for r in rows]}],
+        "datasets": [{"name": _("Custody Value ({0})").format(display_currency()), "values": [flt(r["value"]) for r in rows]}],
         "type": "bar",
     }

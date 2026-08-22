@@ -33,7 +33,6 @@ operator never picked.
 """
 
 import frappe
-from frappe import _
 from frappe.utils import cint
 
 from apex.apex_core.payment_router import validate_target_doctype

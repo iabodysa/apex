@@ -732,7 +732,7 @@ class CustodyKiosk {
 			.appendTo(this.$subtotal);
 		$('<span class="ck-subtotal-value"></span>')
 			.attr("style", CK_STYLE.subtotal_value)
-			.append($("<bdi></bdi>").text(format_currency(flt(total), "SAR")))
+			.append($("<bdi></bdi>").text(format_currency(flt(total), frappe.boot.sysdefaults.currency)))
 			.appendTo(this.$subtotal);
 	}
 

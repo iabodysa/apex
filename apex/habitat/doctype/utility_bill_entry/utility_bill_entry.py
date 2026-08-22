@@ -32,6 +32,8 @@ ambiguous ones blank).
 from __future__ import annotations
 
 import frappe
+
+from apex.apex_core.utils.company import display_currency
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, fmt_money, today
@@ -141,8 +143,8 @@ def _compute_sharing(doc) -> None:
                 "Shared meter — {0}% of {1} = {2} (building share)"
             ).format(
                 f"{pct:.1f}",
-                fmt_money(total, currency="SAR"),
-                fmt_money(share, currency="SAR"),
+                fmt_money(total, currency=display_currency()),
+                fmt_money(share, currency=display_currency()),
             )
         else:
             doc.bill_share_note = ""
