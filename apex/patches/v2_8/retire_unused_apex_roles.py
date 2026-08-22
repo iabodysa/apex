@@ -11,6 +11,11 @@ or the database points at them — so this patch removes both. Admin Manager is 
 Building License's ``responsible_role`` field defaults to it and two live rows name it, so
 the role stays; only its desk access is switched off, since naming a role on a document
 never required a desk.
+
+A blocked deletion is PRINTED rather than logged: ``frappe.logger().info`` emits on no site,
+because ``frappe/utils/logger.py:12`` defaults the level to WARNING on a dev server and ERROR
+otherwise and nothing sets it lower, while migrate's own output is what the operator running
+the upgrade is reading.
 """
 
 import frappe
@@ -26,8 +31,6 @@ def execute():
         try:
             frappe.delete_doc("Role", role_name, ignore_permissions=True)
         except frappe.LinkExistsError as e:
-            # Printed, not logged: this site drops logger().info, and the operator
-            # running the upgrade reads migrate's output.
             print(f"apex: Role {role_name} is still referenced and was left in place: {e}")
 
     if frappe.db.exists("Role", "Admin Manager"):
