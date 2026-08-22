@@ -311,10 +311,7 @@ def _clean_adhoc_passengers(passengers):
     """Validate + normalize the client's ad-hoc passenger rows. Returns a list of
     clean dicts ready to append to the request's ``adhoc_passengers`` table; throws
     on a row missing a name or ID, or carrying an unparseable expiry."""
-    import json
-
-    if isinstance(passengers, str):
-        passengers = json.loads(passengers or "[]")
+    passengers = frappe.parse_json(passengers or "[]")
     rows = []
     for p in passengers or []:
         full_name = (p.get("full_name") or "").strip()

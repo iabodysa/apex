@@ -40,7 +40,12 @@ def _router_base():
 
 
 def _fingerprint(points):
-    """Returns a stable hash of a stop-point list, used as its cache identity."""
+    """Returns a stable hash of a stop-point list, used as its cache identity.
+
+    The dump feeds the SHA-1 straight after; its bytes ARE the hash input, so a
+    formatting change here (key order, separators) changes the fingerprint and
+    silently splits one route's cache entries in two.
+    """
     return hashlib.sha1(json.dumps(points, sort_keys=True).encode("utf-8")).hexdigest()
 
 
@@ -86,6 +91,9 @@ def road_path(points, cached_only=False):
     ceiling into a multiple of itself while a person waits. Spending a bounded budget on
     misses and serving the rest cached-only degrades the tail to straight lines, which is
     the same thing the caller already renders when the router is unreachable.
+
+    The response is parsed as the OSRM server's own HTTP body, byte for byte — it is
+    never client input, so there is no "already parsed" shape to guard against.
     """
     base = _router_base()
     if not base or not points or len(points) < 2:

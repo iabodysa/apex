@@ -38,7 +38,6 @@ savepoint-per-round logic lives in exactly one place.
 from __future__ import annotations
 
 import datetime
-import json
 
 import frappe
 from frappe import _
@@ -359,11 +358,10 @@ def submit_round(building, cadence, round_date, lines, is_reinspection=0):
     if not round_date:
         frappe.throw(_("A round date is required to submit a round."))
 
-    if isinstance(lines, str):
-        try:
-            lines = json.loads(lines)
-        except ValueError:
-            frappe.throw(_("Checklist lines must be valid JSON."))
+    try:
+        lines = frappe.parse_json(lines)
+    except ValueError:
+        frappe.throw(_("Checklist lines must be valid JSON."))
     if not isinstance(lines, list):
         frappe.throw(_("Checklist lines must be a list."))
 
@@ -518,11 +516,10 @@ def submit_due_rounds(building, round_date, results):
     if not round_date:
         frappe.throw(_("A round date is required to submit rounds."))
 
-    if isinstance(results, str):
-        try:
-            results = json.loads(results)
-        except ValueError:
-            frappe.throw(_("Results must be valid JSON."))
+    try:
+        results = frappe.parse_json(results)
+    except ValueError:
+        frappe.throw(_("Results must be valid JSON."))
     if not isinstance(results, list):
         frappe.throw(_("Results must be a list."))
 

@@ -32,8 +32,6 @@ supervisor scoped to building A can neither read nor write building B's items.
 
 from __future__ import annotations
 
-import json
-
 import frappe
 from frappe import _
 
@@ -159,11 +157,10 @@ def submit_counts(building, lines):
     if not building:
         frappe.throw(_("A building is required to submit counts."))
 
-    if isinstance(lines, str):
-        try:
-            lines = json.loads(lines)
-        except ValueError:
-            frappe.throw(_("Counts must be valid JSON."))
+    try:
+        lines = frappe.parse_json(lines)
+    except ValueError:
+        frappe.throw(_("Counts must be valid JSON."))
     if not isinstance(lines, list):
         frappe.throw(_("Counts must be a list."))
     if not lines:

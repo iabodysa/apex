@@ -76,7 +76,11 @@ def _b64d(txt: str) -> bytes:
 
 
 def _issue_token(dispatch_trip: str, worker: str) -> str:
-    """Build a signed pass token binding (trip, worker, issue-time)."""
+    """Build a signed pass token binding (trip, worker, issue-time).
+
+    ``body`` is what ``_sign`` hashes below; its bytes are the HMAC input, not a
+    value to reparse or reshape.
+    """
     payload = {
         "dt": dispatch_trip,
         "w": worker,
@@ -89,7 +93,12 @@ def _issue_token(dispatch_trip: str, worker: str) -> str:
 def _verify_token(token: str) -> dict | None:
     """Return the decoded payload when the signature is intact, else None. A
     tampered body or a wrong/forged signature both fail closed (constant-time
-    compare)."""
+    compare).
+
+    ``body`` is parsed only after it verified against the HMAC above, and it is
+    ``bytes`` here, not ``str`` — a helper that skips non-``str`` input would
+    return it unparsed instead of a payload dict.
+    """
     if not token or "." not in token:
         return None
     encoded, sig = token.rsplit(".", 1)

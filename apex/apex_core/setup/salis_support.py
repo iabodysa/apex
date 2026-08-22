@@ -37,7 +37,7 @@ def _parse_workdays(value) -> list[str]:
         if not value:
             return []
         try:
-            value = json.loads(value)
+            value = frappe.parse_json(value)
         except json.JSONDecodeError:
             value = [part.strip() for part in value.split(",")]
     return [str(day).strip() for day in (value or []) if str(day).strip()]
