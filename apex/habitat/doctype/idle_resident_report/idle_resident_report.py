@@ -36,8 +36,8 @@ def after_insert(doc, method=None):
     Routed through ``assign_role`` rather than a raw ``get_users_with_role`` +
     ``assign_to.add``: a role holder who cannot read this document would otherwise be
     handed one via a DocShare, or blocked outright with Document Sharing off
-    (assign_to.py:98-110). No DocPerm currently grants HR Manager read here, so an HR
-    report is queued to nobody until that is granted — reported, not silently widened.
+    (assign_to.py:98-110). Every role in ``_DEPARTMENT_ROLE`` holds a read DocPerm here;
+    strip one and that department's reports queue to nobody, without an error.
     """
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
