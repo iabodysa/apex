@@ -1,14 +1,16 @@
 # Copyright (c) 2026, afmcoltd
-"""Give every building supervisor the User Permission row his access is about to depend on.
+"""Give every building supervisor the User Permission row their access depends on.
 
 ``Building.on_update`` grants and revokes this row whenever ``responsible_supervisor``
 changes, the same shape erpnext uses for Company on an Employee
-(erpnext/setup/doctype/employee/employee.py:99-101). A building saved before that hook
-existed never got one, and until now nothing noticed: the app derived the same restriction
-itself in Python. Once that derivation is removed the row IS the access, so a missing one
-would silently widen a supervisor to every estate.
+(erpnext/setup/doctype/employee/employee.py:99-101). Any building saved without that hook
+carries no row, and the row IS the estate: ``db_query.add_user_permissions``
+(frappe/model/db_query.py:1067) builds the whole restriction from it. A supervisor missing
+one is refused every estate by ``habitat.permissions.refuse_a_supervisor_with_no_building``
+rather than widened to all of them, so the cost of a gap is a blank list, not a leak.
 
-Idempotent: an existing row is left alone, so a re-run adds nothing.
+Idempotent: an existing row is left alone, so a re-run adds nothing. Skips a supervisor
+with no User record, because User Permission's own link validation would refuse it.
 """
 
 import frappe
