@@ -196,7 +196,21 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     return flt(sum(flt(r.signed_qty) for r in rows))
 
 def has_stock_entries(voucher_type: str, voucher_no: str) -> bool:
-    """Idempotency guard: True if this voucher already has live (non-cancelled) rows."""
+    """Idempotency guard: True if this voucher already has live (non-cancelled) rows.
+
+    Takes the SOURCE row's write lock before reading, so two callers posting the same
+    voucher serialize and the second sees the first's rows. Without it the read is a
+    check-then-insert that nothing enforces: both pass, both post, and a building's
+    stock balance doubles with no error. The lock is here rather than in each caller
+    because a guard the next voucher type does not inherit is not a guard.
+
+    A unique index cannot do this job: one voucher legitimately posts many rows — a
+    pair per detail line for the two ends of a movement, three where a checkout splits
+    returned from missing — so no column tuple identifies a single posting.
+
+    Callers hold the lock until their transaction ends, which is the point: it spans
+    the read and the inserts that follow it."""
+    frappe.db.get_value(voucher_type, voucher_no, "name", for_update=True)
     return bool(frappe.db.exists(
         "Accommodation Stock Ledger",
         {"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},

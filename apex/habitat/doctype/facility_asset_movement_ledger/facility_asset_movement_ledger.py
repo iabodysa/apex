@@ -15,6 +15,28 @@ from frappe import _
 from frappe.model.document import Document
 
 
+def on_doctype_update():
+    """UNIQUE(source_doctype, source_name, reversal_of) — the tuple that identifies
+    one posting, so a raced or retried submit cannot write a second row.
+
+    ``asset_movement_engine`` guards both writes with a read-then-insert that nothing
+    enforces: ``_insert_ledger_row`` skips a source that already has an original, and
+    ``reverse_asset_movement`` skips an original that already has a reversal. Two
+    concurrent submits both pass their read. ``reversal_of`` is in the key because an
+    original and its mirror share a source and must both be allowed to exist.
+
+    Created and kept in sync on migrate through Frappe's on_doctype_update hook.
+    Guarded rather than declared as a field ``unique`` flag: pre-existing duplicate
+    rows would abort a migrate, and this logs the blocking groups instead."""
+    from apex.apex_core.utils.ledger_index import add_unique_guarded
+
+    add_unique_guarded(
+        "Facility Asset Movement Ledger",
+        ["source_doctype", "source_name", "reversal_of"],
+        constraint_name="unique_faml_source",
+    )
+
+
 class FacilityAssetMovementLedger(Document):
     def validate(self):
         """Blocks any update to an already-persisted ledger row, allowing only the initial insert."""

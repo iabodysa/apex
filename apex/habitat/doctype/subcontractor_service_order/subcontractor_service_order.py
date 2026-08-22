@@ -77,7 +77,7 @@ def _stamp_confirmation(doc):
 @frappe.whitelist(methods=["POST"])
 def start_work(service_order):
     """Transition Subcontractor Service Order from Scheduled to In Progress."""
-    doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -105,7 +105,7 @@ def mark_completed(
     order that is In Progress may be marked Completed, so the terminal state is
     reached through a guarded chokepoint rather than a free-form status edit.
     """
-    doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -131,7 +131,7 @@ def mark_completed(
 @frappe.whitelist(methods=["POST"])
 def mark_missed(service_order):
     """Transition Subcontractor Service Order from In Progress to Missed."""
-    doc = frappe.get_doc("Subcontractor Service Order", service_order)
+    doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:

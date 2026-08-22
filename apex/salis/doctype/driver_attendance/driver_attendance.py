@@ -16,10 +16,19 @@ class DriverAttendance(Document):
         self._compute_worked_hours()
 
     def _guard_duplicate(self):
-        """One attendance row per driver per day (defends the portal get-or-create
-        against a concurrent double-insert)."""
+        """One live attendance row per driver per day.
+
+        Takes the Salis Driver row's write lock before reading, so two check-ins for
+        one driver serialize and the second sees the first's row. Without it the read
+        is a check-then-insert that nothing enforces, and a double-tap on the portal
+        writes two attendance rows for one day.
+
+        A unique index on (driver, attendance_date) cannot do this job: the rule below
+        excludes cancelled rows, so cancelling a day's attendance and entering it again
+        is legitimate, and a database key that spans docstatus would refuse it."""
         if not self.is_new():
             return
+        frappe.db.get_value("Salis Driver", self.driver, "name", for_update=True)
         if frappe.db.exists(
             "Driver Attendance",
             {

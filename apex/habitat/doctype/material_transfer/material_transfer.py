@@ -97,8 +97,12 @@ def _post_ship_leg(doc):
 @frappe.whitelist(methods=["POST"])
 def mark_received(transfer: str, received_date: str = None):
     """Post the receive leg into the destination store and mark the transfer
-    Received. Only valid for a submitted, In-Transit transfer; idempotent on status."""
-    doc = frappe.get_doc(VOUCHER_TYPE, transfer)
+    Received. Only valid for a submitted, In-Transit transfer.
+
+    Idempotent on status, and the transfer is loaded ``for_update`` so that holds
+    under concurrency: without the lock two callers both read "In Transit" and both
+    post the receive leg into the destination store."""
+    doc = frappe.get_doc(VOUCHER_TYPE, transfer, for_update=True)
     frappe.has_permission(VOUCHER_TYPE, "write", doc=doc, throw=True)
     if doc.docstatus != 1:
         frappe.throw(_("Only a submitted transfer can be received."))

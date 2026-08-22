@@ -18,7 +18,7 @@ def toggle_service(bed: str) -> str:
     and Out of Service — the value the assignment and room/bed-transfer guards already
     honor, so no parallel "active" flag is introduced. An Occupied bed cannot be
     deactivated; the resident must be checked out first. Returns the new status."""
-    doc = frappe.get_doc("Bed", bed)
+    doc = frappe.get_doc("Bed", bed, for_update=True)
     doc.check_permission("write")
     if doc.status == "Occupied":
         frappe.throw(_("Bed {0} is occupied. Check the resident out before deactivating it.").format(bed))

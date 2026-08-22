@@ -470,7 +470,7 @@ def create_departure_transport(checkout):
     """Offer/raise the departure Transport Request for a Final Exit / End of
     Contract checkout, back-linking it onto the checkout. Idempotent: returns the
     already-linked request name if one was raised before."""
-    doc = frappe.get_doc("Housing Checkout", checkout)
+    doc = frappe.get_doc("Housing Checkout", checkout, for_update=True)
     doc.check_permission("write")
 
     if doc.docstatus != 1:

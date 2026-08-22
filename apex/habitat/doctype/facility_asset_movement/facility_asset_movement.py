@@ -171,7 +171,7 @@ def _validate_intercompany_gates(doc):
 @frappe.whitelist(methods=["POST"])
 def acknowledge_intercompany_movement(movement: str) -> dict:
     """Record the permitted accounting sign-off on a submitted intercompany movement."""
-    doc = frappe.get_doc("Facility Asset Movement", movement)
+    doc = frappe.get_doc("Facility Asset Movement", movement, for_update=True)
 
     doc.check_permission("read")
     if not doc.has_permlevel_access_to(

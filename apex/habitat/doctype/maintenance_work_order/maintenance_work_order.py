@@ -143,7 +143,7 @@ def start_work(work_order):
     allow_on_submit field — see ``mark_completed`` for why — which leaves this method
     and ``mark_completed`` its only writers once the Work Order is submitted.
     """
-    doc = frappe.get_doc("Maintenance Work Order", work_order)
+    doc = frappe.get_doc("Maintenance Work Order", work_order, for_update=True)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -175,10 +175,13 @@ def mark_completed(
     actual-date ordering here because validate() does not run on the after-submit path.
 
     The transition posts a one-time operational memo row. No GL Entry, Payment Entry,
-    Purchase Invoice, or salary document is created.
+    Purchase Invoice, or salary document is created. "One-time" holds because the work
+    order is loaded ``for_update``: without that lock two concurrent calls both read
+    status "In Progress" and both post, and the Accommodation Ledger's unique key does
+    not cover this writer, which posts with no employee and no assignment.
 
     """
-    doc = frappe.get_doc("Maintenance Work Order", work_order)
+    doc = frappe.get_doc("Maintenance Work Order", work_order, for_update=True)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:

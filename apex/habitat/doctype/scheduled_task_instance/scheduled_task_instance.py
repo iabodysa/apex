@@ -61,7 +61,7 @@ def before_cancel(doc, method=None):
 @frappe.whitelist(methods=["POST"])
 def start_task(task_instance):
     """Transition Scheduled Task Instance from Open to In Progress."""
-    doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+    doc = frappe.get_doc("Scheduled Task Instance", task_instance, for_update=True)
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
@@ -77,7 +77,7 @@ def start_task(task_instance):
 @frappe.whitelist(methods=["POST"])
 def mark_completed(task_instance):
     """Transition Scheduled Task Instance from Open/In Progress to Completed."""
-    doc = frappe.get_doc("Scheduled Task Instance", task_instance)
+    doc = frappe.get_doc("Scheduled Task Instance", task_instance, for_update=True)
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
     if doc.docstatus != 1:
