@@ -319,75 +319,12 @@ def make_vehicle(plate, odometer=None, project=None, ownership=None):
     return name
 
 
-def make_site(name):
-    """Get-or-create an Accommodation Site by ``site_name``; return its name."""
-    s = frappe.db.get_value("Site", {"site_name": name}, "name")
-    if not s:
-        s = frappe.get_doc(
-            {"doctype": "Site", "site_name": name, "company": default_company()}
-        ).insert(ignore_permissions=True).name
-    return s
 
 
-def make_masar_building(name):
-    """Get-or-create an Accommodation Building on the shared Masar test site,
-    carrying a ``google_maps_url``; return its name."""
-    b = frappe.db.get_value("Building", {"building_name": name}, "name")
-    if not b:
-        b = _register_building(
-            frappe.get_doc(
-                {
-                    "doctype": "Building",
-                    "building_name": name,
-                    "site": make_site("Masar Test Site"),
-                    "total_capacity": 50,
-                    "google_maps_url": "https://maps.example/masar-building",
-                }
-            ).insert(ignore_permissions=True).name
-        )
-    return b
 
 
-def make_building_with_coords(name, lat, lng):
-    """Get-or-create a building carrying pickup coordinates (idempotent on re-run)."""
-    existing = frappe.db.get_value("Building", {"building_name": name}, "name")
-    if existing:
-        frappe.db.set_value(
-            "Building", existing, {"pickup_lat": lat, "pickup_lng": lng}
-        )
-        return existing
-    return _register_building(
-        frappe.get_doc(
-            {
-                "doctype": "Building",
-                "building_name": name,
-                "site": make_site("Masar GPS Test Site"),
-                "total_capacity": 20,
-                "pickup_lat": lat,
-                "pickup_lng": lng,
-            }
-        )
-        .insert(ignore_permissions=True)
-        .name
-    )
 
 
-def make_worker_employee(first_name):
-    """Get-or-create an Employee by ``first_name`` (matched on employee_name);
-    return its name."""
-    emp = frappe.db.get_value("Employee", {"employee_name": first_name}, "name")
-    if not emp:
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": first_name,
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": today(),
-                "gender": "Male",
-                "company": default_company(),
-            }
-        ).insert(ignore_permissions=True).name
-    return emp
 
 
 def driver_user(driver):
@@ -396,45 +333,6 @@ def driver_user(driver):
     return frappe.db.get_value("Employee", emp, "user_id")
 
 
-def make_driver_chain(email, first_name):
-    """Idempotently get-or-create a User+Employee+Salis Driver chain and return
-    ``(driver_name, email)``. Re-runs on a non-fresh DB never duplicate."""
-    if not frappe.db.exists("User", email):
-        frappe.get_doc(
-            {
-                "doctype": "User",
-                "email": email,
-                "first_name": first_name,
-                "send_welcome_email": 0,
-            }
-        ).insert(ignore_permissions=True)
-    user = frappe.get_doc("User", email)
-    if "Driver" not in frappe.get_roles(email):
-        user.add_roles("Driver")
-    emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
-    if not emp:
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": first_name,
-                "user_id": email,
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": today(),
-                "gender": "Male",
-                "company": default_company(),
-            }
-        ).insert(ignore_permissions=True).name
-    drv = frappe.db.get_value("Salis Driver", {"employee": emp}, "name")
-    if not drv:
-        drv = frappe.get_doc(
-            {
-                "doctype": "Salis Driver",
-                "employee": emp,
-                "full_name": first_name,
-                "status": "Active",
-            }
-        ).insert(ignore_permissions=True).name
-    return drv, email
 
 
 def make_test_driver():
@@ -477,58 +375,8 @@ def make_test_driver():
     return drv
 
 
-def make_driver_without_vehicle(email):
-    """Get-or-create a User+Employee+Salis Driver chain with NO current_vehicle,
-    keyed on ``email``; return ``(driver_name, email)``. Idempotent — the fuel /
-    scope tests use it to prove a vehicle-less driver is rejected."""
-    if not frappe.db.exists("User", email):
-        try:
-            u = frappe.get_doc(
-                {"doctype": "User", "email": email, "first_name": "NoVeh", "send_welcome_email": 0}
-            )
-            u.add_roles("Driver")
-            u.insert(ignore_permissions=True)
-        except frappe.DuplicateEntryError:
-            # [#hxpd3j]
-            pass
-    emp = frappe.db.get_value("Employee", {"user_id": email}, "name")
-    if not emp:
-        emp = frappe.get_doc(
-            {
-                "doctype": "Employee",
-                "first_name": "NoVeh",
-                "user_id": email,
-                "date_of_birth": "1990-01-01",
-                "date_of_joining": today(),
-                "gender": "Male",
-                "company": default_company(),
-            }
-        ).insert(ignore_permissions=True).name
-    drv = frappe.db.get_value("Salis Driver", {"employee": emp}, "name")
-    if not drv:
-        drv = frappe.get_doc(
-            {"doctype": "Salis Driver", "employee": emp, "full_name": "NoVeh", "status": "Active"}
-        ).insert(ignore_permissions=True).name
-    return drv, email
 
 
-def make_worker_token(employee):
-    """Create a Masar Worker Token for an Employee; return the RAW token string. The
-    token is stored hashed at rest, so the raw value is read from the freshly
-    minted doc's transient ``_plaintext_token`` (never re-readable from the row)."""
-    return (
-        frappe.get_doc(
-            {
-                "doctype": "Masar Worker Token",
-                "party_type": "Employee",
-                "party": employee,
-                "employee": employee,
-                "enabled": 1,
-            }
-        )
-        .insert(ignore_permissions=True)
-        ._plaintext_token
-    )
 
 
 def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
@@ -584,21 +432,6 @@ def make_safety_round(building, **overrides):
     return frappe.get_doc(data).insert(ignore_permissions=True)
 
 
-def ensure_worker_token(employee):
-    """The raw Masar Worker Token string for ``employee``, reusing an existing row.
-
-    Unlike ``make_worker_token`` (which always mints a fresh one), this re-enables
-    and recovers whatever token the employee already carries — a second live token
-    for one worker is not a state the portal is meant to reach.
-    """
-    existing = frappe.db.get_value("Masar Worker Token", {"employee": employee}, "name")
-    if not existing:
-        return make_worker_token(employee)
-    doc = frappe.get_doc("Masar Worker Token", existing)
-    if not doc.enabled:
-        doc.db_set("enabled", 1)
-    # [#edhau9]
-    return doc.recover_token()
 
 
 def make_scoped_supervisor(make_user, building, add_cleanup):
@@ -668,44 +501,6 @@ def make_assignment(employee, building, project, room_number=None, bed_code=None
     return doc.name
 
 
-def make_open_assignment(employee, building, add_cleanup):
-    """A submitted, still-open Housing Assignment placing ``employee`` in
-    ``building`` — the SYNTHETIC-row twin of ``make_assignment`` above.
-
-    Bypasses the controller entirely (``ignore_validate`` plus a direct
-    ``docstatus`` write) so no ledger posting or party-link mirroring fires. The
-    building-scope suites that share this pin a READ scope, not the write
-    controllers, and a real ``submit()`` would drag in the Room / Bed / company /
-    cost-center fixtures they otherwise never need. Reach for ``make_assignment``
-    instead whenever the controller's own behaviour is what is under test.
-
-    ``add_cleanup`` is injected rather than assumed, matching
-    ``make_scoped_supervisor``: each test class owns its own cleanup scope. The
-    registered teardown resets ``docstatus`` before deleting, because a submitted
-    document cannot be removed.
-    """
-    doc = frappe.get_doc(
-        {
-            "doctype": "Housing Assignment",
-            "party_type": "Employee",
-            "party": employee,
-            "employee": employee,
-            "building": building,
-            "check_in_date": today(),
-        }
-    )
-    doc.flags.ignore_validate = True
-    doc.insert(ignore_permissions=True, ignore_links=True, ignore_mandatory=True)
-    frappe.db.set_value("Housing Assignment", doc.name, "docstatus", 1)
-    add_cleanup(
-        lambda n=doc.name: (
-            frappe.db.set_value("Housing Assignment", n, "docstatus", 0),
-            frappe.delete_doc(
-                "Housing Assignment", n, force=True, ignore_permissions=True
-            ),
-        )
-    )
-    return doc.name
 
 
 def make_worker_trip(
@@ -849,40 +644,6 @@ def _register_building(name):
     return name
 
 
-def purge_test_buildings():
-    """Force-delete the Accommodation Buildings THIS suite inserted; return the
-    number removed. Idempotent, best-effort per row (as Administrator). Invoked from
-    a ``tearDownModule`` in building-creating test modules.
-
-    It walks the registry above, never ``get_all("Building")``: querying the whole table
-    and subtracting a baseline snapshot depends on a ``before_tests`` hook this app does
-    not register, so the subtracted set would be empty under every runner and this would
-    empty the site's Building table. Registering such a hook would not save the fixtures
-    either — ``frappe/test_runner.py:83-87`` runs ``before_tests`` before any
-    ``make_test_records``, so a fixture Building sits outside the snapshot by
-    construction.
-
-    ``force=True`` bypasses the link-validation check, so a registered building with
-    dependent rooms/beds/assignments is removed regardless (test site only; those
-    children are themselves suite pollution).
-    """
-    frappe.set_user("Administrator")
-    removed = 0
-    for name in sorted(_CREATED_BUILDINGS):
-        if not frappe.db.exists("Building", name):
-            _CREATED_BUILDINGS.discard(name)
-            continue
-        try:
-            frappe.delete_doc("Building", name, ignore_permissions=True, force=True)
-        except Exception:
-            # Best-effort teardown: a row still held by something stays, and the
-            # next call retries it rather than failing the module that called us.
-            continue
-        _CREATED_BUILDINGS.discard(name)
-        removed += 1
-    if removed:
-        frappe.db.commit()
-    return removed
 
 
 # [#a140fx] Accounting / payroll chain fixtures. Site-wide masters (Company, Account)
@@ -959,87 +720,10 @@ def ensure_account(company, account_type, root_type, account_currency=None):
     return frappe.get_doc(values).insert(ignore_permissions=True).name
 
 
-def make_payroll_employee(company, name_prefix="Apex Recovery"):
-    """A brand-new Active Employee on ``company``. Returns its name.
-
-    Deliberately never reuses the site's existing Employee: a test that recovers
-    from whatever worker an earlier test left behind passes for a reason that has
-    nothing to do with the code under test.
-    """
-    return frappe.get_doc(
-        {
-            "doctype": "Employee",
-            "first_name": f"{name_prefix} {fixture_tag()}",
-            "company": company,
-            "status": "Active",
-            "gender": "Male",
-            "date_of_birth": "1990-01-01",
-            "date_of_joining": "2020-01-01",
-        }
-    ).insert(ignore_permissions=True).name
 
 
-def make_salary_component(component_type, prefix="Apex"):
-    """A brand-new Salary Component of ``component_type`` (Earning / Deduction).
-
-    Type matters: an Earning component would silently PAY the worker the amount a
-    Deduction component recovers, so the recovery tests need both to prove the
-    engine tells them apart.
-    """
-    tag = fixture_tag()
-    return frappe.get_doc(
-        {
-            "doctype": "Salary Component",
-            "salary_component": f"{prefix} {component_type} {tag}",
-            "salary_component_abbr": f"{prefix[0]}{component_type[0]}{tag}",
-            "type": component_type,
-        }
-    ).insert(ignore_permissions=True).name
 
 
-def assign_monthly_wage(employee, company, wage, currency=None):
-    """Give ``employee`` a known monthly wage natively: a submitted Salary
-    Structure plus a submitted Salary Structure Assignment. Returns the structure.
-
-    ``employee_recovery._monthly_wage`` reads the assignment's ``base``, and every
-    statutory cap is a percentage of it. Without this a recovery test can only
-    ever observe "no wage known, recover nothing" — a zero that proves nothing.
-    """
-    currency = currency or frappe.db.get_value("Company", company, "default_currency") or "SAR"
-    tag = fixture_tag()
-    structure = frappe.get_doc(
-        {
-            "doctype": "Salary Structure",
-            "name": f"Apex Structure {tag}",
-            "company": company,
-            "is_active": "Yes",
-            "currency": currency,
-            "payroll_frequency": "Monthly",
-            "earnings": [
-                {
-                    "doctype": "Salary Detail",
-                    "salary_component": make_salary_component("Earning"),
-                    "amount": wage,
-                    "parentfield": "earnings",
-                }
-            ],
-        }
-    ).insert(ignore_permissions=True)
-    structure.submit()
-
-    assignment = frappe.get_doc(
-        {
-            "doctype": "Salary Structure Assignment",
-            "employee": employee,
-            "salary_structure": structure.name,
-            "company": company,
-            "currency": currency,
-            "from_date": "2020-01-01",
-            "base": wage,
-        }
-    ).insert(ignore_permissions=True)
-    assignment.submit()
-    return structure.name
 
 
 def make_submitted_custody_issue():

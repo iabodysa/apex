@@ -59,28 +59,8 @@ def workspaces():
     return pages
 
 
-def workspace_titles():
-    """Every workspace title on disk, WITH duplicates, so a collision stays visible."""
-    titles = []
-    for path in sorted(glob.glob(_WORKSPACE_GLOB)):
-        with open(path, encoding="utf-8") as fh:
-            data = json.load(fh)
-        titles.append(data.get("title") or data.get("name"))
-    return titles
 
 
-def ancestors(pages, title):
-    """Parent chain from the immediate parent up to the root; None if the chain is broken."""
-    chain = []
-    seen = {title}
-    parent = pages[title]["parent"]
-    while parent:
-        if parent not in pages or parent in seen:
-            return None
-        chain.append(parent)
-        seen.add(parent)
-        parent = pages[parent]["parent"]
-    return chain
 
 
 def blocks(forebear, role):
@@ -93,27 +73,5 @@ def blocks(forebear, role):
     return forebear["hidden"] or (bool(forebear["roles"]) and role not in forebear["roles"])
 
 
-def orphan_pairs(pages):
-    """(workspace, role) pairs whose sidebar node no holder of that role can ever reach."""
-    orphans = set()
-    for title, page in pages.items():
-        chain = ancestors(pages, title)
-        if chain is None:
-            continue
-        for ancestor in chain:
-            for role in page["roles"]:
-                if blocks(pages[ancestor], role):
-                    orphans.add((title, role))
-    return orphans
 
 
-def blocking_ancestors(pages, title, role):
-    """Ancestors of ``title`` that hide it from a holder of ``role``, nearest first.
-
-    Empty means reachable. Raises KeyError if ``title`` is not on disk and returns
-    None when the parent chain is broken or cyclic, so a caller can report that
-    distinct failure with its own message instead of mislabelling it a role gap."""
-    chain = ancestors(pages, title)
-    if chain is None:
-        return None
-    return [a for a in chain if blocks(pages[a], role)]

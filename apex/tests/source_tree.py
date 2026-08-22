@@ -19,65 +19,16 @@ from pathlib import Path
 import apex
 
 # The INSTALLED package, never this file's own neighbourhood: `dirname(__file__)/..`
-# resolves against wherever this module's copy sits, and the maintainer mirror at
-# `.claude/tests/apex` (SUITE_PACKAGE below) holds nothing but test modules — a source
-# scan rooted there would grade an empty file list and pass, and the translation reader
-# would die on an ar.csv that is not there.
+# resolves against wherever this module's copy sits, so a source scan rooted there
+# would grade whatever directory holds the copy rather than the app.
 APP_ROOT = str(Path(apex.__file__).resolve().parent)
 REPO_ROOT = os.path.dirname(APP_ROOT)
 AR_CSV = os.path.join(APP_ROOT, "translations", "ar.csv")
-
-# The maintainer mirror, named from the repo and NEVER from this file's own
-# neighbourhood. This module was written at `.claude/tests/apex/tests/`, where
-# `dirname(__file__)/../..` did name the mirror; it now ships at `apex/tests/`, where the
-# same expression names the repo root and SUITE_PACKAGE comes out equal to APP_ROOT. Both
-# readers below then answer about the app alone, which is the empty-mirror half of the
-# failure the comment above describes. Absent on a fresh clone, and that is fine: the
-# readers fall back to the shipped corpus rather than to nothing.
-SUITE_ROOT = os.path.join(REPO_ROOT, ".claude", "tests")
-SUITE_PACKAGE = os.path.join(SUITE_ROOT, "apex")
-
-# Package/script CDNs, then font CDNs; a page or bundle needing one needs a vendored copy.
-# One home because the shell scan and the bundle scan both read it, and two hand-kept
-# copies meant a host added to one left the other blind. gstatic is listed even though it
-# never appears in markup alone: a preconnect to it is how these shells warmed the
-# third-party connection.
-CDN_HOSTS = (
-    "unpkg.com",
-    "unpkg.io",
-    "cdn.jsdelivr.net",
-    "jsdelivr.net",
-    "cdnjs.cloudflare.com",
-    "ajax.googleapis.com",
-    "code.jquery.com",
-    "stackpath.bootstrapcdn.com",
-    "maxcdn.bootstrapcdn.com",
-    "esm.sh",
-    "cdn.skypack.dev",
-    "fonts.googleapis.com",
-    "fonts.gstatic.com",
-    "use.typekit.net",
-    "fonts.bunny.net",
-)
 
 
 def rel(path):
     """``path`` relative to the app root (``apex/``)."""
     return os.path.relpath(path, APP_ROOT)
-
-
-def suite_rel(path):
-    """``path`` named against whichever root holds it, for naming a TEST module.
-
-    The corpus spans two roots: a module beside its unit under the app, and a module
-    in the maintainer mirror. ``rel`` on a mirror module yields a ``../.claude/...``
-    string that no reader recognises and no allowlist matches, so the innermost
-    containing root wins and the name comes out the way its own runner spells it.
-    """
-    for root in (APP_ROOT, SUITE_PACKAGE, SUITE_ROOT):
-        if path.startswith(root + os.sep):
-            return os.path.relpath(path, root)
-    return os.path.relpath(path, REPO_ROOT)
 
 
 def parse(path):
@@ -98,12 +49,16 @@ def is_test_file(relpath):
 
 
 def _git_tracked_py_files():
-    """apex/**/*.py as CI would receive them, or None when git cannot answer.
+    """Every apex/**/*.py git would ship OR is about to, or None when git cannot answer.
 
-    CI grades a fresh clone, so a gitignored file exists only on a developer's
-    disk. A guard that walks the filesystem judges it anyway and reds locally
-    while CI stays green -- the same asymmetry the maintainer's own audit scripts
-    avoid with this exact enumeration.
+    ``--cached`` is what CI receives. ``--others --exclude-standard`` adds the files
+    that are untracked but NOT ignored — a module written and not yet committed — so a
+    new file is graded before it lands rather than on the push that lands it. Measured:
+    with one uncommitted module present the list is 837 against 836 tracked.
+
+    What both flags exclude is the ignored file, and that exclusion is the point: a
+    gitignored module exists only on a developer's disk, so a filesystem walk judges it,
+    reds locally, and leaves CI green over a file it never received.
     """
     try:
         out = subprocess.run(
@@ -150,39 +105,8 @@ def production_py_files():
     return [path for path in all_py_files() if not is_test_file(rel(path))]
 
 
-def test_py_files():
-    """Every test_*.py in the corpus — the shipped modules beside their unit AND the
-    maintainer mirror (its tree and its root).
-
-    Both roots, because the corpus is split across both and a guard that scans test
-    modules for a defect has to see all of them. Reading only one root is how the
-    same floor keeps passing over a population that changed underneath it.
-    """
-    paths = set()
-    for root in (APP_ROOT, SUITE_ROOT):
-        paths.update(glob.glob(os.path.join(root, "**", "test_*.py"), recursive=True))
-    return sorted(
-        path
-        for path in paths
-        if "node_modules" not in path and "__pycache__" not in path
-    )
 
 
-def test_support_files():
-    """The plain-named shared helper modules under ``tests/`` — factories.py,
-    _helpers.py, shipped_doctypes.py, this file.
-
-    Test presence lives here as much as in a ``test_*.py``: a fixture promoted out
-    of a test module into factories.py still exercises the production code it
-    builds. A coverage scan reading only ``test_*.py`` would score that promotion
-    as a LOST test and push the next author back to pasting the body inline.
-    """
-    return [
-        path
-        for path in sorted(glob.glob(os.path.join(APP_ROOT, "tests", "*.py")))
-        if not os.path.basename(path).startswith("test_")
-        and os.path.basename(path) != "__init__.py"
-    ]
 
 
 def translations():
@@ -215,12 +139,3 @@ def func_source(src, path, name):
     raise AssertionError(f"{name} not found in {path}")
 
 
-def file_dotted_path(path):
-    """``<app>.<pkg>...<basename>`` — Frappe's dotted-entrypoint convention. A
-    package ``__init__.py`` IS the module, so it resolves to the package path."""
-    relpath = os.path.relpath(path, REPO_ROOT)
-    if relpath.endswith(os.sep + "__init__.py"):
-        relpath = relpath[: -len(os.sep + "__init__.py")]
-    else:
-        relpath = relpath[: -len(".py")]
-    return relpath.replace(os.sep, ".")

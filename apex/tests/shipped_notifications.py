@@ -36,50 +36,5 @@ APP_ROOT = str(Path(apex.__file__).resolve().parent)
 NOTIFICATION_GLOB = os.path.join(APP_ROOT, "*", "notification", "*", "*.json")
 
 
-def shipped_notifications():
-    """``[(abs_path, data)]`` for every is_standard Notification the app ships.
-
-    Sorted by path so a baseline built from this is stable across machines. Both
-    filters are load-bearing: a notification directory can hold JSON that is not
-    the Notification record, and a non-``is_standard`` row is site data that this
-    app does not own. An unparseable or unreadable file is skipped rather than
-    raised on — a guard reports what ships, it does not die on one bad neighbour.
-    """
-    out = []
-    for path in sorted(glob.glob(NOTIFICATION_GLOB)):
-        try:
-            with open(path, encoding="utf-8") as fh:
-                data = json.load(fh)
-        except (OSError, json.JSONDecodeError):
-            continue
-        if not isinstance(data, dict) or data.get("doctype") != "Notification":
-            continue
-        if not data.get("is_standard"):
-            continue
-        out.append((path, data))
-    return out
 
 
-def notification_role_pairs():
-    """``[(notification_name, document_type, role, enabled)]`` — one per receiver.
-
-    A notification with two ``receiver_by_role`` rows yields two pairs, because
-    the permission question is asked once per role. Recipients that name no role
-    (``receiver_by_document_field``, ``send_to_all_assignees``) are not pairs:
-    they resolve to a person, not to an audience this app declares.
-    """
-    pairs = []
-    for _path, data in shipped_notifications():
-        for recipient in data.get("recipients") or []:
-            role = recipient.get("receiver_by_role")
-            if not role:
-                continue
-            pairs.append(
-                (
-                    data.get("name"),
-                    data.get("document_type"),
-                    role,
-                    bool(data.get("enabled")),
-                )
-            )
-    return pairs

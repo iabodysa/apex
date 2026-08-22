@@ -25,24 +25,8 @@ class as_user:
         return False
 
 
-def notification_recipients(notification_name, doc):
-    """The To recipients a native Notification resolves for ``doc``.
-
-    Renders through the Notification's own ``get_list_of_recipients``, so a
-    recipient added by condition/role/field is resolved exactly as it would be on
-    a real send; cc/bcc are dropped because every caller asserts on To only.
-    """
-    notification = frappe.get_doc("Notification", notification_name)
-    context = {"doc": doc, "alert": notification, "comments": None}
-    recipients, _cc, _bcc = notification.get_list_of_recipients(doc, context)
-    return recipients
 
 
-def set_gl_posting(enabled):
-    """Flip the app-wide enable_gl_posting flag the payment router's GL gate reads."""
-    apex = frappe.get_single("Apex Settings")
-    apex.enable_gl_posting = 1 if enabled else 0
-    apex.save(ignore_permissions=True)
 
 
 def approve_rental_settlement(rs, manager):
@@ -68,31 +52,6 @@ def approve_rental_settlement(rs, manager):
     return rs
 
 
-def cancel_submitted_for_cleanup(doc):
-    """Cancel a submitted doc during teardown so it can be deleted, respecting the
-    workflow-bypass guard (``apex.apex_core.utils.workflow_guard``).
-
-    A bare ``doc.cancel()`` on a workflow-governed doctype whose workflow has a cancel
-    (docstatus-2) state is now blocked by the guard. Mirror what ``apply_workflow`` does
-    — land the workflow state field on that cancel state first — so the guard sees the
-    sanctioned target state and lets the cancel through. Runs as Administrator inside
-    ``addCleanup`` and only needs the record gone; it is NOT a substitute for a real
-    workflow transition in a test body. No-ops when the doc is not submitted, and for a
-    non-workflow (or no-cancel-state) doctype falls back to a plain cancel.
-    """
-    from frappe.model.workflow import get_workflow, get_workflow_name
-    from frappe.utils import cint
-
-    if doc.docstatus != 1:
-        return
-    if get_workflow_name(doc.doctype):
-        workflow = get_workflow(doc.doctype)
-        cancel_state = next(
-            (s.state for s in workflow.states if cint(s.doc_status) == 2), None
-        )
-        if cancel_state:
-            doc.set(workflow.workflow_state_field, cancel_state)
-    doc.cancel()
 
 
 def submit_via_workflow(doc):
