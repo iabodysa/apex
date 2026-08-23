@@ -518,8 +518,33 @@ def on_employee_change(doc, method=None) -> int:
         disabled += revoke_subject_tokens(DRIVER, driver)
     return disabled
 
+_DRIVER_DESK_ROLES = (DRIVER, "Portal Driver Capacity")
+
+def close_driver_desk_access() -> None:
+    """Correct ``Driver`` and ``Portal Driver Capacity`` back to no desk access.
+
+    ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1878-1880)
+    hardcodes ``desk_access = 1`` the moment any shipped DocType's permissions table
+    names a role that does not yet exist -- Salis Driver names ``Driver`` and Trip
+    Start Log / Portal Push Subscription name ``Portal Driver Capacity``, so either can
+    win the race against ``portal_identity_seed``'s create-only guard and leave the
+    shared driver capacity user, ``driver@apex.internal``, carrying desk access nobody
+    asked for. The write goes through ``Role.save`` rather than ``frappe.db.set_value``
+    because ``Role.on_update`` (frappe/core/doctype/role/role.py:70-85) is what
+    re-evaluates ``user_type`` on every user holding the role, and it fires only when
+    ``desk_access``'s VALUE changes on a document save -- a raw column write would leave
+    the capacity user's stored ``user_type`` stale.
+    """
+    for role in _DRIVER_DESK_ROLES:
+        if frappe.db.get_value("Role", role, "desk_access"):
+            role_doc = frappe.get_doc("Role", role)
+            role_doc.desk_access = 0
+            role_doc.save(ignore_permissions=True)
+
 def on_salis_driver_change(doc, method=None) -> int:
-    """Revoke driver credentials whenever a driver is not Active."""
+    """Keep the driver capacity identity off the desk, then revoke credentials
+    whenever a driver is not Active."""
+    close_driver_desk_access()
     if not doc.name or doc.status == "Active":
         return 0
     return revoke_subject_tokens(DRIVER, doc.name)
