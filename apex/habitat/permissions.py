@@ -232,7 +232,12 @@ def _render_hop(spec, escaped):
 
 
 def _render_child(spec, escaped):
-    """A row matches when ANY building named in its child table is the user's."""
+    """A row matches when ANY building named in its child table is the user's.
+
+    One strategy in the ``FRAGMENTS`` table, reached only by its key: the table IS the
+    dispatch, so this cannot be inlined without collapsing the strategy set into a
+    branch at every call site.
+    """
     return (
         "`name` in (select `parent` from `tab{child}` "
         "where `parenttype` = {parent} and `building` in ({values}))".format(

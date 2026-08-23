@@ -35,7 +35,12 @@ PORTAL_CAPACITY_PTYPES = frozenset({"create", "write", "submit"})
 
 
 def resolve_user(user=None):
-    """Return the effective user, defaulting to the session user."""
+    """Return the effective user, defaulting to the session user.
+
+    Every scope resolver in Habitat, Salis and Logistay enters through this one call.
+    A module-local copy makes "who is asking" answerable two ways on one request, which
+    is how a scope silently widens for one DocType and not its sibling.
+    """
     return user or frappe.session.user
 
 

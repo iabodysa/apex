@@ -7,11 +7,11 @@ way:
 
     explicit module setting  ->  user company default  ->  global company default
 
-Pure refactor of the chain that was duplicated across the two settings controllers
-(and partly re-implemented at call sites such as ``arrivals_desk``). The
-per-module setting is read with ``get_single_value`` so this util does not import,
-load, or edit the Habitat/Salis Settings DocTypes — it only reads their stored
-value through the field whose name each module uses.
+The per-module setting is read with ``get_single_value`` so this module does not
+import, load, or edit the Habitat/Salis Settings DocTypes — it only reads their
+stored value through the field whose name each module uses. Every settings
+controller and every call site that needs a company enters here; a chain rebuilt
+anywhere else lets two of them disagree on one site.
 
 Returns ``None`` when no company is configured anywhere; callers treat that as
 "no company known" and post nothing that requires one.
@@ -84,6 +84,10 @@ def resolve_company_or_any(module: str | None = None) -> str | None:
     The ``any Company`` tail exists only so demo/seed paths have SOME company to
     attach on a bench where no default is configured yet. Never use in real
     transaction posting — an arbitrary company is meaningless for ownership.
+
+    The demo seeder and the setup wizard's completion hook both enter here. A copy in
+    either would let one of them attach a different company than the other on the same
+    fresh bench, and the mismatch surfaces only once a ledger row carries it.
     """
     return resolve_company(module) or (
         frappe.get_all("Company", pluck="name", limit=1) or [None]
