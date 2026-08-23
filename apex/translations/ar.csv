@@ -314,7 +314,6 @@ Apex messaging gateway test message.,رسالة اختبار بوابة مراس
 Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings and Salis Settings.,يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس.
 Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
-Apex — Recovery and Support,أبكس: الاسترداد والدعم
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
 Appliance,جهاز
 Applicable Days,الأيام السارية
@@ -1179,7 +1178,6 @@ Credentials Delivered By,سلّم بيانات الدخول
 Critical,حرج
 Critical Alert Aging Hours,مهلة معالجة التنبيه الحرج (بالساعات)
 Cross Region,بين المناطق
-Cross-Project Needs Approval,النقل بين المشاريع يتطلب موافقة
 Cross-building moves are not supported here. Use Check-out and a new Check-in.,لا يمكن النقل بين المباني من هنا. استخدم مغادرة السكن ثم تسكينًا جديدًا.
 Cross-cost-center material transfer: {0},نقل مواد بين مراكز تكلفة مختلفة: {0}
 Currency,العملة
@@ -1282,7 +1280,6 @@ Damage evidence is attached to the case,مرفق دليل على التلف
 Damage or Loss Note,ملاحظة تلف أو فقد
 Damage was recorded but no assessment has been raised,سُجِّل تلف ولم يصدر له تقييم
 Damage write-off {0} cancelled.,أُلغي شطب الأضرار {0}.
-Damage write-off {0} submitted (estimated {1} SAR).,اعتُمد شطب الأضرار {0} (القيمة التقديرية {1} ريال).
 Damaged,تالف
 Damaged Items,الأصناف التالفة
 Damaged Parts,الأجزاء المتضررة
@@ -1577,7 +1574,6 @@ Employee,الموظف
 Employee (Custodian),الموظف (مستلم العهدة)
 Employee Advance,سلفة الموظف
 Employee Advance Recovery,استرداد سلفة الموظف
-"Employee Advance recovery and the Salis support SLA are off by default. Enable them only after Payroll, Accounts, and Support have supplied the native records and schedule below.",استرداد سلفة الموظف واتفاقية مستوى دعم ساليس معطّلان افتراضيًا. لا تفعّلهما إلا بعد أن تجهّز إدارات الرواتب والحسابات والدعم السجلات الأساسية وجدول العمل أدناه.
 Employee Cost Center,مركز تكلفة الموظف
 Employee Custody,عهدة الموظف
 Employee Daily Share,الحصة اليومية للموظف
@@ -1613,7 +1609,6 @@ Enable approval routing for fleet transactions?,تفعيل توجيه الاعت
 Enable email notifications?,تفعيل تنبيهات البريد الإلكتروني؟
 Enable if this meter covers multiple units,فعّل هذا الخيار إذا كان هذا العدّاد يغطّي عدة وحدات
 Enable operational notifications?,تفعيل التنبيهات التشغيلية؟
-Enable the Salis support SLA?,هل تريد تفعيل اتفاقية مستوى دعم ساليس؟
 Enable the driver self-service portal?,تفعيل بوابة الخدمة الذاتية للسائق؟
 Enabled,مفعّل
 End Date,تاريخ الانتهاء
@@ -1928,7 +1923,6 @@ Fuel Spend by Vehicle,إنفاق الوقود حسب المركبة
 Fuel chip {0} via request {1} (chip {2}).,شريحة وقود {0} عبر الطلب {1} (الشريحة {2}).
 Fuel claimed for the period,الوقود المطالب به عن الفترة
 Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
-"Fuel daily log {0}: {1} L, {2} SAR.",سجل الوقود اليومي {0}: {1} لتر، {2} ريال.
 "Fuel gauge reading recorded at vehicle handover, from empty to full, used to compare fuel state at pickup and return of the rental vehicle.",قراءة مؤشر الوقود المسجلة عند تسليم المركبة، من فارغ إلى ممتلئ، وتُستخدم لمقارنة مستوى الوقود عند استلام المركبة المستأجرة وإعادتها.
 Fuel requests above this litre amount require approval.,طلبات الوقود التي تتجاوز هذا الحد باللترات تتطلب موافقة.
 Fuel service platform or provider used for fueling fleet vehicles.,منصة أو مزوّد خدمة وقود يُستخدم لتزويد مركبات الأسطول بالوقود.
@@ -2043,15 +2037,11 @@ Holder,مستلم العهدة
 Holder Type,نوع حامل الرمز
 "Holder's login user, mirrored from the employee so receipt notifications can reach a real address.",حساب دخول مستلم العهدة، ويُنسخ من سجل الموظف لتصل إشعارات الاستلام إلى عنوان فعلي.
 "Holder's receipt confirmation for a Custody Issue, captured from the My Custody Acknowledgment Web Form (with a signature fallback).",إقرار مستلم العهدة باستلام الأصناف المصروفة، ويُسجّل عبر نموذج «إقرار استلام عهدتي» مع إمكانية استخدام التوقيع بدلًا من التأكيد.
-Holiday Calendar From Date,تقويم الإجازات من تاريخ
-Holiday Calendar To Date,تقويم الإجازات إلى تاريخ
-Holiday Country Code,رمز دولة الإجازات
 Holiday List To Date cannot be before From Date.,تاريخ نهاية قائمة الإجازات ما يصير قبل تاريخ بدايتها.
 "Holiday List name, From Date and To Date are required to enable support SLA.",اسم قائمة الإجازات وتاريخا البداية والنهاية مطلوبة لتفعيل اتفاقية مستوى الخدمة.
 Holiday List {0} already exists with a different calendar definition.,قائمة الإجازات {0} موجودة بالفعل بتعريف تقويم مختلف.
 Holiday List {0} does not exist.,قائمة العطلات {0} غير موجودة.
 "Holiday List, workdays, support start time and support end time are required to enable the Salis support SLA.",قائمة العطلات وأيام العمل ووقت بدء الدعم ووقت انتهائه مطلوبة لتفعيل اتفاقية مستوى دعم ساليس.
-Holiday Subdivision Code,رمز المنطقة للإجازات
 Hours an open Critical alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.,عدد الساعات التي يبقى فيها التنبيه الحرج مفتوحًا قبل ظهوره كمتأخر في القائمة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Hours an open Info alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.,عدد الساعات التي يبقى فيها التنبيه المعلوماتي مفتوحًا قبل ظهوره كمتأخر في القائمة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
 Hours an open Warning alert may age before the queue flags it as overdue. A blank or zero value falls back to the built-in default.,عدد الساعات التي يبقى فيها التنبيه التحذيري مفتوحًا قبل ظهوره كمتأخر في القائمة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
@@ -2673,14 +2663,12 @@ My Work Center,مركز مهامي
 N/A,لا ينطبق
 NOT a login — drivers open the portal with a personal barcode link. Mirrored from the Employee and kept only so desk Notification rules can name a User and support tickets have an author. Empty is normal.,ليس حساب دخول — يفتح السائق البوابة برابط الباركود الخاص به. يُنقل من الموظف المرتبط ويُحتفظ به فقط لتتمكن قواعد الإشعارات في سطح المكتب من تحديد مستخدم، ولتكون لتذاكر الدعم جهة منشئة. وتركه فارغاً أمر طبيعي.
 Name,الاسم
-Name for the native ERPNext Holiday List created during setup.,اسم قائمة الإجازات التي تُنشأ في ERPNext أثناء الإعداد.
 Naming Series,سلسلة الترقيم
 National ID,رقم الهوية الوطنية
 National ID / Iqama,الهوية الوطنية / الإقامة
 National ID or Iqama number. PII — readable only by privileged roles (permlevel 1). Set once at creation; a DB-level unique index blocks duplicates.,رقم الهوية الوطنية أو الإقامة. بيانات شخصية — لا يقرؤها إلا أصحاب الصلاحيات المميزة (مستوى الصلاحية 1). يُحدد مرة واحدة عند الإنشاء؛ ويمنع فهرس فريد على مستوى قاعدة البيانات التكرار.
 National ID or iqama number. A site gate checks the paper against the card the passenger carries.,رقم الهوية أو الإقامة. تطابق بوابة الموقع الورقة مع البطاقة التي يحملها الراكب.
 Nationality,الجنسية
-Native HRMS Deduction component used for Employee Advance installments.,مكوّن خصم في HRMS يُستخدم لأقساط سلفة الموظف.
 Native HRMS deduction component used for Employee Advance installments.,مكوّن خصم في HRMS يُستخدم لأقساط سلفة الموظف.
 Nature,النوع
 "Nature of the fuel anomaly under investigation, from over-consumption and GPS mismatches to duplicate claims, suspected fraud, or quota disputes, driving the investigation path.",طبيعة استثناء الوقود قيد التحقيق، مثل الاستهلاك الزائد أو عدم تطابق GPS أو تكرار المطالبات أو الاشتباه بالاحتيال أو نزاع الحصة، وهي ما يحدد مسار التحقيق.
@@ -2896,7 +2884,6 @@ Odometer on File,العداد المسجّل
 Odometer reading {0} cannot be lower than the vehicle's current {1}.,قراءة عداد المسافة {0} لا يمكن أن تكون أقل من القراءة الحالية للمركبة {1}.
 "Odometer start and end must be set together, or both left empty.",يجب إدخال قراءتي عداد المسافة في البداية والنهاية معًا، أو تركهما فارغتين.
 Odometer {0} is lower than the last reading for this vehicle ({1}).,قراءة العدّاد {0} أقل من آخر قراءة لهذه المركبة ({1}).
-Off by default — creates the native ERPNext Issue SLA only with a complete operating schedule.,معطّلة افتراضيًا. لا تنشئ اتفاقية مستوى الخدمة للبلاغات في ERPNext إلا بعد اكتمال جدول العمل.
 Off by default — let drivers access the Salis self-service portal.,معطّل افتراضيًا — يسمح للسائقين بالدخول إلى بوابة الخدمة الذاتية في ساليس.
 "Off by default — operational memo only, no GL entries until you enable it.",معطّل افتراضيًا — مذكّرة تشغيلية فقط، بلا قيود في دفتر الأستاذ العام حتى تفعّله.
 Off by default — post expiry and overdue reminders as timeline comments on the source document.,معطّل افتراضيًا — ينشر تذكيرات الانتهاء والتأخّر كتعليقات في مسار المستند المصدر.
@@ -3030,7 +3017,6 @@ Open your personal worker portal (Masar): {0},افتح بوابتك الشخصي
 Operating Card,بطاقة التشغيل
 Operating Days This Month,أيام التشغيل هذا الشهر
 Operating Days Trend,اتجاه أيام التشغيل
-Operating Hours,ساعات العمل
 Operational,تشغيلي
 Operational Alert Windows,مدد التنبيهات التشغيلية
 Operational Depreciation Aging,أعمار الإهلاك التشغيلي
@@ -3048,13 +3034,11 @@ Operational currency for Habitat cost fields. Fetched from Company if left blank
 Operations,العمليات
 Operations Authority,صلاحية العمليات
 Operations Control,التحكم بالعمليات
-Operations Director by default,مدير العمليات افتراضياً
 Operations Manager,مدير العمليات
 Operations authority is required on this case,القضية تحتاج صلاحية العمليات
 "Operations requester, carried from the linked Transport Request (Operations owns the request).",مقدم الطلب من العمليات، ويُنقل من طلب النقل المرتبط لأن الطلب تابع لفريق العمليات.
 Optional ERPNext Supplier FK for the landlord. Used to identify the payee for rent due reminders.,مرجع مورّد ERPNext اختياري للمالك. يُستخدم لتحديد المستفيد في تذكيرات استحقاق الإيجار.
 "Optional Habitat pickup — when set, this stop is a worker housing location (Habitat-Salis bridge).",نقطة صعود اختيارية في هابيتات؛ وعند تحديدها تكون هذه المحطة موقعًا لسكن العمال ضمن تكامل هابيتات مع ساليس.
-Optional ISO country code used by ERPNext's native local-holiday generator.,رمز الدولة ISO اختياري، يستخدمه ERPNext لتوليد الإجازات المحلية.
 Optional future mapping to ERPNext Item/Stock. Leave blank to use Habitat catalog only.,ربط مستقبلي اختياري بصنف أو مخزون ERPNext. اتركه فارغًا لاستخدام قائمة أصناف هابيتات فقط.
 Optional integrated-circuit card id. Unique when present.,مُعرّف بطاقة الدائرة المتكاملة الاختياري. فريد عند وجوده.
 Optional link to a native ERPNext Asset record. Informational cross-reference only; depreciation integration is configured separately.,رابط اختياري بسجل أصل في ERPNext. مرجع معلوماتي فقط؛ ويُهيّأ تكامل الإهلاك بشكل منفصل.
@@ -3064,7 +3048,6 @@ Optional photo of the bed/room condition at check-in (handover evidence).,صور
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
 Optional primary accent colour override. Leave blank to use the Apex default.,لون تمييز أساسي اختياري. اتركه فارغاً لاستخدام لون أبكس الافتراضي.
 Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
-Optional subdivision code for the selected country.,رمز المنطقة اختياري للدولة المختارة.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يشمله هذا الفحص. عند الاعتماد، يُحدّث «تاريخ آخر فحص» بتاريخ الفحص.
 Order Issued By (Client),صدر الأمر من (العميل)
 Order Issued To (Contractor),صدر الأمر إلى (المقاول)
@@ -3168,7 +3151,6 @@ Payment Entry,قيد الدفع
 Payment Reference,مرجع السداد
 Payment Request,طلب دفع
 Payment Request {0} is linked to this settlement.,تم ربط طلب الدفع {0} بهذه التسوية.
-Payment Request {0} raised for {1} SAR.,تم رفع طلب الدفع {0} بمبلغ {1} ريال.
 Payment Routing,توجيه المدفوعات
 Payment Routing Field Map,تعيين حقول توجيه الدفع
 Payment Schedule,جدول الدفع
@@ -3199,7 +3181,6 @@ Pending Utility Bills,فواتير الخدمات المعلّقة
 Pending Vehicle Write-Offs,طلبات شطب المركبات المعلّقة
 Pending on manifest,المتبقّون في كشف الوصول
 "Per-installment scheduling limit, capped at 50% of actual pay-period gross pay from the native Salary Slip preview.",حد القسط الواحد، بحد أقصى ٥٠٪ من إجمالي أجر فترة الرواتب الفعلي حسب معاينة مسيّر الرواتب.
-Per-installment scheduling limit. It cannot exceed 50% of actual pay-period gross pay from the native Salary Slip preview.,حد القسط الواحد. ما يتجاوز ٥٠٪ من إجمالي أجر فترة الرواتب الفعلي حسب معاينة مسيّر الرواتب.
 "Per-manifest-worker boarding/departure state, populated from the manifest when the trip starts (first scan/self-confirm). System-maintained by the boarding flow.",حالة صعود ومغادرة كل عامل في كشف الركاب. تُعبأ من الكشف عند بدء الرحلة بأول مسح أو تأكيد ذاتي، ويحدّثها النظام ضمن إجراءات الصعود.
 Per-stop completion the driver marks as the trip runs; persisted so it survives a reload.,حالة إكمال كل محطة، ويحددها السائق أثناء الرحلة وتُحفظ لتبقى بعد إعادة تحميل الصفحة.
 Percent a vehicle's actual fuel consumption may exceed its monthly quota before an overage / excessive-topup alert is raised; blank or zero uses the built-in default.,النسبة التي يمكن أن يتجاوز بها استهلاك المركبة الفعلي حصتها الشهرية قبل إصدار تنبيه تجاوز أو زيادة مفرطة في الحصة. عند ترك القيمة فارغة أو صفرًا، يُستخدم الإعداد الافتراضي.
@@ -3703,7 +3684,6 @@ Rental Settlements This Month,تسويات الإيجار هذا الشهر
 Rental Start,بداية التأجير
 Rental Start Date,تاريخ بداية التأجير
 Rental Vehicle Movement,حركة مركبة مستأجرة
-Rental accrual for office {0} in period {1} is unsettled: {2} SAR outstanding with no submitted Rental Settlement. (office {0}),استحقاق إيجار المكتب {0} للفترة {1} غير مسوى: مبلغ {2} ريال مستحق ولا توجد تسوية إيجار معتمدة. (المكتب {0})
 Rental movement {0} ({1}) cancelled.,تم إلغاء حركة الإيجار {0} ({1}).
 Rental settlement {0} for period {1}.,تسوية إيجار {0} عن الفترة {1}.
 Rental {0} via {1} (office {2}).,إيجار {0} عبر {1} (المكتب {2}).
@@ -3765,7 +3745,6 @@ Requests in category {0} are resolved directly and have no target document to cr
 Require An Active Store,اشتراط مخزن مفتوح
 Require Handover OTP,اشتراط رمز تحقق للتسليم
 Require Weekly All-Building Coverage,اشتراط تغطية جميع المباني أسبوعيًا
-Require approval when an assignment or transfer crosses project boundaries.,اشتراط الموافقة عند تجاوز الإسناد أو النقل لحدود المشروع.
 Required Issue Priorities are missing: {0}.,أولويات البلاغات المطلوبة ناقصة: {0}.
 Required before the case can move beyond Open.,"مطلوب قبل أن تتجاوز الحالة وضع ""مفتوحة""."
 "Required common-area evidence. Bathrooms, Kitchen, and Corridors must each have a Cleaned photo or be marked Not Cleaned / N/A with a note before submit.",إثبات مطلوب للمناطق المشتركة. يجب أن تتضمن كل من دورات المياه والمطبخ والممرات صورة بحالة «تم التنظيف»، أو تُحدد بحالة «لم يُنظف» أو «لا ينطبق» مع ملاحظة قبل الاعتماد.
@@ -4040,8 +4019,6 @@ Salis Payment Request,طلب دفع ساليس
 Salis Rentals Costs Settlements Pending Approval,تسويات تكاليف إيجار ساليس بانتظار الاعتماد
 Salis Representatives Fleet Vehicles Stopped,مركبات أسطول مندوبي ساليس الموقوفة
 Salis Settings,إعدادات ساليس
-Salis Support,دعم ساليس
-Salis Support SLA,اتفاقية مستوى دعم ساليس
 Salis Vehicle,مركبة ساليس
 Salis Vehicle Compliance,امتثال مركبات ساليس
 Salis departure (relocation) transport raised for a Final Exit / End of Contract checkout.,أُنشئ نقل مغادرة في ساليس بسبب مغادرة السكن للخروج النهائي أو انتهاء العقد.
@@ -4536,10 +4513,6 @@ Supplier Name,اسم المورّد
 Supplier VAT Registration Number,الرقم الضريبي للمورّد
 Supplier-Billed Cost This Month,التكلفة المفوترة من المورّد هذا الشهر
 Suppliers,الموردون
-Support End Time,وقت انتهاء الدعم
-Support Holiday List Name,اسم قائمة إجازات الدعم
-Support Start Time,وقت بدء الدعم
-Support Workdays,أيام عمل الدعم
 Supporting evidence for the loss and its valuation. Required before the recovery can be Approved.,أدلة داعمة للخسارة وتقييمها. مطلوبة قبل أن يتسنى اعتماد الاسترداد.
 Surveillance,المراقبة
 Surveillance Cameras at the Site,كاميرات المراقبة في الموقع
@@ -5270,7 +5243,6 @@ Website,الموقع الإلكتروني
 Wednesday,الأربعاء
 Weekly,أسبوعي
 Weekly Custody Digest,ملخص العهدة الأسبوعي
-Weekly Off,الراحة الأسبوعية
 Weekly custody summary for your building(s):,ملخص العهدة الأسبوعي لمبانيك:
 "Weekly on-site safety field inspection. On submit, each actionable finding (one with an Issue Type and Room, not yet resolved) automatically spawns a Maintenance Request, surfaced in the Generated Maintenance Requests table. (Deprecated: superseded by Safety Round + the Safety Open Findings report.)",تفتيش سلامة ميداني أسبوعي في الموقع. عند الاعتماد تنشئ كل ملاحظة قابلة للتنفيذ (لها نوع عطل وغرفة ولم تُعالج بعد) طلب صيانة آلياً، ويظهر في جدول طلبات الصيانة المولّدة. (متوقف: حل محله جولة السلامة وتقرير ملاحظات السلامة المفتوحة.)
 What Happened,ماذا حصل
@@ -5574,3 +5546,4 @@ issue priority,أولوية بلاغ
 issue type,نوع بلاغ
 renamed or edited,إعادة تسميته أو تعديله
 "{0} is an {1} Apex ships, and every update puts it back as the app defines it. It cannot be {2} here. Ask for the change to ship with the app.",{0} هو {1} يشحنه أبكس، وكل تحديث يعيده كما يعرّفه التطبيق. لا يمكن {2} من هنا. اطلب أن يصدر التغيير مع التطبيق.
+"Permissions for {0} are set by Apex and reapplied on every update, so a change made here would be removed the next time the site is updated. Ask for the change to ship with the app instead.",صلاحيات {0} يحددها أبكس ويعيد تطبيقها مع كل تحديث، فأي تغيير هنا سيُزال عند تحديث الموقع القادم. اطلب أن يصدر التغيير مع التطبيق.
