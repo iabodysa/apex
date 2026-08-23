@@ -17,7 +17,6 @@ second door and imports it rather than keeping a second copy.
 """
 
 import frappe
-from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import (
     guest_redirect,
     publish_portal_context,
@@ -115,7 +114,7 @@ def bootstrap_portal_context(context, route: str, entry: str):
     """Redirect a guest to login, then publish the merged portal's gate and its
     realtime configuration for whichever door was opened."""
     guest_redirect(route)
-    render_in_arabic()
+    frappe.local.lang = "ar"
 
     allowed = bool(PORTAL_ROLES & set(frappe.get_roles()))
     capability_map = portal_capabilities() if allowed else {}

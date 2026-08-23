@@ -23,10 +23,6 @@ Two invariants hold on every path: "" (no restriction) for the Administrator and
 ``UNSCOPED_ROLES`` oversight roles versus "1=0" (matches nothing) for a scoped user
 holding no company — never the other way round — and fail closed, so a doc whose
 company resolves through neither its own field nor its anchor link is DENIED.
-
-The block at the foot of this file is COMPATIBILITY ONLY. Those wrappers hold no rule
-and ``hooks.py`` does not route through them; they exist because callers outside this
-module resolve a fragment by FUNCTION NAME.
 """
 
 from __future__ import annotations
@@ -42,11 +38,6 @@ UNSCOPED_ROLES = {
 }
 
 COMPANY = "company"
-
-
-def _resolve_user(user=None):
-    """Return the effective user, defaulting to the session user."""
-    return permission_scope.resolve_user(user)
 
 
 def _allowed_companies(user):
@@ -136,7 +127,7 @@ def company_scoped_has_permission(doc, ptype, user=None):
     list view. A doc whose company resolves through neither its own field nor its
     anchor link fails closed.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 

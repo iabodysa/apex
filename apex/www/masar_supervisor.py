@@ -2,7 +2,6 @@
 """Authenticated Masar supervisor portal at ``/masar-supervisor``."""
 
 import frappe
-from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
 
 SUPERVISOR_ROLES = {
@@ -31,7 +30,7 @@ def get_context(context):
     """Redirects guests to login and bootstraps the route supervisor portal, gated on a role."""
     guest_redirect("/masar-supervisor")
 
-    render_in_arabic()
+    frappe.local.lang = "ar"
     allowed = bool(SUPERVISOR_ROLES & set(frappe.get_roles()))
     return publish_portal_context(
         context,

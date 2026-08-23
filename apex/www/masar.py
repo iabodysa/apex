@@ -22,7 +22,6 @@ import re
 
 import frappe
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
-from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_identity import (
     WORKER,
     delete_token_cookie,
@@ -59,7 +58,7 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/masar/"
         raise frappe.Redirect
 
-    render_in_arabic()
+    frappe.local.lang = "ar"
 
     cookie_token = presented_token(WORKER)[0]
     subject = _resolve_token_subject(cookie_token) if cookie_token else None

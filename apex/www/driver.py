@@ -24,7 +24,6 @@ from apex.apex_core.utils.portal_identity import (
     resolve_portal_subject,
     set_token_cookie,
 )
-from apex.apex_core.utils.portal_language import render_in_arabic
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 
@@ -55,7 +54,7 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/driver/"
         raise frappe.Redirect
 
-    render_in_arabic()
+    frappe.local.lang = "ar"
 
     cookie_token = presented_token(DRIVER)[0]
     subject = _resolve_token_subject(cookie_token) if cookie_token else None

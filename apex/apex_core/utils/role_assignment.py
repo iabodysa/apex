@@ -74,20 +74,6 @@ def assign_role(doctype: str, name: str, role: str, description: str, priority: 
     return len(assignees)
 
 
-def open_assignments(doctype: str) -> list[str]:
-    """The documents of ``doctype`` that currently carry an open assignment."""
-    return frappe.get_all(
-        "ToDo",
-        filters={
-            "reference_type": doctype,
-            "reference_name": ["is", "set"],
-            "status": ["in", ASSIGNMENT_STATUSES],
-        },
-        pluck="reference_name",
-        distinct=True,
-    )
-
-
 def clear_assignment(doctype: str, name: str) -> int:
     """Close every open ToDo on one document. Returns how many were closed.
 
@@ -121,7 +107,16 @@ def reconcile_role_queue(doctype: str, still_needing_attention) -> int:
     """
     keep = set(still_needing_attention)
     cleared = 0
-    for name in open_assignments(doctype):
+    for name in frappe.get_all(
+        "ToDo",
+        filters={
+            "reference_type": doctype,
+            "reference_name": ["is", "set"],
+            "status": ["in", ASSIGNMENT_STATUSES],
+        },
+        pluck="reference_name",
+        distinct=True,
+    ):
         if name not in keep:
             cleared += clear_assignment(doctype, name)
     return cleared

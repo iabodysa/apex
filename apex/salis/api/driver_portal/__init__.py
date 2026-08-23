@@ -10,7 +10,6 @@ import frappe
 
 from frappe import _
 
-from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint
 from apex.salis.utils import get_driver_for_user
@@ -34,14 +33,14 @@ def _require_enabled():
     The language pin lives here because this is the request PREAMBLE — the first
     statement of every ``/driver`` endpoint, ``manual_boarding.board_worker``
     included — not because it is a permission concern. The shell at
-    ``apex/www/driver.py`` already calls ``render_in_arabic()`` for the page render,
+    ``apex/www/driver.py`` already sets the render language for the page,
     but each endpoint the SPA then calls is its own request: a driver is Guest, so
     ``frappe.translate.get_language`` falls through to the phone's Accept-Language
     header or System Settings (``frappe/translate.py:35-60``) and painted English
     refusals inside an Arabic RTL screen. The portal declares one language in its
     own markup; this makes the API it calls agree.
     """
-    render_in_arabic()
+    frappe.local.lang = "ar"
     if not frappe.db.get_single_value("Salis Settings", "enable_driver_portal"):
         frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
 

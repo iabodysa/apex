@@ -13,7 +13,6 @@ Route trace: hooks.py tile `apex-fleet-os` -> `www/fleet-os.html` -> generated
 """
 
 import frappe
-from apex.apex_core.utils.portal_language import render_in_arabic
 from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
 
 FLEET_ROLES = {
@@ -44,7 +43,7 @@ def get_context(context):
     """Redirects guests to login and bootstraps the fleet supervisor board, gated on a fleet role."""
     guest_redirect("/fleet-os")
 
-    render_in_arabic()
+    frappe.local.lang = "ar"
     allowed = _may_view()
     grants = ["fleet.operations.read"] if allowed else []
     if allowed and frappe.has_permission("Fuel Request", "write"):
