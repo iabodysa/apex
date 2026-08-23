@@ -69,7 +69,12 @@ def _pass_exit(delivery: str, n: int):
     """Clear exit ``n`` of the 3-exit lock. Fail-closed: submitted + Pending Exits,
     the prior exit already cleared, the caller holds exit ``n``'s role, and the
     exit is not already cleared. Clearing exit 3 opens the lock (Released) and
-    issues the on-site code."""
+    issues the on-site code.
+
+    ``frappe.only_for`` (frappe/__init__.py:936) enforces the exit's own role. The one
+    thing a DocPerm cannot express is a per-EXIT gate inside one document: write on
+    the delivery is a single permission, while three different roles must each clear
+    their own step in order."""
     doc = _get_submitted(delivery)
     frappe.has_permission(DELIVERY_DOCTYPE, "write", doc=doc, throw=True)
 

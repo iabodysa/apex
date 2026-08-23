@@ -40,7 +40,14 @@ def _get_submitted(handover: str):
 
 def _require_receiving_side(doc):
     """Write permission plus membership of the receiving side (the receiving
-    supervisor or an Accommodation Manager)."""
+    supervisor or an Accommodation Manager).
+
+    ``frappe.has_permission`` decides the write and ``frappe.get_roles``
+    (frappe/permissions.py:497) the elevation. The one thing a DocPerm cannot express
+    is "the person NAMED on this row": receiving is a per-document relationship, not a
+    role, so an ``if_owner`` rule would gate on who created the handover rather than
+    on who must accept it.
+    """
     frappe.has_permission(VOUCHER_TYPE, "write", doc=doc, throw=True)
     user = frappe.session.user
     if user == doc.receiving_supervisor or ELEVATED_ROLE in frappe.get_roles(user):

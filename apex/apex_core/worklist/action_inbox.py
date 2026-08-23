@@ -52,7 +52,12 @@ def _attach_transitions(workflow_actions: list) -> None:
 
 
 def _pending(workflow_limit: int, todo_limit: int) -> dict:
-    """The two queues, each read to the given cap (0 meaning no cap)."""
+    """The two queues, each read to the given cap (0 meaning no cap).
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) rather than ``get_all``, so both
+    queues carry the caller's own row scope: a Workflow Action names a document, and
+    ``get_all`` would list actions on documents the caller cannot open.
+    """
     workflow_actions = frappe.get_list(
         "Workflow Action",
         filters={"status": "Open"},

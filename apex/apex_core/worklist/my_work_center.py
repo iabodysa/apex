@@ -97,7 +97,12 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
     in ``states``. ``get_list`` (never ``get_all``) enforces DocPerms +
     permission_query_conditions; ``owner`` is the creator. ``recent`` adds the
     48-hour terminal window. A missing/perm-blocked DocType yields no rows, never an
-    error (one bad source must not break the whole worklist)."""
+    error (one bad source must not break the whole worklist).
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) is the primitive. The one thing it
+    cannot do is stay quiet about a DocType the caller may not read — it raises — so
+    the refusal is caught here and turned into an empty section, because a worklist
+    that shows nine of ten sources is more useful than one that shows an error."""
     if not frappe.db.exists("DocType", doctype):
         return []
     if not frappe.has_permission(doctype, "read"):
@@ -211,8 +216,10 @@ def get_my_work() -> dict:
 def _acted_on_by_others(doctype: str, since) -> list[dict]:
     """Rows of ``doctype`` this user RAISED that somebody else last touched after
     ``since``. ``owner`` is the raiser, ``modified_by`` the actor and ``modified`` the
-    moment — the three audit columns the framework writes on every DocType. ``get_list``
-    (never ``get_all``) keeps DocPerms and permission_query_conditions in force, and a
+    moment — the three audit columns ``frappe.get_meta`` (frappe/model/meta.py:66)
+    confirms exist before they are read, because a DocType may be missing them on a
+    site mid-upgrade. ``frappe.get_list`` (frappe/__init__.py:2008), never
+    ``get_all``, keeps DocPerms and permission_query_conditions in force, and a
     missing or perm-blocked DocType yields no rows rather than breaking the whole feed."""
     if not frappe.db.exists("DocType", doctype):
         return []

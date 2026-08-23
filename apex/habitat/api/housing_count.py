@@ -58,8 +58,10 @@ COUNT_LINE_LIMIT = 200
 def _condition_options():
     """Return the Housing Inventory ``condition`` Select option list.
 
-    Read from the DocMeta so the portal's condition picker can never drift from
-    the DocType's option set (server-driven enum display).
+    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) is the source,
+    so the portal's condition picker can never drift from the DocType's option set.
+    The one thing a hardcoded list cannot do is follow the field: adding a condition
+    would leave the portal offering the old set with nothing to say so.
     """
     df = frappe.get_meta("Housing Inventory").get_field("condition")
     options = (df.options or "") if df else ""
