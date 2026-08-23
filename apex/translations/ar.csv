@@ -3643,6 +3643,7 @@ Repair,إصلاح
 Repair Cost,تكلفة الإصلاح
 Repair Quotation Reference,مرجع عرض سعر الإصلاح
 Replace,استبدال
+Replying to a complaint is temporarily unavailable.,الرد على الشكوى غير متاح مؤقتاً.
 Replaced,مُستبدَل
 Replacement Cost,تكلفة الاستبدال
 Reply,الرد
@@ -3963,7 +3964,6 @@ Salis Driver {0} does not exist.,سائق ساليس {0} غير موجود.
 Salis Go-Live,تشغيل ساليس
 Salis Payment Request,طلب دفع ساليس
 Salis Rentals Costs Settlements Pending Approval,تسويات تكاليف إيجار ساليس بانتظار الاعتماد
-Salis Representatives Fleet Vehicles Stopped,مركبات أسطول مندوبي ساليس الموقوفة
 Salis Settings,إعدادات ساليس
 Salis Vehicle,مركبة ساليس
 Salis Vehicle Compliance,امتثال مركبات ساليس
@@ -5130,7 +5130,6 @@ Vehicle {0}: {1} compliance expires on {2}.,المركبة {0}: امتثال {1}
 Vehicles,المركبات
 Vehicles Charged in This Period,المركبات المحتسبة في هذه الفترة
 Vehicles Stopped,المركبات الموقوفة
-Vehicles Under Maintenance,المركبات تحت الصيانة
 Vehicles by Status,المركبات حسب الحالة
 Vehicles on Rent,المركبات على الإيجار
 Verdict,النتيجة
@@ -5281,7 +5280,6 @@ Workers Requests Open,طلبات العمالة المفتوحة
 Workers Requests by Status,طلبات العمالة حسب الحالة
 Workers Transport Dashboard,لوحة نقل العمالة
 Workers Transport Over Time,نقل العمالة عبر الزمن
-Workers Transport Scheduled Awaiting Dispatch,نقل العمال المجدول بانتظار التسيير
 Workers are expected to arrive at this building today — prepare beds and custody,من المتوقع وصول عمال إلى هذا المبنى اليوم — جهّز الأسرّة والعهدة
 Workflow Action,إجراء سير العمل
 Working…,جارٍ العمل…
