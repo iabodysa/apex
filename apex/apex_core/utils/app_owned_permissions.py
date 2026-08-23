@@ -25,7 +25,7 @@ from frappe import _
 APP_OWNED_DOCTYPES = frozenset({"Employee", "Cost Center", "Project"})
 
 
-def _frappe_is_writing_its_own_records() -> bool:
+def frappe_is_writing_its_own_records() -> bool:
     """True while Frappe is applying shipped records rather than serving a person.
 
     A refusal that cannot tell the two apart fails the customer's own upgrade. ``validate``
@@ -45,7 +45,7 @@ def refuse_app_owned_permission_edit(doc, method=None):
     """Refuse a hand-made Custom DocPerm on a DocType whose permissions ship with Apex."""
     if doc.parent not in APP_OWNED_DOCTYPES:
         return
-    if _frappe_is_writing_its_own_records():
+    if frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(

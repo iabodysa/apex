@@ -12,7 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import get_time, getdate
 
-from apex.apex_core.utils.app_owned_permissions import _frappe_is_writing_its_own_records
+from apex.apex_core.utils.app_owned_permissions import frappe_is_writing_its_own_records
 
 SLA_NAME = "Salis Support SLA"
 SLA_PRIORITIES = (
@@ -270,7 +270,7 @@ def _refuse_if_shipped(doc, attempted_action, shipped_names, family):
     """Throw when ``doc`` is one the app ships and a person, not Frappe, is writing it."""
     if doc.name not in shipped_names:
         return
-    if _frappe_is_writing_its_own_records():
+    if frappe_is_writing_its_own_records():
         return
     frappe.throw(
         _(
