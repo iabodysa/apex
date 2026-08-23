@@ -1013,9 +1013,22 @@ def _get_or_create_trip_log(dispatch_trip, employee=None):
     ``employee`` is the resolved worker a fresh create is authorised under: the log is
     the driver's, so the create runs inside ``as_capacity(WORKER, employee)`` and
     ``_trip_start_log_capacity_verdict`` checks the employee against the trip's manifest
-    rather than any field on the row itself."""
+    rather than any field on the row itself.
+
+    Two callers can reach this at once — a driver scan and a worker self-confirm — and
+    each would otherwise see no log and create one. The Dispatch Trip row is locked
+    FIRST, by this function rather than by whatever called it, so the two serialise on
+    a row that always exists; the existence read that follows is itself a locking read,
+    which returns the latest committed row rather than this transaction's pre-lock
+    snapshot. Under REPEATABLE READ a plain read here answers from that snapshot, so
+    the second caller sees no log, creates a second one, and both report success.
+    """
+    frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
     existing = frappe.db.get_value(
-        "Trip Start Log", {"dispatch_trip": dispatch_trip, "docstatus": 0}, "name"
+        "Trip Start Log",
+        {"dispatch_trip": dispatch_trip, "docstatus": 0},
+        "name",
+        for_update=True,
     )
     if existing:
         return frappe.get_doc("Trip Start Log", existing)

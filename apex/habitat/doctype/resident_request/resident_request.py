@@ -348,11 +348,29 @@ def bulk_triage(names):
         frappe.enqueue(
             "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
             queue="short",
+            job_id=_bulk_triage_job_id(names),
+            deduplicate=True,
             names=names,
         )
         return {"advanced": None, "total": len(names), "queued": True}
 
     return _apply_bulk_triage(names)
+
+def _bulk_triage_job_id(names) -> str:
+    """One stable id per SELECTION, so a double-click queues one job and not two.
+
+    ``frappe.enqueue`` (frappe/utils/background_jobs.py:59) drops a duplicate only
+    when ``deduplicate`` is set AND the id matches, and the one thing it cannot do is
+    derive that id itself — without one every click is a distinct job, and the same
+    rows are triaged twice by two workers reading the same pre-lock state.
+
+    The id is the hash of the SORTED names, so the same selection in a different
+    order is the same job.
+    """
+    return "bulk_triage:" + frappe.generate_hash(
+        "|".join(sorted(str(n) for n in names or [])), length=24
+    )
+
 
 def _apply_bulk_triage(names):
     """Advance each New Resident Request in ``names`` to Triaged (per-row write
@@ -370,13 +388,18 @@ def _apply_bulk_triage(names):
     same pass, while the caller had already been told the batch succeeded (the
     sync path returns the advanced count only if nothing raised; the async path
     reports ``queued`` before the job even runs). A row that fails is logged and
-    skipped so the rest of the selection still advances."""
+    skipped so the rest of the selection still advances.
+
+    Each row is loaded ``for_update`` so the LOCK and the READ are one statement.
+    Under REPEATABLE READ a plain read answers from the transaction's own snapshot,
+    so a second caller over an overlapping selection still sees ``New`` on a row the
+    first has already advanced, and triages it a second time."""
     advanced = 0
     for name in names or []:
         frappe.db.savepoint(_BULK_TRIAGE_SAVEPOINT)
         try:
             frappe.has_permission("Resident Request", "write", doc=name, throw=True)
-            doc = frappe.get_doc("Resident Request", name)
+            doc = frappe.get_doc("Resident Request", name, for_update=True)
             if doc.status not in (None, "", "New"):
                 continue
             doc.status = "Triaged"

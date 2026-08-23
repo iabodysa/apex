@@ -281,12 +281,18 @@ def route_payment(payment_request: str) -> str:
     cannot do is know whether the DocType it was handed is a payment at all — it
     happily constructs any DocType on the site — which is why validation runs first
     and why it runs again here rather than only where the setting is written.
+
+    The request is loaded with ``for_update=True`` so the LOCK and the READ are the
+    same statement. A locking read whose result is discarded, followed by a plain
+    ``get_doc``, does not protect this: under REPEATABLE READ the second call answers
+    from the snapshot taken before the lock, so a second caller reads the pre-lock
+    world, sees no linked payment, and pays the same request twice. Nothing times out
+    and no exception is raised — both callers report success.
     """
     settings = frappe.get_single(SETTINGS_DOCTYPE)
     target_doctype = get_target_doctype(settings)
 
-    frappe.db.get_value(SOURCE_DOCTYPE, payment_request, "name", for_update=True)
-    source = frappe.get_doc(SOURCE_DOCTYPE, payment_request)
+    source = frappe.get_doc(SOURCE_DOCTYPE, payment_request, for_update=True)
 
     frappe.has_permission(SOURCE_DOCTYPE, "write", doc=source, throw=True)
     frappe.has_permission(SOURCE_DOCTYPE, "submit", doc=source, throw=True)

@@ -335,11 +335,22 @@ def _get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe
 
     ``driver`` is the server-resolved driver the create is authorised under — set on the
     doc directly (not left to its ``fetch_from``) so the create-permission check already
-    sees the field it must match against the ``as_capacity`` identity."""
+    sees the field it must match against the ``as_capacity`` identity.
+
+    Two callers can reach this at once — a driver scan and a worker self-confirm — and
+    each would otherwise see no log and create one. The Dispatch Trip row is locked
+    FIRST, by this function rather than by whatever called it, so the two serialise on
+    a row that always exists; the existence read that follows is itself a locking read,
+    which returns the latest committed row rather than this transaction's pre-lock
+    snapshot. Under REPEATABLE READ a plain read here answers from that snapshot, so
+    the second caller sees no log, creates a second one, and both report success.
+    """
+    frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
     existing = frappe.db.get_value(
         "Trip Start Log",
         {"dispatch_trip": dispatch_trip, "docstatus": 0},
         "name",
+        for_update=True,
     )
     if existing:
         return frappe.get_doc("Trip Start Log", existing)
