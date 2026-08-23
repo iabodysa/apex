@@ -11,6 +11,7 @@ from __future__ import annotations
 import calendar
 import frappe
 from frappe.query_builder.functions import Count
+from frappe.utils import today
 
 from apex.habitat.utils.occupancy import room_status
 
@@ -145,8 +146,6 @@ def daily_occupancy_snapshot() -> None:
     few grouped queries and looked up in memory, instead of issuing ~7
     ``count``/``exists``/``get_value`` calls per building (N+1). Behaviour and the
     one-row-per-building-per-day idempotency guard are preserved."""
-    from frappe.utils import today
-
     snapshot_date = today()
     year = int(snapshot_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365

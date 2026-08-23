@@ -9,6 +9,7 @@ for whoever is later assigned. There is no document owner this job could run as 
 from __future__ import annotations
 
 import frappe
+from frappe.utils import get_first_day, get_first_day_of_week, getdate, today
 
 _ROW_SAVEPOINT = "scheduled_task_row"
 
@@ -22,8 +23,6 @@ def daily_scheduled_task_instance_generator() -> None:
     an existing non-cancelled instance for the same (assignment, task_catalog, due_date)
     is skipped. Per-item error isolation; paginated 500/batch on assignments.
     """
-    from frappe.utils import today, get_first_day, get_first_day_of_week, getdate
-
     today_str = today()
     today_date = getdate(today_str)
     logger = frappe.logger()

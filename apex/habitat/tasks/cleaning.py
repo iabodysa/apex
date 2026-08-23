@@ -9,6 +9,7 @@ cleaning plan, not filed by anyone. There is no document owner this job could ru
 from __future__ import annotations
 
 import frappe
+from frappe.utils import today
 
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
 
@@ -33,8 +34,6 @@ def daily_cleaning_log_generator() -> None:
     Rooms are pre-aggregated by building in one query (no N+1). Per-building error
     isolation; paginated 500/batch.
     """
-    from frappe.utils import today
-
     cleaning_date = today()
     logger = frappe.logger()
 

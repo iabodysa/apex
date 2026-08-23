@@ -4,6 +4,9 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils.user import get_users_with_role
+
+from apex.apex_core.utils.system_notify import notify_user_system
 
 _SAVEPOINT = "apex_notify_operational"
 
@@ -63,10 +66,6 @@ def _notify_role_system(
     read check, and the trigger here is a scheduler's own aggregate scan rather than
     one document's own save/submit event.
     """
-    from frappe.utils.user import get_users_with_role
-
-    from apex.apex_core.utils.system_notify import notify_user_system
-
     for user in get_users_with_role(role) or []:
         notify_user_system(
             user,

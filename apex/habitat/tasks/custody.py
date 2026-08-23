@@ -3,12 +3,16 @@
 
 from __future__ import annotations
 
-import frappe
+from collections import defaultdict
 
-from apex.apex_core.utils.company import display_currency
+import frappe
 from frappe import _
 from frappe.query_builder.functions import Coalesce, Sum
+from frappe.utils import date_diff, escape_html, flt, fmt_money, get_url_to_list, getdate, today
 from pypika.functions import Min
+
+from apex.apex_core.utils.company import display_currency
+from apex.apex_core.utils.email_gate import mailable
 
 from apex.habitat.tasks.common import _notify_role_system
 
@@ -27,8 +31,6 @@ def consumable_custody_expiry_watch() -> None:
     expiry) so linens/mattresses age out without hardcoding a flat year. One
     bounded grouped query; the alert is one Warning per over-age position per day.
     """
-    from frappe.utils import getdate, today
-
     sle = frappe.qb.DocType("Accommodation Stock Ledger")
     art = frappe.qb.DocType("Custody Article")
     rows = (
@@ -122,12 +124,6 @@ def weekly_custody_digest() -> None:
     supervisor owns. No document event corresponds to "a week has elapsed"; this
     IS the periodic job Notification has no shape for.
     """
-    from collections import defaultdict
-
-    from frappe.utils import date_diff, escape_html, flt, fmt_money, get_url_to_list, getdate, today
-
-    from apex.apex_core.utils.email_gate import mailable
-
     logger = frappe.logger()
 
     if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):

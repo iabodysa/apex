@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import get_datetime, now_datetime, today
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 from apex.habitat.doctype.building_license.building_license import derive_license_status
@@ -23,8 +24,6 @@ def daily_building_license_expiry_check() -> None:
     stripped of the old notify/message boilerplate — purely to keep the persisted
     status accurate. Revoked is terminal and is never recalculated.
     """
-    from frappe.utils import today
-
     today_str = today()
 
     cursor = ""
@@ -127,8 +126,6 @@ def open_maintenance_escalation() -> None:
     reconciled at the end of the pass, so a request that is no longer overdue has its
     assignment closed instead of leaving a row nothing could resolve.
     """
-    from frappe.utils import now_datetime, get_datetime
-
     now = now_datetime()
     logger = frappe.logger()
 

@@ -13,6 +13,14 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils import (
+    add_days,
+    cint,
+    get_first_day_of_week,
+    get_last_day_of_week,
+    getdate,
+    today,
+)
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 from apex.apex_core.utils.system_notify import notify_user_system
@@ -37,15 +45,11 @@ def _zero_rounds_window_days() -> int:
     operator has ever opened it; a site that wants no zero-rounds sweep turns the
     scheduled task off, never by zeroing the window.
     """
-    from frappe.utils import cint
-
     return cint(frappe.db.get_single_value("Habitat Settings", "safety_zero_rounds_window_days")) or 7
 
 
 def _no_recent_round(building):
     """No submitted Safety Round of ANY cadence in the trailing window."""
-    from frappe.utils import add_days, getdate, today
-
     since = str(getdate(add_days(today(), -_zero_rounds_window_days())))
     return not frappe.db.exists(
         "Safety Round", {"docstatus": 1, "building": building, "round_date": [">=", since]}
@@ -54,8 +58,6 @@ def _no_recent_round(building):
 
 def _uncovered_this_week(building):
     """No submitted Weekly-cadence Safety Round dated inside the current site week."""
-    from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
-
     today_date = getdate(today())
     span = [str(get_first_day_of_week(today_date)), str(get_last_day_of_week(today_date))]
     return not frappe.db.exists(
@@ -130,8 +132,6 @@ def daily_safety_task_compliance_scan() -> None:
 
     Per-row error isolation; paginated 500/batch.
     """
-    from frappe.utils import today, getdate, add_days
-
     grace_days = frappe.db.get_single_value("Habitat Settings", "safety_overdue_grace_days") or 0
     cutoff = str(getdate(add_days(today(), -int(grace_days))))
     logger = frappe.logger()
@@ -158,8 +158,6 @@ def weekly_safety_coverage_gate() -> None:
     error isolation.
 
     """
-    from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate, today
-
     require_coverage = frappe.db.get_single_value(
         "Habitat Settings", "require_weekly_all_building_coverage"
     )
@@ -234,8 +232,6 @@ def audit_remediation_deadline_watch() -> None:
     whether fully verified actions already close the plan. Newly overdue plans notify
     the internal owner and Accommodation Manager.
     """
-    from frappe.utils import today, getdate
-
     today_date = getdate(today())
     logger = frappe.logger()
     flagged = 0
@@ -399,8 +395,6 @@ def _flag_buildings_without_rounds(logger):
     Notification Log sends stay unconditional because ``notify_user_system`` already
     dedupes per user against the unread alert.
     """
-    from frappe.utils import add_days, getdate, today
-
     batch_size = 500
     window_days = _zero_rounds_window_days()
     window_start = str(getdate(add_days(today(), -window_days)))

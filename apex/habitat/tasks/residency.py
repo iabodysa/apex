@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import date_diff, flt, getdate, today
 
 from apex.apex_core.utils.company import display_currency
 
@@ -23,8 +24,6 @@ def lease_expiry_watchlist() -> None:
     this job keeps only the single-field flip to ``Expired`` (via ``db_set`` — the
     same out-of-workflow write it always did) once ``lease_end_date`` has passed.
     """
-    from frappe.utils import date_diff, today
-
     today_str = today()
 
     cursor = ""
@@ -66,8 +65,6 @@ def idle_resident_aging() -> None:
     Paginated 500/batch with per-row error isolation; posts a timeline note every
     7 idle days when operational notifications are enabled.
     """
-    from frappe.utils import date_diff, flt, getdate, today
-
     today_str = today()
     start = 0
     batch_size = 500

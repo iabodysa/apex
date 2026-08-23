@@ -30,6 +30,7 @@ already owns those lifecycle methods.
 from __future__ import annotations
 
 import frappe
+from frappe.utils import now_datetime
 
 from apex.apex_core.utils.company import company_for_building
 
@@ -52,8 +53,6 @@ def post_safety_findings(safety_round) -> int:
     ``safety_round`` is the Safety Round document. Returns the number of rows
     posted on this call (0 if every finding was already ledgered).
     """
-    from frappe.utils import now_datetime
-
     posting_date = safety_round.round_date
     building = safety_round.building
     company = company_for_building(building)
@@ -119,8 +118,6 @@ def reverse_safety_findings(safety_round_name: str) -> int:
     posts at most one reversal per original. Returns the number of reversal rows
     posted (0 if the round was never ledgered or is already fully reversed).
     """
-    from frappe.utils import now_datetime
-
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={

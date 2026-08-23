@@ -17,8 +17,12 @@ import re
 import frappe
 from frappe import _
 
+from frappe.utils import now_datetime, today
+
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 from apex.apex_core.utils.role_assignment import role_holders_escalating
+from apex.apex_core.utils.system_notify import notify_user_system
+from apex.habitat.tasks import backdate_assignment_cost
 
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
@@ -56,8 +60,6 @@ def link_temporary_workers() -> None:
     there a successful pass drains the filter, whereas a worker with no Employee yet
     legitimately STAYS Active, so its exclusion set would grow to the whole table.
     """
-    from frappe.utils import today
-
     today_str = today()
     cursor = ""
     while True:
@@ -134,9 +136,6 @@ def _link(tw, employee: str) -> None:
     the operator's request and it has already succeeded by then, so a costing fault
     must not undo it. The missed days remain recoverable by re-running the back-date.
     """
-    from frappe.utils import now_datetime
-    from apex.habitat.tasks import backdate_assignment_cost
-
     _repoint_party(tw.name, employee)
 
     for asg in frappe.get_all(
@@ -177,8 +176,6 @@ def _notify_hr(message: str) -> None:
     Per-user delivery via the shared system_notify helper (the single Notification
     Log writer); the subject IS the message here.
     """
-    from apex.apex_core.utils.system_notify import notify_user_system
-
     for user in role_holders_escalating("HR Manager", "System Manager"):
         notify_user_system(user, message)
 

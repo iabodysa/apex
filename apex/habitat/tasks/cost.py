@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import calendar
 import frappe
+from frappe.utils import add_days, flt, getdate, today
+
+from apex.habitat.doctype.building.building import apply_active_lease
 
 _COST_TYPE_MAPPING = {
     "Rent": "annual_rent",
@@ -48,8 +51,6 @@ def _post_accommodation_ledger_row(
     DuplicateEntryError from other errors; the back-dating path uses a single
     Exception guard. This helper deliberately does no exception handling.
     """
-    from frappe.utils import flt
-
     daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
 
     if frappe.db.exists(
@@ -92,8 +93,6 @@ def daily_accommodation_cost_allocation() -> None:
     large dataset and buildings allocate in parallel. Buildings are discovered
     once; one idempotent job is enqueued per building (safe to retry).
     """
-    from frappe.utils import today
-
     posting_date = today()
     buildings = frappe.get_all(
         "Housing Assignment",
@@ -131,8 +130,6 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     lost and the next run repeats them all. The failure is recorded through
     ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
-    from frappe.utils import today, flt
-
     posting_date = posting_date or today()
     logger = frappe.logger()
 
@@ -145,7 +142,6 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
         )
         return
     building_doc = frappe.get_doc("Building", building)
-    from apex.habitat.doctype.building.building import apply_active_lease
     apply_active_lease(building_doc)
     capacity = flt(building_doc.total_capacity)
     if capacity <= 0:
@@ -229,8 +225,6 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     lost and the next run repeats them all. The failure is recorded through
     ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
-    from frappe.utils import today, getdate, add_days, flt
-
     to_date = to_date or today()
     asgn = frappe.db.get_value(
         "Housing Assignment",
@@ -244,7 +238,6 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
         building = frappe.get_doc("Building", asgn.building)
     except frappe.DoesNotExistError:
         return 0
-    from apex.habitat.doctype.building.building import apply_active_lease
     apply_active_lease(building)
     capacity = flt(building.total_capacity)
     if capacity <= 0:

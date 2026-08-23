@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, now_datetime
 
 
 LEDGER_DOCTYPE = "Facility Asset Movement Ledger"
@@ -140,8 +140,6 @@ def post_asset_movement(doc) -> None:
     Idempotent on ``(source_doctype, source_name)`` for original rows: a source
     already ledgered is skipped, so a re-submit cannot double-post.
     """
-    from frappe.utils import now_datetime
-
     if frappe.db.exists(
         LEDGER_DOCTYPE,
         {
@@ -180,8 +178,6 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
     so calling it twice posts at most one reversal per original. Returns the
     number of reversal rows posted.
     """
-    from frappe.utils import now_datetime
-
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
