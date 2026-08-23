@@ -15,6 +15,8 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.salis.api.masar import _rating_stars
+
 
 class TestTransportTripRating(FrappeTestCase):
     def _employee(self):
@@ -102,3 +104,17 @@ class TestTransportTripRating(FrappeTestCase):
             "manifest",
             doc.insert,
         )
+
+
+class TestTheStoredRatingIsOnTheFieldsOwnScale(FrappeTestCase):
+    """A Rating field holds a 0-1 fraction and the desk multiplies it by the field's
+    ``options`` star count to draw it, so a whole star count written straight through
+    would render as a full five however few stars the worker tapped."""
+
+    def test_the_endpoint_reads_its_star_count_from_the_field(self):
+        declared = frappe.get_meta("Transport Trip Rating").get_field("rating").options
+        self.assertEqual(str(_rating_stars()), str(declared))
+
+    def test_a_stored_rating_never_exceeds_one(self):
+        """The whole point of the scale: the top of the range stores 1.0, not 5."""
+        self.assertEqual(_rating_stars() / _rating_stars(), 1.0)

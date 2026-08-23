@@ -53,10 +53,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Stars out of five. A Rating field stores a 0-1 fraction and the desk multiplies it by this options count to draw the stars, so a whole star count written here straight would render as a full five.",
    "fieldname": "rating",
    "fieldtype": "Rating",
    "in_list_view": 1,
    "label": "Rating",
+   "options": "5",
    "reqd": 1
   },
   {
@@ -79,7 +81,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-14 16:56:00.000000",
+ "modified": "2026-08-24 00:10:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Trip Rating",

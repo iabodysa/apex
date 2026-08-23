@@ -845,6 +845,19 @@ def create_worker_request(
 _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
 
 
+def _rating_stars() -> int:
+    """How many stars a Transport Trip Rating is out of.
+
+    Read from the field's own ``options``, which is the same number the desk
+    multiplies the stored fraction by to draw the stars
+    (frappe/public/js/frappe/form/controls/rating.js:99-101); a second copy here
+    would let the portal's scale and the desk's drift apart. Frappe's own default
+    applies when ``options`` is unset.
+    """
+    field = frappe.get_meta("Transport Trip Rating").get_field("rating")
+    return cint(field.options) or 5
+
+
 def _alert_lead(fieldname: str, fallback: int) -> int:
     """Days of notice for one Masar alert window, read from Salis Settings.
 
@@ -1286,15 +1299,21 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     pure data invariants that need no identity once ``employee`` is known, so
     they live on Transport Trip Rating's own ``validate`` (reachable from any
     insertion path, not only this endpoint) and are not repeated here.
+
+    The portal speaks in WHOLE STARS and the field stores a FRACTION: a Frappe
+    Rating holds 0-1 and the desk multiplies it by the field's ``options`` star
+    count to draw it (frappe/public/js/frappe/form/controls/rating.js:99-101), so
+    the star count is divided here rather than written through.
     """
     employee = _resolve_worker(token)
 
     if not dispatch_trip:
         frappe.throw(_("Missing Dispatch Trip reference."))
 
-    rating = frappe.utils.cint(rating)
-    if rating < 1 or rating > 5:
-        frappe.throw(_("Rating must be between 1 and 5."))
+    out_of = _rating_stars()
+    stars = cint(rating)
+    if stars < 1 or stars > out_of:
+        frappe.throw(_("Rating must be between 1 and {0}.").format(out_of))
 
     trip = frappe.db.get_value(
         "Dispatch Trip", dispatch_trip, ["status", "transport_request"], as_dict=True
@@ -1313,7 +1332,7 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
         "doctype": "Transport Trip Rating",
         "employee": employee,
         "dispatch_trip": dispatch_trip,
-        "rating": rating,
+        "rating": stars / out_of,
         "transport_request": trip.transport_request,
         "feedback": (feedback or "").strip()[:2000]
     })
