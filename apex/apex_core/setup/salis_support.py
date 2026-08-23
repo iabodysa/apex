@@ -12,6 +12,7 @@ import frappe
 from frappe import _
 from frappe.utils import get_time, getdate
 
+from apex.apex_core.setup.support_names import ISSUE_PRIORITIES, ISSUE_TYPES
 from apex.apex_core.utils.app_owned_permissions import frappe_is_writing_its_own_records
 
 SLA_NAME = "Salis Support SLA"
@@ -21,8 +22,6 @@ SLA_PRIORITIES = (
     ("Medium", 14400, 86400, 1),
     ("Low", 28800, 259200, 0),
 )
-ISSUE_TYPES = ("Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other")
-ISSUE_PRIORITIES = ("Low", "Medium", "High", "Urgent")
 ISSUE_ROLE_PERMISSIONS = (
     ("Driver", {"read": 1, "create": 1, "if_owner": 1}),
     ("Fleet Manager", {"read": 1, "write": 1}),

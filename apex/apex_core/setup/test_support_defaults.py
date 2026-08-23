@@ -14,6 +14,8 @@ Priority refusals are covered where they live.
 
 import ast
 import inspect
+import json
+import os
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -121,3 +123,28 @@ class TestShippedSupportRecordsAreNamedOnce(FrappeTestCase):
         self.assertTrue(ISSUE_TYPES)
         self.assertTrue(ISSUE_PRIORITIES)
         self.assertTrue(SLA_NAME)
+
+    def test_the_fixture_hook_ships_exactly_the_shipped_names(self):
+        """The third consumer, and the one that used to hold its own copy: a name the
+        fixtures hook does not select is never installed, so the refusal guards a row
+        that is not there and the SLA hangs off a priority that does not exist."""
+        selected = {
+            entry["dt"]: set(entry["filters"][0][2])
+            for entry in frappe.get_hooks("fixtures", app_name="apex")
+            if isinstance(entry, dict) and entry.get("dt") in ("Issue Type", "Issue Priority")
+        }
+        self.assertEqual(selected.get("Issue Type"), set(ISSUE_TYPES))
+        self.assertEqual(selected.get("Issue Priority"), set(ISSUE_PRIORITIES))
+
+    def test_the_shipped_fixture_files_carry_exactly_the_shipped_names(self):
+        """The fixture FILE is what installs; the tuple only selects. A name in the
+        tuple with no row in the file selects nothing and installs nothing, and the
+        refusal then guards a record the site never received."""
+        fixtures = frappe.get_app_path("apex", "fixtures")
+        for filename, expected in (
+            ("issue_type.json", ISSUE_TYPES),
+            ("issue_priority.json", ISSUE_PRIORITIES),
+        ):
+            with open(os.path.join(fixtures, filename)) as handle:
+                shipped = {row.get("name") for row in json.load(handle)}
+            self.assertEqual(shipped, set(expected), filename)

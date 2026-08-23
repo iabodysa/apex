@@ -6,6 +6,10 @@ snapshots; the retention windows cap their growth. ``clear_old_logs`` purges sub
 rows and their child items, so drafts and every financial ledger stay untouched.
 """
 
+from apex.apex_core.setup.support_names import (
+    ISSUE_PRIORITIES,
+    ISSUE_TYPES,
+)
 from apex.apex_core.setup.workflow_names import (
     WORKFLOW_ACTIONS,
     WORKFLOW_STATES,
@@ -494,14 +498,8 @@ has_permission = {
 
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
-    {
-        "dt": "Issue Type",
-        "filters": [["name", "in", ["Vehicle", "Fuel", "Attendance", "Salary", "Complaint", "Other"]]],
-    },
-    {
-        "dt": "Issue Priority",
-        "filters": [["name", "in", ["Low", "Medium", "High", "Urgent"]]],
-    },
+    {"dt": "Issue Type", "filters": [["name", "in", list(ISSUE_TYPES)]]},
+    {"dt": "Issue Priority", "filters": [["name", "in", list(ISSUE_PRIORITIES)]]},
     {"dt": "Workflow State", "filters": [["name", "in", list(WORKFLOW_STATES)]]},
     {"dt": "Workflow Action Master", "filters": [["name", "in", list(WORKFLOW_ACTIONS)]]},
     {"dt": "Workflow", "filters": [["name", "in", list(WORKFLOWS)]]},
