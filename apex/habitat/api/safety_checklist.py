@@ -709,6 +709,12 @@ def _email_round_report(building, round_date, rounds):
     ``email_gate.mailable``. A failure is caught and logged with
     ``frappe.get_traceback`` rather than raised, because the rounds are already
     submitted and an email fault must not undo a completed inspection.
+
+    Not a native Notification: there is no single ``Safety Round`` whose Submit event
+    this could hang from, because the report spans every cadence recorded in one
+    portal call (:func:`submit_due_rounds`) and lists issue tasks pulled from each of
+    their linked Safety Task Execution rows — a cross-document rollup, not one
+    document's own event.
     """
     if not rounds:
         return False

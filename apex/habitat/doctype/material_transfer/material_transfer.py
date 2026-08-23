@@ -129,6 +129,12 @@ def _notify_finance_on_cost_center_shift(doc):
     Entry — we only email Finance so they can record the cross-charge manually,
     and only when the admin has opted in via Habitat Settings.
 
+    Not a native Notification: the condition would have to read
+    ``Building.default_cost_center`` on BOTH sides of the transfer, and a Notification
+    condition is evaluated against a context carrying only ``doc``, ``nowdate`` and
+    ``frappe.utils`` (frappe/email/doctype/notification/notification.py:556-562) — no
+    ``frappe.db`` and so no lookup on a linked doctype.
+
     ``frappe.sendmail`` (frappe/__init__.py:681) queues the memo and
     ``frappe.utils.escape_html`` (frappe/utils/data.py:1521) guards every operator
     string that reaches its body. The send is wrapped and logged through

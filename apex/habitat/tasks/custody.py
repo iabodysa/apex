@@ -115,6 +115,12 @@ def weekly_custody_digest() -> None:
     Gated by the master email kill-switch; per-recipient delivery is isolated
     (rollback before log) so one bad recipient never aborts the rest. Idempotent:
     a re-run re-sends the current snapshot and mutates no state.
+
+    Not a native Notification: Notification.send fires per single document event
+    (frappe/email/doctype/notification/notification.py:169), while this is one
+    grouped table aggregated across every open Custody Issue and every building a
+    supervisor owns. No document event corresponds to "a week has elapsed"; this
+    IS the periodic job Notification has no shape for.
     """
     from collections import defaultdict
 
