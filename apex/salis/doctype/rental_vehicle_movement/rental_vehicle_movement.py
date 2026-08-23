@@ -17,6 +17,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
+from apex.salis.rental_engine import reverse_rental_accrual
 from apex.salis.utils import add_timeline_note
 
 
@@ -115,8 +116,6 @@ class RentalVehicleMovement(Document):
         outlive it and still be there for the next settlement to claim.
         """
         if self.movement_type == "Receipt":
-            from apex.salis.rental_engine import reverse_rental_accrual
-
             reverse_rental_accrual("Rental Vehicle Movement", self.name)
 
         add_timeline_note(

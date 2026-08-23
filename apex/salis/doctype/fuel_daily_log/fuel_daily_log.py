@@ -15,6 +15,7 @@ from frappe.utils import flt, fmt_money
 
 from apex.apex_core.utils.company import display_currency
 
+from apex.salis.fuel_engine import reverse_fuel_ledger
 from apex.salis.utils import add_timeline_note
 
 
@@ -70,6 +71,4 @@ class FuelDailyLog(Document):
 
     def on_trash(self):
         """Reverses this log's entry from the fuel consumption ledger when the row is deleted."""
-        from apex.salis.fuel_engine import reverse_fuel_ledger
-
         reverse_fuel_ledger("Fuel Daily Log", self.name)

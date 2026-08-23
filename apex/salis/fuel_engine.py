@@ -32,8 +32,11 @@ from __future__ import annotations
 
 import frappe
 from frappe.query_builder.functions import Coalesce, Sum
+from frappe.utils import add_months, flt, getdate, now_datetime, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 from apex.apex_core.utils.company import company_for_vehicle
+from apex.salis.tasks.common import _queue_document, _reconcile_queue
 
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 BATCH_SIZE = 500
@@ -45,8 +48,6 @@ def get_overage_margin() -> float:
 
     Reads the Int percent ``fuel_overage_margin_percent`` from Salis Settings via
     the zero-trap helper and divides by 100, so a blank/0 setting keeps today's 5%."""
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     percent = get_salis_int("fuel_overage_margin_percent", OVERAGE_MARGIN_DEFAULT_PERCENT)
     return percent / 100.0
 
@@ -76,8 +77,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     per original row. Returns the number of reversal rows posted (0 if the source
     was never ledgered or is already fully reversed).
     """
-    from frappe.utils import flt, now_datetime
-
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -139,8 +138,6 @@ def accrue_fuel_consumption() -> None:
     the flag safe to introduce on a site whose rows all start at 0. Per-row
     try/except isolates failures; no commit inside the loops.
     """
-    from frappe.utils import flt, now_datetime
-
     logger = frappe.logger()
 
     failed_logs: set[str] = set()
@@ -291,10 +288,6 @@ def monthly_fuel_reconciliation() -> None:
 
     Per-row try/except isolates failures; no commit inside the loop.
     """
-    from frappe.utils import add_months, flt, getdate, today
-
-    from apex.salis.tasks.common import _queue_document, _reconcile_queue
-
     period_month = _period_month(add_months(getdate(today()), -1))
     logger = frappe.logger()
 

@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, now_datetime
 
+from apex.salis.tasks.dispatch import generate_for_assignment
+
 
 class RouteAssignment(Document):
     def validate(self):
@@ -41,8 +43,6 @@ class RouteAssignment(Document):
         self.approved_on = now_datetime()
 
     def on_submit(self):
-        from apex.salis.tasks.dispatch import generate_for_assignment
-
         generate_for_assignment(self.name)
 
     def on_cancel(self):

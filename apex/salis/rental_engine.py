@@ -31,9 +31,10 @@ from __future__ import annotations
 
 import frappe
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import flt, fmt_money, today
+from frappe.utils import add_months, flt, fmt_money, get_first_day, get_last_day, getdate, today
 
-from apex.apex_core.utils.company import display_currency
+from apex.apex_core.utils.company import display_currency, resolve_company
+from apex.salis.tasks.common import _queue_document, _reconcile_queue
 
 
 LEDGER_DOCTYPE = "Rental Accrual Ledger"
@@ -77,8 +78,6 @@ def daily_rental_accrual() -> None:
     """
     posting_date = today()
     logger = frappe.logger()
-
-    from apex.apex_core.utils.company import resolve_company
 
     _default_company = resolve_company("Salis")
 
@@ -170,8 +169,6 @@ def reverse_rental_accrual(source_doctype: str, source_name: str) -> int:
     number of reversal rows posted (0 if the source was never accrued or is already
     fully reversed).
     """
-    from frappe.utils import flt
-
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -210,8 +207,6 @@ def _period_bounds(period_month: str) -> tuple[str, str] | None:
     ``accrual_date``; the settlement carries a "YYYY-MM" ``period_month``, so a
     settlement's rows are those whose accrual_date falls inside this window.
     """
-    from frappe.utils import get_first_day, get_last_day, getdate
-
     if not period_month:
         return None
     try:
@@ -343,10 +338,6 @@ def monthly_rental_reconciliation() -> None:
     settlement's job, via :func:`stamp_settlement`). Per-row try/except isolates
     failures; no commit inside the loop.
     """
-    from frappe.utils import add_months, get_first_day, get_last_day, getdate
-
-    from apex.salis.tasks.common import _queue_document, _reconcile_queue
-
     closed_anchor = getdate(add_months(getdate(today()), -1))
     period_month = str(closed_anchor)[:7]
     first_day, last_day = str(get_first_day(closed_anchor)), str(get_last_day(closed_anchor))

@@ -47,6 +47,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, nowdate
 
+from apex.salis.fuel_engine import reverse_fuel_ledger
 from apex.salis.utils import (
     add_timeline_note,
     lock_fuel_quota,
@@ -178,8 +179,6 @@ class FuelRequest(Document):
                     self.name, self.topup_litres
                 ),
             )
-
-        from apex.salis.fuel_engine import reverse_fuel_ledger
 
         reverse_fuel_ledger("Fuel Request", self.name)
 

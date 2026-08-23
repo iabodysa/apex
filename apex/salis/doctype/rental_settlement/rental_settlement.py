@@ -41,9 +41,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, fmt_money, now_datetime
 
-from apex.apex_core.utils.company import display_currency
+from apex.apex_core.utils.company import display_currency, resolve_company
 
 from apex.apex_core.utils.vat import apply_vat
+from apex.salis.rental_engine import linked_accrued_total, release_settlement, stamp_settlement
 
 VALID_STATUSES = (
     "Draft",
@@ -74,8 +75,6 @@ class RentalSettlement(Document):
         if not self.requested_by:
             self.requested_by = frappe.session.user
         if not self.company:
-            from apex.apex_core.utils.company import resolve_company
-
             self.company = resolve_company("Salis")
 
         accrued = 0.0
@@ -86,8 +85,6 @@ class RentalSettlement(Document):
             if derive_line_amounts and self._amount_was_derived(row, stored_rows):
                 row.amount = computed
             accrued += flt(row.amount)
-
-        from apex.salis.rental_engine import linked_accrued_total
 
         ledger_total = linked_accrued_total(self.rental_office, self.period_month)
         self.ledger_accrued_total = flt(ledger_total)
@@ -193,8 +190,6 @@ class RentalSettlement(Document):
 
     def on_cancel(self):
         """Releases this settlement's stamped rental accrual ledger rows so they can be re-settled."""
-        from apex.salis.rental_engine import release_settlement
-
         release_settlement(self.name)
 
     def _sync_accrual_stamp(self):
@@ -209,8 +204,6 @@ class RentalSettlement(Document):
         """
         if self.status not in SETTLED_STATUSES:
             return
-        from apex.salis.rental_engine import stamp_settlement
-
         stamp_settlement(self.name, self.rental_office, self.period_month)
 
     @frappe.whitelist(methods=["POST"])
