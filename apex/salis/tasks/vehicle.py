@@ -11,7 +11,6 @@ from pypika import Case
 from apex.salis.tasks.common import (
     BATCH_SIZE,
     _queue_document,
-    _settings_int,
 )
 
 _ROW_SAVEPOINT = "salis_vehicle_row"
@@ -27,9 +26,11 @@ def idle_vehicle_watch() -> None:
     """
     from frappe.utils import add_days, today
 
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
     today_str = today()
     logger = frappe.logger()
-    idle_days = _settings_int("idle_vehicle_days", 7)
+    idle_days = get_salis_int("idle_vehicle_days", 7)
     cutoff = add_days(today_str, -idle_days)
 
     try:
@@ -103,10 +104,12 @@ def vehicle_compliance_expiry_watch() -> None:
     """
     from frappe.utils import add_days, getdate, today
 
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
     today_str = today()
     today_date = getdate(today_str)
     logger = frappe.logger()
-    lead_days = _settings_int("alert_lead_days", 30)
+    lead_days = get_salis_int("alert_lead_days", 30)
     horizon = add_days(today_str, lead_days)
 
     start = 0

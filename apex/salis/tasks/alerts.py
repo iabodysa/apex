@@ -7,7 +7,6 @@ import frappe
 
 from apex.salis.tasks.common import (
     _reconcile_queue,
-    _settings_int,
 )
 
 _ROW_SAVEPOINT = "salis_alerts_row"
@@ -45,11 +44,13 @@ def reconcile_operations_alerts() -> None:
     """
     from frappe.utils import add_days, today
 
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
     today_str = today()
     logger = frappe.logger()
 
-    idle_days = _settings_int("idle_vehicle_days", 7)
-    lead_days = _settings_int("alert_lead_days", 30)
+    idle_days = get_salis_int("idle_vehicle_days", 7)
+    lead_days = get_salis_int("alert_lead_days", 30)
     idle_cutoff = add_days(today_str, -idle_days)
 
     DT = frappe.qb.DocType("Dispatch Trip")

@@ -9,7 +9,6 @@ from frappe import _
 from apex.salis.tasks.common import (
     _queue_document,
     _reconcile_queue,
-    _settings_int,
 )
 
 _ROW_SAVEPOINT = "salis_workshop_row"
@@ -28,7 +27,9 @@ def _overstay_stops() -> list:
     """
     from frappe.utils import add_days, today
 
-    days = _settings_int("workshop_overstay_days", 14)
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+    days = get_salis_int("workshop_overstay_days", 14)
     cutoff = add_days(today(), -days)
     rows = frappe.get_all(
         "Vehicle Suspension",
@@ -68,7 +69,9 @@ def workshop_overstay_watch() -> None:
     of leaving a row nothing could resolve. This job is the only queuer of Vehicle
     Suspension, so its own findings are the reconcile union.
     """
-    days = _settings_int("workshop_overstay_days", 14)
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+
+    days = get_salis_int("workshop_overstay_days", 14)
     logger = frappe.logger()
     still_overstaying: list[str] = []
     for r in _overstay_stops():

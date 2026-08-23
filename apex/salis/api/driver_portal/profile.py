@@ -8,12 +8,8 @@ from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,
 )
+from apex.salis.api.masar_worker import _fmt_date
 from apex.salis.utils import days_until as _days_until
-
-
-def _fmt_date(value):
-    """Returns the value as a string, or None when it is blank."""
-    return frappe.utils.cstr(value) if value else None
 
 
 def _employee_documents(employee):

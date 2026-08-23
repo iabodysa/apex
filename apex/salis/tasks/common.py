@@ -26,18 +26,12 @@ SEVERITY_TO_PRIORITY = {"Critical": "High", "Warning": "Medium", "Info": "Low"}
 PRIORITY_TO_SEVERITY = {"High": "Critical", "Medium": "Warning", "Low": "Info"}
 
 
-def _settings_int(fieldname: str, default: int) -> int:
-    """Read an Int from the Salis Settings single, falling back to ``default``.
-
-    Thin alias over the canonical ``get_salis_int`` coalesce helper, kept for the
-    existing in-module call sites."""
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
-    return get_salis_int(fieldname, default)
-
-
 def _vehicle_project(vehicle: str | None) -> str | None:
-    """The vehicle's project, or None. Never raises (a lookup must not abort the job)."""
+    """The vehicle's project, or None. Never raises (a lookup must not abort the job).
+
+    ``frappe.db.get_value`` (frappe/database/database.py:469) raises on a bad
+    query; a scheduler job must survive one failed lookup rather than abort the
+    whole pass, which the primitive alone does not guarantee."""
     if not vehicle:
         return None
     try:
@@ -51,7 +45,11 @@ def _publish_operations_alert(project: str | None = None) -> None:
     """Signal the operations board to refetch its alert strip/queue. Broadcast to
     the site room; the board filters by project client-side (a None project reloads
     every open board). after_commit so subscribers read committed state. Best-effort:
-    a publish failure must never abort the scheduler job."""
+    a publish failure must never abort the scheduler job.
+
+    ``frappe.publish_realtime`` (frappe/realtime.py:23) has no try/except of its
+    own; a scheduled watcher cannot let a socket-layer failure abort the pass it
+    is reporting on."""
     try:
         frappe.publish_realtime("operations_alert", {"project": project}, after_commit=True)
     except Exception:

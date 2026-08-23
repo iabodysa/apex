@@ -34,7 +34,8 @@ from apex.apex_core.utils.role_assignment import clear_assignment
 from apex.salis.api.assignment_queue import open_queue_rows, queue_ref
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.enrich import vehicle_driver_titles
-from apex.salis.tasks import QUEUE_DOCTYPES, _settings_int
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+from apex.salis.tasks import QUEUE_DOCTYPES
 
 SEVERITIES = ["Info", "Warning", "Critical"]
 
@@ -44,7 +45,7 @@ AGING_DEFAULT = {"Critical": 4, "Warning": 24, "Info": 72}
 
 def _aging_thresholds() -> dict:
     """Per-severity aging cutoffs in hours, from Settings (with sane fallbacks)."""
-    return {sev: _settings_int(AGING_SETTING[sev], AGING_DEFAULT[sev]) for sev in SEVERITIES}
+    return {sev: get_salis_int(AGING_SETTING[sev], AGING_DEFAULT[sev]) for sev in SEVERITIES}
 
 
 def _scoped_vehicles(unscoped, projects):

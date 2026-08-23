@@ -81,13 +81,15 @@ def _resolve_worker(token):
     return resolve_portal_subject(WORKER, token, required=True)
 
 
-def _employee_doc(employee):
-    """The Employee document, read defensively (fields vary across HR setups)."""
-    return frappe.get_cached_doc("Employee", employee)
-
-
 def _fmt_date(value):
-    """Returns the value as a string, or None when it is blank."""
+    """Returns the value as a string, or None when it is blank.
+
+    ``frappe.utils.cstr`` (frappe/utils/data.py:1041) stringifies ``None`` as
+    ``""`` and a falsy value like ``0`` as its own string, neither of which JSON
+    payload consumers can tell apart from a set value; this coalesces every
+    blank input to ``None`` so the API response can say "no value" with a JSON
+    null. Absorbed the identical definition that lived in
+    ``apex.salis.api.driver_portal.profile``."""
     return frappe.utils.cstr(value) if value else None
 
 

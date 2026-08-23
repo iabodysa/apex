@@ -58,11 +58,11 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
     user with no permitted project gets an empty board. ``compliance`` narrows to
     one of Compliant / Expiring Soon / Expired (the vehicle's compliance_status).
     """
-    from apex.salis.tasks import _settings_int
+    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     unscoped, projects, base_filters = scope_filter()
-    stopped_over_days = _settings_int("workshop_overstay_days", 14)
+    stopped_over_days = get_salis_int("workshop_overstay_days", 14)
 
     offices = [o.name for o in frappe.get_all("Rental Office", fields=["name"], order_by="name asc")]
     proj_opts = (

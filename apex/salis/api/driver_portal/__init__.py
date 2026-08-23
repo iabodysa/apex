@@ -15,21 +15,15 @@ from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_
 from apex.salis.api.maps_links import _stop_waypoint
 from apex.salis.utils import get_driver_for_user
 
-def _find_driver(user=None):
-    """Resolve the presented driver credential, else a linked preview user.
-
-	Thin alias of the shared ``salis.utils.get_driver_for_user`` (the single
-	resolver). Soft lookup with no exception — the portal bootstrap (and masar,
-	which imports ``_resolve_driver``) relies on an unlinked user getting a
-	friendly screen instead of a 403."""
-    return get_driver_for_user(user)
-
 def _resolve_driver(user=None):
     """Return the credential-resolved driver, else 403.
 
 	A presented credential always wins over any signed-in preview user. Used by every
-	action endpoint so writes are scoped to one active server-resolved driver."""
-    driver = _find_driver(user)
+	action endpoint so writes are scoped to one active server-resolved driver. Soft
+	lookup with no exception on the resolve itself — the portal bootstrap (and masar,
+	which imports this function) relies on an unlinked user getting a friendly screen
+	instead of a 403, which this function then raises for its own callers."""
+    driver = get_driver_for_user(user)
     if not driver:
         frappe.throw(_("No Salis Driver is linked to your account."), frappe.PermissionError)
     return driver

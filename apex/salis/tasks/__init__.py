@@ -18,7 +18,6 @@ from apex.salis.tasks.common import (
     _publish_operations_alert,
     _queue_document,
     _reconcile_queue,
-    _settings_int,
     _vehicle_project,
 )
 from apex.salis.tasks.vehicle import (
@@ -52,7 +51,6 @@ __all__ = [
     "_publish_operations_alert",
     "_queue_document",
     "_reconcile_queue",
-    "_settings_int",
     "_vehicle_project",
     "get_workshop_overstay_count",
     "idle_vehicle_watch",

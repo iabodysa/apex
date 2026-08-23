@@ -32,7 +32,13 @@ def _fmt_time(value):
     Frappe stores Time as a ``datetime.timedelta``; ``cstr`` on it yields an
     unpadded value with stray microseconds (e.g. ``6:30:00`` /
     ``2:05:46.198544``). ``format_time`` normalises it to ``06:30:00`` for a clean
-    JSON payload."""
+    JSON payload.
+
+    ``frappe.utils.format_time`` (frappe/utils/data.py:583) treats a blank value
+    and a malformed one the same way a display label would — "" for one, a raised
+    exception for the other — neither of which a JSON API can return; this
+    coalesces blank to ``None`` and a parse failure to the raw ``cstr`` value
+    instead of propagating the exception to the caller."""
     if value in (None, ""):
         return None
     try:

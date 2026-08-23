@@ -124,11 +124,6 @@ def _is_staff(user: str | None = None) -> bool:
     return has_any_role(user, STAFF_ROLES)
 
 
-def _driver_for_user(user: str | None = None) -> str | None:
-    """Returns the Salis Driver linked to the given user, or None."""
-    return get_driver_for_user(user)
-
-
 def _presented_driver() -> str | None:
     """Resolve a presented driver credential before any lookup or write."""
     raw, was_presented = presented_token(DRIVER)
@@ -144,7 +139,7 @@ def _authorize_scan_actor() -> str:
         return credential_driver
     if _is_staff():
         return f"staff:{frappe.session.user}"
-    session_driver = _driver_for_user()
+    session_driver = get_driver_for_user()
     if session_driver:
         return session_driver
     frappe.throw(
@@ -279,7 +274,7 @@ def _resolve_trip(dispatch_trip: str, ptype: str = "read") -> dict:
     if not credential_driver:
         staff_actor = _is_staff()
         if not staff_actor:
-            session_driver = _driver_for_user()
+            session_driver = get_driver_for_user()
             if not session_driver:
                 frappe.throw(
                     _("You may only handle boarding for your own trips."),

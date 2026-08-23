@@ -76,7 +76,6 @@ from apex.salis.api.masar_worker import (
     _building_in_charge,
     _clean_adhoc_passengers,
     _custody_issued_by,
-    _employee_doc,
     _fmt_date,
     _hr_notify_recipients,
     _iqama_of,
@@ -307,7 +306,7 @@ def get_worker_context(token=None):
     every field is read defensively via ``.get()``; missing fields surface as None
     rather than erroring. Read-only, no commit, no GL."""
     employee = _resolve_worker(token)
-    emp = _employee_doc(employee)
+    emp = frappe.get_cached_doc("Employee", employee)
 
     documents = _worker_documents(emp)
     photo = emp.get("image")
@@ -968,7 +967,7 @@ def notify_hr_iqama_expiring(token=None):
     GL. Tight ``rate_limit`` so the personal link cannot spam HR.
     Returns ``{"notified": bool, "days_left": int|None, "recipients": int}``."""
     employee = _resolve_worker(token)
-    emp = _employee_doc(employee)
+    emp = frappe.get_cached_doc("Employee", employee)
 
     iqama_no, iqama_expiry = _iqama_of(emp)
     days_left = _days_until(iqama_expiry)
