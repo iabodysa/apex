@@ -98,6 +98,10 @@ def _post_to_gateway(cfg: dict, to: str, message: str, channel: str) -> dict:
 def send_message(to: str, message: str, channel: str | None = None) -> dict:
     """Send one WhatsApp/SMS message through the configured gateway.
 
+    Not the framework's ``send_message`` (frappe/www/contact.py:30), which posts a
+    website Contact-Us query to a configured mailbox over ``frappe.sendmail``. The
+    name is shared and the question is not: frappe has no WhatsApp/SMS transport.
+
     The single low-level send. Returns ``{"sent": bool, ...}`` and NEVER raises
     on a configuration or transport problem:
 

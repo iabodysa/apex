@@ -165,7 +165,12 @@ _DEMO_RENTAL_OFFICE = "Demo Rental Office"
 _DEMO_ROOMS = ("DEMO-101", "DEMO-102")
 
 def setup_demo(args=None):
-    """`setup_wizard_complete` hook — queue the demo build if the operator asked."""
+    """`setup_wizard_complete` hook — queue the demo build if the operator asked.
+
+    Separate from erpnext's own demo (erpnext/setup/demo.py:37), which seeds erpnext
+    transactions and cannot create a Building, a Housing Assignment or a Dispatch Trip.
+    Both may run on one site; neither clears the other's rows.
+    """
     args = frappe._dict(args or {})
     if not args.get(DEMO_ARG):
         return
@@ -242,7 +247,11 @@ def clear_demo_data():
     """Remove every row the demo build created, and nothing else.
 
     Returns ``{"deleted": int, "residue": [...]}``. Residue is reported, never
-    hidden: a row that refuses to go leaves the rest of the clear standing."""
+    hidden: a row that refuses to go leaves the rest of the clear standing.
+
+    Clears only what this app's demo built. erpnext's ``clear_demo_data``
+    (erpnext/setup/demo.py:37) owns its own rows and is not called from here.
+    """
     frappe.only_for("System Manager")
     if not frappe.db.exists("User", DEMO_OWNER):
         frappe.throw(_("This site has no Apex demo data to remove."))

@@ -73,6 +73,11 @@ def _validate_status_rules(doc):
 def make_work_order(source_name, target_doc=None):
     """Create a Maintenance Work Order from this request.
 
+    Built on ``get_mapped_doc`` (frappe/model/mapper.py), not on erpnext's
+    manufacturing ``make_work_order`` (erpnext/manufacturing/doctype/work_order/
+    work_order.py:1396), which maps a Sales Order to a production order and knows
+    nothing of a building or an issue type.
+
     field_map is intentionally omitted for building/issue_type: get_mapped_doc
     copies same-named fields automatically (mapper lines 190-195).  status is
     excluded via field_no_map so the source "Open" value is never copied; the
