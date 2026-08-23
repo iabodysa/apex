@@ -26,11 +26,11 @@ from frappe.utils import getdate
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.logistay import permissions
 from apex.logistay.doctype.sim_card.sim_card import set_projection
-from apex.logistay.tasks.sim_alerts import _sim_operations_users
 from apex.logistay.utils.cost_center import (
     resolve_employee_cost_center,
     resolve_project_cost_center,
 )
+from apex.logistay.utils.roles import sim_operations_users
 
 CUSTODIAN_ACTIONS = ("Assign", "Transfer")
 
@@ -224,7 +224,7 @@ class SIMCustodyAssignment(Document):
         else:
             body = _("A SIM has been suspended: {0}.").format(self.sim_card)
 
-        for user in _sim_operations_users():
+        for user in sim_operations_users():
             restrict, allowed = permissions.report_company_scope(user, doctype="SIM Card")
             if restrict and self.company not in (allowed or []):
                 continue

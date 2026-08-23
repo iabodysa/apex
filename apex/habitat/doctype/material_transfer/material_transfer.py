@@ -14,6 +14,15 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    get_store_balance,
+    has_stock_entries,
+    post_stock_entry,
+    reverse_and_mark_cancelled,
+    validate_reversal_allowed,
+)
+from apex.habitat.utils.item_master import resolve_item
+
 VOUCHER_TYPE = "Material Transfer"
 
 
@@ -26,9 +35,6 @@ class MaterialTransfer(Document):
         A Document method rather than a module function like the rest of this
         controller, because Frappe dispatches it from the class with no hooks.py
         doc_events entry to add — this DocType has none registered for before_cancel."""
-        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            validate_reversal_allowed,
-        )
         validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
 
@@ -38,14 +44,11 @@ def validate(doc, method=None):
         frappe.throw(_("At least one item is required on a Material Transfer."))
     if doc.from_building and doc.to_building and doc.from_building == doc.to_building:
         frappe.throw(_("Source and destination buildings must be different."))
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        _resolve_item,
-    )
     for row in doc.items:
         if (row.qty or 0) <= 0:
             frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
         if row.item_type and row.item:
-            item_name, uom, _cost = _resolve_item(row.item_type, row.item)
+            item_name, uom, _cost = resolve_item(row.item_type, row.item)
             row.item_name = item_name
             row.uom = uom
 
@@ -61,9 +64,6 @@ def on_submit(doc, method=None):
 def _assert_source_availability(doc):
     """Reject the transfer if the source store cannot cover the requested quantity
     for any item (quantities aggregated per item, in case of duplicate rows)."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        get_store_balance,
-    )
     needed = {}
     for row in doc.items:
         needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
@@ -79,9 +79,6 @@ def _assert_source_availability(doc):
 
 def _post_ship_leg(doc):
     """Stock leaves the source store (employee unset). Idempotent."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries,
-    )
     if has_stock_entries(VOUCHER_TYPE, doc.name):
         return
     for row in doc.items:
@@ -110,9 +107,6 @@ def mark_received(transfer: str, received_date: str = None):
         return doc.name
     if doc.status != "In Transit":
         frappe.throw(_("Transfer {0} is not In Transit.").format(doc.name))
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry,
-    )
     rcv_date = received_date or today()
     for row in doc.items:
         post_stock_entry(
@@ -194,7 +188,4 @@ def _role_emails(role):
 
 def on_cancel(doc, method=None):
     """Reverse every ledger row this transfer posted (ship and, if any, receive legs)."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_and_mark_cancelled,
-    )
     reverse_and_mark_cancelled(doc, VOUCHER_TYPE)

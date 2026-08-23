@@ -41,6 +41,7 @@ from contextlib import contextmanager
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.phone import normalize_phone
 from apex.apex_core.utils.rate_window import charge_window
 
 WORKER = "Worker"
@@ -762,13 +763,12 @@ def credential_delivery_destination(
 ) -> str | None:
     """Return the stored subject phone and reject a different caller value."""
     _require_audience(audience)
-    from apex.salis.api.messaging_gateway import _normalize_phone
 
     fieldname = "cell_number" if audience == WORKER else "phone"
-    stored = _normalize_phone(
+    stored = normalize_phone(
         frappe.db.get_value(_SUBJECT_DOCTYPES[audience], subject, fieldname)
     )
-    if requested is not None and _normalize_phone(requested) != stored:
+    if requested is not None and normalize_phone(requested) != stored:
         frappe.throw(
             _("The requested phone does not match the subject's stored phone."),
             frappe.PermissionError,

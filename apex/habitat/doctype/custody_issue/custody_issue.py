@@ -7,7 +7,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate
+
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    get_store_balance,
+    has_stock_entries,
+    post_stock_entry,
+    reverse_and_mark_cancelled,
+    validate_reversal_allowed,
+)
 
 
 class CustodyIssue(Document):
@@ -108,9 +116,6 @@ def _assert_source_availability(doc):
     (see ``_post_custody_stock``), so it has nothing to verify."""
     if not _holder(doc)[1]:
         return
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        get_store_balance,
-    )
     needed = {}
     for row in doc.items:
         if not row.article:
@@ -138,9 +143,6 @@ def _holder(doc):
 def _post_custody_stock(doc):
     """Move stock from the building store into the holder's custody (same building) on
     the Accommodation Stock Ledger. Skipped for a free-text issue naming no holder."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries,
-    )
     party_type, party = _holder(doc)
     if not party or has_stock_entries("Custody Issue", doc.name):
         return
@@ -169,16 +171,10 @@ def before_cancel(doc, method=None):
                 doc.name, returned[0].name
             )
         )
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        validate_reversal_allowed,
-    )
     validate_reversal_allowed("Custody Issue", doc.name)
 
 
 def on_cancel(doc, method=None):
     """Reverses the posted custody stock movement, unnames the issuer, and marks the issue cancelled."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_and_mark_cancelled,
-    )
     doc.db_set("issued_by", None)
     reverse_and_mark_cancelled(doc, "Custody Issue")

@@ -19,6 +19,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.phone import normalize_phone
 from apex.apex_core.utils.portal_identity import (
     WORKER,
     credential_delivery_destination,
@@ -62,18 +63,6 @@ def is_configured() -> bool:
     Lets a UI offer a "send via WhatsApp/SMS" action only when it will actually
     do something, without exposing the credential."""
     return _gateway_config() is not None
-
-
-def _normalize_phone(phone) -> str | None:
-    """Trim a phone to digits and a single leading ``+``, or None when empty.
-
-    Provider-agnostic light cleanup (strips spaces/dashes/parens a record may
-    carry); the gateway/provider does final validation and country defaulting."""
-    phone = (phone or "").strip()
-    if not phone:
-        return None
-    cleaned = "".join(ch for ch in phone if ch.isdigit())
-    return ("+" + cleaned) if phone.startswith("+") else cleaned or None
 
 
 def _post_to_gateway(cfg: dict, to: str, message: str, channel: str) -> dict:
@@ -127,7 +116,7 @@ def send_message(to: str, message: str, channel: str | None = None) -> dict:
         return {"sent": False, "reason": "not_configured"}
 
     try:
-        phone = _normalize_phone(to)
+        phone = normalize_phone(to)
         if not phone:
             return {"sent": False, "reason": "no_phone"}
 
@@ -159,7 +148,7 @@ def enqueue_message(to: str, message: str, channel: str | None = None) -> dict:
     if not is_configured():
         frappe.logger("messaging_gateway").info("enqueue skipped: gateway not configured")
         return {"queued": False, "reason": "not_configured"}
-    if not _normalize_phone(to):
+    if not normalize_phone(to):
         return {"queued": False, "reason": "no_phone"}
     frappe.enqueue(
         "apex.salis.api.messaging_gateway.send_message",

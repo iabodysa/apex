@@ -27,7 +27,7 @@ from frappe.utils import add_to_date, nowdate, today
 
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.logistay import permissions
-from apex.logistay.tasks.sim_alerts import _sim_operations_users
+from apex.logistay.utils.roles import sim_operations_users
 
 _ROW_SAVEPOINT = "telecom_contract_expiry_row"
 CONTRACT_EXPIRY_NOTICE_DAYS = 30
@@ -92,7 +92,7 @@ def contract_expiry_soon_watch() -> None:
     if not contracts:
         return
 
-    for user in _sim_operations_users():
+    for user in sim_operations_users():
         restrict, allowed = permissions.report_company_scope(user, doctype="Telecom Contract")
         rows = (
             [c for c in contracts if c.company in (allowed or [])] if restrict else contracts

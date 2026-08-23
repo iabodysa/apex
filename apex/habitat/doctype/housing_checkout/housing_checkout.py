@@ -32,8 +32,14 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 
-from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    has_stock_entries,
+    post_stock_entry,
+    reverse_stock_entries,
+    validate_reversal_allowed,
+)
+from apex.habitat.doctype.housing_assignment.housing_assignment import recalculate_spatial
 
 DEPARTURE_REASONS = ("Final Exit", "End of Contract")
 
@@ -345,9 +351,6 @@ def _post_return_stock(doc, assignment):
 
     The party pair must be the one check-in credited, or the two legs never net out.
     """
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries,
-    )
     if not doc.custody_return_items or has_stock_entries("Housing Checkout", doc.name):
         return
 
@@ -403,9 +406,6 @@ def _cancel_orphan_damage_assessment(doc):
 def before_cancel(doc, method=None):
     """Blocks cancellation when no Cancellation Reason has been given, or when the
     custody this checkout returned has already moved on again."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        validate_reversal_allowed,
-    )
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is mandatory."))
     validate_reversal_allowed("Housing Checkout", doc.name)
@@ -413,9 +413,6 @@ def before_cancel(doc, method=None):
 def on_cancel(doc, method=None):
     """Drops the clearance sign-off, cancels the draft damage assessment, puts the
     custody back on the resident's name, and reopens the stay."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
-    )
     _stamp_clearance(doc, clear=True)
     _cancel_orphan_damage_assessment(doc)
     reverse_stock_entries("Housing Checkout", doc.name)

@@ -42,7 +42,7 @@ from apex.habitat.utils.arrival_slips import (
     CHECKIN_SLIP_TEMPLATE,
     CUSTODY_HANDOVER_SLIP_TEMPLATE,
 )
-from apex.habitat.utils.housing_scope import active_building_scope
+from apex.habitat.utils.housing_scope import active_building_scope, assert_party_in_scope
 
 __all__ = [
     "ARRIVAL_SLIP_TEMPLATE",
@@ -63,59 +63,6 @@ def _expiry_days(expiry_date) -> int | None:
     if not expiry_date:
         return None
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
-
-def _assert_party_in_scope(party_type, party) -> None:
-    """Enforce per-doc BUILDING scope before any party PII / identity is returned.
-
-    The desk lookups take a CLIENT-SUPPLIED docname. A type-level
-    ``has_permission`` only proves the caller may read the doctype at all — it does
-    NOT confine them to their own estate, so a scoped supervisor (or any low-role
-    user with a type-level read) could otherwise harvest another building's worker
-    identity, passport, and Iqama. This re-applies the same building scope the list
-    views get via ``permission_query_conditions``. That hook runs inside
-    ``DatabaseQuery`` (frappe/model/db_query.py), and the one thing it cannot do is
-    reach a direct ``frappe.db.get_value`` — which is exactly the read below it, so
-    the scope is asserted here or it is not asserted at all. Refusal raises
-    ``frappe.PermissionError``, the class the framework itself uses.
-
-    Unscoped oversight roles (HOUSING_UNSCOPED_ROLES) / Administrator pass through.
-    Scoped-user rules per party type:
-
-    * Temporary Worker — scoped on its own ``building`` field; a worker with no
-      building (or one outside the caller's estate) is denied (a scoped user can
-      never act on an estate-less party — mirrors permissions). The
-      passport / Iqama leak (R1) lives here.
-    * Employee — scoped on the building of its LIVE Accommodation Assignment. An
-      employee actively housed in ANOTHER estate is denied (the real R2 leak). An
-      employee with NO live assignment (a not-yet-housed arrival) is allowed, so
-      the legitimate intake / check-in lookup the desk does before assigning a bed
-      is never broken — that path exposes only name + photo, never PII.
-    """
-    user = frappe.session.user
-    if permissions._building_is_unscoped(user):
-        return
-
-    allowed = set(permissions._allowed_buildings(user))
-
-    if party_type == PARTY_TEMPORARY_WORKER:
-        building = frappe.db.get_value("Temporary Worker", party, "building")
-        if not building or building not in allowed:
-            raise frappe.PermissionError(
-                _("You are not permitted to access this worker's record.")
-            )
-        return
-
-    if party_type == PARTY_EMPLOYEE:
-        building = frappe.db.get_value(
-            "Housing Assignment",
-            occupancy.active_assignment_filters(party_type=PARTY_EMPLOYEE, party=party),
-            "building",
-        )
-        if building and building not in allowed:
-            raise frappe.PermissionError(
-                _("You are not permitted to access this worker's record.")
-            )
-        return
 
 @frappe.whitelist()
 def get_intake_settings() -> dict:
@@ -159,7 +106,7 @@ def send_masar_link_message(employee, phone=None) -> dict:
     from apex.salis.api import messaging_gateway
 
     frappe.has_permission("Masar Worker Token", "read", throw=True)
-    _assert_party_in_scope(PARTY_EMPLOYEE, employee)
+    assert_party_in_scope(PARTY_EMPLOYEE, employee)
     destination = credential_delivery_destination(
         WORKER, employee, requested=phone
     )
@@ -204,7 +151,7 @@ def _arrival_identity(party_type, party):
     an expiry; only an Employee has a photo."""
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
-        _assert_party_in_scope(party_type, party)
+        assert_party_in_scope(party_type, party)
         info = frappe.db.get_value("Employee", party, ["employee_name", "image"], as_dict=True) or {}
         if not info:
             frappe.throw(_("Employee {0} does not exist.").format(party))
@@ -212,7 +159,7 @@ def _arrival_identity(party_type, party):
 
     if party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        _assert_party_in_scope(party_type, party)
+        assert_party_in_scope(party_type, party)
         info = frappe.db.get_value(
             "Temporary Worker", party, ["worker_name", "expiry_date"], as_dict=True
         ) or {}
@@ -961,7 +908,7 @@ def get_arrival_slip(party_type, party) -> dict:
             ctx["qr"] = masar_qr_data_uri(link)
     elif party_type == PARTY_TEMPORARY_WORKER:
         frappe.has_permission("Temporary Worker", "read", throw=True)
-        _assert_party_in_scope(party_type, party)
+        assert_party_in_scope(party_type, party)
         tw = (
             frappe.db.get_value(
                 "Temporary Worker", party, ["passport_number", "iqama_number", "nationality"], as_dict=True

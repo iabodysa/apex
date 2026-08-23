@@ -25,7 +25,7 @@ from frappe.utils import now, today
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.habitat.utils import occupancy
-from apex.habitat.utils.housing_scope import active_building_scope
+from apex.habitat.utils.housing_scope import active_building_scope, assert_party_in_scope
 from apex.salis.api.driver_portal.images import verified_image_type
 
 
@@ -439,10 +439,8 @@ def building_open_requests(building: str) -> dict:
 def get_employee_card(employee):
     """Read-only HR identity card for the check-in dialog: name + profile photo.
     Lets the supervisor visually verify the worker before assigning a bed."""
-    from apex.habitat.api.arrivals_desk import _assert_party_in_scope
-
     frappe.has_permission("Employee", "read", throw=True)
-    _assert_party_in_scope("Employee", employee)
+    assert_party_in_scope("Employee", employee)
     vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
     return {"employee_name": vals.get("employee_name"), "image": vals.get("image")}
 
@@ -579,9 +577,7 @@ def resolve_worker(identifier: str) -> dict:
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
 
-    from apex.habitat.api.arrivals_desk import _assert_party_in_scope
-
-    _assert_party_in_scope(party_type, party)
+    assert_party_in_scope(party_type, party)
 
     if employee:
         image = frappe.db.get_value("Employee", employee, "image")
@@ -624,9 +620,7 @@ def describe_worker(party_type: str, party: str) -> dict:
     if party_type == "Temporary Worker":
         frappe.has_permission("Temporary Worker", "read", throw=True)
 
-    from apex.habitat.api.arrivals_desk import _assert_party_in_scope
-
-    _assert_party_in_scope(party_type, party)
+    assert_party_in_scope(party_type, party)
 
     if party_type == "Employee":
         employee = party

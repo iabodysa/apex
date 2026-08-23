@@ -24,22 +24,9 @@ from frappe.utils import escape_html
 
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.logistay import permissions
+from apex.logistay.utils.roles import sim_operations_users
 
 _FIELDS = ["name", "mobile_number", "status"]
-
-
-def _sim_operations_users():
-    """Enabled, real Users holding the SIM Operations User role."""
-    users = frappe.get_all(
-        "Has Role",
-        filters={"role": "SIM Operations User", "parenttype": "User"},
-        pluck="parent",
-    )
-    return [
-        u
-        for u in set(users)
-        if u not in ("Administrator", "Guest") and frappe.db.get_value("User", u, "enabled")
-    ]
 
 
 def _watchlist(companies) -> list:
@@ -76,7 +63,7 @@ def _watchlist(companies) -> list:
 
 def assigned_suspended_or_lost_watch() -> None:
     """Daily per-recipient digest of held-but-Suspended SIMs and every Lost SIM."""
-    for user in _sim_operations_users():
+    for user in sim_operations_users():
         restrict, allowed = permissions.report_company_scope(user, doctype="SIM Card")
         if restrict and not allowed:
             continue

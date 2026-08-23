@@ -44,6 +44,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
+from apex.habitat.utils.item_master import resolve_item
+
 class AccommodationStockLedger(Document):
     pass
 
@@ -64,19 +66,6 @@ def on_doctype_update():
         ["is_cancelled", "item_type", "party"],
         "idx_asl_cancel_type_party",
     )
-
-_MASTER_FIELDS = {
-    "Custody Article": ("article_name", "unit_of_measure", "standard_unit_cost"),
-    "Maintenance Material": ("material_name", "default_uom", "estimated_unit_cost"),
-}
-
-def _resolve_item(item_type: str, item: str):
-    """Looks up an item's display name, unit of measure and standard cost from its master doctype."""
-    fields = _MASTER_FIELDS.get(item_type)
-    if not fields:
-        return (item, "", 0.0)
-    vals = frappe.db.get_value(item_type, item, list(fields), as_dict=True) or {}
-    return (vals.get(fields[0]) or item, vals.get(fields[1]) or "", flt(vals.get(fields[2])))
 
 def _resolve_holder(employee, party_type, party):
     """The holder of a row as the (party_type, party, employee) triple every column
@@ -103,7 +92,7 @@ def post_stock_entry(*, item_type, item, qty, building, voucher_type, voucher_no
     party_type, party, employee = _resolve_holder(employee, party_type, party)
     if not reversal_of:
         _assert_policy_allows(item_type, item, qty, building, party_type, party, posting_date)
-    item_name, uom, unit_cost = _resolve_item(item_type, item)
+    item_name, uom, unit_cost = resolve_item(item_type, item)
     company, cost_center = frappe.db.get_value(
         "Building", building, ["company", "default_cost_center"]
     ) or (None, None)

@@ -17,6 +17,14 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    has_stock_entries,
+    post_stock_entry,
+    reverse_and_mark_cancelled,
+    validate_reversal_allowed,
+)
+from apex.habitat.utils.item_master import resolve_item
+
 VOUCHER_TYPE = "Goods Receipt"
 
 
@@ -31,14 +39,11 @@ class GoodsReceipt(Document):
                     self.intake_building
                 )
             )
-        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            _resolve_item,
-        )
         for row in self.items:
             if (row.qty or 0) <= 0:
                 frappe.throw(_("Row {0}: Qty must be greater than zero.").format(row.idx))
             if row.item_type and row.item:
-                item_name, uom, _cost = _resolve_item(row.item_type, row.item)
+                item_name, uom, _cost = resolve_item(row.item_type, row.item)
                 row.item_name = item_name
                 row.uom = uom
 
@@ -49,9 +54,6 @@ class GoodsReceipt(Document):
 
     def _post_intake(self):
         """Stock lands unassigned in the intake building store (employee unset). Idempotent."""
-        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            post_stock_entry, has_stock_entries,
-        )
         if has_stock_entries(VOUCHER_TYPE, self.name):
             return
         for row in self.items:
@@ -67,14 +69,8 @@ class GoodsReceipt(Document):
         """Refuse the cancel here, not in on_cancel: this runs before db_update()
         stamps docstatus 2, so a receipt whose goods have already left the store is
         left submitted instead of reading as cancelled for the rest of the request."""
-        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            validate_reversal_allowed,
-        )
         validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
     def on_cancel(self):
         """Reverse every ledger row this receipt posted."""
-        from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-            reverse_and_mark_cancelled,
-        )
         reverse_and_mark_cancelled(self, VOUCHER_TYPE)

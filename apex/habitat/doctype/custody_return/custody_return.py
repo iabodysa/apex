@@ -8,6 +8,12 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    has_stock_entries,
+    post_stock_entry,
+    reverse_stock_entries,
+    validate_reversal_allowed,
+)
 from apex.habitat.doctype.custody_issue.custody_issue import validate_serialized_rows
 
 
@@ -167,9 +173,6 @@ def _post_return_stock(doc):
     Accommodation Stock Ledger. ``returned_by_employee`` is the older Employee-only
     field and still wins where set; otherwise the party pair names the holder, which
     is how a Temporary Worker returns what was issued to them."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries,
-    )
     if doc.get("returned_by_employee"):
         party_type, party = "Employee", doc.returned_by_employee
     else:
@@ -202,9 +205,6 @@ def before_cancel(doc, method=None):
                 doc.name, damage[0].name
             )
         )
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        validate_reversal_allowed,
-    )
     validate_reversal_allowed("Custody Return", doc.name)
 
 
@@ -220,9 +220,6 @@ def on_cancel(doc, method=None):
             title="Custody Return on_cancel: return-progress recompute failed",
             message=frappe.get_traceback(),
         )
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
-    )
     reverse_stock_entries("Custody Return", doc.name)
 
 

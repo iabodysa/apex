@@ -14,6 +14,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    get_store_balance,
+    has_stock_entries,
+    post_stock_entry,
+    reverse_stock_entries,
+)
 from apex.habitat.utils.occupancy import room_status
 
 class HousingAssignment(Document):
@@ -296,9 +302,6 @@ def _post_checkin_custody(doc):
     Custody Issue does. Idempotent through ``has_stock_entries``, which also means
     assignments submitted before this shipped stay as they are — history is left alone
     and the ledger starts from the next check-in."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry, has_stock_entries, get_store_balance,
-    )
     if not doc.get("custody_items") or not doc.party:
         return
     if has_stock_entries("Housing Assignment", doc.name):
@@ -344,9 +347,6 @@ def on_cancel(doc, method=None):
     if active_on_bed == 0:
         frappe.db.set_value("Bed", doc.bed, "status", "Available")
 
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
-    )
     reverse_stock_entries("Housing Assignment", doc.name)
 
     recalculate_spatial(doc.room, doc.building)
