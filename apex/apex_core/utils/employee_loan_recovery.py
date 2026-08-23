@@ -32,15 +32,54 @@ The installment is capped, once, at ``MAX_RECOVERY_PERCENT`` of the employee's o
 gross pay (the same KSA Labor Law Art. 91 ceiling ``employee_recovery`` enforces every
 period) using one native Salary Slip preview taken when the Loan is built
 (``employee_recovery._salary_preview``, reused rather than duplicated — a second real
-consumer of that helper). Unlike ``employee_recovery.compute_recovery_installment``,
-this cap is NOT re-checked every pay period: a Loan's repayment schedule is fixed at
-submit, so the number the employee's gross pay implied on the day the incident was
-approved is what every future installment charges, even if pay later falls. The backstop
-that stays live every period is native and not ours: Salary Slip's own ``on_submit``
-refuses outright when the slip's net pay would go negative
-(hrms/payroll/doctype/salary_slip/salary_slip.py:207-209) — a whole slip is blocked
-rather than an installment silently shrunk, so payroll must resolve the conflict by
-hand instead of the deduction quietly not being collected.
+consumer of that helper).
+
+WHY THAT ALONE IS NOT ENOUGH, checked against the installed primitive rather than
+assumed: ``lending`` never re-evaluates a term Loan's installment against a
+borrower's ACTUAL pay. A schedule's rows are computed once, in
+``loan_repayment_schedule.py:30-96`` (``make_repayment_schedule``), and are only
+rebuilt by ``validate()`` on the schedule document ITSELF — which a submitted Loan
+never calls again (``loan.py:173-191``, ``update_draft_schedule`` only runs
+pre-submission). Every later read — ``calculate_amounts`` /
+``get_amounts`` (loan_repayment.py:1128-1226) via ``set_loan_repayment``
+(salary_slip_loan_utils.py:25-71) — walks those SAME frozen rows through the
+period's ``Loan Interest Accrual`` entries; none of it looks at the employee's
+current gross pay. The one native primitive that reshapes a live Loan's future
+installments is ``Loan Restructure`` (loan_restructure.py), which is a
+human-reviewed collections document (branch limits, waivers, DPD, an
+initiated-restructure guard) built for a case worker's decision, not a silent
+per-slip recompute — driving one automatically on every Salary Slip would itself
+route around the review it is supposed to get. So this module's frozen figure IS a
+real gap: an employee whose pay drops after the Loan is raised keeps owing the
+ORIGINAL installment, and nothing in ``lending`` shrinks it back down.
+
+The backstop that DOES stay live every period is native and not ours: Salary Slip's
+own ``on_submit`` refuses outright when the slip's net pay would go negative
+(hrms/payroll/doctype/salary_slip/salary_slip.py:207-209). That is a materially
+weaker promise than "no more than half of THIS period's pay" — it only refuses the
+slip once pay has gone NEGATIVE, so an installment can legally consume the vast
+majority of a shrunken paycheque and still submit without a word.
+
+``cap_loan_installments_to_current_pay`` closes that gap on the SALARY SLIP side —
+never by touching the Loan or its schedule (which would fight the accrual/repayment
+bookkeeping ``loan_repayment.py`` owns): it re-reads ``doc.gross_pay`` (THIS slip's
+own, already computed) right after hrms first populates ``doc.loans`` and clamps
+this slip's own row, never the Loan, down to the current cap when the frozen
+installment would exceed it. The unpaid remainder is not written off: ``lending``'s
+own accrual math (loan_repayment.py's outstanding-balance read in
+``get_amounts``) already treats an underpaid accrual entry as still owed, so it
+surfaces again the next time this Loan is read — carried forward exactly the way a
+partial repayment always is, not lost. The seam is Salary Slip's own ``validate``
+doc_event — NOT ``before_validate``: ``set_loan_repayment`` only populates
+``doc.loans``/``doc.net_pay`` INSIDE the controller's own ``validate()``
+(salary_slip.py:169, via ``calculate_net_pay`` at :853), so a ``before_validate``
+handler would run too early and see nothing to clamp; a handler registered on
+``validate`` itself runs AFTER the controller's own method returns
+(frappe/model/document.py's ``hook``/``compose`` chain), which is the first point a
+row exists. Reached ONLY through a ``hooks.py`` ``doc_events`` entry — this module
+cannot add one (out of this change's write scope; a `hooks.py` edit is reported, not
+applied), so the function is written, tested by direct call, and NOT YET ACTIVE
+until that one line is added. See the exact patch in the card.
 
 No custom field two-way links a Loan back to its Vehicle Incident (the retired
 Employee Advance path had ``custom_source_doctype``/``custom_source_document`` via a
@@ -266,3 +305,75 @@ def raise_recovery_loan(
         f"employee_loan_recovery: Loan {loan.name} raised for {source_doctype} {source_name}."
     )
     return loan.name
+
+
+def _is_recovery_loan_product(loan_product: str | None) -> bool:
+    """True only for a Loan Product THIS module raised, never a company's own staff loan.
+
+    Scoping on the product (rather than "any Loan with repay_from_salary") matters
+    the moment Apex or HR raises a Loan for something else — a real salary advance a
+    person asked for should not be capped by a rule written for a damage claim they
+    did not choose.
+    """
+    return bool(loan_product) and loan_product.startswith(f"{RECOVERY_LOAN_PRODUCT_NAME} - ")
+
+
+def cap_loan_installments_to_current_pay(doc, method=None) -> None:
+    """Reduce (never increase) each recovery Loan row on THIS slip to at most
+    ``MAX_RECOVERY_PERCENT`` of THIS period's own gross pay, and recompute the
+    totals hrms derived from it.
+
+    Wire this as Salary Slip's own ``validate`` doc_event, NOT ``before_validate``:
+    ``set_loan_repayment`` (salary_slip_loan_utils.py:25, called from
+    ``calculate_net_pay`` at salary_slip.py:853) is what first populates
+    ``doc.loans`` and ``doc.net_pay``, and that call happens INSIDE the
+    controller's own ``validate()`` (salary_slip.py:169) — before ``before_validate``
+    would ever see a populated row. A ``doc_events`` handler registered on
+    ``validate`` runs AFTER the controller's own ``validate()`` method completes
+    (frappe/model/document.py's ``hook``/``compose``: the class method runs first,
+    every registered hook after), which is the first point this row exists to clamp.
+
+    Because nothing runs ``set_net_pay`` (salary_slip.py:860-870) again after this,
+    the same formula is repeated here for ``total_loan_repayment``, ``net_pay``,
+    ``rounded_total``, ``base_net_pay`` and ``base_rounded_total`` — the only fields
+    that formula derives from ``total_loan_repayment``, which is the one number this
+    function changes.
+    """
+    from frappe.utils import rounded
+
+    cap = round(flt(doc.gross_pay) * MAX_RECOVERY_PERCENT / 100.0, 2)
+    changed = False
+
+    for row in doc.get("loans", []) or []:
+        if not row.loan:
+            continue
+        loan_product = frappe.db.get_value("Loan", row.loan, "loan_product")
+        if not _is_recovery_loan_product(loan_product):
+            continue
+
+        current = flt(row.total_payment)
+        if current <= cap or current <= 0:
+            continue
+
+        ratio = cap / current
+        row.principal_amount = round(flt(row.principal_amount) * ratio, 2)
+        row.interest_amount = round(flt(row.interest_amount) * ratio, 2)
+        row.total_payment = round(row.principal_amount + row.interest_amount, 2)
+        changed = True
+        frappe.logger().warning(
+            f"employee_loan_recovery: Loan {row.loan} installment reduced from "
+            f"{current} to {row.total_payment} on {doc.doctype} {doc.name or '(new)'} "
+            f"— {doc.employee}'s gross pay this period leaves less statutory room "
+            "than when the Loan was raised."
+        )
+
+    if not changed:
+        return
+
+    doc.total_principal_amount = sum(flt(row.principal_amount) for row in doc.get("loans", []))
+    doc.total_interest_amount = sum(flt(row.interest_amount) for row in doc.get("loans", []))
+    doc.total_loan_repayment = sum(flt(row.total_payment) for row in doc.get("loans", []))
+    doc.net_pay = flt(doc.gross_pay) - (flt(doc.total_deduction) + flt(doc.total_loan_repayment))
+    doc.rounded_total = rounded(doc.net_pay)
+    doc.base_net_pay = flt(flt(doc.net_pay) * flt(doc.exchange_rate), doc.precision("base_net_pay"))
+    doc.base_rounded_total = flt(rounded(doc.base_net_pay), doc.precision("base_net_pay"))

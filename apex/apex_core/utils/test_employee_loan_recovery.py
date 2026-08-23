@@ -27,6 +27,7 @@ from hrms.payroll.doctype.salary_structure.test_salary_structure import make_sal
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 from apex.apex_core.utils.employee_loan_recovery import (
+    cap_loan_installments_to_current_pay,
     ensure_recovery_loan_product,
     raise_recovery_loan,
 )
@@ -254,3 +255,61 @@ class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
         slip = _build_slip(structure, employee)
         slip.insert()
         self.assertRaises(frappe.ValidationError, slip.submit)
+
+
+class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
+    """The gap the first review found: hrms's own floor only refuses a NEGATIVE net
+    pay (salary_slip.py:207-209), so an installment frozen against the employee's
+    ORIGINAL pay can legally consume most of a later, smaller paycheque and still
+    submit without a word. This is not yet wired — see the module docstring for the
+    exact ``hooks.py`` entry it needs — but proves the function itself, called the
+    way that hook would call it, on a real Salary Slip.
+    """
+
+    def test_a_pay_drop_below_the_frozen_installment_is_absorbed_not_gutted(self):
+        employee, structure = _payroll_employee("apex.loan.paydrop@apex.test", base=6000)
+        loan_name = raise_recovery_loan(
+            source_doctype="Vehicle Incident",
+            source_name="VI-PAYDROP-0001",
+            employee=employee,
+            amount=999999,
+            purpose="test",
+            company=_COMPANY,
+        )
+        loan = frappe.get_doc("Loan", loan_name)
+        frozen_installment = loan.monthly_repayment_amount
+        self.assertGreater(frozen_installment, 0)
+
+        # The employee's pay drops sharply after the Loan was raised (unpaid leave,
+        # an ended allowance, a restructured salary — any of it).
+        assignment = frappe.db.get_value(
+            "Salary Structure Assignment", {"employee": employee}, "name"
+        )
+        frappe.db.set_value("Salary Structure Assignment", assignment, "base", 100)
+
+        slip = _build_slip(structure, employee)
+        slip.insert()
+
+        # Baseline, unfixed: hrms carries the FROZEN installment forward unreduced.
+        # It swallows nearly the whole (now much smaller) gross pay, and hrms's own
+        # floor (salary_slip.py:207-209) only refuses a NEGATIVE net pay — it says
+        # nothing about a merely tiny, or merely small, one.
+        self.assertEqual(len(slip.loans), 1)
+        self.assertEqual(slip.loans[0].total_payment, frozen_installment)
+        gutted_net_pay = slip.net_pay
+        new_cap = round(slip.gross_pay * MAX_RECOVERY_PERCENT / 100.0, 2)
+        self.assertLess(new_cap, frozen_installment)
+        self.assertLess(gutted_net_pay, new_cap)
+
+        cap_loan_installments_to_current_pay(slip)
+        slip.save()
+
+        self.assertEqual(slip.loans[0].total_payment, new_cap)
+        self.assertGreater(slip.net_pay, gutted_net_pay)
+        self.assertAlmostEqual(
+            slip.net_pay, slip.gross_pay - slip.total_deduction - new_cap, places=2
+        )
+        self.assertGreaterEqual(slip.net_pay, slip.gross_pay * 0.4)
+
+        _submit_without_emailing(slip)
+        self.assertEqual(slip.docstatus, 1)

@@ -130,3 +130,57 @@ class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
                     doc._release_recovery_loan()
 
         self.assertEqual(cancelled_docs, ["Loan Disbursement", "Loan"])
+
+
+class TestClearingTheLinkByHandCannotDoubleRaise(FrappeTestCase):
+    """Answers a question raised on review: the ``recovery_loan`` link is
+    ``no_copy``/read-only in the UI, but that is hygiene, not the guarantee. The
+    real guarantee is Frappe's own docstatus-transition rule
+    (frappe/model/document.py:902-908): once a document's ``docstatus`` is already
+    1, calling ``submit()`` again routes to the "update_after_submit" action, never
+    back through ``on_submit`` — so ``_raise_recovery_loan`` cannot run a second
+    time for the same document, whether or not ``recovery_loan`` was cleared by
+    hand in between. A second Loan can only ever come from a cancel + amend, which
+    is a NEW document with its own, single ``on_submit``.
+    """
+
+    def _incident(self, **fields):
+        doc = frappe.new_doc("Vehicle Incident")
+        doc.update(
+            {
+                "incident_type": "Accident",
+                "vehicle": "_T ABC 1001",
+                "incident_date": today(),
+                "description": "Test collision.",
+            }
+        )
+        doc.update(fields)
+        return doc
+
+    def test_resubmitting_after_clearing_the_link_does_not_call_raise_again(self):
+        doc = self._incident(
+            recover_from_driver=1, recovery_amount=400, worker_signature="sig"
+        )
+        doc.insert()
+        with patch(f"{_MODULE}.raise_recovery_loan", return_value="LOAN-FIRST") as mock_raise:
+            doc.submit()
+        mock_raise.assert_called_once()
+        self.assertEqual(doc.recovery_loan, "LOAN-FIRST")
+
+        frappe.db.set_value("Vehicle Incident", doc.name, "recovery_loan", None)
+        reloaded = frappe.get_doc("Vehicle Incident", doc.name)
+        self.assertEqual(reloaded.docstatus, 1)
+
+        with patch(f"{_MODULE}.raise_recovery_loan") as mock_raise_again:
+            reloaded.submit()
+
+        mock_raise_again.assert_not_called()
+
+        # The negative control: nothing in THIS module refuses a second raise once
+        # the link is blank. Calling the internal method directly (bypassing
+        # submit(), which is exactly what Frappe's own docstatus rule prevents)
+        # shows the risk is real — the safeguard here is Frappe's transition rule,
+        # not an extra check of our own.
+        with patch(f"{_MODULE}.raise_recovery_loan", return_value="LOAN-SECOND") as mock_direct:
+            reloaded._raise_recovery_loan()
+        mock_direct.assert_called_once()
