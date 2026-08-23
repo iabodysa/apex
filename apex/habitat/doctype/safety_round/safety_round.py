@@ -29,6 +29,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.portal_live import notify_building
+
 
 class SafetyRound(Document):
     def validate(self):
@@ -98,12 +100,7 @@ class SafetyRound(Document):
 
         post_safety_findings(self)
         self._clear_building_scan_alerts()
-        frappe.publish_realtime(
-            "safety_update",
-            {"building": self.building, "cadence": self.cadence, "action": "submit"},
-            doctype="Safety Round",
-            after_commit=True,
-        )
+        notify_building(self.building)
 
     def _ratify_executions(self) -> int:
         """Submit the round's still-draft executions, then return how many.
@@ -179,16 +176,11 @@ class SafetyRound(Document):
             )
 
     def on_cancel(self):
-        """Reverses this round's posted safety findings and publishes a cancel update to the portal."""
+        """Reverses this round's posted safety findings and rings the building's watchers."""
         from apex.habitat.safety_engine import reverse_safety_findings
 
         reverse_safety_findings(self.name)
-        frappe.publish_realtime(
-            "safety_update",
-            {"building": self.building, "cadence": self.cadence, "action": "cancel"},
-            doctype="Safety Round",
-            after_commit=True,
-        )
+        notify_building(self.building)
 
     def _derive_overall_result(self):
         """Derives Fail, Needs Attention or Pass from the round's task execution statuses."""

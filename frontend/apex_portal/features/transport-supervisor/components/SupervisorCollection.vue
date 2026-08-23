@@ -1,5 +1,5 @@
 <script setup>
-import { computed, inject, reactive, watch } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, reactive, watch } from "vue";
 import { Button, FormControl } from "frappe-ui";
 import { Link } from "frappe-ui/frappe";
 import { routeLocationKey, routerKey } from "vue-router";
@@ -17,6 +17,8 @@ const props = defineProps({
   baseFilters: { type: Object, default: () => ({}) },
   dateField: { type: String, default: "" },
   statusOptions: { type: Array, default: () => [] },
+  liveDoctype: { type: String, default: "" },
+  liveEvent: { type: String, default: "" },
 });
 
 const route = inject(routeLocationKey, reactive({ query: {} }));
@@ -39,6 +41,17 @@ let queryQueue = Promise.resolve();
 function reloadResource() {
   return props.resource.reload?.() ?? props.resource.fetch?.();
 }
+
+// A collection that names its room re-reads itself when the room rings, keeping the filters
+// and the page the supervisor is already looking at. The event is a doorbell: nothing about a
+// rider crosses the socket, and the rows come back through the same permission-scoped list.
+const subscribeDoctype = inject("portalDoctypeSubscribe", () => () => {});
+let unsubscribe = () => {};
+onMounted(() => {
+  if (!props.liveDoctype || !props.liveEvent) return;
+  unsubscribe = subscribeDoctype(props.liveDoctype, props.liveEvent, () => reloadResource()) || (() => {});
+});
+onBeforeUnmount(() => unsubscribe());
 
 function normalizedFilters(query) {
   return {

@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.portal_live import notify_building
+
 
 class Bed(Document):
     pass
@@ -21,19 +23,13 @@ def toggle_service(bed: str) -> str:
 
     This is the one bed-state change that never touches occupancy, so it never reaches
     the ``recalculate_building_occupancy`` choke point that notifies the building's watchers.
-    It publishes the framework's own ``doc_update`` event directly, on the Building doc room,
-    so the portal needs one listener for both paths rather than a bed-specific one."""
+    It rings the Building doc room through ``portal_live.notify_building``, so the portal
+    needs one listener for both paths rather than a bed-specific one."""
     doc = frappe.get_doc("Bed", bed, for_update=True)
     doc.check_permission("write")
     if doc.status == "Occupied":
         frappe.throw(_("Bed {0} is occupied. Check the resident out before deactivating it.").format(bed))
     new_status = "Available" if doc.status == "Out of Service" else "Out of Service"
     doc.db_set("status", new_status)
-    frappe.publish_realtime(
-        "doc_update",
-        {"doctype": "Building", "name": doc.building},
-        doctype="Building",
-        docname=doc.building,
-        after_commit=True,
-    )
+    notify_building(doc.building)
     return new_status

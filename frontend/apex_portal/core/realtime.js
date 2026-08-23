@@ -56,6 +56,65 @@ export function createPortalSubscriber({
   };
 }
 
+// The third admission rule, and the one an operations BOARD needs: doctype_subscribe joins
+// the room every row of one doctype is published to, gated on read permission for the doctype
+// (realtime/handlers/frappe_handlers.js doctype_subscribe -> can_subscribe_doctype). A board
+// watches a fleet, not one vehicle, so a doc room cannot express it and a token portal — which
+// holds no DocPerm — is refused the join outright. The server side must name that room
+// explicitly: publish_realtime given a doctype and no docname falls through to the site room
+// (apex_core/utils/portal_live.py says where), so this subscriber only ever hears the events
+// portal_live.notify_doctype sends.
+// Unlike the two subscribers below this one holds SEVERAL rooms on one socket, because a
+// doctype room carries no subject: an operations screen watching vehicles and trips at once
+// is one operator's own permission set, not two audiences, and the server re-checks read
+// permission on every join. A doc or task room is refused a second room for the opposite
+// reason — the room id IS the subject there, so widening it would widen who is heard.
+export function createDoctypeSubscriber({
+  settings = {},
+  origin = globalThis.location?.origin || "",
+  ioFactory = io,
+} = {}) {
+  if (!settings.site_name || !settings.socketio_port || !origin) return () => () => {};
+  let socket;
+  let join;
+  const rooms = new Map();
+
+  return (doctype, event, callback) => {
+    if (!doctype || !event || typeof callback !== "function") return () => {};
+    if (!socket) {
+      socket = ioFactory(socketUrl(settings, origin), {
+        withCredentials: true,
+        reconnectionAttempts: 5,
+        secure: globalThis.location?.protocol === "https:",
+      });
+      join = () => rooms.forEach((_count, name) => socket?.emit("doctype_subscribe", name));
+      socket.on("connect", join);
+      socket.on("reconnect", join);
+    }
+    if (!rooms.has(doctype)) socket.emit("doctype_subscribe", doctype);
+    rooms.set(doctype, (rooms.get(doctype) || 0) + 1);
+    socket.on(event, callback);
+    let active = true;
+    return () => {
+      if (!active || !socket) return;
+      active = false;
+      socket.off(event, callback);
+      const left = (rooms.get(doctype) || 1) - 1;
+      if (left) rooms.set(doctype, left);
+      else {
+        rooms.delete(doctype);
+        socket.emit("doctype_unsubscribe", doctype);
+      }
+      if (rooms.size) return;
+      socket.off("connect", join);
+      socket.off("reconnect", join);
+      socket.disconnect();
+      socket = undefined;
+      join = undefined;
+    };
+  };
+}
+
 // Separate from createPortalSubscriber on purpose: that one emits task_subscribe, which the
 // server accepts with no permission check (correct for the Driver/Worker guest bearer-token
 // audience — see frappe_handlers.js task_subscribe). This one emits doc_subscribe, which the

@@ -42,6 +42,8 @@ const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
     :base-filters="{ status: ['not in', ['Completed', 'Cancelled']] }"
     :status-options="tripStatusOptions"
     empty="لا توجد رحلات تشغيل حالياً."
+    live-doctype="Dispatch Trip"
+    live-event="driver_trip_update"
   >
     <template #default="{ rows }">
       <ol class="supervisor-trip-board">

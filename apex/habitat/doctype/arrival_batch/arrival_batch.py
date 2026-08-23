@@ -16,6 +16,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.portal_live import notify_building
 
 _MAX_EXPECTED_WORKERS = 500
 
@@ -38,6 +39,15 @@ class ArrivalBatch(Document):
                 _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)
             )
         self.title = f"{self.building} - {frappe.utils.formatdate(self.expected_date)}"
+
+    def on_update(self):
+        """Rings the building's watchers so an open Arrivals Desk shows a new or amended
+        manifest without a reload.
+
+        A supplier files this manifest through the public web form, so the change arrives
+        with nobody at a desk having asked for it — the receptionist reconciling arrivals
+        against it is the one who must see it appear."""
+        notify_building(self.building)
 
     @property
     def pending_arrival_count(self) -> int:

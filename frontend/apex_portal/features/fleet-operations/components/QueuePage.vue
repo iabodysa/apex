@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { Badge, Button } from "frappe-ui";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
@@ -11,6 +11,8 @@ const props = defineProps({
     rowsKey: { type: String, default: "" },
     detailBase: { type: String, default: "" },
     empty: String,
+    liveDoctype: { type: String, default: "" },
+    liveEvent: { type: String, default: "" },
 });
 const rows = computed(() => {
     const data = props.resource.data;
@@ -24,7 +26,19 @@ const rowBinding = (row) =>
     props.detailBase
         ? { is: RouterLink, to: `${props.detailBase}/${encodeURIComponent(rowKey(row))}` }
         : { is: "div" };
-onMounted(() => props.resource.fetch());
+// A queue that names its room refetches when the room rings, so a second operator sees a
+// vehicle leave the queue without pressing the refresh button beside the heading. The payload
+// is a doorbell only: the rows are re-read through the same permission-scoped endpoint.
+const subscribeDoctype = inject("portalDoctypeSubscribe", () => () => {});
+let unsubscribe = () => {};
+onMounted(() => {
+    props.resource.fetch();
+    if (props.liveDoctype && props.liveEvent) {
+        unsubscribe = subscribeDoctype(props.liveDoctype, props.liveEvent, () => props.resource.fetch())
+            || (() => {});
+    }
+});
+onBeforeUnmount(() => unsubscribe());
 </script>
 <template>
     <section class="ops-page">

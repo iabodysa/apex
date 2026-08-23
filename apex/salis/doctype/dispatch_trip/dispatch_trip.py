@@ -14,6 +14,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_time, now_datetime
 
+from apex.apex_core.utils.portal_live import notify_doctype
 from apex.salis.doctype.dispatch_trip.trip_manifest import (
     ROUTE_STOP_FIELDS,
     copy_route_stops,
@@ -84,12 +85,7 @@ class DispatchTrip(Document):
     def _publish_driver_update(self):
         """Tell authorised desk and portal clients to refetch after commit."""
         try:
-            frappe.publish_realtime(
-                "driver_trip_update",
-                {"name": self.name},
-                doctype="Dispatch Trip",
-                after_commit=True,
-            )
+            notify_doctype("Dispatch Trip", "driver_trip_update", {"name": self.name})
         except Exception:
             pass
         try:

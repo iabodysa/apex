@@ -1,5 +1,5 @@
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
+import { computed, inject, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
@@ -44,10 +44,28 @@ const saveReason = computed(() => {
 const progressLabel = computed(() => saveReason.value
   || (checklistComplete.value ? "اكتملت بنود الجولة." : "تقدم الجولة"));
 
+const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
+let unsubscribers = [];
+let liveBuilding = null;
+
+function stopLive() {
+  liveBuilding = null;
+  while (unsubscribers.length) unsubscribers.pop()();
+}
+
+function startLive(name) {
+  if (name === liveBuilding) return;
+  liveBuilding = name;
+  while (unsubscribers.length) unsubscribers.pop()();
+  if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => due.fetch()) || (() => {}));
+}
+
 watch(building, async (value) => {
   Object.keys(results).forEach((key) => delete results[key]);
+  startLive(value);
   if (value) await due.fetch();
 }, { immediate: true });
+onBeforeUnmount(stopLive);
 function update(task, cadence, value) {
   results[`${cadence}:${task}`] = { ...value, task, cadence };
 }

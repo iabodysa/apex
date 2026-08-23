@@ -29,6 +29,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, today
 
+from apex.apex_core.utils.portal_live import notify_doctype
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.fleet_os_board import build_board, driver_pii_visible
 from apex.salis.doctype.vehicle_incident.vehicle_incident import close_incident_internal
@@ -364,12 +365,7 @@ def reassign(plate, driver_id, date=None):
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
 
     assignment = reassign_vehicle_driver(vehicle, driver, date)
-    frappe.publish_realtime(
-        "fleet_update",
-        {"plate": plate, "action": "reassign"},
-        doctype="Salis Vehicle",
-        after_commit=True,
-    )
+    notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "reassign"})
     return {"ok": True, "assignment": assignment}
 
 
@@ -408,12 +404,7 @@ def stop_vehicle(plate, reason=None):
             frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": getdate(today())})
         set_current_driver(vehicle, None)
         frappe.db.set_value("Salis Driver", current_driver, "current_vehicle", None)
-    frappe.publish_realtime(
-        "fleet_update",
-        {"plate": plate, "action": "stop"},
-        doctype="Salis Vehicle",
-        after_commit=True,
-    )
+    notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "stop"})
     return {"ok": True, "stop": doc.name}
 
 
@@ -451,12 +442,7 @@ def workshop_in(plate, expected_return=None, notes=None):
     doc.submit()
 
     frappe.db.set_value("Salis Vehicle", vehicle, "status", "Under Maintenance")
-    frappe.publish_realtime(
-        "fleet_update",
-        {"plate": plate, "action": "workshop_in"},
-        doctype="Salis Vehicle",
-        after_commit=True,
-    )
+    notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "workshop_in"})
     return {"ok": True, "stop": doc.name}
 
 
@@ -487,12 +473,7 @@ def workshop_out(plate):
     close_open_stop(stop.name)
     if frappe.db.get_value("Salis Vehicle", vehicle, "status") == "Under Maintenance":
         frappe.db.set_value("Salis Vehicle", vehicle, "status", stop.previous_status or "Active")
-    frappe.publish_realtime(
-        "fleet_update",
-        {"plate": plate, "action": "workshop_out"},
-        doctype="Salis Vehicle",
-        after_commit=True,
-    )
+    notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "workshop_out"})
     return {"ok": True, "stop": stop.name}
 
 
@@ -544,12 +525,7 @@ def recover(plate):
 
     if not incident:
         frappe.db.set_value("Salis Vehicle", vehicle, "status", "Active")
-        frappe.publish_realtime(
-            "fleet_update",
-            {"plate": plate, "action": "recover"},
-            doctype="Salis Vehicle",
-            after_commit=True,
-        )
+        notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "recover"})
         return {"ok": True}
 
     if incident.previous_driver and not frappe.db.get_value(
@@ -561,10 +537,5 @@ def recover(plate):
     frappe.db.set_value(
         "Salis Vehicle", vehicle, "status", incident.previous_status or "Active"
     )
-    frappe.publish_realtime(
-        "fleet_update",
-        {"plate": plate, "action": "recover"},
-        doctype="Salis Vehicle",
-        after_commit=True,
-    )
+    notify_doctype("Salis Vehicle", "fleet_update", {"plate": plate, "action": "recover"})
     return {"ok": True, "incident": incident.name}

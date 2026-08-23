@@ -8,5 +8,5 @@ const resource = createResource({
 });
 </script>
 <template>
-  <QueuePage title="المركبات" :resource="resource" rows-key="vehicles" detail-base="/vehicles" empty="لا توجد مركبات ضمن المشاريع المسموحة." />
+  <QueuePage title="المركبات" :resource="resource" rows-key="vehicles" detail-base="/vehicles" empty="لا توجد مركبات ضمن المشاريع المسموحة." live-doctype="Salis Vehicle" live-event="fleet_update" />
 </template>
