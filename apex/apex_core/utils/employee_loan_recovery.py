@@ -1,106 +1,47 @@
 # Copyright (c) 2026, afmcoltd
 """Employee cost recovery on the native lending app's Loan.
 
-The lending app was installed at the owner's instruction; ``hrms`` wires a Loan into
-payroll on its own the moment it finds one (``if_lending_app_installed``,
-hrms/payroll/doctype/salary_slip/salary_slip_loan_utils.py:13-21). Its
-``set_loan_repayment`` (salary_slip_loan_utils.py:25) reads every submitted, open Loan
-with ``repay_from_salary`` set for the Salary Slip's own employee and company
-(salary_slip_loan_utils.py:74-93), appends its due installment to the slip's ``loans``
-child table, and ``make_loan_repayment_entry``/``cancel_loan_repayment_entry``
-(:127, :166) post and reverse the matching Loan Repayment on submit and cancel. None of
-that is called from here: this module only builds the Loan and lets HRMS run it.
+``hrms`` wires a Loan into payroll on its own: ``set_loan_repayment``
+(hrms/payroll/doctype/salary_slip/salary_slip_loan_utils.py:25) reads every submitted, open
+Loan with ``repay_from_salary`` set for the slip's own employee and company, appends its due
+installment to ``doc.loans``, and ``make_loan_repayment_entry`` (:127) posts the matching Loan
+Repayment on submit. This module builds the Loan and calls none of that.
 
-A vehicle damage recovery owes the company money the employee was never given, unlike
-Employee Advance (a receivable FOR money the company gave), which is why this module
-raises a Loan instead of a second call into ``employee_recovery.raise_recovery_advance``.
-Proven empirically (a submitted term Loan with no Loan Disbursement produced zero
-accrual and an empty Salary Slip ``loans`` row): ``lending`` will not run a term Loan's
-repayment schedule until it is disbursed —
-``loan_disbursement.py:26-48`` (``LoanDisbursement.on_submit`` /
-``update_repayment_schedule_status``) is the ONLY place a Loan Repayment Schedule moves
-from ``Initiated`` to ``Active``, and ``process_loan_interest_accrual.py:69-73``
-(``term_loan_accrual_pending``) only looks at the ``Active`` schedule. So this module
-disburses the full amount right after the Loan is submitted, into a dedicated internal
-clearing pair (``_RECOVERY_LOAN_ACCOUNTS``) rather than the company's real bank account:
-the debt is real and the schedule must be Active for HRMS to run it, but no cash
-actually left the company, so the "Bank" leg of the disbursement is a same-company
-clearing account created and named for this recovery product alone, never a shared
-operating account another payment would also post through.
+A damage recovery owes the company money the employee was never given, unlike Employee Advance
+(a receivable FOR money the company gave) — hence a Loan, not a second call into
+``employee_recovery.raise_recovery_advance``.
 
-The installment is capped, once, at ``MAX_RECOVERY_PERCENT`` of the employee's own
-gross pay (the same KSA Labor Law Art. 91 ceiling ``employee_recovery`` enforces every
-period) using one native Salary Slip preview taken when the Loan is built
-(``employee_recovery._salary_preview``, reused rather than duplicated — a second real
-consumer of that helper).
+``lending`` will not run a term Loan's repayment schedule until it is disbursed:
+``loan_disbursement.py:26-48`` is the ONLY place a Loan Repayment Schedule moves from
+``Initiated`` to ``Active``, and ``process_loan_interest_accrual.py:69-73`` reads only an
+``Active`` schedule. So the full amount is disbursed right after submit, into this product's own
+internal clearing pair (``_RECOVERY_LOAN_ACCOUNTS``) and never the company's real bank account:
+the debt is real and the schedule must be Active, but no cash leaves the company.
 
-WHY THAT ALONE IS NOT ENOUGH, checked against the installed primitive rather than
-assumed: ``lending`` never re-evaluates a term Loan's installment against a
-borrower's ACTUAL pay. A schedule's rows are computed once, in
-``loan_repayment_schedule.py:30-96`` (``make_repayment_schedule``), and are only
-rebuilt by ``validate()`` on the schedule document ITSELF — which a submitted Loan
-never calls again (``loan.py:173-191``, ``update_draft_schedule`` only runs
-pre-submission). Every later read — ``calculate_amounts`` /
-``get_amounts`` (loan_repayment.py:1128-1226) via ``set_loan_repayment``
-(salary_slip_loan_utils.py:25-71) — walks those SAME frozen rows through the
-period's ``Loan Interest Accrual`` entries; none of it looks at the employee's
-current gross pay. The one native primitive that reshapes a live Loan's future
-installments is ``Loan Restructure`` (loan_restructure.py), which is a
-human-reviewed collections document (branch limits, waivers, DPD, an
-initiated-restructure guard) built for a case worker's decision, not a silent
-per-slip recompute — driving one automatically on every Salary Slip would itself
-route around the review it is supposed to get. So this module's frozen figure IS a
-real gap: an employee whose pay drops after the Loan is raised keeps owing the
-ORIGINAL installment, and nothing in ``lending`` shrinks it back down.
+The installment is capped once, at ``MAX_RECOVERY_PERCENT`` of gross pay — the KSA Labor Law
+Art. 91 ceiling ``employee_recovery`` enforces every period — from one native Salary Slip
+preview taken while the Loan is built. One cap is not enough, and the gap sits in the primitive:
+``lending`` never re-evaluates a term Loan's installment against actual pay. A schedule's rows
+are computed once (``loan_repayment_schedule.py:30-96``) and rebuilt only by that document's own
+``validate()``, which a submitted Loan never calls again (``loan.py:173-191``). The one primitive that reshapes a live Loan is ``Loan Restructure``, a
+human-reviewed collections document, so driving it per slip would route around its review. The
+native backstop that does stay live — Salary Slip refusing a negative net pay
+(hrms/payroll/doctype/salary_slip/salary_slip.py:207-209) — fires only once pay is NEGATIVE, so
+an installment may consume most of a shrunken paycheque and still submit.
+``cap_loan_installments_to_current_pay`` closes that on the slip and never on the Loan, whose
+accrual bookkeeping ``loan_repayment.py`` owns; the unpaid remainder stays owed, because
+``get_amounts`` reads an underpaid accrual as still outstanding.
 
-The backstop that DOES stay live every period is native and not ours: Salary Slip's
-own ``on_submit`` refuses outright when the slip's net pay would go negative
-(hrms/payroll/doctype/salary_slip/salary_slip.py:207-209). That is a materially
-weaker promise than "no more than half of THIS period's pay" — it only refuses the
-slip once pay has gone NEGATIVE, so an installment can legally consume the vast
-majority of a shrunken paycheque and still submit without a word.
+No custom field links a Loan back to its Vehicle Incident: the one-way link is that incident's
+own ``recovery_loan`` (``no_copy``), and raising is idempotent because the caller only calls
+while it is blank. Nor is raising gated behind Salis Settings — once a Loan is submitted with
+``repay_from_salary`` HRMS deducts on every Salary Slip unconditionally, so a gate here would
+hide the receivable without changing what payroll does with it.
 
-``cap_loan_installments_to_current_pay`` closes that gap on the SALARY SLIP side —
-never by touching the Loan or its schedule (which would fight the accrual/repayment
-bookkeeping ``loan_repayment.py`` owns): it re-reads ``doc.gross_pay`` (THIS slip's
-own, already computed) right after hrms first populates ``doc.loans`` and clamps
-this slip's own row, never the Loan, down to the current cap when the frozen
-installment would exceed it. The unpaid remainder is not written off: ``lending``'s
-own accrual math (loan_repayment.py's outstanding-balance read in
-``get_amounts``) already treats an underpaid accrual entry as still owed, so it
-surfaces again the next time this Loan is read — carried forward exactly the way a
-partial repayment always is, not lost. The seam is Salary Slip's own ``validate``
-doc_event — NOT ``before_validate``: ``set_loan_repayment`` only populates
-``doc.loans``/``doc.net_pay`` INSIDE the controller's own ``validate()``
-(salary_slip.py:169, via ``calculate_net_pay`` at :853), so a ``before_validate``
-handler would run too early and see nothing to clamp; a handler registered on
-``validate`` itself runs AFTER the controller's own method returns
-(frappe/model/document.py's ``hook``/``compose`` chain), which is the first point a
-row exists. Reached ONLY through a ``hooks.py`` ``doc_events`` entry — this module
-cannot add one (out of this change's write scope; a `hooks.py` edit is reported, not
-applied), so the function is written, tested by direct call, and NOT YET ACTIVE
-until that one line is added. See the exact patch in the card.
-
-No custom field two-way links a Loan back to its Vehicle Incident (the retired
-Employee Advance path had ``custom_source_doctype``/``custom_source_document`` via a
-Customization fixture; adding one to Loan is a fixture write outside this change). The
-one-way link lives on Vehicle Incident's own ``recovery_loan`` (``no_copy``): raising is
-idempotent because the caller only calls this while that field is still blank, exactly
-the same guarantee ``recovery_advance`` gave the retired path within one document's
-lifecycle.
-
-Raising is NOT gated behind Salis Settings the way wage deduction used to be: once a
-Loan is submitted with ``repay_from_salary`` set, HRMS deducts on every Salary Slip it
-touches unconditionally — there is no separate "recovery enabled" switch in the native
-wiring to defer to, so gating this module's own call would only hide the receivable
-without changing what payroll does with it.
-
-CONTRACT: every public name here reaches a DocType the ``lending`` app owns — Loan,
-Loan Product — while apex itself declares only frappe, erpnext and hrms, so a site is
-entitled to run without lending. Each one therefore carries hrms's own
-``if_lending_app_installed``, and returns ``None`` on such a site. Drop a decorator and
-that site stops SAVING the document that called it, because an unknown DocType raises
-an import error rather than reporting a missing row.
+CONTRACT: every public name here reaches a DocType ``lending`` owns, while apex declares only
+frappe, erpnext and hrms — so each carries hrms's own ``if_lending_app_installed`` and returns
+``None`` on a site without it. Drop a decorator and that site stops SAVING the document that
+called it, because an unknown DocType raises an import error rather than reporting a missing row.
 """
 
 from __future__ import annotations
