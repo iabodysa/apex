@@ -1,26 +1,9 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety Round controller.
+"""Safety Round controller. Periodic safety pass over one building for a given cadence (Daily / Weekly / Monthly / Quarterly / Annual). The individual checks live on Safety Task Execution rows; this record groups them and, on submit, derives a single overall_result from their execution statuses.
 
-A Safety Round is the periodic safety pass over one building for a given cadence
-(Daily / Weekly / Monthly / Quarterly / Annual). The individual checks live on
-Safety Task Execution rows that point back at the round via their safety_round
-link; this record groups them and, on submit, derives a single overall_result
-from their execution statuses. It supersedes the legacy Safety Inspection Report.
+Result rule: any "Not Done" -> Fail; otherwise any "Poor" -> Needs Attention; otherwise Pass.
 
-Result rule (worst status wins): any "Not Done" -> Fail; otherwise any "Poor" ->
-Needs Attention; otherwise Pass.
-
-Maker-checker: the Safety Officer holds create + write and NOT submit (see the
-DocPerms), so the officer composes the round and its Safety Task Execution rows
-as DRAFTS and a manager / supervisor closes it. Submitting is therefore the
-CHECKER's act of ratifying the maker's evidence, and on_submit performs that
-ratification: every still-draft execution on the round is submitted before the
-result is derived. Without it the checker's approval read the maker's drafts as
-absent — an all-"Not Done" round closed as "Pass" and none of its findings
-reached the Safety Finding Ledger. before_submit refuses a round carrying no
-rated task at all, so an unrated round can never claim a result; it is
-deliberately NOT in validate(), because the maker must be able to SAVE the round
-first in order to have something for the executions to link to.
+Maker-checker: the Safety Officer holds create + write and NOT submit (see the DocPerms), so the officer composes the round as DRAFTS and a manager / supervisor closes it. Submitting is the CHECKER's act of ratifying the maker's evidence, and on_submit performs that ratification: every still-draft execution on the round is submitted before the result is derived. Without it the checker's approval read the maker's drafts as absent — an all-"Not Done" round closed as "Pass" and none of its findings reached the Safety Finding Ledger. before_submit refuses a round carrying no rated task at all, so an unrated round can never claim a result; it is deliberately NOT in validate(), because the maker must SAVE the round first to have something for the executions to link to.
 """
 
 from __future__ import annotations
