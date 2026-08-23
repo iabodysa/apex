@@ -5,12 +5,19 @@ be resolved for the employee — no active Salary Structure Assignment, in this
 test. The outcome belongs on the Employee Advance the operator already has
 open, not in a Python ``logger`` call floored at ERROR in production
 (frappe/utils/logger.py:12).
+
+The advance account is prepared through the app's OWN ``ensure_advance_account``
+rather than by writing the Company field here. HRMS refuses an Employee Advance whose
+company advance account is not of type Receivable, so a test that skips this step
+errors on the fixture and never reaches the behaviour it asserts — and using the app's
+setup path means this also fails if that path stops producing a Receivable account.
 """
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
+from apex.apex_core.setup.employee_advance_recovery import ensure_advance_account
 from apex.apex_core.utils.employee_recovery import schedule_recovery_deduction
 from apex.tests.factories import ensure_company, make_employee
 
@@ -29,6 +36,7 @@ class TestScheduleRecoveryDeductionCommentsOnTheAdvance(FrappeTestCase):
 
     def test_no_salary_structure_assignment_comments_on_the_advance(self):
         company = ensure_company()
+        ensure_advance_account(company)
         employee = make_employee(name="Apex Recovery Test Employee", company=company)
         employee_name = employee.name if hasattr(employee, "name") else employee["name"]
         currency = frappe.db.get_value("Company", company, "default_currency") or "SAR"
