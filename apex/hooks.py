@@ -4,6 +4,15 @@
 ``default_log_clearing_doctypes`` lists only non-financial, submittable point-in-time
 snapshots; the retention windows cap their growth. ``clear_old_logs`` purges submitted
 rows and their child items, so drafts and every financial ledger stay untouched.
+
+``after_install`` and ``after_sync`` are not interchangeable. ``frappe.installer``
+``install_app`` runs ``after_install`` at :327 and ``sync_fixtures`` only at :334, so an
+``after_install`` entry cannot see a fixture row; ``after_sync`` at :338 can. Anything
+reading a shipped Workflow, Issue Type or Custody master belongs in the second list.
+
+``after_migrate`` never runs on a fresh install — ``frappe/migrate.py:156`` is its only
+caller. An entry that must hold on a new site is registered in ``after_install`` or
+``after_sync`` as well, never in ``after_migrate`` alone.
 """
 
 from apex.apex_core.setup.support_names import (
@@ -156,9 +165,6 @@ doc_events = {
     "Address": {
         "validate": "apex.habitat.address_customizations.validate",
     },
-    "Site": {},
-    "Bed": {},
-    "Room": {},
     "QR Location": {
         "before_save": "apex.habitat.doctype.qr_location.qr_location.before_save",
     },
@@ -170,11 +176,6 @@ doc_events = {
         "validate": "apex.habitat.doctype.resident_request.resident_request.validate",
         "on_update": "apex.habitat.doctype.resident_request.resident_request.on_update",
     },
-    "Building License": {},
-    "Camera Access Grant": {},
-    "Cleaning Log": {},
-    "Audit Remediation Plan": {},
-    "Scheduled Task Template": {},
     "Building": {
         "before_save": "apex.habitat.doctype.building.building.before_save",
         "on_update": "apex.habitat.doctype.building.building.on_update",
@@ -203,12 +204,9 @@ doc_events = {
         "on_submit": "apex.habitat.doctype.room_bed_transfer.room_bed_transfer.on_submit",
         "on_cancel": "apex.habitat.doctype.room_bed_transfer.room_bed_transfer.on_cancel",
     },
-    "Safety Inspection Report": {},
     "Maintenance Request": {
         "validate": "apex.habitat.doctype.maintenance_request.maintenance_request.validate",
     },
-    "Custody Article": {},
-    "Custody Asset Category": {},
     "Idle Resident Report": {
         "validate": "apex.habitat.doctype.idle_resident_report.idle_resident_report.validate",
         "after_insert": "apex.habitat.doctype.idle_resident_report.idle_resident_report.after_insert",
@@ -237,25 +235,18 @@ doc_events = {
         "validate": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.validate",
         "before_cancel": "apex.habitat.doctype.operational_depreciation_snapshot.operational_depreciation_snapshot.before_cancel",
     },
-    "Facility Asset": {},
-    "Facility Asset Custody Assignment": {},
     "Facility Asset Movement": {
         "validate": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.validate",
         "on_submit": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.on_submit",
         "before_cancel": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.before_cancel",
         "on_cancel": "apex.habitat.doctype.facility_asset_movement.facility_asset_movement.on_cancel",
     },
-    "Operational Depreciation Policy": {},
     "Subcontractor Service Order": {
         "before_save": "apex.habitat.doctype.subcontractor_service_order.subcontractor_service_order.before_save",
     },
-    "Subcontractor Service Contract": {},
-    "Utility Account": {},
     "Habitat Settings": {
         "before_save": "apex.apex_core.doctype.habitat_settings.habitat_settings.before_save",
     },
-    "Safety Task Catalog": {},
-    "Safety Task Execution": {},
     "Maintenance Work Order": {
         "validate": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.validate",
         "on_submit": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.on_submit",
@@ -554,9 +545,12 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
+    "apex.apex_core.utils.portal_identity.close_all_capacity_desk_access",
 ]
 
-after_sync = []
+after_sync = [
+    "apex.apex_core.doctype.salis_settings.salis_settings.apply_approval_switch",
+]
 after_migrate = [
     "apex.setup.after_migrate",
     "apex.apex_core.setup.salis_support.grant_issue_role_permissions",

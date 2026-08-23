@@ -34,9 +34,11 @@ def after_install():
     """Runs the after-install seed: roles, profiles, item defaults and material templates.
 
     The Custody Asset Category, Custody Article and Operational Depreciation Policy
-    masters that used to be created here now ship as fixtures (``apex/fixtures/``),
-    which ``sync_fixtures`` applies on this same install before this function runs —
-    see ``frappe.installer.install_app`` calling ``sync_for`` ahead of ``after_install``.
+    masters ship as fixtures (``apex/fixtures/``). Nothing here may read one:
+    ``frappe.installer.install_app`` runs this function at :327 and ``sync_fixtures``
+    only at :334, so on a fresh install every fixture row is still absent while this
+    runs. Work that needs a fixture belongs in ``after_sync``, which the same function
+    calls at :338.
     """
     create_roles()
     frappe.db.commit()
