@@ -192,6 +192,12 @@ def build_demo_data():
     step failure rolls the whole scenario back and reports to the operator out of band, so
     without it a caller cannot tell a full scenario from an empty one — every outcome looked
     like ``None`` and a build that produced nothing read as one that succeeded.
+
+    ``frappe.set_user`` (frappe/__init__.py:641) makes every record's ``owner`` the
+    demo user, which is what the removal keys on — the one thing a background job
+    cannot do is remember who asked for it, so ownership IS the marker. The bootinfo
+    cache is dropped with ``frappe.cache.delete_keys`` (frappe/utils/redis_wrapper.py)
+    so the "remove demo data" control appears without a re-login.
     """
     if frappe.db.exists("User", DEMO_OWNER):
         return {"built": False, "stopped_at": "already built"}
@@ -231,7 +237,13 @@ def _report_build_failure(operator, doctype, traceback):
     The wizard reports success the moment its stages finish, while this job is still
     queued, so a raw exception here surfaces only in a worker log the operator never
     opens. Roll the half-built scenario back, keep the traceback in the Error Log, and
-    say which step stopped."""
+    say which step stopped.
+
+    ``frappe.db.rollback`` (frappe/database/database.py:1186) unwinds the whole job
+    rather than a savepoint: a half-built scenario is not a smaller demo, it is an
+    inconsistent one. ``frappe.publish_realtime`` (frappe/realtime.py:23) is what
+    reaches the operator — the one thing the Error Log cannot do is tell someone who
+    has already left the wizard that their build stopped."""
     frappe.db.rollback()
     frappe.log_error(title="Apex demo build", message=traceback or doctype)
     frappe.publish_realtime(
@@ -280,6 +292,13 @@ def _remove_one(doctype, name):
     """Cancel-then-delete one record inside its own savepoint.
 
     Returns None on success, or the error text of a record that survived.
+
+    ``frappe.db.savepoint`` (frappe/database/database.py:1203) isolates each record:
+    the one thing ``frappe.delete_doc`` (frappe/model/delete_doc.py:23) cannot do is
+    fail cleanly — a link that refuses leaves the cancel already written, and without
+    the point the next record inherits it. ``frappe.clear_last_message`` drops the
+    framework's own throw text so a survivable refusal is reported in the residue
+    list rather than raised at whoever pressed the button.
     """
     save_point = "".join(random.sample(string.ascii_lowercase, 10))
     frappe.db.savepoint(save_point)
@@ -304,7 +323,13 @@ def _release(save_point, undo=False):
 
     MariaDB drops every savepoint when anything in the transaction commits, and a
     delete path may commit for its own reasons. Letting that surface would abort
-    the whole clear from inside the very handler meant to contain one bad record."""
+    the whole clear from inside the very handler meant to contain one bad record.
+
+    ``frappe.db.release_savepoint`` and ``rollback``
+    (frappe/database/database.py:1186) both accept the point; the one thing neither
+    can do is tell a missing point from a failed release, so the absence is tolerated
+    here rather than distinguished. ``frappe.clear_last_message`` drops the framework
+    throw text that would otherwise reach the operator twice."""
     try:
         if undo:
             frappe.db.rollback(save_point=save_point)
@@ -334,6 +359,10 @@ def _remove_demo_users(deleted, residue):
     so dropping it on top of residue would leave the site holding demo data that
     nothing can select any more. Keeping the user keeps the boot flag set and the
     action re-runnable once the blocker is cleared.
+
+    ``frappe.db.commit`` (frappe/database/database.py:1173) lands the removal before
+    the users go: the demo user is the key every other row is found by, so the one
+    thing that must not happen is losing the key while rows remain.
     """
     if residue:
         return deleted, residue
@@ -427,7 +456,15 @@ def _create(doctype, payload):
 
 def _walk_workflow(doctype, name, actions, user=DEMO_APPROVER):
     """Applies a sequence of workflow actions to a document while impersonating ``user``
-    (the demo approver by default, so every existing call site is unaffected)."""
+    (the demo approver by default, so every existing call site is unaffected).
+
+    ``frappe.set_user`` (frappe/__init__.py:641) does the switch and the restore is in
+    a ``finally``: the one thing ``set_user`` cannot do is put the session back, and a
+    background worker is reused, so a session left elevated carries into whatever runs
+    next. ``apply_workflow`` (frappe/model/workflow.py) is the transition itself — the
+    states are never written directly, so the demo exercises the same gate an operator
+    would.
+    """
     from frappe.model.workflow import apply_workflow
 
     previous_user = frappe.session.user
@@ -444,7 +481,9 @@ def _build_partner_company(context):
 
     The fallback is the SITE's own default, never a pinned code: a demo built on a site
     whose company trades in another currency would otherwise show every seeded figure in
-    one this operator does not use.
+    one this operator does not use. The chain is ``resolve_company_or_any``, which ends
+    at ``frappe.defaults.get_global_default`` (frappe/defaults.py) — the one thing a
+    literal currency cannot do is follow the site it lands on.
     """
     context["company"] = resolve_company_or_any()
     currency = (
@@ -580,7 +619,11 @@ def _demo_gender():
     rows first and write one only if the wait runs out. Rolling back between reads is what
     lets this connection see the other transaction's commit — and is why this is resolved
     before the build starts rather than at the Employee step, where the same rollback threw
-    away every row already built and left the next link pointing at nothing."""
+    away every row already built and left the next link pointing at nothing.
+
+    ``frappe.db.rollback`` (frappe/database/database.py:1186) between reads is not
+    cleanup here — it is the only way this connection sees the fixture transaction's
+    commit, which is the one thing a long-running read cannot do on its own."""
     deadline = time.monotonic() + _GENDER_WAIT_SECONDS
     while True:
         existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value(
@@ -1100,8 +1143,12 @@ def _build_vehicle_incident(context):
 def _build_vehicle_write_off(context):
     """Creates the demo damage write-off and drives it to Closed.
 
-    The DocType makes `evidence` mandatory, so a placeholder File is attached: an Attach field
-    stores a URL, and a write-off with no photo is a record no approver could act on.
+    The DocType makes `evidence` mandatory, so a placeholder File is attached, because a
+    write-off with no photo is a record no approver could act on.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the File; an Attach field stores
+    a URL, so the placeholder must be a real File row rather than a string — the one
+    thing a bare path cannot do is survive the field's own validation.
     """
     evidence = frappe.new_doc("File")
     evidence.update(
@@ -1479,6 +1526,10 @@ def _build_movement_cost_recovery(context):
     ``basis_evidence`` is a mandatory Attach field, so a placeholder File is
     attached — the same pattern ``_build_vehicle_write_off`` uses for its own
     mandatory evidence field.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the File; an Attach field stores
+    a URL, so the placeholder must be a real File row rather than a string — the one
+    thing a bare path cannot do is survive the field's own validation.
     """
     evidence = frappe.new_doc("File")
     evidence.update(
