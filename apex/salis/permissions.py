@@ -39,6 +39,7 @@ import frappe
 
 from apex.apex_core.utils import permission_scope
 from apex.apex_core.utils.portal_identity import DRIVER, WORKER, capacity_subject
+from apex.salis.api.boarding_flow import _manifest_employees
 from apex.salis.utils import get_driver_for_session_user
 
 UNSCOPED_ROLES = {
@@ -749,8 +750,6 @@ def _trip_start_log_capacity_verdict(doc, ptype):
     worker = capacity_subject(WORKER)
     dispatch_trip = getattr(doc, "dispatch_trip", None)
     if worker and dispatch_trip:
-        from apex.salis.api.boarding_flow import _manifest_employees
-
         if worker in _manifest_employees(dispatch_trip):
             return verdict
 

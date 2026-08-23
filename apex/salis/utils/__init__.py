@@ -8,8 +8,12 @@ role create on ToDo to satisfy it would let that role assign work to anyone on t
 
 import frappe
 from frappe import _
+from frappe.desk.form import assign_to as _assign_to
+from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
 from frappe.utils import getdate, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_default_cost_center
+from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.portal_identity import (
     DRIVER,
     presented_token,
@@ -241,8 +245,6 @@ def _workflow_source_states(action):
 
     Read off the Workflow record rather than copied into this module: a duplicate of a
     governance table is the one that drifts."""
-    from frappe.model.workflow import get_workflow_name
-
     workflow = get_workflow_name("Transport Request")
     if not workflow:
         return set()
@@ -293,8 +295,6 @@ def drive_transport_request(tr_name, action, target_state, extra_fields=None):
         return current
 
     try:
-        from frappe.model.workflow import apply_workflow, get_transitions, get_workflow_name
-
         if get_workflow_name("Transport Request"):
             tr_doc = frappe.get_doc("Transport Request", tr_name)
             available = {t.action for t in get_transitions(tr_doc)}
@@ -497,8 +497,6 @@ def raise_rider_clearance_task(driver, vehicle=None, source_doctype=None, source
             "Recover the vehicle and custody."
         ).format(label, veh or _("n/a"))
 
-        from frappe.desk.form import assign_to as _assign_to
-
         _assign_to.add(
             {
                 "doctype": "Salis Driver",
@@ -538,7 +536,13 @@ def _clearance_assignees(driver):
 	driver's own project — the same project scope ``apex.salis.permissions``
 	enforces everywhere else, so this fallback cannot hand a task to a
 	supervisor who could not open the driver it names. Administrator / Guest
-	and disabled users are filtered out."""
+	and disabled users are filtered out.
+
+	``permissions`` stays a function-local import: ``permissions`` imports
+	``apex.salis.api.boarding_flow``, which imports ``apex.salis.api.boarding``,
+	which imports ``get_driver_for_user`` from THIS module (``utils``) at module
+	level — a module-level import here would close that loop before
+	``get_driver_for_user`` is defined."""
     candidates = []
 
     assignment_sup = frappe.get_all(
@@ -601,11 +605,6 @@ def add_timeline_note(doctype, name, message):
 def set_financial_defaults(doc):
     """Default company and cost center from Salis Settings for reporting and
 	financial context. Reference fields only - no GL/Payment Entry is posted."""
-    from apex.apex_core.doctype.salis_settings.salis_settings import (
-        get_default_cost_center,
-    )
-    from apex.apex_core.utils.company import resolve_company
-
     if not doc.company:
         doc.company = resolve_company("Salis")
     if not doc.cost_center:
