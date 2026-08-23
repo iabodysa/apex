@@ -53,9 +53,6 @@ def _session_driver(required=False):
         frappe.throw(_("Your account is not linked to a fleet representative."), frappe.PermissionError)
     return driver
 
-def _driver_project(driver):
-    return frappe.db.get_value("Salis Driver", driver, "project") if driver else None
-
 def _session_vehicle(driver):
     return bound_vehicle(driver) if driver else None
 

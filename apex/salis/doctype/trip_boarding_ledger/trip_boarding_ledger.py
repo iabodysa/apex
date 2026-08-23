@@ -47,7 +47,7 @@ def on_doctype_update():
     board the same worker twice. ``reversal_of`` is part of the key rather than a
     separate constraint because it separates the two guards without blocking either:
     an original row carries '' (a Link column is NOT NULL DEFAULT ''), so two
-    originals for one trip+worker collide — which is what ``_ledger_exists``
+    originals for one trip+worker collide — which is what the posting path
     checks — while a reversal carries the original's name, so one trip+worker may
     still hold its mirror and only a SECOND reversal of the same original collides —
     which is what ``reverse_trip_boarding`` checks. A plain (dispatch_trip, employee)

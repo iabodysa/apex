@@ -38,55 +38,6 @@ LEDGER_DOCTYPE = "Maintenance Cost Ledger"
 SOURCE_DOCTYPE = "Maintenance Work Order"
 
 
-def _ledger_exists(source_name: str, detail_no: int) -> bool:
-    """True if an ORIGINAL ledger row already exists for this Work Order + item
-    row (idempotency key). Reversal rows carry reversal_of, so an original is
-    keyed by reversal_of unset."""
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {
-                "source_doctype": SOURCE_DOCTYPE,
-                "source_name": source_name,
-                "source_detail_no": detail_no,
-                "reversal_of": ["is", "not set"],
-            },
-        )
-    )
-
-
-def _insert_ledger_row(
-    work_order,
-    company: str | None,
-    row,
-    detail_no: int,
-) -> None:
-    """Insert one Maintenance Cost Ledger row for a procurement item.
-
-    Source traceability: ``source_doctype`` is the Work Order DocType, ``source_name``
-    the Work Order name, and ``source_detail_no`` the 1-based procurement row idx, so
-    each item posts a distinct, idempotency-keyed row.
-    """
-    frappe.get_doc(
-        {
-            "doctype": LEDGER_DOCTYPE,
-            "company": company,
-            "posting_date": work_order.actual_end_date or today(),
-            "maintenance_work_order": work_order.name,
-            "maintenance_request": work_order.maintenance_request,
-            "building": work_order.building,
-            "item": row.get("item"),
-            "material": row.get("material"),
-            "item_description": row.get("item_description"),
-            "amount": flt(row.get("estimated_cost") or 0),
-            "logged_at": now_datetime(),
-            "source_doctype": SOURCE_DOCTYPE,
-            "source_name": work_order.name,
-            "source_detail_no": detail_no,
-        }
-    ).insert(ignore_permissions=True)
-
-
 def post_maintenance_cost(work_order) -> int:
     """Post one Maintenance Cost Ledger row per procurement item of a completed
     Work Order. Returns the number of rows posted.
@@ -101,9 +52,34 @@ def post_maintenance_cost(work_order) -> int:
         amount = flt(row.get("estimated_cost") or 0)
         if amount <= 0:
             continue
-        if _ledger_exists(work_order.name, detail_no):
+        if frappe.db.exists(
+            LEDGER_DOCTYPE,
+            {
+                "source_doctype": SOURCE_DOCTYPE,
+                "source_name": work_order.name,
+                "source_detail_no": detail_no,
+                "reversal_of": ["is", "not set"],
+            },
+        ):
             continue
-        _insert_ledger_row(work_order, company, row, detail_no)
+        frappe.get_doc(
+            {
+                "doctype": LEDGER_DOCTYPE,
+                "company": company,
+                "posting_date": work_order.actual_end_date or today(),
+                "maintenance_work_order": work_order.name,
+                "maintenance_request": work_order.maintenance_request,
+                "building": work_order.building,
+                "item": row.get("item"),
+                "material": row.get("material"),
+                "item_description": row.get("item_description"),
+                "amount": amount,
+                "logged_at": now_datetime(),
+                "source_doctype": SOURCE_DOCTYPE,
+                "source_name": work_order.name,
+                "source_detail_no": detail_no,
+            }
+        ).insert(ignore_permissions=True)
         posted += 1
     return posted
 

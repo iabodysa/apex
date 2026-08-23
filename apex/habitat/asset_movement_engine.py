@@ -132,75 +132,40 @@ def restore_asset_audit_trail(facility_asset: str) -> None:
     )
 
 
-def _ledger_exists(source_doctype: str, source_name: str) -> bool:
-    """True if an original ledger row already exists for this source (idempotency
-    key = source + not-a-reversal), so a re-submit cannot double-post."""
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {
-                "source_doctype": source_doctype,
-                "source_name": source_name,
-                "reversal_of": ["is", "not set"],
-            },
-        )
-    )
-
-
-def _insert_ledger_row(
-    facility_asset: str,
-    company: str | None,
-    posting_date,
-    from_building: str | None,
-    from_location: str | None,
-    to_building: str | None,
-    to_location: str | None,
-    moved_by: str | None,
-    source_doctype: str,
-    source_name: str,
-) -> None:
-    """Insert one Facility Asset Movement Ledger row (system-written, no GL).
+def post_asset_movement(doc) -> None:
+    """Post the immutable from->to ledger row for a submitted Facility Asset
+    Movement. ``moved_by`` on the source is an Employee link; the ledger records
+    the acting User instead, so map it to the current session user.
 
     Idempotent on ``(source_doctype, source_name)`` for original rows: a source
-    already ledgered is skipped.
+    already ledgered is skipped, so a re-submit cannot double-post.
     """
-    if _ledger_exists(source_doctype, source_name):
+    from frappe.utils import now_datetime
+
+    if frappe.db.exists(
+        LEDGER_DOCTYPE,
+        {
+            "source_doctype": doc.doctype,
+            "source_name": doc.name,
+            "reversal_of": ["is", "not set"],
+        },
+    ):
         return
     frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
-            "facility_asset": facility_asset,
-            "company": company,
-            "posting_datetime": posting_date,
-            "from_building": from_building,
-            "from_location": from_location,
-            "to_building": to_building,
-            "to_location": to_location,
-            "moved_by_user": moved_by,
-            "source_doctype": source_doctype,
-            "source_name": source_name,
+            "facility_asset": doc.facility_asset,
+            "company": doc.from_company or doc.to_company,
+            "posting_datetime": now_datetime(),
+            "from_building": doc.from_building,
+            "from_location": doc.from_room,
+            "to_building": doc.to_building,
+            "to_location": doc.to_room,
+            "moved_by_user": frappe.session.user,
+            "source_doctype": doc.doctype,
+            "source_name": doc.name,
         }
     ).insert(ignore_permissions=True)
-
-
-def post_asset_movement(doc) -> None:
-    """Post the immutable from->to ledger row for a submitted Facility Asset
-    Movement. ``moved_by`` on the source is an Employee link; the ledger records
-    the acting User instead, so map it to the current session user."""
-    from frappe.utils import now_datetime
-
-    _insert_ledger_row(
-        facility_asset=doc.facility_asset,
-        company=doc.from_company or doc.to_company,
-        posting_date=now_datetime(),
-        from_building=doc.from_building,
-        from_location=doc.from_room,
-        to_building=doc.to_building,
-        to_location=doc.to_room,
-        moved_by=frappe.session.user,
-        source_doctype=doc.doctype,
-        source_name=doc.name,
-    )
 
 
 def reverse_asset_movement(source_doctype: str, source_name: str) -> int:

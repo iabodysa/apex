@@ -22,17 +22,14 @@ ZERO_ROUNDS_WINDOW_DAYS = 7
 SAFETY_ROLE = "Safety Officer"
 
 
-def _has_round(building, filters):
-    """Returns whether a submitted Safety Round exists for the building matching the given filters."""
-    return bool(frappe.db.exists("Safety Round", {"docstatus": 1, "building": building, **filters}))
-
-
 def _no_recent_round(building):
     """No submitted Safety Round of ANY cadence in the trailing window."""
     from frappe.utils import add_days, getdate, today
 
     since = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
-    return not _has_round(building, {"round_date": [">=", since]})
+    return not frappe.db.exists(
+        "Safety Round", {"docstatus": 1, "building": building, "round_date": [">=", since]}
+    )
 
 
 def _uncovered_this_week(building):
@@ -41,7 +38,10 @@ def _uncovered_this_week(building):
 
     today_date = getdate(today())
     span = [str(get_first_day_of_week(today_date)), str(get_last_day_of_week(today_date))]
-    return not _has_round(building, {"cadence": "Weekly", "round_date": ["between", span]})
+    return not frappe.db.exists(
+        "Safety Round",
+        {"docstatus": 1, "building": building, "cadence": "Weekly", "round_date": ["between", span]},
+    )
 
 
 def buildings_needing_safety_attention():

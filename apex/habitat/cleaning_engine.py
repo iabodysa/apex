@@ -38,21 +38,6 @@ LEDGER_DOCTYPE = "Cleaning Compliance Ledger"
 SOURCE_DOCTYPE = "Cleaning Log"
 
 
-def _row_already_posted(cleaning_log: str, source_detail_no: str) -> bool:
-    """Idempotency key: a live (non-cancelled) row already exists for this exact
-    Cleaning Log child row."""
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {
-                "cleaning_log": cleaning_log,
-                "source_detail_no": source_detail_no,
-                "is_cancelled": 0,
-            },
-        )
-    )
-
-
 def _insert_ledger_row(
     *,
     company: str | None,
@@ -115,7 +100,10 @@ def post_cleaning_compliance(doc) -> int:
 
     posted = 0
     for row in rows:
-        if _row_already_posted(doc.name, row.name):
+        if frappe.db.exists(
+            LEDGER_DOCTYPE,
+            {"cleaning_log": doc.name, "source_detail_no": row.name, "is_cancelled": 0},
+        ):
             continue
         room_status = getattr(row, "room_status", None)
         cleaned = 0 if room_status == "Skipped" else cint(getattr(row, "cleaned", 0))

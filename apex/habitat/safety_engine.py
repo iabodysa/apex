@@ -17,7 +17,7 @@ can silently reopen or be edited and history is lost. Each finding is mirrored
 here as one read-only row, so safety reports are stable.
 
 Mirrors the Salis fuel ledger pattern
-(``apex.salis.fuel_engine``): an idempotent ``_insert_ledger_row`` keyed
+(``apex.salis.fuel_engine``): an idempotent insert keyed
 on ``(source_doctype, source_name, source_detail_no)`` and a reverse-not-delete
 cancellation that posts a negating mirror row (``is_cancelled=1`` +
 ``reversal_of``) rather than deleting the original.
@@ -38,59 +38,6 @@ LEDGER_DOCTYPE = "Safety Finding Ledger"
 EXECUTION_DOCTYPE = "Safety Task Execution"
 
 _RESOLVED_STATUS = "Resolved"
-
-
-def _ledger_exists(source_doctype: str, source_name: str, source_detail_no: int) -> bool:
-    """True if a ledger row already exists for this finding (idempotency key).
-
-    The key is (source execution DocType, execution name, finding row idx): each
-    finding row of each execution posts at most one original ledger row.
-    """
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {
-                "source_doctype": source_doctype,
-                "source_name": source_name,
-                "source_detail_no": source_detail_no,
-                "reversal_of": ["is", "not set"],
-            },
-        )
-    )
-
-
-def _insert_ledger_row(
-    safety_round: str,
-    building: str | None,
-    company: str | None,
-    posting_date,
-    finding: str | None,
-    severity: str | None,
-    status: str | None,
-    resolved: int,
-    source_doctype: str,
-    source_name: str,
-    source_detail_no: int,
-    logged_at,
-) -> None:
-    """Insert one immutable Safety Finding Ledger row (system-written)."""
-    frappe.get_doc(
-        {
-            "doctype": LEDGER_DOCTYPE,
-            "safety_round": safety_round,
-            "building": building,
-            "company": company,
-            "posting_date": posting_date,
-            "finding": finding,
-            "severity": severity,
-            "status": status,
-            "resolved": resolved,
-            "source_doctype": source_doctype,
-            "source_name": source_name,
-            "source_detail_no": source_detail_no,
-            "logged_at": logged_at,
-        }
-    ).insert(ignore_permissions=True)
 
 
 def post_safety_findings(safety_round) -> int:
@@ -126,22 +73,33 @@ def post_safety_findings(safety_round) -> int:
             order_by="idx asc",
         )
         for finding in findings:
-            if _ledger_exists(EXECUTION_DOCTYPE, execution_name, finding.idx):
+            if frappe.db.exists(
+                LEDGER_DOCTYPE,
+                {
+                    "source_doctype": EXECUTION_DOCTYPE,
+                    "source_name": execution_name,
+                    "source_detail_no": finding.idx,
+                    "reversal_of": ["is", "not set"],
+                },
+            ):
                 continue
-            _insert_ledger_row(
-                safety_round=safety_round.name,
-                building=building,
-                company=company,
-                posting_date=posting_date,
-                finding=finding.description,
-                severity=finding.severity,
-                status=finding.status,
-                resolved=1 if (finding.status or "") == _RESOLVED_STATUS else 0,
-                source_doctype=EXECUTION_DOCTYPE,
-                source_name=execution_name,
-                source_detail_no=finding.idx,
-                logged_at=now_datetime(),
-            )
+            frappe.get_doc(
+                {
+                    "doctype": LEDGER_DOCTYPE,
+                    "safety_round": safety_round.name,
+                    "building": building,
+                    "company": company,
+                    "posting_date": posting_date,
+                    "finding": finding.description,
+                    "severity": finding.severity,
+                    "status": finding.status,
+                    "resolved": 1 if (finding.status or "") == _RESOLVED_STATUS else 0,
+                    "source_doctype": EXECUTION_DOCTYPE,
+                    "source_name": execution_name,
+                    "source_detail_no": finding.idx,
+                    "logged_at": now_datetime(),
+                }
+            ).insert(ignore_permissions=True)
             posted += 1
 
     return posted

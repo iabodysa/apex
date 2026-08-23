@@ -20,7 +20,7 @@ def on_doctype_update():
     one posting, so a raced or retried submit cannot write a second row.
 
     ``asset_movement_engine`` guards both writes with a read-then-insert that nothing
-    enforces: ``_insert_ledger_row`` skips a source that already has an original, and
+    enforces: the posting path skips a source that already has an original, and
     ``reverse_asset_movement`` skips an original that already has a reversal. Two
     concurrent submits both pass their read. ``reversal_of`` is in the key because an
     original and its mirror share a source and must both be allowed to exist.

@@ -55,46 +55,6 @@ def _period_month(date_value) -> str:
     """Return the YYYY-MM period string for a date/datetime value."""
     return str(date_value)[:7]
 
-def _ledger_exists(source_type: str, source_name: str) -> bool:
-    """True if a ledger row already exists for this source (idempotency key)."""
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {"source_type": source_type, "source_name": source_name},
-        )
-    )
-
-def _insert_ledger_row(
-    vehicle: str,
-    driver: str | None,
-    period_month: str,
-    litres: float,
-    amount: float,
-    source_type: str,
-    source_name: str,
-    logged_at,
-) -> None:
-    """Insert one Fuel Consumption Ledger row (system-written, no GL).
-
-    Source traceability: ``source_type`` is the originating DocType name
-    ("Fuel Daily Log" / "Fuel Request"), so ``source_doctype`` mirrors it and
-    ``source_name`` points to the originating record.
-    """
-    frappe.get_doc(
-        {
-            "doctype": LEDGER_DOCTYPE,
-            "vehicle": vehicle,
-            "driver": driver,
-            "company": company_for_vehicle(vehicle),
-            "period_month": period_month,
-            "litres": litres,
-            "amount": amount,
-            "source_type": source_type,
-            "source_doctype": source_type,
-            "source_name": source_name,
-            "logged_at": logged_at,
-        }
-    ).insert(ignore_permissions=True)
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     """Reverse the ledgered consumption for a corrected/cancelled fuel source.
@@ -204,17 +164,25 @@ def accrue_fuel_consumption() -> None:
             sp = "accrual_row"
             frappe.db.savepoint(sp)
             try:
-                if log.vehicle and not _ledger_exists("Fuel Daily Log", log.name):
-                    _insert_ledger_row(
-                        vehicle=log.vehicle,
-                        driver=log.driver,
-                        period_month=_period_month(log.log_date),
-                        litres=flt(log.litres),
-                        amount=flt(log.amount),
-                        source_type="Fuel Daily Log",
-                        source_name=log.name,
-                        logged_at=now_datetime(),
-                    )
+                if log.vehicle and not frappe.db.exists(
+                    LEDGER_DOCTYPE,
+                    {"source_type": "Fuel Daily Log", "source_name": log.name},
+                ):
+                    frappe.get_doc(
+                        {
+                            "doctype": LEDGER_DOCTYPE,
+                            "vehicle": log.vehicle,
+                            "driver": log.driver,
+                            "company": company_for_vehicle(log.vehicle),
+                            "period_month": _period_month(log.log_date),
+                            "litres": flt(log.litres),
+                            "amount": flt(log.amount),
+                            "source_type": "Fuel Daily Log",
+                            "source_doctype": "Fuel Daily Log",
+                            "source_name": log.name,
+                            "logged_at": now_datetime(),
+                        }
+                    ).insert(ignore_permissions=True)
                 frappe.db.set_value(
                     "Fuel Daily Log", log.name, "ledgered", 1, update_modified=False
                 )
@@ -260,22 +228,30 @@ def accrue_fuel_consumption() -> None:
                     )
                     progressed = True
                     continue
-                if _ledger_exists("Fuel Request", req.name):
+                if frappe.db.exists(
+                    LEDGER_DOCTYPE,
+                    {"source_type": "Fuel Request", "source_name": req.name},
+                ):
                     frappe.db.set_value(
                         "Fuel Request", req.name, "ledgered", 1, update_modified=False
                     )
                     progressed = True
                     continue
-                _insert_ledger_row(
-                    vehicle=req.vehicle,
-                    driver=req.driver,
-                    period_month=_period_month(req.request_date),
-                    litres=flt(req.requested_litres),
-                    amount=flt(req.amount),
-                    source_type="Fuel Request",
-                    source_name=req.name,
-                    logged_at=now_datetime(),
-                )
+                frappe.get_doc(
+                    {
+                        "doctype": LEDGER_DOCTYPE,
+                        "vehicle": req.vehicle,
+                        "driver": req.driver,
+                        "company": company_for_vehicle(req.vehicle),
+                        "period_month": _period_month(req.request_date),
+                        "litres": flt(req.requested_litres),
+                        "amount": flt(req.amount),
+                        "source_type": "Fuel Request",
+                        "source_doctype": "Fuel Request",
+                        "source_name": req.name,
+                        "logged_at": now_datetime(),
+                    }
+                ).insert(ignore_permissions=True)
                 frappe.db.set_value(
                     "Fuel Request", req.name, "ledgered", 1, update_modified=False
                 )

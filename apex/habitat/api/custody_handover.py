@@ -107,11 +107,20 @@ def confirm_handover(handover: str, otp: str):
     frappe.throw(_("Invalid code."))
 
 
-def _receive_leg_posted(doc) -> bool:
-    """True once this handover's receive leg exists: a live positive-qty ledger
-    row landing in to_building under this voucher. Distinguishes the receive leg
-    from the ship leg (negative, in from_building), which shares the voucher_no."""
-    return bool(frappe.db.exists(
+def _post_receive_and_confirm(doc):
+    """Post the receive leg into the destination store, mark the handover
+    Confirmed, stamp the verification time, and clear the stored hash. Idempotent
+    on the receive leg — re-entry posts nothing further (belt-and-braces with the
+    FOR UPDATE lock + Confirmed-status short-circuit in confirm_handover).
+
+    The receive leg is a live positive-qty ledger row landing in to_building
+    under this voucher, distinguishing it from the ship leg (negative, in
+    from_building) which shares the voucher_no.
+    """
+    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+        post_stock_entry,
+    )
+    if frappe.db.exists(
         "Accommodation Stock Ledger",
         {
             "voucher_type": VOUCHER_TYPE,
@@ -120,18 +129,7 @@ def _receive_leg_posted(doc) -> bool:
             "signed_qty": [">", 0],
             "is_cancelled": 0,
         },
-    ))
-
-
-def _post_receive_and_confirm(doc):
-    """Post the receive leg into the destination store, mark the handover
-    Confirmed, stamp the verification time, and clear the stored hash. Idempotent
-    on the receive leg — re-entry posts nothing further (belt-and-braces with the
-    FOR UPDATE lock + Confirmed-status short-circuit in confirm_handover)."""
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry,
-    )
-    if _receive_leg_posted(doc):
+    ):
         return doc.name
     now = now_datetime()
     for row in doc.items:

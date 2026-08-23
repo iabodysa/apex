@@ -43,11 +43,7 @@ class SafetyTaskExecution(Document):
         self._escalate_failed_execution()
 
     def on_cancel(self):
-        """Closes any untouched, still-Open Maintenance Requests this execution raised."""
-        self._retract_untouched_requests()
-
-    def _retract_untouched_requests(self) -> None:
-        """Close the tickets this execution raised that nobody has picked up.
+        """Closes any untouched, still-Open Maintenance Requests this execution raised.
 
         The tickets are found by source_execution, the back-link stamped at
         creation, so a finding edited or removed after submit cannot hide one.

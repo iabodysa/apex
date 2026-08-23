@@ -38,22 +38,6 @@ LEDGER_DOCTYPE = "Trip Boarding Ledger"
 TERMINAL_OUTCOMES = ("Boarded", "Absent")
 
 
-def _ledger_exists(dispatch_trip: str, employee: str) -> bool:
-    """True if an ORIGINAL ledger row already exists for this trip+worker
-    (idempotency key). A reversal row is excluded so re-posting after a reversal
-    is still guarded by the original it mirrors, not by the mirror."""
-    return bool(
-        frappe.db.exists(
-            LEDGER_DOCTYPE,
-            {
-                "dispatch_trip": dispatch_trip,
-                "employee": employee,
-                "reversal_of": ["is", "not set"],
-            },
-        )
-    )
-
-
 def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
     """Map each manifest worker -> the Accommodation Building of the Transport
     Request they belong to (their housing pickup). The trip manifest is the union
@@ -81,39 +65,6 @@ def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
             if employee and employee not in mapping:
                 mapping[employee] = building
     return mapping
-
-
-def _insert_ledger_row(
-    dispatch_trip: str,
-    employee: str,
-    building: str | None,
-    outcome: str,
-    confirm_source: str | None,
-    boarded_at,
-    company: str | None,
-    posting_date: str,
-) -> None:
-    """Insert one Trip Boarding Ledger row (system-written, no GL).
-
-    Source traceability: the originating record is the Dispatch Trip, and the
-    worker id is stamped into ``source_detail_no`` so the row points back to the
-    exact Trip Boarding State child it snapshots."""
-    frappe.get_doc(
-        {
-            "doctype": LEDGER_DOCTYPE,
-            "company": company,
-            "posting_date": posting_date,
-            "dispatch_trip": dispatch_trip,
-            "employee": employee,
-            "building": building,
-            "outcome": outcome,
-            "confirm_source": confirm_source,
-            "boarded_at": boarded_at,
-            "source_doctype": "Dispatch Trip",
-            "source_name": dispatch_trip,
-            "source_detail_no": employee,
-        }
-    ).insert(ignore_permissions=True)
 
 
 def post_trip_boarding(dispatch_trip: str) -> int:
@@ -148,21 +99,34 @@ def post_trip_boarding(dispatch_trip: str) -> int:
         sp = "boarding_row"
         frappe.db.savepoint(sp)
         try:
-            if _ledger_exists(dispatch_trip, row.employee):
+            if frappe.db.exists(
+                LEDGER_DOCTYPE,
+                {
+                    "dispatch_trip": dispatch_trip,
+                    "employee": row.employee,
+                    "reversal_of": ["is", "not set"],
+                },
+            ):
                 continue
             boarded_at = (
                 row.worker_claim_at if row.status == "Boarded" else None
             )
-            _insert_ledger_row(
-                dispatch_trip=dispatch_trip,
-                employee=row.employee,
-                building=buildings.get(row.employee),
-                outcome=row.status,
-                confirm_source=row.confirm_source or None,
-                boarded_at=boarded_at,
-                company=company,
-                posting_date=posting_date,
-            )
+            frappe.get_doc(
+                {
+                    "doctype": LEDGER_DOCTYPE,
+                    "company": company,
+                    "posting_date": posting_date,
+                    "dispatch_trip": dispatch_trip,
+                    "employee": row.employee,
+                    "building": buildings.get(row.employee),
+                    "outcome": row.status,
+                    "confirm_source": row.confirm_source or None,
+                    "boarded_at": boarded_at,
+                    "source_doctype": "Dispatch Trip",
+                    "source_name": dispatch_trip,
+                    "source_detail_no": row.employee,
+                }
+            ).insert(ignore_permissions=True)
             posted += 1
         except Exception:
             frappe.db.rollback(save_point=sp)
