@@ -126,7 +126,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Issue Type",
-   "options": "Electrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
+   "options": "\nElectrical\nPlumbing\nFurniture\nAir Conditioning\nFire Safety\nPest Control\nStructural\nOther",
    "reqd": 1
   },
   {
@@ -395,7 +395,7 @@
    "table_fieldname": "findings"
   }
  ],
- "modified": "2026-08-23 12:00:00.000000",
+ "modified": "2026-08-24 01:31:53.920641",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",
