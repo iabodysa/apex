@@ -5561,3 +5561,16 @@ workshop status,حالة الورشة
 {0} {1} is not a stop on this trip.,{0}: المحطة {1} ليست ضمن هذه الرحلة.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
 {0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
+Accommodation Manager by default,مدير السكن افتراضيًا
+Apex — Recovery,أبكس — الاسترداد
+Damage write-off {0} submitted (estimated {1}).,تم ترحيل شطب الضرر {0} (بتقدير {1}).
+Employee Advance recovery is off by default. Enable it only after Payroll and Accounts have supplied the native records the recovery schedule needs.,استرداد سلفة الموظف مغلق افتراضيًا. لا تفعّله إلا بعد أن توفّر الرواتب والحسابات السجلات التي يحتاجها جدول الاسترداد.
+"Fuel daily log {0}: {1} L, {2}.",سجل الوقود اليومي {0}: {1} لتر، {2}.
+Payment Request {0} raised for {1}.,أُنشئ طلب دفع {0} بمبلغ {1}.
+Rental accrual for office {0} in period {1} is unsettled: {2} outstanding with no submitted Rental Settlement. (office {0}),استحقاق إيجار المكتب {0} لفترة {1} غير مسوّى: {2} متبقٍّ بلا تسوية إيجار مرحّلة. (المكتب {0})
+Set by Apex,يحدده أبكس
+deleted,حذفه
+issue priority,أولوية بلاغ
+issue type,نوع بلاغ
+renamed or edited,إعادة تسميته أو تعديله
+"{0} is an {1} Apex ships, and every update puts it back as the app defines it. It cannot be {2} here. Ask for the change to ship with the app.",{0} هو {1} يشحنه أبكس، وكل تحديث يعيده كما يعرّفه التطبيق. لا يمكن {2} من هنا. اطلب أن يصدر التغيير مع التطبيق.
