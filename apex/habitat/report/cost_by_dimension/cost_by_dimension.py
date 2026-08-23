@@ -46,20 +46,7 @@ def get_columns():
 
 
 def get_data(filters):
-    """Sums non-reversal ledger cost by company, building and project, per the given filters.
-
-    Confined to the reader's own buildings first. A Script Report builds its own SQL, so
-    ``permission_query_conditions`` never runs against it — the scope has to be applied
-    here or a building-scoped supervisor reads every company's costs on the site.
-    """
-    from apex.habitat import permissions
-
-    restrict, allowed = permissions.report_building_scope(
-        frappe.session.user, doctype="Accommodation Ledger"
-    )
-    if restrict and not allowed:
-        return []
-
+    """Sums non-reversal ledger cost by company, building and project, per the given filters."""
     ledger = frappe.qb.DocType("Accommodation Ledger")
 
     query = (
@@ -89,7 +76,5 @@ def get_data(filters):
         query = query.where(ledger.posting_date >= filters.from_date)
     if filters.get("to_date"):
         query = query.where(ledger.posting_date <= filters.to_date)
-    if restrict:
-        query = query.where(ledger.building.isin(allowed))
 
     return query.run(as_dict=True)
