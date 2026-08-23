@@ -89,6 +89,10 @@ def make_company(name="Test AFMCO", **kwargs):
     test module may be run after another that built the same fixture. Nothing here
     commits: ``FrappeTestCase`` rolls the transaction back, which is the one thing a
     committed fixture would defeat.
+
+    The site's own default is read through ``frappe.defaults.get_global_default``
+    (frappe/defaults.py) before a new Company is built, so a bench that already
+    carries one is reused rather than duplicated.
     """
     if frappe.db.exists("Company", name):
         return frappe.get_doc("Company", name)
