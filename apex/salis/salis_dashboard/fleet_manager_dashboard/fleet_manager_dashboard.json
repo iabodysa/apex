@@ -1,9 +1,5 @@
 {
- "cards": [
-  {
-   "card": "Vehicles Under Maintenance"
-  }
- ],
+ "cards": [],
  "charts": [
   {
    "chart": "Vehicles by Status",
@@ -18,5 +14,5 @@
  "is_standard": 1,
  "module": "Salis",
  "name": "Fleet Manager Dashboard",
- "modified": "2026-08-24 02:39:34.806308"
+ "modified": "2026-08-24 03:31:59.418944"
 }

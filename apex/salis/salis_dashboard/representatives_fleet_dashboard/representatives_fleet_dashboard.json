@@ -1,9 +1,6 @@
 {
  "cards": [
   {
-   "card": "Vehicles Under Maintenance"
-  },
-  {
    "card": "Expiring Vehicle Compliance"
   },
   {
@@ -63,5 +60,5 @@
  "is_standard": 1,
  "module": "Salis",
  "name": "Representatives Fleet Dashboard",
- "modified": "2026-08-24 02:39:34.806308"
+ "modified": "2026-08-24 03:31:59.418944"
 }
