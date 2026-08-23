@@ -9,10 +9,14 @@ on the site's own first day they differ by a full week rather than a day. These 
 fail against any window computed from ``date.weekday()``, which is Monday-based.
 """
 
+import ast
+import inspect
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_first_day_of_week, get_last_day_of_week, getdate
 
+from apex.habitat.api import safety_checklist
 from apex.habitat.api.safety_checklist import _current_period
 
 SUNDAY = "2026-08-23"
@@ -80,3 +84,40 @@ class TestCurrentPeriod(FrappeTestCase):
         self.assertEqual(str(month_start), "2026-08-01")
         self.assertEqual(str(month_end), "2026-08-31")
         self.assertEqual(month_period["kind"], "month")
+
+
+class TestSubmitFunctionsParseThroughTheOneFrappePrimitive(FrappeTestCase):
+    """``submit_round`` and ``submit_due_rounds`` each take their JSON-or-list
+    argument straight to ``frappe.parse_json`` (frappe/utils/__init__.py:875),
+    which already does the ``isinstance(x, str)`` check before calling
+    ``json.loads``. A hand-rolled ``isinstance`` guard ahead of a bare
+    ``json.loads`` duplicates that check; these fail the moment either
+    function goes back to hand-rolling it.
+    """
+
+    def _assert_parses_through_frappe_only(self, func):
+        tree = ast.parse(inspect.getsource(func))
+        calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call)]
+
+        def _is_attr_call(node, owner, attr):
+            return (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == attr
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == owner
+            )
+
+        self.assertTrue(
+            any(_is_attr_call(c, "frappe", "parse_json") for c in calls),
+            f"{func.__name__} no longer calls frappe.parse_json",
+        )
+        self.assertFalse(
+            any(_is_attr_call(c, "json", "loads") for c in calls),
+            f"{func.__name__} hand-rolls json.loads instead of frappe.parse_json",
+        )
+
+    def test_submit_round_parses_lines_through_frappe_parse_json(self):
+        self._assert_parses_through_frappe_only(safety_checklist.submit_round)
+
+    def test_submit_due_rounds_parses_results_through_frappe_parse_json(self):
+        self._assert_parses_through_frappe_only(safety_checklist.submit_due_rounds)
