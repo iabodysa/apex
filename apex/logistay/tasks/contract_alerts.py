@@ -15,22 +15,33 @@ Operations User site-wide through ``receiver_by_role`` — a company-scoped user
 was alerted about every other company's contracts, because
 ``get_info_based_on_role`` runs ``ignore_permissions``. Same
 ``report_company_scope`` narrowing as ``sim_alerts.py``'s daily digest, and
-the same 30-day match Frappe's own ``Notification.get_documents_for_today``
-used (``contract_end_date`` falling on today + 30, matched by full day).
+the same day-exact match Frappe's own ``Notification.get_documents_for_today``
+used (``contract_end_date`` falling on today plus the notice window, matched by
+full day).
 """
 
 from __future__ import annotations
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date, nowdate, today
+from frappe.utils import add_to_date, cint, nowdate, today
 
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.logistay import permissions
 from apex.logistay.utils.roles import sim_operations_users
 
 _ROW_SAVEPOINT = "telecom_contract_expiry_row"
-CONTRACT_EXPIRY_NOTICE_DAYS = 30
+
+
+def _contract_expiry_notice_days() -> int:
+    """Days of notice before a Telecom Contract's end date.
+
+    Read from ``Logistay Settings.contract_expiry_notice_days``. The fallback
+    applies to an unset or zero field, which is what a Single returns before an
+    operator has ever opened it; a site that wants no notice turns this scheduled
+    task off, never by zeroing the window.
+    """
+    return cint(frappe.db.get_single_value("Logistay Settings", "contract_expiry_notice_days")) or 30
 
 
 def contract_expiry_watch() -> None:
@@ -77,8 +88,8 @@ def contract_expiry_watch() -> None:
 def contract_expiry_soon_watch() -> None:
     """Notify each SIM Operations User, scoped to their own company, of every
     submitted Active contract whose end date falls exactly
-    ``CONTRACT_EXPIRY_NOTICE_DAYS`` from today."""
-    reference_date = add_to_date(nowdate(), days=CONTRACT_EXPIRY_NOTICE_DAYS)
+    ``Logistay Settings.contract_expiry_notice_days`` from today."""
+    reference_date = add_to_date(nowdate(), days=_contract_expiry_notice_days())
     contracts = frappe.get_all(
         "Telecom Contract",
         filters={

@@ -5569,3 +5569,6 @@ Recovery Advance (legacy),سلفة الاسترداد (قديمة)
 Recovery Loan,قرض الاسترداد
 "The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",القرض المُنشأ لهذا الحادث مع تفعيل السداد من الراتب. الحادث الواحد يُنشئ قرضاً واحداً على الأكثر، وتدير الموارد البشرية القسط والرصيد المتبقي من جدول السداد الخاص به.
 "Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state. The Maintenance Request Workflow, not this field's read_only flag, is what stops a hand edit — see the Close/Reopen actions.",مرحلة العمل في الطلب. الإسنادات تحدد من يملك العمل ولا تنشئ دورة حياة ثانية. مسار عمل طلب الصيانة، لا خاصية القراءة فقط في هذا الحقل، هو ما يمنع التعديل اليدوي — راجع إجراءي الإغلاق وإعادة الفتح.
+Logistay Settings,إعدادات لوجيستاي
+Contract Expiry Notice Days,مهلة تنبيه انتهاء العقد (أيام)
+"Days of notice before a Telecom Contract's end date. Leave it at zero to keep the shipped 30-day notice; turn the alert off at its scheduled task, not by zeroing this.",عدد أيام التنبيه قبل تاريخ انتهاء عقد الاتصالات. اتركه صفراً للإبقاء على مهلة الثلاثين يوماً الافتراضية، وأوقف التنبيه من مهمته المجدولة لا بتصفير هذا الرقم.

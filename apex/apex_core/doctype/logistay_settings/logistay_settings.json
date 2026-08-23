@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "creation": "2026-08-23 22:10:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "logistay_settings_sec_alerts",
+  "contract_expiry_notice_days"
+ ],
+ "fields": [
+  {
+   "fieldname": "logistay_settings_sec_alerts",
+   "fieldtype": "Section Break",
+   "label": "Operational Alert Windows"
+  },
+  {
+   "default": "30",
+   "description": "Days of notice before a Telecom Contract's end date. Leave it at zero to keep the shipped 30-day notice; turn the alert off at its scheduled task, not by zeroing this.",
+   "fieldname": "contract_expiry_notice_days",
+   "fieldtype": "Int",
+   "label": "Contract Expiry Notice Days"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-08-23 22:10:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Logistay Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "SIM Operations User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

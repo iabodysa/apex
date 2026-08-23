@@ -39,11 +39,19 @@
    "link_type": "DocType",
    "link_to": "Habitat Settings",
    "idx": 3
+  },
+  {
+   "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Logistay Settings",
+   "link_type": "DocType",
+   "link_to": "Logistay Settings",
+   "idx": 4
   }
  ],
  "charts": [],
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:01.000000",
- "modified": "2026-08-22 23:00:00.000000"
+ "modified": "2026-08-23 22:10:00.000000"
 }
