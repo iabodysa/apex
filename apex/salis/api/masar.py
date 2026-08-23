@@ -53,8 +53,9 @@ from apex.apex_core.utils.portal_identity import WORKER, as_capacity, portal_roo
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.role_assignment import role_holders_escalating
 from apex.apex_core.utils.system_notify import notify_user_system
-from apex.salis.api import boarding_window
+from apex.salis.api import boarding, boarding_window
 from apex.salis.api.boarding import already_boarded
+from apex.salis.api.boarding_flow import ensure_trip_boarding_state, mark_boarded
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
 from apex.salis.api.maps_links import _full_route_maps_url
@@ -1064,8 +1065,6 @@ def _get_or_create_trip_log(dispatch_trip, employee=None):
     )
     with as_capacity(WORKER, employee):
         log.insert()
-    from apex.salis.api.boarding_flow import ensure_trip_boarding_state
-
     ensure_trip_boarding_state(dispatch_trip)
     return log
 
@@ -1135,8 +1134,6 @@ def confirm_boarding(token=None, transport_request=None):
     )
     with as_capacity(WORKER, employee):
         log.save()
-    from apex.salis.api.boarding_flow import mark_boarded
-
     mark_boarded(dispatch_trip, employee)
     return {
         "created": True,
@@ -1162,8 +1159,6 @@ def get_worker_boarding_pass(token=None, transport_request=None):
     so the worker's QR and the driver's scanner share ONE signing scheme; issues no
     DB write (a pass is just a signed claim). ``{"pass": None}`` when the worker has
     no boardable trip today."""
-    from apex.salis.api import boarding
-
     employee = _resolve_worker(token)
     transport_request = (transport_request or "").strip() or None
 
