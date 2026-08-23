@@ -153,14 +153,18 @@ def raise_recovery_advance(
     """Raise (once) the submitted Employee Advance recovering ``amount`` from ``employee``.
 
     Returns the advance name, or the pre-existing one when this source document has
-    already been mapped. Returns ``None`` — logging why, never throwing — when the
-    site is not configured for employee advances yet (no company, no Employee
-    Advance account); the operational document must still be submittable on a site
-    whose Accounts setup is incomplete.
+    already been mapped. Returns ``None`` — recording why in Error Log, never
+    throwing — when the site is not configured for employee advances yet (no
+    company, no Employee Advance account); the operational document must still be
+    submittable on a site whose Accounts setup is incomplete. Each guard's
+    ``frappe.log_error`` carries ``reference_doctype``/``reference_name`` pointed at
+    the source document rather than ``frappe.logger().warning``, which never reaches
+    production (frappe/utils/logger.py:12 floors it above WARNING there) and leaves
+    an operator with no record that the recovery was dropped.
 
     The advance account is checked to be of type Receivable before the Employee Advance
     is built: HRMS requires a Receivable advance account and throws on submit, so
-    catching it here degrades to a logged warning instead of a failed submit.
+    catching it here degrades to a logged Error Log entry instead of a failed submit.
 
     ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) gates the read
     of this app's Custom Field on hrms' Employee Advance. The one thing the field
@@ -174,9 +178,14 @@ def raise_recovery_advance(
         return None
 
     if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
-        logger.warning(
-            f"employee_recovery: {source_doctype} {source_name} — the Employee Advance source "
-            f"Customization has not synced yet (run bench migrate). No Employee Advance raised."
+        frappe.log_error(
+            title="employee_recovery: Employee Advance source Customization not synced"[:140],
+            message=(
+                f"{source_doctype} {source_name} — the Employee Advance source Customization "
+                "has not synced yet (run bench migrate). No Employee Advance raised."
+            ),
+            reference_doctype=source_doctype,
+            reference_name=source_name,
         )
         return None
 
@@ -191,9 +200,11 @@ def raise_recovery_advance(
         for_update=True,
     )
     if not source:
-        logger.warning(
-            f"employee_recovery: source {source_doctype} {source_name} does not exist. "
-            "No Employee Advance raised."
+        frappe.log_error(
+            title="employee_recovery: source document does not exist"[:140],
+            message=f"{source_doctype} {source_name} does not exist. No Employee Advance raised.",
+            reference_doctype=source_doctype,
+            reference_name=source_name,
         )
         return None
 
@@ -203,9 +214,14 @@ def raise_recovery_advance(
 
     company = company or frappe.db.get_value("Employee", employee, "company")
     if not company:
-        logger.warning(
-            f"employee_recovery: {source_doctype} {source_name} — employee {employee} has no "
-            f"company. No Employee Advance raised."
+        frappe.log_error(
+            title="employee_recovery: employee has no company"[:140],
+            message=(
+                f"{source_doctype} {source_name} — employee {employee} has no company. "
+                "No Employee Advance raised."
+            ),
+            reference_doctype=source_doctype,
+            reference_name=source_name,
         )
         return None
 
@@ -213,16 +229,26 @@ def raise_recovery_advance(
         "Company", company, "default_employee_advance_account"
     )
     if not advance_account:
-        logger.warning(
-            f"employee_recovery: {source_doctype} {source_name} — company {company} has no Default "
-            f"Employee Advance Account. No Employee Advance raised."
+        frappe.log_error(
+            title="employee_recovery: company has no Default Employee Advance Account"[:140],
+            message=(
+                f"{source_doctype} {source_name} — company {company} has no Default Employee "
+                "Advance Account. No Employee Advance raised."
+            ),
+            reference_doctype=source_doctype,
+            reference_name=source_name,
         )
         return None
 
     if frappe.db.get_value("Account", advance_account, "account_type") != "Receivable":
-        logger.warning(
-            f"employee_recovery: {source_doctype} {source_name} — advance account {advance_account} "
-            f"is not of type Receivable. No Employee Advance raised."
+        frappe.log_error(
+            title="employee_recovery: advance account is not of type Receivable"[:140],
+            message=(
+                f"{source_doctype} {source_name} — advance account {advance_account} is not "
+                "of type Receivable. No Employee Advance raised."
+            ),
+            reference_doctype=source_doctype,
+            reference_name=source_name,
         )
         return None
 
