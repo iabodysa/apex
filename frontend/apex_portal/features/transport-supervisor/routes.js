@@ -45,7 +45,7 @@ export const supervisorRoutes = Object.freeze([
       { key: "requested_by", label: "حساب مقدم الطلب", link: { doctype: "User", fieldname: "full_name", fallback: "مستخدم" } },
       { key: "service_line", label: "نوع النقل" },
       { key: "project", label: "المشروع", link: { doctype: "Project", fieldname: "project_name", fallback: "مشروع" } },
-      { key: "accommodation_building", label: "مبنى الانطلاق", labelKey: "accommodation_building_label", link: { doctype: "Accommodation Building", fieldname: "building_name", fallback: "مبنى سكن" } },
+      { key: "accommodation_building", label: "مبنى الانطلاق", labelKey: "accommodation_building_label", link: { doctype: "Building", fieldname: "building_name", fallback: "مبنى سكن" } },
       { key: "from_location", label: "الانطلاق" },
       { key: "to_location", label: "الوجهة" },
       { key: "pickup_datetime", label: "موعد الانطلاق" },
