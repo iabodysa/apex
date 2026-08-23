@@ -1470,7 +1470,6 @@ Driver Clearance Certificate,شهادة إخلاء طرف السائق
 Driver Clearance Item,بند إخلاء طرف سائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
 Driver ID,معرّف السائق
-Driver ID is required in salis_driver.csv.,معرّف السائق مطلوب في ملف salis_driver.csv.
 Driver Latitude,خط عرض السائق
 Driver Longitude,خط طول السائق
 Driver Portal,بوابة السائق
@@ -2113,7 +2112,6 @@ Immutable Record,قيد غير قابل للتغيير
 Immutable per-pay-period installment agreed on the operational source when this advance was raised.,قسط كل فترة رواتب كما اتُّفق عليه في المستند التشغيلي وقت إنشاء السلفة، وغير قابل للتعديل.
 Immutable snapshot of the signed evidence on the operational source when this advance was raised.,نسخة من الإثبات الموقّع كما كان في المستند التشغيلي وقت إنشاء السلفة، وغير قابلة للتعديل.
 Import trail in an operator-facing field,أثر استيراد في حقل يقرأه المشغّل
-Imported Salis Driver {0} has status {1}. Only blank or Active is accepted. Use Driver Suspension or Driver Clearance for lifecycle changes.,السائق المستورد {0} حالته {1}. لا يُقبل إلا حقل فارغ أو الحالة «نشط». استخدم إيقاف السائق أو إخلاء طرف السائق لتغيير حالة دورة العمل.
 In Progress,قيد التنفيذ
 In Storage,في المستودع
 In Transit,في الطريق
@@ -2685,7 +2683,6 @@ No SIM line is registered against this contract yet,لا توجد شريحة م�
 No Salis Driver is linked to your account.,لا يوجد سائق ساليس مرتبط بحسابك.
 "No action has been decided on this notice yet, and nothing may be scrapped, repaired or charged until an authorising officer signs it.",ما تقرر إجراء على هذا الإشعار إلى الآن، وما يُشطب ولا يُصلح ولا يُحمّل شيء حتى يوقّعه مسؤول معتمد.
 No actions available.,لا توجد إجراءات متاحة.
-No active Employee is linked to this driver.,لا يوجد موظف نشط مرتبط بهذا السائق.
 No active Safety Task Catalog entries found. Run the app setup first.,لا توجد بنود نشطة في دليل مهام السلامة. شغّل إعداد التطبيق أولًا.
 No active accommodation assignment when raised — needs housing triage.,عند إنشاء الطلب، لم يكن للعامل تسكين نشط؛ ويحتاج الطلب إلى مراجعة فريق السكن.
 No active assignment found for bed {0}.,لا يوجد إسناد نشط للسرير {0}.
