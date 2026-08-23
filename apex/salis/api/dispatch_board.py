@@ -258,6 +258,11 @@ def _drivers_pane(unscoped, projects) -> dict:
     show the bound vehicle without an extra round trip. Only ``Active`` drivers
     are considered for the availability split (Stopped / Released
     drivers are out of the dispatchable pool).
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) gates the
+    optional driver columns, because several are Custom Fields a site may not carry;
+    the one thing reading them unguarded cannot do is degrade — it raises, and the
+    dispatch board would go blank rather than lose one column.
     """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"

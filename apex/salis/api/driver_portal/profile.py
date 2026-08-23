@@ -20,6 +20,11 @@ def _employee_documents(employee):
 	surfaces as None rather than erroring. Returns a list of ``{type, number, expiry,
 	days_left}`` entries (only for documents on file), the same shape the Masar
 	profile consumes — so the SPA reuses one renderer. Read-only.
+
+    ``frappe.get_cached_doc`` (frappe/__init__.py:1183) is read once and every field
+    taken off it with ``.get()``. The one thing ``frappe.db.get_value`` cannot do is
+    tolerate a column that does not exist — it raises — and Employee identity fields
+    differ between HR setups, so a missing one must read as "not on file".
     """
     if not employee or not frappe.db.exists("Employee", {"name": employee}):
         return []

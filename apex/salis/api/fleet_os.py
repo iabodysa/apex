@@ -122,6 +122,14 @@ def _queue_scope(project=None):
 
 
 def _project_queue(doctype, fields, project=None, filters=None, order_by="modified desc", limit=100):
+    """One fleet-OS queue, confined to the projects this caller may see.
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) applies row scope, and the explicit
+    ``has_permission(..., throw=True)`` above it is not redundant: ``get_list`` on a
+    doctype the caller cannot read returns an EMPTY list rather than refusing, and an
+    empty queue already means "nothing waiting". Without the throw the two are
+    indistinguishable on screen.
+    """
     frappe.has_permission(doctype, "read", throw=True)
     projects = _queue_scope(project)
     if projects == []:
@@ -150,6 +158,14 @@ def get_assignment_queue(project=None):
 
 
 def _handover_queue(direction, project=None):
+    """Vehicle handovers in one direction, confined to this caller's projects.
+
+    Scoped in TWO steps because a handover carries no project of its own: the
+    vehicles in scope are resolved first with ``frappe.get_list``
+    (frappe/__init__.py:2008), then the handovers are filtered to those vehicles. The
+    one thing a single scoped list cannot do is reach a project that lives one link
+    away from the row.
+    """
     projects = _queue_scope(project)
     if projects == []:
         return []
