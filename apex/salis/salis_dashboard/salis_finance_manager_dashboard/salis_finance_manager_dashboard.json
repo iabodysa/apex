@@ -1,21 +1,5 @@
 {
- "cards": [
-  {
-   "card": "Fuel Cost This Month"
-  },
-  {
-   "card": "Approved Fuel Awaiting Fulfilment"
-  },
-  {
-   "card": "Unreverted Temporary Topups"
-  },
-  {
-   "card": "Overdue Temporary Topups"
-  },
-  {
-   "card": "Failed Fuel Requests"
-  }
- ],
+ "cards": [],
  "charts": [
   {
    "chart": "Fuel Cost by Month",
@@ -41,5 +25,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Salis",
- "name": "Salis Finance Manager Dashboard"
+ "name": "Salis Finance Manager Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

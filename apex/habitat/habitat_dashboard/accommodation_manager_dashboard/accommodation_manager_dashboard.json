@@ -1,25 +1,13 @@
 {
  "cards": [
   {
-   "card": "Occupied Beds"
-  },
-  {
    "card": "Available Beds"
-  },
-  {
-   "card": "Beds Out of Service"
-  },
-  {
-   "card": "Pending Housing Checkouts"
   },
   {
    "card": "Imminent Checkouts"
   },
   {
    "card": "Idle Residents"
-  },
-  {
-   "card": "Active Housing Assignments"
   }
  ],
  "charts": [
@@ -51,5 +39,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Habitat",
- "name": "Accommodation Manager Dashboard"
+ "name": "Accommodation Manager Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

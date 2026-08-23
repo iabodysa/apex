@@ -4,22 +4,13 @@
    "card": "Open Audit Remediation Plans"
   },
   {
-   "card": "Overdue Audit Remediation Plans"
-  },
-  {
    "card": "Poor Safety Task Executions"
-  },
-  {
-   "card": "Expired Licenses"
   },
   {
    "card": "Licenses Expiring Soon"
   },
   {
    "card": "Safety Inspections Recorded"
-  },
-  {
-   "card": "Recent Error Logs"
   }
  ],
  "charts": [
@@ -51,5 +42,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Habitat",
- "name": "Internal Auditor Dashboard"
+ "name": "Internal Auditor Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

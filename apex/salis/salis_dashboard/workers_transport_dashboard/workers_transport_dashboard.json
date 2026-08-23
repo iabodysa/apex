@@ -4,16 +4,7 @@
    "card": "Workers Requests Open"
   },
   {
-   "card": "Open Transport Requests"
-  },
-  {
-   "card": "Inter-City Relocations This Month"
-  },
-  {
    "card": "Large Worker Moves Pending Escalation"
-  },
-  {
-   "card": "Workers Transport Fulfilled This Month"
   },
   {
    "card": "Transport SLA Breaches Open"
@@ -40,5 +31,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Salis",
- "name": "Workers Transport Dashboard"
+ "name": "Workers Transport Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

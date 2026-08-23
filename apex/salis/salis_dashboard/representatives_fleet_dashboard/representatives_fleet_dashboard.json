@@ -1,9 +1,6 @@
 {
  "cards": [
   {
-   "card": "Active Vehicles"
-  },
-  {
    "card": "Vehicles Under Maintenance"
   },
   {
@@ -13,13 +10,7 @@
    "card": "Pending Fuel Requests"
   },
   {
-   "card": "Fuel Cost This Month"
-  },
-  {
    "card": "Open Fuel Exception Cases"
-  },
-  {
-   "card": "Rental Accrual This Month"
   },
   {
    "card": "Blocked Driver Clearances"
@@ -71,5 +62,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Salis",
- "name": "Representatives Fleet Dashboard"
+ "name": "Representatives Fleet Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

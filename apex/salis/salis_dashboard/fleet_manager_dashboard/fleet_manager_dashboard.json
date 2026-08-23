@@ -1,13 +1,7 @@
 {
  "cards": [
   {
-   "card": "Active Vehicles"
-  },
-  {
    "card": "Vehicles Under Maintenance"
-  },
-  {
-   "card": "Salis Representatives Fleet Active Assignments"
   }
  ],
  "charts": [
@@ -23,5 +17,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Salis",
- "name": "Fleet Manager Dashboard"
+ "name": "Fleet Manager Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

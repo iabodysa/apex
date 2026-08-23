@@ -13,16 +13,10 @@
    "card": "Overdue Scheduled Tasks"
   },
   {
-   "card": "Overdue Safety Tasks"
-  },
-  {
    "card": "Open Resident Requests"
   },
   {
    "card": "Custody Items Pending Return"
-  },
-  {
-   "card": "Tasks Due Today"
   }
  ],
  "charts": [
@@ -58,5 +52,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Habitat",
- "name": "Resident Supervisor Dashboard"
+ "name": "Resident Supervisor Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

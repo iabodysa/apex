@@ -25,7 +25,7 @@
  ],
  "sequence_id": 2.2,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"custodyHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody and Costs</b></span>\", \"col\": 12}}, {\"id\": \"onbCaCG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody and Costs Go-Live\", \"col\": 12}}, {\"id\": \"custodySc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"custodySc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"custodySc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"custodySc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"custodySc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"custodySc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease\", \"col\": 3}}, {\"id\": \"custodySc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"custodySc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"custodySc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"custodyNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"custodyNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"custodyNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Returns\", \"col\": 3}}, {\"id\": \"custodyNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"custodyNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"custodyNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"custodyNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"custodyNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"custodyNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"custodyNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rejected Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"custodyNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"custodyNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"custodyNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"custodyNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Accommodation Cost This Month\", \"col\": 3}}, {\"id\": \"custodyCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"custodyCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"custodyCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing and Utilities\", \"col\": 4}}, {\"id\": \"custodyCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"custodyCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"custodyCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"custodyCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"custodyHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody and Costs</b></span>\", \"col\": 12}}, {\"id\": \"onbCaCG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody and Costs Go-Live\", \"col\": 12}}, {\"id\": \"custodySc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"custodySc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"custodySc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"custodySc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"custodySc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"custodySc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease\", \"col\": 3}}, {\"id\": \"custodySc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"custodySc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"custodySc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"custodyNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"custodyNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"custodyNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"custodyNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"custodyNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"custodyNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"custodyNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"custodyNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"custodyNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rejected Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"custodyNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"custodyNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"custodyNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"custodyNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Accommodation Cost This Month\", \"col\": 3}}, {\"id\": \"custodyCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"custodyCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"custodyCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing and Utilities\", \"col\": 4}}, {\"id\": \"custodyCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"custodyCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"custodyCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"custodyCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -436,90 +436,84 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Overdue Returns",
-   "label": "Overdue Returns",
-   "idx": 3
-  },
-  {
-   "doctype": "Workspace Number Card",
    "number_card_name": "Custody Damage Assessments",
    "label": "Custody Damage Assessments",
-   "idx": 4
+   "idx": 3
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Custody Value in Employee Hands (SAR)",
    "label": "Custody Value in Employee Hands (SAR)",
-   "idx": 5
+   "idx": 4
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "SIM Cards Total",
    "label": "Total SIMs",
-   "idx": 6
+   "idx": 5
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "SIM Cards Assigned",
    "label": "Assigned SIMs",
-   "idx": 7
+   "idx": 6
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Active Telecom Contracts",
    "label": "Active Contracts",
-   "idx": 8
+   "idx": 7
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Active Leases",
    "label": "Active Leases",
-   "idx": 9
+   "idx": 8
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Pending Utility Bills",
    "label": "Pending Utility Bills",
-   "idx": 10
+   "idx": 9
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Rejected Utility Bills",
    "label": "Rejected Utility Bills",
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Utility Bills Under Review",
    "label": "Utility Bills Under Review",
-   "idx": 12
+   "idx": 11
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Open Subcontractor Service Orders",
    "label": "Open Subcontractor Service Orders",
-   "idx": 13
+   "idx": 12
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Missed Subcontractor Visits",
    "label": "Missed Subcontractor Visits",
-   "idx": 14
+   "idx": 13
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Supplier-Billed Cost This Month",
    "label": "Supplier-Billed Cost This Month",
-   "idx": 15
+   "idx": 14
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Total Accommodation Cost This Month",
    "label": "Total Accommodation Cost This Month",
-   "idx": 16
+   "idx": 15
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-15 06:41:00.000000",
+ "modified": "2026-08-24 02:39:34.806308",
  "creation": "2020-01-01 00:00:03.000000"
 }

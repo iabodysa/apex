@@ -1,37 +1,7 @@
 {
  "cards": [
   {
-   "card": "Completed Trips Today"
-  },
-  {
-   "card": "Completed Trips This Month"
-  },
-  {
-   "card": "Pending Transport Requests"
-  },
-  {
    "card": "Open Fuel Exception Cases"
-  },
-  {
-   "card": "Rental Accrual This Month"
-  },
-  {
-   "card": "Vehicles Tracked"
-  },
-  {
-   "card": "Inter-City Requests This Month"
-  },
-  {
-   "card": "Open Fuel Claims"
-  },
-  {
-   "card": "Open Cost Recoveries"
-  },
-  {
-   "card": "Pending Vehicle Write-Offs"
-  },
-  {
-   "card": "Rental Settlements This Month"
   },
   {
    "card": "Blocked Driver Clearances"
@@ -70,5 +40,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Salis",
- "name": "Movement Operations Dashboard"
+ "name": "Movement Operations Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }

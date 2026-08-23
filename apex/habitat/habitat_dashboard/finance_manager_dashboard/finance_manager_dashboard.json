@@ -20,9 +20,6 @@
   },
   {
    "card": "Missed Subcontractor Visits"
-  },
-  {
-   "card": "Total Asset Book Value"
   }
  ],
  "charts": [
@@ -54,5 +51,6 @@
  "is_default": 0,
  "is_standard": 1,
  "module": "Habitat",
- "name": "Finance Manager Dashboard"
+ "name": "Finance Manager Dashboard",
+ "modified": "2026-08-24 02:39:34.806308"
 }
