@@ -478,7 +478,7 @@ def get_my_complaints():
 @frappe.whitelist()
 def get_complaint(name):
     issue = _my_issue(name)[0]
-    issue["communications"] = frappe.get_all(
+    issue["communications"] = frappe.get_list(
         "Communication",
         filters={"reference_doctype": "Issue", "reference_name": name},
         fields=["name", "sender", "content", "communication_date"],

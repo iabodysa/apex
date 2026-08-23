@@ -22,7 +22,7 @@ def load_template_into_doc(doctype, docname, issue_type):
     doc = frappe.get_doc(doctype, docname)
     frappe.has_permission(doctype, "write", doc=doc, throw=True)
 
-    templates = frappe.get_all(
+    templates = frappe.get_list(
         "Maintenance Material Template",
         filters={"issue_type": issue_type, "is_active": 1},
         fields=["name"],

@@ -83,7 +83,7 @@ def get_open_alerts(project=None, severity=None, since=None):
     unscoped, projects = _permitted_projects()
 
     proj_opts = (
-        [p.name for p in frappe.get_all("Project", fields=["name"], order_by="name asc", limit_page_length=0)]
+        [p.name for p in frappe.get_list("Project", fields=["name"], order_by="name asc", limit_page_length=0)]
         if unscoped
         else list(projects or [])
     )
@@ -91,7 +91,7 @@ def get_open_alerts(project=None, severity=None, since=None):
     now = now_datetime()
 
     if project and (unscoped or project in (projects or [])):
-        plates = frappe.get_all(
+        plates = frappe.get_list(
             "Salis Vehicle", filters={"project": project}, pluck="name", limit_page_length=0
         )
     else:
@@ -113,8 +113,9 @@ def get_open_alerts(project=None, severity=None, since=None):
     assignee_ids = list({u for a in alerts for u in a["assignees"]})
     name_map = {
         u.name: u.full_name
-        for u in frappe.get_all(
-            "User", filters={"name": ["in", assignee_ids]}, fields=["name", "full_name"]
+        for u in frappe.get_list(
+            "User", filters={"name": ["in", assignee_ids]}, fields=["name", "full_name"],
+            limit_page_length=0,
         )
     } if assignee_ids else {}
 
@@ -232,7 +233,7 @@ def assign_alert(name, user=None):
         "doctype": ref.reference_type,
         "name": ref.reference_name,
     })
-    assignees = frappe.get_all(
+    assignees = frappe.get_list(
         "ToDo",
         filters={
             "reference_type": ref.reference_type,
@@ -241,6 +242,7 @@ def assign_alert(name, user=None):
         },
         pluck="allocated_to",
         distinct=True,
+        limit_page_length=0,
     )
     return {"ok": True, "name": name, "assignees": assignees}
 
@@ -261,7 +263,7 @@ def unassign_alert(name, user=None):
     target = user or frappe.session.user
     ref = _queue_ref_checked(name)
     assign_to.remove(ref.reference_type, ref.reference_name, target)
-    assignees = frappe.get_all(
+    assignees = frappe.get_list(
         "ToDo",
         filters={
             "reference_type": ref.reference_type,
@@ -270,6 +272,7 @@ def unassign_alert(name, user=None):
         },
         pluck="allocated_to",
         distinct=True,
+        limit_page_length=0,
     )
     return {"ok": True, "name": name, "assignees": assignees}
 

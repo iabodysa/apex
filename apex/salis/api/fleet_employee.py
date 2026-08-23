@@ -152,6 +152,7 @@ def get_fuel_stations():
         filters={"status": "Active"},
         pluck="name",
         order_by="platform_name asc",
+        limit_page_length=0,
     )
 
 @frappe.whitelist(methods=["POST"])
@@ -273,10 +274,11 @@ def get_my_fuel_requests(days=90, limit=30):
     if vehicles:
         plates = {
             v["name"]: v["plate_number"]
-            for v in frappe.get_all(
+            for v in frappe.get_list(
                 "Salis Vehicle",
                 filters={"name": ["in", list(vehicles)]},
                 fields=["name", "plate_number"],
+                limit_page_length=0,
             )
         }
 

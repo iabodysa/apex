@@ -33,7 +33,9 @@ def _bounded_positive(value, default, maximum):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trips_today():
-    """Today's Dispatch Trips for the current driver (read)."""
+    """Today's Dispatch Trips for the current driver (read), scoped on ``driver`` —
+    resolved from the portal identity via ``_resolve_driver``, never a
+    client-supplied id."""
     _require_enabled()
     driver = _resolve_driver()
     trips = frappe.get_all(

@@ -63,7 +63,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
         subtotal client-side.
     """
     frappe.has_permission("Custody Article", "read", throw=True)
-    articles = frappe.get_all(
+    articles = frappe.get_list(
         "Custody Article",
         fields=[
             "name as article",
@@ -73,6 +73,7 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
             "standard_unit_cost",
         ],
         order_by="article_name asc",
+        limit_page_length=0,
     )
 
     balances: dict[str, float] = {}
@@ -584,10 +585,11 @@ def return_cart(party_type: str, party: str, items_json: str) -> dict:
             row["condition_on_return"] = condition
         grouped.setdefault(custody_issue, []).append(row)
 
-    issue_party = frappe.get_all(
+    issue_party = frappe.get_list(
         "Custody Issue",
         filters={"name": ["in", list(grouped.keys())]},
         fields=["name", "party_type", "party", "building", "docstatus"],
+        limit_page_length=0,
     )
     issue_map = {i.name: i for i in issue_party}
     for custody_issue in grouped:

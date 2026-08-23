@@ -234,7 +234,7 @@ def get_problem_detail(name):
     if doc.issue_type != "Complaint":
         frappe.throw(_("Problem not found."), frappe.DoesNotExistError)
     result = doc.as_dict(no_nulls=False)
-    result["communications"] = frappe.get_all(
+    result["communications"] = frappe.get_list(
         "Communication",
         filters={"reference_doctype": "Issue", "reference_name": name},
         fields=["name", "sender", "content", "communication_date"],
@@ -279,7 +279,7 @@ def get_vehicle_timeline(plate):
 
     events: list[dict] = []
 
-    for a in frappe.get_all(
+    for a in frappe.get_list(
         "Vehicle Assignment",
         filters={"vehicle": vehicle},
         fields=["name", "driver", "start_date", "end_date", "status", "docstatus"],
@@ -297,7 +297,7 @@ def get_vehicle_timeline(plate):
             "end_date": str(a.end_date or ""),
         })
 
-    for s in frappe.get_all(
+    for s in frappe.get_list(
         "Vehicle Suspension",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "stop_reason", "stop_date", "return_date", "notes"],
@@ -314,7 +314,7 @@ def get_vehicle_timeline(plate):
             "notes": s.notes or "",
         })
 
-    for inc in frappe.get_all(
+    for inc in frappe.get_list(
         "Vehicle Incident",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "incident_type", "incident_date", "status", "location"],
@@ -399,10 +399,11 @@ def stop_vehicle(plate, reason=None):
     doc.submit()
 
     if current_driver:
-        for r in frappe.get_all(
+        for r in frappe.get_list(
             "Vehicle Assignment",
             filters={"vehicle": vehicle, "status": "Active", "docstatus": 1},
             fields=["name"],
+            limit_page_length=0,
         ):
             frappe.db.set_value("Vehicle Assignment", r.name, {"status": "Ended", "end_date": getdate(today())})
         set_current_driver(vehicle, None)

@@ -184,7 +184,13 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
 
 @frappe.whitelist()
 def get_cleaning_compliance_today(filters=None):
-    """Returns today's percentage of Cleaning Log room rows marked cleaned for the user's buildings."""
+    """Returns today's percentage of Cleaning Log room rows marked cleaned for the user's buildings.
+
+    Counts every matching Cleaning Log name via ``get_all`` (never a page of them) to
+    feed the child-row completion count below; the building restriction is already
+    folded into ``log_filters`` by ``report_building_scope``, so ``get_list``'s own
+    scope engine would only repeat it, not add to it.
+    """
     frappe.has_permission("Cleaning Log", "read", throw=True)
     log_filters = {"cleaning_date": today(), "docstatus": ["<", 2]}
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Cleaning Log")

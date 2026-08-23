@@ -233,7 +233,7 @@ def get_building_grid(building: str) -> dict:
 
     building_title = frappe.db.get_value("Building", building, "building_name") or building
 
-    rooms = frappe.get_all(
+    rooms = frappe.get_list(
         "Room",
         filters={"building": building},
         fields=[
@@ -246,15 +246,17 @@ def get_building_grid(building: str) -> dict:
             "bed_capacity",
             "current_occupancy",
         ],
+        limit_page_length=0,
     )
     rooms_by_name = {r.name: r for r in rooms}
 
     bed_rows = _grid_bed_rows(building)
 
-    assignments = frappe.get_all(
+    assignments = frappe.get_list(
         "Housing Assignment",
         filters=occupancy.active_assignment_filters(building=building),
         fields=["name", "bed", "employee", "employee_name", "party_type", "party", "project", "check_in_date"],
+        limit_page_length=0,
     )
     assignments_by_bed = {a.bed: a for a in assignments}
 
@@ -341,10 +343,11 @@ def list_supervisor_buildings() -> list[dict]:
     if scope.filters is None:
         return []
 
-    buildings = frappe.get_all(
+    buildings = frappe.get_list(
         "Building",
         filters=scope.filters,
         fields=["name", "building_name", "site", "accommodation_type"],
+        limit_page_length=0,
     )
     if not buildings:
         return []

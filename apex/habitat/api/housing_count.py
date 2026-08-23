@@ -106,10 +106,11 @@ def get_inventory_for_building(building, room=None):
     room_names = sorted({it.room for it in items if it.room})
     labels = {}
     if room_names:
-        for r in frappe.get_all(
+        for r in frappe.get_list(
             "Room",
             filters={"name": ["in", room_names]},
             fields=["name", "room_number"],
+            limit_page_length=0,
         ):
             labels[r.name] = r.room_number or r.name
     for it in items:

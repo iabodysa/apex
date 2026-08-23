@@ -57,6 +57,12 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
     All filters are optional. Project scope is enforced server-side: a scoped
     user with no permitted project gets an empty board. ``compliance`` narrows to
     one of Compliant / Expiring Soon / Expired (the vehicle's compliance_status).
+
+    Three ``get_all`` reads stay unpaged and unconverted here: Rental Office and
+    Project are filter-dropdown option lists, not project-scoped operational rows;
+    and the Vehicle Incident read is a ``GROUP BY count(name)`` aggregate over the
+    already-scoped ``plates`` — a 20-row page would silently drop the tail of the
+    fleet from the per-vehicle incident tally.
     """
     from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
@@ -160,14 +166,14 @@ def get_vehicle_detail(vehicle):
     if v.current_driver:
         v["current_driver_name"] = frappe.db.get_value("Salis Driver", v.current_driver, "full_name")
 
-    incidents = frappe.get_all(
+    incidents = frappe.get_list(
         "Vehicle Incident",
         filters={"vehicle": vehicle},
         fields=["name", "incident_type", "incident_date", "status", "location"],
         order_by="incident_date desc, incident_time desc",
         limit=10,
     )
-    assignments = frappe.get_all(
+    assignments = frappe.get_list(
         "Vehicle Assignment",
         filters={"vehicle": vehicle},
         fields=["name", "driver", "start_date", "end_date", "status"],
@@ -201,7 +207,7 @@ def get_vehicle_timeline(vehicle):
 
     events = []
 
-    for r in frappe.get_all(
+    for r in frappe.get_list(
         "Vehicle Incident",
         filters={"vehicle": vehicle},
         fields=["name", "incident_type", "incident_date", "status", "location"],
@@ -217,7 +223,7 @@ def get_vehicle_timeline(vehicle):
             "location": r.location,
         })
 
-    for r in frappe.get_all(
+    for r in frappe.get_list(
         "Vehicle Suspension",
         filters={"vehicle": vehicle, "docstatus": ["<", 2]},
         fields=["name", "stop_reason", "stop_date", "return_date", "related_driver"],
@@ -233,7 +239,7 @@ def get_vehicle_timeline(vehicle):
             "driver": r.related_driver,
         })
 
-    for r in frappe.get_all(
+    for r in frappe.get_list(
         "Vehicle Assignment",
         filters={"vehicle": vehicle},
         fields=["name", "driver", "start_date", "end_date", "status"],

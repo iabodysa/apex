@@ -55,6 +55,9 @@ def get_my_accommodation():
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_my_custody():
+    """The session driver's own live custody holding, scoped on ``employee`` —
+    resolved from the portal identity via ``_resolve_linked_employee``, never a
+    client-supplied id."""
     _require_enabled()
     employee = _resolve_linked_employee(required=True)
     rows = frappe.get_all(
@@ -90,6 +93,9 @@ def get_my_custody():
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_my_resident_requests():
+    """The session driver's own Resident Requests, scoped on ``employee`` —
+    resolved from the portal identity via ``_resolve_linked_employee``, never a
+    client-supplied id."""
     _require_enabled()
     employee = _resolve_linked_employee(required=True)
     rows = frappe.get_all(

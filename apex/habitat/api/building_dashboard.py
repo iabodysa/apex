@@ -27,7 +27,7 @@ def get_building_layout(building: str) -> dict:
     """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
-    rooms = frappe.get_all(
+    rooms = frappe.get_list(
         "Room",
         filters={"building": building},
         fields=[
@@ -40,6 +40,7 @@ def get_building_layout(building: str) -> dict:
             "bed_capacity",
             "current_occupancy",
         ],
+        limit_page_length=0,
     )
 
     _NEEDS_ATTENTION = {"Needs Cleaning", "Needs Repair"}
@@ -115,7 +116,7 @@ def get_building_metrics(building: str) -> dict:
     """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
-    snaps = frappe.get_all(
+    snaps = frappe.get_list(
         "Occupancy Snapshot",
         filters={"building": building},
         fields=["snapshot_date", "occupancy_percent"],

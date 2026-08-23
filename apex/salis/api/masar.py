@@ -1379,6 +1379,10 @@ def get_public_trip_board():
     national id, no manifest. The personal half (my seat, my housing, my documents)
     stays behind ``get_worker_transport``/``get_worker_boarding_pass``, which still
     require a resolved token.
+
+    ``get_all`` stays deliberate here, unpaged: the caller is Guest by design (no
+    token, no employee/project to scope by), and every trip of the day must appear
+    on the board or the sign is wrong for whoever is reading it at the gate.
     """
     trip_date = frappe.utils.today()
     trips = frappe.get_all(

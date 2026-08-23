@@ -78,13 +78,14 @@ def get_safety_map(building=None):
         frappe.db.get_value("Building", building, "building_name") or building
     )
 
-    rooms = frappe.get_all(
+    rooms = frappe.get_list(
         "Room",
         filters={"building": building},
         fields=["name", "room_number", "floor", "room_type", "status", "readiness_status"],
+        limit_page_length=0,
     )
 
-    maint_rows = frappe.get_all(
+    maint_rows = frappe.get_list(
         "Maintenance Request",
         filters={
             "building": building,
@@ -92,6 +93,7 @@ def get_safety_map(building=None):
             "status": ["in", _OPEN_MAINTENANCE_STATUSES],
         },
         fields=["name", "room", "priority", "status"],
+        limit_page_length=0,
     )
     maint_by_room: dict[str, dict] = {}
     for m in maint_rows:

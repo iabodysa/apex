@@ -843,6 +843,7 @@ def get_expected_arrivals(date=None, building=None) -> dict:
                         party=["in", registered_parties],
                     ),
                     pluck="party",
+                    limit_page_length=0,
                 )
             )
         for r in rows:
@@ -1042,8 +1043,8 @@ def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters)
     if txt:
         f["building_name"] = ["like", f"%{txt}%"]
 
-    buildings = frappe.get_all(
-        "Building", filters=f, fields=["name", "building_name"]
+    buildings = frappe.get_list(
+        "Building", filters=f, fields=["name", "building_name"], limit_page_length=0
     )
     if not buildings:
         return []

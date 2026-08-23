@@ -126,7 +126,13 @@ def _grouped_counts(filters, group_field, limit=None):
 
 @frappe.whitelist()
 def get_summary_cards(filters=None):
-    """Returns SIM and active-contract summary counts and monthly commitment for the control desk."""
+    """Returns SIM and active-contract summary counts and monthly commitment for the control desk.
+
+    The Telecom Contract read must see every contract matching ``contract_filters``
+    (company-scoped above), never a page of them: ``commitment`` and ``expiring``
+    are summed/counted over the full set, and a truncated fetch would silently
+    undercount both for a company with more than one page of active contracts.
+    """
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -200,7 +206,7 @@ def get_sim_rows(filters=None, page=1, page_size=DEFAULT_PAGE_SIZE):
         return {"rows": [], "total": 0, "page": page, "page_size": page_size}
 
     total = frappe.db.count("SIM Card", sim_filters)
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "SIM Card",
         filters=sim_filters,
         fields=_SIM_ROW_FIELDS,
@@ -254,7 +260,7 @@ def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
     if sim_filters.get("supplier"):
         contract_filters["supplier"] = sim_filters["supplier"]
 
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Telecom Contract",
         filters=contract_filters,
         fields=[
@@ -275,7 +281,12 @@ def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
 
 @frappe.whitelist()
 def get_cost_center_totals(filters=None):
-    """Normalized monthly commitment per cost center across active contracts."""
+    """Normalized monthly commitment per cost center across active contracts.
+
+    Reads every matching Telecom Contract (``limit_page_length=0``, explicit): the
+    per-cost-center total is a running sum over the whole company-scoped set, and a
+    paged fetch would silently under-total whichever cost centers fell past the page.
+    """
     frappe.has_permission("Telecom Contract", "read", throw=True)
     allowed = _company_scope("Telecom Contract")
     sim_filters = _sanitize_filters(filters)
@@ -325,7 +336,7 @@ def get_sim_detail(sim_card):
             "Employee", doc.current_custodian_employee, "employee_name"
         )
 
-    history = frappe.get_all(
+    history = frappe.get_list(
         "SIM Custody Assignment",
         filters={"sim_card": sim_card, "docstatus": 1},
         fields=[
