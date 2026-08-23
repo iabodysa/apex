@@ -1,5 +1,12 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
+"""Scheduled tasks for the Salis fleet module (split by domain).
+
+Every ``assign_role`` call here is not a declarative Assignment Rule for the same
+reason named in habitat.tasks.safety: a rule picks exactly one user per document
+event with no per-document read check (frappe/automation/doctype/assignment_rule/
+assignment_rule.py:88-96), while these jobs fan out to every current holder of a
+role who can already read the specific document, from a scheduler's own scan.
+"""
 
 from __future__ import annotations
 
@@ -118,11 +125,14 @@ def _notify_fleet_role(
     """Post an in-app (system) Notification Log of type Alert to every enabled
     Fleet Supervisor.
 
-    Mirrors habitat.tasks.common._notify_role_system: the notify half of the
-    Operations Alert replacement, for a condition that is a completed event or a
-    balance rather than pending work a queue could hold open. Per-user delivery via
-    the shared system_notify helper (the single Notification Log writer), which
-    dedupes on the source doc link per user. No recipients = no-op.
+    Mirrors habitat.tasks.common._notify_role_system, including why it is not a
+    declarative Notification: ``receiver_by_role`` resolves with no per-document
+    read check (frappe/email/doctype/notification/notification.py:366), and the
+    trigger here is a scheduler's own aggregate scan, not one document's own
+    save/submit — a condition that is a completed event or a balance rather than
+    pending work a queue could hold open. Per-user delivery via the shared
+    system_notify helper (the single Notification Log writer), which dedupes on
+    the source doc link per user. No recipients = no-op.
     """
     from frappe.utils.user import get_users_with_role
 

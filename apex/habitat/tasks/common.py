@@ -56,6 +56,12 @@ def _notify_role_system(
     Per-user delivery via the shared system_notify helper (the single Notification
     Log writer). Optional ``document_type``/``document_name`` link the alert to its
     source record, which is also the helper's per-user dedup key.
+
+    Not a declarative Notification: ``receiver_by_role`` resolves through
+    ``get_info_based_on_role(..., ignore_permissions=True)``
+    (frappe/email/doctype/notification/notification.py:366) with no per-document
+    read check, and the trigger here is a scheduler's own aggregate scan rather than
+    one document's own save/submit event.
     """
     from frappe.utils.user import get_users_with_role
 

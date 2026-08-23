@@ -8,6 +8,11 @@ SIM — the "assigned suspended or lost" watch. One in-app Notification Log per 
 Operations User per day (no per-SIM spam); re-running re-sends the current snapshot
 and mutates nothing.
 
+Not a declarative Notification: a Notification fires per single document event
+(frappe/email/doctype/notification/notification.py:169); this rolls up every
+Suspended-and-held and every Lost SIM Card into one per-recipient digest, and no
+document event corresponds to "still true today".
+
 The digest is built PER RECIPIENT, not broadcast. ``frappe.get_all`` hardcodes
 ``ignore_permissions=True`` (frappe/__init__.py:2050), so the
 ``permission_query_conditions`` entry that scopes SIM Card to a user's companies

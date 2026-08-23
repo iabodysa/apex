@@ -1,5 +1,13 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
+"""Scheduled tasks for the Habitat module (split by domain).
+
+Every ``assign_role`` call in this file is not a declarative Assignment Rule: a rule
+picks exactly one user per document event via ``AssignmentRule.do_assignment``
+(frappe/automation/doctype/assignment_rule/assignment_rule.py:88-96), with no
+per-document read check, while these jobs fan out to every current holder of a role
+who can already read the specific document and are triggered by a scheduler's own
+multi-table scan, not one document's own save/submit.
+"""
 
 from __future__ import annotations
 
