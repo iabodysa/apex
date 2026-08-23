@@ -502,6 +502,44 @@ fixtures = [
     {"dt": "Workflow State", "filters": [["name", "in", list(WORKFLOW_STATES)]]},
     {"dt": "Workflow Action Master", "filters": [["name", "in", list(WORKFLOW_ACTIONS)]]},
     {"dt": "Workflow", "filters": [["name", "in", list(WORKFLOWS)]]},
+    {
+        "dt": "Custody Asset Category",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Bedding & Linen",
+                    "Room Access",
+                    "Remote Controls",
+                    "Furniture",
+                    "Cleaning Tools",
+                    "Safety Equipment",
+                    "Facility Keys",
+                ],
+            ]
+        ],
+    },
+    {
+        "dt": "Custody Article",
+        "filters": [["name", "in", [f"CUST-ART-{n:04d}" for n in range(1, 11)]]],
+    },
+    {
+        "dt": "Operational Depreciation Policy",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Linen - 12 Months",
+                    "Keys and Cards - 24 Months",
+                    "Remotes - 24 Months",
+                    "Furniture - 36 Months",
+                    "Electronics - 36 Months",
+                ],
+            ]
+        ],
+    },
 ]
 
 after_install = [
