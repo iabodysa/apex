@@ -62,6 +62,14 @@ def is_p256_point(key: str) -> bool:
 
 
 def _vapid_config() -> dict | None:
+    """The VAPID keys to sign a push with, or ``None`` when push is off or unusable.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the settings and
+    ``Document.get_password`` decrypts the private key; the one thing neither can do
+    is judge the key. A public key that is not a P-256 point produces a push the
+    browser silently discards, so an unusable pair answers ``None`` — the same answer
+    as "switched off" — because a caller can act on neither.
+    """
     settings = frappe.get_single(_SETTINGS)
     if not settings.get("enable_web_push"):
         return None
@@ -138,6 +146,16 @@ def disable_subject_subscriptions(audience: str, subject: str) -> int:
 
 
 def _deliver(config: dict, subscription: dict, payload: str) -> bool:
+    """Push one payload to one device, disabling the row when the browser is gone.
+
+    ``get_decrypted_password`` (frappe/utils/password.py:24) is read with
+    ``raise_exception=False``: a subscription whose secret is missing must disable
+    quietly, not abort the fan-out to the person's other devices.
+
+    404 and 410 from the push service mean the subscription is permanently dead, so
+    the row is disabled rather than retried; every other failure is logged and left
+    enabled, because a transient outage must not unsubscribe a working device.
+    """
     if not is_allowed_push_endpoint(subscription.get("endpoint")):
         frappe.db.set_value(_SUBSCRIPTION_DOCTYPE, subscription["name"], "enabled", 0)
         return False
@@ -184,6 +202,17 @@ def send_to_subject(
     body: str,
     url: str | None = None,
 ) -> dict:
+    """Push one message to every enabled device a subject holds. Never raises.
+
+    ``frappe.as_json`` (frappe/__init__.py:2071) builds the payload, because the
+    service worker reads JSON and a hand-built string would be one escaping bug away
+    from a notification that never renders. The body is clipped first: the one thing
+    the serialiser cannot do is keep the payload under the push service's size limit,
+    and an oversized push is rejected whole.
+
+    Every outcome is a dict with a reason, never an exception: this runs from a
+    background job beside real work, and a raise here would roll that work back.
+    """
     try:
         config = _vapid_config()
     except Exception:
@@ -220,6 +249,15 @@ def enqueue_to_subject(
     body: str,
     url: str | None = None,
 ) -> dict:
+    """Queue :func:`send_to_subject` instead of pushing inside the caller's request.
+
+    ``frappe.enqueue`` (frappe/utils/background_jobs.py:59) with
+    ``enqueue_after_commit`` is the point: a push describes a row, so firing before
+    the transaction commits can tell a worker about a boarding the database then
+    rolls back. The configured check runs HERE, before queueing, because the one
+    thing the queue cannot do is decline cheaply — an unconfigured site would
+    otherwise spend a worker slot per notification to discover push is off.
+    """
     if not is_configured():
         return {"queued": False, "reason": "not_configured"}
     frappe.enqueue(

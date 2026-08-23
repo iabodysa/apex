@@ -54,7 +54,11 @@ def _trip_date_window():
     at the exact moment the worker needs to board. Including yesterday keeps that
     in-progress night trip reachable. The caller drops a YESTERDAY trip that has
     already finished (see ``_drop_finished_yesterday``), so today's completed trips
-    stay visible while only an in-motion night run carries over — no double-count."""
+    stay visible while only an in-motion night run carries over — no double-count.
+
+    ``frappe.utils.add_days`` and ``today`` (frappe/utils/data.py:270, :367) do the
+    arithmetic; the one thing they cannot decide is the WIDTH of the window, and the
+    minus-one day is that decision, not a formatting detail."""
     return ["in", [frappe.utils.add_days(frappe.utils.today(), -1), frappe.utils.today()]]
 
 def _drop_finished_yesterday(trips):
@@ -64,7 +68,11 @@ def _drop_finished_yesterday(trips):
     still in motion reachable past midnight; a yesterday trip that has already
     Completed/Cancelled is done and must not resurface. Today's trips pass through
     untouched in every status (the driver's route view shows today's completed
-    runs). Keyed on ``trip_date``, so a row missing it is kept defensively."""
+    runs). Keyed on ``trip_date``, so a row missing it is kept defensively.
+
+    Pairs with :func:`_trip_date_window` and re-derives yesterday from the same
+    ``frappe.utils.add_days`` / ``today`` (frappe/utils/data.py:270, :367), so the two
+    halves cannot drift onto different days."""
     yesterday = frappe.utils.add_days(frappe.utils.today(), -1)
     return [
         t
@@ -299,7 +307,13 @@ def _ordered_trip_stops(dispatch_trip, route_plan=None):
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
     """True when ``pickup_datetime`` (a backend string or datetime) is at or after
     ``now_dt`` (defaults to now). A missing pickup is treated as upcoming so a
-    not-yet-scheduled request never silently drops off the worker's view."""
+    not-yet-scheduled request never silently drops off the worker's view.
+
+    ``frappe.utils.get_datetime`` (frappe/utils/data.py:110) normalises before the
+    comparison, because the stored value may be a ``str`` or a ``datetime`` depending
+    on the write path, and comparing the two shapes as text orders them wrongly
+    without raising. An unparseable value is treated as upcoming for the same reason
+    a missing one is: a ride the worker cannot see is worse than one shown early."""
     if not pickup_datetime:
         return True
     now_dt = now_dt or frappe.utils.now_datetime()
@@ -345,6 +359,10 @@ WORKER_TRANSPORT_ROW_LIMIT = 200
 def _worker_transport_requests(employee):
     """Transport Requests whose worker manifest includes ``employee``, scoped via the
     child table.
+
+    ``frappe.utils.add_days`` (frappe/utils/data.py:270) bounds the history to
+    ``WORKER_TRANSPORT_HISTORY_DAYS``; the row cap beside it exists because the date
+    bound alone cannot promise a small result on a busy site.
 
     Rejected and Cancelled are excluded; Fulfilled is included. It is the caller that
     partitions these rows into the worker's upcoming and past rides, so dropping

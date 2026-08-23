@@ -31,6 +31,10 @@ def get_target_doctype(settings=None) -> str:
     ``Habitat Settings.target_payment_doctype`` wins when set; otherwise
     the native ``Payment Request`` primitive is used so the flow works out of the
     box with no configuration.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole settings document
+    rather than one field, because the caller that resolves the target almost always
+    needs the sibling switches too, and reading them one at a time is one query each.
     """
     settings = settings or frappe.get_single(SETTINGS_DOCTYPE)
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
@@ -73,7 +77,13 @@ def validate_configured_target(built_doctype: str) -> None:
 def validate_target_doctype(target_doctype) -> None:
     """Refuse a structurally impossible payment target BEFORE anything is built.
 
-    ``frappe.new_doc(dt).insert()`` succeeds for far more than payment documents,
+    ``frappe.get_meta`` (frappe/model/meta.py:66) answers all three questions — does
+    the DocType exist, is it a Single, is it submittable. The one thing it cannot do
+    is object: it describes the target and has no opinion about whether a payment
+    should be built from it, which is the whole of this function.
+
+    ``frappe.new_doc(dt).insert()`` (frappe/__init__.py:1152) succeeds for far more
+    than payment documents,
     so without this the router turns a config typo into a convincing artefact that
     is not a payment - worse than refusing, because nobody re-reads it. Three
     refusals, each a real failure mode:
@@ -123,8 +133,11 @@ def validate_field_map(target_doctype, field_map) -> None:
 
     Shape checks (a row names a target, names it once, and carries either a source
     field or a static value) plus the check that actually stops a wrong payment:
-    both fieldnames must EXIST. ``BaseDocument.set`` writes to ``__dict__`` with no
-    meta check and ``get_valid_dict`` then keeps only ``meta.get_valid_columns()``,
+    both fieldnames must EXIST. ``frappe.get_meta(...).has_field``
+    (frappe/model/meta.py:66, :247) is what answers that, and it is asked HERE because
+    nothing downstream will: ``BaseDocument.set`` writes to ``__dict__`` with no
+    meta check and ``get_valid_dict`` then keeps only ``meta.get_valid_columns()``
+    (frappe/model/meta.py:225),
     so a mistyped target fieldname is dropped in silence and the payment is created
     with that field simply unset - a 0.00 payment that looks entirely normal. A
     mistyped SOURCE fieldname is worse still: ``source.get`` returns ``None``, so
@@ -263,6 +276,11 @@ def route_payment(payment_request: str) -> str:
     before the build, and the link stamp carries the created document's own doctype.
     Refusing is the desired outcome for a bad config - a payment that merely LOOKS
     right is worse, because it is never read a second time.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the target. The one thing it
+    cannot do is know whether the DocType it was handed is a payment at all — it
+    happily constructs any DocType on the site — which is why validation runs first
+    and why it runs again here rather than only where the setting is written.
     """
     settings = frappe.get_single(SETTINGS_DOCTYPE)
     target_doctype = get_target_doctype(settings)
