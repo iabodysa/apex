@@ -40,6 +40,7 @@ from apex.apex_core.utils.party_link import (
     PARTY_TEMPORARY_WORKER,
 )
 from apex.habitat import permissions
+from apex.salis.api.driver_portal.images import verified_image_type
 
 @frappe.whitelist()
 def get_kiosk_catalog(building: str | None = None) -> dict:
@@ -346,6 +347,7 @@ def issue_cart(
     )
     signature = (signature or "").strip()
     if signature:
+        verified_image_type(signature)
         doc.signature = signature
         doc.acknowledged_on = now_datetime()
     doc.insert(ignore_permissions=False)

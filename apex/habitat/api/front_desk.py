@@ -26,6 +26,7 @@ from frappe.utils import now, today
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.habitat.utils import occupancy
 from apex.habitat.utils.housing_scope import active_building_scope
+from apex.salis.api.driver_portal.images import verified_image_type
 
 
 def _floor_label(n: int) -> str:
@@ -722,6 +723,10 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
         party_type, party = "Employee", employee
 
     check_in_date = check_in_date or today()
+
+    terms_signature = (terms_signature or "").strip()
+    if terms_signature:
+        verified_image_type(terms_signature)
 
     room, building = frappe.db.get_value("Bed", bed, ["room", "building"])
     if not room or not building:

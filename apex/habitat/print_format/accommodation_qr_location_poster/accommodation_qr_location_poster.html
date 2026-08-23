@@ -72,7 +72,7 @@
 
     <div class="ax-scan">
       {%- if qr %}
-      <img src="{{ qr }}" alt="{{ doc.name }}">
+      <img src="{{ qr | e }}" alt="{{ doc.name | e }}">
       <div class="ax-url">{{ doc.public_url }}</div>
       {%- else %}
       <div class="ax-code-k">{{ _("Location Code") }} · LOCATION CODE</div>

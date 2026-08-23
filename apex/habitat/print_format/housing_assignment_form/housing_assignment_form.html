@@ -122,7 +122,7 @@
   {%- if doc.terms_signature and doc.terms_signature.startswith("data:") %}
   <div class="ax-note">
     <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
-    <img src="{{ doc.terms_signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
+    <img src="{{ doc.terms_signature | e }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
     {%- if doc.terms_accepted_on %}{{ _("Accepted on") }}: {{ frappe.format_value(doc.terms_accepted_on, {"fieldtype": "Datetime"}) }}{% endif %}
   </div>
   {%- endif %}

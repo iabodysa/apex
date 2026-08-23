@@ -229,7 +229,7 @@
 {%- macro doc_footer(doc, qr=True) -%}
 {%- set uri = doc_verify_qr(doc.doctype, doc.name) if qr else None -%}
 <div class="ax-foot">
-  <div>{% if uri %}<img src="{{ uri }}" alt="{{ doc.name }}">{% endif %}</div>
+  <div>{% if uri %}<img src="{{ uri | e }}" alt="{{ doc.name | e }}">{% endif %}</div>
   <div style="text-align:end">
     {{ _("Printed by") }}: {{ frappe.get_fullname(frappe.session.user) }} ·
     {{ frappe.format_date(frappe.utils.nowdate()) }}<br>

@@ -94,7 +94,7 @@
   {%- if doc.worker_signature and doc.worker_signature.startswith("data:") %}
   <div class="ax-note">
     <span class="lbl">{{ _("Electronic Acknowledgement") }}<span class="en">Electronic acknowledgement</span></span>
-    <img src="{{ doc.worker_signature }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
+    <img src="{{ doc.worker_signature | e }}" alt="" style="max-height:54px;max-width:220px;display:block;margin:4px 0">
     {%- if doc.acknowledged_on %}{{ _("Acknowledged on") }}: {{ frappe.format_value(doc.acknowledged_on, {"fieldtype": "Datetime"}) }}{% endif %}
   </div>
   {%- endif %}

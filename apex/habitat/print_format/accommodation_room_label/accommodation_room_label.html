@@ -51,7 +51,7 @@
       </div>
       {%- if qr %}
       <div class="qr">
-        <img src="{{ qr }}" alt="{{ doc.name }}">
+        <img src="{{ qr | e }}" alt="{{ doc.name | e }}">
         <span>{{ _("Scan for the room record") }}</span>
       </div>
       {%- endif %}

@@ -140,7 +140,7 @@
   {%- if doc.worker_signature and doc.worker_signature.startswith("data:") %}
   <div style="border:1px solid #d8d0bd;border-radius:5px;padding:8px 10px;margin-bottom:12px">
     <span class="lbl">{{ _("Worker Consent Signature") }}<span class="en">Worker consent signature</span></span>
-    <img src="{{ doc.worker_signature }}" style="max-height:70px;display:block;margin-top:5px">
+    <img src="{{ doc.worker_signature | e }}" style="max-height:70px;display:block;margin-top:5px">
   </div>
   {%- endif %}
   {{ ax.declaration(_("The employee agrees that the amount above is deducted from his pay in the instalments shown, until the whole amount is settled.")) }}
