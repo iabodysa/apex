@@ -83,6 +83,13 @@ test_ignore = [
 ]
 
 def make_company(name="Test AFMCO", **kwargs):
+    """The test Company, created once and reused after.
+
+    Existence-guarded because ``insert`` raises on a name that already exists, and a
+    test module may be run after another that built the same fixture. Nothing here
+    commits: ``FrappeTestCase`` rolls the transaction back, which is the one thing a
+    committed fixture would defeat.
+    """
     if frappe.db.exists("Company", name):
         return frappe.get_doc("Company", name)
     doc = frappe.get_doc({
@@ -197,7 +204,12 @@ def service_item(name):
     return name
 
 def default_company():
-    """The site's default company name (global default, else the first Company)."""
+    """The site's default company name (global default, else the first Company).
+
+    ``frappe.defaults.get_global_default`` (frappe/defaults.py) is asked first so a
+    test reads the same company the product would. The one thing the global default
+    cannot do is exist on a bare site, hence the fallback to any Company.
+    """
     return (
         frappe.defaults.get_global_default("company")
         or frappe.get_all("Company", limit=1)[0].name
@@ -219,6 +231,11 @@ def purge_doc(doctype, name):
     A submitted document cannot be force-deleted directly, and a cancel the
     workflow guard refuses must not break an ``addCleanup`` chain, so the cancel is
     best-effort and the delete runs either way.
+
+    ``frappe.set_user`` (frappe/__init__.py:641) elevates for teardown only, and
+    ``frappe.delete_doc`` (frappe/model/delete_doc.py:23) runs with ``force`` because
+    the one thing an ordinary delete cannot do is remove a document whose links a
+    half-built fixture left dangling.
     """
     frappe.set_user("Administrator")
     if not frappe.db.exists(doctype, name):
@@ -235,7 +252,9 @@ def purge_trip_request(tr_name, rp_name):
     """Tear down a Transport Request together with its Route Plan.
 
     Trip Fulfilment Ledger rows link the request, so they go first or the request's
-    delete is refused by link validation.
+    delete is refused by link validation — the one thing ``frappe.delete_doc``
+    (frappe/model/delete_doc.py:23) will not do for the caller is work out its own
+    order. ``frappe.set_user`` (frappe/__init__.py:641) elevates for teardown only.
     """
     frappe.set_user("Administrator")
     for ledger in frappe.get_all(
@@ -472,7 +491,12 @@ def make_worker_trip(
     ``depart_time`` defaults to NOW rather than a fixed clock time: boarding is gated
     on the worker's own stop being served (salis/api/boarding_window.py), so a trip
     pinned to 06:30 is boardable or not depending on what time the suite happens to
-    run. A caller that is testing the window itself passes the time it needs."""
+    run. A caller that is testing the window itself passes the time it needs.
+
+    ``frappe.utils.nowtime`` (frappe/utils/data.py) is read at call time rather than
+    pinned, because the one thing a fixed clock cannot do is stay inside a window the
+    product computes from the current moment.
+    """
     from_location = building if from_location is None else from_location
     depart_time = frappe.utils.nowtime() if depart_time is None else depart_time
     passengers = len(workers) if passengers is None else passengers
@@ -583,7 +607,12 @@ def _register_building(name):
 
 def fixture_tag():
     """A collision-free fixture suffix: at least 12 random characters, because a
-    shorter one collides across a parallel run and reads as a logic bug."""
+    shorter one collides across a parallel run and reads as a logic bug.
+
+    ``frappe.generate_hash`` (frappe/__init__.py:1134) supplies the randomness; the
+    one thing a counter cannot do is stay unique across processes, which is what a
+    parallel suite runs in.
+    """
     return frappe.generate_hash(length=12)
 
 def ensure_company(name_prefix="Apex Test"):

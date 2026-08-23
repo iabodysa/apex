@@ -35,6 +35,12 @@ def approve_rental_settlement(rs, manager):
 
     Falls back to a direct status write + submit when the workflow is not seeded on
     this site, so the accrual assertions still run on a bench that predates it.
+
+    ``apply_workflow`` and ``get_workflow_name`` (frappe/model/workflow.py) drive the
+    real transition so the test exercises the same gate an operator would.
+    ``frappe.set_user`` (frappe/__init__.py:641) puts the manager in the chair,
+    because the one thing a workflow action cannot do is name an actor other than the
+    session user.
     """
     from frappe.model.workflow import apply_workflow, get_workflow_name
 
