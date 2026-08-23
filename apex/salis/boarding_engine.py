@@ -31,6 +31,7 @@ import frappe
 from frappe.utils import today
 
 from apex.apex_core.utils.company import company_for_trip
+from apex.salis.api.boarding_flow import _assigned_request_names, _request_workers
 
 
 LEDGER_DOCTYPE = "Trip Boarding Ledger"
@@ -44,11 +45,6 @@ def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
     of the Route Plan request and every assigned request; a worker's building is
     the building of the FIRST request that lists them. Best-available per-worker
     snapshot — the boarding state child carries no building of its own."""
-    from apex.salis.api.boarding_flow import (
-        _assigned_request_names,
-        _request_workers,
-    )
-
     transport_request = frappe.db.get_value(
         "Dispatch Trip", dispatch_trip, "transport_request"
     )

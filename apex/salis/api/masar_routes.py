@@ -21,6 +21,7 @@ of them widens that scope.
 import frappe
 
 from apex.salis.api import boarding_window
+from apex.salis.api.boarding_flow import _manifest_request_names
 
 WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 
@@ -217,8 +218,6 @@ def _registered_workers(transport_request):
 
 def _registered_trip_workers(dispatch_trip, transport_request=None):
     """Return the de-duplicated worker manifest across all trip requests."""
-    from apex.salis.api.boarding_flow import _manifest_request_names
-
     workers = []
     seen = set()
     for request in _manifest_request_names(dispatch_trip, transport_request):

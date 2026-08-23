@@ -163,7 +163,12 @@ def _deliver(config: dict, subscription: dict, payload: str) -> bool:
     404 and 410 from the push service mean the subscription is permanently dead, so
     the row is disabled rather than retried; every other failure is logged and left
     enabled, because a transient outage must not unsubscribe a working device.
-    """
+
+    ``pywebpush`` stays a guarded, function-local import: the surrounding
+    ``try/except ImportError`` is the fallback itself, not deferred cycle-breaking.
+    A site that never enables Web Push need not install ``pywebpush`` at all —
+    moving the import to module level would turn its absence into a hard failure
+    to import this whole module instead of a per-call no-op."""
     if not is_allowed_push_endpoint(subscription.get("endpoint")):
         frappe.db.set_value(_SUBSCRIPTION_DOCTYPE, subscription["name"], "enabled", 0)
         return False

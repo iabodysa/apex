@@ -54,7 +54,8 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.doctype.salis_settings.salis_settings import (
     get_boarding_setting,
 )
-from apex.salis.api import boarding_window
+from apex.salis.api import boarding, boarding_window
+from apex.salis.api.web_push import enqueue_boarding_event
 
 
 _MISBOARD_CACHE_PREFIX = "salis_misboard:"
@@ -90,8 +91,6 @@ def _publish(event, dispatch_trip, payload, driver=None, employee=None, employee
         except Exception:
             pass
     try:
-        from apex.salis.api.web_push import enqueue_boarding_event
-
         enqueue_boarding_event(
             event,
             dispatch_trip,
@@ -278,7 +277,14 @@ def build_wrong_bus_result(scanned_trip, worker):
 
     Resolved forward from today's trips via the worker's own manifest membership
     (the same direction masar._worker_today_dispatch_trip uses), so it can only
-    ever reach a trip the worker is actually on."""
+    ever reach a trip the worker is actually on.
+
+    ``masar`` stays a function-local import: this module (``boarding_flow``) at
+    module level would import ``masar``, which imports ``driver_portal``
+    (``driver_portal/__init__.py``), which imports ``driver_portal.profile``,
+    which imports ``masar_worker``, which imports ``masar_routes``, which
+    imports ``_manifest_request_names`` back from ``boarding_flow`` — closing the
+    loop before this module finishes executing."""
     from apex.salis.api.masar import _worker_today_dispatch_trip
 
     resolved = _worker_today_dispatch_trip(worker)
@@ -352,8 +358,6 @@ def _resolve_trip_for_driver(dispatch_trip, ptype="read"):
     ``boarding._resolve_trip``. An endpoint that mutates the trip MUST pass
     "write"; the default suits the manifest reads only.
     """
-    from apex.salis.api import boarding
-
     return boarding._resolve_trip(dispatch_trip, ptype)
 
 
@@ -472,7 +476,12 @@ def worker_request_wait(token=None):
     driver's socket surfaces it. Returns the new count + remaining.
 
     A worker with no boardable trip today, or not on the trip's boarding state, is
-    a clean no-op. Tight rate_limit so a personal link cannot spam the driver."""
+    a clean no-op. Tight rate_limit so a personal link cannot spam the driver.
+
+    ``masar`` stays a function-local import: see ``build_wrong_bus_result`` above
+    for the cycle it would close at module level (``boarding_flow`` -> ``masar`` ->
+    ``driver_portal`` -> ``driver_portal.profile`` -> ``masar_worker`` ->
+    ``masar_routes`` -> back to ``boarding_flow``)."""
     from apex.salis.api.masar import _resolve_worker, _worker_today_dispatch_trip
 
     employee = _resolve_worker(token)
@@ -548,7 +557,12 @@ def worker_claim_boarded(token=None):
     reading ``undefined``: no boardable trip today is ``dispatch_trip = None``, a
     worker not on that trip's manifest is a REAL ``dispatch_trip`` with
     ``status = None``, and a self-confirm is ``status = "Boarded"`` plus
-    ``confirm_source`` and ``reject_count``."""
+    ``confirm_source`` and ``reject_count``.
+
+    ``masar`` stays a function-local import: see ``build_wrong_bus_result`` above
+    for the cycle it would close at module level (``boarding_flow`` -> ``masar`` ->
+    ``driver_portal`` -> ``driver_portal.profile`` -> ``masar_worker`` ->
+    ``masar_routes`` -> back to ``boarding_flow``)."""
     from apex.salis.api.masar import (
         already_boarded,
         _get_or_create_trip_log,
@@ -695,7 +709,12 @@ def worker_trip_boarding(token=None):
 
     ``{"trip": None}`` with any pending misboard hint when the worker has no
     boardable trip on this bus; a worker not on the trip's boarding state gets a
-    Pending default so the client always has a shape to render."""
+    Pending default so the client always has a shape to render.
+
+    ``masar`` stays a function-local import: see ``build_wrong_bus_result`` above
+    for the cycle it would close at module level (``boarding_flow`` -> ``masar`` ->
+    ``driver_portal`` -> ``driver_portal.profile`` -> ``masar_worker`` ->
+    ``masar_routes`` -> back to ``boarding_flow``)."""
     from apex.salis.api.masar import _resolve_worker, _worker_today_dispatch_trip
 
     employee = _resolve_worker(token)
@@ -758,7 +777,14 @@ def depart_and_finalize(dispatch_trip):
     Absent). Publishes a ``boarding_update``. Returns the boarded vs absent
     counts.
 
-    Caller scope is resolved credential-first before any trip access."""
+    Caller scope is resolved credential-first before any trip access.
+
+    ``boarding_engine`` stays a function-local import: ``boarding_engine`` imports
+    ``_assigned_request_names`` and ``_request_workers`` from THIS module
+    (``boarding_flow``) at module level, so a module-level import here would ask
+    for ``apex.salis.boarding_engine`` before this module finishes executing —
+    Python would find ``boarding_engine`` only partially initialized on the way
+    back in."""
     _resolve_trip_for_driver(dispatch_trip, "write")
 
     max_count = get_boarding_setting("boarding_notify_max_count")
