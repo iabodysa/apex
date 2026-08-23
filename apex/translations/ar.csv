@@ -5561,3 +5561,11 @@ SIM {0} was suspended on {1}.,شريحة {0} عُلّقت بتاريخ {1}.
 Worker Document Alert Lead Days,مهلة تنبيه مستندات العامل (أيام)
 Iqama HR Notice Lead Days,مهلة إشعار الموارد البشرية للإقامة (أيام)
 Zero Rounds Window (Days),نافذة انعدام الجولات (أيام)
+Cannot cancel incident {0}: Loan {1} already carries a recovered amount. Reverse it in Accounts first.,لا يمكن إلغاء الحادث {0}: القرض {1} فيه مبلغ مسترد بالفعل. اعكسه في الحسابات أولاً.
+Legacy: the Employee Advance raised for this incident before recovery moved onto the native Loan. Left to run out; no new incident writes this field.,قديم: سلفة الموظف التي أُنشئت لهذا الحادث قبل انتقال الاسترداد إلى القرض. تُترك حتى تنتهي، ولا يكتب أي حادث جديد في هذا الحقل.
+Loan,قرض
+Recover the repair cost from the driver. On submit this raises one native Loan with Repay From Salary set; HRMS deducts the installment on the employee's own Salary Slip.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد يُنشأ قرض واحد مع تفعيل السداد من الراتب، وتخصم الموارد البشرية القسط في قسيمة راتب الموظف.
+Recovery Advance (legacy),سلفة الاسترداد (قديمة)
+Recovery Loan,قرض الاسترداد
+"The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",القرض المُنشأ لهذا الحادث مع تفعيل السداد من الراتب. الحادث الواحد يُنشئ قرضاً واحداً على الأكثر، وتدير الموارد البشرية القسط والرصيد المتبقي من جدول السداد الخاص به.
+"Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state. The Maintenance Request Workflow, not this field's read_only flag, is what stops a hand edit — see the Close/Reopen actions.",مرحلة العمل في الطلب. الإسنادات تحدد من يملك العمل ولا تنشئ دورة حياة ثانية. مسار عمل طلب الصيانة، لا خاصية القراءة فقط في هذا الحقل، هو ما يمنع التعديل اليدوي — راجع إجراءي الإغلاق وإعادة الفتح.
