@@ -23,6 +23,11 @@ rules in ``habitat.utils.occupancy``.
 
 from __future__ import annotations
 
+import base64
+import datetime
+import io
+import re
+
 import frappe
 from frappe import _
 
@@ -30,12 +35,14 @@ from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
     masar_qr_data_uri,
     reshare_worker_link,
 )
+from apex.apex_core.utils.addresses import get_address_text
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 from apex.apex_core.utils.portal_identity import (
     WORKER,
     credential_delivery_destination,
 )
 from apex.habitat import permissions
+from apex.habitat.api.front_desk import quick_check_in
 from apex.habitat.utils import arrival_slips, occupancy
 from apex.habitat.utils.arrival_slips import (
     ARRIVAL_SLIP_TEMPLATE,
@@ -43,6 +50,7 @@ from apex.habitat.utils.arrival_slips import (
     CUSTODY_HANDOVER_SLIP_TEMPLATE,
 )
 from apex.habitat.utils.housing_scope import active_building_scope, assert_party_in_scope
+from apex.salis.api import messaging_gateway
 
 __all__ = [
     "ARRIVAL_SLIP_TEMPLATE",
@@ -103,8 +111,6 @@ def send_masar_link_message(employee, phone=None) -> dict:
     configured the send is a graceful no-op (``queued: False, reason:
     not_configured``) so the desk can message the operator to wire it, never
     erroring."""
-    from apex.salis.api import messaging_gateway
-
     frappe.has_permission("Masar Worker Token", "read", throw=True)
     assert_party_in_scope(PARTY_EMPLOYEE, employee)
     destination = credential_delivery_destination(
@@ -449,8 +455,6 @@ def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
     expiry is always in the future — so the century is inferred from that, not
     guessed. Returns None on any non-numeric or out-of-range field rather than
     raising (a bad scan must degrade to manual entry, never error)."""
-    import datetime
-
     value = (value or "").strip()
     if len(value) != 6 or not value.isdigit():
         return None
@@ -477,8 +481,6 @@ def parse_mrz_text(text: str) -> dict:
     field is extracted defensively and missing/garbled fields come back as None —
     the desk pre-fills what parsed and the supervisor confirms the rest. Returns
     only the keys that parsed (plus ``raw_lines`` for debugging)."""
-    import re
-
     lines = [
         re.sub(r"[^A-Z0-9<]", "", ln.strip().upper())
         for ln in (text or "").splitlines()
@@ -525,9 +527,6 @@ def _ocr_image_to_text(image: str) -> str | None:
     when none is available — at which point ``parse_passport`` reports that the
     OCR engine must be enabled, and the desk falls back to manual entry. Kept fully
     defensive so a missing dependency degrades gracefully rather than 500-ing."""
-    import base64
-    import io
-
     payload = image.split(",", 1)[1] if image.startswith("data:") and "," in image else image
     try:
         raw = base64.b64decode(payload)
@@ -591,7 +590,6 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     capacity. Each worker still gets his own bed, so the assignment bed-lock and
     occupancy controllers are untouched.
     """
-    from apex.habitat.api.front_desk import quick_check_in
 
     frappe.has_permission("Bed", "create", throw=True)
     if not frappe.db.exists("Room", room):
@@ -933,8 +931,6 @@ def get_checkin_slip(party_type, party) -> dict:
     an acceptance line, and worker / supervisor signature lines. Reuses
     get_arrival_card for identity and reads the building address/city for the
     header. The desk opens the HTML in a print window."""
-    from apex.apex_core.utils.addresses import get_address_text
-
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     if building:

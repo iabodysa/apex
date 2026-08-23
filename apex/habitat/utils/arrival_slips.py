@@ -13,14 +13,13 @@ from __future__ import annotations
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
 
 
 def slip_company() -> str:
     """The operating company for slip headers, via the shared Habitat resolver
     (explicit Habitat Settings company -> user default -> global default)."""
-    from apex.apex_core.utils.company import resolve_company
-
     return resolve_company("Habitat") or ""
 
 

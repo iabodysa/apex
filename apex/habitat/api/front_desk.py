@@ -23,7 +23,9 @@ import frappe
 from frappe import _
 from frappe.utils import now, today
 
+from apex.apex_core.utils.portal_identity import hash_token
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.habitat.doctype.housing_checkout.housing_checkout import _outstanding_custody_for_party
 from apex.habitat.utils import occupancy
 from apex.habitat.utils.housing_scope import active_building_scope, assert_party_in_scope
 from apex.salis.api.driver_portal.images import verified_image_type
@@ -481,8 +483,6 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
 def _match_masar_token(identifier):
     """``(party_type, party, employee, employee_name)`` for a scanned personal Masar
     link, or None. The raw token is never stored, so the lookup is on its hash."""
-    from apex.apex_core.utils.portal_identity import hash_token
-
     row = frappe.db.get_value(
         "Masar Worker Token",
         {"token": hash_token(identifier), "enabled": 1},
@@ -798,10 +798,6 @@ def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_conditio
     if not row:
         frappe.throw(_("No active assignment found for bed {0}.").format(bed))
     assignment = row.name
-
-    from apex.habitat.doctype.housing_checkout.housing_checkout import (
-        _outstanding_custody_for_party,
-    )
 
     if _outstanding_custody_for_party(
         row.party_type, row.party, row.employee

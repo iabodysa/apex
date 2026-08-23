@@ -33,6 +33,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate
 
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.habitat.api.custody_kiosk import _open_party_custody
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     has_stock_entries,
     post_stock_entry,
@@ -221,8 +222,6 @@ def _outstanding_custody_for_party(party_type, party, employee=None):
         return _outstanding_custody_for_employee(employee)
     if not party_type or not party:
         return {}
-
-    from apex.habitat.api.custody_kiosk import _open_party_custody
 
     outstanding = {}
     for line in _open_party_custody(party_type, party):

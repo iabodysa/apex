@@ -51,7 +51,9 @@ from frappe.utils import (
     getdate,
     nowdate,
 )
+from frappe.utils.user import get_users_with_role
 
+from apex.apex_core.utils.email_gate import mailable
 from apex.habitat.permissions import validate_building_scope
 
 _SCOPE_BASE = {"is_active": 1}
@@ -628,8 +630,6 @@ def _report_recipients():
     if configured:
         return [configured]
 
-    from frappe.utils.user import get_users_with_role
-
     users = get_users_with_role(_REPORT_ROLE)
     if not users:
         return []
@@ -718,8 +718,6 @@ def _email_round_report(building, round_date, rounds):
     """
     if not rounds:
         return False
-
-    from apex.apex_core.utils.email_gate import mailable
 
     if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
         return False

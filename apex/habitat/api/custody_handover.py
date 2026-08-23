@@ -23,6 +23,10 @@ from apex.habitat.doctype.custody_handover.custody_handover import (
 )
 
 from apex.apex_core.utils.otp_lockout import charge_wrong_code, is_locked_out
+from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
+    post_stock_entry,
+    reverse_stock_entries,
+)
 from apex.habitat.utils.otp_policy import (
     ELEVATED_ROLE,
     LOCKOUT_MINUTES,
@@ -124,9 +128,6 @@ def _post_receive_and_confirm(doc):
     under this voucher, distinguishing it from the ship leg (negative, in
     from_building) which shares the voucher_no.
     """
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        post_stock_entry,
-    )
     if frappe.db.exists(
         "Accommodation Stock Ledger",
         {
@@ -196,9 +197,6 @@ def reject_handover(handover: str, reason: str):
     locked_status = frappe.db.get_value(VOUCHER_TYPE, doc.name, "status", for_update=True)
     if locked_status in ("Confirmed", "Rejected", "Cancelled"):
         frappe.throw(_("Handover {0} can no longer be rejected.").format(doc.name))
-    from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
-        reverse_stock_entries,
-    )
     reverse_stock_entries(VOUCHER_TYPE, doc.name)
     doc.add_comment("Comment", _("Rejected: {0}").format(reason))
     doc.db_set("status", "Rejected")
