@@ -296,7 +296,14 @@ def close_incident_internal(
     *,
     check_permission: bool = True,
 ) -> dict:
-    """Close one submitted incident through the canonical transition."""
+    """Close one submitted incident through the canonical transition.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    wrap the close, because it moves the incident AND writes the vehicle back to
+    service. The one thing a plain try/except cannot do is undo the first write when
+    the second refuses, which would leave a closed incident on a vehicle still marked
+    stopped.
+    """
     resolution = str(resolution or "").strip()
     if not resolution:
         frappe.throw(_("A resolution is required to close a Vehicle Incident."))

@@ -77,7 +77,13 @@ def post_trip_boarding(dispatch_trip: str) -> int:
 
     Idempotent on ``(dispatch_trip, employee)``: a worker already posted (original
     row) is skipped, so calling it again after a re-finalize posts no duplicate.
-    Per-row savepoint isolates a failing row; no commit inside the loop. Returns
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a plain try/except cannot do is undo a PARTIAL
+    write: a row that fails midway leaves what it already inserted, and the next unit
+    inherits it. The failure goes to the Error Log through ``frappe.get_traceback``
+    and the loop carries on. No commit inside the loop: the caller owns the transaction, and committing
+    here would publish a half-posted trip. Returns
     the number of rows posted.
     """
     if not dispatch_trip:

@@ -66,6 +66,13 @@ def _queue_document(
     """Put a document that needs fleet attention in the Fleet Supervisor queue.
 
     This replaces an Operations Alert row whose only durable link to its subject was
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a plain try/except cannot do is undo a PARTIAL
+    write: a row that fails midway leaves what it already inserted, and the next unit
+    inherits it. The failure goes to the Error Log through ``frappe.get_traceback``
+    and the loop carries on.
+
+    This replaces an alert row whose only durable link to its subject was
     a vehicle/driver Link pair plus the record name inside the message text. A native
     assignment IS the link: the ToDo carries reference_type and reference_name, so
     the same document is never queued twice (``assign_to.add`` skips a holder who

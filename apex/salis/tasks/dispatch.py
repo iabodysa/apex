@@ -116,6 +116,17 @@ def generate_for_assignment(route_assignment, start_date=None, end_date=None):
 
 
 def generate_recurring_trips(start_date=None, days=HORIZON_DAYS):
+    """Generate the coming horizon's trips for every approved Route Assignment.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a plain try/except cannot do is undo a PARTIAL
+    write: a row that fails midway leaves what it already inserted, and the next unit
+    inherits it. The failure goes to the Error Log through ``frappe.get_traceback``
+    and the loop carries on.
+
+    One bad assignment must not cost the whole horizon: without the per-assignment
+    point, a single malformed schedule leaves every fleet with no trips tomorrow.
+    """
     start = getdate(start_date or today())
     end = start + timedelta(days=days - 1)
     assignments = frappe.get_all(
