@@ -47,21 +47,48 @@ class TestSeedersReachAnUpgradedSite(FrappeTestCase):
             with self.subTest(path=path):
                 self.assertIn(path, after_migrate)
 
-    def test_the_four_master_seeders_run_at_migrate_as_well(self):
+    def test_the_remaining_master_seeder_runs_at_migrate_as_well(self):
         from apex import setup
 
         source = ast.unparse(
             ast.parse(pathlib.Path(setup.__file__).read_text())
         )
         migrate_body = source.split("def after_migrate")[1].split("\ndef ")[0]
-        for call in (
-            "create_custody_asset_categories()",
-            "create_custody_articles()",
-            "create_operational_depreciation_policies()",
-            "seed_templates()",
+        self.assertIn("seed_templates()", migrate_body)
+
+
+class TestCustodyMastersShipAsFixtures(FrappeTestCase):
+    """Custody Asset Category, Custody Article and Operational Depreciation Policy
+    used to be created by ``apex.setup`` functions; ``sync_all``/``sync_fixtures``
+    ships them from ``apex/fixtures/`` now, so no Python path may create them again."""
+
+    def test_no_seeder_creates_the_three_masters(self):
+        source = pathlib.Path(
+            __import__("apex.setup", fromlist=["setup"]).__file__
+        ).read_text()
+        for name in (
+            "create_custody_asset_categories",
+            "create_custody_articles",
+            "create_operational_depreciation_policies",
         ):
-            with self.subTest(call=call):
-                self.assertIn(call, migrate_body)
+            with self.subTest(name=name):
+                self.assertNotIn(name, source)
+
+    def test_every_fixture_row_matches_the_shipped_file(self):
+        for dt, fixture_file in (
+            ("Custody Asset Category", "custody_asset_category.json"),
+            ("Custody Article", "custody_article.json"),
+            ("Operational Depreciation Policy", "operational_depreciation_policy.json"),
+        ):
+            with self.subTest(doctype=dt):
+                shipped = json.loads((APP_ROOT / "fixtures" / fixture_file).read_text())
+                names = {row["name"] for row in shipped}
+                self.assertGreater(len(names), 0)
+                for name in names:
+                    self.assertTrue(
+                        frappe.db.exists(dt, name),
+                        f"{dt} {name} is fixture-declared but not on this site",
+                    )
 
 
 class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):

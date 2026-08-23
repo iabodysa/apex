@@ -1,0 +1,9 @@
+[
+ {"category_name": "Bedding & Linen", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Bedding & Linen"},
+ {"category_name": "Room Access", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Room Access"},
+ {"category_name": "Remote Controls", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Remote Controls"},
+ {"category_name": "Furniture", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Furniture"},
+ {"category_name": "Cleaning Tools", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Cleaning Tools"},
+ {"category_name": "Safety Equipment", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Safety Equipment"},
+ {"category_name": "Facility Keys", "docstatus": 0, "doctype": "Custody Asset Category", "modified": "2000-01-01 00:00:00.000000", "name": "Facility Keys"}
+]

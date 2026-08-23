@@ -1,0 +1,7 @@
+[
+ {"docstatus": 0, "doctype": "Operational Depreciation Policy", "modified": "2000-01-01 00:00:00.000000", "name": "Linen - 12 Months", "policy_name": "Linen - 12 Months", "useful_life_years": 1},
+ {"docstatus": 0, "doctype": "Operational Depreciation Policy", "modified": "2000-01-01 00:00:00.000000", "name": "Keys and Cards - 24 Months", "policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
+ {"docstatus": 0, "doctype": "Operational Depreciation Policy", "modified": "2000-01-01 00:00:00.000000", "name": "Remotes - 24 Months", "policy_name": "Remotes - 24 Months", "useful_life_years": 2},
+ {"docstatus": 0, "doctype": "Operational Depreciation Policy", "modified": "2000-01-01 00:00:00.000000", "name": "Furniture - 36 Months", "policy_name": "Furniture - 36 Months", "useful_life_years": 3},
+ {"docstatus": 0, "doctype": "Operational Depreciation Policy", "modified": "2000-01-01 00:00:00.000000", "name": "Electronics - 36 Months", "policy_name": "Electronics - 36 Months", "useful_life_years": 3}
+]

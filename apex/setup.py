@@ -17,7 +17,6 @@ from apex.apex_core.setup.seeders.habitat_auto_email_reports_seed import seed_au
 from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
     seed_templates,
 )
-from apex.apex_core.setup.seeders.letter_head_seed import seed_letter_head
 from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
 
 
@@ -32,17 +31,19 @@ ACCOMMODATION_ITEM_GROUPS = [
 KEPT_GENDERS = ("Male", "Female")
 
 def after_install():
-    """Runs the after-install seed: roles, profiles, item defaults, custody masters, and policies."""
+    """Runs the after-install seed: roles, profiles, item defaults and material templates.
+
+    The Custody Asset Category, Custody Article and Operational Depreciation Policy
+    masters that used to be created here now ship as fixtures (``apex/fixtures/``),
+    which ``sync_fixtures`` applies on this same install before this function runs —
+    see ``frappe.installer.install_app`` calling ``sync_for`` ahead of ``after_install``.
+    """
     create_roles()
     frappe.db.commit()
     create_role_profiles()
     create_accommodation_item_defaults(allow_deferred=True)
-    create_custody_asset_categories()
-    create_custody_articles()
-    create_operational_depreciation_policies()
     seed_templates()
     seed_auto_email_reports()
-    seed_letter_head()
     seed_portal_identities()
     restrict_genders()
     frappe.clear_cache()
@@ -51,21 +52,11 @@ def after_install():
 def after_migrate():
     """Bring an UPGRADED site to the same shipped state a fresh install reaches.
 
-    The custody masters, the material templates and the depreciation policies were
-    reachable only from ``after_install``, so a site that installed Apex before they
-    shipped never received them and nothing said so. Every one is
-    ``frappe.db.exists``-guarded, so running them on every migrate costs one probe per
-    record and cannot duplicate.
-
     ``create_accommodation_item_defaults`` keeps ``allow_deferred`` because it needs
     ERPNext's Item Group root, which an incomplete site may not have yet — deferring is
     correct there and a hard failure is not.
     """
-    seed_letter_head()
     seed_portal_identities()
-    create_custody_asset_categories()
-    create_custody_articles()
-    create_operational_depreciation_policies()
     seed_templates()
     return create_accommodation_item_defaults(allow_deferred=True)
 
@@ -195,28 +186,20 @@ def _load_accommodation_item_records():
 
 
 def create_roles():
-    """Creates each standing Apex role that does not already exist."""
-    roles = [
-        ("Accommodation Manager", 1),
-        ("Resident Supervisor", 1),
-        ("Finance Manager", 1),
-        ("Internal Auditor", 1),
-        ("Maintenance Technician", 1),
-        ("Cleaning Supervisor", 1),
-        ("Safety Officer", 1),
-        ("Resident Request Coordinator", 1),
-        ("Admin Manager", 0),
-        ("Procurement Supervisor", 1),
-        ("SIM Operations User", 1),
-        ("Fleet Manager", 1),
-        ("Driver", 0),
-    ]
-    for role_name, desk_access in roles:
-        if not frappe.db.exists("Role", role_name):
-            doc = frappe.new_doc("Role")
-            doc.role_name = role_name
-            doc.desk_access = desk_access
-            doc.insert(ignore_permissions=True)
+    """Creates the one standing Apex role no shipped DocType names in a permissions block.
+
+    ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1852-1889)
+    already creates a Role for every role a shipped DocType's ``permissions`` table
+    names, the moment that DocType syncs — so the other twelve roles this function used
+    to list are redundant with that native mechanism and were dropped. Admin Manager is
+    the sole holdout: no shipped DocType permission row names it, so nothing else on
+    the site would ever create it.
+    """
+    if not frappe.db.exists("Role", "Admin Manager"):
+        doc = frappe.new_doc("Role")
+        doc.role_name = "Admin Manager"
+        doc.desk_access = 0
+        doc.insert(ignore_permissions=True)
 
 
 def create_role_profiles():
@@ -245,75 +228,3 @@ def create_role_profiles():
         doc.insert(ignore_permissions=True)
         doc.unlock()
 
-
-def create_custody_asset_categories():
-    """Creates each standing Custody Asset Category that does not already exist.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
-    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
-    ignore a name that already exists — it raises DuplicateEntryError — and this runs
-    on every install AND every migrate.
-    """
-    categories = [
-        "Bedding & Linen",
-        "Room Access",
-        "Remote Controls",
-        "Furniture",
-        "Cleaning Tools",
-        "Safety Equipment",
-        "Facility Keys",
-    ]
-    for category_name in categories:
-        if not frappe.db.exists("Custody Asset Category", category_name):
-            doc = frappe.new_doc("Custody Asset Category")
-            doc.category_name = category_name
-            doc.insert(ignore_permissions=True)
-
-
-def create_custody_articles():
-    """Creates each standing returnable Custody Article under its category.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
-    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
-    ignore a name that already exists — it raises DuplicateEntryError — and this runs
-    on every install AND every migrate.
-    """
-    articles = [
-        {"article_name": "Room Key", "category": "Room Access", "is_returnable": 1},
-        {"article_name": "Gate Access Card", "category": "Room Access", "is_returnable": 1},
-        {"article_name": "Locker Key", "category": "Room Access", "is_returnable": 1},
-        {"article_name": "Blanket", "category": "Bedding & Linen", "is_returnable": 1},
-        {"article_name": "Pillow", "category": "Bedding & Linen", "is_returnable": 1},
-        {"article_name": "Bed Sheet", "category": "Bedding & Linen", "is_returnable": 1},
-        {"article_name": "Mattress Protector", "category": "Bedding & Linen", "is_returnable": 1},
-        {"article_name": "AC Remote", "category": "Remote Controls", "is_returnable": 1},
-        {"article_name": "TV Remote", "category": "Remote Controls", "is_returnable": 1},
-        {"article_name": "Padlock", "category": "Facility Keys", "is_returnable": 1},
-    ]
-    for article in articles:
-        if not frappe.db.exists("Custody Article", {"article_name": article["article_name"]}):
-            doc = frappe.new_doc("Custody Article")
-            doc.update(article)
-            doc.insert(ignore_permissions=True)
-
-
-def create_operational_depreciation_policies():
-    """Creates each standing Operational Depreciation Policy with its useful life.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
-    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
-    ignore a name that already exists — it raises DuplicateEntryError — and this runs
-    on every install AND every migrate.
-    """
-    policies = [
-        {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
-        {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},
-        {"policy_name": "Remotes - 24 Months", "useful_life_years": 2},
-        {"policy_name": "Furniture - 36 Months", "useful_life_years": 3},
-        {"policy_name": "Electronics - 36 Months", "useful_life_years": 3},
-    ]
-    for policy in policies:
-        if not frappe.db.exists("Operational Depreciation Policy", policy["policy_name"]):
-            doc = frappe.new_doc("Operational Depreciation Policy")
-            doc.update(policy)
-            doc.insert(ignore_permissions=True)

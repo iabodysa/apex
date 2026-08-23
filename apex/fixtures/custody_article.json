@@ -1,0 +1,12 @@
+[
+ {"article_name": "Room Key", "category": "Room Access", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0001", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Gate Access Card", "category": "Room Access", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0002", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Locker Key", "category": "Room Access", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0003", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Blanket", "category": "Bedding & Linen", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0004", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Pillow", "category": "Bedding & Linen", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0005", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Bed Sheet", "category": "Bedding & Linen", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0006", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Mattress Protector", "category": "Bedding & Linen", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0007", "naming_series": "CUST-ART-.####"},
+ {"article_name": "AC Remote", "category": "Remote Controls", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0008", "naming_series": "CUST-ART-.####"},
+ {"article_name": "TV Remote", "category": "Remote Controls", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0009", "naming_series": "CUST-ART-.####"},
+ {"article_name": "Padlock", "category": "Facility Keys", "docstatus": 0, "doctype": "Custody Article", "modified": "2000-01-01 00:00:00.000000", "name": "CUST-ART-0010", "naming_series": "CUST-ART-.####"}
+]
