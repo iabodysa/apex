@@ -58,9 +58,12 @@ class TestSeedersReachAnUpgradedSite(FrappeTestCase):
 
 
 class TestCustodyMastersShipAsFixtures(FrappeTestCase):
-    """Custody Asset Category, Custody Article and Operational Depreciation Policy
-    used to be created by ``apex.setup`` functions; ``sync_all``/``sync_fixtures``
-    ships them from ``apex/fixtures/`` now, so no Python path may create them again."""
+    """Custody Asset Category, Custody Article, Operational Depreciation Policy and
+    Module Profile used to be created by a Python seeder; ``sync_all``/``sync_fixtures``
+    ships them from ``apex/fixtures/`` now, so no Python path may create the first three
+    again. Module Profile is added to the fixture-parity check below only — its own
+    seeder (``apex.apex_core.setup.seeders.module_profile_seed``) is still wired
+    directly into ``hooks.py`` and stays in place until that hook entry is retired."""
 
     def test_no_seeder_creates_the_three_masters(self):
         source = pathlib.Path(
@@ -79,6 +82,7 @@ class TestCustodyMastersShipAsFixtures(FrappeTestCase):
             ("Custody Asset Category", "custody_asset_category.json"),
             ("Custody Article", "custody_article.json"),
             ("Operational Depreciation Policy", "operational_depreciation_policy.json"),
+            ("Module Profile", "module_profile.json"),
         ):
             with self.subTest(doctype=dt):
                 shipped = json.loads((APP_ROOT / "fixtures" / fixture_file).read_text())
