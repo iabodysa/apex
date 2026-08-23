@@ -461,11 +461,11 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
 def _match_masar_token(identifier):
     """``(party_type, party, employee, employee_name)`` for a scanned personal Masar
     link, or None. The raw token is never stored, so the lookup is on its hash."""
-    from apex.apex_core.doctype.masar_worker_token.masar_worker_token import _hash_token
+    from apex.apex_core.utils.portal_identity import hash_token
 
     row = frappe.db.get_value(
         "Masar Worker Token",
-        {"token": _hash_token(identifier), "enabled": 1},
+        {"token": hash_token(identifier), "enabled": 1},
         ["party_type", "party", "employee", "employee_name"],
         as_dict=True,
     )

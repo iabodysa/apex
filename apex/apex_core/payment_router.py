@@ -308,8 +308,13 @@ def route_payment(payment_request: str) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def create_routed_payment(payment_request: str) -> str:
-    """Whitelisted POST entry for the Create Payment desk action - a thin wrapper
-    over :func:`route_payment` (which enforces the caller's permission). POST-only so
-    a cacheable GET cannot trigger this write (guarded in test_http_enforcement).
+    """Whitelisted POST entry for the Create Payment desk action.
+
+    It forwards to :func:`route_payment`, which enforces the caller's permission, and
+    that forwarding is not what it is for: ``frappe.whitelist(methods=["POST"])``
+    (frappe/__init__.py:819) is the boundary, and it has to sit on a name the desk
+    calls rather than on an internal one. Whitelisting ``route_payment`` itself would
+    either expose a money write to a cacheable GET or publish an internal function as
+    an endpoint. The wrapper IS the restriction, so it is not a pass-through.
     """
     return route_payment(payment_request)

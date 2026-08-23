@@ -52,11 +52,6 @@ SUBJECT_BINDING_FIELDS = (
 _CREDENTIAL_REISSUE_GUARD = object()
 
 
-def _hash_token(raw: str) -> str:
-    """The at-rest form of a raw token: its SHA-256 hex digest (what ``token`` stores
-    and what every resolver filters by)."""
-    return hash_token(raw)
-
 TOKEN_TTL_DAYS = 180
 
 
@@ -69,7 +64,7 @@ def _new_token() -> str:
     """A fresh url-safe random raw token, whose HASH is unique across the doctype."""
     for _attempt in range(8):
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
-        if not frappe.db.exists("Masar Worker Token", {"token": _hash_token(candidate)}):
+        if not frappe.db.exists("Masar Worker Token", {"token": hash_token(candidate)}):
             return candidate
     frappe.throw(_("Could not generate a unique worker token. Please try again."))
 
@@ -163,7 +158,7 @@ class MasarWorkerToken(Document):
                 rotated = False
             else:
                 rotated = hmac.compare_digest(
-                    pending["token"], _hash_token(raw)
+                    pending["token"], hash_token(raw)
                 )
         if not rotated:
             frappe.throw(_("Not permitted"), frappe.PermissionError)
@@ -177,7 +172,7 @@ class MasarWorkerToken(Document):
 
             disable_subject_subscriptions(audience, subject)
         raw = _new_token()
-        self.token = _hash_token(raw)
+        self.token = hash_token(raw)
         self.token_enc = encrypt(raw)
         self._pending_token_fields = {
             "token": self.token,
