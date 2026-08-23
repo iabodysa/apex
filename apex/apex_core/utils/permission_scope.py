@@ -7,7 +7,7 @@ oversight role sees everything, read the user's allowed values from frappe's own
 User Permission resolver, narrow them to the doctype being queried, and turn that
 into a SQL WHERE fragment or a report-scope tuple. Those primitives live here ONCE;
 ``apex.habitat.permissions``, ``apex.salis.permissions`` and
-``apex.logistay.permissions`` keep thin wrappers that bind their own oversight-role
+``apex.logistay.permissions`` bind their own oversight-role
 set and ``allow`` doctype.
 
 What is deliberately NOT here: the per-doctype ``*_query`` / ``*_has_permission``

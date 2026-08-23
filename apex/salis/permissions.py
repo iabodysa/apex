@@ -33,10 +33,6 @@ Three invariants hold on every path and are why the edge cases look asymmetric:
 The document rules NEVER return True and never branch on ``ptype`` (two exceptions, named
 on ``payment_sod_has_permission`` and on the portal-capacity branch that precedes the
 dispatch table): deny-only, so they narrow and never widen.
-
-The block at the foot of this file is COMPATIBILITY ONLY: wrappers holding no rule, each
-forwarding to a dispatcher with its own ``scope_for``, which ``hooks.py`` does not route
-through. They exist so callers outside this module can still resolve by FUNCTION NAME.
 """
 
 import frappe
@@ -62,7 +58,7 @@ def _resolve_user(user=None):
 def _allowed_projects(user):
     """Project names the given user has an explicit User Permission for (cached).
 
-    Thin wrapper over ``permission_scope.allowed_for`` binding the Project ``allow``
+    Calls ``permission_scope.allowed_for`` with the Project ``allow``
     doctype and the ``apex_allowed_projects`` cache namespace. That namespace is
     DISTINCT from Habitat's ``apex_allowed_buildings`` and Logistay's
     ``apex_allowed_companies`` so two scopes can never collide in
@@ -317,18 +313,13 @@ def _fragment(kind, spec, values):
         return "1=0"
     return render(spec, ", ".join(frappe.db.escape(value) for value in values))
 
-def project_scope_query(user=None, doctype=None, scope_for=None):
+def project_scope_query(user=None, doctype=None):
     """WHERE fragment scoping ``doctype``'s list/report view to the user's projects.
 
     ``doctype`` MUST stay in this signature: ``frappe.call`` drops any keyword the
     callee does not declare, so a signature without it would receive no DocType,
     silently skip the ``applicable_for`` narrowing in ``_allowed_projects_for``, and
     widen every scope on the tenant axis.
-
-    ``scope_for`` is never passed by frappe. It exists for the named compatibility
-    wrappers at the foot of this module, which must select their own DocType's strategy
-    while leaving ``doctype`` — the ``applicable_for`` narrowing key — exactly as their
-    caller supplied it.
 
     THE NO-PROJECT BRANCH IS NOT UNIFORMLY "1=0". A DocType carrying an own-row basis
     returns that clause ALONE, because the users who reach those rows without a project
@@ -347,7 +338,7 @@ def project_scope_query(user=None, doctype=None, scope_for=None):
     if permission_scope.is_portal_capacity(user):
         return "1=0"
 
-    kind, spec = SALIS_SCOPE.get(scope_for or doctype) or _column()
+    kind, spec = SALIS_SCOPE.get(doctype) or _column()
     own = _own_clause(spec, user)
 
     projects = _allowed_projects_for(user, doctype)

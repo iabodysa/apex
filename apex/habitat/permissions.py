@@ -78,7 +78,7 @@ def _is_privileged(user):
 def _allowed_buildings(user):
     """Building names the user has an explicit User Permission for (request-cached).
 
-    Thin wrapper over ``permission_scope.allowed_for`` binding the Building ``allow``
+    Calls ``permission_scope.allowed_for`` with the Building ``allow``
     doctype and the ``apex_allowed_buildings`` cache namespace. That namespace is
     DISTINCT from Salis' ``apex_allowed_projects`` and Logistay's
     ``apex_allowed_companies`` so two scopes can never collide in
@@ -281,18 +281,13 @@ def _fragment(kind, spec, values):
     return render(spec, ", ".join(frappe.db.escape(value) for value in values))
 
 
-def building_scope_query(user=None, doctype=None, scope_for=None):
+def building_scope_query(user=None, doctype=None):
     """WHERE fragment scoping ``doctype``'s list/report view to the user's estate.
 
     ``doctype`` MUST stay in this signature: ``frappe.call`` drops any keyword the
     callee does not declare, so a signature without it would receive no DocType,
     silently skip the ``applicable_for`` narrowing in ``_allowed_buildings_for``, and
     widen every scope on the tenant axis.
-
-    ``scope_for`` is never passed by frappe. It exists for the named compatibility
-    wrappers at the foot of this module, which must select their own DocType's strategy
-    while leaving ``doctype`` — the ``applicable_for`` narrowing key — exactly as their
-    caller supplied it.
 
     An unknown DocType falls back to the plain ``building`` column, which is what the
     hand-written per-DocType functions did (all of them delegated to
@@ -307,7 +302,7 @@ def building_scope_query(user=None, doctype=None, scope_for=None):
     if not buildings:
         return "1=0"
 
-    kind, spec = BUILDING_SCOPE.get(scope_for or doctype) or _column(BUILDING)
+    kind, spec = BUILDING_SCOPE.get(doctype) or _column(BUILDING)
     return _fragment(kind, spec, buildings)
 
 
