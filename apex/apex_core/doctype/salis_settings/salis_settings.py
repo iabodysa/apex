@@ -12,6 +12,7 @@ from frappe.model.document import Document
 from frappe.utils import cint
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
+from apex.apex_core.utils.company import resolve_company
 
 _CSS_COLOR_RE = re.compile(
     r"""^(?:
@@ -200,8 +201,6 @@ def get_default_cost_center():
     first, so an operator can point fleet cost at a cost center that is not the
     company's own — which the primitive has no argument for.
     """
-    from apex.apex_core.utils.company import resolve_company
-
     cost_center = frappe.db.get_single_value("Salis Settings", "default_cost_center")
     if not cost_center:
         company = resolve_company("Salis")

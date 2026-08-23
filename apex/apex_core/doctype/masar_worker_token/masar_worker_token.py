@@ -19,6 +19,8 @@ No financial impact: this is identity/issuance metadata only.
 from __future__ import annotations
 
 import hmac
+import io
+from base64 import b64encode
 
 import frappe
 from frappe import _
@@ -40,6 +42,7 @@ from apex.apex_core.utils.portal_identity import (
     validate_subject_binding,
 )
 from apex.apex_core.utils.party_link import sync_party_employee
+from apex.salis.api.web_push import disable_subject_subscriptions
 
 TOKEN_BYTES = 24
 SUBJECT_BINDING_FIELDS = (
@@ -171,8 +174,6 @@ class MasarWorkerToken(Document):
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         if not self.is_new() and frappe.db.table_exists("Portal Push Subscription"):
-            from apex.salis.api.web_push import disable_subject_subscriptions
-
             disable_subject_subscriptions(audience, subject)
         raw = _new_token()
         self.token = hash_token(raw)
@@ -623,9 +624,6 @@ def masar_qr_data_uri(text: str):
     missing optional dependency degrades to a plain link rather than erroring the
     desk action."""
     try:
-        import io
-        from base64 import b64encode
-
         import pyqrcode
 
         q = pyqrcode.create(text)

@@ -18,6 +18,12 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint
 
+from apex.apex_core.payment_router import (
+    get_target_doctype,
+    validate_field_map,
+    validate_target_doctype,
+)
+
 RETENTION_DEFAULTS = {
     "snapshot_retention_days": 365,
     "depreciation_snapshot_retention_days": 730,
@@ -35,12 +41,6 @@ class HabitatSettings(Document):
         ``db_set``, raw SQL and patches. Config-integrity only - nothing is posted
         or created here.
         """
-        from apex.apex_core.payment_router import (
-            get_target_doctype,
-            validate_field_map,
-            validate_target_doctype,
-        )
-
         target = get_target_doctype(self)
         validate_target_doctype(target)
         validate_field_map(target, self.field_map or [])
