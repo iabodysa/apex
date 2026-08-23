@@ -46,6 +46,7 @@ WORKFLOWS = (
     "Transport Request Workflow",
     "Utility Bill Entry Workflow",
     "Vehicle Damage Write-Off Workflow",
+    "Vehicle Incident Workflow",
 )
 
 WORKFLOW_STATES = (

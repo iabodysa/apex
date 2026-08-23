@@ -25,6 +25,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.workflow import apply_workflow
 from frappe.utils import flt, getdate, today
 
 from apex.apex_core.utils.employee_loan_recovery import raise_recovery_loan
@@ -45,8 +46,17 @@ _TRANSITION_SAVEPOINT = "vehicle_incident_transition"
 
 class VehicleIncident(Document):
     def validate(self):
-        """Validates the incident date and cost, and enforces public-intake and cost-recovery guards."""
-        self._guard_status()
+        """Validates the incident date and cost, and enforces public-intake and cost-recovery guards.
+
+        ``status`` carries no hand-written guard: the Vehicle Incident Workflow
+        (apex/fixtures/workflow.json) owns the Close transition natively — a
+        hand-edit that is not a modelled transition is refused by
+        ``frappe.model.workflow.validate_workflow`` (frappe/model/document.py:
+        687-695) before this method ever sees the save. The Open -> Under
+        Review move stays outside the workflow on purpose: it is the native
+        submit lifecycle, not a person choosing a named action, and
+        ``on_submit`` stamps it directly.
+        """
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
         if flt(self.estimated_cost) < 0:
@@ -54,17 +64,6 @@ class VehicleIncident(Document):
         self._guard_public_intake()
         self._guard_cost_recovery()
         self._sync_third_party()
-
-    def _guard_status(self):
-        """Keep lifecycle status under controller-owned transitions."""
-        if self.is_new():
-            self.status = "Open"
-            return
-        if self.has_value_changed("status"):
-            frappe.throw(
-                _("Use the incident actions to change Status."),
-                frappe.PermissionError,
-            )
 
     def _sync_third_party(self):
         """Keep the third-party block and its flag telling the same story.
@@ -372,13 +371,18 @@ def close_incident_internal(
     *,
     check_permission: bool = True,
 ) -> dict:
-    """Close one submitted incident through the canonical transition.
+    """Close one submitted incident through the Vehicle Incident Workflow's
+    Close transition.
+
+    ``apply_workflow`` (frappe/model/workflow.py:99) is what now finds
+    "Under Review -> Closed" among the caller's roles and refuses anything
+    else — the docstatus check stays because it also guards a data edge case
+    ``apply_workflow`` does not: a not-yet-submitted incident.
 
     ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    wrap the close, because it moves the incident AND writes the vehicle back to
-    service. The one thing a plain try/except cannot do is undo the first write when
-    the second refuses, which would leave a closed incident on a vehicle still marked
-    stopped.
+    wrap the close, because it moves the incident AND writes the vehicle's
+    timeline. The one thing a plain try/except cannot do is undo the workflow
+    transition when the timeline note fails.
     """
     resolution = str(resolution or "").strip()
     if not resolution:
@@ -389,12 +393,10 @@ def close_incident_internal(
         doc.check_permission("write")
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Vehicle Incidents can be closed."))
-    if doc.status != "Under Review":
-        frappe.throw(_("Only an incident under review can be closed."))
 
     frappe.db.savepoint(_TRANSITION_SAVEPOINT)
     try:
-        doc.db_set("status", "Closed")
+        apply_workflow(doc, "Close")
         doc.add_comment(
             "Comment",
             _("Incident closed: {0}").format(resolution),
@@ -407,7 +409,7 @@ def close_incident_internal(
     except Exception:
         frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
         raise
-    return {"name": doc.name, "status": "Closed"}
+    return {"name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist(methods=["POST"])

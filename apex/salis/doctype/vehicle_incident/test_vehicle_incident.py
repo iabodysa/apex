@@ -3,10 +3,13 @@
 
 Patterned on frappe/tests/test_document.py. Most cases build an unsaved
 Document via frappe.new_doc and call one guard method directly. The
-status-transition refusal is the exception: ``has_value_changed`` only knows
-about a change once the document has been loaded from the database, so that
-one case inserts a minimal incident against the fixture vehicle and reloads
-it before asserting the refusal.
+status-transition case is the exception: it travels through the Vehicle
+Incident Workflow (apex/fixtures/workflow.json), so those cases insert a
+minimal incident against the fixture vehicle, submit it, and drive the Close
+action through ``frappe.model.workflow.apply_workflow`` — the same
+production path ``close_incident`` calls — asserting the framework's own
+``validate_workflow`` (frappe/model/document.py:687-695) refuses a
+hand-edited jump instead of a bespoke check.
 
 WHY ``test_ignore`` NAMES ``Loan``. ``get_dependencies`` (frappe/test_runner.py:359-381)
 builds a test record for every Link on the DocType under test, whether or not a case
@@ -22,9 +25,11 @@ here because nothing below reads ``recovery_loan``; the cases that do live in
 from __future__ import annotations
 
 import frappe
+from frappe.model.workflow import WorkflowPermissionError
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
+from apex.salis.doctype.vehicle_incident.vehicle_incident import close_incident
 from apex.tests._helpers import lending_installed
 
 test_dependencies = ["Salis Vehicle"]
@@ -45,18 +50,49 @@ class TestVehicleIncident(FrappeTestCase):
         doc.update(fields)
         return doc
 
+    def _delete_incident(self, name):
+        doc = frappe.get_doc("Vehicle Incident", name)
+        if doc.docstatus == 1:
+            doc.cancel()
+        frappe.delete_doc("Vehicle Incident", name, force=True)
 
-    def test_a_new_incident_is_forced_to_open_regardless_of_caller_input(self):
-        doc = self._incident(status="Closed")
-        doc._guard_status()
-        self.assertEqual(doc.status, "Open")
 
-    def test_changing_status_on_a_saved_incident_outside_the_actions_is_refused(self):
+    def test_a_new_incident_defaults_to_open_with_no_python_default(self):
+        """The DocType JSON's ``default: Open`` on the status field does this
+        alone now that ``_guard_status``'s ``is_new()`` branch is gone."""
         doc = self._incident()
         doc.insert()
-        reloaded = frappe.get_doc("Vehicle Incident", doc.name)
-        reloaded.status = "Closed"
-        self.assertRaises(frappe.PermissionError, reloaded._guard_status)
+        self.addCleanup(self._delete_incident, doc.name)
+        self.assertEqual(doc.status, "Open")
+
+    def test_a_hand_edited_status_is_refused(self):
+        """Break the removed guard's job on purpose: a plain save() that jumps
+        the field to a state with no modelled transition from Open must still
+        fail — now via the Workflow, not a ``has_value_changed`` throw."""
+        doc = self._incident()
+        doc.insert()
+        self.addCleanup(self._delete_incident, doc.name)
+        doc.status = "Closed"
+        with self.assertRaises(WorkflowPermissionError):
+            doc.save()
+
+    def test_close_travels_through_apply_workflow(self):
+        """Proves the production path: ``close_incident`` calls
+        ``close_incident_internal``, which drives the Close transition through
+        ``frappe.model.workflow.apply_workflow`` rather than setting the field
+        directly."""
+        doc = self._incident()
+        doc.insert()
+        self.addCleanup(self._delete_incident, doc.name)
+        doc.submit()
+        self.assertEqual(
+            frappe.db.get_value("Vehicle Incident", doc.name, "status"), "Under Review"
+        )
+
+        close_incident(doc.name, "Repaired and returned to service.")
+        self.assertEqual(
+            frappe.db.get_value("Vehicle Incident", doc.name, "status"), "Closed"
+        )
 
 
     def test_incident_date_in_the_future_is_refused(self):
