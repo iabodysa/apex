@@ -31,3 +31,4 @@ apex.patches.v2_8.drop_salary_deduction_orphan_storage
 apex.patches.v2_8.retire_unused_apex_roles
 apex.patches.v2_8.insert_missing_module_defs
 apex.patches.v2_8.drop_seeded_workspace_roles
+apex.patches.v2_8.prune_orphaned_number_cards
