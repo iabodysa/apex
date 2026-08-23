@@ -297,7 +297,6 @@
    "label": "Assignment"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "description": "Set when the transport supervisor assigns this request onto a Dispatch Trip. Status remains workflow-owned; this is the preliminary assignment flag.",
    "fieldname": "is_assigned",
@@ -308,7 +307,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "assigned_to_trip",
    "fieldtype": "Link",
    "label": "Assigned Trip",
@@ -478,7 +476,7 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",

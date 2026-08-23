@@ -159,7 +159,6 @@
    "options": "User"
   },
   {
-   "allow_on_submit": 1,
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -218,7 +217,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",

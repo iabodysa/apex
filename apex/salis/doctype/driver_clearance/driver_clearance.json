@@ -101,7 +101,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "default": "Open",
    "description": "Progress of the driver clearance process, tracking whether checks are open or in progress, fully cleared, blocked by an outstanding item, or cancelled.",
    "fieldname": "status",
@@ -220,7 +219,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-08 01:42:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Driver Clearance",

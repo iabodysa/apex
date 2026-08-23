@@ -127,7 +127,6 @@
    "search_index": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "Planned",
    "description": "Execution stage of the dispatch trip, from a planned trip to one dispatched to the driver, then completed or cancelled.",
    "fieldname": "status",
@@ -170,7 +169,6 @@
    "label": "Assigned Requests"
   },
   {
-   "allow_on_submit": 1,
    "description": "Transport requests assigned to this trip, including each request's pickup and drop-off stops.",
    "fieldname": "assigned_requests",
    "fieldtype": "Table",
@@ -301,7 +299,6 @@
    "label": "Live Driver Position"
   },
   {
-   "allow_on_submit": 1,
    "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_lat",
    "fieldtype": "Float",
@@ -312,7 +309,6 @@
    "hidden": 1
   },
   {
-   "allow_on_submit": 1,
    "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_lng",
    "fieldtype": "Float",
@@ -327,7 +323,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "description": "Not reported. No writer exists; kept so a future one has a column.",
    "fieldname": "driver_position_updated_at",
    "fieldtype": "Datetime",
@@ -413,7 +408,7 @@
    "link_fieldname": "dispatch_trip"
   }
  ],
- "modified": "2026-08-22 23:10:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Dispatch Trip",

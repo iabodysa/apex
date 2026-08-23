@@ -235,8 +235,7 @@
    "fieldname": "accounting_acknowledged",
    "fieldtype": "Check",
    "label": "Accounting Acknowledged",
-   "permlevel": 1,
-   "allow_on_submit": 1
+   "permlevel": 1
   },
   {
    "depends_on": "eval:doc.accounting_acknowledged==1",
@@ -245,7 +244,6 @@
    "label": "Acknowledged By",
    "options": "User",
    "permlevel": 1,
-   "allow_on_submit": 1,
    "read_only": 1
   },
   {
@@ -289,7 +287,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-07 13:39:00.000000",
+ "modified": "2026-08-23 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Movement",

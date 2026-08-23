@@ -1275,64 +1275,18 @@ def create_worker_transport_request(
         doc.insert()
     return {"name": doc.name, "status": doc.status, "adhoc_count": len(adhoc_rows)}
 
-def _worker_was_on_trip(employee, dispatch_trip):
-    """True when ``employee`` actually rode ``dispatch_trip``.
-
-    ``Passenger Manifest`` has no ``employee`` column — the passengers live on its
-    child ``Manifest Passenger`` — so the membership must be resolved through a
-    child table, never a flat filter on the parent. Two authoritative links are
-    honoured so a worker can rate a trip however it is tracked:
-
-    1. Trip -> its Transport Request -> worker manifest (Transport Request Worker):
-       the SAME demand->worker chain ``get_worker_transport`` scopes by; the trip
-       carries its request from planning, long before the fulfilment back-link.
-    2. Passenger Manifest for the trip lists the employee among its passengers
-       (the on-board headcount record), matched via the child ``Manifest
-       Passenger`` rows."""
-    if not (employee and dispatch_trip):
-        return False
-
-    boarding = frappe.get_all(
-        "Trip Boarding State",
-        filters={"parent": dispatch_trip, "parenttype": "Dispatch Trip"},
-        fields=["employee", "status"],
-    )
-    if boarding:
-        return any(b.employee == employee and b.status == "Boarded" for b in boarding)
-
-    transport_request = frappe.db.get_value(
-        "Dispatch Trip", dispatch_trip, "transport_request"
-    )
-    if transport_request and frappe.db.exists(
-        "Transport Request Worker",
-        {
-            "parent": transport_request,
-            "parenttype": "Transport Request",
-            "employee": employee,
-        },
-    ):
-        return True
-    manifests = frappe.get_all(
-        "Passenger Manifest", filters={"dispatch_trip": dispatch_trip}, pluck="name"
-    )
-    if manifests and frappe.db.exists(
-        "Passenger Manifest Item",
-        {
-            "parent": ["in", manifests],
-            "parenttype": "Passenger Manifest",
-            "employee": employee,
-        },
-    ):
-        return True
-    return False
-
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=None, transport_request=None):
     """Allows a worker to submit a rating and feedback for a completed trip.
 
-    Scoped by the worker's token to ensure they actually went on the trip.
-    Creates a 'Transport Trip Rating' record."""
+    Scoped by the worker's token to ensure they actually went on the trip: the
+    caller's identity (``employee``) is resolved here and cannot come from the
+    request body. "Trip must be Completed" and "employee was on the trip" are
+    pure data invariants that need no identity once ``employee`` is known, so
+    they live on Transport Trip Rating's own ``validate`` (reachable from any
+    insertion path, not only this endpoint) and are not repeated here.
+    """
     employee = _resolve_worker(token)
 
     if not dispatch_trip:
@@ -1347,11 +1301,6 @@ def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=Non
     )
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
-    if trip.status != "Completed":
-        frappe.throw(_("A trip can only be rated once it is completed."))
-
-    if not _worker_was_on_trip(employee, dispatch_trip):
-        frappe.throw(_("You were not part of this trip's manifest."), frappe.PermissionError)
 
     existing = frappe.db.exists(
         "Transport Trip Rating",

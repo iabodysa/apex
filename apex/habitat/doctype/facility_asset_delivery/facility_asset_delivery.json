@@ -179,7 +179,6 @@
    "label": "Exit 1 — Hand-over at the source"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "exit1_security_cleared",
    "fieldtype": "Check",
@@ -187,7 +186,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit1_cleared_by",
    "fieldtype": "Link",
    "label": "Cleared By",
@@ -195,7 +193,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit1_cleared_on",
    "fieldtype": "Datetime",
    "label": "Cleared On",
@@ -209,7 +206,6 @@
    "hidden": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "exit2_logistics_cleared",
    "fieldtype": "Check",
@@ -218,7 +214,6 @@
    "hidden": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit2_cleared_by",
    "fieldtype": "Link",
    "label": "Cleared By",
@@ -227,7 +222,6 @@
    "hidden": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit2_cleared_on",
    "fieldtype": "Datetime",
    "label": "Cleared On",
@@ -241,7 +235,6 @@
    "label": "Exit 2 — Receiving Acceptance"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "exit3_receiving_cleared",
    "fieldtype": "Check",
@@ -249,7 +242,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit3_cleared_by",
    "fieldtype": "Link",
    "label": "Cleared By",
@@ -257,7 +249,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "exit3_cleared_on",
    "fieldtype": "Datetime",
    "label": "Cleared On",
@@ -270,7 +261,6 @@
    "label": "On-Site Code"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "otp_hash",
    "fieldtype": "Data",
    "hidden": 1,
@@ -280,7 +270,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "otp_expires_at",
    "fieldtype": "Datetime",
    "hidden": 1,
@@ -290,7 +279,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "otp_attempts",
    "fieldtype": "Int",
@@ -301,7 +289,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "otp_locked_until",
    "fieldtype": "Datetime",
    "hidden": 1,
@@ -311,7 +298,6 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "otp_verified_on",
    "fieldtype": "Datetime",
    "hidden": 1,
@@ -354,7 +340,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-23 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Facility Asset Delivery",

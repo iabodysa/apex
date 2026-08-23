@@ -93,7 +93,6 @@
   },
   {
    "fetch_from": "room.building",
-   "fetch_if_empty": 1,
    "fieldname": "building",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -245,7 +244,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-15 06:48:00.000000",
+ "modified": "2026-08-23 23:40:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Housing Inventory",

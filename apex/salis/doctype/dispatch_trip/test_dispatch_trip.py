@@ -63,3 +63,41 @@ class TestDispatchTrip(FrappeTestCase):
     def test_completion_notes_present_satisfies_the_completed_guard(self):
         doc = self._trip(status="Completed", completion_notes="Delivered on time.")
         doc._require_completion_notes()
+
+
+class TestDispatchTripDriverPositionIsFrozenAfterSubmit(FrappeTestCase):
+    """``driver_lat``/``driver_lng``/``driver_position_updated_at`` carried
+    ``allow_on_submit: 1`` with no writer anywhere in the app (see
+    apex/salis/api/route_supervisor.py:4-12). Removing the flag lets the framework
+    refuse a post-submit edit again. Proven through ``insert()``/``submit()``/
+    ``save()``, never by calling a controller method directly."""
+
+    def _submitted_trip(self):
+        from frappe.test_runner import make_test_records
+
+        make_test_records("Dispatch Trip")
+        vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
+        driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
+        project = frappe.get_all("Project", limit=1, pluck="name")[0]
+        employee = frappe.get_all("Employee", limit=1, pluck="name")
+        if not employee:
+            from frappe.test_runner import make_test_records as _mtr
+
+            _mtr("Employee")
+            employee = frappe.get_all("Employee", limit=1, pluck="name")
+        doc = frappe.new_doc("Dispatch Trip")
+        doc.trip_type = "Ad Hoc"
+        doc.vehicle = vehicle
+        doc.driver = driver
+        doc.project = project
+        doc.trip_date = "2026-08-20"
+        doc.append("stops", {"stop_name": "Camp Gate"})
+        doc.append("boarding_state", {"employee": employee[0], "status": "Boarded"})
+        doc.insert()
+        doc.submit()
+        return doc
+
+    def test_editing_driver_lat_after_submit_is_refused(self):
+        doc = self._submitted_trip()
+        doc.driver_lat = 24.7
+        self.assertRaises(frappe.exceptions.UpdateAfterSubmitError, doc.save)

@@ -121,3 +121,56 @@ class TestFuelRequest(FrappeTestCase):
         doc = self._request(status="Approved", approved_by="someone@example.com")
         doc._stamp_approver()
         self.assertEqual(doc.approved_by, "someone@example.com")
+
+
+class TestFuelRequestApprovedByIsFrozenAfterSubmit(FrappeTestCase):
+    """``approved_by`` is stamped once, only at the initial Pending -> Approved
+    submission (docstatus 0 -> 1, an unrestricted ``submit`` action); no save on
+    an already-submitted request ever changes it again. ``allow_on_submit``
+    therefore opened a plain-``save()`` edit path nothing in the app used.
+    Removing it lets the framework refuse that edit again. Proven through
+    ``insert()``/the native Workflow ``Approve`` transition/``save()``, never by
+    calling a controller method directly."""
+
+    def _approver(self):
+        email = "_test-fuel-request-approver@example.com"
+        if not frappe.db.exists("User", email):
+            user = frappe.get_doc(
+                {
+                    "doctype": "User",
+                    "email": email,
+                    "first_name": "Fuel Request Approver Probe",
+                    "send_welcome_email": 0,
+                }
+            )
+            user.insert(ignore_permissions=True)
+            user.add_roles("Fleet Manager")
+        return email
+
+    def _approved_request(self):
+        from frappe.model.workflow import apply_workflow
+        from frappe.test_runner import make_test_records
+
+        make_test_records("Salis Vehicle")
+        vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
+        approver = self._approver()
+
+        doc = frappe.new_doc("Fuel Request")
+        doc.request_type = "Standard"
+        doc.vehicle = vehicle
+        doc.requested_litres = 5
+        doc.request_date = "2026-08-20"
+        doc.requested_by = "Administrator"
+        doc.insert()
+
+        frappe.set_user(approver)
+        self.addCleanup(frappe.set_user, "Administrator")
+        doc = apply_workflow(doc, "Approve")
+        frappe.set_user("Administrator")
+        self.assertEqual(doc.status, "Approved")
+        return doc
+
+    def test_editing_approved_by_after_submit_is_refused(self):
+        doc = self._approved_request()
+        doc.approved_by = "Administrator"
+        self.assertRaises(frappe.exceptions.UpdateAfterSubmitError, doc.save)
