@@ -239,7 +239,16 @@ def _common_location(source, target):
         target.bed = source.bed
 
 def _build_maintenance_request(source):
-    """Builds an unsaved Maintenance Request from the request's location, category and description."""
+    """Builds an unsaved Maintenance Request from the request's location, category and description.
+
+    ``get_mapped_doc`` (frappe/model/mapper.py:50) is the framework's mapper and is used
+    elsewhere in this app. Two things it cannot do here: it re-fetches the source by
+    NAME (frappe/model/mapper.py:75-77) when the caller already holds the loaded
+    document, and it refuses on the target's create permission before the caller has
+    decided whether to keep the draft at all. This returns an UNSAVED target the
+    triage flow may discard, so no permission is spent on a document that is never
+    written.
+    """
     target = frappe.new_doc("Maintenance Request")
     _common_location(source, target)
     target.issue_type = _CATEGORY_TO_ISSUE_TYPE.get(source.request_category, "Other")
@@ -250,7 +259,13 @@ def _build_maintenance_request(source):
     return target
 
 def _build_safety_incident(source):
-    """Builds an unsaved Safety Incident from the request's location, severity and description."""
+    """Builds an unsaved Safety Incident from the request's location, severity and description.
+
+    Hand-mapped rather than through ``get_mapped_doc`` (frappe/model/mapper.py:50) for
+    the reason :func:`_build_maintenance_request` gives, and because the severity is
+    DERIVED from the request's priority rather than copied: the two fields share no
+    name and no scale, which a field map cannot express.
+    """
     target = frappe.new_doc("Safety Incident")
     target.incident_datetime = frappe.utils.now_datetime()
     target.building = source.building
@@ -262,7 +277,13 @@ def _build_safety_incident(source):
     return target
 
 def _build_custody_issue(source):
-    """Builds an unsaved Custody Issue from the resident request's building, party and description."""
+    """Builds an unsaved Custody Issue from the resident request's building, party and description.
+
+    Hand-mapped rather than through ``get_mapped_doc`` (frappe/model/mapper.py:50) for
+    the reason :func:`_build_maintenance_request` gives. The party pair is copied only
+    when BOTH halves are present: a Dynamic Link with a type and no name is a row the
+    framework cannot resolve later.
+    """
     target = frappe.new_doc("Custody Issue")
     target.issue_date = frappe.utils.today()
     target.building = source.building
@@ -337,6 +358,11 @@ def _apply_bulk_triage(names):
     """Advance each New Resident Request in ``names`` to Triaged (per-row write
     permission checked); returns the count advanced. Shared body of the inline and
     the background bulk-triage paths.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    wrap EACH row. The one thing the framework's own transaction cannot do is unwind
+    one document out of a batch: a raise past this loop rolls back every row already
+    saved in the same pass, after the caller was told the batch succeeded.
 
     Each row saves behind its own savepoint: without it, one row's failure (a
     permission error, a validation error, a stale timestamp) raised past this
