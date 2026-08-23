@@ -155,18 +155,6 @@ def _locked_session_assignment(assignment, driver):
     return doc
 
 
-def _existing_handover(assignment, direction):
-    return frappe.db.get_value(
-        "Vehicle Handover",
-        {
-            "vehicle_assignment": assignment,
-            "direction": direction,
-            "docstatus": 1,
-        },
-        "name",
-    )
-
-
 def _validate_active_session_assignment(assignment, driver):
     if assignment.status != "Active":
         frappe.throw(
@@ -234,7 +222,11 @@ def _submit_session_handover(
 ):
     driver = base._session_driver(required=True)
     assignment_doc = _locked_session_assignment(assignment, driver)
-    duplicate = _existing_handover(assignment_doc.name, direction)
+    duplicate = frappe.db.get_value(
+        "Vehicle Handover",
+        {"vehicle_assignment": assignment_doc.name, "direction": direction, "docstatus": 1},
+        "name",
+    )
     if duplicate:
         return {"name": duplicate, "status": "Submitted"}
     _validate_active_session_assignment(assignment_doc, driver)

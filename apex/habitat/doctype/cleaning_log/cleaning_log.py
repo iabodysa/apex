@@ -45,7 +45,9 @@ class CleaningLog(Document):
             if row.photo and not row.captured_at:
                 row.captured_at = now()
             if row.photo and not row.captured_by:
-                row.captured_by = _session_employee()
+                row.captured_by = frappe.db.get_value(
+                    "Employee", {"user_id": frappe.session.user}, "name"
+                )
 
     def _validate_area_evidence(self):
         """Each required area needs a Cleaned photo, or a Not Cleaned / N/A note."""
@@ -69,11 +71,6 @@ class CleaningLog(Document):
                         "Area {0} must have a Cleaned photo, or be marked Not Cleaned / N/A with a note."
                     ).format(_(area))
                 )
-
-
-def _session_employee() -> str | None:
-    """Resolve the current session user to their Employee, if any."""
-    return frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
 
 
 def on_doctype_update():

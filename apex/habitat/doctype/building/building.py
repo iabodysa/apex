@@ -103,15 +103,6 @@ def apply_active_lease(doc):
         doc.landlord = lease.landlord
 
 
-def _building_supervisor_permissions(user, building):
-    """Returns the names of the User Permission rows granting a user access to a given building."""
-    return frappe.get_all(
-        "User Permission",
-        filters={"user": user, "allow": "Building", "for_value": building},
-        pluck="name",
-    )
-
-
 def on_update(doc, method=None):
     """Reconcile the building-scoped User Permission to the supervisor field:
     grant the new supervisor's permission for this building, drop the previous
@@ -122,9 +113,17 @@ def on_update(doc, method=None):
     if old_sup == new_sup:
         return
     if old_sup:
-        for perm in _building_supervisor_permissions(old_sup, doc.name):
+        for perm in frappe.get_all(
+            "User Permission",
+            filters={"user": old_sup, "allow": "Building", "for_value": doc.name},
+            pluck="name",
+        ):
             frappe.delete_doc("User Permission", perm, ignore_permissions=True)
-    if new_sup and not _building_supervisor_permissions(new_sup, doc.name):
+    if new_sup and not frappe.get_all(
+        "User Permission",
+        filters={"user": new_sup, "allow": "Building", "for_value": doc.name},
+        pluck="name",
+    ):
         frappe.get_doc(
             {
                 "doctype": "User Permission",

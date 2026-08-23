@@ -22,7 +22,10 @@ def execute(filters=None):
     buildings = _get_buildings(building_filter)
     if not buildings:
         if _is_scope_gap(building_filter):
-            return columns, [], _no_scope_message()
+            return columns, [], frappe._(
+                "No active buildings are in your scope. Ask an Accommodation Manager to"
+                " grant you a building permission, then reopen this report."
+            )
         return columns, []
 
     building_names = [b.name for b in buildings]
@@ -129,14 +132,6 @@ def _is_scope_gap(building_filter):
     if building_filter:
         return False
     return not allowed
-
-
-def _no_scope_message():
-    """Returns the message shown when a scoped user has no building permission at all."""
-    return frappe._(
-        "No active buildings are in your scope. Ask an Accommodation Manager to grant you"
-        " a building permission, then reopen this report."
-    )
 
 
 def _occupancy(building_names):

@@ -262,17 +262,6 @@ def _read_office_city(office_names) -> dict[str, str]:
     return out
 
 
-def _read_assignments(plates) -> list:
-    """Every Vehicle Assignment touching the permitted fleet, oldest first."""
-    return frappe.get_all(
-        "Vehicle Assignment",
-        filters={"vehicle": ["in", plates]},
-        fields=["vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
-        order_by="start_date asc",
-        limit_page_length=0,
-    )
-
-
 def _read_drivers(driver_names) -> dict[str, dict]:
     """The Salis Driver rows behind every current driver and every assignment."""
     out: dict[str, dict] = {}
@@ -382,7 +371,13 @@ def build_board() -> dict:
 
     plates = [v.name for v in vehicles]
     assignments = _read(
-        reader_errors, _("assignments"), lambda: _read_assignments(plates), []
+        reader_errors, _("assignments"), lambda: frappe.get_all(
+            "Vehicle Assignment",
+            filters={"vehicle": ["in", plates]},
+            fields=["vehicle", "driver", "project", "start_date", "end_date", "status", "docstatus"],
+            order_by="start_date asc",
+            limit_page_length=0,
+        ), []
     )
     for a in assignments:
         if a.get("driver"):

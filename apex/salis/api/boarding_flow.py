@@ -218,7 +218,7 @@ def ensure_trip_boarding_state(dispatch_trip, transport_request=None, audience=D
     employees = [e for e in _manifest_employees(dispatch_trip, transport_request) if e]
     if not employees:
         return 0
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     existing = {r.employee for r in (trip.boarding_state or [])}
     added = 0
     for employee in employees:
@@ -243,7 +243,7 @@ def mark_boarded(dispatch_trip, employee, source="Scan", audience=DRIVER):
     simply skipped."""
     if not (dispatch_trip and employee):
         return
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     changed = False
     for row in trip.boarding_state or []:
         if row.employee == employee and row.status != "Boarded":
@@ -331,47 +331,19 @@ def _worker_pickup_arrival(window):
     return {"arrived": True, "arrived_at": window.get("arrived_at")}
 
 
-def _trip_start_dt(dispatch_trip):
-    """The trip's start instant — the open Trip Start Log's start_datetime, falling
-    back to None (no log yet means the trip has not really started)."""
-    return frappe.db.get_value(
-        "Trip Start Log",
-        {"dispatch_trip": dispatch_trip, "docstatus": 0},
-        "start_datetime",
-    )
-
-
 def _grace_elapsed(dispatch_trip):
     """True once boarding_grace_minutes have passed since the trip started. Before
     that, escalation/absence is suppressed (workers are still arriving). With no
     start log yet, grace is treated as NOT elapsed (the trip has not begun)."""
-    start = _trip_start_dt(dispatch_trip)
+    start = frappe.db.get_value(
+        "Trip Start Log",
+        {"dispatch_trip": dispatch_trip, "docstatus": 0},
+        "start_datetime",
+    )
     if not start:
         return False
     grace = get_boarding_setting("boarding_grace_minutes")
     return time_diff_in_seconds(now_datetime(), start) >= grace * 60
-
-
-def _locked_trip(dispatch_trip):
-    """Load a Dispatch Trip for a boarding write, holding its rows for the transaction.
-
-    Ten writers in this module load the whole trip, mutate ``boarding_state`` and save it.
-    Four took the trip's row lock first and six did not, among them a poll running at 120
-    requests a minute. The framework does refuse the resulting lost update — the second
-    save fails ``check_if_latest`` — so what contention costs is not a corrupted manifest
-    but the driver's tap: it is rejected with a timestamp mismatch at the stop, and the
-    reminder or override he just made is simply not applied.
-
-    ``for_update`` is passed to the LOAD rather than taken as a separate ``get_value``
-    beside it, because the site runs MariaDB at REPEATABLE READ: a lock taken before a
-    plain read does not advance this transaction's read view, so the document could still
-    be built from a snapshot older than the lock. ``Document.load_from_db`` carries the
-    flag into the parent read and the child-table read alike, which makes both current
-    reads and locks the boarding rows themselves.
-
-    Idempotent — the scan and manual-boarding doors already hold this lock by the time
-    they reach here."""
-    return frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
 
 
 def _resolve_trip_for_driver(dispatch_trip, ptype="read"):
@@ -426,7 +398,7 @@ def get_trip_boarding(dispatch_trip):
 
     notify_window = get_boarding_setting("boarding_notify_window_seconds")
 
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
 
     return {
         "dispatch_trip": dispatch_trip,
@@ -458,7 +430,7 @@ def notify_remaining_passengers(dispatch_trip):
     window = get_boarding_setting("boarding_notify_window_seconds")
     grace_ok = _grace_elapsed(dispatch_trip)
 
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     now = now_datetime()
     changed = False
     pending_employees = []
@@ -518,7 +490,7 @@ def worker_request_wait(token=None):
     window = get_boarding_setting("worker_wait_request_seconds")
 
     ensure_trip_boarding_state(dispatch_trip, audience=WORKER)
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
         return {"trip": dispatch_trip, "wait_count": 0, "remaining": max_count}
@@ -601,7 +573,7 @@ def worker_claim_boarded(token=None):
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     ensure_trip_boarding_state(dispatch_trip, audience=WORKER)
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
         return {"dispatch_trip": dispatch_trip, "status": None}
@@ -681,7 +653,7 @@ def driver_mark_not_boarded(dispatch_trip, employee):
     resolved credential-first before any trip access."""
     _resolve_trip_for_driver(dispatch_trip, "write")
 
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     target = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     if target is None:
         frappe.throw(_("Worker {0} is not on this trip's boarding state.").format(employee))
@@ -749,7 +721,7 @@ def worker_trip_boarding(token=None):
     building = resolved[3]
     window = boarding_window.resolve(dispatch_trip, resolved[1], building)
 
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     row = next((r for r in (trip.boarding_state or []) if r.employee == employee), None)
     state = (
         _state_payload(row, notify_window_seconds)
@@ -797,7 +769,7 @@ def depart_and_finalize(dispatch_trip):
     max_count = get_boarding_setting("boarding_notify_max_count")
     grace_ok = _grace_elapsed(dispatch_trip)
 
-    trip = _locked_trip(dispatch_trip)
+    trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)
     changed = False
     boarded = absent = pending = 0
     for row in trip.boarding_state or []:

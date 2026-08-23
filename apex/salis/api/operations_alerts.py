@@ -172,20 +172,6 @@ def _queue_ref_checked(name):
     return ref
 
 
-def _queue_assignees(ref) -> list:
-    """The current open-assignment holders of a queue row's document."""
-    return frappe.get_all(
-        "ToDo",
-        filters={
-            "reference_type": ref.reference_type,
-            "reference_name": ref.reference_name,
-            "status": ["in", ["Open", "Overdue"]],
-        },
-        pluck="allocated_to",
-        distinct=True,
-    )
-
-
 @frappe.whitelist(methods=["POST"])
 def acknowledge_alert(name):
     """Acknowledge a queue row: permission-check and report no transition.
@@ -244,7 +230,17 @@ def assign_alert(name, user=None):
         "doctype": ref.reference_type,
         "name": ref.reference_name,
     })
-    return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
+    assignees = frappe.get_all(
+        "ToDo",
+        filters={
+            "reference_type": ref.reference_type,
+            "reference_name": ref.reference_name,
+            "status": ["in", ["Open", "Overdue"]],
+        },
+        pluck="allocated_to",
+        distinct=True,
+    )
+    return {"ok": True, "name": name, "assignees": assignees}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -261,7 +257,17 @@ def unassign_alert(name, user=None):
         assign_to.remove(ref.reference_type, ref.reference_name, target)
     except Exception:
         pass
-    return {"ok": True, "name": name, "assignees": _queue_assignees(ref)}
+    assignees = frappe.get_all(
+        "ToDo",
+        filters={
+            "reference_type": ref.reference_type,
+            "reference_name": ref.reference_name,
+            "status": ["in", ["Open", "Overdue"]],
+        },
+        pluck="allocated_to",
+        distinct=True,
+    )
+    return {"ok": True, "name": name, "assignees": assignees}
 
 
 @frappe.whitelist(methods=["POST"])

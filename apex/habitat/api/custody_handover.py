@@ -180,7 +180,7 @@ def reject_handover(handover: str, reason: str):
     leaves the handover exactly as it was.
 
     The status is re-read under a row lock, the way confirm_handover reads it: the
-    reversal below takes no lock of its own (_live_rows is a plain read), so two
+    reversal below takes no lock of its own (it reads the live rows plainly), so two
     rejections arriving together both found live rows and credited the source store
     twice for one shipment."""
     doc = _get_submitted(handover)

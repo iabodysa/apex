@@ -247,23 +247,18 @@ def _assert_reversal_keeps_stock_positive(rows) -> None:
             ).format(flt(qty), item, building, available)
         )
 
-def _live_rows(voucher_type: str, voucher_no: str):
-    """The rows a reversal of this voucher would mirror: its not-yet-cancelled
-    entries. One query shape shared by the refusal check and the reversal itself."""
-    return frappe.get_all(
-        "Accommodation Stock Ledger",
-        filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
-        fields=["name", "item_type", "item", "signed_qty", "building", "employee",
-                "party_type", "party", "from_building", "to_building"],
-    )
-
 def validate_reversal_allowed(voucher_type: str, voucher_no: str) -> None:
     """REFUSAL half of a stock voucher's cancel — call from ``before_cancel``.
 
     The RESTORATION half (writing the mirror rows) stays in reverse_stock_entries,
     which on_cancel still runs.
     """
-    _assert_reversal_keeps_stock_positive(_live_rows(voucher_type, voucher_no))
+    _assert_reversal_keeps_stock_positive(frappe.get_all(
+        "Accommodation Stock Ledger",
+        filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+        fields=["name", "item_type", "item", "signed_qty", "building", "employee",
+                "party_type", "party", "from_building", "to_building"],
+    ))
 
 def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     """RESTORATION half: reverse (do not delete) all live rows of a voucher — post
@@ -273,7 +268,12 @@ def reverse_stock_entries(voucher_type: str, voucher_no: str) -> None:
     before_cancel: this is also the entry point for reject_handover, which is not a
     docstatus transition and so has no before_cancel to hook, and re-reading inside
     the same transaction is free (the locking read already holds the rows)."""
-    rows = _live_rows(voucher_type, voucher_no)
+    rows = frappe.get_all(
+        "Accommodation Stock Ledger",
+        filters={"voucher_type": voucher_type, "voucher_no": voucher_no, "is_cancelled": 0},
+        fields=["name", "item_type", "item", "signed_qty", "building", "employee",
+                "party_type", "party", "from_building", "to_building"],
+    )
     _assert_reversal_keeps_stock_positive(rows)
     for r in rows:
         rev = post_stock_entry(
