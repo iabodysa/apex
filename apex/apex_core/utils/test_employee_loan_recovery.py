@@ -27,7 +27,6 @@ from hrms.payroll.doctype.salary_structure.test_salary_structure import make_sal
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 from apex.apex_core.utils.employee_loan_recovery import (
-    cap_loan_installments_to_current_pay,
     ensure_recovery_loan_product,
     raise_recovery_loan,
 )
@@ -210,10 +209,18 @@ class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
         _submit_without_emailing(slip)
         self.assertGreaterEqual(slip.net_pay, 0)
 
-    def test_an_installment_that_would_go_negative_is_refused(self):
-        """Built directly on the Loan Product, bypassing this module's own statutory
-        cap on purpose: the cap belongs to ``TestRaiseRecoveryLoan``, and this case
-        isolates hrms's floor from it so the two guards are proved independently."""
+    def test_an_installment_that_would_go_negative_is_capped_before_it_can(self):
+        """A loan built directly on the Loan Product, far past what the pay can bear.
+
+        This case used to assert hrms's floor refusing the submit. It cannot any more,
+        and the reason is the point: the per-period cap is now a wired Salary Slip
+        ``validate`` hook, so it clamps the installment BEFORE hrms is ever asked
+        whether net pay went negative. A guard that never has to fire is the better
+        outcome — the employee keeps half their pay instead of being refused a slip.
+
+        hrms's floor is untouched and still the deeper backstop; it is simply no longer
+        reachable through this path, which is what the fix was for.
+        """
         employee, structure = _payroll_employee("apex.loan.floor.refuse@apex.test", base=500)
         loan_product = ensure_recovery_loan_product(_COMPANY)
         loan = frappe.get_doc(
@@ -254,16 +261,30 @@ class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
 
         slip = _build_slip(structure, employee)
         slip.insert()
-        self.assertRaises(frappe.ValidationError, slip.submit)
+
+        cap = round(slip.gross_pay * MAX_RECOVERY_PERCENT / 100.0, 2)
+        self.assertEqual(
+            slip.loans[0].total_payment,
+            cap,
+            "a 10,000 installment on a 500 base was not clamped — check the Salary "
+            "Slip validate hook is still wired in hooks.py",
+        )
+        self.assertGreaterEqual(slip.net_pay, 0)
+
+        _submit_without_emailing(slip)
+        self.assertEqual(slip.docstatus, 1)
 
 
 class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
     """The gap the first review found: hrms's own floor only refuses a NEGATIVE net
     pay (salary_slip.py:207-209), so an installment frozen against the employee's
     ORIGINAL pay can legally consume most of a later, smaller paycheque and still
-    submit without a word. This is not yet wired — see the module docstring for the
-    exact ``hooks.py`` entry it needs — but proves the function itself, called the
-    way that hook would call it, on a real Salary Slip.
+    submit without a word. Wired as a Salary Slip ``validate`` doc_event, which is the
+    only seam that works: ``set_loan_repayment`` populates ``doc.loans`` inside the
+    controller's own ``validate`` (salary_slip.py:853 via :169), and a hooked method
+    runs AFTER the controller's — ``Document.hook``'s composer calls the function first
+    and the hooks after it (frappe/model/document.py:1354-1362) — so a
+    ``before_validate`` handler would fire with nothing to clamp.
     """
 
     def test_a_pay_drop_below_the_frozen_installment_is_absorbed_not_gutted(self):
@@ -290,22 +311,22 @@ class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
         slip = _build_slip(structure, employee)
         slip.insert()
 
-        # Baseline, unfixed: hrms carries the FROZEN installment forward unreduced.
-        # It swallows nearly the whole (now much smaller) gross pay, and hrms's own
-        # floor (salary_slip.py:207-209) only refuses a NEGATIVE net pay — it says
-        # nothing about a merely tiny, or merely small, one.
+        # The cap is applied by the wired Salary Slip validate hook, so it has
+        # already happened by the time insert() returns — nothing here calls it.
+        # hrms would otherwise carry the FROZEN installment forward unreduced, and
+        # its own floor (salary_slip.py:207-209) refuses only a NEGATIVE net pay,
+        # saying nothing about a merely decimated one.
         self.assertEqual(len(slip.loans), 1)
-        self.assertEqual(slip.loans[0].total_payment, frozen_installment)
-        gutted_net_pay = slip.net_pay
         new_cap = round(slip.gross_pay * MAX_RECOVERY_PERCENT / 100.0, 2)
         self.assertLess(new_cap, frozen_installment)
-        self.assertLess(gutted_net_pay, new_cap)
 
-        cap_loan_installments_to_current_pay(slip)
-        slip.save()
-
-        self.assertEqual(slip.loans[0].total_payment, new_cap)
-        self.assertGreater(slip.net_pay, gutted_net_pay)
+        self.assertEqual(
+            slip.loans[0].total_payment,
+            new_cap,
+            "the frozen installment was not clamped to this period's pay — "
+            "check the Salary Slip validate hook is still wired in hooks.py",
+        )
+        self.assertGreater(slip.net_pay, slip.gross_pay - frozen_installment)
         self.assertAlmostEqual(
             slip.net_pay, slip.gross_pay - slip.total_deduction - new_cap, places=2
         )

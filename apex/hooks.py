@@ -143,6 +143,9 @@ doc_events = {
     "Additional Salary": {
         "before_submit": "apex.apex_core.utils.employee_recovery.validate_recovery_additional_salary",
     },
+    "Salary Slip": {
+        "validate": "apex.apex_core.utils.employee_loan_recovery.cap_loan_installments_to_current_pay",
+    },
     "Salis Driver": {
         "on_change": "apex.apex_core.utils.portal_identity.on_salis_driver_change",
     },
