@@ -47,6 +47,14 @@ def mailable(users) -> list[str]:
     "blocked", and the address passes through unfiltered — the same default
     ``is_email_notifications_enabled`` already applies to a User with no Notification
     Settings row.
+
+    CONTRACT, and the one thing this function no longer does: an unknown address is
+    now PASSED THROUGH rather than dropped, so this is no longer a filter against an
+    address nobody configured. Every caller today supplies either an administrator-set
+    Habitat Settings field or a role-derived User list, and that is what makes the
+    pass-through safe. A caller that ever feeds it a request parameter would be handing
+    an outsider the app's own mail; such a caller must validate the address itself
+    before this point.
     """
     out = []
     for user in users or []:

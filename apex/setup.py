@@ -168,7 +168,7 @@ def restrict_genders():
         except frappe.LinkExistsError:
             kept.append(name)
     if kept:
-        frappe.logger().info(f"apex: Gender still in use, left in place: {kept}")
+        print(f"apex: Gender still in use, left in place: {kept}")
     return {"removed": removed, "in_use": kept}
 
 

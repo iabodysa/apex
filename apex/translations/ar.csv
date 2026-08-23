@@ -5546,3 +5546,14 @@ issue type,نوع بلاغ
 renamed or edited,إعادة تسميته أو تعديله
 "{0} is an {1} Apex ships, and every update puts it back as the app defines it. It cannot be {2} here. Ask for the change to ship with the app.",{0} هو {1} يشحنه أبكس، وكل تحديث يعيده كما يعرّفه التطبيق. لا يمكن {2} من هنا. اطلب أن يصدر التغيير مع التطبيق.
 "Permissions for {0} are set by Apex and reapplied on every update, so a change made here would be removed the next time the site is updated. Ask for the change to ship with the app instead.",صلاحيات {0} يحددها أبكس ويعيد تطبيقها مع كل تحديث، فأي تغيير هنا سيُزال عند تحديث الموقع القادم. اطلب أن يصدر التغيير مع التطبيق.
+Salary recovery deferred for {0}: no valid Salary Slip preview period for {1}.,تأجّل استرداد الراتب لتاريخ {0}: لا توجد فترة معاينة صالحة لقسيمة الراتب للموظف {1}.
+Salary recovery deferred for {0}: nothing recoverable this period.,تأجّل استرداد الراتب لتاريخ {0}: لا يوجد مبلغ قابل للاسترداد في هذه الفترة.
+Building not covered by a weekly safety round: {0},مبنى غير مشمول بجولة سلامة أسبوعية: {0}
+Building {0} ({1}) has no submitted Weekly Safety Round for the week of {2} — {3}.,المبنى {0} ({1}) ليس له جولة سلامة أسبوعية معتمدة لأسبوع {2} — {3}.
+Audit remediation overdue: {0},تجاوز خطة معالجة التدقيق موعدها: {0}
+Remediation plan {0} (project {1}) passed its deadline {2} and is now Overdue.,تجاوزت خطة المعالجة {0} (المشروع {1}) موعدها النهائي {2} وأصبحت متأخرة.
+Scheduled task {0} ({1}) is overdue (was due {2}).,المهمة المجدولة {0} ({1}) متأخرة (كان موعد استحقاقها {2}).
+{0}-priority scheduled task {1} ({2}) is overdue (was due {3}).,مهمة مجدولة بأولوية {0}: {1} ({2}) متأخرة (كان موعد استحقاقها {3}).
+Overdue {0} safety task: {1},مهمة سلامة متأخرة بأولوية {0}: {1}
+Telecom Contract {0} with {1} expires on {2}.,عقد الاتصالات {0} مع {1} ينتهي في {2}.
+SIM {0} was suspended on {1}.,شريحة {0} عُلّقت بتاريخ {1}.

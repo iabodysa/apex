@@ -11,8 +11,9 @@
  "event": "Days Before",
  "idx": 0,
  "is_standard": 1,
- "message": "",
+ "message": "{{ _(\"Telecom Contract {0} with {1} expires on {2}.\").format(doc.name, doc.supplier, doc.contract_end_date) }}",
  "message_type": "HTML",
+ "modified": "2026-08-22 18:40:00.000000",
  "module": "Logistay",
  "name": "SIM Operations - Contract Expiry Soon",
  "recipients": [
@@ -22,6 +23,5 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "{{ _(\"Telecom Contract Expiring\") }}: {{ doc.name }} ({{ doc.supplier }})",
- "modified": "2026-08-22 18:40:00.000000"
+ "subject": "{{ _(\"Telecom Contract Expiring\") }}: {{ doc.name }} ({{ doc.supplier }})"
 }

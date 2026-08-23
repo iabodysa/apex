@@ -9,8 +9,9 @@
  "event": "Submit",
  "idx": 0,
  "is_standard": 1,
- "message": "",
+ "message": "{{ _(\"SIM {0} was suspended on {1}.\").format(doc.sim_card, doc.assignment_date) }}",
  "message_type": "HTML",
+ "modified": "2026-08-16 00:00:00.000000",
  "module": "Logistay",
  "name": "SIM Operations - SIM Suspended",
  "recipients": [
@@ -20,6 +21,5 @@
  ],
  "send_system_notification": 1,
  "send_to_all_assignees": 0,
- "subject": "{{ _(\"SIM Suspended\") }}: {{ doc.sim_card }}",
- "modified": "2026-08-16 00:00:00.000000"
+ "subject": "{{ _(\"SIM Suspended\") }}: {{ doc.sim_card }}"
 }
