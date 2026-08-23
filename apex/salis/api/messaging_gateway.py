@@ -35,7 +35,12 @@ def _gateway_config() -> dict | None:
     Reads the Single fresh (no cache) so an operator enabling the gateway or
     rotating the key takes effect immediately. Returns None — the no-op signal —
     when the master switch is off or the URL/key is missing, so every caller
-    degrades to a logged no-op instead of erroring."""
+    degrades to a logged no-op instead of erroring.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) rather than ``get_cached_doc``:
+    the one thing the cache cannot do is notice a key rotated seconds ago, and a
+    gateway that keeps using a revoked credential fails silently for the rest of the
+    worker's life."""
     s = frappe.get_single(_SETTINGS)
     if not s.get("messaging_gateway_enabled"):
         return None
@@ -145,7 +150,12 @@ def enqueue_message(to: str, message: str, channel: str | None = None) -> dict:
     gateway must never block the desk action or a document save. Returns
     immediately with ``{"queued": bool, "reason": ...}``; when the gateway is not
     configured it does not even enqueue (a no-op), so the background worker is
-    never woken for nothing."""
+    never woken for nothing.
+
+    ``frappe.enqueue`` (frappe/utils/background_jobs.py:59) hands the send to a
+    worker. The one thing the queue cannot do is decline cheaply — an unconfigured
+    site would spend a worker slot per message to discover the gateway is off — which
+    is why the configured check runs here rather than inside the job."""
     if not is_configured():
         frappe.logger("messaging_gateway").info("enqueue skipped: gateway not configured")
         return {"queued": False, "reason": "not_configured"}

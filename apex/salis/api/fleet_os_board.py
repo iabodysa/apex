@@ -224,6 +224,11 @@ def _read(reader_errors: list, reader: str, fn, default):
     (drivers, assignments, incidents, write-offs, category fuel) is best-effort —
     a failure in one returns ``default`` and is recorded in ``reader_errors`` so
     the page can show a dismissible inline notice instead of a blank screen.
+
+    The failure is recorded through ``frappe.get_traceback`` into the Error Log. The
+    one thing an unhandled raise cannot do is degrade: a single enrichment fault would
+    otherwise take the whole board down, and the vehicles — the part that matters —
+    are already in hand by then.
     """
     try:
         return fn()

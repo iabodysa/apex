@@ -145,8 +145,10 @@ def get_open_alerts(project=None, severity=None, since=None):
 def _resolved_since(since, plates) -> int:
     """Count queue rows drained after ``since`` for the delta banner.
 
-    Unscoped callers only: a closed ToDo carries no vehicle column to scope by,
-    so a scoped caller gets zero rather than leak another project's activity.
+    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database.
+    The one thing it cannot do is apply row scope, which decides the rule here:
+    a closed ToDo carries no vehicle column to scope by, so a scoped caller gets zero
+    rather than a number drawn from another project's activity.
     """
     if not since or plates is not None:
         return 0

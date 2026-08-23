@@ -245,6 +245,12 @@ def linked_accrued_total(rental_office: str, period_month: str) -> float:
     This is the ledger-derived accrued figure the Rental Settlement controller
     cross-checks its hand-entered vehicle lines against — the source of truth for
     "what the rental engine actually accrued" for this office and month.
+
+    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
+    ``frappe.get_all`` cannot do is SUM in the database: a month of accrual rows
+    fetched to be added in Python is the whole ledger crossing the wire to produce one
+    figure. Reversals are excluded by filter, so the total is what was ORIGINALLY
+    accrued rather than the net after corrections.
     """
     bounds = _period_bounds(period_month)
     if not rental_office or not bounds:

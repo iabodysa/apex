@@ -31,6 +31,13 @@ ROUTER_CALLS_PER_REQUEST = 3
 
 
 def _require_portal_role():
+    """Refuse anyone outside the route-supervisor portal's role set.
+
+    ``frappe.get_roles`` (frappe/permissions.py:497) returns every Role for
+    Administrator, so the explicit branch above it is a shortcut rather than a repair.
+    The one thing a DocPerm cannot gate is a PAGE: this portal is a route, not a
+    DocType, so admission is asserted here or not at all.
+    """
     user = frappe.session.user
     if user == "Administrator":
         return
