@@ -45,8 +45,10 @@ write only when the resolved employee is on the trip's own manifest — the same
 
 import frappe
 from frappe import _
+from frappe.translate import get_all_translations
 from frappe.utils import cint
 
+from apex.apex_core.utils.addresses import get_address_text
 from apex.apex_core.utils.portal_identity import WORKER, as_capacity, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.apex_core.utils.role_assignment import role_holders_escalating
@@ -281,8 +283,6 @@ def get_enum_labels(lang="ar"):
     raw value, so identity entries add nothing). Public + cacheable: it exposes no
     worker data, only option metadata + translations, so no token is required."""
     lang = (lang or "ar").strip() or "ar"
-    from frappe.translate import get_all_translations
-
     translations = get_all_translations(lang) or {}
     out = {}
     for ns, (doctype, field) in _ENUM_SOURCES.items():
@@ -337,8 +337,6 @@ def get_worker_accommodation(token=None):
     building, room, bed, occupancy, the building in-charge contact, and any
     building notices. Scoped to the resolved employee; a worker with no active
     assignment gets a friendly ``{"assignment": None}`` empty state. Read-only."""
-    from apex.apex_core.utils.addresses import get_address_text
-
     employee = _resolve_worker(token)
     assignment = _active_assignment(employee)
     if not assignment:

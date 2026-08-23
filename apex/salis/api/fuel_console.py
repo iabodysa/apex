@@ -45,6 +45,7 @@ from frappe import _
 from frappe.model.workflow import apply_workflow, get_transitions
 from frappe.utils import date_diff, flt, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.enrich import vehicle_driver_titles
 
@@ -88,8 +89,6 @@ def _approval_threshold() -> float:
     unset, which means "no threshold" (every request auto-flows) — here a 0 IS the
     semantic default, so the zero-coalesce is behaviour-preserving.
     """
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
-
     return get_salis_float("fuel_request_approval_threshold_litres", 0.0)
 
 

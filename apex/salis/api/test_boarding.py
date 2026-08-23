@@ -8,9 +8,13 @@ idempotent and double-counts the headcount, so the one property that matters is 
 every caller reads the same rule off the same log object.
 """
 
+import ast
+import pathlib
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.salis.api import boarding, masar
 from apex.salis.api.boarding import already_boarded
 
 
@@ -52,11 +56,6 @@ class TestAlreadyBoarded(FrappeTestCase):
         imports, so identity is proved on the definitions in the tree rather than on
         every module's attributes.
         """
-        import ast
-        import pathlib
-
-        from apex.salis.api import boarding, masar
-
         self.assertIs(masar.already_boarded, boarding.already_boarded)
 
         root = pathlib.Path(boarding.__file__).parents[3]

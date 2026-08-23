@@ -44,6 +44,8 @@ import os
 
 import frappe
 from frappe import _
+from frappe.utils import flt
+from frappe.utils.file_manager import save_file
 
 from apex.apex_core.utils.portal_identity import (
     WORKER,
@@ -219,8 +221,6 @@ def _net_custody_items(rows):
 
     Pure: ``rows`` is the whole input, so the net-balance rule can be exercised
     without a ledger."""
-    from frappe.utils import flt
-
     agg = {}
     for r in rows:
         key = (r.building, r.item)
@@ -286,9 +286,16 @@ def _attach_worker_photo(doc, photo, photo_filename):
 
     The File is PRIVATE and created through the framework's ``save_file`` (which
     re-checks the site max-file-size); its path is written back to ``attachment`` so
-    the existing detail view renders it."""
-    from frappe.utils.file_manager import save_file
+    the existing detail view renders it.
 
+    ``verified_image_type`` stays a function-local import: importing
+    ``apex.salis.api.driver_portal.images`` first imports the ``driver_portal``
+    package (``apex/salis/api/driver_portal/__init__.py``), which imports
+    ``driver_portal.profile``, which imports ``_fmt_date`` from this module
+    (``masar_worker``) — a module-level import here would ask for
+    ``apex.salis.api.driver_portal.images`` before this module finishes
+    executing, and Python would find ``masar_worker`` only partially
+    initialized on the way back in."""
     from apex.salis.api.driver_portal.images import verified_image_type
 
     photo = (photo or "").strip()

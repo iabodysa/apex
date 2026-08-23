@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 from apex.salis.api.dispatch_board import VEHICLE_STATUSES
 from apex.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
 from apex.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_driver
@@ -64,8 +65,6 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
     already-scoped ``plates`` — a 20-row page would silently drop the tail of the
     fleet from the per-vehicle incident tally.
     """
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     unscoped, projects, base_filters = scope_filter()
     stopped_over_days = get_salis_int("workshop_overstay_days", 14)

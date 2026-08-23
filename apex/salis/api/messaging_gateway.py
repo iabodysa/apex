@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.integrations.utils import make_post_request
 
 from apex.apex_core.utils.phone import normalize_phone
 from apex.apex_core.utils.portal_identity import (
@@ -72,8 +73,6 @@ def _post_to_gateway(cfg: dict, to: str, message: str, channel: str) -> dict:
     token, using Frappe's native HTTP helper. Any transport/HTTP error is caught,
     logged (WITHOUT the body or key), and returned as ``sent=False`` so a send
     failure never bubbles into the caller's flow."""
-    from frappe.integrations.utils import make_post_request
-
     payload = {"to": to, "message": message, "channel": channel}
     if cfg.get("sender_id"):
         payload["sender_id"] = cfg["sender_id"]
