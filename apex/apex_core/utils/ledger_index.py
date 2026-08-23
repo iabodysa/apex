@@ -33,7 +33,13 @@ from pypika import Order
 
 
 def _constraint_exists(doctype: str, constraint_name: str) -> bool:
-    """True if a UNIQUE constraint with this name already exists on the table."""
+    """True if a UNIQUE constraint with this name already exists on the table.
+
+    Read from ``information_schema.TABLE_CONSTRAINTS`` rather than through
+    ``frappe.db.has_index``, which reports indexes and cannot tell a UNIQUE
+    constraint from a plain one. Best-effort: a probe failure answers ``False``
+    and the caller falls through to its own guarded DDL.
+    """
     try:
         return bool(
             frappe.db.sql(
@@ -86,10 +92,11 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
 def _column_set_indexed(doctype: str, fields: list[str]) -> bool:
     """True if ANY index on the table spans exactly this ordered column set.
 
-    EXACT ordered equality, never leading-prefix coverage: Frappe's own
-    ``get_column_index`` discards composite keys (it drops any key that has a
-    ``Seq_in_index = 2`` row), so a composite never satisfies the framework's
-    single-column ``search_index`` and must not be treated here as covering one.
+    EXACT ordered equality, never leading-prefix coverage: ``get_column_index``
+    (frappe/database/mariadb/database.py:381) answers only for a SINGLE column at
+    ``Seq_in_index = 1`` and discards any key that has a second column, so a
+    composite never satisfies the framework's single-column ``search_index`` and
+    must not be treated here as covering one.
     ``(a, b)`` and ``(b, a)`` are likewise different indexes.
 
     Table name is BOUND, not interpolated, so no identifier reaches the SQL text.
@@ -124,6 +131,8 @@ def _index_exists(doctype: str, index_name: str, fields: list[str] | None = None
     Matches on NAME first; when ``fields`` is given, an index over exactly that
     ordered column set counts too, whatever its name (see ``_column_set_indexed``)
     — so an equivalent index Frappe already maintains is reused, not duplicated.
+    ``frappe.db.has_index`` matches by NAME only, which is the one thing it cannot
+    do: two names over the same columns read as two different indexes to it.
     """
     try:
         named = frappe.db.sql(
@@ -142,13 +151,18 @@ def _index_exists(doctype: str, index_name: str, fields: list[str] | None = None
 def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
     """Add a plain composite (non-unique) performance index idempotently.
 
+    ``frappe.db.add_index`` (frappe/database/mariadb/database.py:411) is the
+    primitive and is itself idempotent. Three things it cannot do here: it matches
+    an existing index by NAME alone, so an equivalent composite under another name
+    is duplicated; it calls ``self.commit()`` before the DDL, which ends the
+    migrate transaction mid-flight; and it returns nothing, so a caller cannot tell
+    a created index from a failed one.
+
     Called from a controller ``on_doctype_update`` so BOTH fresh installs (app
     sync applies it) and existing sites (``bench migrate``) get the index — a
     patch alone never reaches fresh installs, which mark patches complete without
-    running them. No-op when the index already exists — under ``index_name`` OR
-    under any other name over the same ordered column set, so an index the
-    framework already maintains is never duplicated; best-effort on DDL error
-    (logs and returns ``False`` rather than aborting migrate).
+    running them. Best-effort on DDL error: logs and returns ``False`` rather than
+    aborting migrate.
     """
     if _index_exists(doctype, index_name, fields):
         return True
@@ -173,10 +187,11 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
 def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) -> bool:
     """Add a composite UNIQUE index, guarding against pre-existing duplicate data.
 
-    Returns ``True`` if the constraint exists (already or newly created), or
-    ``False`` if it could not be created (e.g. duplicate data) — in which case
-    the blocking duplicate groups are logged and migration continues.
-
+    ``frappe.db.add_unique`` (frappe/database/mariadb/database.py:436) writes the
+    constraint. The one thing it cannot do is survive a table that already holds
+    duplicates: it raises, and inside ``on_doctype_update`` that aborts the whole
+    migrate. This answers ``False`` instead and logs the blocking row groups, so
+    the operator learns which rows to clean rather than which migrate to re-run.
     """
     if _constraint_exists(doctype, constraint_name):
         return True

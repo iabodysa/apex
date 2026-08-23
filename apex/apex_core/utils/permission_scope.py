@@ -47,11 +47,14 @@ def resolve_user(user=None):
 def is_unscoped(user, unscoped_roles):
     """True when the user is the Administrator or holds an oversight role.
 
-    Guest is never unscoped (``user == "Administrator"`` is False for Guest, and
-    Guest short-circuits before the role check). ``unscoped_roles`` is the
-    MODULE-SPECIFIC oversight set — the ONE thing that differs between Building and
-    Project scoping — so it is passed in explicitly and never defaulted; a shared
-    default here would silently apply the wrong oversight set to one domain.
+    ``frappe.get_roles`` (frappe/permissions.py:497) does the membership itself and
+    already answers correctly for both edge users — every Role for Administrator,
+    only the Guest role for Guest — so the explicit branch here states that contract
+    rather than repairing the primitive. The one thing the primitive cannot do is
+    know WHICH roles count as oversight: ``unscoped_roles`` is the module-specific
+    set, the only thing that differs between Building and Project scoping, so it is
+    passed in explicitly and never defaulted. A shared default would silently apply
+    one domain's oversight set to the other.
     """
     if user in ("Administrator", "Guest"):
         return user == "Administrator"
@@ -148,6 +151,9 @@ def scope_condition(user, is_unscoped_fn, allowed_fn, column, allow=None, doctyp
     "" for unscoped users (no restriction); "1=0" when the user is scoped but has
     no allowed values (so they see nothing); ``column in (v1, v2, ...)`` otherwise.
 
+    Values reach the SQL through ``frappe.db.escape``
+    (frappe/database/database.py:1371); no identifier is interpolated, only literals.
+
     ``is_unscoped_fn`` / ``allowed_fn`` are the calling MODULE's own single-arg
     resolvers (``_building_is_unscoped`` / ``_allowed_buildings`` for Building;
     ``_is_unscoped`` / ``_allowed_projects`` for Project). They are injected — not
@@ -208,9 +214,12 @@ def render_fragment(kind, spec, values, fragments):
     """Render one scope strategy from ``fragments`` against the user's allowed values.
 
     ``values`` is non-empty — the caller has already answered the unscoped and
-    empty-scope cases, so every renderer emits a real restriction. An unrecognised
-    kind renders "1=0" rather than falling through to no restriction: an unknown
-    strategy must fail CLOSED.
+    empty-scope cases, so every renderer emits a real restriction. Each value is
+    passed through ``frappe.db.escape`` (frappe/database/database.py:1371) before it
+    reaches a renderer, so a renderer never has to decide about quoting.
+
+    An unrecognised kind renders "1=0" rather than falling through to no
+    restriction: an unknown strategy must fail CLOSED.
     """
     render = fragments.get(kind)
     if not render:
