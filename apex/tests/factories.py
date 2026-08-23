@@ -120,7 +120,6 @@ def make_building(name=None, company=None, **kwargs):
         **kwargs,
     })
     doc.insert(ignore_permissions=True)
-    _register_building(doc.name)
     return doc
 
 def make_room(building, room_number=None, **kwargs):
@@ -595,19 +594,6 @@ class WorkerTripMixin:
                     except Exception:
                         pass
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
-
-_CREATED_BUILDINGS: set[str] = set()
-
-def _register_building(name):
-    """Note that a builder above INSERTED ``name``, and hand it straight back.
-
-    The teardown reads this set and nothing else, so a building the suite did not
-    create is out of its reach by construction. Only the create branch of a
-    get-or-create builder calls this: a building that was already on the site is
-    borrowed, not made, and borrowing it must not license deleting it.
-    """
-    _CREATED_BUILDINGS.add(name)
-    return name
 
 def fixture_tag():
     """A collision-free fixture suffix: at least 12 random characters, because a

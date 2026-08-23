@@ -251,14 +251,16 @@ def unassign_alert(name, user=None):
 
     Delegates to ``assign_to.remove``, which closes the ToDo and rewrites
     ``_assign``. Permission is re-checked on the referenced document. No-op
-    (still ``ok``) if not assigned.
+    (still ``ok``) if not assigned — ``assign_to.set_status``
+    (frappe/desk/form/assign_to.py:203-228) already no-ops that case on its own;
+    it is not caught here, so a real failure (the caller's write grant on the
+    reference document was revoked between the check above and this call, or the
+    reference document itself vanished) surfaces instead of being reported as the
+    success it was not.
     """
     target = user or frappe.session.user
     ref = _queue_ref_checked(name)
-    try:
-        assign_to.remove(ref.reference_type, ref.reference_name, target)
-    except Exception:
-        pass
+    assign_to.remove(ref.reference_type, ref.reference_name, target)
     assignees = frappe.get_all(
         "ToDo",
         filters={

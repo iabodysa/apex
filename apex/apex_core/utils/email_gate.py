@@ -29,7 +29,7 @@ from frappe.desk.doctype.notification_settings.notification_settings import (
 
 
 def mailable(users) -> list[str]:
-    """Keep only the users who can be emailed, in the order given.
+    """Keep only the addresses that can be emailed, in the order given.
 
     The Habitat Settings toggle answers whether the APP may send at all; this answers
     whether a PERSON agreed to receive. They are different questions and both must be
@@ -38,12 +38,25 @@ def mailable(users) -> list[str]:
     switched their own email notifications off still passes it.
 
     Administrator and Guest are dropped: neither is a person who chose anything.
+
+    ``users`` also carries a plain email address with no matching ``User`` row on sites
+    where a recipient is configured directly (``Habitat Settings.finance_notification_email``,
+    ``safety_report_recipient``) — an external contact who never logs in. Such an address
+    has no login to disable and no Notification Settings to opt out with, so
+    ``frappe.db.get_value("User", ...)`` returning nothing is read as "not a User", not as
+    "blocked", and the address passes through unfiltered — the same default
+    ``is_email_notifications_enabled`` already applies to a User with no Notification
+    Settings row.
     """
     out = []
     for user in users or []:
         if not user or user in ("Administrator", "Guest"):
             continue
-        if not frappe.db.get_value("User", user, "enabled"):
+        enabled = frappe.db.get_value("User", user, "enabled")
+        if enabled is None:
+            out.append(user)
+            continue
+        if not enabled:
             continue
         if not is_email_notifications_enabled(user):
             continue
