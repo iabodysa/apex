@@ -144,8 +144,9 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "default": "Open",
-   "description": "Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state.",
+   "description": "Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state. The Maintenance Request Workflow, not this field's read_only flag, is what stops a hand edit — see the Close/Reopen actions.",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -394,7 +395,7 @@
    "table_fieldname": "findings"
   }
  ],
- "modified": "2026-08-16 07:10:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Maintenance Request",

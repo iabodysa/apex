@@ -26,7 +26,13 @@ class SalisDriver(Document):
             )
 
     def _refuse_a_hand_written_status(self):
-        """Keep the fleet state under Driver Suspension and Driver Clearance."""
+        """Keep the fleet state under Driver Suspension and Driver Clearance.
+
+        No Workflow replaces this: the transition is not a person choosing an
+        action on THIS document, it is Driver Suspension.on_submit/on_cancel and
+        Driver Clearance.on_submit writing this field on someone else's record —
+        a Workflow only governs a save() on its own document.
+        """
         if self.is_new():
             self.status = "Active"
             return

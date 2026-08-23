@@ -96,7 +96,16 @@ class FacilityAssetDelivery(Document):
         """The exit fields are allow_on_submit so the API can stamp them, and read_only,
         which is a form control and not a server one — so a plain set_value could tick the
         other side's checkpoint, open the lock and issue the code past the role and order
-        gates. db_set runs no hook, so _pass_exit never reaches here."""
+        gates. db_set runs no hook, so _pass_exit never reaches here.
+
+        No Workflow replaces this guard: the transition to Released depends on an
+        hmac-compared OTP hash and a rate-limited lockout (habitat/api/facility_asset_delivery.py),
+        and a Workflow Transition's ``condition`` runs through ``frappe.safe_eval`` against the
+        deliberately narrow globals in ``get_workflow_safe_globals`` (frappe/model/workflow.py:75-88
+        — ``frappe.db.get_value``, ``get_list``, session, date utils only, no ``hmac``, no lockout
+        module). A condition cannot verify the code, so the exit-clearing role/order/OTP gates stay
+        Python; this guard is what stops a hand edit from reaching them through the plain save() path.
+        """
         touched = [f for f in _EXIT_FIELDS if self.has_value_changed(f)]
         if touched:
             frappe.throw(

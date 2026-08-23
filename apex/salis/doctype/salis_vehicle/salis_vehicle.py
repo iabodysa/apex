@@ -48,7 +48,13 @@ class SalisVehicle(Document):
         editable on a non-submittable DocType — so a plain save puts a stopped or stolen vehicle
         back to Active while the stop has no ``return_date`` and the incident is still Open, and
         every board that offers Active vehicles for dispatch believes it. Only the interval a
-        machine owns is refused; the operator keeps the field the rest of the time."""
+        machine owns is refused; the operator keeps the field the rest of the time.
+
+        No Workflow replaces this: Vehicle Suspension and Vehicle Incident, not a
+        person choosing an action on THIS document, drive the stop — a Workflow
+        only governs a save() on its own document, and both write this field on
+        someone else's record.
+        """
         if self.is_new() or not self.has_value_changed("status"):
             return
         if frappe.db.exists(

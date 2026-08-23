@@ -36,6 +36,7 @@ WORKFLOWS = (
     "Fuel Exception Case Workflow",
     "Fuel Request Workflow",
     "Lease Workflow",
+    "Maintenance Request Workflow",
     "Movement Cost Recovery Workflow",
     "Movement Cost Transfer Workflow",
     "Rental Settlement Workflow",

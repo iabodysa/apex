@@ -25,6 +25,7 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
+from frappe.model.workflow import apply_workflow
 from frappe.utils import flt
 
 _TRANSITION_SAVEPOINT = "maintenance_request_transition"
@@ -35,8 +36,17 @@ class MaintenanceRequest(Document):
 
 
 def validate(doc, method=None):
-    """Default request ownership and enforce lifecycle rules on save and submit."""
-    _guard_status(doc)
+    """Default request ownership and enforce lifecycle rules on save and submit.
+
+    ``status`` carries no hand-written guard: the Maintenance Request Workflow
+    (apex/fixtures/workflow.json) owns every Close/Reopen transition natively —
+    a hand-edit that is not a modelled transition is refused by
+    ``frappe.model.workflow.validate_workflow`` (frappe/model/document.py:687-695)
+    before this function ever sees the save. The Open -> In Progress -> Resolved
+    moves stay outside the workflow on purpose: Maintenance Work Order drives them
+    with ``db_set`` (maintenance_work_order.py on_submit / mark_completed), which
+    runs no validate() and so never reaches a workflow either.
+    """
     if doc.is_new() and not doc.reported_by:
         doc.reported_by = frappe.session.user
 
@@ -46,18 +56,6 @@ def validate(doc, method=None):
         doc.company = resolve_company("Habitat")
 
     _validate_status_rules(doc)
-
-
-def _guard_status(doc):
-    """Keep lifecycle status under server-owned work-order and action transitions."""
-    if doc.is_new():
-        doc.status = "Open"
-        return
-    if doc.has_value_changed("status"):
-        frappe.throw(
-            _("Use the Maintenance Request actions to change Status."),
-            frappe.PermissionError,
-        )
 
 
 def _validate_status_rules(doc):
@@ -120,27 +118,38 @@ def _locked_request(name: str):
 
 @frappe.whitelist(methods=["POST"])
 def close_request(name: str) -> dict:
-    """Close a resolved request and its native Frappe assignments atomically."""
+    """Close a resolved request through the Maintenance Request Workflow's Close
+    transition, and release its native Frappe assignments atomically.
+
+    ``apply_workflow`` (frappe/model/workflow.py:99) is what now finds "Resolved
+    -> Closed" among the caller's roles and refuses anything else — the
+    docstatus check stays because it also guards a data edge case
+    ``apply_workflow`` does not: a not-yet-submitted document whose status was
+    forced to Resolved by something other than the normal lifecycle.
+    """
     doc = _locked_request(name)
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Maintenance Requests can be closed."))
-    if doc.status != "Resolved":
-        frappe.throw(_("Only a resolved Maintenance Request can be closed."))
 
     frappe.db.savepoint(_TRANSITION_SAVEPOINT)
     try:
-        doc.db_set("status", "Closed")
+        apply_workflow(doc, "Close")
         close_all_assignments("Maintenance Request", doc.name)
-        doc.add_comment("Comment", _("Maintenance Request closed."))
     except Exception:
         frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
         raise
-    return {"name": doc.name, "status": "Closed"}
+    return {"name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist(methods=["POST"])
 def reopen_request(name: str, reason: str) -> dict:
-    """Return a resolved or closed request to Open with an auditable reason."""
+    """Return a resolved or closed request to Open through the Workflow's Reopen
+    transition, with an auditable reason.
+
+    The reason is this function's own job: ``apply_workflow`` has no field for
+    it, so it is recorded as a follow-up comment alongside the Workflow's own
+    transition comment.
+    """
     reason = str(reason or "").strip()
     if not reason:
         frappe.throw(_("A reason is required to reopen a Maintenance Request."))
@@ -148,12 +157,10 @@ def reopen_request(name: str, reason: str) -> dict:
     doc = _locked_request(name)
     if doc.docstatus != 1:
         frappe.throw(_("Only submitted Maintenance Requests can be reopened."))
-    if doc.status not in ("Resolved", "Closed"):
-        frappe.throw(_("Only a resolved or closed Maintenance Request can be reopened."))
 
     frappe.db.savepoint(_TRANSITION_SAVEPOINT)
     try:
-        doc.db_set("status", "Open")
+        apply_workflow(doc, "Reopen")
         doc.add_comment(
             "Comment",
             _("Maintenance Request reopened: {0}").format(reason),
@@ -161,4 +168,4 @@ def reopen_request(name: str, reason: str) -> dict:
     except Exception:
         frappe.db.rollback(save_point=_TRANSITION_SAVEPOINT)
         raise
-    return {"name": doc.name, "status": "Open"}
+    return {"name": doc.name, "status": doc.status}

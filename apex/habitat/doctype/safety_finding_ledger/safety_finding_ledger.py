@@ -27,7 +27,15 @@ from frappe.model.document import Document
 
 class SafetyFindingLedger(Document):
     def on_update(self):
-        """Blocks editing a Safety Finding Ledger row after it has already been inserted."""
+        """Blocks editing a Safety Finding Ledger row after it has already been inserted.
+
+        No Workflow replaces this: nobody holds create/write on this DocType and
+        no person ever chooses a transition — habitat.safety_engine is the only
+        writer, at Safety Round submit. The native primitive for a write-once
+        record is ``is_submittable``, not a Workflow; this DocType stays a plain
+        immutable insert because there is no approval step to model, only a
+        single machine-posted row that must never change again.
+        """
         if self.is_new():
             return
         if not self.flags.ignore_validate_update_after_submit and self.get_doc_before_save():
