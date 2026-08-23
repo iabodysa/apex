@@ -41,12 +41,6 @@ from apex.apex_core.utils.party_link import (
 )
 from apex.habitat import permissions
 
-def _row_exists(doctype: str, name: str) -> bool:
-    """True only when a REAL row of ``doctype`` is named ``name``.
-
-    """
-    return bool(frappe.db.exists(doctype, {"name": name}))
-
 @frappe.whitelist()
 def get_kiosk_catalog(building: str | None = None) -> dict:
     """Return the Custody Article catalog for the kiosk tile grid.
@@ -170,7 +164,7 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
     for pt in order:
         if not frappe.has_permission(pt, "read"):
             continue
-        if _row_exists(pt, code):
+        if frappe.db.exists(pt, code):
             title_field = frappe.get_meta(pt).get_title_field()
             party_name = frappe.db.get_value(pt, code, title_field)
             return {
@@ -189,7 +183,7 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
     tile carries the live store balance (same source as the catalog). Read-only and
     permission-gated. Returns ``None`` on no/ambiguous match.
 
-    The docname probe goes through :func:`_row_exists` like the two party gates, so
+    The docname probe goes through ``frappe.db.exists`` like the two party gates, so
     the scanned token cannot clear it on the strength of the string. Latent rather
     than live: the positional form let ``Custody Article`` take the docname branch,
     but ``get_value`` then returned ``None`` and the scan degraded into a benign
@@ -207,7 +201,7 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
         "standard_unit_cost",
     ]
     match = None
-    if _row_exists("Custody Article", code):
+    if frappe.db.exists("Custody Article", code):
         match = frappe.db.get_value("Custody Article", code, fields, as_dict=True)
     else:
         by_name = frappe.get_all(
@@ -368,7 +362,7 @@ def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, st
         frappe.throw(_("Select a valid worker type (Employee or Temporary Worker)."))
     if not party:
         frappe.throw(_("Select a worker before continuing."))
-    if not _row_exists(party_type, party):
+    if not frappe.db.exists(party_type, party):
         frappe.throw(_("{0} {1} does not exist.").format(_(party_type), party))
     return party_type, party
 

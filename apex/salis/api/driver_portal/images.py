@@ -33,11 +33,6 @@ _PIL_FORMATS = {
 }
 
 
-def _invalid_photo(message):
-    """Raises a validation error carrying the given message for a rejected photo."""
-    frappe.throw(message, frappe.ValidationError)
-
-
 def _has_exact_container_end(decoded, image_format):
     """Reject bytes appended after an otherwise valid image container."""
     if image_format == "PNG":
@@ -67,24 +62,24 @@ def verified_image_type(photo, expected_type=None, max_bytes=None):
     ``max_bytes`` lets a door keep its own published size ceiling.
     """
     if not isinstance(photo, str):
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     max_bytes = max_bytes or MAX_IMAGE_BYTES
 
     match = _DATA_URI.fullmatch(photo)
     if not match or (expected_type and match.group(1) != expected_type):
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     content_type = match.group(1)
     encoded = match.group(2)
     if len(encoded) > ((max_bytes + 2) // 3) * 4:
-        _invalid_photo(_("The photo is too large."))
+        frappe.throw(_("The photo is too large."), frappe.ValidationError)
     try:
         decoded = base64.b64decode(encoded, validate=True)
     except (binascii.Error, ValueError):
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     if not decoded or base64.b64encode(decoded).decode("ascii") != encoded:
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     if len(decoded) > max_bytes:
-        _invalid_photo(_("The photo is too large."))
+        frappe.throw(_("The photo is too large."), frappe.ValidationError)
 
     try:
         with warnings.catch_warnings():
@@ -99,7 +94,7 @@ def verified_image_type(photo, expected_type=None, max_bytes=None):
                     or height > MAX_IMAGE_HEIGHT
                     or width * height > MAX_IMAGE_PIXELS
                 ):
-                    _invalid_photo(_("The photo dimensions are too large."))
+                    frappe.throw(_("The photo dimensions are too large."), frappe.ValidationError)
                 image.verify()
     except (
         Image.DecompressionBombWarning,
@@ -109,11 +104,11 @@ def verified_image_type(photo, expected_type=None, max_bytes=None):
         SyntaxError,
         ValueError,
     ):
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     if (
         image_format != _PIL_FORMATS[content_type]
         or not _has_exact_container_end(decoded, image_format)
     ):
-        _invalid_photo(_("The photo data is invalid."))
+        frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
 
     return content_type

@@ -309,13 +309,6 @@ def build_wrong_bus_result(scanned_trip, worker):
     return result
 
 
-def _read_misboard(worker):
-    """The worker's transient wrong-bus correction hint, or None."""
-    if not worker:
-        return None
-    return frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + worker)
-
-
 def _worker_pickup_arrival(window):
     """The "driver has arrived at your pickup" state for the worker, or None.
 
@@ -707,7 +700,7 @@ def worker_trip_boarding(token=None):
     notify_window_seconds = get_boarding_setting("boarding_notify_window_seconds")
     wait_max = get_boarding_setting("worker_wait_request_max")
     poll_seconds = get_boarding_setting("boarding_active_poll_seconds")
-    misboard = _read_misboard(employee)
+    misboard = frappe.cache.get_value(_MISBOARD_CACHE_PREFIX + employee) if employee else None
 
     resolved = _worker_today_dispatch_trip(employee)
     if not resolved:

@@ -65,25 +65,6 @@ def _get_submitted(delivery: str):
     return doc
 
 
-def _require_role(role: str):
-    """Caller must hold the exit's role (or be System Manager). Write permission on
-    the delivery is also required (defense in depth on top of the role grant).
-
-    ``frappe.only_for`` (frappe/__init__.py:936) throws the same PermissionError for a
-    missing role but only ever names ALL permitted roles in one generic template
-    string; it cannot say which of the three checkpoints the caller failed, which
-    matters here because ``pass_exit_1`` and ``pass_exit_3`` share this one function
-    and a caller needs to know which physical exit rejected them.
-    """
-    roles = frappe.get_roles(frappe.session.user)
-    if "System Manager" in roles or role in roles:
-        return
-    frappe.throw(
-        _("Only a {0} may clear this exit.").format(_(role)),
-        frappe.PermissionError,
-    )
-
-
 def _pass_exit(delivery: str, n: int):
     """Clear exit ``n`` of the 3-exit lock. Fail-closed: submitted + Pending Exits,
     the prior exit already cleared, the caller holds exit ``n``'s role, and the
@@ -109,7 +90,7 @@ def _pass_exit(delivery: str, n: int):
                 _("Exit {0} must be cleared before exit {1}.").format(prior, n)
             )
 
-    _require_role(EXIT_ROLES[n])
+    frappe.only_for([EXIT_ROLES[n], "System Manager"], message=True)
 
     now = now_datetime()
     doc.db_set(

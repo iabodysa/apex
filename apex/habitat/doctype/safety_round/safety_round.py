@@ -98,7 +98,12 @@ class SafetyRound(Document):
 
         post_safety_findings(self)
         self._clear_building_scan_alerts()
-        self._publish_safety_update("submit")
+        frappe.publish_realtime(
+            "safety_update",
+            {"building": self.building, "cadence": self.cadence, "action": "submit"},
+            doctype="Safety Round",
+            after_commit=True,
+        )
 
     def _ratify_executions(self) -> int:
         """Submit the round's still-draft executions, then return how many.
@@ -178,18 +183,9 @@ class SafetyRound(Document):
         from apex.habitat.safety_engine import reverse_safety_findings
 
         reverse_safety_findings(self.name)
-        self._publish_safety_update("cancel")
-
-    def _publish_safety_update(self, action: str) -> None:
-        """Signal the /safety portal to refetch its due set ahead of a manual
-        reload. Routed to the Safety Round doctype room; the socket server
-        delivers only to recipients with read permission, so building scope is
-        honoured without extra filtering. after_commit so subscribers refetch
-        committed state. The payload is advisory only — the SPA refetches via
-        get_due_cadences, it does not trust the message body."""
         frappe.publish_realtime(
             "safety_update",
-            {"building": self.building, "cadence": self.cadence, "action": action},
+            {"building": self.building, "cadence": self.cadence, "action": "cancel"},
             doctype="Safety Round",
             after_commit=True,
         )
