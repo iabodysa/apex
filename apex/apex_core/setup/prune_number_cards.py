@@ -10,6 +10,10 @@ Only rows this app shipped are swept: ``is_standard=1`` restricts to file-synced
 and ``module`` scopes to Apex's own modules, so a card an operator built by hand in the
 desk carries no shipped directory and is never touched. The shipped set is read off disk
 rather than listed here, so this stays correct as cards come and go.
+
+This runs on every migrate rather than once as a patch, because migrate is what creates
+the drift: each deletion of a card file leaves its row behind again, and a patch that
+already executed never fires for the next one.
 """
 
 import json
@@ -20,7 +24,7 @@ import frappe
 APEX_MODULES = ["Habitat", "Salis", "Apex Core", "Logistay"]
 
 
-def execute():
+def prune_orphaned_number_cards():
     """Delete standard Number Card rows in Apex's modules whose shipped file is gone."""
     app_root = pathlib.Path(frappe.get_app_path("apex"))
 

@@ -571,6 +571,7 @@ after_migrate = [
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     "apex.setup.create_roles",
     "apex.setup.create_role_profiles",
+    "apex.apex_core.setup.prune_number_cards.prune_orphaned_number_cards",
     "apex.apex_core.utils.portal_identity.close_all_capacity_desk_access",
     "apex.apex_core.doctype.salis_settings.salis_settings.apply_approval_switch",
 ]
