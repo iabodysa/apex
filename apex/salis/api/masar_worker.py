@@ -251,7 +251,12 @@ def _custody_issued_by(custody_issue, building):
     ``owner`` (the user who created/submitted it), resolved to a person name.
     Falls back to the building's responsible facility supervisor, then None when
     nothing resolves (the client renders its own placeholder). Never throws —
-    the worker view degrades gracefully."""
+    the worker view degrades gracefully.
+
+    ``frappe.utils.get_fullname`` (frappe/utils/__init__.py:47) turns the user id into
+    the name a person recognises. The one thing it cannot do is fail loudly: it
+    returns the id back when no User row exists, which is why the caller treats a
+    value equal to the id as "unresolved" rather than as a name."""
     owner = None
     if custody_issue:
         owner = frappe.db.get_value("Custody Issue", custody_issue, "owner")
@@ -312,7 +317,12 @@ def _attach_worker_photo(doc, photo, photo_filename):
 def _clean_adhoc_passengers(passengers):
     """Validate + normalize the client's ad-hoc passenger rows. Returns a list of
     clean dicts ready to append to the request's ``adhoc_passengers`` table; throws
-    on a row missing a name or ID, or carrying an unparseable expiry."""
+    on a row missing a name or ID, or carrying an unparseable expiry.
+
+    ``frappe.parse_json`` (frappe/__init__.py:2491) accepts the string the portal
+    posts. The one thing it cannot do is validate the rows: it produces whatever
+    shape the client sent, so every field is checked here before any of it reaches a
+    child table the framework would then accept without comment."""
     passengers = frappe.parse_json(passengers or "[]")
     rows = []
     for p in passengers or []:
@@ -341,7 +351,12 @@ def _clean_adhoc_passengers(passengers):
 def _building_in_charge(employee):
     """The worker's current building in-charge contact, or None. Resolved from the
     active assignment's building (``responsible_supervisor`` User), the
-    same source the accommodation screen uses."""
+    same source the accommodation screen uses.
+
+    ``frappe.utils.get_fullname`` (frappe/utils/__init__.py:47) renders the contact.
+    Only the name and the contact fields are returned, never the User record: this is
+    read by a worker's portal, and the one thing the framework will not do for us is
+    decide which of a User's fields a non-User audience may see."""
     assignment = _active_assignment(employee)
     user = assignment and frappe.db.get_value(
         "Building", assignment.get("building"), "responsible_supervisor"

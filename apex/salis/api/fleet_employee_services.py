@@ -25,7 +25,13 @@ from apex.salis.utils import add_timeline_note, lock_vehicle, period_quota
 
 
 def _handover_checklist_template(vehicle, requested_template=None):
-    """Return the active native checklist applicable to ``vehicle``."""
+    """Return the active native checklist applicable to ``vehicle``.
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) is used rather than ``get_all`` so
+    the driver's own row scope applies to the templates offered. The one thing the
+    list API cannot do is rank the matches: a template bound to the vehicle's category
+    must beat a general one, and that preference is the decision here.
+    """
     vehicle_category = frappe.db.get_value("Salis Vehicle", vehicle, "vehicle_category")
     if requested_template:
         template = frappe.get_doc("Vehicle Handover Checklist Template", requested_template)
@@ -75,7 +81,13 @@ def _validate_handover_template(template, vehicle_category):
 
 
 def _inspection_rows(template, value):
-    """Bind explicit portal answers to every native template row in order."""
+    """Bind explicit portal answers to every native template row in order.
+
+    ``frappe.parse_json`` (frappe/__init__.py:2491) accepts the string a form field
+    sends. The one thing it cannot do is check the SHAPE, so the length is compared
+    against the template's own rows: a shorter list would silently leave items
+    unanswered and a longer one would bind answers to rows that do not exist.
+    """
     if isinstance(value, str):
         value = frappe.parse_json(value)
     if not isinstance(value, list):
@@ -438,6 +450,12 @@ def report_incident(incident_type, incident_date, description, incident_time=Non
 
 
 def _my_issue(name=None):
+    """The complaints this driver raised, or one of them by name.
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) rather than ``get_all``, so a driver
+    cannot read another driver's complaint by passing its name — the explicit
+    ``custom_driver`` filter states the intent and the scoped list enforces it.
+    """
     driver = base._session_driver(required=True)
     filters = {"custom_driver": driver, "issue_type": "Complaint"}
     if name:

@@ -54,6 +54,11 @@ def _clearable_exits() -> list:
     (``api.facility_asset_delivery.EXIT_ROLES``), so a screen that offered the button on
     write alone showed a Procurement Supervisor a large green control that only a Resident
     Supervisor may press, and the refusal arrived after the tap.
+
+    ``frappe.has_permission`` answers the DocType write and ``frappe.get_roles``
+    (frappe/permissions.py:497) the role set. The one thing a DocPerm cannot express is
+    WHICH EXIT a role may clear — that is a per-value gate inside one document, which
+    has no DocPerm equivalent, so the mapping is stated in ``EXIT_ROLES``.
     """
     from apex.habitat.api.facility_asset_delivery import EXIT_ROLES
 
@@ -66,7 +71,15 @@ def _clearable_exits() -> list:
 
 def portal_capabilities() -> dict:
     """The per-action grants a section needs, so a control can be disabled with a
-    stated reason instead of failing at the server."""
+    stated reason instead of failing at the server.
+
+    Every entry is derived from ``frappe.has_permission`` and ``frappe.get_roles``
+    (frappe/permissions.py:497), never from a list of roles kept here: the portal and
+    the desk must refuse the same things, and a second list drifts. The one thing the
+    server checks cannot do is reach the browser, which is the whole purpose of this
+    map — the refusal still happens server-side, this only lets the control say so
+    before the tap rather than after.
+    """
     exits = _clearable_exits()
     roles = set(frappe.get_roles())
     return {
@@ -112,7 +125,13 @@ def portal_landing(capabilities: dict) -> str:
 
 def bootstrap_portal_context(context, route: str, entry: str):
     """Redirect a guest to login, then publish the merged portal's gate and its
-    realtime configuration for whichever door was opened."""
+    realtime configuration for whichever door was opened.
+
+    ``frappe.get_roles`` (frappe/permissions.py:497) decides admittance. The language
+    is pinned on ``frappe.local.lang`` because a portal request may arrive with no
+    User preference at all — a session the framework has nothing to derive a language
+    from would otherwise render this Arabic screen in English.
+    """
     guest_redirect(route)
     frappe.local.lang = "ar"
 
