@@ -31,7 +31,7 @@
  ],
  "sequence_id": 2.1,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"housingHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Housing and Safety</b></span>\", \"col\": 12}}, {\"id\": \"onbHaSG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Housing and Safety Go-Live\", \"col\": 12}}, {\"id\": \"housingSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"housingSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"housingSc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"housingSc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Checkout\", \"col\": 3}}, {\"id\": \"housingSc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventory Count\", \"col\": 3}}, {\"id\": \"housingSc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Portal\", \"col\": 3}}, {\"id\": \"housingSc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Checklist\", \"col\": 3}}, {\"id\": \"housingSc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"housingSc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"housingSc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Incident\", \"col\": 3}}, {\"id\": \"housingSc11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"housingNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Available Beds\", \"col\": 3}}, {\"id\": \"housingNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Imminent Checkouts\", \"col\": 3}}, {\"id\": \"housingNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Checkouts\", \"col\": 3}}, {\"id\": \"housingNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 3}}, {\"id\": \"housingNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rooms Needing Readiness\", \"col\": 3}}, {\"id\": \"housingNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Idle Residents\", \"col\": 3}}, {\"id\": \"housingNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"housingNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"housingNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"housingNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Safety Tasks\", \"col\": 3}}, {\"id\": \"housingNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"housingNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"housingNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Poor Safety Task Executions\", \"col\": 3}}, {\"id\": \"housingNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Inspections Recorded\", \"col\": 3}}, {\"id\": \"housingNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"housingNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"housingNc17\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cleaning Compliance Today %\", \"col\": 3}}, {\"id\": \"housingNc18\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Tasks Done This Week %\", \"col\": 3}}, {\"id\": \"housingCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Front Desk\", \"col\": 4}}, {\"id\": \"housingCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Housing\", \"col\": 4}}, {\"id\": \"housingCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"housingCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety\", \"col\": 4}}, {\"id\": \"housingCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Cleaning\", \"col\": 4}}, {\"id\": \"housingCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"housingCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"housingCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"housingCard9\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"housingHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Housing and Safety</b></span>\", \"col\": 12}}, {\"id\": \"onbHaSG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Housing and Safety Go-Live\", \"col\": 12}}, {\"id\": \"housingSc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Front Desk\", \"col\": 3}}, {\"id\": \"housingSc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Arrivals Desk\", \"col\": 3}}, {\"id\": \"housingSc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"housingSc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Checkout\", \"col\": 3}}, {\"id\": \"housingSc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inventory Count\", \"col\": 3}}, {\"id\": \"housingSc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Portal\", \"col\": 3}}, {\"id\": \"housingSc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Checklist\", \"col\": 3}}, {\"id\": \"housingSc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"housingSc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"housingSc10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Incident\", \"col\": 3}}, {\"id\": \"housingSc11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building License\", \"col\": 3}}, {\"id\": \"housingNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Available Beds\", \"col\": 3}}, {\"id\": \"housingNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Imminent Checkouts\", \"col\": 3}}, {\"id\": \"housingNc3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Checkouts\", \"col\": 3}}, {\"id\": \"housingNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Resident Requests\", \"col\": 3}}, {\"id\": \"housingNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rooms Needing Readiness\", \"col\": 3}}, {\"id\": \"housingNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Idle Residents\", \"col\": 3}}, {\"id\": \"housingNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"housingNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Escalated Maintenance Requests\", \"col\": 3}}, {\"id\": \"housingNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Overdue Scheduled Tasks\", \"col\": 3}}, {\"id\": \"housingNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Licenses Expiring Soon\", \"col\": 3}}, {\"id\": \"housingNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Audit Remediation Plans\", \"col\": 3}}, {\"id\": \"housingNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Poor Safety Task Executions\", \"col\": 3}}, {\"id\": \"housingNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Inspections Recorded\", \"col\": 3}}, {\"id\": \"housingNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Maintenance Work Orders In Progress\", \"col\": 3}}, {\"id\": \"housingNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Facility Assets Needing Attention\", \"col\": 3}}, {\"id\": \"housingNc17\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cleaning Compliance Today %\", \"col\": 3}}, {\"id\": \"housingNc18\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Safety Tasks Done This Week %\", \"col\": 3}}, {\"id\": \"housingCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Front Desk\", \"col\": 4}}, {\"id\": \"housingCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Housing\", \"col\": 4}}, {\"id\": \"housingCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"housingCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Safety\", \"col\": 4}}, {\"id\": \"housingCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Cleaning\", \"col\": 4}}, {\"id\": \"housingCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"housingCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"housingCard8\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"housingCard9\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -629,60 +629,54 @@
   },
   {
    "doctype": "Workspace Number Card",
-   "number_card_name": "Overdue Safety Tasks",
-   "label": "Overdue Safety Tasks",
-   "idx": 10
-  },
-  {
-   "doctype": "Workspace Number Card",
    "number_card_name": "Licenses Expiring Soon",
    "label": "Licenses Expiring Soon",
-   "idx": 11
+   "idx": 10
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Open Audit Remediation Plans",
    "label": "Open Audit Remediation Plans",
-   "idx": 12
+   "idx": 11
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Poor Safety Task Executions",
    "label": "Poor Safety Task Executions",
-   "idx": 13
+   "idx": 12
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Safety Inspections Recorded",
    "label": "Safety Inspections Recorded",
-   "idx": 14
+   "idx": 13
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Maintenance Work Orders In Progress",
    "label": "Maintenance Work Orders In Progress",
-   "idx": 15
+   "idx": 14
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Facility Assets Needing Attention",
    "label": "Facility Assets Needing Attention",
-   "idx": 16
+   "idx": 15
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Cleaning Compliance Today %",
    "label": "Cleaning Compliance Today %",
-   "idx": 17
+   "idx": 16
   },
   {
    "doctype": "Workspace Number Card",
    "number_card_name": "Safety Tasks Done This Week %",
    "label": "Safety Tasks Done This Week %",
-   "idx": 18
+   "idx": 17
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-14 02:17:00.000000",
+ "modified": "2026-08-23 15:05:24.564150",
  "creation": "2020-01-01 00:00:02.000000"
 }
