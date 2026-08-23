@@ -1,12 +1,4 @@
 [pre_model_sync]
-# Empty by owner decision, 2026-08-07. Every registered patch had already run on the
-# deployed site, so each one was dead weight: frappe records a patch by name in Patch
-# Log and never replays it, and a FRESH install runs no patch at all — its schema comes
-# from the DocType JSON and its data from the after_install seeders in
-# apex_core/setup/seeders/.
-#
-# BEFORE ADDING ONE, ask what a fresh install would do without it. If the answer is
-# "nothing, the JSON or a seeder already covers it", it is not a patch.
 apex.patches.v2_6.rename_driver_push_subscription
 
 [post_model_sync]
