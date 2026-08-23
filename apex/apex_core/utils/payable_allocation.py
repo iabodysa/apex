@@ -47,6 +47,12 @@ def list_payables(company: str, supplier: str, limit: int = 50) -> list:
 
     Read-only. An empty list is the "fail closed / hide the action" signal: with no
     approved payable there is nothing a payment could legitimately be allocated to.
+
+    ``frappe.get_list`` (frappe/__init__.py:2008) applies row scope; the explicit
+    ``has_permission(..., throw=True)`` above it is not redundant, because
+    ``get_list`` on a doctype the caller cannot read returns an EMPTY list rather
+    than refusing, and an empty list here already means "nothing to pay". Without the
+    throw the two answers are indistinguishable.
     """
     if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
         return []
@@ -63,7 +69,13 @@ def list_payables(company: str, supplier: str, limit: int = 50) -> list:
 def payable_count(company: str, supplier: str):
     """How many eligible payables exist, or ``None`` when the caller may not read
     invoices at all — so a status read never throws for an operations user who can see
-    the contract or lease but not the finance documents behind it."""
+    the contract or lease but not the finance documents behind it.
+
+    ``frappe.db.count`` would be the shorter primitive and is deliberately not used:
+    it applies no permission at all, so it cannot tell "no payables" from "not
+    allowed to look". The three answers here are distinct on purpose — 0 when the
+    doctype is absent, ``None`` when the caller may not read, a real count otherwise.
+    """
     if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
         return 0
     if not frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read"):

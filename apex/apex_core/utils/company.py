@@ -99,8 +99,14 @@ def display_currency(module: str = "Habitat") -> str:
 
     The operator answers currency once, on erpnext's own wizard slide, and it lands on
     the Company. Writing a literal here instead shows every site the same currency
-    whatever it actually trades in. Falls back to the site default, then to the global
-    default, so a report still renders before a company is configured.
+    whatever it actually trades in.
+
+    ``erpnext.get_default_currency`` (erpnext/__init__.py:26) resolves the same field
+    off the same Company. Two things it cannot do: it reads the user or Global
+    Defaults company only, so it cannot express Habitat and Salis posting to
+    different companies on one site; and it returns ``None`` before a company exists,
+    which a label or a report column cannot render. This falls through to the site
+    currency default, then the global one, then "" — always a string.
     """
     company = resolve_company(module)
     if company:

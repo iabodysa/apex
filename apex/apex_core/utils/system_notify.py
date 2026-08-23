@@ -53,6 +53,19 @@ def notify_user_system(
     ``for_user`` and dedup key — the source doc link when supplied, else the clipped
     subject — already exists, so a re-running job can't stack duplicate unread bell
     notifications. A different doc or subject stays a distinct alert.
+
+    ``enqueue_create_notification``
+    (frappe/desk/doctype/notification_log/notification_log.py:73) is the framework's
+    own fan-out and is the right call for a multi-recipient alert. Three things it
+    cannot do, and they are why this writes the row directly: it hands the work to a
+    background job, so the caller learns nothing about whether a row landed and this
+    function's boolean return would be a guess; it never dedupes, so a job that runs
+    twice stacks two unread bells; and it returns during install, which is correct
+    for it and wrong for a seeder that must know it wrote nothing.
+
+    The savepoint is ``frappe.db.savepoint`` / ``rollback``
+    (frappe/database/database.py:1203, :1186) with an OWN named point, so a failure
+    here never unwinds the caller's outer savepoint or the rows it already wrote.
     """
     if not user or not frappe.db.get_value("User", user, "enabled"):
         return False
