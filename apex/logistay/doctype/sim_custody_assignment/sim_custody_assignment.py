@@ -170,9 +170,6 @@ class SIMCustodyAssignment(Document):
         allowed = ALLOWED_PRIOR_STATUS.get(self.action, ())
         if status not in allowed:
             frappe.throw(
-                # Every interpolated value here is a stored English Select value, so each
-                # one goes through _() as lines 93 and 122 already do — otherwise the
-                # sentence an Arabic operator hits most often is half translated.
                 _("Cannot {0} SIM {1}: its status is {2}, expected {3}.").format(
                     _(self.action),
                     self.sim_card,

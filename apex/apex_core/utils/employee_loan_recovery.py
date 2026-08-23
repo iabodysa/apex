@@ -114,7 +114,6 @@ from apex.apex_core.utils.employee_recovery import _salary_preview
 
 RECOVERY_LOAN_PRODUCT_NAME = "Vehicle Damage Recovery"
 
-# (fieldname on Loan Product, Account.account_type, Account.root_type)
 _RECOVERY_LOAN_ACCOUNTS = (
     ("loan_account", "Receivable", "Asset"),
     ("payment_account", "Bank", "Asset"),

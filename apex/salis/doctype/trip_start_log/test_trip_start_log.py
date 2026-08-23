@@ -26,9 +26,6 @@ class TestTripStartLogStartDatetimeIsFrozenAfterSubmit(FrappeTestCase):
         driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
         project = frappe.get_all("Project", limit=1, pluck="name")[0]
 
-        # A dedicated, guaranteed-live (never cancelled) trip: a site's existing
-        # Dispatch Trip records can be in any docstatus, and Trip Start Log's
-        # ``dispatch_trip`` Link refuses to point at a cancelled one.
         trip_doc = frappe.new_doc("Dispatch Trip")
         trip_doc.trip_type = "Ad Hoc"
         trip_doc.vehicle = vehicle

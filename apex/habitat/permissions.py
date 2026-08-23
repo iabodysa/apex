@@ -46,9 +46,6 @@ PRIVILEGED_ROLES = {
     "Resident Request Coordinator",
 }
 
-# Membership widens a role only where it already holds a read DocPerm; the building
-# narrowing runs after the role check, never instead of it. "HR Manager" reads Idle
-# Resident Report company-wide and holds no other Habitat DocPerm.
 HOUSING_UNSCOPED_ROLES = {
     "System Manager",
     "Accommodation Manager",

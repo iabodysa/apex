@@ -44,9 +44,6 @@ class TestTransportTripRating(FrappeTestCase):
         trip.append("stops", {"stop_name": "Camp Gate"})
         trip.append("boarding_state", {"employee": employee, "status": "Boarded"})
         trip.insert()
-        # A direct submit() on Dispatch Trip lands status on Completed: it is the
-        # only workflow state carrying docstatus 1 (frappe/model/workflow.py's
-        # set_workflow_state_on_action picks the sole doc_status-1 state).
         trip.submit()
         self.assertEqual(trip.status, "Completed")
         return trip

@@ -24,19 +24,6 @@ from apex.habitat.doctype.maintenance_request.maintenance_request import (
 )
 from apex.tests.factories import make_building, make_maintenance_request, make_room
 
-# ``get_dependencies`` (frappe/test_runner.py:359-381) walks every Link field on
-# Maintenance Request, and three of them reach the same unreachable app by three
-# separate routes: ``target_asset`` is a direct Link to ERPNext ``Asset``;
-# ``related_facility_asset`` -> Facility Asset -> its own ``linked_erpnext_asset``
-# reaches the identical ``Asset``; ``subcontractor_service_order`` -> Subcontractor
-# Service Order -> Purchase Invoice reaches it a third way. Every route continues
-# Asset -> Journal Entry -> Payment Order -> Payment Request -> Payment Gateway
-# Account -> Payment Gateway; the payments app is on the bench but not installed
-# on this site, so collecting any of these chains aborts the whole suite before a
-# single test runs — measured the same way
-# habitat/doctype/utility_bill_entry/test_utility_bill_entry.py records it for
-# ``Payment Entry``. None of these tests sets ``target_asset``,
-# ``related_facility_asset`` or ``subcontractor_service_order``.
 test_ignore = ["Asset", "Facility Asset", "Subcontractor Service Order"]
 
 

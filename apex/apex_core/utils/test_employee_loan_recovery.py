@@ -257,8 +257,6 @@ class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
         )
         loan.insert(ignore_permissions=True)
         loan.submit()
-        # A term Loan's repayment schedule stays "Initiated" (nothing due, nothing
-        # accrued) until it is disbursed — see the module docstring's evidence.
         disbursement = frappe.get_doc(
             {
                 "doctype": "Loan Disbursement",
@@ -317,8 +315,6 @@ class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
         frozen_installment = loan.monthly_repayment_amount
         self.assertGreater(frozen_installment, 0)
 
-        # The employee's pay drops sharply after the Loan was raised (unpaid leave,
-        # an ended allowance, a restructured salary — any of it).
         assignment = frappe.db.get_value(
             "Salary Structure Assignment", {"employee": employee}, "name"
         )
@@ -327,11 +323,6 @@ class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
         slip = _build_slip(structure, employee)
         slip.insert()
 
-        # The cap is applied by the wired Salary Slip validate hook, so it has
-        # already happened by the time insert() returns — nothing here calls it.
-        # hrms would otherwise carry the FROZEN installment forward unreduced, and
-        # its own floor (salary_slip.py:207-209) refuses only a NEGATIVE net pay,
-        # saying nothing about a merely decimated one.
         self.assertEqual(len(slip.loans), 1)
         new_cap = round(slip.gross_pay * MAX_RECOVERY_PERCENT / 100.0, 2)
         self.assertLess(new_cap, frozen_installment)

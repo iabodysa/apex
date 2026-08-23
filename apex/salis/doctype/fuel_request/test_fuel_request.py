@@ -19,7 +19,6 @@ class TestFuelRequest(FrappeTestCase):
         doc.update(fields)
         return doc
 
-    # -- _guard_quota_allowance: pure arithmetic, quota passed explicitly --
 
     def test_an_exhausted_quota_refuses_a_standard_draw(self):
         doc = self._request(fuel_quota="_Test Quota", requested_litres=5)
@@ -50,7 +49,6 @@ class TestFuelRequest(FrappeTestCase):
             frappe._dict(consumed_litres=0, monthly_litres=1, status="Active")
         )
 
-    # -- per-type required-field validation --
 
     def test_standard_requires_positive_requested_litres(self):
         doc = self._request(request_type="Standard", requested_litres=0)
@@ -101,7 +99,6 @@ class TestFuelRequest(FrappeTestCase):
         doc = self._request(request_type="Chip", action="Issue", chip_number=None)
         doc._validate_chip()
 
-    # -- initial-status guard and the approver stamp --
 
     def test_a_new_request_must_be_created_pending(self):
         doc = self._request(status="Approved")

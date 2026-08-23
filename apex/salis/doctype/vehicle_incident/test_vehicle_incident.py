@@ -45,7 +45,6 @@ class TestVehicleIncident(FrappeTestCase):
         doc.update(fields)
         return doc
 
-    # -- status stays under controller-owned transitions --
 
     def test_a_new_incident_is_forced_to_open_regardless_of_caller_input(self):
         doc = self._incident(status="Closed")
@@ -59,7 +58,6 @@ class TestVehicleIncident(FrappeTestCase):
         reloaded.status = "Closed"
         self.assertRaises(frappe.PermissionError, reloaded._guard_status)
 
-    # -- date and cost sanity, exercised through the whole validate() --
 
     def test_incident_date_in_the_future_is_refused(self):
         doc = self._incident(incident_date=add_days(today(), 1))
@@ -77,7 +75,6 @@ class TestVehicleIncident(FrappeTestCase):
         doc = self._incident(estimated_cost=0)
         doc.validate()
 
-    # -- third-party block follows its own flag --
 
     def test_third_party_fields_are_cleared_once_the_flag_is_off(self):
         doc = self._incident(
@@ -94,7 +91,6 @@ class TestVehicleIncident(FrappeTestCase):
         doc._sync_third_party()
         self.assertEqual(doc.third_party_plate, "ABC 123")
 
-    # -- wage-recovery consent and arithmetic --
 
     def test_recovery_amount_must_be_positive(self):
         doc = self._incident(recover_from_driver=1, recovery_amount=0)

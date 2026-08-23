@@ -65,8 +65,6 @@ class TestAccommodationStockLedgerStoreBalance(FrappeTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # "_Test Ledger Article" is the fixture's article_name, not its naming-series
-        # document name — resolve the real name once for every case in this class.
         cls.item = frappe.db.get_value(
             "Custody Article", {"article_name": "_Test Ledger Article"}, "name"
         )

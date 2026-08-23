@@ -216,11 +216,6 @@ class TestClearingTheLinkByHandCannotDoubleRaise(FrappeTestCase):
 
         mock_raise_again.assert_not_called()
 
-        # The negative control: nothing in THIS module refuses a second raise once
-        # the link is blank. Calling the internal method directly (bypassing
-        # submit(), which is exactly what Frappe's own docstatus rule prevents)
-        # shows the risk is real — the safeguard here is Frappe's transition rule,
-        # not an extra check of our own.
         with patch(f"{_MODULE}.raise_recovery_loan", return_value="LOAN-SECOND") as mock_direct:
             reloaded._raise_recovery_loan()
         mock_direct.assert_called_once()

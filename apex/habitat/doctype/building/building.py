@@ -301,10 +301,6 @@ def generate_safety_setup(building_name):
     """
     frappe.has_permission("Building", "write", doc=building_name, throw=True)
 
-    # Population: every active Safety Task Catalog entry company-wide, not the
-    # caller's building-scoped subset — the idempotent setup must apply the
-    # whole catalog to this building, and a permission-narrowed read here would
-    # silently produce a partial (looks-complete) safety setup.
     catalogs = frappe.get_all(
         "Safety Task Catalog",
         filters={"is_active": 1},
