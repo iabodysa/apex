@@ -160,7 +160,15 @@ def portal_rooms_for_subject(audience: str, subject: str) -> list:
     return [PORTAL_ROOM_PREFIX + h for h in hashes if h]
 
 def publish_to_portal_subject(audience: str, subject: str, event: str, message=None) -> int:
-    """Ring one subject's own rooms. Returns how many were rung."""
+    """Ring one subject's own rooms. Returns how many were rung.
+
+    ``frappe.publish_realtime`` (frappe/realtime.py:23) delivers to a room, a user or
+    a document. The one thing it cannot do is address a portal SUBJECT: a worker or
+    driver holds a token, not a User record, so ``user=`` reaches nobody and there is
+    no doctype room that means "this person's live devices". The rooms are derived
+    from the subject's own token hashes, and every publish goes ``after_commit`` so a
+    listener is never told about a row the transaction later rolls back.
+    """
     rooms = portal_rooms_for_subject(audience, subject)
     for room in rooms:
         frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
@@ -254,6 +262,11 @@ def _reject_invalid_token() -> None:
 def as_capacity(audience: str, subject: str | None = None):
     """Run a block as the capacity user, then hand the session back.
 
+    ``frappe.set_user`` (frappe/__init__.py:641) does the switch. The one thing it
+    cannot do is put it back: it has no scope and no paired restore, so every caller
+    would have to remember the ``finally``. That is what this context manager is —
+    the restore, not the switch.
+
     Only ever open this AFTER a token has been resolved: the token is the authentication and this
     is the authorisation that follows it. The restore is in a ``finally`` because a scheduler or a
     request worker is reused, and a session left elevated would carry into whatever ran next.
@@ -298,7 +311,13 @@ def capacity_subject(audience: str) -> str | None:
     return subject if bound_audience == audience else None
 
 def resolve_portal_subject(audience: str, token=None, required=False):
-    """Resolve a valid audience token to its active Employee or Salis Driver."""
+    """Resolve a valid audience token to its active Employee or Salis Driver.
+
+    Expiry is compared through ``frappe.utils.get_datetime`` (frappe/utils/data.py:110)
+    rather than by string, because a stored value may be a ``str`` or a ``datetime``
+    depending on how the row was written, and comparing the two shapes as text puts
+    a token's expiry in the wrong order without raising.
+    """
     _require_audience(audience)
     raw, was_presented = presented_token(audience, token)
     if not was_presented:
@@ -365,7 +384,14 @@ def _lock_subject_row(audience: str, subject: str, *, require_active=False):
     return row
 
 def _lock_subject_token_rows(audience: str, subject: str):
-    """Lock exact-audience token rows in a stable order."""
+    """Lock exact-audience token rows in a stable order.
+
+    ``frappe.qb`` (frappe/query_builder) is the primitive; the one thing
+    ``frappe.db.get_all`` cannot do is ``for_update``, and without the row lock two
+    concurrent revocations read the same enabled rows and both count them. The
+    ``orderby`` is not cosmetic: two callers locking the same set in different orders
+    deadlock, and a stable order is what makes them queue instead.
+    """
     Token = frappe.qb.DocType("Masar Worker Token")
     subject_field = getattr(Token, _TOKEN_SUBJECT_FIELDS[audience])
     return (
@@ -441,7 +467,17 @@ def log_credential_event(
     ).insert(ignore_permissions=True, ignore_links=True).name
 
 def revoke_subject_tokens(audience: str, subject: str) -> int:
-    """Disable enabled credentials for one exact audience and subject."""
+    """Disable enabled credentials for one exact audience and subject.
+
+    ``frappe.db.table_exists`` (frappe/database/database.py:1220) guards the read,
+    because this runs from an Employee and a Salis Driver hook that fire during
+    install and migrate, before the token table is created — and the one thing a
+    hook cannot do is decline to run on a half-built site.
+
+    Writes go through ``frappe.db.set_value`` with ``update_modified=False``: a
+    revocation is a system act, and stamping ``modified`` would show an operator's
+    name against a change no operator made.
+    """
     _require_audience(audience)
     if not subject or not _lock_subject_row(audience, subject):
         return 0
@@ -498,7 +534,17 @@ def authorize_issuance(
     *,
     require_active: bool = True,
 ) -> bool:
-    """Authorize one issuer and subject, returning whether scope is restricted."""
+    """Authorize one issuer and subject, returning whether scope is restricted.
+
+    ``frappe.has_permission`` decides the DocType-level write and is called with
+    ``throw=True`` so refusal is loud. The one thing it cannot do is answer about the
+    SUBJECT: whether this issuer may mint a credential for THIS driver or worker is a
+    row-scope question, which ``frappe.get_roles`` (frappe/permissions.py:497) plus
+    the module's own project scope answers below.
+
+    Both locks are taken BEFORE the verdict, so a concurrent revocation cannot land
+    between the check and the issue.
+    """
     _require_audience(audience)
     user = user or frappe.session.user
     frappe.has_permission(
@@ -592,7 +638,11 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
     ``audience`` is always ``DRIVER`` or ``WORKER`` here (the loop in
     :func:`masar_worker_token_scope_query` supplies nothing else), so it is interpolated
     as a literal rather than escaped, matching every other hardcoded fragment in this
-    module.
+    module. Every value that does NOT come from that closed set reaches the SQL
+    through ``frappe.db.escape`` (frappe/database/database.py:1371).
+
+    An issuer with no permitted project gets ``1=0`` and not an empty string: an empty
+    fragment is no restriction, which would show one issuer every audience's tokens.
     """
     if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
         return "`holder_type` = '{0}'".format(audience)
