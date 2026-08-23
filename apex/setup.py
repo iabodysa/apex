@@ -189,11 +189,10 @@ def create_roles():
     """Creates the one standing Apex role no shipped DocType names in a permissions block.
 
     ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1852-1889)
-    already creates a Role for every role a shipped DocType's ``permissions`` table
-    names, the moment that DocType syncs — so the other twelve roles this function used
-    to list are redundant with that native mechanism and were dropped. Admin Manager is
-    the sole holdout: no shipped DocType permission row names it, so nothing else on
-    the site would ever create it.
+    creates a Role for every role a shipped DocType's ``permissions`` table names, the
+    moment that DocType syncs, so a role that appears in any permissions block needs no
+    line here. Admin Manager appears in none, which is why nothing else on the site
+    would ever create it. Give it a DocPerm row anywhere and this function is dead.
     """
     if not frappe.db.exists("Role", "Admin Manager"):
         doc = frappe.new_doc("Role")
