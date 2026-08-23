@@ -116,7 +116,7 @@ Track telecom contracts, renewal dates, SIM inventory, employee custody, billing
 allocation. Manage temporary workers and freelancers without losing the link to projects,
 companies, and native payment processes.
 
-### Governance and coordination
+### Apex Core — governance and coordination
 
 Give each role a focused starting point with shared setup, a personal action inbox,
 notifications, permission-aware approvals, and controlled routing to finance and payroll.
