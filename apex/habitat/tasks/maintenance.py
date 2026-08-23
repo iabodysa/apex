@@ -86,19 +86,27 @@ def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, i
     Accommodation Manager is the audience because the technician role holds read only on
     this DocType — a queue addressed to someone who cannot act on the record is the
     second inbox this move exists to remove.
+
+    The comment is written only the pass the request is NEWLY queued (``assign_role``
+    returns how many assignees were actually ADDED). This job runs on a cadence, so a
+    request still overdue is re-seen every pass; commenting unconditionally would grow
+    one identical comment per run for as long as it stayed overdue, on top of the
+    assignment the technician already has open.
     """
     message = (
         f"Maintenance Request {req_name} ({issue_type}, status: {status}) is overdue. "
         f"Priority: {priority}, hours open: {elapsed_hours:.1f} "
         f"(threshold: {threshold_hours} hours)."
     )[:2000]
-    assign_role(
+    newly_assigned = assign_role(
         "Maintenance Request",
         req_name,
         MAINTENANCE_ROLE,
         description=message,
         priority="High" if priority in ("Critical", "High") else "Medium",
     )
+    if not newly_assigned:
+        return
     frappe.db.savepoint(_ROW_SAVEPOINT)
     try:
         frappe.get_doc("Maintenance Request", req_name).add_comment("Comment", message)

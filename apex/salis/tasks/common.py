@@ -79,8 +79,15 @@ def _queue_document(
     already has an open ToDo for it) and the old per-day dedupe window disappears
     with the row. Severity survives as the ToDo priority so the board can still rank
     the queue. The realtime publish is kept — the operations board listens for it.
+
+    The comment is written only the first time a document is newly queued
+    (``assign_role`` returns how many assignees were actually ADDED). A watcher runs
+    daily, so a document already queued is re-seen every pass while its condition
+    holds; commenting unconditionally would grow one identical comment per day for
+    as long as the queue stayed unresolved, on top of the assignment the operator
+    already has open.
     """
-    assign_role(
+    newly_assigned = assign_role(
         doctype,
         name,
         FLEET_ROLE,
@@ -88,6 +95,8 @@ def _queue_document(
         priority=SEVERITY_TO_PRIORITY.get(severity, "Medium"),
     )
     _publish_operations_alert(_vehicle_project(vehicle))
+    if not newly_assigned:
+        return
     frappe.db.savepoint(_ALERT_SAVEPOINT)
     try:
         frappe.get_doc(doctype, name).add_comment("Comment", message)

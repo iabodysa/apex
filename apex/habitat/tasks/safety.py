@@ -368,6 +368,14 @@ def _flag_buildings_without_rounds(logger):
     the top: the worker rolls back the whole run, so every unit already completed is
     lost and the next run repeats them all. The failure is recorded through
     ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
+
+    The rolling window means a building can stay flagged for many days straight —
+    unlike ``audit_remediation_deadline_watch`` and the overdue-instance scan above,
+    whose own query filters drop a row the moment it is flagged. The timeline comment
+    is therefore written only the pass the building is NEWLY queued to the Safety
+    Officer (``assign_role`` returns how many assignees were actually ADDED); the two
+    Notification Log sends stay unconditional because ``notify_user_system`` already
+    dedupes per user against the unread alert.
     """
     from frappe.utils import add_days, getdate, today
 
@@ -406,13 +414,16 @@ def _flag_buildings_without_rounds(logger):
                     f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
                     f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
                 )
-                assign_role("Building", b.name, SAFETY_ROLE, description=msg)
+                newly_assigned = assign_role(
+                    "Building", b.name, SAFETY_ROLE, description=msg
+                )
                 _notify_role_system(
                     SAFETY_ROLE,
                     subject=zero_rounds_alert_subject(label),
                     message=msg,
                 )
-                _notify_operational("Building", b.name, msg)
+                if newly_assigned:
+                    _notify_operational("Building", b.name, msg)
                 notify_user_system(
                     b.responsible_supervisor,
                     subject=zero_rounds_alert_subject(label),
