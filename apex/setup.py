@@ -19,7 +19,6 @@ from apex.apex_core.setup.seeders.maintenance_material_template_seed import (
 )
 from apex.apex_core.setup.seeders.letter_head_seed import seed_letter_head
 from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
-from apex.apex_core.setup.seeders.workspace_role_seed import seed_workspace_roles
 
 
 ACCOMMODATION_ITEM_GROUPS = [
@@ -43,7 +42,6 @@ def after_install():
     create_operational_depreciation_policies()
     seed_templates()
     seed_auto_email_reports()
-    seed_workspace_roles()
     seed_letter_head()
     seed_portal_identities()
     restrict_genders()
@@ -63,7 +61,6 @@ def after_migrate():
     ERPNext's Item Group root, which an incomplete site may not have yet — deferring is
     correct there and a hard failure is not.
     """
-    seed_workspace_roles()
     seed_letter_head()
     seed_portal_identities()
     create_custody_asset_categories()
