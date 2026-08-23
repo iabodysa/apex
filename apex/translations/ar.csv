@@ -2923,7 +2923,6 @@ Only a submitted delivery can be actioned.,لا يمكن اتخاذ إجراء �
 Only a submitted handover can be actioned.,لا يمكن اتخاذ إجراء إلا على تسليم معتمد.
 Only a submitted movement can be acknowledged.,لا يمكن اعتماد الحركة إلا بعد اعتماد المستند.
 Only a submitted transfer can be received.,لا يمكن استلام النقل إلا بعد اعتماده.
-Only a {0} may clear this exit.,لا يمكن اعتماد نقطة الخروج هذه إلا بواسطة {0}.
 Only an authorised user can return a stopped vehicle to service.,لا يعيد المركبة الموقوفة إلى الخدمة إلا مستخدم مخوّل.
 Only an authorised user can stop an active vehicle.,لا يوقف المركبة النشطة إلا مستخدم مخوّل.
 Only an in-progress submitted Maintenance Request can be resolved by a Work Order.,لا يمكن لأمر العمل معالجة إلا طلب صيانة معتمد قيد التنفيذ.
