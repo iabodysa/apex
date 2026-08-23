@@ -37,13 +37,13 @@ savepoint-per-round logic lives in exactly one place.
 
 from __future__ import annotations
 
-import datetime
-
 import frappe
 from frappe import _
 from frappe.utils import (
     get_first_day,
+    get_first_day_of_week,
     get_last_day,
+    get_last_day_of_week,
     get_quarter_ending,
     get_quarter_start,
     get_year_ending,
@@ -161,10 +161,14 @@ def _current_period(cadence, on_date=None):
     Boundaries (all computed from ``on_date``, default today):
 
     - **Daily**: the single day ``on_date`` (start == end).
-    - **Weekly**: the ISO week Monday..Sunday. Computed DIRECTLY from
-      ``date.weekday()`` (Mon=0) — NOT frappe ``get_first_day_of_week``, which
-      honours the System Settings week-start (Sunday by default) and would give
-      a Sun..Sat window, not the ISO Mon..Sun the contract requires.
+    - **Weekly**: the site's own week, via ``get_first_day_of_week`` /
+      ``get_last_day_of_week`` (frappe/utils/data.py:427, :454), which resolve the
+      ``first_day_of_the_week`` System Setting and default to Sunday. The window
+      MUST come from that setting and not from ``date.weekday()``, which is
+      Monday-based: the two differ by a full week on the site's own first day, and
+      ``tasks/safety.py`` decides weekly coverage from the same primitive. A
+      hardcoded week here makes the screen name one period while the coverage gate
+      counts another.
     - **Monthly**: first..last day of the month.
     - **Quarterly**: the calendar quarter via ``get_quarter_start`` / ``get_quarter_ending``.
     - **Annual**: Jan 1..Dec 31 of the year.
@@ -175,8 +179,8 @@ def _current_period(cadence, on_date=None):
         return day, day, {"kind": "day"}
 
     if cadence == "Weekly":
-        start = day - datetime.timedelta(days=day.weekday())
-        end = start + datetime.timedelta(days=6)
+        start = getdate(get_first_day_of_week(day))
+        end = getdate(get_last_day_of_week(day))
         return start, end, {"kind": "week"}
 
     if cadence == "Monthly":
