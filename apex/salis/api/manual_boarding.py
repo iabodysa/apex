@@ -14,6 +14,9 @@ from frappe import _
 
 from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.salis.api import boarding
+from apex.salis.api.boarding_flow import mark_boarded
+from apex.salis.api.driver_portal import _require_enabled
 
 
 def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, created=0):
@@ -45,10 +48,6 @@ def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, cre
 @rate_limit(limit=30, seconds=60)
 def board_worker(dispatch_trip, employee):
     """Board one manifest worker manually on the credential-scoped driver trip."""
-    from apex.salis.api import boarding
-    from apex.salis.api.boarding_flow import mark_boarded
-    from apex.salis.api.driver_portal import _require_enabled
-
     _require_enabled()
     trip = boarding._resolve_trip(dispatch_trip, "write")
     employee = (employee or "").strip()

@@ -78,7 +78,12 @@ def _label_trips(trips):
         )
 
 def _trip_route_maps_url(dispatch_trip, route_plan=None):
-    """Build directions from the actual trip stops, with legacy fallback."""
+    """Build directions from the actual trip stops, with legacy fallback.
+
+    ``masar`` stays a function-local import: ``masar`` imports this module
+    (``driver_portal``) at module level, so a module-level import here would
+    close the loop — Python would find ``masar`` only partially initialized on
+    the way back in, before ``_ordered_trip_stops`` is defined."""
     from apex.salis.api import masar
 
     return _chain_route_maps_url(masar._ordered_trip_stops(dispatch_trip, route_plan))

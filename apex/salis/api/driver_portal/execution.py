@@ -15,6 +15,12 @@ from frappe import _
 
 from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.salis.api.boarding_flow import (
+    _manifest_employees,
+    _manifest_employees_for_stop,
+    _publish,
+    ensure_trip_boarding_state,
+)
 from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,
@@ -81,12 +87,6 @@ def start_my_trip(dispatch_trip):
         )
         with as_capacity(DRIVER, driver):
             doc.insert()
-    from apex.salis.api.boarding_flow import (
-        _manifest_employees,
-        _publish,
-        ensure_trip_boarding_state,
-    )
-
     ensure_trip_boarding_state(dispatch_trip)
     _publish(
         "driver_trip_update",
@@ -134,8 +134,6 @@ def complete_my_trip(dispatch_trip):
         doc.end_datetime = frappe.utils.now_datetime()
     with as_capacity(DRIVER, driver):
         doc.save() if not doc.is_new() else doc.insert()
-    from apex.salis.api.boarding_flow import _manifest_employees, _publish
-
     _publish(
         "driver_trip_update",
         dispatch_trip,
@@ -198,8 +196,6 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 @rate_limit(limit=30, seconds=60)
 def mark_arrived(dispatch_trip, route_stop):
     """Record arrival at one stop and notify workers waiting there."""
-    from apex.salis.api.boarding_flow import _manifest_employees_for_stop, _publish
-
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)

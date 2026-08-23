@@ -2,8 +2,10 @@
 
 import frappe
 
+from apex.apex_core.utils.portal_identity import DRIVER, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
+from apex.salis.api.driver_portal.trips import my_trips_today
 from apex.salis.api.masar_worker import (
     _active_assignment,
     _custody_issued_by,
@@ -32,9 +34,6 @@ def get_masar_today():
     _require_enabled()
     driver = _resolve_driver()
     employee = _resolve_linked_employee()
-    from apex.salis.api.driver_portal.trips import my_trips_today
-    from apex.apex_core.utils.portal_identity import DRIVER, portal_room
-
     return {
         "driver": driver,
         "employee": employee,

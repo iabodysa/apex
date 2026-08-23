@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.salis.api import masar
+from apex.salis.api.boarding_flow import _manifest_request_names
 from apex.salis.api.driver_portal import (
     _resolve_driver,
     _require_enabled,
@@ -140,8 +142,6 @@ def my_worker_route_today():
     the driver SPA calls one cohesive driver-portal API namespace. Augments each
     trip's registered worker manifest with the worker's ``phone`` so the portal can
     offer a one-tap call; masar is imported (read-only), not edited. Read-only."""
-    from apex.salis.api import masar
-
     data = masar.get_my_worker_route_today()
     for trip in data.get("trips", []):
         _enrich_workers_with_phone(trip.get("workers"))
@@ -192,13 +192,9 @@ def my_trip_route(dispatch_trip):
     if not trip:
         frappe.throw(_("Trip not found."), frappe.DoesNotExistError)
 
-    from apex.salis.api import masar
-
     route_plan = trip.get("route_plan")
     stops = masar._ordered_trip_stops(trip["name"], route_plan)
     _attach_stop_progress(stops, trip["name"], driver)
-
-    from apex.salis.api.boarding_flow import _manifest_request_names
 
     workers = []
     seen_workers = set()

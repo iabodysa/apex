@@ -321,7 +321,12 @@ def _trip_manifest_workers(
     Route Plan Transport Request's workers and every assigned-request's workers. A
     pass is only honoured for a worker actually on this union. Resolved through the
     boarding_flow helper so the QR gate and the boarding-state seeding share one
-    definition of "on this trip"."""
+    definition of "on this trip".
+
+    ``boarding_flow`` stays a function-local import: it imports this module
+    (``boarding``) at module level, so a module-level import here would close the
+    loop — Python would find ``boarding_flow`` only partially initialized on the
+    way back in, before ``_manifest_employees`` is defined."""
     from apex.salis.api.boarding_flow import _manifest_employees
 
     return {e for e in _manifest_employees(dispatch_trip, transport_request) if e}
@@ -344,7 +349,10 @@ def _get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe
     which returns the latest committed row rather than this transaction's pre-lock
     snapshot. Under REPEATABLE READ a plain read here answers from that snapshot, so
     the second caller sees no log, creates a second one, and both report success.
-    """
+
+    ``boarding_flow`` stays a function-local import: see ``_trip_manifest_workers``
+    above for the cycle it would close at module level (``boarding_flow`` imports
+    this module, ``boarding``, at module level)."""
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
     existing = frappe.db.get_value(
         "Trip Start Log",
@@ -467,7 +475,11 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     pass whose worker is no longer on the manifest is **Wrong Trip**; a pass past
     its TTL is **Expired**. EVERY outcome writes a Boarding Scan Log row, so the
     audit trail is complete. Returns the result and (when created) the log id and
-    boarding row count. No GL is posted."""
+    boarding row count. No GL is posted.
+
+    ``boarding_flow`` stays a function-local import (twice, below): see
+    ``_trip_manifest_workers`` above for the cycle it would close at module level
+    (``boarding_flow`` imports this module, ``boarding``, at module level)."""
     try:
         actor = _authorize_scan_actor()
     except frappe.PermissionError:
