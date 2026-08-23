@@ -55,7 +55,11 @@ def _expiry_days(expiry_date) -> int | None:
 
     Negative once the window has lapsed, ``0`` on the expiry day, ``None`` when
     no expiry is set. Computed server-side so the desk renders a single source of
-    truth (no client-side date math)."""
+    truth (no client-side date math).
+
+    ``frappe.utils.date_diff`` (frappe/utils/data.py:282) does the subtraction. The
+    one thing it cannot do is distinguish "no expiry" from "expires today": handed a
+    blank it raises rather than answering, so the ``None`` case is decided here."""
     if not expiry_date:
         return None
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
@@ -68,8 +72,11 @@ def _assert_party_in_scope(party_type, party) -> None:
     NOT confine them to their own estate, so a scoped supervisor (or any low-role
     user with a type-level read) could otherwise harvest another building's worker
     identity, passport, and Iqama. This re-applies the same building scope the list
-    views get via ``permission_query_conditions`` (bypassed on the direct get_value
-    read here).
+    views get via ``permission_query_conditions``. That hook runs inside
+    ``DatabaseQuery`` (frappe/model/db_query.py), and the one thing it cannot do is
+    reach a direct ``frappe.db.get_value`` — which is exactly the read below it, so
+    the scope is asserted here or it is not asserted at all. Refusal raises
+    ``frappe.PermissionError``, the class the framework itself uses.
 
     Unscoped oversight roles (HOUSING_UNSCOPED_ROLES) / Administrator pass through.
     Scoped-user rules per party type:
@@ -349,7 +356,12 @@ def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
 
     Housed workers are excluded in the QUERY for the reason _employee_matches gives:
     dropping them from an already-limited page returns fewer rows than the page holds,
-    and sometimes none at all."""
+    and sometimes none at all.
+
+    Dates are rendered with ``frappe.utils.formatdate``, a backwards-compatibility
+    alias for ``format_date`` (frappe/utils/data.py:580); it applies the site's own
+    date format, which a hand-built string cannot, so the desk shows one format
+    everywhere the operator looks."""
     tw_filters = {"status": "Active"}
     if restrict:
         tw_filters["building"] = ["in", allowed]
@@ -708,7 +720,14 @@ def _supplier_breakdown(arrivals) -> list:
     )
 
 def _over_capacity_count(bed_ids) -> int:
-    """How many of today's placements went onto a virtual over-capacity bed."""
+    """How many of today's placements went onto a virtual over-capacity bed.
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
+    rather than by the length of a fetched list, so a busy day does not pull every bed
+    row into memory to be counted. The one thing it cannot do is apply row scope,
+    which is safe here only because the bed ids were produced by an already-scoped
+    read — never call this with client-supplied ids.
+    """
     if not bed_ids:
         return 0
     return frappe.db.count("Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1})

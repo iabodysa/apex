@@ -393,6 +393,14 @@ def _create_round(building, cadence, round_date, lines, is_reinspection, ratify=
     ratifies the drafts it finds). Everything else is identical, including the
     evidence guard, which runs on insert.
 
+    ``frappe.db.savepoint`` / ``rollback`` / ``release_savepoint``
+    (frappe/database/database.py:1203, :1186) wrap the whole round, because a round
+    and its executions are one operational fact: a partially inserted round is worse
+    than none, and the one thing a plain try/except cannot do is undo the executions
+    already written when a later one refuses. ``frappe.scrub``
+    (frappe/__init__.py:1463) builds the savepoint name from the cadence, so two
+    cadences submitted in one request cannot share a point and unwind each other.
+
     The single source of truth for "record a round": inserts the Safety Round
     (not yet submitted), inserts and submits one Safety Task Execution per line
     linked back to the round, then submits the round LAST so its on_submit reads
@@ -580,7 +588,13 @@ def _refusal_text(exc: Exception) -> str:
 
     The message log is drained as it is read so a refusal that this call has already
     turned into a ``failed`` entry is not ALSO raised at the client as a server
-    message on an otherwise successful submit.
+    message on an otherwise successful submit. ``frappe.clear_last_message`` is what
+    drains it; the one thing ``frappe.throw`` cannot do is put its message back once
+    the caller has decided to keep going.
+
+    ``frappe.utils.strip_html`` (frappe/utils/data.py:1516) reduces the thrown message
+    to a plain sentence, because ``throw`` may carry markup a per-cadence status line
+    would render as tags.
     """
     log = getattr(frappe.local, "message_log", None) or []
     text = ""
@@ -632,6 +646,11 @@ def _round_report_html(building, round_date, rounds):
     Lists the building, the round date, and per cadence the overall result plus
     the issue tasks (executions that are Poor or Not Done) recorded in that
     cadence's round. Returns ``(subject, message)``.
+
+    Every operator-supplied value goes through ``frappe.utils.escape_html``
+    (frappe/utils/data.py:1521) before it reaches the body: a task title or a remark
+    is free text, and this is assembled as HTML for an email client that will render
+    whatever it is given.
     """
     subject = _("Safety Round Report: {0} ({1})").format(building, round_date)
 
@@ -683,6 +702,13 @@ def _email_round_report(building, round_date, rounds):
     ``frappe.sendmail`` for at least one recipient; any failure (no recipient,
     kill-switch off, or a send error) returns ``False`` so the caller reports
     ``emailed=false`` WITHOUT rolling back the already-submitted rounds.
+
+    ``frappe.sendmail`` (frappe/__init__.py:681) queues the mail. Two things it cannot
+    do, and both are answered before it is called: it honours no app-level switch, and
+    it does not ask whether a recipient turned their own notifications off — that is
+    ``email_gate.mailable``. A failure is caught and logged with
+    ``frappe.get_traceback`` rather than raised, because the rounds are already
+    submitted and an email fault must not undo a completed inspection.
     """
     if not rounds:
         return False
