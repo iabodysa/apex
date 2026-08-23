@@ -6,13 +6,13 @@ from __future__ import annotations
 import frappe
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
+from apex.apex_core.utils.system_notify import notify_user_system
 from apex.habitat.doctype.audit_remediation_plan.audit_remediation_plan import (
     refresh_overall_status,
 )
 from apex.habitat.tasks.common import (
     _notify_operational,
     _notify_role_system,
-    _notify_user_system,
 )
 
 _ROW_SAVEPOINT = "safety_row"
@@ -252,7 +252,7 @@ def audit_remediation_deadline_watch() -> None:
                 logger.warning(msg)
                 _notify_operational("Audit Remediation Plan", plan.name, msg)
                 if plan.internal_owner:
-                    _notify_user_system(
+                    notify_user_system(
                         plan.internal_owner,
                         f"Audit remediation overdue: {plan.name}",
                         msg,
@@ -401,7 +401,7 @@ def _flag_buildings_without_rounds(logger):
                     message=msg,
                 )
                 _notify_operational("Building", b.name, msg)
-                _notify_user_system(
+                notify_user_system(
                     b.responsible_supervisor,
                     subject=zero_rounds_alert_subject(label),
                     message=msg,

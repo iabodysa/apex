@@ -63,30 +63,3 @@ def _notify_role_system(
             document_type=document_type,
             document_name=document_name,
         )
-
-
-def _notify_user_system(
-    user: str | None,
-    subject: str,
-    message: str | None = None,
-    *,
-    document_type: str | None = None,
-    document_name: str | None = None,
-) -> None:
-    """Post an in-app (system) Notification Log of type Alert to ONE specific user.
-
-    Single-recipient sibling of _notify_role_system, for reaching the building's own
-    responsible supervisor specifically (not the whole role). Falsy/disabled user = no-op.
-    Thin wrapper over the shared system_notify helper. Optional ``document_type``/
-    ``document_name`` link the alert to its source record, which is also the helper's
-    per-user dedup key.
-    """
-    from apex.apex_core.utils.system_notify import notify_user_system
-
-    notify_user_system(
-        user,
-        subject,
-        message,
-        document_type=document_type,
-        document_name=document_name,
-    )

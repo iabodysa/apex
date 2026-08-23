@@ -67,7 +67,14 @@ def _get_submitted(delivery: str):
 
 def _require_role(role: str):
     """Caller must hold the exit's role (or be System Manager). Write permission on
-    the delivery is also required (defense in depth on top of the role grant)."""
+    the delivery is also required (defense in depth on top of the role grant).
+
+    ``frappe.only_for`` (frappe/__init__.py:936) throws the same PermissionError for a
+    missing role but only ever names ALL permitted roles in one generic template
+    string; it cannot say which of the three checkpoints the caller failed, which
+    matters here because ``pass_exit_1`` and ``pass_exit_3`` share this one function
+    and a caller needs to know which physical exit rejected them.
+    """
     roles = frappe.get_roles(frappe.session.user)
     if "System Manager" in roles or role in roles:
         return

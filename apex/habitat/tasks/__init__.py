@@ -11,7 +11,6 @@ from __future__ import annotations
 from apex.habitat.tasks.common import (
     _notify_operational,
     _notify_role_system,
-    _notify_user_system,
 )
 from apex.habitat.tasks.safety import (
     _instance_priority,
@@ -51,7 +50,6 @@ __all__ = [
     "_instance_priority",
     "_notify_operational",
     "_notify_role_system",
-    "_notify_user_system",
     "allocate_building_accommodation_cost",
     "audit_remediation_deadline_watch",
     "backdate_assignment_cost",

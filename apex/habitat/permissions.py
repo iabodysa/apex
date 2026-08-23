@@ -33,12 +33,6 @@ Two invariants hold on every path and are the reason the edge cases look asymmet
 ``_allowed_buildings``, ``_building_is_unscoped`` and ``_building_condition`` stay
 module-level functions: ``apex.habitat.api`` and the Habitat reports import those
 three names directly, and the scoped-permission suite stubs the first two.
-
-The block at the foot of this file is COMPATIBILITY ONLY. Those wrappers hold no rule
-— each forwards to the dispatcher with its own ``scope_for`` — and ``hooks.py`` does
-not route through them. They exist because callers outside this module resolve a
-fragment by FUNCTION NAME; a wrapper is the whole cost of keeping such a caller
-working, and none of them has to be edited when the rule changes.
 """
 
 import frappe
