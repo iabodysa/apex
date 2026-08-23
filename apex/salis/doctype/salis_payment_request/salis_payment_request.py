@@ -70,7 +70,6 @@ class SalisPaymentRequest(Document):
         set_financial_defaults(self)
         if (self.amount or 0) <= 0:
             frappe.throw(_("Amount must be greater than zero."))
-        self._guard_finance_stamp()
         self._enforce_finance_gate()
 
 
@@ -79,20 +78,6 @@ class SalisPaymentRequest(Document):
         previous = self.get_doc_before_save()
         return (previous.status if previous else None) or "Draft"
 
-    def _guard_finance_stamp(self):
-        """The approver stamp is SERVER-OWNED: only ``_enforce_finance_gate`` may
-		write ``finance_approved_by`` / ``finance_approved_on``, and only after the
-		finance-role and SoD checks. ``read_only`` is a UI-only attribute (it is NOT
-		enforced on save) and these fields sit at permlevel 0, so without this guard
-		any role with create/write could forge the stamp directly - e.g. insert with
-		a non-gated status, where the gate early-returns and never inspects it - and
-		the payment router would then route a real payment off the forged value.
-		Revert any caller-supplied value to the stored one so the stamp can never be
-		introduced or altered on a save except by the gate itself."""
-        before = self.get_doc_before_save()
-        self.finance_approved_by = before.finance_approved_by if before else None
-        self.finance_approved_on = before.finance_approved_on if before else None
-
     def _enforce_finance_gate(self):
         """Finance-exclusive gate (kept as a hard server-side block; defence in
 		depth alongside the workflow condition and the permission hook).
@@ -100,7 +85,15 @@ class SalisPaymentRequest(Document):
 		Entering "Approved by Finance" or "Paid" is permitted ONLY when the
 		current user holds a finance authority role and is not the requester.
 		This step cannot be bypassed, even on a save that does not go through the
-		workflow action. On entering any finance-gated state, stamp the approver."""
+		workflow action. On entering any finance-gated state, stamp the approver.
+
+		CONTRACT: ``finance_approved_by`` and ``finance_approved_on`` sit at
+		``permlevel: 1`` with read granted to All and write granted to no role, so a
+		caller-supplied value is discarded by ``validate_higher_perm_levels``
+		(frappe/model/document.py:783) BEFORE any controller method runs, and this
+		method — which runs after it — is the only writer left. Drop that permlevel
+		and any create/write role can forge the approver identity on an insert at a
+		non-gated status, which the payment router would then route a payment off."""
         new_status = self.status or "Draft"
         old_status = self._old_status()
 
