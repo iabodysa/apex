@@ -10,6 +10,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.permissions import add_permission, update_permission_property
 from frappe.utils import get_time, getdate
 
 from apex.apex_core.setup.support_names import ISSUE_PRIORITIES, ISSUE_TYPES
@@ -307,8 +308,6 @@ def grant_issue_role_permissions():
     """Create missing native Custom DocPerm rows without rewriting operator-owned rows."""
     if not frappe.db.exists("DocType", "Issue"):
         return
-    from frappe.permissions import add_permission, update_permission_property
-
     for role, flags in ISSUE_ROLE_PERMISSIONS:
         if not frappe.db.exists("Role", role):
             continue

@@ -19,9 +19,12 @@ import time
 
 import frappe
 from frappe import _
+from frappe.model.workflow import apply_workflow
 from frappe.utils import add_days, today
 
 from apex.apex_core.utils.company import resolve_company_or_any
+from apex.habitat.tasks.cost import allocate_building_accommodation_cost
+from apex.salis.utilisation_engine import weekly_vehicle_utilisation_snapshot
 
 DEMO_ARG = "apex_setup_demo"
 
@@ -516,8 +519,6 @@ def _walk_workflow(doctype, name, actions, user=DEMO_APPROVER):
     states are never written directly, so the demo exercises the same gate an operator
     would.
     """
-    from frappe.model.workflow import apply_workflow
-
     previous_user = frappe.session.user
     frappe.set_user(user)
     try:
@@ -1121,14 +1122,10 @@ def _build_driver_clearance(context):
 
 def _build_vehicle_snapshots(context):
     """Runs the weekly vehicle utilisation snapshot job to populate demo data."""
-    from apex.salis.utilisation_engine import weekly_vehicle_utilisation_snapshot
-
     weekly_vehicle_utilisation_snapshot()
 
 def _build_accommodation_ledger(context):
     """Allocates today's accommodation cost for the demo building."""
-    from apex.habitat.tasks.cost import allocate_building_accommodation_cost
-
     allocate_building_accommodation_cost(context["building"], today())
 
 def _build_qr_location(context):

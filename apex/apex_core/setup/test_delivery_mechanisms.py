@@ -16,10 +16,12 @@ import pathlib
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex import setup
 from apex.apex_core.setup.app_owned_permissions_seed import (
     APP_OWNED_PERMISSIONS,
     seed_app_owned_permissions,
 )
+from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
 from apex.apex_core.setup.workflow_names import WORKFLOWS
 
 APP_ROOT = pathlib.Path(frappe.get_app_path("apex"))
@@ -48,8 +50,6 @@ class TestSeedersReachAnUpgradedSite(FrappeTestCase):
                 self.assertIn(path, after_migrate)
 
     def test_the_remaining_master_seeder_runs_at_migrate_as_well(self):
-        from apex import setup
-
         source = ast.unparse(
             ast.parse(pathlib.Path(setup.__file__).read_text())
         )
@@ -103,23 +103,17 @@ class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
                 self.assertIn(doctype, events)
 
     def test_a_shipped_workflow_is_refused(self):
-        from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
-
         shipped = sorted(WORKFLOWS)[0]
         with self.assertRaises(frappe.PermissionError):
             refuse_shipped_workflow_edit(frappe._dict(doctype="Workflow", name=shipped))
 
     def test_an_operator_workflow_is_untouched(self):
         """The positive control: a refusal that refuses everything is not a gate."""
-        from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
-
         refuse_shipped_workflow_edit(
             frappe._dict(doctype="Workflow", name="Some Operator Workflow")
         )
 
     def test_a_child_row_is_refused_through_its_parent(self):
-        from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
-
         shipped = sorted(WORKFLOWS)[0]
         with self.assertRaises(frappe.PermissionError):
             refuse_shipped_workflow_edit(
@@ -128,8 +122,6 @@ class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
 
     def test_the_fixture_import_is_not_refused(self):
         """The app's own reimport must land, or migrate refuses itself."""
-        from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
-
         shipped = sorted(WORKFLOWS)[0]
         frappe.flags.in_migrate = True
         try:

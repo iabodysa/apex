@@ -16,10 +16,12 @@ import ast
 import inspect
 import json
 import os
+import pathlib
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.apex_core.setup import setup_wizard
 from apex.apex_core.setup.salis_support import (
     ISSUE_PRIORITIES,
     ISSUE_TYPES,
@@ -68,8 +70,6 @@ class TestNoSlaWithoutAnAnswer(FrappeTestCase):
     def test_the_wizard_is_the_only_caller_that_enables_it(self):
         """Read from the source: an enable that reaches a seeder instead of the wizard
         is exactly the silent creation this card retired."""
-        from apex.apex_core.setup import setup_wizard
-
         source = inspect.getsource(setup_wizard._apply_salis_support)
         self.assertIn("apex_enable_salis_support_sla", source)
         tree = ast.parse(source)
@@ -91,8 +91,6 @@ class TestSupportDefaultsAreIdempotent(FrappeTestCase):
         self.assertEqual(frappe.db.count("Custom DocPerm", {"parent": "Issue"}), before)
 
     def test_the_seeder_runs_at_install_and_at_migrate(self):
-        import pathlib
-
         hooks = ast.parse((pathlib.Path(frappe.get_app_path("apex")) / "hooks.py").read_text())
         lists = {
             node.targets[0].id: ast.literal_eval(node.value)

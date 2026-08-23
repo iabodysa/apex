@@ -42,6 +42,8 @@ that actually write.
 import json
 import os
 
+import frappe
+
 DATA_ROOT = os.path.join(os.path.dirname(__file__), "data")
 
 _REQUIRED_KEYS = ("doctype", "key", "records")
@@ -213,8 +215,6 @@ def apply_spec(spec):
     production site (``frappe/utils/logger.py:12`` floors the level at ERROR
     there).
     """
-    import frappe
-
     doctype, key = spec["doctype"], spec["key"]
     created = skipped = failed = 0
 
@@ -265,8 +265,6 @@ def seed(module_dir, only=None):
     (frappe/desk/page/setup_wizard/setup_wizard.py:504-541) does neither: it logs a failing
     record and moves on.
     """
-    import frappe
-
     totals = {"created": 0, "skipped": 0, "failed": 0}
     specs = [spec for spec in load_specs(module_dir, only=only) if spec.get("apply", True)]
     ordered, cyclic = order_specs(frappe, specs)

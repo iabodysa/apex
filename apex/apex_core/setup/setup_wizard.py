@@ -35,14 +35,18 @@ import frappe
 from frappe.utils import cint
 
 from apex.apex_core.payment_router import validate_target_doctype
+from apex.apex_core.setup.employee_advance_recovery import configure_recovery
+from apex.apex_core.setup.salis_support import (
+    configure_support_sla,
+    ensure_support_holiday_list,
+)
+from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
 from apex.apex_core.utils.company import resolve_company_or_any
+from apex.setup import create_accommodation_item_defaults
 
 def setup_wizard_complete(args=None):
     """`setup_wizard_complete` hook — apply the operator's first-run choices."""
     apply_apex_setup(args)
-    from apex.apex_core.setup.seeders.portal_identity_seed import seed_portal_identities
-    from apex.setup import create_accommodation_item_defaults
-
     seed_portal_identities()
     create_accommodation_item_defaults()
 
@@ -139,8 +143,6 @@ def _apply_payment_routing(args):
 
 def _apply_employee_advance_recovery(args, company):
     """Enable the Apex scheduler only after native HRMS accounts and component exist."""
-    from apex.apex_core.setup.employee_advance_recovery import configure_recovery
-
     configure_recovery(
         enabled=bool(cint(args.get("apex_enable_employee_advance_recovery"))),
         company=company,
@@ -150,11 +152,6 @@ def _apply_employee_advance_recovery(args, company):
 
 def _apply_salis_support(args):
     """Create an Issue SLA only when the setup answers include a complete schedule."""
-    from apex.apex_core.setup.salis_support import (
-        configure_support_sla,
-        ensure_support_holiday_list,
-    )
-
     enabled = bool(cint(args.get("apex_enable_salis_support_sla")))
     if not enabled:
         configure_support_sla(enabled=False)

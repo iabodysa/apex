@@ -36,6 +36,7 @@ re-run and never overwrites a row an operator has adjusted.
 from __future__ import annotations
 
 import frappe
+from frappe.permissions import add_permission, update_permission_property
 
 APP_OWNED_PERMISSIONS = (
     ("Employee", "Employee Self Service", 0, ("read", "write", "export", "share", "print", "email")),
@@ -65,8 +66,6 @@ _ALL_PTYPES = (
 
 def seed_app_owned_permissions():
     """Create the rows this app needs, leaving every other Custom DocPerm alone."""
-    from frappe.permissions import add_permission, update_permission_property
-
     for doctype, role, permlevel, granted in APP_OWNED_PERMISSIONS:
         if not frappe.db.exists("DocType", doctype):
             continue
