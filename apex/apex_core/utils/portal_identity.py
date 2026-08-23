@@ -816,6 +816,31 @@ def credential_delivery_destination(
 
 _PUSH_SUBSCRIPTION_SUBJECT_FIELDS = {WORKER: "employee", DRIVER: "driver"}
 
+
+def portal_push_subscription_scope_query(user=None, doctype=None) -> str:
+    """WHERE fragment shutting the Portal Push Subscription list to a portal capacity.
+
+    Registered in ``hooks.py`` (``permission_query_conditions``), paired with
+    :func:`portal_push_subscription_has_permission`, which denies a capacity every
+    ``read`` / ``report`` / ``print`` on a single row. That pairing is the whole point:
+    ``frappe.has_permission`` reaches ``has_controller_permissions`` only inside
+    ``get_doc_permissions``, which runs under ``if doc:`` (frappe/permissions.py:125-128
+    and :206), so a LIST is decided by the DocPerm alone. Both capacity roles hold
+    ``read`` with no ``if_owner``, so without this fragment one capacity user lists every
+    subject's push endpoint and keys, and the single-row refusal never fires.
+
+    Returns "1=0" for a capacity and None for everyone else, because only System Manager
+    holds any other DocPerm here and its estate is the whole site. Delete this and the
+    list side opens while the form side stays shut.
+    """
+    del doctype
+    from apex.apex_core.utils.permission_scope import is_portal_capacity, resolve_user
+
+    if is_portal_capacity(resolve_user(user)):
+        return "1=0"
+    return None
+
+
 def portal_push_subscription_has_permission(doc, ptype, user=None):
     """Deny a portal capacity from touching another subject's push registration.
 

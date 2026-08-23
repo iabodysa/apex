@@ -150,3 +150,49 @@ class TestCloseAllCapacityDeskAccess(FrappeTestCase):
         self.assertEqual(
             frappe.db.get_value("User", CAPACITY_USERS[WORKER], "user_type"), "Website User"
         )
+
+
+class TestPushSubscriptionListIsShutToACapacity(FrappeTestCase):
+    """A capacity lists no push registration, not even its own subject's.
+
+    ``has_permission`` reaches a controller hook only through ``get_doc_permissions``,
+    which frappe runs under ``if doc:`` (frappe/permissions.py:125-128), so a list is
+    decided by the DocPerm alone -- and both capacity roles carry ``read`` with no
+    ``if_owner``. The list fragment is therefore the only thing standing between one
+    capacity user and every subject's endpoint and keys.
+    """
+
+    def setUp(self):
+        default_company()
+        self.employee = make_employee()
+        self.rows = []
+        for endpoint in ("https://fcm.googleapis.com/fcm/send/apex-a", "https://fcm.googleapis.com/fcm/send/apex-b"):
+            doc = frappe.get_doc(
+                {
+                    "doctype": "Portal Push Subscription",
+                    "holder_type": "Worker",
+                    "employee": self.employee,
+                    "endpoint": endpoint,
+                    "p256dh": "test-p256dh",
+                    "auth": "test-auth",
+                }
+            ).insert(ignore_permissions=True)
+            self.rows.append(doc.name)
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+        for name in self.rows:
+            frappe.delete_doc(
+                "Portal Push Subscription", name, force=True, ignore_permissions=True
+            )
+
+    def test_administrator_sees_the_rows_the_capacity_must_not(self):
+        listed = {r.name for r in frappe.get_list("Portal Push Subscription", limit_page_length=0)}
+        self.assertTrue(set(self.rows).issubset(listed))
+
+    def test_each_capacity_lists_nothing(self):
+        for audience in (DRIVER, WORKER):
+            frappe.set_user(CAPACITY_USERS[audience])
+            listed = frappe.get_list("Portal Push Subscription", limit_page_length=0)
+            frappe.set_user("Administrator")
+            self.assertEqual(listed, [], f"{CAPACITY_USERS[audience]} listed a push registration")

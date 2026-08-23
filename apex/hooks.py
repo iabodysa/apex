@@ -378,6 +378,7 @@ permission_query_conditions = {
     "Salis Driver": _SALIS_SCOPE_QUERY,
     "Passenger Manifest": _SALIS_SCOPE_QUERY,
     "Masar Worker Token": "apex.apex_core.utils.portal_identity.masar_worker_token_scope_query",
+    "Portal Push Subscription": "apex.apex_core.utils.portal_identity.portal_push_subscription_scope_query",
     "Facility Asset Custody Assignment": _HABITAT_NO_BUILDING_QUERY,
     "Operational Depreciation Snapshot": _HABITAT_NO_BUILDING_QUERY,
     "Custody Return": _HABITAT_NO_BUILDING_QUERY,
