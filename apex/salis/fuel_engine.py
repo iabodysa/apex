@@ -38,7 +38,6 @@ from apex.apex_core.utils.company import company_for_vehicle
 LEDGER_DOCTYPE = "Fuel Consumption Ledger"
 BATCH_SIZE = 500
 
-OVERAGE_MARGIN = 0.05
 OVERAGE_MARGIN_DEFAULT_PERCENT = 5
 
 def get_overage_margin() -> float:
@@ -274,7 +273,8 @@ def monthly_fuel_reconciliation() -> None:
 
     For the period that has CLOSED, every active Fuel Quota is compared with the
     summed Fuel Consumption Ledger litres for the same vehicle+period. If consumption
-    exceeds ``monthly_litres`` by more than the ``OVERAGE_MARGIN`` tolerance, the
+    exceeds ``monthly_litres`` by more than the tolerance the operator set in
+    ``Salis Settings.fuel_overage_margin_percent``, the
     breached Fuel Quota — the document whose allocation the supervisor must revisit —
     is ASSIGNED to the Fleet Supervisor queue.
 

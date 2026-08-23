@@ -40,12 +40,6 @@ def on_doctype_update():
     )
 
 
-def validate(doc, method=None):
-    """Blocks saving a Scheduled Task Instance that has no due date."""
-    if not doc.due_date:
-        frappe.throw(_("Due Date is required."))
-
-
 def on_submit(doc, method=None):
     """Defaults the status to Open on submit unless it is already In Progress, Completed or Cancelled."""
     if doc.status not in ("In Progress", "Completed", "Cancelled"):

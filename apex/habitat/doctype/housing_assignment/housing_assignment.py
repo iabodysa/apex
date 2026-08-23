@@ -167,9 +167,6 @@ def validate(doc, method=None):
 
     building = frappe.get_doc("Building", doc.building)
 
-    if not doc.project:
-        frappe.throw(_("Project is required."))
-
     if not doc.cost_center:
         doc.cost_center = building.default_cost_center
     if not doc.cost_center and building.company:

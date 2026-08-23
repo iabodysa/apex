@@ -262,7 +262,6 @@ doc_events = {
         "before_cancel": "apex.habitat.doctype.maintenance_work_order.maintenance_work_order.before_cancel",
     },
     "Scheduled Task Instance": {
-        "validate": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.validate",
         "on_submit": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.on_submit",
         "before_cancel": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.before_cancel",
     },
