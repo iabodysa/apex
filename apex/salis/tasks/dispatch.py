@@ -56,6 +56,16 @@ def _driver_if_still_available(driver):
 
 
 def generate_for_assignment(route_assignment, start_date=None, end_date=None):
+    """Create the missing Dispatch Trips for ONE approved assignment's horizon.
+
+    The assignment is loaded ``for_update`` so two overlapping runs cannot both read
+    the same ``generated_through`` and both create the same day's trips —
+    ``frappe.new_doc`` (frappe/__init__.py:1152) has no idempotency of its own, and a
+    duplicate trip puts a second bus on one route.
+
+    Returns how many were created; an assignment that is not submitted, approved and
+    enabled creates nothing.
+    """
     assignment = frappe.get_doc("Route Assignment", route_assignment, for_update=True)
     if not (
         assignment.docstatus == 1

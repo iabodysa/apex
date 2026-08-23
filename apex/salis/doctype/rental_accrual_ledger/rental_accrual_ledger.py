@@ -31,6 +31,13 @@ def _drop_stale_unique_key():
     the exact insert the reversal makes. Best-effort and idempotent: once the
     live columns already match, this is a no-op; a fresh install has no index
     yet, so the SELECT returns no rows and nothing is dropped.
+
+    ``information_schema.STATISTICS`` is read directly because the one thing
+    ``frappe.db.has_index`` (frappe/database/mariadb/database.py:375) cannot do is
+    report an index's COLUMNS — it matches ``Key_name`` alone, which is exactly the
+    name this index keeps while its columns are wrong. Both parameters are bound.
+    A probe failure is logged through ``frappe.get_traceback`` and nothing is
+    dropped: refusing to guess is safer than dropping a constraint on a guess.
     """
     try:
         rows = frappe.db.sql(

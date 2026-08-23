@@ -516,7 +516,14 @@ def _normalise_request_assignments(value, trip):
 
 
 def _parse_request_assignment_rows(value):
-    """Parse the request collection before any trip row is inserted."""
+    """Parse the request collection before any trip row is inserted.
+
+    ``frappe.parse_json`` (frappe/__init__.py:2491) handles the JSON case, but only
+    when the value LOOKS like JSON: the one thing it cannot do is accept a bare
+    document name — it raises — so a single request passed as a plain string is
+    wrapped rather than parsed. Parsing before any insert is the point: a malformed
+    collection must refuse the whole trip, not leave half its rows written.
+    """
     if isinstance(value, str):
         value = (
             frappe.parse_json(value)

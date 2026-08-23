@@ -50,7 +50,16 @@ MAINTENANCE_MATERIAL_CATALOG = [
 
 
 def seed_catalog():
-    """Insert catalog items if not already present. Idempotent."""
+    """Insert catalog items if not already present. Idempotent.
+
+    The existence probe is what makes it re-runnable: ``insert`` raises on a name that
+    already exists, and this runs on every install AND every migrate.
+
+    ``frappe.db.commit`` (frappe/database/database.py:1173) is called because this runs
+    from an install or migrate step: the one thing an uncommitted seed cannot do is
+    survive a LATER step failing, and a half-seeded catalog leaves the operator with
+    a screen of empty pickers and no error to search for.
+    """
     for item in MAINTENANCE_MATERIAL_CATALOG:
         if frappe.db.exists("Maintenance Material", item["material_name"]):
             continue

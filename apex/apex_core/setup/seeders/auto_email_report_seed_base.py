@@ -29,7 +29,12 @@ def seed_auto_email_reports_for(reports):
     Auto Email Report auto-names from its report, so idempotency is keyed on the
     `report` link (one scheduled email per report), not a synthetic name. A report
     that is not installed is skipped, so a partially installed module never aborts
-    migrate."""
+    migrate.
+
+    ``frappe.db.commit`` (frappe/database/database.py:1173) is called because this runs
+    from an install or migrate step: the one thing an uncommitted seed cannot do is
+    survive a LATER step failing, and a half-seeded catalog leaves the operator with
+    a screen of empty pickers and no error to search for."""
     admin_email = frappe.db.get_value("User", "Administrator", "email") or "admin@example.com"
     for cfg in reports:
         if frappe.db.exists("Auto Email Report", {"report": cfg["report"]}):
