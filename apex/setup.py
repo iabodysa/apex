@@ -59,7 +59,15 @@ def after_migrate():
 
 
 def create_accommodation_item_defaults(*, allow_deferred=False):
-    """Seed accommodation Item Groups and Items once ERPNext has its root."""
+    """Seed accommodation Item Groups and Items once ERPNext has its root.
+
+    Raises ``frappe.DoesNotExistError`` (frappe/exceptions.py) when the root is absent
+    and ``allow_deferred`` is false. The flag exists because the SAME function runs at
+    two moments: from ``after_install``, where erpnext's own setup has not created the
+    Item Group root yet and deferring is correct, and from the setup wizard's
+    completion, where the root must exist and a silent skip would leave a site with no
+    accommodation items and no error.
+    """
     item_group_root = _get_item_group_root()
     if not item_group_root:
         if allow_deferred:
@@ -158,7 +166,12 @@ def create_accommodation_items():
 
 
 def _load_accommodation_item_records():
-    """Loads the bundled accommodation Item records from their JSON fixture file."""
+    """Loads the bundled accommodation Item records from their JSON fixture file.
+
+    ``frappe.get_app_path`` (frappe/__init__.py:1484) resolves the installed app's own
+    directory, so the records read are the ones that SHIPPED with the running version
+    rather than whatever path the bench process started from.
+    """
     data_path = frappe.get_app_path(
         "apex",
         "apex_core",
@@ -222,7 +235,13 @@ def create_role_profiles():
 
 
 def create_custody_asset_categories():
-    """Creates each standing Custody Asset Category that does not already exist."""
+    """Creates each standing Custody Asset Category that does not already exist.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
+    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
+    ignore a name that already exists — it raises DuplicateEntryError — and this runs
+    on every install AND every migrate.
+    """
     categories = [
         "Bedding & Linen",
         "Room Access",
@@ -240,7 +259,13 @@ def create_custody_asset_categories():
 
 
 def create_custody_articles():
-    """Creates each standing returnable Custody Article under its category."""
+    """Creates each standing returnable Custody Article under its category.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
+    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
+    ignore a name that already exists — it raises DuplicateEntryError — and this runs
+    on every install AND every migrate.
+    """
     articles = [
         {"article_name": "Room Key", "category": "Room Access", "is_returnable": 1},
         {"article_name": "Gate Access Card", "category": "Room Access", "is_returnable": 1},
@@ -261,7 +286,13 @@ def create_custody_articles():
 
 
 def create_operational_depreciation_policies():
-    """Creates each standing Operational Depreciation Policy with its useful life."""
+    """Creates each standing Operational Depreciation Policy with its useful life.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds each row and the existence check
+    above it is what makes this re-runnable: the one thing ``insert`` cannot do is
+    ignore a name that already exists — it raises DuplicateEntryError — and this runs
+    on every install AND every migrate.
+    """
     policies = [
         {"policy_name": "Linen - 12 Months", "useful_life_years": 1},
         {"policy_name": "Keys and Cards - 24 Months", "useful_life_years": 2},

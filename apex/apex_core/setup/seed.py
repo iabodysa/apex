@@ -114,10 +114,14 @@ def _exists(frappe, doctype, key, value):
 def _unresolved_link(frappe, doctype, record):
     """Name the first Link target this record cannot resolve, or None if all resolve.
 
-    Child rows are walked too: a Table row's Link is as fatal as a top-level one
-    (Frappe's own ``_validate_links`` checks children), so a record whose rows
-    dangle must be refused here rather than raising mid-batch.
+    Child rows are walked too: a Table row's Link is as fatal as a top-level one —
+    ``Document._validate_links`` (frappe/model/document.py:969) checks children, so a
+    record whose rows dangle must be refused here rather than raising mid-batch.
 
+    ``frappe.get_meta`` (frappe/model/meta.py:66) supplies the Link fields. The one
+    thing the framework's own validation cannot do is answer BEFORE the insert: it
+    raises during save, which in a seed batch aborts the records that would have
+    succeeded after it.
     """
     meta = frappe.get_meta(doctype)
     for field in meta.get("fields", {"fieldtype": "Link"}):
@@ -146,6 +150,10 @@ def _linked_doctypes(frappe, doctype):
     ``options``, which is the same metadata ``_unresolved_link`` already reads to decide
     whether a record can be created. Dynamic Link is deliberately absent — its target is a
     value in a sibling field, so no static reading of the schema can name it.
+
+    ``Meta.get_table_fields`` (frappe/model/meta.py:214) supplies the child tables, so
+    a Link that lives only on a child row is still counted; a targets set built from
+    top-level fields alone would order a parent before the DocType its rows point at.
     """
     meta = frappe.get_meta(doctype)
     targets = {f.options for f in meta.get("fields", {"fieldtype": "Link"}) if f.options}
@@ -160,6 +168,10 @@ def order_specs(frappe, specs):
     The order is DERIVED, not declared: seeding Room before Building fails because Room
     carries a Link to Building, and the schema already says so. Deriving it means nobody
     maintains a hand-written list that silently rots when a field is added.
+
+    ``frappe.db.table_exists`` (frappe/database/database.py:1220) drops a DocType whose
+    table is not on this site, because the order must be derivable during install when
+    a later app's DocTypes do not exist yet.
 
     Returns ``(ordered, cyclic)``. A cycle — two DocTypes that Link to each other — cannot
     be ordered at all, so those specs come back separately for the caller's retry loop
@@ -184,6 +196,15 @@ def apply_spec(spec):
     """Create the records for one spec. Returns ``{created, skipped, failed}``.
 
     create-only, existence-guarded, per-record savepoint with log-then-rollback.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    are taken PER RECORD, because the one thing a plain try/except cannot do is undo a
+    partial write: a failed insert leaves child rows behind, and without a savepoint
+    the next record in the batch inherits them.
+
+    ``frappe.db.table_exists`` (frappe/database/database.py:1220) guards the whole
+    spec, so a seeder that ships ahead of its DocType reports every record skipped
+    rather than failing the install.
     """
     import frappe
 
