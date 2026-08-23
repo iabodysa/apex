@@ -81,8 +81,10 @@ def tally_bed(mix: dict, color: str) -> None:
 def bed_mix_rows(building_names) -> list:
     """ONE bounded Bed/Room aggregate covering every building in scope.
 
-    Link fields carry no index by default, so the boards read all their beds in a
-    single pass rather than one query per building."""
+    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
+    ``frappe.get_all`` cannot do is LEFT JOIN and aggregate in one statement. Link
+    fields carry no index by default, so the boards read all their beds in a single
+    pass rather than one query per building."""
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     return (

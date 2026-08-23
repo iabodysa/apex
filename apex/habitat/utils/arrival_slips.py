@@ -41,7 +41,14 @@ def party_type_label(party_type) -> str:
 
 def slip_context(worker_name, party_type=None) -> dict:
     """The masthead every slip carries. ``party_type`` is omitted on slips that
-    identify the worker by a document reference instead of a party."""
+    identify the worker by a document reference instead of a party.
+
+    Dates are rendered with ``frappe.utils.formatdate``, an alias for ``format_date``
+    (frappe/utils/data.py:580), so a printed slip carries the site's date format
+    rather than one this module invents. The direction and language are read from
+    ``frappe.local.lang``, because a slip printed from a background job has no request
+    to infer them from.
+    """
     ctx = {"worker_name": worker_name}
     if party_type is not None:
         ctx["party_type"] = party_type

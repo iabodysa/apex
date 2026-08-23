@@ -72,7 +72,13 @@ def _spawn_request(finding, source_doc) -> str:
     """Build, insert, and return the name of the MR for one finding.
 
     Maps room / issue_type / priority / building and stamps the source-specific
-    back-link field (source_execution for an STE, source_inspection for a SIR)."""
+    back-link field (source_execution for an STE, source_inspection for a SIR).
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the request rather than
+    ``get_mapped_doc`` (frappe/model/mapper.py:50): the source is a child ROW of a
+    submitted parent, and the mapper maps a document by name — it has no way to be
+    handed one row out of a table.
+    """
     mr = frappe.new_doc("Maintenance Request")
     mr.building = source_doc.get("building")
     mr.room = finding.room

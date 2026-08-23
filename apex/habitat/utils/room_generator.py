@@ -92,7 +92,12 @@ def validate_floor_plan(doc):
 
 def load_existing(building_name):
     """Pre-load the building's existing rooms (room_number -> name) and bed codes so the
-    generator stays idempotent without per-iteration lookups."""
+    generator stays idempotent without per-iteration lookups.
+
+    Read in two bulk queries rather than probing per room with ``frappe.db.exists``:
+    generating a tower is thousands of iterations, and the one thing an existence
+    probe cannot do is amortise — it is one round trip each time it is asked.
+    """
     existing_room_rows = frappe.db.get_all(
         "Room",
         filters={"building": building_name},
@@ -275,7 +280,14 @@ def process_floor_row(row, abbreviation, building_name, allow_create,
 
 
 def finalize_building_stats(building_name, stats):
-    """After any room/bed write, refresh the building's setup status + derived totals."""
+    """After any room/bed write, refresh the building's setup status + derived totals.
+
+    ``frappe.db.set_value`` writes the derived figures without running the Building's
+    validation: these are recomputed FROM the rows that already exist, so re-validating
+    would grade the building against a total this call is in the middle of correcting.
+    Nothing is written when the pass created nothing, so a no-op generate leaves the
+    building's timestamps alone.
+    """
     if not (stats.created_rooms > 0 or stats.created_beds > 0 or stats.updated_rooms > 0):
         return
     total_floors = building_rollup.distinct_floor_count(building_name)

@@ -62,6 +62,11 @@ def derive_total_capacity(building_name):
     ``is_temporary`` over-capacity beds. ``None`` when it has no bed rows yet (the
     pre-generation path — keep the manually-entered planned figure); 0 when it has
     beds but all are excluded.
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) does the counting. The one
+    thing a count cannot express is the difference between "no beds yet" and "no
+    usable beds", which is why the existence probe runs first: both would answer 0,
+    and only one of them should overwrite the planned capacity.
     """
     if not frappe.db.exists("Bed", {"building": building_name}):
         return None

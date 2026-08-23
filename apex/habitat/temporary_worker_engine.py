@@ -99,7 +99,13 @@ def _repoint_party(tw_name: str, employee: str) -> None:
     Worker to the Employee on every party-bearing doctype. Built with frappe.qb so
     the (dynamic) table and column identifiers are quoted by the builder, not
     string-interpolated: these include submitted documents, and this is a system
-    identity correction, not a user edit. Existence-guarded on table + columns."""
+    identity correction, not a user edit.
+
+    ``frappe.db.table_exists`` and ``get_table_columns``
+    (frappe/database/database.py:1220) guard each target, because the party-bearing
+    set spans modules that may not all be installed. The one thing a bulk UPDATE
+    cannot do is skip a table it does not know about — it raises, and here that would
+    abandon the identity correction half-applied across the tables before it."""
     for doctype, emp_field in PARTY_DOCTYPES.items():
         if not _IDENT.match(doctype):
             frappe.throw(_("Invalid SQL identifier: doctype {0}").format(doctype))
@@ -121,7 +127,13 @@ def _repoint_party(tw_name: str, employee: str) -> None:
 
 def _link(tw, employee: str) -> None:
     """Link a Temporary Worker to an Employee: re-point party across docs, back-date the
-    skipped accommodation cost, then stamp the link and mark Linked."""
+    skipped accommodation cost, then stamp the link and mark Linked.
+
+    The cost back-dating is attempted inside its own try/except and its failure is
+    logged through ``frappe.get_traceback`` rather than raised: the identity link is
+    the operator's request and it has already succeeded by then, so a costing fault
+    must not undo it. The missed days remain recoverable by re-running the back-date.
+    """
     from frappe.utils import now_datetime
     from apex.habitat.tasks import backdate_assignment_cost
 
