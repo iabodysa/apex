@@ -33,25 +33,19 @@ function load() {
 }
 
 const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
-let pollTimer;
 let unsubscribers = [];
 let liveBuilding = null;
 
 function stopLive() {
-  clearInterval(pollTimer);
   liveBuilding = null;
   while (unsubscribers.length) unsubscribers.pop()();
 }
 
-// Called on every building change, so it must be a no-op while the room already holds the
-// current building — otherwise a poll tick would tear the listener down and rebuild it.
 function startLive(name) {
   if (name === liveBuilding) return;
   liveBuilding = name;
   while (unsubscribers.length) unsubscribers.pop()();
   if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => arrivals.fetch()) || (() => {}));
-  clearInterval(pollTimer);
-  pollTimer = setInterval(() => building.value && arrivals.fetch(), 10000);
 }
 
 function candidateFrom(row) {

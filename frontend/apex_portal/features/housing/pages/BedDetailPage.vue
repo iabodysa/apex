@@ -47,12 +47,10 @@ watch(candidate, (value) => {
 }, { immediate: true });
 
 const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
-let pollTimer;
 let unsubscribers = [];
 let liveBuilding = null;
 
 function stopLive() {
-  clearInterval(pollTimer);
   liveBuilding = null;
   while (unsubscribers.length) unsubscribers.pop()();
 }
@@ -65,8 +63,6 @@ function startLive(name) {
   liveBuilding = name;
   while (unsubscribers.length) unsubscribers.pop()();
   if (name) unsubscribers.push(subscribeBuilding(name, "doc_update", () => bed.reload()) || (() => {}));
-  clearInterval(pollTimer);
-  pollTimer = setInterval(() => bed.doc?.building && bed.reload(), 10000);
 }
 
 watch(() => bed.doc?.building, startLive, { immediate: true });
