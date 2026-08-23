@@ -395,6 +395,16 @@ def batch_issue_worker_links(employees_json) -> list:
                 "qr": masar_qr_data_uri(link),
             }
         )
+    # ``emp_ids`` is not an unscoped read: every id in it already passed
+    # ``authorize_issuance(WORKER, emp)`` above, one at a time, which is a STRICTER
+    # test (Housing Assignment building scope) than Employee's own DocPerm — read on
+    # Employee (erpnext/setup/doctype/employee/employee.json) is granted to
+    # "Employee", "HR User" and "HR Manager" only, never to "Accommodation Manager"
+    # or "Resident Supervisor". A permission-checked ``frappe.get_list`` here would
+    # return nothing for exactly those two roles and silently blank every phone on
+    # the one Arrivals Desk action they use, though they were already proven
+    # entitled to each named worker. ``frappe.get_all`` stays: the population is
+    # the caller's own already-authorized batch, named by id, nothing wider.
     emp_ids = [r["employee"] for r in out if r.get("employee")]
     phones = dict(
         frappe.get_all(
@@ -565,13 +575,23 @@ def batch_issue_driver_links(drivers_json) -> list:
                 "qr": masar_qr_data_uri(link),
             }
         )
+    # Unlike Employee below, Salis Driver carries its OWN wired scoping
+    # (hooks.py permission_query_conditions/has_permission -> apex.salis.permissions),
+    # on the SAME project axis ``authorize_issuance`` already checked per driver
+    # above, and grants read to every DRIVER issuer role (Fleet Manager, Fleet
+    # Project Manager, Fleet Supervisor, System Manager — salis_driver.json). A
+    # permission-checked read costs nothing here: ``driver_ids`` already sits inside
+    # the caller's allowed-project set, so the native scope narrows to the same
+    # rows, never fewer. ``limit_page_length=0`` is explicit because
+    # ``frappe.get_list`` defaults to 20 and a batch can exceed that.
     driver_ids = [r["driver"] for r in out if r.get("driver")]
     phones = dict(
-        frappe.get_all(
+        frappe.get_list(
             "Salis Driver",
             filters={"name": ["in", driver_ids]},
             fields=["name", "phone"],
             as_list=True,
+            limit_page_length=0,
         )
     ) if driver_ids else {}
     for r in out:

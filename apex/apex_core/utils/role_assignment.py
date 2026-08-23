@@ -101,6 +101,16 @@ def clear_assignment(doctype: str, name: str) -> int:
     routes through ``ToDo.save()``, so ``on_update`` fires and rewrites the parent's
     ``_assign``. Writing the status column directly left the assignee on the document's
     desk sidebar after the queue was settled, with nothing to show it was stale.
+
+    ``ignore_permissions`` is left at its default (False): ``close_all_assignments``
+    (frappe/desk/form/assign_to.py:154-171) already calls
+    ``frappe.get_doc(doctype, name).check_permission()`` — a ``read`` check on the
+    REFERENCED document, never on the ToDo — so the assignee's own permission was
+    never the gate this needed to clear. Every caller already holds it: the Habitat
+    and Salis scheduler jobs that reconcile the queue run as the scheduler's system
+    user (Administrator), for whom every check passes, and
+    ``apex.salis.api.operations_alerts.resolve_alert`` re-checks ``write`` on the
+    same referenced document before calling in.
     """
     todos = frappe.get_all(
         "ToDo",
@@ -112,7 +122,7 @@ def clear_assignment(doctype: str, name: str) -> int:
         pluck="name",
     )
     if todos:
-        close_all_assignments(doctype, name, ignore_permissions=True)
+        close_all_assignments(doctype, name)
     return len(todos)
 
 
