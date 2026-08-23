@@ -502,8 +502,45 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
         disable_subject_subscriptions(audience, subject)
     return disabled
 
+_CAPACITY_DESK_ROLES = {
+    WORKER: (WORKER, "Portal Worker Capacity"),
+    DRIVER: (DRIVER, "Portal Driver Capacity"),
+}
+
+def close_capacity_desk_access(audience: str) -> None:
+    """Correct one portal capacity's roles back to no desk access.
+
+    ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1878-1880)
+    hardcodes ``desk_access = 1`` the moment any shipped DocType's permissions table
+    names a role that does not yet exist. Both capacity roles keep reappearing in that
+    position: Salis Driver names ``Driver``; Resident Request, Dispatch Trip, Transport
+    Trip Rating and Transport Request all name ``Worker``; Trip Start Log and Portal
+    Push Subscription name both ``Portal Driver Capacity`` and ``Portal Worker
+    Capacity``. Any one of them can win the race against ``portal_identity_seed``'s
+    create-only guard and leave the shared capacity user -- ``driver@apex.internal`` or
+    ``worker@apex.internal`` -- carrying desk access nobody asked for. The write goes
+    through ``Role.save`` rather than ``frappe.db.set_value`` because ``Role.on_update``
+    (frappe/core/doctype/role/role.py:70-85) is what re-evaluates ``user_type`` on every
+    user holding the role, and it fires only when ``desk_access``'s VALUE changes on a
+    document save -- a raw column write would leave the capacity user's stored
+    ``user_type`` stale.
+    """
+    _require_audience(audience)
+    for role in _CAPACITY_DESK_ROLES[audience]:
+        if frappe.db.get_value("Role", role, "desk_access"):
+            role_doc = frappe.get_doc("Role", role)
+            role_doc.desk_access = 0
+            role_doc.save(ignore_permissions=True)
+
+def close_all_capacity_desk_access() -> None:
+    """Sweep both portal capacities in one migrate-time call, the ``after_migrate`` entry."""
+    for audience in _CAPACITY_DESK_ROLES:
+        close_capacity_desk_access(audience)
+
 def on_employee_change(doc, method=None) -> int:
-    """Revoke worker and linked-driver credentials for a non-active Employee."""
+    """Keep the worker capacity identity off the desk, then revoke worker and
+    linked-driver credentials for a non-active Employee."""
+    close_capacity_desk_access(WORKER)
     if not doc.name or doc.status == "Active":
         return 0
 
@@ -518,33 +555,10 @@ def on_employee_change(doc, method=None) -> int:
         disabled += revoke_subject_tokens(DRIVER, driver)
     return disabled
 
-_DRIVER_DESK_ROLES = (DRIVER, "Portal Driver Capacity")
-
-def close_driver_desk_access() -> None:
-    """Correct ``Driver`` and ``Portal Driver Capacity`` back to no desk access.
-
-    ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1878-1880)
-    hardcodes ``desk_access = 1`` the moment any shipped DocType's permissions table
-    names a role that does not yet exist -- Salis Driver names ``Driver`` and Trip
-    Start Log / Portal Push Subscription name ``Portal Driver Capacity``, so either can
-    win the race against ``portal_identity_seed``'s create-only guard and leave the
-    shared driver capacity user, ``driver@apex.internal``, carrying desk access nobody
-    asked for. The write goes through ``Role.save`` rather than ``frappe.db.set_value``
-    because ``Role.on_update`` (frappe/core/doctype/role/role.py:70-85) is what
-    re-evaluates ``user_type`` on every user holding the role, and it fires only when
-    ``desk_access``'s VALUE changes on a document save -- a raw column write would leave
-    the capacity user's stored ``user_type`` stale.
-    """
-    for role in _DRIVER_DESK_ROLES:
-        if frappe.db.get_value("Role", role, "desk_access"):
-            role_doc = frappe.get_doc("Role", role)
-            role_doc.desk_access = 0
-            role_doc.save(ignore_permissions=True)
-
 def on_salis_driver_change(doc, method=None) -> int:
     """Keep the driver capacity identity off the desk, then revoke credentials
     whenever a driver is not Active."""
-    close_driver_desk_access()
+    close_capacity_desk_access(DRIVER)
     if not doc.name or doc.status == "Active":
         return 0
     return revoke_subject_tokens(DRIVER, doc.name)
