@@ -17,6 +17,8 @@ Loan Product this module creates lazily is rebuilt fresh on the next run too.
 
 from __future__ import annotations
 
+import unittest
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
@@ -33,6 +35,15 @@ from apex.apex_core.utils.employee_loan_recovery import (
 from apex.apex_core.utils.employee_recovery import _salary_preview
 
 _COMPANY = "_Test Company"
+
+requires_lending = unittest.skipUnless(
+    "lending" in frappe.get_installed_apps(),
+    "the lending app is not installed on this site, so there is no Loan wiring to prove",
+)
+"""Every class here asserts what hrms does with a real Loan, and apex declares only
+frappe, erpnext and hrms — so a site without lending has no Loan DocType at all. On such
+a site these skip by name; the module they cover returns ``None`` there rather than
+raising, which is what ``if_lending_app_installed`` is for."""
 
 
 def _payroll_employee(email: str, base: float) -> tuple[str, str]:
@@ -88,6 +99,7 @@ def _submit_without_emailing(slip):
         frappe.flags.via_payroll_entry = previous
 
 
+@requires_lending
 class TestEnsureRecoveryLoanProduct(FrappeTestCase):
     def test_the_product_is_zero_interest_term_and_reused(self):
         first = ensure_recovery_loan_product(_COMPANY)
@@ -98,6 +110,7 @@ class TestEnsureRecoveryLoanProduct(FrappeTestCase):
         self.assertTrue(product.is_term_loan)
 
 
+@requires_lending
 class TestRaiseRecoveryLoan(FrappeTestCase):
     def test_defers_without_an_active_salary_structure_assignment(self):
         """No wage is known, so no Loan can be sized — the receivable is deferred,
@@ -153,6 +166,7 @@ class TestRaiseRecoveryLoan(FrappeTestCase):
         self.assertEqual(loan.repay_from_salary, 1)
 
 
+@requires_lending
 class TestSalarySlipLoanProof(FrappeTestCase):
     """The proof the card demands: a real Salary Slip's own loan section, read back —
     not the amount this module asked for."""
@@ -185,6 +199,7 @@ class TestSalarySlipLoanProof(FrappeTestCase):
         )
 
 
+@requires_lending
 class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
     """The backstop that stays live every pay period, unlike our own cap which is
     fixed once at Loan creation: hrms refuses to submit a Salary Slip whose net pay
@@ -275,6 +290,7 @@ class TestNoNegativeNetSalaryFromALoan(FrappeTestCase):
         self.assertEqual(slip.docstatus, 1)
 
 
+@requires_lending
 class TestCapLoanInstallmentsToCurrentPay(FrappeTestCase):
     """The gap the first review found: hrms's own floor only refuses a NEGATIVE net
     pay (salary_slip.py:207-209), so an installment frozen against the employee's

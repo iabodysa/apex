@@ -5,6 +5,12 @@ refusal/reversal pair a cancel must run for whichever recovery record it holds.
 The Loan itself (its schedule, its cap, hrms's own deduction) is proved in
 apex.apex_core.utils.test_employee_loan_recovery against a real Salary Slip; this
 module never builds one, only the incident's own bookkeeping around it.
+
+``test_ignore`` names ``Loan`` for the same reason ``test_vehicle_incident.py`` does:
+``get_dependencies`` (frappe/test_runner.py:359-381) walks ``recovery_loan``'s Link and
+would abort the whole suite on a site without the ``lending`` app, which apex does not
+declare. Nothing here inserts a real Loan — ``raise_recovery_loan`` is patched — so the
+hatch (test_runner.py:374-377) costs this module no coverage.
 """
 
 from __future__ import annotations
@@ -18,6 +24,7 @@ from frappe.utils import today
 from apex.tests._helpers import as_user
 
 test_dependencies = ["Salis Vehicle"]
+test_ignore = ["Loan"]
 
 _MODULE = "apex.salis.doctype.vehicle_incident.vehicle_incident"
 

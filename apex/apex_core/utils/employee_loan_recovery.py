@@ -94,12 +94,20 @@ Loan is submitted with ``repay_from_salary`` set, HRMS deducts on every Salary S
 touches unconditionally — there is no separate "recovery enabled" switch in the native
 wiring to defer to, so gating this module's own call would only hide the receivable
 without changing what payroll does with it.
+
+CONTRACT: every public name here reaches a DocType the ``lending`` app owns — Loan,
+Loan Product — while apex itself declares only frappe, erpnext and hrms, so a site is
+entitled to run without lending. Each one therefore carries hrms's own
+``if_lending_app_installed``, and returns ``None`` on such a site. Drop a decorator and
+that site stops SAVING the document that called it, because an unknown DocType raises
+an import error rather than reporting a missing row.
 """
 
 from __future__ import annotations
 
 import frappe
 from frappe.utils import flt, today
+from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import if_lending_app_installed
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 from apex.apex_core.utils.employee_recovery import _salary_preview
@@ -153,6 +161,7 @@ def _ensure_recovery_loan_account(company: str, fieldname: str, account_type: st
     return account.name
 
 
+@if_lending_app_installed
 def ensure_recovery_loan_product(company: str) -> str | None:
     """Return the company's zero-interest Loan Product for damage recovery, creating it once.
 
@@ -202,6 +211,7 @@ def ensure_recovery_loan_product(company: str) -> str | None:
     return product.name
 
 
+@if_lending_app_installed
 def raise_recovery_loan(
     source_doctype: str,
     source_name: str,
@@ -318,6 +328,7 @@ def _is_recovery_loan_product(loan_product: str | None) -> bool:
     return bool(loan_product) and loan_product.startswith(f"{RECOVERY_LOAN_PRODUCT_NAME} - ")
 
 
+@if_lending_app_installed
 def cap_loan_installments_to_current_pay(doc, method=None) -> None:
     """Reduce (never increase) each recovery Loan row on THIS slip to at most
     ``MAX_RECOVERY_PERCENT`` of THIS period's own gross pay, and recompute the

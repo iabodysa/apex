@@ -7,6 +7,16 @@ status-transition refusal is the exception: ``has_value_changed`` only knows
 about a change once the document has been loaded from the database, so that
 one case inserts a minimal incident against the fixture vehicle and reloads
 it before asserting the refusal.
+
+WHY ``test_ignore`` NAMES ``Loan``. ``get_dependencies`` (frappe/test_runner.py:359-381)
+builds a test record for every Link on the DocType under test, whether or not a case
+touches it. ``recovery_loan`` Links to ``Loan``, which the ``lending`` app owns, and
+apex declares only frappe, erpnext and hrms — so on a site without lending the walk
+aborts the WHOLE suite with ``DocType Loan not found`` before one case runs, which
+reads as UNKNOWN rather than as a failure. ``test_ignore`` (test_runner.py:374-377) is
+the framework's own hatch for this and is scoped to this module alone. It is honest
+here because nothing below reads ``recovery_loan``; the cases that do live in
+``test_vehicle_incident_loan_recovery.py`` and skip themselves when lending is absent.
 """
 
 from __future__ import annotations
@@ -16,6 +26,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 test_dependencies = ["Salis Vehicle"]
+test_ignore = ["Loan"]
 
 
 class TestVehicleIncident(FrappeTestCase):
