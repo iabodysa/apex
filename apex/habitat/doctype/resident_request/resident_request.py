@@ -10,6 +10,7 @@ from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
+from frappe.utils import sha256_hash
 from apex.apex_core.utils.party_link import sync_party_employee
 
 class ResidentRequest(Document):
@@ -364,12 +365,19 @@ def _bulk_triage_job_id(names) -> str:
     derive that id itself — without one every click is a distinct job, and the same
     rows are triaged twice by two workers reading the same pre-lock state.
 
-    The id is the hash of the SORTED names, so the same selection in a different
-    order is the same job.
+    The id is a DIGEST of the SORTED names, so the same selection in a different order
+    is the same job.
+
+    ``frappe.utils.sha256_hash`` (frappe/utils/data.py:2151) derives it. NOT
+    ``frappe.generate_hash``: that takes a ``txt`` argument and ignores it entirely —
+    ``frappe/__init__.py:1134-1142`` returns ``secrets.token_hex`` and never reads the
+    input — so an id built that way is random per call, ``deduplicate`` compares two
+    values that never match, and nothing is deduplicated while the code reads as
+    though it is.
     """
-    return "bulk_triage:" + frappe.generate_hash(
-        "|".join(sorted(str(n) for n in names or [])), length=24
-    )
+    return "bulk_triage:" + sha256_hash(
+        "|".join(sorted(str(n) for n in names or []))
+    )[:24]
 
 
 def _apply_bulk_triage(names):

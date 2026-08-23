@@ -138,10 +138,10 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
         self.assertIn(path, _hooks_list("after_migrate"))
 
     def test_the_select_only_rows_do_not_grant_read(self):
-        """The trap: ``add_permission`` defaults to read, and twelve of these must not.
+        """The trap: ``add_permission`` defaults to read, and thirteen of these must not.
 
         A select-only grant lets a supervisor pick an Employee in a Link field without
-        being able to open the record. Seeding them with the default would hand twelve
+        being able to open the record. Seeding them with the default would hand thirteen
         roles read access to personnel, cost and project data they cannot see today.
         """
         select_only = [
@@ -149,7 +149,7 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
             for dt, role, _lvl, granted in APP_OWNED_PERMISSIONS
             if granted == ("select",)
         ]
-        self.assertEqual(len(select_only), 12)
+        self.assertEqual(len(select_only), 13)
         for dt, role, _lvl, granted in APP_OWNED_PERMISSIONS:
             with self.subTest(doctype=dt, role=role):
                 if granted == ("select",):

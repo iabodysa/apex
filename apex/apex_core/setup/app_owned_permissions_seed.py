@@ -22,10 +22,10 @@ the exported rows are copies of the base apps' own DocPerm — same role, same p
 flag for flag. Seeding those would rebuild the duplication this change removes, and they
 are already in force through the fallback above.
 
-THE TRAP THIS FILE EXISTS TO AVOID: twelve of the sixteen grant ``select`` and NOTHING
+THE TRAP THIS FILE EXISTS TO AVOID: THIRTEEN of the sixteen grant ``select`` and NOTHING
 else — the Link-field picker, so a supervisor can choose an Employee without being able
 to open one. ``frappe.permissions.add_permission`` grants ``read`` by default, so seeding
-these with its default would hand twelve roles read access to personnel, cost and project
+these with its default would hand thirteen roles read access to personnel, cost and project
 records they cannot see today. Every row below therefore names its own permission types
 and ``read`` is set only where the file set it.
 
