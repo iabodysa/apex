@@ -52,6 +52,7 @@
   "worker_signature",
   "signed_on",
   "recovery_advance",
+  "recovery_loan",
   "vi_sec_system",
   "naming_series",
   "previous_status",
@@ -289,7 +290,7 @@
   },
   {
    "default": "0",
-   "description": "Recover the repair cost from the driver. On submit this raises one native Employee Advance; payroll installments remain off until Employee Advance Recovery is enabled in Salis Settings.",
+   "description": "Recover the repair cost from the driver. On submit this raises one native Loan with Repay From Salary set; HRMS deducts the installment on the employee's own Salary Slip.",
    "fieldname": "recover_from_driver",
    "fieldtype": "Check",
    "label": "Recover Cost from Driver"
@@ -345,13 +346,23 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.recover_from_driver",
-   "description": "The Employee Advance raised for this incident. One incident raises at most one advance; the company payment and the wage installments both run on it.",
+   "depends_on": "eval:doc.recovery_advance",
+   "description": "Legacy: the Employee Advance raised for this incident before recovery moved onto the native Loan. Left to run out; no new incident writes this field.",
    "fieldname": "recovery_advance",
    "fieldtype": "Link",
-   "label": "Recovery Advance",
+   "label": "Recovery Advance (legacy)",
    "no_copy": 1,
    "options": "Employee Advance",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.recover_from_driver",
+   "description": "The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",
+   "fieldname": "recovery_loan",
+   "fieldtype": "Link",
+   "label": "Recovery Loan",
+   "no_copy": 1,
+   "options": "Loan",
    "read_only": 1
   },
   {
@@ -405,7 +416,7 @@
    "link_fieldname": "source_incident"
   }
  ],
- "modified": "2026-08-14 16:35:00.000000",
+ "modified": "2026-08-23 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Vehicle Incident",

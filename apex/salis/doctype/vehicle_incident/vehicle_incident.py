@@ -10,11 +10,14 @@ it cleanly. An Accident incident records the event only; stopping the vehicle, i
 needed, is a separate Vehicle Suspension.
 
 Cost recovery is native, no bespoke consent DocType: when the incident is flagged
-``recover_from_driver`` it raises ONE HRMS Employee Advance on submit (the
-receivable), and the wage installments run on Additional Salary rows linked to that
-advance - see apex.apex_core.utils.employee_recovery. The worker's signed consent is
+``recover_from_driver`` it raises ONE native Loan on submit, with Repay From Salary
+set - see apex.apex_core.utils.employee_loan_recovery. HRMS itself runs the wage
+installment and the outstanding balance from the Loan's own repayment schedule; this
+controller neither computes nor stores either. The worker's signed consent is
 mandatory before that approval (KSA Labor Law), and one incident maps to at most one
-advance.
+loan. ``recovery_advance`` is legacy: incidents raised before this change may still
+carry an open Employee Advance, which is left to run out rather than migrated (see
+apex.apex_core.utils.employee_recovery); no incident writes that field anymore.
 """
 
 from __future__ import annotations
@@ -24,7 +27,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
-from apex.apex_core.utils.employee_recovery import raise_recovery_advance
+from apex.apex_core.utils.employee_loan_recovery import raise_recovery_loan
 from apex.salis.utils import add_timeline_note, lock_vehicle, set_current_driver
 
 _RECOVERY_INTAKE_RESET = {
@@ -35,6 +38,7 @@ _RECOVERY_INTAKE_RESET = {
     "worker_signature": None,
     "signed_on": None,
     "recovery_advance": None,
+    "recovery_loan": None,
 }
 _TRANSITION_SAVEPOINT = "vehicle_incident_transition"
 
@@ -138,9 +142,9 @@ class VehicleIncident(Document):
                 frappe.throw(_("{0} is too long.").format(_(self.meta.get_label(field))))
 
     def on_submit(self):
-        """Raises the recovery advance and, for a theft, stops the vehicle and clears its driver."""
+        """Raises the recovery loan and, for a theft, stops the vehicle and clears its driver."""
         self.db_set("status", "Under Review")
-        self._raise_recovery_advance()
+        self._raise_recovery_loan()
         if self.incident_type != "Theft":
             return
 
@@ -163,17 +167,17 @@ class VehicleIncident(Document):
             _("Reported stolen via {0}.").format(self.name),
         )
 
-    def _raise_recovery_advance(self):
-        """Map this incident to its ONE Employee Advance.
+    def _raise_recovery_loan(self):
+        """Map this incident to its ONE Loan.
 
-        Idempotent on both sides: the stored link short-circuits a re-submit, and
-        ``find_recovery_advance`` catches an amendment that arrives with a blank link.
-        A site that cannot raise an advance yet (no Employee Advance account) logs and
-        continues — the incident is still the event of record.
+        Idempotent within this document's lifecycle: the stored link short-circuits a
+        re-submit. A site that cannot yet size the installment (no company, no Loan
+        Product accounts, no active Salary Structure Assignment for the employee) logs
+        and continues — the incident is still the event of record.
         """
-        if not self.recover_from_driver or self.recovery_advance:
+        if not self.recover_from_driver or self.recovery_loan:
             return
-        advance = raise_recovery_advance(
+        loan = raise_recovery_loan(
             source_doctype=self.doctype,
             source_name=self.name,
             employee=self.recovery_employee,
@@ -182,16 +186,36 @@ class VehicleIncident(Document):
                 self.name, self.vehicle
             ),
             posting_date=self.incident_date,
+            agreed_installment=flt(self.installment_amount),
         )
-        if advance:
-            self.db_set("recovery_advance", advance)
+        if loan:
+            self.db_set("recovery_loan", loan)
 
-    def _live_recovery_advance(self):
-        """The linked Employee Advance while it is still submitted, else None.
+    def _live_recovery_loan(self):
+        """The linked Loan while it is still submitted and untouched by payroll, else None.
 
         One reader for both halves of the cancel: there is nothing to refuse and
-        nothing to reverse when the incident raised no advance, or when the advance
-        is already a draft or cancelled.
+        nothing to reverse when the incident raised no loan, when the loan is already
+        cancelled, or (defensively; ``before_cancel`` already checked this) once a Loan
+        Repayment has been posted against it.
+        """
+        loan = self.recovery_loan
+        if not loan:
+            return None
+        state = frappe.db.get_value(
+            "Loan",
+            loan,
+            ["name", "docstatus", "total_principal_paid"],
+            as_dict=True,
+            for_update=True,
+        )
+        return state if state and state.docstatus == 1 else None
+
+    def _live_recovery_advance(self):
+        """The legacy linked Employee Advance while it is still submitted, else None.
+
+        Only a pre-migration incident carries ``recovery_advance``; kept so cancelling
+        one of those still refuses and reverses correctly.
         """
         advance = self.recovery_advance
         if not advance:
@@ -207,24 +231,60 @@ class VehicleIncident(Document):
 
     def before_cancel(self):
         """REFUSAL half of the cancel: once real money has moved - the company has
-        paid, or an installment has been recovered - reversing is an accounting
-        decision, so the cancel is refused instead of silently unwinding a posted
-        balance.
+        paid, an installment has been recovered, or a Loan Repayment has posted -
+        reversing is an accounting decision, so the cancel is refused instead of
+        silently unwinding a posted balance.
 
         A Document method with no hooks.py entry: Frappe composes the class method
         ahead of the app-wide workflow_guard.before_cancel handler.
 
         """
-        state = self._live_recovery_advance()
-        if state and (flt(state.paid_amount) or flt(state.return_amount)):
+        loan_state = self._live_recovery_loan()
+        if loan_state and (
+            flt(loan_state.total_principal_paid)
+            or frappe.db.exists(
+                "Loan Repayment", {"against_loan": loan_state.name, "docstatus": 1}
+            )
+        ):
+            frappe.throw(
+                _(
+                    "Cannot cancel incident {0}: Loan {1} already carries a recovered amount. Reverse it in Accounts first."
+                ).format(self.name, loan_state.name)
+            )
+
+        advance_state = self._live_recovery_advance()
+        if advance_state and (flt(advance_state.paid_amount) or flt(advance_state.return_amount)):
             frappe.throw(
                 _(
                     "Cannot cancel incident {0}: Employee Advance {1} already carries a paid or recovered amount. Reverse it in Accounts first."
-                ).format(self.name, state.name)
+                ).format(self.name, advance_state.name)
             )
 
+    def _release_recovery_loan(self):
+        """RESTORATION half: cancel the Loan (and its Disbursement) when the incident
+        is cancelled.
+
+        The Disbursement is cancelled first: it is what activated the Loan's
+        repayment schedule (see apex.apex_core.utils.employee_loan_recovery), and a
+        submitted Loan Disbursement still linking the Loan would refuse the Loan's own
+        cancel (Loan.on_cancel only ignores GL Entry / Payment Ledger Entry links,
+        lending/loan_management/doctype/loan/loan.py:118). Cancelling the Loan itself
+        then reverses its draft repayment schedule natively (loan.py:115-118). The
+        paid refusal is not re-checked here: ``before_cancel`` already locked the loan
+        row for this transaction, so nothing between the two hooks can pay it.
+        """
+        state = self._live_recovery_loan()
+        if state:
+            for disbursement in frappe.get_all(
+                "Loan Disbursement",
+                filters={"against_loan": state.name, "docstatus": 1},
+                pluck="name",
+            ):
+                frappe.get_doc("Loan Disbursement", disbursement).cancel()
+            frappe.get_doc("Loan", state.name).cancel()
+
     def _release_recovery_advance(self):
-        """RESTORATION half: reverse the receivable when the incident is cancelled.
+        """RESTORATION half: reverse the legacy receivable when the incident is cancelled.
 
         Cancelling the advance reverses the recovered balance natively (HRMS reverses
         each linked Additional Salary's contribution on its own cancel). The paid /
@@ -253,8 +313,10 @@ class VehicleIncident(Document):
             frappe.get_doc("Employee Advance", state.name).cancel()
 
     def on_cancel(self):
-        """Reverses the recovery advance and, for a theft, restores the vehicle's prior driver and status."""
+        """Reverses the recovery loan (or, for a pre-migration incident, the legacy
+        advance) and, for a theft, restores the vehicle's prior driver and status."""
         self.db_set("status", "Closed")
+        self._release_recovery_loan()
         self._release_recovery_advance()
         if self.incident_type != "Theft":
             return
