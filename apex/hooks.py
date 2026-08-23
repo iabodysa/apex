@@ -126,8 +126,16 @@ doc_events = {
         "before_rename": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_edit",
         "validate": "apex.apex_core.setup.salis_support.refuse_shipped_issue_type_edit",
     },
-    "Custom DocPerm": {
-        "validate": "apex.apex_core.utils.app_owned_permissions.refuse_app_owned_permission_edit",
+    "Workflow": {
+        "validate": "apex.apex_core.setup.app_owned_workflows.refuse_shipped_workflow_edit",
+        "before_rename": "apex.apex_core.setup.app_owned_workflows.refuse_shipped_workflow_edit",
+        "on_trash": "apex.apex_core.setup.app_owned_workflows.refuse_shipped_workflow_edit",
+    },
+    "Workflow Document State": {
+        "validate": "apex.apex_core.setup.app_owned_workflows.refuse_shipped_workflow_edit",
+    },
+    "Workflow Transition": {
+        "validate": "apex.apex_core.setup.app_owned_workflows.refuse_shipped_workflow_edit",
     },
     "Employee": {
         "on_change": "apex.apex_core.utils.portal_identity.on_employee_change",
@@ -502,6 +510,7 @@ after_install = [
     "apex.apex_core.setup.seeders.salis_navbar_seed.seed_salis_navbar_help_links",
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     "apex.apex_core.setup.salis_support.grant_issue_role_permissions",
+    "apex.apex_core.setup.app_owned_permissions_seed.seed_app_owned_permissions",
     "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
@@ -511,6 +520,9 @@ after_install = [
 after_sync = []
 after_migrate = [
     "apex.setup.after_migrate",
+    "apex.apex_core.setup.salis_support.grant_issue_role_permissions",
+    "apex.apex_core.setup.app_owned_permissions_seed.seed_app_owned_permissions",
+    "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
     "apex.apex_core.utils.employee_recovery.backfill_recovery_snapshots",
     "apex.apex_core.setup.seed.seed_all",
     "apex.apex_core.setup.seeders.habitat_auto_email_reports_seed.seed_auto_email_reports",

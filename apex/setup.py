@@ -51,10 +51,25 @@ def after_install():
 
 
 def after_migrate():
-    """Recover item defaults on configured sites without blocking incomplete sites."""
+    """Bring an UPGRADED site to the same shipped state a fresh install reaches.
+
+    The custody masters, the material templates and the depreciation policies were
+    reachable only from ``after_install``, so a site that installed Apex before they
+    shipped never received them and nothing said so. Every one is
+    ``frappe.db.exists``-guarded, so running them on every migrate costs one probe per
+    record and cannot duplicate.
+
+    ``create_accommodation_item_defaults`` keeps ``allow_deferred`` because it needs
+    ERPNext's Item Group root, which an incomplete site may not have yet — deferring is
+    correct there and a hard failure is not.
+    """
     seed_workspace_roles()
     seed_letter_head()
     seed_portal_identities()
+    create_custody_asset_categories()
+    create_custody_articles()
+    create_operational_depreciation_policies()
+    seed_templates()
     return create_accommodation_item_defaults(allow_deferred=True)
 
 

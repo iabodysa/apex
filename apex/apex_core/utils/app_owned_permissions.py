@@ -1,28 +1,14 @@
 # Copyright (c) 2026, afmcoltd
-"""Refuse a permission edit that the next update would silently undo.
+"""Tell an app-owned write apart from a person's edit.
 
-Three DocTypes carry their permissions in this app's customization files —
-``apex/habitat/custom/employee.json``, ``cost_center.json`` and ``project.json``, each
-with ``sync_on_migrate`` set. Frappe's customization sync does not merge those rows: at
-``frappe/modules/utils.py:184-186`` it deletes every Custom DocPerm for the DocType and
-reinserts only the file's, and its own comment says so — "Docperm have no sync as of
-now. They get OVERRIDDEN on sync."
-
-So a grant made in Role Permission Manager is accepted, saved, and gone at the next
-``bench migrate``, with nothing said. Refusing the write is the honest version of the
-same outcome: the administrator learns immediately instead of discovering it when a role
-he granted stops working.
-
-The sync's own reinserts must pass, which is why the refusal stands down while Frappe is
-installing, migrating or running a patch.
+Several refusals in this app must stand down while Frappe is applying its own shipped
+records, or the app's install and migrate would refuse themselves. This module holds that
+one test, so the answer is the same wherever it is asked.
 """
 
 from __future__ import annotations
 
 import frappe
-from frappe import _
-
-APP_OWNED_DOCTYPES = frozenset({"Employee", "Cost Center", "Project"})
 
 
 def frappe_is_writing_its_own_records() -> bool:
@@ -38,21 +24,4 @@ def frappe_is_writing_its_own_records() -> bool:
         or frappe.flags.in_install
         or frappe.flags.in_patch
         or frappe.flags.in_import
-    )
-
-
-def refuse_app_owned_permission_edit(doc, method=None):
-    """Refuse a hand-made Custom DocPerm on a DocType whose permissions ship with Apex."""
-    if doc.parent not in APP_OWNED_DOCTYPES:
-        return
-    if frappe_is_writing_its_own_records():
-        return
-    frappe.throw(
-        _(
-            "Permissions for {0} are set by Apex and reapplied on every update, so a"
-            " change made here would be removed the next time the site is updated. Ask"
-            " for the change to ship with the app instead."
-        ).format(_(doc.parent)),
-        frappe.PermissionError,
-        title=_("Set by Apex"),
     )
