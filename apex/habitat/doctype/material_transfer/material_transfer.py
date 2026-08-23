@@ -150,8 +150,8 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    from apex.apex_core.utils.email_gate import email_enabled, mailable
-    if not email_enabled():
+    from apex.apex_core.utils.email_gate import mailable
+    if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
         frappe.logger().info(
             f"Email disabled (Habitat Settings): skipped finance memo for transfer {doc.name}"
         )

@@ -5,8 +5,9 @@ Registered via ``override_doctype_class`` in ``hooks.py`` (NOT a core
 monkey-patch). It changes two behaviours and nothing else:
 
 FIRST, it is where the Habitat Settings email kill-switch reaches the DECLARATIVE
-send path. ``email_gate.email_enabled`` is asked by every explicit
-``frappe.sendmail`` call site in this app, and a Notification record reaches
+send path. The ``enable_email_notifications`` toggle on Habitat Settings is read
+by every explicit ``frappe.sendmail`` call site in this app, and a Notification
+record reaches
 ``frappe.sendmail`` through core rather than through any of them — so with the
 switch OFF the eighteen records this app ships with ``enabled: 1`` and
 ``channel: Email`` would still send. This class is the one place all of them pass
@@ -32,9 +33,8 @@ the building. Recipients, conditions, and the notifications actually produced
 are unchanged — only ordering + error resilience differ.
 """
 
+import frappe
 from frappe.email.doctype.notification.notification import Notification
-
-from apex.apex_core.utils.email_gate import email_enabled
 
 
 class ApexNotification(Notification):
@@ -51,7 +51,7 @@ class ApexNotification(Notification):
         if self.channel == "System Notification":
             return
 
-        if self.channel == "Email" and not email_enabled():
+        if self.channel == "Email" and not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
             return
 
         try:

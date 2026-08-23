@@ -120,11 +120,11 @@ def weekly_custody_digest() -> None:
 
     from frappe.utils import date_diff, escape_html, flt, fmt_money, get_url_to_list, getdate, today
 
-    from apex.apex_core.utils.email_gate import email_enabled, mailable
+    from apex.apex_core.utils.email_gate import mailable
 
     logger = frappe.logger()
 
-    if not email_enabled():
+    if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
         logger.info("weekly_custody_digest: email disabled (Habitat Settings); skipped.")
         return
 

@@ -17,8 +17,8 @@ aborts migrate.
 
 Email kill-switch: seeding these **disabled** is the gate for this declarative
 path — nothing is sent until an admin both enables the individual report AND
-turns on the master ``enable_email_notifications`` toggle in Habitat Settings
-(``apex_core.utils.email_gate.email_enabled``). We never seed them enabled, so
+turns on the master ``enable_email_notifications`` toggle in Habitat Settings.
+We never seed them enabled, so
 the master toggle being OFF by default is upheld here without extra logic.
 """
 

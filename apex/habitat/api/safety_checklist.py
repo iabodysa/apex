@@ -683,9 +683,9 @@ def _email_round_report(building, round_date, rounds):
     if not rounds:
         return False
 
-    from apex.apex_core.utils.email_gate import email_enabled, mailable
+    from apex.apex_core.utils.email_gate import mailable
 
-    if not email_enabled():
+    if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
         frappe.logger().info(
             "Email disabled (Habitat Settings): skipped safety round report "
             f"for {building} on {round_date}"

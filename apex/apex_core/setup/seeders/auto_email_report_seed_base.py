@@ -15,9 +15,8 @@ stays a code seeder instead of externalised seed JSON.
 Email kill-switch: every report is created **disabled** with Administrator as
 the placeholder recipient — the customer's real users are unknown at install.
 Nothing is sent until an admin both enables the individual report AND turns on
-the master ``enable_email_notifications`` toggle in Habitat Settings
-(``apex_core.utils.email_gate.email_enabled``), so seeding never has to reason
-about the master toggle itself.
+the master ``enable_email_notifications`` toggle in Habitat Settings, so
+seeding never has to reason about the master toggle itself.
 """
 
 import frappe
