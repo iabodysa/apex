@@ -47,7 +47,7 @@ called it, because an unknown DocType raises an import error rather than reporti
 from __future__ import annotations
 
 import frappe
-from frappe.utils import flt, today
+from frappe.utils import flt, rounded, today
 from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import if_lending_app_installed
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
@@ -290,8 +290,6 @@ def cap_loan_installments_to_current_pay(doc, method=None) -> None:
     that formula derives from ``total_loan_repayment``, which is the one number this
     function changes.
     """
-    from frappe.utils import rounded
-
     cap = round(flt(doc.gross_pay) * MAX_RECOVERY_PERCENT / 100.0, 2)
     changed = False
 

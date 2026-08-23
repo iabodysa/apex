@@ -20,6 +20,7 @@ A document is queued while any condition holds and settled only when none does.
 from __future__ import annotations
 
 import frappe
+from frappe.desk.form import assign_to as _assign_to
 from frappe.desk.form.assign_to import close_all_assignments
 from frappe.utils.user import get_users_with_role
 
@@ -71,8 +72,6 @@ def assign_role(doctype: str, name: str, role: str, description: str, priority: 
     Idempotent by the framework's own rule: a holder who already has an open ToDo for
     this document is skipped, so a daily job never stacks a second copy.
     """
-    from frappe.desk.form import assign_to as _assign_to
-
     doc = frappe.get_doc(doctype, name)
     assignees = [
         user for user in role_holders(role) if frappe.has_permission(doc=doc, user=user)

@@ -11,6 +11,10 @@ in Accounts reverses the operational status with no reversal code anywhere.
 from __future__ import annotations
 
 import frappe
+from erpnext.accounts.doctype.payment_entry.payment_entry import (
+    get_default_bank_cash_account,
+    get_payment_entry,
+)
 from frappe import _
 from frappe.utils import flt
 
@@ -142,10 +146,6 @@ def validate_money_source(company: str) -> None:
     """Fail closed unless the company has a default Cash or Bank account.
 
     """
-    from erpnext.accounts.doctype.payment_entry.payment_entry import (
-        get_default_bank_cash_account,
-    )
-
     source = get_default_bank_cash_account(company, "Cash") or get_default_bank_cash_account(
         company, "Bank"
     )
@@ -170,8 +170,6 @@ def build_allocated_payment(company: str, supplier: str, purchase_invoice: str |
     logic rather than from an amount copied off the source document — an amount copied
     off a contract or a rent schedule looks correct while settling nothing.
     """
-    from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-
     invoice = load_eligible_payable(company, supplier, purchase_invoice)
     validate_money_source(company)
 
