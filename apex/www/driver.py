@@ -16,11 +16,14 @@ import re
 
 import frappe
 
-from apex.apex_core.doctype.masar_worker_token.masar_worker_token import (
-    DRIVER_TOKEN_COOKIE,
-    resolve_driver_token,
-)
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
+from apex.apex_core.utils.portal_identity import (
+    DRIVER,
+    delete_token_cookie,
+    presented_token,
+    resolve_portal_subject,
+    set_token_cookie,
+)
 from apex.apex_core.utils.portal_language import render_in_arabic
 
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
@@ -46,18 +49,18 @@ def get_context(context):
     valid_token = raw_token if isinstance(raw_token, str) and _TOKEN_RE.fullmatch(raw_token) else ""
     if query_token_supplied:
         if valid_token and _token_resolves(valid_token):
-            _set_token_cookie(valid_token)
+            set_token_cookie(DRIVER, valid_token, _COOKIE_MAX_AGE_SECONDS)
         else:
-            _delete_cookie(DRIVER_TOKEN_COOKIE)
+            delete_token_cookie(DRIVER)
         frappe.local.flags.redirect_location = "/driver/"
         raise frappe.Redirect
 
     render_in_arabic()
 
-    cookie_token = _request_token_cookie()
+    cookie_token = presented_token(DRIVER)[0]
     subject = _resolve_token_subject(cookie_token) if cookie_token else None
     if cookie_token and not subject:
-        _delete_cookie(DRIVER_TOKEN_COOKIE)
+        delete_token_cookie(DRIVER)
     return publish_portal_context(
         context,
         entry="driver",
@@ -71,48 +74,13 @@ def get_context(context):
 def _token_resolves(token: str) -> bool:
     """Whether the credential still names an active driver, not merely a legal string."""
     try:
-        return bool(resolve_driver_token(token))
+        return bool(resolve_portal_subject(DRIVER, token))
     except frappe.PermissionError:
         return False
 
 
 def _resolve_token_subject(token: str) -> str | None:
     try:
-        return resolve_driver_token(token)
+        return resolve_portal_subject(DRIVER, token)
     except frappe.PermissionError:
         return None
-
-
-def _set_token_cookie(token: str) -> None:
-    """Persist the validated token in the httpOnly site cookie (best-effort).
-
-	Guarded so a missing cookie_manager (a non-request render path) degrades to
-	leaving the query-string token in place rather than 500-ing the page. No ``path``
-	is passed, so the cookie defaults to ``/`` and rides every request to this site."""
-    cm = getattr(frappe.local, "cookie_manager", None)
-    if cm is None:
-        return
-    cm.set_cookie(
-        DRIVER_TOKEN_COOKIE,
-        token,
-        httponly=True,
-        samesite="Lax",
-        max_age=_COOKIE_MAX_AGE_SECONDS,
-    )
-
-
-def _delete_cookie(name: str) -> None:
-    cm = getattr(frappe.local, "cookie_manager", None)
-    if cm is not None:
-        cm.delete_cookie(name)
-
-
-def _request_token_cookie() -> str:
-    """The token already stored in the request's httpOnly cookie, or ''."""
-    request = getattr(frappe.local, "request", None)
-    if request is None:
-        return ""
-    try:
-        return (request.cookies.get(DRIVER_TOKEN_COOKIE) or "").strip()
-    except Exception:
-        return ""

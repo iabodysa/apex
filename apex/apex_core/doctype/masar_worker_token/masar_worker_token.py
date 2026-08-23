@@ -32,13 +32,11 @@ from apex.apex_core.utils.portal_identity import (
     RESHARED,
     ROTATED,
     WORKER,
-    TOKEN_COOKIES,
     authorize_issuance,
     authorize_revocation,
     hash_token,
     log_credential_event,
     revoke_subject_tokens,
-    resolve_portal_subject,
     validate_subject_binding,
 )
 from apex.apex_core.utils.party_link import sync_party_employee
@@ -53,18 +51,11 @@ SUBJECT_BINDING_FIELDS = (
 )
 _CREDENTIAL_REISSUE_GUARD = object()
 
-DRIVER_TOKEN_COOKIE = TOKEN_COOKIES[DRIVER]
-
 
 def _hash_token(raw: str) -> str:
     """The at-rest form of a raw token: its SHA-256 hex digest (what ``token`` stores
     and what every resolver filters by)."""
     return hash_token(raw)
-
-
-def _decrypt_token(token_enc: str) -> str:
-    """Recover the raw token from its stored Fernet ciphertext (site-key protected)."""
-    return decrypt(token_enc)
 
 TOKEN_TTL_DAYS = 180
 
@@ -167,7 +158,7 @@ class MasarWorkerToken(Document):
         )
         if rotated:
             try:
-                raw = _decrypt_token(pending["token_enc"])
+                raw = decrypt(pending["token_enc"])
             except Exception:
                 rotated = False
             else:
@@ -227,7 +218,7 @@ class MasarWorkerToken(Document):
             return self.regenerate()
         if self.token_enc:
             try:
-                return _decrypt_token(self.token_enc)
+                return decrypt(self.token_enc)
             except Exception:
                 pass
         return self.regenerate()
@@ -617,7 +608,7 @@ def revoke_driver_link(driver: str) -> dict:
     ``revoke_subject_tokens``, so every path lands one row. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     authorize_revocation(DRIVER, driver)
-    revoked = revoke_driver_tokens(driver)
+    revoked = revoke_subject_tokens(DRIVER, driver)
     return {
         "driver": driver,
         "driver_name": frappe.db.get_value("Salis Driver", driver, "full_name"),
@@ -626,29 +617,12 @@ def revoke_driver_link(driver: str) -> dict:
     }
 
 
-def resolve_driver_token(token=None):
-    """Resolve an optional Driver credential to its exact active Salis Driver.
-
-    A missing credential returns None so desk preview may fall back to its session.
-    Any presented invalid credential raises PermissionError and blocks fallback.
-    """
-    return resolve_portal_subject(DRIVER, token)
-
-
-def revoke_driver_tokens(driver: str) -> int:
-    """Disable every enabled Driver-holder token for ``driver`` (auto-revoke on
-    clearance/off-boarding). Idempotent — a re-run finds nothing enabled and is a
-    no-op. Explicit reissue rotates the retained row before enabling it. Returns how
-    many were disabled."""
-    return revoke_subject_tokens(DRIVER, driver)
-
-
 def on_driver_clearance_submit(doc, method=None):
     """doc_events hook (Driver Clearance on_submit): auto-revoke the driver's barcode on
     exit clearance. A submitted clearance is the exit event, so the passwordless bearer
     credential is disabled the moment the driver is cleared out. Fail-safe: revoking is
     the safe direction; re-issue a fresh QR from the desk if a clearance is cancelled."""
-    revoke_driver_tokens(getattr(doc, "driver", None))
+    revoke_subject_tokens(DRIVER, getattr(doc, "driver", None))
 
 
 def masar_qr_data_uri(text: str):

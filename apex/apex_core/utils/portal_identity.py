@@ -182,6 +182,33 @@ def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
         return (cookies.get(cookie_name) or "").strip(), True
     return "", False
 
+def set_token_cookie(audience: str, token: str, max_age_seconds: int) -> None:
+    """Persist a validated ``audience`` bearer token in its httpOnly site cookie.
+
+    Guarded so a missing ``cookie_manager`` (a non-request render path) degrades to
+    leaving the query-string token in place rather than 500-ing the page. No ``path``
+    is passed, so the cookie defaults to ``/`` and rides every request to this site.
+    Shared by the Driver and Worker portal shells so the write mechanics live once.
+    """
+    _require_audience(audience)
+    cm = getattr(frappe.local, "cookie_manager", None)
+    if cm is None:
+        return
+    cm.set_cookie(
+        TOKEN_COOKIES[audience],
+        token,
+        httponly=True,
+        samesite="Lax",
+        max_age=max_age_seconds,
+    )
+
+def delete_token_cookie(audience: str) -> None:
+    """Remove the ``audience`` bearer-token cookie, guarded like :func:`set_token_cookie`."""
+    _require_audience(audience)
+    cm = getattr(frappe.local, "cookie_manager", None)
+    if cm is not None:
+        cm.delete_cookie(TOKEN_COOKIES[audience])
+
 def validate_subject_binding(
     row,
     audience: str,
