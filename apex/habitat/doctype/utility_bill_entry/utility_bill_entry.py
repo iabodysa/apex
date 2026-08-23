@@ -48,8 +48,8 @@ class UtilityBillEntry(Document):
 def validate(doc, method=None):
     """Defaults the company, validates the period, computes readings and variance, blocks negatives."""
     if not doc.company:
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-        doc.company = get_default_company()
+        from apex.apex_core.utils.company import resolve_company
+        doc.company = resolve_company("Habitat")
 
     if doc.billing_period_to and doc.billing_period_from:
         if doc.billing_period_to < doc.billing_period_from:

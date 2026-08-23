@@ -31,8 +31,8 @@ class SubcontractorServiceOrder(Document):
 def before_save(doc, method=None):
     """Defaults the order's company and restates its cost with VAT."""
     if not doc.company:
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-        doc.company = get_default_company()
+        from apex.apex_core.utils.company import resolve_company
+        doc.company = resolve_company("Habitat")
 
     _price_from_lines(doc)
     apply_vat(doc, doc.service_cost)

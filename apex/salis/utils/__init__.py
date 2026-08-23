@@ -602,12 +602,12 @@ def set_financial_defaults(doc):
     """Default company and cost center from Salis Settings for reporting and
 	financial context. Reference fields only - no GL/Payment Entry is posted."""
     from apex.apex_core.doctype.salis_settings.salis_settings import (
-        get_default_company,
         get_default_cost_center,
     )
+    from apex.apex_core.utils.company import resolve_company
 
     if not doc.company:
-        doc.company = get_default_company()
+        doc.company = resolve_company("Salis")
     if not doc.cost_center:
         doc.cost_center = get_default_cost_center()
 

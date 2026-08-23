@@ -41,10 +41,9 @@ def validate(doc, method=None):
         doc.reported_by = frappe.session.user
 
     if not doc.company:
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import (
-            get_default_company,
-        )
-        doc.company = get_default_company()
+        from apex.apex_core.utils.company import resolve_company
+
+        doc.company = resolve_company("Habitat")
 
     _validate_status_rules(doc)
 

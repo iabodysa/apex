@@ -58,18 +58,6 @@ def before_save(doc, method=None):
     doc.last_modified_by_role = roles[0] if roles else ""
 
 
-def get_default_company() -> str | None:
-    """Resolve the company applied to Habitat transactions when not set explicitly.
-
-    Thin wrapper over the shared resolver (explicit Habitat Settings ``company``
-    -> user company default -> global company default), so Habitat resolves a
-    company the same way Salis does. Returns ``None`` when none is configured.
-    """
-    from apex.apex_core.utils.company import resolve_company
-
-    return resolve_company("Habitat")
-
-
 def retention_days(key: str) -> int:
     """Return a retention window (days) for one of the retention fields, falling
     back to its built-in default when the stored value is blank or zero.

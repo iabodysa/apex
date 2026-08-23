@@ -25,8 +25,8 @@ class Lease(Document):
 def validate(doc, method=None):
     """Blocks a bad lease date, an out-of-range utility share, or an overlapping building lease."""
     if not doc.company:
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-        doc.company = get_default_company()
+        from apex.apex_core.utils.company import resolve_company
+        doc.company = resolve_company("Habitat")
 
     if doc.lease_end_date and doc.lease_start_date:
         if getdate(doc.lease_end_date) <= getdate(doc.lease_start_date):

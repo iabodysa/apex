@@ -72,11 +72,9 @@ class SalisVehicle(Document):
         """Default the owning company from Salis Settings (asset ownership /
         reporting context). Reference field only - no GL is posted."""
         if not self.company:
-            from apex.apex_core.doctype.salis_settings.salis_settings import (
-                get_default_company,
-            )
+            from apex.apex_core.utils.company import resolve_company
 
-            self.company = get_default_company()
+            self.company = resolve_company("Salis")
 
     def _set_plate_normalized(self):
         """Sets the normalized plate number from the raw plate number, or clears it when blank."""

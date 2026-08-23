@@ -181,8 +181,8 @@ def before_save(doc, method=None):
     """Guards the abbreviation lock, defaults company, and recomputes capacity and occupancy."""
     _guard_abbreviation_lock(doc)
     if not doc.company:
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-        doc.company = get_default_company()
+        from apex.apex_core.utils.company import resolve_company
+        doc.company = resolve_company("Habitat")
 
     _recompute_capacity_and_cost(doc)
 

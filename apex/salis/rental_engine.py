@@ -78,9 +78,9 @@ def daily_rental_accrual() -> None:
     posting_date = today()
     logger = frappe.logger()
 
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_default_company
+    from apex.apex_core.utils.company import resolve_company
 
-    _default_company = get_default_company()
+    _default_company = resolve_company("Salis")
 
     start = 0
     batch_size = 500

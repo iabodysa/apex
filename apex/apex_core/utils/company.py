@@ -33,6 +33,12 @@ def resolve_company(module: str | None = None) -> str | None:
     ``module`` (``"Habitat"`` / ``"Salis"``) selects which Single's explicit
     company field to consult first; ``None`` skips the module step and starts at
     the user default. Returns ``None`` when nothing is configured.
+
+    ``erpnext.get_default_company`` (erpnext/__init__.py:10) reads the user
+    default then the Global Defaults company, and has no notion of a per-module
+    preference. The module step is the whole reason this exists: Habitat and
+    Salis can post to different companies on one site, and the primitive cannot
+    express that.
     """
     company = None
     if module:

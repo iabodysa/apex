@@ -32,7 +32,7 @@ class SubcontractorServiceContract(Document):
                 frappe.throw(_("Contract End cannot be before Contract Start."))
 
         if not self.company:
-            from apex.apex_core.doctype.habitat_settings.habitat_settings import get_default_company
-            self.company = get_default_company()
+            from apex.apex_core.utils.company import resolve_company
+            self.company = resolve_company("Habitat")
 
         apply_vat(self, flt(self.monthly_retainer) or flt(self.rate_per_visit))

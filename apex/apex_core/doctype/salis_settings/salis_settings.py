@@ -192,27 +192,19 @@ def get_boarding_settings() -> dict:
     return {key: get_boarding_setting(key) for key in BOARDING_FLOW_DEFAULTS}
 
 
-def get_default_company():
-    """Resolve the company applied to Salis transactions when not set explicitly.
-
-    Thin wrapper over the shared resolver (explicit Salis Settings default ->
-    user company default -> global company default). Returns ``None`` when no
-    company is configured (no posting is performed regardless).
-    """
-    from apex.apex_core.utils.company import resolve_company
-
-    return resolve_company("Salis")
-
-
 def get_default_cost_center():
     """Resolve the default cost center for fleet cost references.
 
-    Falls back from the explicit Salis Settings default to the resolved
-    company's own default cost center. Returns ``None`` when none is configured.
+    ``erpnext.get_default_cost_center`` (erpnext/__init__.py:33) answers only
+    "what is this company's cost center". This asks the Salis Settings default
+    first, so an operator can point fleet cost at a cost center that is not the
+    company's own — which the primitive has no argument for.
     """
+    from apex.apex_core.utils.company import resolve_company
+
     cost_center = frappe.db.get_single_value("Salis Settings", "default_cost_center")
     if not cost_center:
-        company = get_default_company()
+        company = resolve_company("Salis")
         if company and frappe.db.exists("Company", company):
             cost_center = frappe.get_cached_value("Company", company, "cost_center")
     return cost_center or None
