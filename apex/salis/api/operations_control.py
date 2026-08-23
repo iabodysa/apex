@@ -18,8 +18,10 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+from apex.salis.api.assignment_queue import queue_events_for_vehicle
 from apex.salis.api.dispatch_board import VEHICLE_STATUSES
 from apex.salis.api.fleet_reader import driver_names, scope_filter, scoped_vehicles
+from apex.salis.tasks import _overstay_stops
 from apex.salis.utils import close_open_stop, lock_vehicle, reassign_vehicle_driver
 
 COMPLIANCE_AT_RISK = ("Expiring Soon", "Expired")
@@ -132,8 +134,6 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
             summary["by_status"][v.status] += 1
         if v.get("compliance_status") in COMPLIANCE_AT_RISK:
             summary["compliance_at_risk"] += 1
-
-    from apex.salis.tasks import _overstay_stops
 
     on_board = {v.name for v in vehicles}
     summary["stopped_over_n"] = len({r.vehicle for r in _overstay_stops()} & on_board)
@@ -253,8 +253,6 @@ def get_vehicle_timeline(vehicle):
             "end_date": str(r.end_date) if r.end_date else None,
             "status": r.status,
         })
-
-    from apex.salis.api.assignment_queue import queue_events_for_vehicle
 
     for r in queue_events_for_vehicle(vehicle, ("Closed",), TIMELINE_PER_SOURCE):
         events.append({

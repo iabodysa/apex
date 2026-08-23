@@ -30,6 +30,7 @@ from frappe import _
 from frappe.utils import date_diff, getdate, today
 
 from apex.salis.api.fleet_reader import scope_filter, scoped_vehicles
+from apex.salis.tasks import _overstay_stops
 
 _VEHICLE_FIELDS = [
     "name", "plate_number", "vehicle_category", "status",
@@ -324,8 +325,6 @@ def _read_workshop(plates) -> tuple[dict, set]:
     Open means submitted with no return date — the invariant the overstay rule
     and the workshop release both rely on. The earliest open stop wins when a
     vehicle somehow carries two."""
-    from apex.salis.tasks import _overstay_stops
-
     stops = frappe.get_all(
         "Vehicle Suspension",
         filters={

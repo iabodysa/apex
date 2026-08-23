@@ -30,8 +30,10 @@ from frappe import _
 from frappe.utils import getdate, today
 
 from apex.apex_core.utils.portal_live import notify_doctype
+from apex.salis.api.assignment_queue import queue_events_for_vehicle
 from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.api.fleet_os_board import build_board, driver_pii_visible
+from apex.salis.api.fuel_console import get_pending_fuel_requests
 from apex.salis.doctype.vehicle_incident.vehicle_incident import close_incident_internal
 from apex.salis.utils import (
     close_open_stop,
@@ -260,8 +262,6 @@ def get_operations_overview(project=None):
 
 
 def get_pending_fuel_requests_for_overview(project=None):
-    from apex.salis.api.fuel_console import get_pending_fuel_requests
-
     return get_pending_fuel_requests(project)
 
 
@@ -331,8 +331,6 @@ def get_vehicle_timeline(plate):
             "status": inc.status or "",
             "location": inc.location or "",
         })
-
-    from apex.salis.api.assignment_queue import queue_events_for_vehicle
 
     for q in queue_events_for_vehicle(vehicle, ("Open", "Overdue", "Closed"), 100):
         events.append({
