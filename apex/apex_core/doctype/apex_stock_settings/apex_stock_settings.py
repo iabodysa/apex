@@ -50,7 +50,11 @@ class ApexStockSettings(Document):
 def policy() -> dict:
     """The engine's settings as plain values, cached for the request.
 
-    Read through ``get_cached_doc`` so a posting loop does not fetch the Single per row.
+    ``frappe.get_cached_doc`` (frappe/__init__.py:1183) is read rather than
+    ``get_single_value`` per field, so a posting loop does not fetch the Single once
+    per row. The values are returned as a plain dict because the one thing a cached
+    Document cannot do is stay unchanged: a caller holding the document could write to
+    it and mutate every other holder's copy in the same request.
     """
     doc = frappe.get_cached_doc(SETTINGS)
     return {
@@ -65,6 +69,10 @@ def policy() -> dict:
 
 def validate_posting_allowed(building: str, posting_date=None) -> None:
     """Refuse a posting the policy does not allow, before any row is written.
+
+    ``frappe.utils.add_days`` (frappe/utils/data.py:270) computes the backdating
+    boundary; the one thing it cannot do is decide the window, which is a policy field
+    the operator sets.
 
     Three refusals, in the order that tells the operator the most: the engine is off, the
     period is frozen, the date is further back than the window allows. The store check is
@@ -100,7 +108,13 @@ def validate_posting_allowed(building: str, posting_date=None) -> None:
 
 
 def _holds_role(role) -> bool:
-    """True when the session holds ``role``, or System Manager, which outranks every gate."""
+    """True when the session holds ``role``, or System Manager, which outranks every gate.
+
+    ``frappe.get_roles`` (frappe/permissions.py:497) returns every Role for
+    Administrator, so the administrator passes without a special case. The one thing
+    it cannot do is rank them: "System Manager outranks this gate" is a policy this
+    app states, not something the framework's role list implies.
+    """
     roles = frappe.get_roles(frappe.session.user)
     return "System Manager" in roles or (bool(role) and role in roles)
 

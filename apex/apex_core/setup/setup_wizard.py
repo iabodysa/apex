@@ -75,7 +75,14 @@ def _created_cost_center(company):
 def _apply_habitat_settings(args, company):
     """Habitat Settings — default company, the email/operational notification
     kill-switches and the app-wide GL-posting finance gate (default OFF). Company is
-    only written when one exists so the Single default holds."""
+    only written when one exists so the Single default holds.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole document rather than
+    writing field by field with ``set_single_value``, because the Single's own
+    ``validate`` must run once over the FINAL combination — several of these switches
+    only make sense together, and per-field writes would validate each against the
+    half-applied state of the others.
+    """
     habitat = frappe.get_single("Habitat Settings")
     if company:
         habitat.company = company
@@ -88,7 +95,17 @@ def _apply_habitat_settings(args, company):
 
 def _apply_salis_settings(args, company, cost_center):
     """Salis Settings — default company + cost center and the driver-portal /
-    approvals switches."""
+    approvals switches.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole document rather than
+    writing field by field with ``set_single_value``, because the Single's own
+    ``validate`` must run once over the FINAL combination — several of these switches
+    only make sense together, and per-field writes would validate each against the
+    half-applied state of the others.
+
+    ``enable_approvals`` is written only when the wizard actually carried it, so a
+    slide that never asked cannot silently switch twelve workflows off.
+    """
     salis = frappe.get_single("Salis Settings")
     if company:
         salis.default_company = company
@@ -105,9 +122,13 @@ def _apply_payment_routing(args):
 
     Blank keeps the native Payment Request default. A named target is validated by
     the router's own guard and the setup fails loudly if it does not hold: silently
-    dropping the choice (the previous behaviour when e.g. the optional Expense
-    Request Afmco DocType was absent) let setup report success while every later
-    payment was built as a different document than the operator selected."""
+    dropping the choice lets setup report success while every later payment is built
+    as a different document than the operator selected, so it refuses instead.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the settings; the validation
+    is the router's own guard rather than a field check, because the one thing the
+    Single cannot do is know whether a DocType name can behave as a payment.
+    """
     payment_method = (args.get("apex_default_payment_method") or "").strip()
     if not payment_method:
         return

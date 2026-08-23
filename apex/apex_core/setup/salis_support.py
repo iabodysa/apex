@@ -33,6 +33,13 @@ ISSUE_ROLE_PERMISSIONS = (
 )
 
 def _parse_workdays(value) -> list[str]:
+    """The workdays the operator chose, whatever shape the wizard sent them in.
+
+    ``frappe.parse_json`` (frappe/__init__.py:2491) handles the JSON case. The one
+    thing it cannot do is accept the comma-separated string a plain text field
+    produces — it raises — so the fallback below it splits by comma rather than
+    failing the whole setup step over a formatting difference.
+    """
     if isinstance(value, str):
         value = value.strip()
         if not value:
@@ -52,7 +59,13 @@ def ensure_support_holiday_list(
     country=None,
     subdivision=None,
 ):
-    """Resolve or create the setup calendar through ERPNext's native Holiday List."""
+    """Resolve or create the setup calendar through ERPNext's native Holiday List.
+
+    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the Holiday List and hrms'
+    own ``get_weekly_off_dates`` fills it. Nothing here re-implements a calendar:
+    the one thing the primitive cannot do is decide WHICH list a Salis support SLA
+    should hang off, which is the operator's answer on the wizard slide.
+    """
     name = (name or "").strip()
     if not (name and from_date and to_date):
         frappe.throw(
@@ -156,7 +169,16 @@ def _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time):
 def configure_support_sla(
     *, enabled=False, holiday_list=None, workdays=None, start_time=None, end_time=None
 ):
-    """Create the native Issue SLA only after the operator supplies its site schedule."""
+    """Create the native Issue SLA only after the operator supplies its site schedule.
+
+    The SLA is a native Service Level Agreement built with ``frappe.new_doc``
+    (frappe/__init__.py:1152); the switch is written with ``frappe.db.set_single_value``
+    (frappe/database/database.py:782) rather than by loading the Single, so enabling
+    support does not re-run that settings document's validation mid-wizard.
+
+    Refuses loudly when the schedule is incomplete: an SLA with no workdays and no
+    hours accepts every ticket and promises nothing, which reads as configured.
+    """
     if not enabled:
         return None
     workdays = _parse_workdays(workdays)
