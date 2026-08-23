@@ -40,7 +40,13 @@ def _floor_label(n: int) -> str:
 
 def _grid_bed_rows(building: str) -> list:
     """Every bed in one building with the room facts the board draws it from, in ONE
-    join rather than a lookup per bed."""
+    join rather than a lookup per bed.
+
+    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
+    ``frappe.get_all`` cannot do is LEFT JOIN a sibling DocType: fetching beds and
+    then reading each bed's room is one query per bed, and a large building draws its
+    board hundreds of times over.
+    """
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     return (
@@ -388,7 +394,13 @@ _RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")
 def _open_resident_request_statuses() -> list[str]:
     """Open statuses = the Select options minus the terminal set, read from meta
     so a newly-added non-terminal status is automatically treated as open
-    (no hand-kept list to drift from the DocType)."""
+    (no hand-kept list to drift from the DocType).
+
+    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) supplies the
+    options. Only the TERMINAL set is named here, because that is the shorter and more
+    stable half: a status added to the DocType is open until someone decides it ends
+    the request, and defaulting the other way would silently close it.
+    """
     options = frappe.get_meta("Resident Request").get_field("status").options or ""
     return [
         o
@@ -437,7 +449,13 @@ def get_employee_card(employee):
 def _employee_iqama_field() -> str | None:
     """The Employee field that holds the Iqama number, or None if this HR setup
     has none. The field name varies across HR configs, so it is probed from meta
-    (same defensive stance Masar uses) rather than hard-coded."""
+    (same defensive stance Masar uses) rather than hard-coded.
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) answers whether
+    a name exists on this site. The one thing it cannot do is tell which of several
+    candidate names means Iqama, so the order here is the decision — the first match
+    wins, and a site carrying two of them gets the first in this list.
+    """
     meta = frappe.get_meta("Employee")
     for fieldname in ("iqama", "iqama_no", "iqama_number"):
         if meta.has_field(fieldname):

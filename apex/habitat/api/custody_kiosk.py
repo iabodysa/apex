@@ -154,6 +154,12 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
     Probes the current ``party_type`` first, then the other kind, so a badge for
     the other party kind still resolves (the client flips the selector). Read-only
     and permission-gated per party DocType. Returns ``None`` on no match.
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
+    each identity field is probed, because Iqama and passport are Custom Fields: on a
+    site whose customization has not synced the column is absent, and querying it
+    raises instead of reporting "no match" — which at a kiosk means a worker standing
+    at the counter with an error rather than a retry.
     """
     party_type = (party_type or "").strip()
     order = [party_type] if party_type in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER) else []
@@ -221,6 +227,11 @@ def _article_store_balance(article: str, building: str | None) -> float | None:
     Same ledger source as :func:`get_kiosk_catalog` but scoped to a single article
     (a scan touches one tile, so one tiny query is fine — no N+1). Returns ``None``
     when no building is given. Read-only.
+
+    Built with ``frappe.qb`` (frappe/query_builder) rather than ``frappe.get_all``,
+    because the balance is a SUM over signed ledger rows and the one thing the list
+    API cannot do is aggregate — fetching the rows to add them up in Python would pull
+    a building's whole custody history to answer one tile.
     """
     if not building:
         return None
@@ -345,7 +356,13 @@ _OPEN_ISSUE_STATUSES = ("Issued", "Partially Returned")
 
 def _return_condition_options() -> list[str]:
     """The Custody Return Item condition values, read from the field's own Select so a
-    kiosk cannot post one the DocType does not offer."""
+    kiosk cannot post one the DocType does not offer.
+
+    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) is the source,
+    so the kiosk's options and the DocType's own validation can never disagree. The
+    one thing a hardcoded list cannot do is follow the field: adding a condition to
+    the Select would leave the kiosk offering the old set with nothing to say so.
+    """
     options = frappe.get_meta("Custody Return Item").get_field("condition_on_return").options or ""
     return [o for o in (opt.strip() for opt in options.split("\n")) if o]
 
