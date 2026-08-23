@@ -54,6 +54,7 @@ APP_OWNED_PERMISSIONS = (
     ("Project", "Fleet Project Manager", 0, ("select",)),
     ("Project", "Fleet Supervisor", 0, ("select",)),
     ("Project", "Finance Manager", 0, ("select",)),
+    ("Issue", "Portal Driver Capacity", 0, ("create",)),
 )
 
 _ALL_PTYPES = (

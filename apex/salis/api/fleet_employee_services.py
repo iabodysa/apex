@@ -511,25 +511,46 @@ def get_complaint(name):
 
 @frappe.whitelist(methods=["POST"])
 def create_complaint(priority, subject, description, attachment=None):
-    """Parked off: the Issue create grant this needs has no home inside this change's scope.
+    """File the caller's own complaint as an Issue, under the driver capacity's own grant.
 
-    ``as_capacity(DRIVER)`` was tried, verified live (``frappe.has_permission("Issue", "create",
-    user="driver@apex.internal")`` returned ``True`` and an actual insert succeeded), then
-    reverted. The row it depended on was added by hand through the ``custom_perms`` block of
-    ``apex/salis/custom/issue.json``, which ``test_no_apex_customisation_file_carries_custom_perms``
-    (apex/apex_core/setup/test_doctype_links.py:110) forbids: that block is deleted and
-    reinserted whole on every migrate (frappe/modules/utils.py:183-188), so it would have
-    silently dropped Issue's other six roles (Support Team, three Fleet roles, Finance Manager,
-    Internal Auditor) the next time anyone else's customisation touched Issue. The seed this app
-    actually uses for a permission on a DocType it does not own is per-row and guarded
-    (``apex.apex_core.setup.app_owned_permissions_seed.seed_app_owned_permissions``), and needs
-    one more entry there — ``("Issue", "Portal Driver Capacity", 0, ("create",))`` — outside this
-    change's write scope. The three sibling DocTypes this file already calls
-    ``as_capacity(DRIVER)`` against (Vehicle Handover, Fuel Request, Vehicle Incident) measured
-    the same ``False`` for the same capacity user; see the module docstring above.
+    The insert runs inside ``as_capacity(DRIVER)`` and carries no ``ignore_permissions``:
+    Issue belongs to the framework, so the ``create`` row lives in
+    ``app_owned_permissions_seed.APP_OWNED_PERMISSIONS`` rather than in
+    ``apex/salis/custom/issue.json`` — that file's ``custom_perms`` block is deleted and
+    reinserted whole on every migrate (frappe/modules/utils.py:183-188), which would drop
+    Issue's other roles the next time any app customises it. The attachment is re-parented
+    through ``File.save`` so File's own ``has_permission``
+    (frappe/core/doctype/file/file.py:883) grants the write to its owner.
     """
-    base._session_driver(required=True)
-    frappe.throw(_("Filing a complaint is temporarily unavailable."))
+    driver = base._session_driver(required=True)
+    subject = frappe.utils.cstr(subject).strip()
+    description = frappe.utils.cstr(description).strip()
+    if not subject or not description:
+        frappe.throw(_("Subject and description are required."))
+    doc = frappe.get_doc({
+        "doctype": "Issue",
+        "issue_type": "Complaint",
+        "priority": priority or "Medium",
+        "subject": subject,
+        "description": description,
+        "custom_driver": driver,
+        "project": frappe.db.get_value("Salis Driver", driver, "project"),
+        "raised_by": frappe.session.user,
+        "via_customer_portal": 1,
+        "status": "Open",
+    })
+    with as_capacity(DRIVER):
+        doc.insert()
+    if attachment:
+        file_name = frappe.db.get_value(
+            "File", {"file_url": attachment, "owner": frappe.session.user, "is_private": 1}, "name"
+        )
+        if file_name:
+            attached = frappe.get_doc("File", file_name)
+            attached.attached_to_doctype = "Issue"
+            attached.attached_to_name = doc.name
+            attached.save()
+    return {"name": doc.name, "status": doc.status}
 
 
 @frappe.whitelist(methods=["POST"])
