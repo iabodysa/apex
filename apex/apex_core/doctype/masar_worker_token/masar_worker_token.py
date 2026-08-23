@@ -56,7 +56,15 @@ TOKEN_TTL_DAYS = 180
 
 
 def _new_token() -> str:
-    """A fresh url-safe random raw token, whose HASH is unique across the doctype."""
+    """A fresh url-safe random raw token, whose HASH is unique across the doctype.
+
+    ``frappe.generate_hash`` (frappe/__init__.py:1134) supplies the randomness. The
+    one thing it cannot do is promise the value is unused, so the collision probe
+    runs against the stored HASH — never the raw token, which is never persisted.
+    Refusing after eight attempts is deliberate: at this length a real collision run
+    means the entropy source is broken, and issuing anyway would mint a credential
+    that opens someone else's portal.
+    """
     for _attempt in range(8):
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
         if not frappe.db.exists("Masar Worker Token", {"token": hash_token(candidate)}):

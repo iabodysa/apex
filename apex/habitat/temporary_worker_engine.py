@@ -130,7 +130,7 @@ def _link(tw, employee: str) -> None:
     skipped accommodation cost, then stamp the link and mark Linked.
 
     The cost back-dating is attempted inside its own try/except and its failure is
-    logged through ``frappe.get_traceback`` rather than raised: the identity link is
+    logged through ``frappe.get_traceback`` (frappe/__init__.py) rather than raised: the identity link is
     the operator's request and it has already succeeded by then, so a costing fault
     must not undo it. The missed days remain recoverable by re-running the back-date.
     """

@@ -390,7 +390,7 @@ def _cancel_orphan_damage_assessment(doc):
     left for the manager to handle: it is an approved valuation served on the worker, and
     withdrawing it is the manager's decision to record on the assessment itself.
 
-    ``frappe.delete_doc`` is used only on a DRAFT: the one thing cancellation cannot
+    ``frappe.delete_doc`` (frappe/model/delete_doc.py:23) is used only on a DRAFT: the one thing cancellation cannot
     do is reach a submitted document's own audit trail, and deleting one would remove
     a valuation the worker has already been shown."""
     for cda in frappe.get_all(

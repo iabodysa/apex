@@ -59,7 +59,13 @@ def _constraint_exists(doctype: str, constraint_name: str) -> bool:
 
 def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: str) -> None:
     """Find and log the row groups that violate the intended uniqueness, so the
-    operator/orchestrator can clean them up. Best-effort: never raises."""
+    operator/orchestrator can clean them up. Best-effort: never raises.
+
+    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
+    ``frappe.get_all`` cannot do is GROUP BY with a HAVING: the answer is "which key
+    values appear more than once", which no list filter expresses. Never raises,
+    because this runs only after a constraint has already failed — a second failure
+    here would hide the first."""
     try:
         tbl = frappe.qb.DocType(doctype)
         cols = [getattr(tbl, f) for f in fields]

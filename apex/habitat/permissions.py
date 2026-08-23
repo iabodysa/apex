@@ -63,7 +63,9 @@ BUILDING = "building"
 def _is_privileged(user):
     """True when the user is the Administrator or holds any privileged role.
 
-    Guest is never privileged.
+    ``frappe.get_roles`` (frappe/permissions.py:497) returns every Role for
+    Administrator and only the Guest role for Guest, so the explicit branch states
+    that contract rather than repairing the primitive. Guest is never privileged.
     """
     if user in ("Administrator", "Guest"):
         return user == "Administrator"
@@ -234,8 +236,9 @@ def _render_hop(spec, escaped):
 def _render_child(spec, escaped):
     """A row matches when ANY building named in its child table is the user's.
 
-    One strategy in the ``FRAGMENTS`` table, reached only by its key: the table IS the
-    dispatch, so this cannot be inlined without collapsing the strategy set into a
+    Values reach the SQL through ``frappe.db.escape``
+    (frappe/database/database.py:1371). One strategy in the ``FRAGMENTS`` table,
+    reached only by its key: the table IS the dispatch, so this cannot be inlined without collapsing the strategy set into a
     branch at every call site.
     """
     return (

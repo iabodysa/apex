@@ -36,7 +36,8 @@ REQUEST_TIMEOUT = 6
 def _router_base():
     """Returns the configured OSRM routing server base URL, or the public default.
 
-    Read from ``frappe.conf`` (site config) rather than a Single, because the routing
+    Read from ``frappe.conf`` / ``get_site_config`` (frappe/__init__.py:329) rather
+    than a Single, because the routing
     host is deployment infrastructure and not an operator choice: it must be settable
     before any site data exists, and it must not travel between environments in a
     fixture.

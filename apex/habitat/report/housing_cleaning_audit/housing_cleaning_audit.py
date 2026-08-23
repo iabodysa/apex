@@ -141,8 +141,9 @@ def _cleaning_logs(date_from, date_to, chosen_building, allowed):
 def _log_counts(log_names):
     """Returns (rooms cleaned, photos attached) per log, both keyed by Cleaning Log name.
 
-    Two bulk reads keyed by the log names already fetched, rather than a count per
-    log: the one thing a per-row count cannot do is stay bounded, and an audit over a
+    Two bulk reads with ``frappe.get_all`` (frappe/__init__.py:1996), keyed by the
+    log names already fetched, rather than a count per log: the one thing a per-row
+    count cannot do is stay bounded, and an audit over a
     month of logs would issue one query per row twice over.
     """
     rooms_cleaned_map: dict[str, int] = {}

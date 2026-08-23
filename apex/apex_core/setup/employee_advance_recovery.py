@@ -87,7 +87,14 @@ def ensure_advance_account(company: str) -> str:
     return match
 
 def configure_recovery(*, enabled=False, company=None, salary_component=None, max_percent=None):
-    """Apply setup-wizard recovery choices without bypassing native HRMS validation."""
+    """Apply setup-wizard recovery choices without bypassing native HRMS validation.
+
+    ``frappe.get_single`` (frappe/__init__.py:1335) loads the settings and saves them
+    once, so the Single's own ``validate`` grades the FINAL combination. The one thing
+    per-field writes cannot do is validate the switches against each other — a
+    recovery percentage means nothing until recovery is enabled, and the two must
+    land together.
+    """
     settings = frappe.get_single("Salis Settings")
     max_percent = (
         MAX_RECOVERY_PERCENT if max_percent in (None, "") else flt(max_percent)

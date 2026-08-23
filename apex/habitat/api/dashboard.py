@@ -157,7 +157,8 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
     One bounded grouped query; returns ``[{employee, value}]`` value-desc.
 
     Raw SQL because the answer is a GROUP BY with a signed SUM and a HAVING, and the
-    one thing ``frappe.get_all`` cannot do is aggregate across groups — reading the
+    one thing ``frappe.get_all`` (frappe/__init__.py:1996) cannot do is aggregate
+    across groups — reading the
     rows to total them in Python would pull the whole custody history to draw one
     card. The building scope is applied as a bound fragment, never interpolated."""
     building_cond = _building_condition()
