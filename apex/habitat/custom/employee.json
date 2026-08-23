@@ -1,7 +1,208 @@
 {
  "custom_fields": [],
  "doctype": "Employee",
- "links": [],
+ "links": [
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Issue",
+   "link_fieldname": "issued_to_employee"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Return",
+   "link_fieldname": "returned_by_employee"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Acknowledgment",
+   "link_fieldname": "acknowledged_by_employee"
+  },
+  {
+   "group": "Custody",
+   "link_doctype": "Custody Damage Assessment",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Housing Assignment",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Housing Checkout",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Room Bed Transfer",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Resident Request",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Idle Resident Report",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Maintenance Work Order",
+   "link_fieldname": "assigned_to"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Maintenance Inspection Report",
+   "link_fieldname": "inspector"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Facility Asset Movement",
+   "link_fieldname": "moved_by"
+  },
+  {
+   "group": "Cleaning",
+   "link_doctype": "Cleaning Log",
+   "link_fieldname": "cleaner_employee"
+  },
+  {
+   "group": "Cleaning",
+   "link_doctype": "Cleaning Compliance Ledger",
+   "link_fieldname": "assignee"
+  },
+  {
+   "group": "Cleaning",
+   "is_child_table": 1,
+   "link_doctype": "Cleaning Area Photo",
+   "link_fieldname": "captured_by",
+   "parent_doctype": "Cleaning Log",
+   "table_fieldname": "area_photos"
+  },
+  {
+   "group": "Scheduled Tasks",
+   "link_doctype": "Scheduled Task Instance",
+   "link_fieldname": "assigned_to"
+  },
+  {
+   "group": "Scheduled Tasks",
+   "link_doctype": "Scheduled Task Template",
+   "link_fieldname": "assigned_to"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Stock Ledger",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Salis Driver",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Incident",
+   "link_fieldname": "recovery_employee"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Trip Rating",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Boarding Scan Log",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "representative"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Trip Boarding Ledger",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Movement",
+   "is_child_table": 1,
+   "link_doctype": "Trip Boarding Event",
+   "link_fieldname": "worker",
+   "parent_doctype": "Trip Start Log",
+   "table_fieldname": "boarding_events"
+  },
+  {
+   "group": "Movement",
+   "is_child_table": 1,
+   "link_doctype": "Transport Request Worker",
+   "link_fieldname": "employee",
+   "parent_doctype": "Transport Request",
+   "table_fieldname": "workers"
+  },
+  {
+   "group": "Movement",
+   "is_child_table": 1,
+   "link_doctype": "Passenger Manifest Item",
+   "link_fieldname": "employee",
+   "parent_doctype": "Passenger Manifest",
+   "table_fieldname": "passengers"
+  },
+  {
+   "group": "Movement",
+   "is_child_table": 1,
+   "link_doctype": "Trip Boarding State",
+   "link_fieldname": "employee",
+   "parent_doctype": "Dispatch Trip",
+   "table_fieldname": "boarding_state"
+  },
+  {
+   "group": "Portal",
+   "link_doctype": "Masar Worker Token",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Portal",
+   "link_doctype": "Portal Push Subscription",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Telecom Custody",
+   "link_doctype": "SIM Card",
+   "link_fieldname": "current_custodian_employee"
+  },
+  {
+   "group": "Telecom Custody",
+   "link_doctype": "SIM Card",
+   "link_fieldname": "custodian_supervisor"
+  },
+  {
+   "group": "Telecom Custody",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "employee"
+  },
+  {
+   "group": "Telecom Custody",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "previous_custodian_employee"
+  },
+  {
+   "group": "Telecom Custody",
+   "link_doctype": "Temporary Worker",
+   "link_fieldname": "linked_employee"
+  }
+ ],
  "property_setters": [],
  "sync_on_migrate": 1
 }

@@ -1,7 +1,93 @@
 {
  "custom_fields": [],
  "doctype": "Cost Center",
- "links": [],
+ "links": [
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Subcontractor Service Order",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Maintenance and Facilities",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Stock Ledger",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Housing Assignment",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Housing Checkout",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Facilities",
+   "link_doctype": "Building",
+   "link_fieldname": "default_cost_center"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Salis Payment Request",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Recovery",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Transfer",
+   "link_fieldname": "from_cost_center"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Transfer",
+   "link_fieldname": "to_cost_center"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "Telecom Contract",
+   "link_fieldname": "cost_center"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Card",
+   "link_fieldname": "current_cost_center"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "employee_cost_center"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "project_cost_center"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "cost_center"
+  }
+ ],
  "property_setters": [],
  "sync_on_migrate": 1
 }

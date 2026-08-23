@@ -56,8 +56,14 @@
    "description": "4-digit secondary (additional) number."
   }
  ],
- "custom_perms": [],
  "doctype": "Address",
+ "links": [
+  {
+   "group": "Housing",
+   "link_doctype": "Building",
+   "link_fieldname": "building_address"
+  }
+ ],
  "property_setters": [],
  "sync_on_migrate": 1
 }

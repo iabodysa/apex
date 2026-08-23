@@ -11,7 +11,6 @@
    "translatable": 0
   }
  ],
- "custom_perms": [],
  "doctype": "Issue",
  "property_setters": [],
  "sync_on_migrate": 1

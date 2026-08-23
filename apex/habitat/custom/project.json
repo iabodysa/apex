@@ -1,7 +1,128 @@
 {
  "custom_fields": [],
  "doctype": "Project",
- "links": [],
+ "links": [
+  {
+   "group": "Ledgers",
+   "link_doctype": "Accommodation Ledger",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Housing Assignment",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Housing",
+   "link_doctype": "Arrival Batch",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Compliance",
+   "link_doctype": "Audit Remediation Plan",
+   "link_fieldname": "client_project"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Salis Payment Request",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Transfer",
+   "link_fieldname": "from_project"
+  },
+  {
+   "group": "Costs",
+   "link_doctype": "Movement Cost Transfer",
+   "link_fieldname": "to_project"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Salis Driver",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Assignment",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fleet",
+   "link_doctype": "Salis Vehicle",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Route Plan",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Dispatch Trip",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Transport Request",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Movement",
+   "link_doctype": "Route Assignment",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Claim",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Quota",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Exception Case",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Fuel",
+   "link_doctype": "Fuel Request",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "Telecom Contract",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Card",
+   "link_fieldname": "current_project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "Temporary Worker",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "SIM Custody Assignment",
+   "link_fieldname": "previous_project"
+  },
+  {
+   "group": "Logistay",
+   "link_doctype": "Freelancer",
+   "link_fieldname": "project"
+  }
+ ],
  "property_setters": [],
  "sync_on_migrate": 1
 }

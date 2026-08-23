@@ -67,8 +67,14 @@
    "translatable": 0
   }
  ],
- "custom_perms": [],
  "doctype": "Employee Advance",
+ "links": [
+  {
+   "group": "Fleet",
+   "link_doctype": "Vehicle Incident",
+   "link_fieldname": "recovery_advance"
+  }
+ ],
  "property_setters": [],
  "sync_on_migrate": 1
 }
