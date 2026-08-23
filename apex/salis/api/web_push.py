@@ -129,6 +129,14 @@ def _active_subscriptions(audience: str, subject: str) -> list[dict]:
 
 
 def disable_subject_subscriptions(audience: str, subject: str) -> int:
+    """Disable every enabled subscription for one subject as part of a credential revocation.
+
+    Both callers (``revoke_subject_tokens``, ``Masar Worker Token._mint``) are the same system
+    act as their own ``frappe.db.set_value`` on Masar Worker Token: a revocation cascades onto
+    this subject's devices regardless of who triggered it, so it is not attributed to whichever
+    caller's session happened to be open, the same reasoning ``revoke_subject_tokens``
+    (apex/apex_core/utils/portal_identity.py:470) already carries for its own write.
+    """
     if not subject:
         return 0
     rows = frappe.get_all(

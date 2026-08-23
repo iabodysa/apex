@@ -102,6 +102,12 @@ def save_subscription(
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def delete_subscription(entry: str, endpoint: str) -> dict:
+    """Disable one device subscription under the same capacity grant ``save_subscription`` uses.
+
+    ``as_capacity(audience, subject)`` plus ``portal_push_subscription_has_permission`` already
+    authorise this row for its own holder (see the module docstring); there is no need to bypass
+    that with ``frappe.db.set_value`` when ``doc.save()`` reaches the same grant.
+    """
     audience, subject = _resolve_identity(entry)
     endpoint = _clean(endpoint, 2048, _("Notification endpoint"))
     row = frappe.db.get_value(
@@ -114,5 +120,8 @@ def delete_subscription(entry: str, endpoint: str) -> dict:
         return {"subscribed": False}
     if not _belongs_to(row, audience, subject):
         frappe.throw(_("This notification device belongs to another portal holder."), frappe.PermissionError)
-    frappe.db.set_value(_SUBSCRIPTION_DOCTYPE, row.name, "enabled", 0)
+    doc = frappe.get_doc(_SUBSCRIPTION_DOCTYPE, row.name)
+    doc.enabled = 0
+    with as_capacity(audience, subject):
+        doc.save()
     return {"subscribed": False}

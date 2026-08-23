@@ -17,6 +17,12 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, created=0):
+    """Write one immutable Boarding Scan Log row for this manual scan attempt.
+
+    ``board_worker`` is ``allow_guest=True``: the caller is a credential-scoped driver trip, not a
+    signed-in account, so there is no role to grant a DocPerm to in the first place. See
+    ``log_credential_event`` (apex/apex_core/utils/portal_identity.py:1) for the same shape.
+    """
     doc = frappe.get_doc(
         {
             "doctype": "Boarding Scan Log",

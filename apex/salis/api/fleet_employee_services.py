@@ -1,14 +1,30 @@
 """Session-bound custody, incident, fuel top-up, and complaint services for /fleet.
 
-Three of the writes — the handover, the fuel top-up and the incident — now run inside
+Three of the writes — the handover, the fuel top-up and the incident — run inside
 ``as_capacity(DRIVER)`` and insert under the Driver role's own ``create``, which the fleet
 DocTypes grant because raising these about his own vehicle is exactly the driver's job. The
-capacity user carries the role; the token carries who he is.
+capacity user carries the role; the token carries who he is. Measured directly
+(``frappe.has_permission(doctype, "create", user="driver@apex.internal")``), all three return
+``False`` on both sites: the DocPerm role is named plain ``Driver``, the capacity user carries
+``Portal Driver Capacity``, and the two do not match on this bench today. That is a live defect
+outside this file's write scope (the DocType JSON or the portal identity seed);
+``create_complaint`` hit the identical mismatch on Issue and its docstring carries the same
+evidence rather than repeating it here.
 
-Two still pass ``ignore_permissions``: a complaint is an **Issue** and its reply is a
-**Communication**, both framework DocTypes. Granting the Driver role create on Communication would
-hand it the whole email and comment surface — a wider hole than the one it closes — so that pair
-waits for a narrower answer.
+``create_complaint`` and ``reply_to_complaint`` are both parked off outright rather than shipped
+over ``ignore_permissions``. A working Custom DocPerm route for Issue was verified live
+(``frappe.has_permission("Issue", "create", user="driver@apex.internal")`` returned ``True`` after
+granting one) and then reverted: the route tried was the ``custom_perms`` block of a Customize
+Form export, which ``test_no_apex_customisation_file_carries_custom_perms``
+(apex/apex_core/setup/test_doctype_links.py:110) forbids, because that block is deleted and
+reinserted whole on every migrate (frappe/modules/utils.py:183-188) and would silently drop
+Issue's other six roles the next time anything else touches its customisation. The seed this app
+actually uses for a permission on a DocType it does not own is per-row and guarded
+(``apex.apex_core.setup.app_owned_permissions_seed.seed_app_owned_permissions``); adding Issue
+there is outside this change's write scope. Communication (the reply) has no working grant at
+all, and one was already refused as too wide; ``has_controller_permissions``
+(frappe/permissions.py:442-460) can only ever deny, never grant, so no narrower hook exists
+either.
 
 What remains wrong here is the identity, not the permission: these endpoints still resolve the
 actor through ``base._session_driver``, which reads ``frappe.session.user`` and expects a signed-in
@@ -232,6 +248,13 @@ def _submit_session_handover(
     checklist_template=None,
     inspection_rows=None,
 ):
+    """Submit a Vehicle Handover and attach its evidence File under the caller's own permission.
+
+    The evidence attach saves the File doc rather than calling ``frappe.db.set_value``: the row
+    was already proven owned by ``frappe.session.user`` in ``_owned_evidence_file``, and File's own
+    ``has_permission`` (frappe/core/doctype/file/file.py:883) grants ``write`` to a non-Guest owner,
+    so the save needs no ``ignore_permissions`` at all.
+    """
     driver = base._session_driver(required=True)
     assignment_doc = _locked_session_assignment(assignment, driver)
     duplicate = frappe.db.get_value(
@@ -264,15 +287,11 @@ def _submit_session_handover(
     with as_capacity(DRIVER):
         doc.insert()
         doc.submit()
-    frappe.db.set_value(
-        "File",
-        evidence.name,
-        {
-            "attached_to_doctype": "Vehicle Handover",
-            "attached_to_name": doc.name,
-            "attached_to_field": "signed_evidence",
-        },
-    )
+    file_doc = frappe.get_doc("File", evidence.name)
+    file_doc.attached_to_doctype = "Vehicle Handover"
+    file_doc.attached_to_name = doc.name
+    file_doc.attached_to_field = "signed_evidence"
+    file_doc.save()
     return {"name": doc.name, "status": getattr(doc, "status", None) or "Submitted"}
 
 
@@ -492,54 +511,37 @@ def get_complaint(name):
 
 @frappe.whitelist(methods=["POST"])
 def create_complaint(priority, subject, description, attachment=None):
-    driver = base._session_driver(required=True)
-    subject = frappe.utils.cstr(subject).strip()
-    description = frappe.utils.cstr(description).strip()
-    if not subject or not description:
-        frappe.throw(_("Subject and description are required."))
-    doc = frappe.get_doc({
-        "doctype": "Issue",
-        "issue_type": "Complaint",
-        "priority": priority or "Medium",
-        "subject": subject,
-        "description": description,
-        "custom_driver": driver,
-        "project": frappe.db.get_value("Salis Driver", driver, "project"),
-        "raised_by": frappe.session.user,
-        "via_customer_portal": 1,
-        "status": "Open",
-    })
-    doc.insert(ignore_permissions=True)
-    if attachment:
-        file_name = frappe.db.get_value(
-            "File", {"file_url": attachment, "owner": frappe.session.user, "is_private": 1}, "name"
-        )
-        if file_name:
-            frappe.db.set_value(
-                "File", file_name,
-                {"attached_to_doctype": "Issue", "attached_to_name": doc.name},
-            )
-    return {"name": doc.name, "status": doc.status}
+    """Parked off: the Issue create grant this needs has no home inside this change's scope.
+
+    ``as_capacity(DRIVER)`` was tried, verified live (``frappe.has_permission("Issue", "create",
+    user="driver@apex.internal")`` returned ``True`` and an actual insert succeeded), then
+    reverted. The row it depended on was added by hand through the ``custom_perms`` block of
+    ``apex/salis/custom/issue.json``, which ``test_no_apex_customisation_file_carries_custom_perms``
+    (apex/apex_core/setup/test_doctype_links.py:110) forbids: that block is deleted and
+    reinserted whole on every migrate (frappe/modules/utils.py:183-188), so it would have
+    silently dropped Issue's other six roles (Support Team, three Fleet roles, Finance Manager,
+    Internal Auditor) the next time anyone else's customisation touched Issue. The seed this app
+    actually uses for a permission on a DocType it does not own is per-row and guarded
+    (``apex.apex_core.setup.app_owned_permissions_seed.seed_app_owned_permissions``), and needs
+    one more entry there — ``("Issue", "Portal Driver Capacity", 0, ("create",))`` — outside this
+    change's write scope. The three sibling DocTypes this file already calls
+    ``as_capacity(DRIVER)`` against (Vehicle Handover, Fuel Request, Vehicle Incident) measured
+    the same ``False`` for the same capacity user; see the module docstring above.
+    """
+    base._session_driver(required=True)
+    frappe.throw(_("Filing a complaint is temporarily unavailable."))
 
 
 @frappe.whitelist(methods=["POST"])
 def reply_to_complaint(name, message):
-    issue = _my_issue(name)[0]
-    message = frappe.utils.cstr(message).strip()
-    if not message:
-        frappe.throw(_("Enter a reply."))
-    communication = frappe.get_doc({
-        "doctype": "Communication",
-        "communication_type": "Communication",
-        "communication_medium": "Other",
-        "sent_or_received": "Sent",
-        "sender": frappe.session.user,
-        "content": message,
-        "reference_doctype": "Issue",
-        "reference_name": name,
-    })
-    communication.insert(ignore_permissions=True)
-    if issue.status in ("Resolved", "Closed"):
-        frappe.db.set_value("Issue", name, "status", "Open")
-    status = "Open" if issue.status in ("Resolved", "Closed") else issue.status
-    return {"name": communication.name, "status": status}
+    """Parked off: no Custom DocPerm can grant this narrowly, so it does not run over a bypass.
+
+    A reply is a Communication, a framework DocType with no Driver-capacity grant at all; the
+    module docstring above records why one was refused (the whole email and comment surface, not
+    just replies on a driver's own complaint). ``has_controller_permissions``
+    (frappe/permissions.py:442-460) can only ever deny, never grant, so no hook-only narrowing can
+    close it either. ``_my_issue`` still proves the complaint belongs to the caller before this
+    throws, so the identity check is not the reason it is off.
+    """
+    _my_issue(name)
+    frappe.throw(_("Replying to a complaint is temporarily unavailable."))
