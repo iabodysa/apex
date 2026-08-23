@@ -152,17 +152,17 @@ DEMO_INVENTORY.update(
     }
 )
 
-_DEMO_SITE = "Demo Housing Site"
-_DEMO_BUILDING = "Demo Building A"
-_DEMO_PARTNER_BUILDING = "Demo Building B"
-_DEMO_PROJECT = "Demo Residential Project"
-_DEMO_COMPLETED_PROJECT = "Demo Completed Project"
-_DEMO_PARTNER_COMPANY = "Demo Partner Company"
-_DEMO_SUPPLIER = "Demo Accommodation Supplier"
-_DEMO_CATEGORY = "Demo Custody Category"
-_DEMO_ARTICLE = "Demo Custody Article"
-_DEMO_RENTAL_OFFICE = "Demo Rental Office"
-_DEMO_ROOMS = ("DEMO-101", "DEMO-102")
+_DEMO_SITE = "Al Waha Workers Village"
+_DEMO_BUILDING = "Al Waha Building 1"
+_DEMO_PARTNER_BUILDING = "Al Rawdah Building 1"
+_DEMO_PROJECT = "Al Waha Housing Project"
+_DEMO_COMPLETED_PROJECT = "Al Furat Housing Project"
+_DEMO_PARTNER_COMPANY = "Al Rawdah Support Services"
+_DEMO_SUPPLIER = "Dar Al Sakan Supplies"
+_DEMO_CATEGORY = "Room Furnishings"
+_DEMO_ARTICLE = "Bunk Bed Mattress"
+_DEMO_RENTAL_OFFICE = "Al Yamamah Rental Office"
+_DEMO_ROOMS = ("101", "102")
 
 def setup_demo(args=None):
     """`setup_wizard_complete` hook — queue the demo build if the operator asked.
@@ -254,6 +254,54 @@ def _report_build_failure(operator, doctype, traceback):
         user=operator,
     )
 
+def _break_settlement_payment_cycle():
+    """Clears the demo Rental Settlement's ``payment_request`` link before the removal walks the table.
+
+    ``_build_rental_settlement`` raises the demo Salis Payment Request through
+    ``RentalSettlement.create_payment_request()``, which stamps a link BOTH ways: the
+    settlement's ``payment_request`` points at the request, and the request's
+    ``reference_doctype``/``reference_name`` (Dynamic Link) points back at the
+    settlement. Frappe's own link-existence check then refuses either side first —
+    each cites the other as the still-standing reference — so no processing order of
+    ``DEMO_DOCTYPES`` can ever clear the pair. ``frappe.db.set_value`` breaks the
+    settlement's half of the cycle directly (the field is read-only, so the ORM write
+    path would refuse it), after which the reversed sweep below deletes the request,
+    then the settlement, in the normal order.
+    """
+    for name in frappe.get_all(
+        "Rental Settlement",
+        filters={"owner": ["in", list(DEMO_USERS)], "payment_request": ["is", "set"]},
+        pluck="name",
+    ):
+        frappe.db.set_value("Rental Settlement", name, "payment_request", None, update_modified=False)
+
+def _remove_worker_tokens_for_demo_drivers(deleted, residue):
+    """Deletes any Masar Worker Token issued for a demo driver, before Salis Driver is swept.
+
+    ``issue_driver_link`` (``masar_worker_token.py``) is the whitelisted API a Fleet
+    persona calls from the portal to hand a driver their access link; it stamps the
+    token's ``owner`` as whoever called it, never the demo user, and the token is not a
+    demo DocType (``DEMO_DOCTYPES`` never lists it). A demo driver left Active is a
+    normal target for that call — this site carried one such token from outside the
+    build, and it blocked the driver's removal exactly as the settlement/payment cycle
+    above blocks each other. Found by the ``driver`` link rather than by ownership,
+    since ownership is exactly the column that does not identify it.
+    """
+    drivers = frappe.get_all(
+        "Salis Driver", filters={"owner": ["in", list(DEMO_USERS)]}, pluck="name"
+    )
+    if not drivers:
+        return deleted, residue
+    for name in frappe.get_all(
+        "Masar Worker Token", filters={"driver": ["in", drivers]}, pluck="name"
+    ):
+        error = _remove_one("Masar Worker Token", name)
+        if error:
+            residue.append({"doctype": "Masar Worker Token", "name": name, "error": error})
+        else:
+            deleted += 1
+    return deleted, residue
+
 @frappe.whitelist()
 def clear_demo_data():
     """Remove every row the demo build created, and nothing else.
@@ -268,9 +316,12 @@ def clear_demo_data():
     if not frappe.db.exists("User", DEMO_OWNER):
         frappe.throw(_("This site has no Apex demo data to remove."))
 
+    _break_settlement_payment_cycle()
+
     deleted = 0
     residue = []
     deleted, residue = _remove_user_permissions(deleted, residue)
+    deleted, residue = _remove_worker_tokens_for_demo_drivers(deleted, residue)
     for doctype in reversed(DEMO_DOCTYPES):
         for name in frappe.get_all(
             doctype, filters={"owner": ["in", list(DEMO_USERS)]}, pluck="name"
@@ -420,11 +471,11 @@ def _create_demo_users():
     """The owner key and the scoped persona. Created as the installing user, so
     they are never swept by the owner filter and are deleted explicitly instead."""
     for email, full_name, roles in (
-        (DEMO_OWNER, "Demo Manager", ("System Manager",)),
-        (DEMO_SUPERVISOR, "Demo Supervisor", ("Resident Supervisor",)),
-        (DEMO_APPROVER, "Demo Approver", ("Accommodation Manager", "Finance Manager")),
-        (DEMO_FLEET_SUPERVISOR, "Demo Fleet Supervisor", ("Fleet Supervisor",)),
-        (DEMO_FLEET_MANAGER, "Demo Fleet Manager", ("Fleet Manager",)),
+        (DEMO_OWNER, "Fahad Al-Dosari", ("System Manager",)),
+        (DEMO_SUPERVISOR, "Turki Al-Zahrani", ("Resident Supervisor",)),
+        (DEMO_APPROVER, "Nasser Al-Qahtani", ("Accommodation Manager", "Finance Manager")),
+        (DEMO_FLEET_SUPERVISOR, "Khalid Al-Harbi", ("Fleet Supervisor",)),
+        (DEMO_FLEET_MANAGER, "Sultan Al-Ghamdi", ("Fleet Manager",)),
     ):
         if frappe.db.exists("User", {"name": email}):
             continue
@@ -654,7 +705,7 @@ def _build_employee(context):
                 "status": "Active",
             },
         ).name
-        for first_name in ("Demo Resident", "Demo Supplier Worker", "Demo Leaver")
+        for first_name in ("Majed Al-Shehri", "Yousef Al-Anazi", "Bandar Al-Subaie")
     ]
     context["employee"] = context["employees"][0]
 
@@ -678,7 +729,7 @@ def _build_utility_account(context):
         {
             "building": context["building"],
             "utility_type": "Electricity",
-            "account_number": "DEMO-UTIL-0001",
+            "account_number": "SEC-2205841",
             "status": "Active",
         },
     ).name
@@ -688,7 +739,7 @@ def _build_facility_asset(context):
     context["facility_asset"] = _create(
         "Facility Asset",
         {
-            "asset_name": "Demo CCTV Camera",
+            "asset_name": "Main Gate CCTV Camera",
             "asset_category": "CCTV Camera",
             "building": context["building"],
             "responsible_supervisor": DEMO_SUPERVISOR,
@@ -696,10 +747,57 @@ def _build_facility_asset(context):
         },
     ).name
 
+def _grant_demo_scope(context):
+    """Give the scoped demo personas the User Permission their role needs.
+
+    Fleet Supervisor and Resident Supervisor are SCOPED roles — they are absent from
+    ``salis.permissions.UNSCOPED_ROLES``, so ``permission_query_conditions`` confines
+    them to the projects and buildings a User Permission grants, and a persona with no
+    grant can read nothing at all. The demo walks a Driver Clearance workflow as the
+    fleet supervisor, which is refused outright without this.
+
+    This is what a real deployment does for a scoped supervisor, so granting it here
+    exercises the scoping rather than stepping around it: the persona sees the demo
+    project and nothing else, which is the behaviour worth demonstrating.
+    """
+    grants = (
+        (DEMO_FLEET_SUPERVISOR, "Project", context["project"]),
+        (DEMO_SUPERVISOR, "Project", context["project"]),
+        (DEMO_SUPERVISOR, "Building", context["building"]),
+    )
+    for user, allow, value in grants:
+        if not value or not frappe.db.exists("User", user):
+            continue
+        if frappe.db.exists(
+            "User Permission", {"user": user, "allow": allow, "for_value": value}
+        ):
+            continue
+        frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": user,
+                "allow": allow,
+                "for_value": value,
+                "apply_to_all_doctypes": 1,
+            }
+        ).insert(ignore_permissions=True)
+
+
 def _build_driver(context):
-    """Creates the demo Salis Driver."""
+    """Creates the demo Salis Driver, on the demo project.
+
+    The project is not decoration. Every Salis document is scoped through the driver's
+    or vehicle's project (``salis.permissions``), so a driver with no project is
+    invisible to every SCOPED role — a Fleet Supervisor is then refused read on the
+    driver's own clearance, and the workflow this demo walks cannot start.
+    """
     context["driver"] = _create(
-        "Salis Driver", {"full_name": "Demo Driver", "status": "Active"}
+        "Salis Driver",
+        {
+            "full_name": "Hassan Al-Amri",
+            "status": "Active",
+            "project": context["project"],
+        },
     ).name
 
 def _build_vehicle(context):
@@ -712,9 +810,10 @@ def _build_vehicle(context):
     context["vehicle"] = _create(
         "Salis Vehicle",
         {
-            "plate_number": "DEMO-1234",
+            "plate_number": "RUH 4521",
             "status": "Active",
             "planned_fuel_grade": "Petrol 91",
+            "project": context["project"],
         },
     ).name
 
@@ -756,8 +855,8 @@ def _build_sim_cards(context):
             },
         ).name
         for mobile, iccid, status, custodian_type, employee, cost_center in (
-            ("0550000001", "DEMO-ICCID-0001", "Assigned", "Employee", holder, context.get("cost_center")),
-            ("0550000002", "DEMO-ICCID-0002", "Assigned", "Employee", holder, context.get("cost_center")),
+            ("0550000001", "8996605112345678901", "Assigned", "Employee", holder, context.get("cost_center")),
+            ("0550000002", "8996605112345678902", "Assigned", "Employee", holder, context.get("cost_center")),
             ("0550000003", None, "Suspended", "Unassigned", None, None),
         )
     ]
@@ -843,7 +942,7 @@ def _build_cleaning_log(context):
                     "room": context["rooms"][1],
                     "room_status": "Skipped",
                     "cleaned": 0,
-                    "skip_reason": "Demo pending round",
+                    "skip_reason": "Awaiting next cleaning round",
                 },
             ],
         },
@@ -897,7 +996,7 @@ def _build_damage_assessment(context):
             "items": [
                 {
                     "article": context["article"],
-                    "damage_description": "Demo damaged mattress",
+                    "damage_description": "Torn mattress cover, foam exposed",
                     "estimated_replacement_cost": 150,
                 }
             ],
@@ -915,13 +1014,13 @@ def _build_audit_plan(context):
             "buildings_in_scope": [{"building": context["building"]}],
             "remediation_items": [
                 {
-                    "finding_description": "Demo audit finding: fire extinguisher expired",
+                    "finding_description": "Fire extinguisher inspection tag expired",
                     "remediation_action": "Replace the expired extinguisher",
                     "due_date": add_days(today(), -5),
                     "status": "Open",
                 },
                 {
-                    "finding_description": "Demo audit finding: room signage missing",
+                    "finding_description": "Room number signage missing",
                     "remediation_action": "Install room signage",
                     "due_date": add_days(today(), 15),
                     "status": "In Progress",
@@ -1037,7 +1136,7 @@ def _build_qr_location(context):
     context["qr_location"] = _create(
         "QR Location",
         {
-            "poster_title": "Demo Building A — Main Entrance",
+            "poster_title": "{0} — Main Entrance".format(context["building"]),
             "is_active": 1,
             "room": context["rooms"][0],
         },
@@ -1076,7 +1175,7 @@ def _build_handover_checklist_template(context):
     context["handover_template"] = _create(
         "Vehicle Handover Checklist Template",
         {
-            "template_name": "Demo Vehicle Handover Checklist",
+            "template_name": "Vehicle Handover Checklist",
             "is_active": 1,
             "items": [{"check_item": item} for item in _HANDOVER_CHECKS],
         },
@@ -1154,7 +1253,7 @@ def _build_vehicle_write_off(context):
     evidence.update(
         {
             "file_name": "demo-write-off-evidence.txt",
-            "content": "Demo damage evidence placeholder.",
+            "content": "Vehicle damage evidence photo (placeholder).",
             "is_private": 0,
         }
     )
@@ -1390,7 +1489,16 @@ def _build_rental_settlement(context):
             "rental_office": context["rental_office"],
             "period_month": today()[:7],
             "status": "Draft",
-            "vehicles": [{"vehicle": context["vehicle"]}],
+            "vehicles": [
+                {
+                    "vehicle": context["vehicle"],
+                    "rental_start_date": add_days(today(), -30),
+                    "rental_end_date": today(),
+                    "days": 30,
+                    "daily_rate": 120,
+                    "amount": 3600,
+                }
+            ],
         },
     )
     _walk_workflow(
@@ -1418,9 +1526,9 @@ def _build_route_template(context):
     context["route_template"] = _create(
         "Route Template",
         {
-            "template_name": "Demo Route Template",
+            "template_name": "Main Gate Shuttle Route",
             "route_type": "Pickup",
-            "stops": [{"stop_name": "Demo Building A — Main Entrance"}],
+            "stops": [{"stop_name": "{0} — Main Entrance".format(context["building"])}],
         },
     ).name
 
@@ -1429,7 +1537,7 @@ def _build_work_shift(context):
     context["work_shift"] = _create(
         "Work Shift",
         {
-            "shift_name": "Demo Morning Shift",
+            "shift_name": "Morning Shift",
             "start_time": "06:00:00",
             "end_time": "14:00:00",
             "applicable_days": [{"day_of_week": "Sunday"}],
@@ -1506,10 +1614,10 @@ def _build_fuel_exception_case(context):
             "driver": context["driver"],
             "exception_type": "Over-Consumption",
             "description": (
-                "Demo exception: fuel consumption exceeds the vehicle's "
-                "planned average for the period."
+                "Fuel consumption exceeds the vehicle's planned average "
+                "for the period."
             ),
-            "evidence_notes": "Demo investigation notes: pump receipt matches the trip log.",
+            "evidence_notes": "Investigation notes: pump receipt matches the trip log.",
         },
     )
     _walk_workflow(
@@ -1535,7 +1643,7 @@ def _build_movement_cost_recovery(context):
     evidence.update(
         {
             "file_name": "demo-cost-recovery-evidence.txt",
-            "content": "Demo cost recovery evidence placeholder.",
+            "content": "Cost recovery evidence photo (placeholder).",
             "is_private": 0,
         }
     )
@@ -1607,6 +1715,7 @@ _BUILD_STEPS = (
     ("Custody Article", _build_custody_article),
     ("Utility Account", _build_utility_account),
     ("Facility Asset", _build_facility_asset),
+    ("User Permission", _grant_demo_scope),
     ("Salis Driver", _build_driver),
     ("Salis Vehicle", _build_vehicle),
     ("Telecom Contract", _build_telecom_contract),
