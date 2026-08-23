@@ -58,7 +58,7 @@ def board_worker(dispatch_trip, employee):
 
     driver = trip.get("driver")
     log = boarding._get_or_create_log(dispatch_trip, driver)
-    if boarding._already_boarded(log, employee):
+    if boarding.already_boarded(log, employee):
         scan_log = _log_attempt(dispatch_trip, trip, employee, "Duplicate", log.name)
         return {"result": "Duplicate", "scan_log": scan_log, "trip_start_log": log.name}
 

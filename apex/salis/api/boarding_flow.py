@@ -548,7 +548,7 @@ def worker_claim_boarded(token=None):
     ``status = None``, and a self-confirm is ``status = "Boarded"`` plus
     ``confirm_source`` and ``reject_count``."""
     from apex.salis.api.masar import (
-        _already_boarded,
+        already_boarded,
         _get_or_create_trip_log,
         _resolve_worker,
         _worker_today_dispatch_trip,
@@ -572,7 +572,7 @@ def worker_claim_boarded(token=None):
         return {"dispatch_trip": dispatch_trip, "status": None}
 
     log = _get_or_create_trip_log(dispatch_trip, employee)
-    if not _already_boarded(log, employee):
+    if not already_boarded(log, employee):
         log.append(
             "boarding_events",
             {

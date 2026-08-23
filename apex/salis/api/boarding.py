@@ -353,8 +353,16 @@ def _get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe
     return log
 
 
-def _already_boarded(log, worker: str) -> bool:
-    """Returns True when the worker already has a registered boarding event on this log."""
+def already_boarded(log, worker: str) -> bool:
+    """True when the worker already has a REGISTERED boarding event on this log.
+
+    Public because three sibling entry points — the Masar confirm, the manual desk and
+    the boarding flow — must answer this the same way; a second copy anywhere makes a
+    re-confirm stop being idempotent and double-counts the headcount.
+
+    An UNREGISTERED row never counts: it records someone boarded without a worker
+    record, so it can neither be matched to ``worker`` nor block their own boarding.
+    """
     return any(
         (row.worker == worker and not row.is_unregistered)
         for row in (log.boarding_events or [])
@@ -486,7 +494,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     driver = trip.get("driver")
     log = _get_or_create_log(dispatch_trip, driver)
 
-    if _already_boarded(log, worker):
+    if already_boarded(log, worker):
         log_name = _log_scan(
             dispatch_trip, trip, worker, "Duplicate", pass_token,
             trip_start_log=log.name, notes="Worker already boarded this trip.",

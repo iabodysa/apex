@@ -18,6 +18,7 @@ import frappe
 from frappe import _
 
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
+from apex.apex_core.utils.role_assignment import role_holders_escalating
 
 _IDENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_ ]*$")
 
@@ -166,15 +167,6 @@ def _notify_hr(message: str) -> None:
     """
     from apex.apex_core.utils.system_notify import notify_user_system
 
-    for user in _hr_recipients():
+    for user in role_holders_escalating("HR Manager", "System Manager"):
         notify_user_system(user, message)
 
-def _hr_recipients() -> list:
-    """Enabled users holding HR Manager (fallback: System Manager)."""
-    from frappe.utils.user import get_users_with_role
-
-    for role in ("HR Manager", "System Manager"):
-        users = get_users_with_role(role)
-        if users:
-            return users
-    return []

@@ -21,6 +21,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, today
 
+from apex.apex_core.utils.company import resolve_company_or_any
+
 DEMO_ARG = "apex_setup_demo"
 
 _GENDER_WAIT_SECONDS = 60
@@ -190,7 +192,7 @@ def build_demo_data():
         return {"built": False, "stopped_at": "already built"}
 
     operator = frappe.session.user
-    if not _company():
+    if not resolve_company_or_any():
         _report_build_failure(operator, "Company", None)
         return {"built": False, "stopped_at": "Company"}
 
@@ -414,10 +416,6 @@ def _create(doctype, payload):
     doc.insert(ignore_permissions=True)
     return doc
 
-def _company():
-    """Returns the global default company, or any existing company as a fallback."""
-    return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
-
 def _walk_workflow(doctype, name, actions, user=DEMO_APPROVER):
     """Applies a sequence of workflow actions to a document while impersonating ``user``
     (the demo approver by default, so every existing call site is unaffected)."""
@@ -439,7 +437,7 @@ def _build_partner_company(context):
     whose company trades in another currency would otherwise show every seeded figure in
     one this operator does not use.
     """
-    context["company"] = _company()
+    context["company"] = resolve_company_or_any()
     currency = (
         frappe.db.get_value("Company", context["company"], "default_currency")
         if context["company"]

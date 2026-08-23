@@ -36,6 +36,24 @@ def role_holders(role: str) -> list[str]:
     return [user for user in get_users_with_role(role) if user != "Guest"]
 
 
+def role_holders_escalating(*roles: str) -> list[str]:
+    """Holders of the FIRST role in ``roles`` that anyone holds, else an empty list.
+
+    An escalation ladder, not a union: a notification meant for HR reaches System
+    Manager only on a site where nobody holds HR Manager, so a configured site never
+    copies the site administrator on routine HR traffic. Returning the union instead
+    would make every escalation permanent once it fired one time.
+
+    Guest is dropped by :func:`role_holders`, so a role granted to Guest cannot make a
+    rung look occupied when nobody is on it.
+    """
+    for role in roles:
+        holders = role_holders(role)
+        if holders:
+            return holders
+    return []
+
+
 def assign_role(doctype: str, name: str, role: str, description: str, priority: str = "Medium") -> int:
     """Assign one document to every holder of ``role`` WHO MAY ALREADY READ IT.
 

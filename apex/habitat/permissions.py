@@ -60,11 +60,6 @@ HOUSING_UNSCOPED_ROLES = {
 BUILDING = "building"
 
 
-def _resolve_user(user=None):
-    """Return the effective user, defaulting to the session user."""
-    return permission_scope.resolve_user(user)
-
-
 def _is_privileged(user):
     """True when the user is the Administrator or holds any privileged role.
 
@@ -113,7 +108,7 @@ def validate_building_scope(user=None, doctype=None):
     it says it here. Callers invoke this BEFORE acting; the deny-only hook stays
     deny-only, since a permission hook that throws would break list rendering.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _building_is_unscoped(user):
         return
     if _allowed_buildings_for(user, doctype):
@@ -168,9 +163,6 @@ def _child(child_doctype, parent_doctype):
     return ("child", {"child": child_doctype, "parent": parent_doctype})
 
 
-def _quote(field):
-    """Backtick-quote one column name. The only place this module writes a quote."""
-    return "`{0}`".format(field)
 
 
 BUILDING_SCOPE = {
@@ -228,24 +220,14 @@ BUILDING_FETCH_ANCHOR = {
 }
 
 
-def _render_column(spec, escaped):
-    """``building in (...)`` — the estate stored on the row."""
-    return "{column} in ({values})".format(column=_quote(spec["field"]), values=escaped)
 
 
-def _render_dual(spec, escaped):
-    """Either endpoint in scope.
-
-    """
-    return "({first} in ({values}) or {second} in ({values}))".format(
-        first=_quote(spec["first"]), second=_quote(spec["second"]), values=escaped
-    )
 
 
 def _render_hop(spec, escaped):
     """The estate one link away, as a subquery on the linked DocType."""
     return "{column} in (select `name` from `tab{doctype}` where `building` in ({values}))".format(
-        column=_quote(spec["field"]), doctype=spec["doctype"], values=escaped
+        column=permission_scope.quote_column(spec["field"]), doctype=spec["doctype"], values=escaped
     )
 
 
@@ -260,25 +242,16 @@ def _render_child(spec, escaped):
 
 
 FRAGMENTS = {
-    "column": _render_column,
-    "dual": _render_dual,
+    "column": permission_scope.render_column,
+    "dual": permission_scope.render_dual,
     "hop": _render_hop,
     "child": _render_child,
 }
 
 
 def _fragment(kind, spec, values):
-    """Render one scope strategy against the user's allowed buildings.
-
-    ``values`` is non-empty — the caller has already answered the unscoped and
-    no-building cases, so every renderer emits a real restriction. An unrecognised
-    kind renders "1=0" rather than falling through to no restriction: an unknown
-    strategy must fail CLOSED.
-    """
-    render = FRAGMENTS.get(kind)
-    if not render:
-        return "1=0"
-    return render(spec, ", ".join(frappe.db.escape(value) for value in values))
+    """Render one scope strategy against the user's allowed buildings."""
+    return permission_scope.render_fragment(kind, spec, values, FRAGMENTS)
 
 
 def building_scope_query(user=None, doctype=None):
@@ -294,7 +267,7 @@ def building_scope_query(user=None, doctype=None):
     ``_building_condition``) and the shape 29 of the 36 scoped DocTypes use.
 
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _building_is_unscoped(user):
         return ""
 
@@ -320,7 +293,7 @@ def refuse_a_supervisor_with_no_building(user=None, doctype=None):
     and nothing else: empty for oversight and for anyone Frappe will already narrow, and
     ``1=0`` for a scoped user with no building at all.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _building_is_unscoped(user):
         return ""
     return "" if _allowed_buildings(user) else "1=0"
@@ -428,7 +401,7 @@ def building_scoped_has_permission(doc, ptype, user=None):
     the capacity role's DocPerm. See ``permission_scope.portal_capacity_verdict``; the
     fragment above already returns "1=0" for it, so no estate opens on the list side.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _building_is_unscoped(user):
         return None
 
@@ -475,7 +448,7 @@ def maintenance_request_query(user=None, doctype=None):
     roles such as Maintenance Technician, the realistic assignee. Any assignee can
     still OPEN an assigned ticket via ``maintenance_request_has_permission``.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if user == "Guest":
         return "1=0"
     roles = set(frappe.get_roles(user))
@@ -503,7 +476,7 @@ def maintenance_request_has_permission(doc, ptype, user=None):
     This is the ONE handler in this module that returns True: the owner/assignee basis
     is an independent grant, not a narrowing of the building axis.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     roles = set(frappe.get_roles(user))
     if "Resident Supervisor" in roles and not (
         roles & {"System Manager", "Accommodation Manager"}
@@ -530,7 +503,7 @@ def report_maintenance_request_scope(user=None):
     ``or_filters``), matching the owner/assignee fragment in
     ``maintenance_request_query``.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_privileged(user):
         return False, user
     return True, user

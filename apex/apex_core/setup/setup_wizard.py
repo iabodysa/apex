@@ -35,6 +35,7 @@ import frappe
 from frappe.utils import cint
 
 from apex.apex_core.payment_router import validate_target_doctype
+from apex.apex_core.utils.company import resolve_company_or_any
 
 def setup_wizard_complete(args=None):
     """`setup_wizard_complete` hook — apply the operator's first-run choices."""
@@ -50,9 +51,15 @@ def apply_apex_setup(args=None):
 
     Skip-safe: a blank/absent field keeps the Single's shipped default (the helpers
     below only write a Link when the arg is present and the target exists). No commit
-    — Frappe commits after all setup stages succeed."""
+    — Frappe commits after all setup stages succeed.
+
+    Company and cost center are READ here rather than asked for on the slide. The Apex
+    slide carries no Link field at either: Frappe renders every slide before it runs a
+    single stage, and ERPNext creates the company in a stage, so a picker would query an
+    empty table and force the operator to leave blank a choice he could not make.
+    ERPNext's stage runs before this completion hook, so both values already exist."""
     args = frappe._dict(args or {})
-    company = _created_company()
+    company = resolve_company_or_any()
     cost_center = _created_cost_center(company)
 
     _apply_payment_routing(args)
@@ -60,16 +67,6 @@ def apply_apex_setup(args=None):
     _apply_salis_settings(args, company, cost_center)
     _apply_employee_advance_recovery(args, company)
     _apply_salis_support(args)
-
-def _created_company():
-    """The company this wizard has just created, read rather than asked for.
-
-    The Apex slide carries no Link fields at Company or Cost Center: Frappe renders
-    every slide before it runs a single stage, and ERPNext creates the company in a
-    stage, so a picker on the slide would query an empty table, forcing the operator to
-    leave blank a choice he could not make. ERPNext's stage runs before this completion
-    hook, so both values already exist here."""
-    return frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {})
 
 def _created_cost_center(company):
     """The default cost center ERPNext attached to that company."""

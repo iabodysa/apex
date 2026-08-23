@@ -175,3 +175,39 @@ def report_scope(user, is_unscoped_fn, allowed_fn, allow=None, doctype=None):
     if is_unscoped_fn(user):
         return False, []
     return True, for_doctype(user, allow, doctype, allowed_fn(user))
+
+
+def quote_column(field):
+    """Backtick-quote one column name — the one place a scope fragment writes a quote."""
+    return "`{0}`".format(field)
+
+
+def render_column(spec, escaped):
+    """``<column> in (...)`` — the tenant stored directly on the row."""
+    return "{column} in ({values})".format(column=quote_column(spec["field"]), values=escaped)
+
+
+def render_dual(spec, escaped):
+    """Either endpoint in scope, as ONE fragment.
+
+    Frappe AND-joins the conditions it collects, so a scope satisfied by EITHER of
+    two columns has to arrive already OR-ed. Splitting it into two fragments would
+    demand both endpoints be in scope and hide every row that crosses the boundary.
+    """
+    return "({first} in ({values}) or {second} in ({values}))".format(
+        first=quote_column(spec["first"]), second=quote_column(spec["second"]), values=escaped
+    )
+
+
+def render_fragment(kind, spec, values, fragments):
+    """Render one scope strategy from ``fragments`` against the user's allowed values.
+
+    ``values`` is non-empty — the caller has already answered the unscoped and
+    empty-scope cases, so every renderer emits a real restriction. An unrecognised
+    kind renders "1=0" rather than falling through to no restriction: an unknown
+    strategy must fail CLOSED.
+    """
+    render = fragments.get(kind)
+    if not render:
+        return "1=0"
+    return render(spec, ", ".join(frappe.db.escape(value) for value in values))

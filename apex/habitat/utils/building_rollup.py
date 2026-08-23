@@ -79,12 +79,11 @@ def distinct_floor_count(building_name) -> int:
     """How many floors the building's rooms occupy, counting the ground floor as one.
 
     A Room's ``floor`` is a Frappe ``Int``, whose column is ``int(11) NOT NULL DEFAULT 0``, so a
-    room whose floor was never set is stored as 0 and is indistinguishable from a room on the
-    ground floor. This deliberately does NOT try to tell them apart: the previous version filtered
-    ``f is not None`` and promised "rooms with no floor set are not a floor", which the schema
-    cannot express — the filter could never fire, and the promise read as a guarantee nobody held.
+    room whose floor was never set is stored as 0 and cannot be told apart from a room on the
+    ground floor. No filter here attempts that distinction, because the schema cannot express it.
     Rooms are generated from the building's floor plan with an explicit floor, so an unset floor is
-    not a state the product produces.
+    not a state the product produces; if Room.floor ever becomes nullable, this count changes
+    meaning and both callers must be re-read.
     """
     return len(
         frappe.db.get_all(

@@ -6,7 +6,7 @@ personal token resolved to exactly one Employee — plus the readers and shapers
 for the records that Employee owns.
 
 Readers (``_active_assignment``, ``_custody_issued_by``, ``_building_in_charge``,
-``_today_driver``, ``_hr_notify_recipients``) touch the database. Shapers
+``_today_driver``) touch the database. Shapers
 (``_iqama_of``, ``_worker_documents``, ``_net_custody_items``,
 ``_request_status_timeline``, ``_clean_adhoc_passengers``) take plain values and
 return plain values, so each runs without a bench.
@@ -336,19 +336,6 @@ def _clean_adhoc_passengers(passengers):
             }
         )
     return rows
-
-
-def _hr_notify_recipients():
-    """Enabled users to receive a worker's HR notification: HR Manager, falling
-    back to System Manager. Mirrors temporary_worker_engine._hr_recipients so the
-    Masar action lands in the same HR inbox the engine's automated alerts do."""
-    from frappe.utils.user import get_users_with_role
-
-    for role in ("HR Manager", "System Manager"):
-        users = get_users_with_role(role)
-        if users:
-            return users
-    return []
 
 
 def _building_in_charge(employee):

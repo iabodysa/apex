@@ -50,11 +50,6 @@ UNSCOPED_ROLES = {
 }
 
 PROJECT = "project"
-
-def _resolve_user(user=None):
-    """Return the effective user, defaulting to the session user."""
-    return permission_scope.resolve_user(user)
-
 def _allowed_projects(user):
     """Project names the given user has an explicit User Permission for (cached).
 
@@ -132,9 +127,6 @@ def _driver(field="driver", own=None):
     """Project hanging off a Salis Driver link."""
     return ("driver", {"field": field, "own": own, "rule": "driver_chain"})
 
-def _quote(field):
-    """Backtick-quote one column name. The only place this module writes a quote."""
-    return "`{0}`".format(field)
 
 SALIS_SCOPE = {
     "Vehicle Assignment": _column(),
@@ -220,20 +212,12 @@ def _own_clause(spec, user):
         return "`route_supervisor` = {0}".format(frappe.db.escape(user))
     return None
 
-def _render_column(spec, escaped):
-    """``project in (...)`` — the project stored on the row."""
-    return "{column} in ({values})".format(column=_quote(spec["field"]), values=escaped)
 
-def _render_dual(spec, escaped):
-    """Either endpoint in scope, as ONE fragment (Frappe AND-joins separate ones)."""
-    return "({first} in ({values}) or {second} in ({values}))".format(
-        first=_quote(spec["first"]), second=_quote(spec["second"]), values=escaped
-    )
 
 def _render_hop(spec, escaped):
     """The project one link away, as a subquery on the linked DocType."""
     return "{column} in (select `name` from `tab{doctype}` where `project` in ({values}))".format(
-        column=_quote(spec["field"]), doctype=spec["doctype"], values=escaped
+        column=permission_scope.quote_column(spec["field"]), doctype=spec["doctype"], values=escaped
     )
 
 def _route_plan_scope(escaped):
@@ -276,7 +260,7 @@ def _render_driver(spec, escaped):
     return (
         "{column} in ("
         "select `name` from `tabSalis Driver` where `project` in ({values})"
-        ")".format(column=_quote(spec["field"]), values=escaped)
+        ")".format(column=permission_scope.quote_column(spec["field"]), values=escaped)
     )
 
 def _render_manifest(spec, escaped):
@@ -290,8 +274,8 @@ def _render_manifest(spec, escaped):
     ).format(trips=trips, route_plans=route_plans)
 
 FRAGMENTS = {
-    "column": _render_column,
-    "dual": _render_dual,
+    "column": permission_scope.render_column,
+    "dual": permission_scope.render_dual,
     "hop": _render_hop,
     "trip": _render_trip,
     "trip_child": _render_trip_child,
@@ -301,17 +285,8 @@ FRAGMENTS = {
 }
 
 def _fragment(kind, spec, values):
-    """Render one scope strategy against the user's allowed projects.
-
-    ``values`` is non-empty — the caller has already answered the unscoped and
-    no-project cases, so every renderer emits a real restriction. An unrecognised kind
-    renders "1=0" rather than falling through to no restriction: an unknown strategy
-    must fail CLOSED.
-    """
-    render = FRAGMENTS.get(kind)
-    if not render:
-        return "1=0"
-    return render(spec, ", ".join(frappe.db.escape(value) for value in values))
+    """Render one scope strategy against the user's allowed projects."""
+    return permission_scope.render_fragment(kind, spec, values, FRAGMENTS)
 
 def project_scope_query(user=None, doctype=None):
     """WHERE fragment scoping ``doctype``'s list/report view to the user's projects.
@@ -331,7 +306,7 @@ def project_scope_query(user=None, doctype=None):
     use.
 
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return ""
 
@@ -489,7 +464,7 @@ def scoped_has_permission(doc, ptype, user=None):
     the module deliberately does NOT fail closed on an unresolvable project, and the
     named set is what bounds it.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -524,7 +499,7 @@ def _owner_or_project_has_permission(doc, user=None):
     exactly as the ``if_owner`` DocPerms and the matching query fragments require.
 
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -544,7 +519,7 @@ def _owner_or_project_has_permission(doc, user=None):
 
 def _dispatch_trip_has_permission(doc, user=None):
     """Allow the assigned driver; otherwise enforce the trip's project."""
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -578,7 +553,7 @@ def _dispatch_trip_has_permission(doc, user=None):
 
 def _route_assignment_has_permission(doc, user=None):
     """Allow the named supervisor; otherwise enforce the assignment's project."""
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -611,7 +586,7 @@ def _driver_chain_has_permission(doc, user=None, driver_field="driver", with_own
     the action.
 
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -637,7 +612,7 @@ def movement_cost_transfer_has_permission(doc, ptype, user=None):
     deliberate: there is no tenant to enforce, and the matching fragment's "1=0" hides
     such a row from the list rather than from the form.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return None
 
@@ -687,7 +662,7 @@ def payment_sod_has_permission(doc, ptype, user=None):
     if status not in FINANCE_EXCLUSIVE_STATES:
         return None
 
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if user in ("Administrator", "Guest"):
         return None
 
@@ -780,7 +755,7 @@ def project_scoped_has_permission(doc, ptype, user=None):
     capacity-reached DocType (Fuel Request, Dispatch Trip's ``boarding_state``) still
     answers through the plain ``permission_scope.portal_capacity_verdict``, unchanged.
     """
-    user = _resolve_user(user)
+    user = permission_scope.resolve_user(user)
     if permission_scope.is_portal_capacity(user):
         if getattr(doc, "doctype", None) == "Trip Start Log":
             return _trip_start_log_capacity_verdict(doc, ptype)

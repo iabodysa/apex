@@ -48,8 +48,10 @@ from frappe import _
 
 from apex.apex_core.utils.portal_identity import WORKER, as_capacity, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
+from apex.apex_core.utils.role_assignment import role_holders_escalating
 from apex.apex_core.utils.system_notify import notify_user_system
 from apex.salis.api import boarding_window
+from apex.salis.api.boarding import already_boarded
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
 from apex.salis.utils import days_until as _days_until
 from apex.salis.api.maps_links import _full_route_maps_url
@@ -77,7 +79,6 @@ from apex.salis.api.masar_worker import (
     _clean_adhoc_passengers,
     _custody_issued_by,
     _fmt_date,
-    _hr_notify_recipients,
     _iqama_of,
     _net_custody_items,
     _request_status_timeline,
@@ -988,7 +989,7 @@ def notify_hr_iqama_expiring(token=None):
         "{2} is expiring (expiry {3}, {4} day(s) left). Please action the renewal."
     ).format(worker_name, emp_no, iqama_no or _("on file"), _fmt_date(iqama_expiry), days_left)
 
-    recipients = _hr_notify_recipients()
+    recipients = role_holders_escalating("HR Manager", "System Manager")
     for user in recipients:
         notify_user_system(
             user,
@@ -1032,14 +1033,6 @@ def _get_or_create_trip_log(dispatch_trip, employee=None):
 
     ensure_trip_boarding_state(dispatch_trip)
     return log
-
-def _already_boarded(log, employee):
-    """True when this registered worker already has a boarding row on the log —
-    so a re-confirm is idempotent (no duplicate headcount)."""
-    return any(
-        (row.worker == employee and not row.is_unregistered)
-        for row in (log.boarding_events or [])
-    )
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=12, seconds=60 * 60)
@@ -1085,7 +1078,7 @@ def confirm_boarding(token=None, transport_request=None):
 
     log = _get_or_create_trip_log(dispatch_trip, employee)
 
-    if _already_boarded(log, employee):
+    if already_boarded(log, employee):
         return {
             "created": False,
             "dispatch_trip": dispatch_trip,

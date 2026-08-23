@@ -21,33 +21,6 @@ import frappe
 from apex.apex_core.utils.portal_bootstrap import guest_redirect, publish_portal_context
 from apex.salis.api.fleet_employee import get_context as get_fleet_context
 
-FLEET_ROLES = {
-    "System Manager",
-    "Fleet Manager",
-    "Fleet Project Manager",
-    "Fleet Supervisor",
-}
-
-
-def has_apps_screen_access() -> bool:
-    """retained-unused: /fleet is ungated by design, so no tile points here.
-
-    The "apex-fleet" tile in hooks.py add_to_apps_screen carries NO has_permission
-    key, so Frappe never calls this. That is deliberate, not a missing wire. The
-    /apps tile gate exists to MIRROR a page's own gate — README's contract is that
-    a tile "can never be shown to a user the page would turn away" — and
-    get_context() below turns nobody away: every logged-in user gets can_view = 1,
-    with per-user scoping enforced server-side by the fleet_employee endpoints.
-    Gating the tile on FLEET_ROLES would invert that contract, hiding "My Fleet"
-    from the ordinary employees the page exists to serve. The sibling open worker
-    pages /driver and /masar match this shape: no helper, no has_permission.
-
-    Kept rather than deleted so the fleet role-set stays documented beside the page
-    and the gate is one hooks line away should /fleet ever become role-restricted.
-    Contrast www/fleet_os.py, whose identical helper IS wired to "apex-fleet-os".
-    """
-    return bool(FLEET_ROLES & set(frappe.get_roles()))
-
 
 def get_context(context):
     """Redirects guests to login and bootstraps the fleet self-service page for any logged-in user."""
