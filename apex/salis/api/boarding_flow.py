@@ -68,7 +68,9 @@ def _publish(event, dispatch_trip, payload, driver=None, employee=None, employee
     token, and frappe's socket server gates a doctype room on read permission, so a
     publish routed only there is emitted and never delivered. The portal subjects are
     therefore rung on their own rooms as well — see
-    ``portal_identity.portal_room``.
+    ``portal_identity.portal_room``. ``frappe.publish_realtime``
+    (frappe/realtime.py:23) does the emitting; the one thing it cannot do is decide
+    that one event needs two audiences with different admission rules.
 
     after_commit so subscribers read committed state; best-effort so a publish
     failure can never abort the calling write."""
@@ -240,7 +242,13 @@ def mark_boarded(dispatch_trip, employee, source="Scan", audience=DRIVER):
     boarding paths when a worker's boarding event is recorded, so the flow state
     tracks the manifest. ``source`` records HOW (Scan for a QR scan, Manual for a
     driver entry). Best-effort: a missing row (e.g. an unregistered rider) is
-    simply skipped."""
+    simply skipped.
+
+    The trip is loaded ``for_update`` so two scans of the same worker cannot both
+    read Pending and both append. The misboard cache entry is dropped with
+    ``frappe.cache.delete_value`` (frappe/utils/redis_wrapper.py:133) once the worker
+    boards: the one thing a TTL cannot do is expire early, and a stale warning would
+    keep flagging a worker who is already aboard."""
     if not (dispatch_trip and employee):
         return
     trip = frappe.get_doc("Dispatch Trip", dispatch_trip, for_update=True)

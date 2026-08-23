@@ -153,6 +153,14 @@ def _charge_request_window(
 ) -> None:
     """Charge this request against one named window.
 
+    ``frappe.cache.get`` backs the counter through :func:`rate_window.charge_window`.
+    The one thing ``frappe.rate_limiter.rate_limit`` cannot do is charge SEVERAL
+    windows for one call — it decorates an endpoint with a single bucket — and a
+    boarding scan is metered per token, per address and per connection at once.
+
+    A call with no request (a scheduler or a console) charges nothing: there is no
+    caller to hold responsible, and a background job would otherwise exhaust a
+    worker's window on their behalf.
     """
     if not getattr(frappe.local, "request", None):
         return

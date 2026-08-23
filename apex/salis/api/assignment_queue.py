@@ -78,6 +78,11 @@ def open_queue_rows() -> list:
     holders collapse into the row's assignee list). The row ``name`` is the oldest
     ToDo's name — an id the action endpoints resolve back to the reference
     document. Caller applies its own scope filtering.
+
+    ``frappe.as_json`` (frappe/__init__.py:2071) serialises the payload the screen
+    reads, so a value's shape on the wire matches what every other Frappe response
+    sends. The queue itself is native ToDo rows — nothing here maintains a second
+    inbox, which is the one thing a hand-built alert table could not avoid becoming.
     """
     todos = frappe.get_all(
         "ToDo",
