@@ -1606,7 +1606,6 @@ Ends On,ينتهي في
 Ends On cannot be earlier than Starts On.,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
 Engine,المحرّك
 English,الإنجليزية
-Enter a reply.,اكتب الرد.
 Enter a valid mobile number.,أدخل رقم جوال صحيحاً.
 Enter any deduction for room or asset damage.,أدخل أي خصم مقابل أضرار الغرفة أو الأصول.
 "Enter how many litres are requested, then save.",أدخل عدد اللترات المطلوبة، ثم احفظ.
@@ -1972,6 +1971,7 @@ Handed over from,من مستودع
 Handed over from {0} to {1} via {2} (odometer {3}).,تم التسليم من {0} إلى {1} عبر {2} (عداد المسافة {3}).
 Handed over to,إلى مستودع
 "Handling priority assigned to the finding for scheduling remediation, independent of severity, from low up to critical.",أولوية متابعة الملاحظة عند جدولة المعالجة، وهي مستقلة عن درجة الخطورة وتتدرج من منخفضة إلى حرجة.
+"Handling stage of the incident. The Vehicle Incident Workflow, not this field's read_only flag, is what stops a hand edit — see the Close action.",مرحلة معالجة الواقعة. مسار عمل واقعة المركبة، لا خاصية القراءة فقط في هذا الحقل، هو ما يمنع التعديل اليدوي — راجع إجراء الإغلاق.
 "Handling stage of the resident request from intake to closure, tracking triage, assignment, active work, an evidence hold, and the final resolved, rejected, or closed outcome.",مرحلة معالجة طلب الساكن من الاستلام حتى الإغلاق، وتشمل الفرز والإسناد والعمل الجاري والتعليق بانتظار الأدلة، ثم المعالجة أو الرفض أو الإغلاق.
 "Handling stage of the transport request from intake through validation, approval, and scheduling to fulfilment, or a rejected or cancelled outcome.",مرحلة معالجة طلب النقل من الاستلام مرورًا بالتحقق والاعتماد والجدولة حتى التنفيذ، أو نتيجة مرفوضة أو ملغاة.
 Handover,تسليم
@@ -2896,7 +2896,6 @@ Only a submitted transfer can be received.,لا يمكن استلام النقل
 Only an authorised user can return a stopped vehicle to service.,لا يعيد المركبة الموقوفة إلى الخدمة إلا مستخدم مخوّل.
 Only an authorised user can stop an active vehicle.,لا يوقف المركبة النشطة إلا مستخدم مخوّل.
 Only an in-progress submitted Maintenance Request can be resolved by a Work Order.,لا يمكن لأمر العمل معالجة إلا طلب صيانة معتمد قيد التنفيذ.
-Only an incident under review can be closed.,لا يمكن إغلاق البلاغ إلا إذا كان قيد المراجعة.
 Only an intercompany movement needs an accounting acknowledgement.,الاعتماد المحاسبي مطلوب فقط للحركات بين الشركات.
 Only an open submitted Maintenance Request can be started by a Work Order.,لا يمكن لأمر العمل بدء إلا طلب صيانة معتمد مفتوح.
 Only submitted Building Licenses can be revoked.,لا يمكن سحب إلا رخصة مبنى معتمدة.
@@ -3997,7 +3996,6 @@ Schedule & Status,الجدول والحالة
 Schedule and Approval,الجدولة والاعتماد
 Schedule native Additional Salary installments against paid Employee Advances. Disabled until payroll and accounts are configured.,جدولة أقساط «راتب إضافي» في HRMS مقابل سلف الموظفين المدفوعة. تظل معطّلة حتى إعداد الرواتب والحسابات.
 Scheduled,مجدول
-Scheduled Awaiting Dispatch,مجدولة بانتظار التسيير
 Scheduled Date,التاريخ المجدول
 Scheduled Job Log,سجل المهام المجدولة
 Scheduled Task,مهمة مجدولة
@@ -4471,7 +4469,6 @@ System Info,معلومات النظام
 System Manager,مدير النظام
 System logs: read-only diagnostics.,سجلات النظام: تشخيصات للقراءة فقط.
 System-generated document from Apex,مستند صادر آليًا من نظام أبيكس
-System-managed handling stage of the vehicle incident record.,حالة معالجة البلاغ ويحدّثها النظام تلقائياً.
 System-managed rollup of remediation progress and deadline.,حالة عامة يحسبها النظام من تقدم المعالجة وموعدها النهائي.
 "System-managed validity state derived from expiry, unless the license is revoked.",حالة الرخصة يحسبها النظام من تاريخ الانتهاء ما لم تكن مسحوبة.
 "System-written, read-only periodic snapshot of vehicle utilisation over a trailing window. Never hand-entered; derived from completed Dispatch Trips.",لقطة دورية للقراءة فقط يكتبها النظام لاستخدام المركبات عبر نافذة زمنية متحركة. لا تُدخل يدوياً؛ وتُشتق من رحلات التسيير المكتملة.
@@ -4512,7 +4509,6 @@ Tasks Rated Average,مهام بتقدير متوسط
 Tasks Rated Good or Better,مهام بتقدير جيد فأعلى
 Tasks Rated Poor,مهام بتقدير رديء
 Tasks with Photographic Evidence on File,مهام لها إثبات بالصور
-Tax ID,الرقم الضريبي
 Technician Notes,ملاحظات الفني
 Telecom,اتصالات
 Telecom Billing Document,مستند فوترة اتصالات
@@ -4998,7 +4994,6 @@ Urdu,الأردية
 "Urgency of the maintenance request, setting target response time and escalation from routine low priority to critical faults needing immediate attention.",إلحاح طلب الصيانة، يحدّد زمن الاستجابة المستهدف والتصعيد من الأولوية المنخفضة الاعتيادية إلى الأعطال الحرجة التي تحتاج اهتمامًا فوريًا.
 Use filters to focus on work assigned to you and its current status.,استخدم المرشحات لعرض العمل المسند إليك وحالته الحالية.
 Use the Approve workflow action to approve this assignment.,اعتمد الإسناد من إجراء «اعتماد».
-Use the incident actions to change Status.,استخدم إجراءات البلاغ لتغيير الحالة.
 Use the remediation action controls to update submitted actions.,استخدم إجراءات المعالجة لتحديث البنود بعد اعتماد الخطة.
 Use this table to list every article handed over.,استخدم هذا الجدول لسرد كل صنف يتم تسليمه.
 "Use this table to record every article returned, then save.",استخدم هذا الجدول لتسجيل كل صنف مُرجع، ثم احفظ.
@@ -5129,7 +5124,6 @@ Vehicle {0}: {1} compliance expired on {2}.,المركبة {0}: امتثال {1}
 Vehicle {0}: {1} compliance expires on {2}.,المركبة {0}: امتثال {1} ينتهي في {2}.
 Vehicles,المركبات
 Vehicles Charged in This Period,المركبات المحتسبة في هذه الفترة
-Vehicles Stopped,المركبات الموقوفة
 Vehicles by Status,المركبات حسب الحالة
 Vehicles on Rent,المركبات على الإيجار
 Verdict,النتيجة
