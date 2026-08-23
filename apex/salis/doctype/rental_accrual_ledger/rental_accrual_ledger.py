@@ -12,6 +12,8 @@ from __future__ import annotations
 import frappe
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 UNIQUE_KEY = ["vehicle", "accrual_date", "reversal_of"]
 UNIQUE_KEY_NAME = "unique_ral_vehicle_date"
 
@@ -82,8 +84,6 @@ def on_doctype_update():
     second reversal of the same original would. Created/kept in sync on migrate
     via Frappe's on_doctype_update hook. Guarded so pre-existing duplicate data
     logs rather than aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     _drop_stale_unique_key()
     add_unique_guarded(
         "Rental Accrual Ledger",

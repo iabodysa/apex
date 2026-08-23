@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.salis.utils import worker_was_on_trip
 
 
@@ -45,8 +46,6 @@ class TransportTripRating(Document):
 def on_doctype_update():
     """One rating per worker per trip, enforced by the database rather than by a
     read-then-insert that two taps can both pass."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Transport Trip Rating",
         ["employee", "dispatch_trip"],

@@ -13,6 +13,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 
 def on_doctype_update():
     """UNIQUE(dispatch_trip) — one completion memo per trip, enforced by the database.
@@ -27,8 +29,6 @@ def on_doctype_update():
     Created and kept in sync on migrate through Frappe's on_doctype_update hook. Guarded
     rather than declared as a field ``unique`` flag: pre-existing duplicate rows would
     abort a migrate, and this logs the blocking groups instead."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Trip Fulfilment Ledger",
         ["dispatch_trip"],

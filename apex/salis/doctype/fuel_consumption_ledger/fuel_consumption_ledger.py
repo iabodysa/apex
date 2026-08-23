@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 
 class FuelConsumptionLedger(Document):
     pass
@@ -23,8 +25,6 @@ def on_doctype_update():
     ``(source_type, source_name)`` idempotency key. Created/kept in sync on
     migrate via Frappe's on_doctype_update hook. Guarded so pre-existing duplicate
     data logs rather than aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Fuel Consumption Ledger",
         ["source_type", "source_name"],

@@ -8,6 +8,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+from apex.apex_core.utils.company import resolve_company
 from apex.salis.utils import normalize_plate
 
 DEFAULT_ALERT_LEAD_DAYS = 30
@@ -78,8 +80,6 @@ class SalisVehicle(Document):
         """Default the owning company from Salis Settings (asset ownership /
         reporting context). Reference field only - no GL is posted."""
         if not self.company:
-            from apex.apex_core.utils.company import resolve_company
-
             self.company = resolve_company("Salis")
 
     def _set_plate_normalized(self):
@@ -150,6 +150,4 @@ class SalisVehicle(Document):
     @staticmethod
     def _get_alert_lead_days():
         """Returns the configured number of lead days before an expiry counts as Expiring Soon."""
-        from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
         return get_salis_int("alert_lead_days", DEFAULT_ALERT_LEAD_DAYS)

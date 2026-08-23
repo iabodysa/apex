@@ -14,6 +14,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 
 class TripBoardingLedger(Document):
     def validate(self):
@@ -55,8 +57,6 @@ def on_doctype_update():
 
     Created/kept in sync on migrate via Frappe's on_doctype_update hook. Guarded so
     pre-existing duplicate data logs rather than aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Trip Boarding Ledger",
         ["dispatch_trip", "employee", "reversal_of"],

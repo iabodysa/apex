@@ -27,6 +27,9 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import add_days, get_first_day, get_last_day, getdate, today
+
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 
 VALID_STATUSES = (
     "New",
@@ -126,8 +129,6 @@ class TransportRequest(Document):
         if self.request_type != "Administrative Trip / Document Signing":
             self.trips_this_month = 0
             return
-        from frappe.utils import getdate, today, get_first_day, get_last_day, add_days
-
         ref = getdate(self.pickup_datetime or today())
         start = get_first_day(ref)
         end = add_days(get_last_day(ref), 1)
@@ -155,8 +156,6 @@ class TransportRequest(Document):
         remains). Derived here — never trusted from the client — so the gate
         cannot be under-stated. Mirrors the previous before_submit tier logic.
         """
-        from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 

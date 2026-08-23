@@ -27,6 +27,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 from apex.salis.utils import set_financial_defaults
 
 _OPERATIONS_ROLES = {"Fleet Manager", "System Manager"}
@@ -49,8 +50,6 @@ class MovementCostRecovery(Document):
         """Server-side DoA derivation: set ``needs_operations`` when the amount
 		reaches the Cost Recovery Operations Threshold (read via the zero-trap
 		helper). Derived here — never trusted from the client."""
-        from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
-
         threshold = get_salis_float("cost_recovery_ops_threshold", 1000.0)
         self.needs_operations = 1 if flt(self.amount) >= threshold else 0
 

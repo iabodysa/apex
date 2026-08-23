@@ -27,6 +27,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.company import resolve_company
+
 
 class MovementCostTransfer(Document):
     def validate(self):
@@ -41,8 +43,6 @@ class MovementCostTransfer(Document):
         """Default the owning company from Salis Settings for reporting and
 		financial context. Reference field only - this memo posts no GL."""
         if not self.company:
-            from apex.apex_core.utils.company import resolve_company
-
             self.company = resolve_company("Salis")
 
 

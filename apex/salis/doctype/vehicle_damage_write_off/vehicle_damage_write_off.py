@@ -23,6 +23,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, fmt_money, now_datetime
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
 from apex.apex_core.utils.company import display_currency
 
 from apex.salis.utils import add_timeline_note
@@ -46,8 +47,6 @@ class VehicleDamageWriteOff(Document):
         cost reaches the Write-Off Operations Threshold (read via the zero-trap
         helper). Derived here — never trusted from the client — so the gate cannot
         be under-stated."""
-        from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_float
-
         threshold = get_salis_float("writeoff_ops_threshold", 2000.0)
         self.needs_operations = 1 if flt(self.estimated_cost) >= threshold else 0
 

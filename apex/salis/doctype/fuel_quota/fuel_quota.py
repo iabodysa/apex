@@ -12,6 +12,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.salis.utils import lock_vehicle
 
 
@@ -70,8 +71,6 @@ def on_doctype_update():
 	Task Instance backstop).
 
 	Guarded so pre-existing duplicate data logs rather than aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Fuel Quota",
         ["vehicle", "period_month", "docstatus"],
