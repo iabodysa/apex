@@ -133,9 +133,34 @@ def _snapshot_agreed_rate(doc, building):
     if not doc.agreed_monthly_rate:
         doc.agreed_monthly_rate = building.monthly_cost_per_capacity or 0
 
+def _derive_place_from_bed(doc) -> None:
+    """Fill room and building from the bed when a caller supplied only the bed.
+
+    ``fetch_from`` is declared as a CHAIN on this DocType — room fetches from
+    ``bed.room`` and building from ``room.building`` — and a chain only resolves in
+    the desk, where the client fetches one hop, writes the field, and the next hop
+    fires off that write. On the server ``BaseDocument`` resolves each ``fetch_from``
+    once against the values present when validation starts, so the second hop reads a
+    room that is still empty and building stays blank.
+
+    Every desk save therefore worked while every programmatic one — an API call, an
+    import, a scheduled job, the demo builder — produced a row with no building. The
+    controller below returns early on a blank building, so the assignment saved having
+    silently skipped its cost centre, its capacity check and its duplicate-occupancy
+    check; only the field being ``reqd`` turned that into a refusal instead of a bad row.
+
+    Anything the caller set explicitly is left alone.
+    """
+    if doc.bed and not doc.room:
+        doc.room = frappe.db.get_value("Bed", doc.bed, "room")
+    if doc.room and not doc.building:
+        doc.building = frappe.db.get_value("Room", doc.room, "building")
+
+
 def validate(doc, method=None):
     """Derives the cost center and rate, and blocks duplicate occupancy, mismatches, and over-capacity."""
     sync_party_employee(doc, require_party=True)
+    _derive_place_from_bed(doc)
 
     if not doc.building or not frappe.db.exists("Building", doc.building):
         return
