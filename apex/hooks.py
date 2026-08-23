@@ -525,6 +525,16 @@ fixtures = [
         "filters": [["name", "in", [f"CUST-ART-{n:04d}" for n in range(1, 11)]]],
     },
     {
+        "dt": "Module Profile",
+        "filters": [
+            [
+                "name",
+                "in",
+                ["Apex Operations Desk", "Apex Procurement Desk", "Apex Finance Desk"],
+            ]
+        ],
+    },
+    {
         "dt": "Operational Depreciation Policy",
         "filters": [
             [
@@ -552,7 +562,6 @@ after_install = [
     "apex.apex_core.setup.employee_advance_recovery.seed_recovery_component",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
-    "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
 ]
 
 after_sync = []
@@ -568,7 +577,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_auto_email_reports_seed.seed_salis_auto_email_reports",
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
-    "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     "apex.setup.create_roles",
     "apex.setup.create_role_profiles",
     "apex.apex_core.doctype.salis_settings.salis_settings.apply_approval_switch",
