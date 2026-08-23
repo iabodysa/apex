@@ -43,6 +43,7 @@
   "habitat_settings_sec_safety",
   "safety_predue_days_before",
   "safety_overdue_grace_days",
+  "safety_zero_rounds_window_days",
   "habitat_settings_safety_col",
   "require_weekly_all_building_coverage",
   "habitat_settings_sec_custody_handover",
@@ -304,6 +305,12 @@
    "label": "Safety Overdue Grace Days"
   },
   {
+   "default": "7",
+   "fieldname": "safety_zero_rounds_window_days",
+   "fieldtype": "Int",
+   "label": "Zero Rounds Window (Days)"
+  },
+  {
    "fieldname": "habitat_settings_safety_col",
    "fieldtype": "Column Break"
   },
@@ -408,7 +415,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-22 23:20:00.000000",
+ "modified": "2026-08-23 21:40:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

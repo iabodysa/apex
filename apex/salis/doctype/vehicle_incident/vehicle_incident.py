@@ -92,11 +92,25 @@ class VehicleIncident(Document):
         Labor Law requires before a wage may be touched; the incident cannot be
         approved (submitted) without it. A draft may still be saved unsigned so the
         signature can be collected after the case is opened.
+
+        The recovery itself lands on a ``lending`` Loan, and apex declares only frappe,
+        erpnext and hrms, so a site may legitimately have no ``lending``. On such a
+        site ``raise_recovery_loan`` returns ``None`` and the incident would save with
+        the flag ticked and no recovery behind it; the flag is refused here instead,
+        naming the missing app. Clearing the flag saves the incident normally - the
+        event of record never depends on ``lending``.
         """
         if not self.recover_from_driver:
             for field in ("worker_signature", "signed_on"):
                 self.set(field, None)
             return
+
+        if "lending" not in frappe.get_installed_apps():
+            frappe.throw(
+                _(
+                    "Recovering this cost from the driver needs the Lending app, which is not installed on this site. Install it first, or clear Recover From Driver."
+                )
+            )
 
         if self.worker_signature and not self.signed_on:
             self.signed_on = today()

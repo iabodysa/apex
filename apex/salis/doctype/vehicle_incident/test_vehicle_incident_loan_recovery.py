@@ -21,7 +21,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-from apex.tests._helpers import as_user
+from apex.tests._helpers import as_user, lending_installed
 
 test_dependencies = ["Salis Vehicle"]
 test_ignore = ["Loan"]
@@ -30,6 +30,12 @@ _MODULE = "apex.salis.doctype.vehicle_incident.vehicle_incident"
 
 
 class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
+    def setUp(self):
+        """This module assumes a site WITH ``lending``: it proves the incident's own
+        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
+        is absent. The one case that asserts that refusal patches the site shape back."""
+        self.enterContext(lending_installed())
+
     def _incident(self, **fields):
         doc = frappe.new_doc("Vehicle Incident")
         doc.update(
@@ -78,6 +84,21 @@ class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
             frappe.db.get_value("Vehicle Incident", doc.name, "recovery_loan"), "LOAN-NEW"
         )
 
+    def test_flagging_recovery_is_refused_when_the_lending_app_is_absent(self):
+        """A site without ``lending`` has no Loan for the recovery to land on, so the
+        flag is refused at save rather than saved with nothing behind it."""
+        doc = self._incident(recover_from_driver=1, recovery_amount=400, installment_amount=100)
+        with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
+            with self.assertRaises(frappe.ValidationError):
+                doc._guard_cost_recovery()
+
+    def test_an_unflagged_incident_saves_on_a_site_without_the_lending_app(self):
+        """The event of record never depends on ``lending``."""
+        doc = self._incident(recover_from_driver=0)
+        with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
+            doc._guard_cost_recovery()
+        self.assertFalse(doc.recover_from_driver)
+
     def test_raising_never_raises_a_legacy_employee_advance(self):
         """The regression this guards: a stray import of the retired call would
         raise BOTH records for one incident."""
@@ -89,6 +110,12 @@ class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
 
 
 class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
+    def setUp(self):
+        """This module assumes a site WITH ``lending``: it proves the incident's own
+        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
+        is absent. The one case that asserts that refusal patches the site shape back."""
+        self.enterContext(lending_installed())
+
     def _incident(self, **fields):
         doc = frappe.new_doc("Vehicle Incident")
         doc.update(
@@ -140,6 +167,12 @@ class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
 
 
 class TestClearingTheLinkByHandCannotDoubleRaise(FrappeTestCase):
+    def setUp(self):
+        """This module assumes a site WITH ``lending``: it proves the incident's own
+        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
+        is absent. The one case that asserts that refusal patches the site shape back."""
+        self.enterContext(lending_installed())
+
     """Answers a question raised on review: the ``recovery_loan`` link is
     ``no_copy``/read-only in the UI, but that is hygiene, not the guarantee. The
     real guarantee is Frappe's own docstatus-transition rule

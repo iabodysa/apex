@@ -19,6 +19,8 @@
   "alert_lead_days",
   "license_alert_lead_days",
   "license_expiring_warn_days",
+  "worker_document_alert_lead_days",
+  "iqama_notify_hr_lead_days",
   "salis_settings_alerts_col1",
   "idle_vehicle_days",
   "workshop_overstay_days",
@@ -153,6 +155,18 @@
    "fieldname": "license_expiring_warn_days",
    "fieldtype": "Int",
    "label": "License Expiring Warn Days"
+  },
+  {
+   "default": "60",
+   "fieldname": "worker_document_alert_lead_days",
+   "fieldtype": "Int",
+   "label": "Worker Document Alert Lead Days"
+  },
+  {
+   "default": "30",
+   "fieldname": "iqama_notify_hr_lead_days",
+   "fieldtype": "Int",
+   "label": "Iqama HR Notice Lead Days"
   },
   {
    "fieldname": "salis_settings_alerts_col1",
@@ -439,7 +453,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-23 11:30:00.000000",
+ "modified": "2026-08-23 21:40:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

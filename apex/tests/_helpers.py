@@ -1,6 +1,8 @@
 # Copyright (c) 2026, AFMCO and contributors
 """Shared test helpers: session switching, workflow-safe submit/cancel, fixtures."""
 
+from unittest.mock import patch
+
 import frappe
 
 
@@ -27,6 +29,29 @@ class as_user:
 
 
 
+
+
+class lending_installed:
+    """Run a block as if the ``lending`` app were installed on this site.
+
+    Vehicle Incident refuses ``recover_from_driver`` where ``lending`` is absent,
+    because the recovery has no Loan to land on. A test that exercises the
+    incident's OWN bookkeeping around that flag - the link it stores, the consent
+    stamp - must therefore state the site shape it assumes instead of inheriting
+    the bench's; apex declares only frappe, erpnext and hrms, so either shape is
+    legitimate and CI runs on one of them.
+    """
+
+    def __enter__(self):
+        installed = frappe.get_installed_apps()
+        apps = list(installed) + ["lending"] if "lending" not in installed else list(installed)
+        self._patch = patch("frappe.get_installed_apps", return_value=apps)
+        self._patch.start()
+        return self
+
+    def __exit__(self, *exc):
+        self._patch.stop()
+        return False
 
 
 def approve_rental_settlement(rs, manager):

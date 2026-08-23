@@ -45,6 +45,7 @@ write only when the resolved employee is on the trip's own manifest — the same
 
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 from apex.apex_core.utils.portal_identity import WORKER, as_capacity, portal_room
 from apex.apex_core.utils.rate_limit_identity import rate_limit
@@ -840,9 +841,19 @@ def create_worker_request(
         _attach_worker_photo(doc, photo, photo_filename)
     return {"name": doc.name, "status": doc.status}
 
-_DOCUMENT_ALERT_LEAD_DAYS = 60
 
 _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
+
+
+def _alert_lead(fieldname: str, fallback: int) -> int:
+    """Days of notice for one Masar alert window, read from Salis Settings.
+
+    The fallback applies to an unset or zero field, which is what a Single
+    returns before an operator has ever opened it; a site that means "no notice"
+    turns the alert off at its own switch, never by zeroing the window.
+    """
+    return cint(frappe.db.get_single_value("Salis Settings", fieldname)) or fallback
+
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
@@ -877,7 +888,7 @@ def get_worker_home(token=None):
     profile_alerts = [
         d
         for d in documents
-        if d.get("days_left") is not None and d["days_left"] <= _DOCUMENT_ALERT_LEAD_DAYS
+        if d.get("days_left") is not None and d["days_left"] <= _alert_lead("worker_document_alert_lead_days", 60)
     ]
     iqama_days_left = next(
         (d.get("days_left") for d in documents if d.get("type") == "iqama"),
@@ -946,7 +957,6 @@ def get_worker_contacts(token=None):
         or None,
     }
 
-_IQAMA_NOTIFY_HR_LEAD_DAYS = 30
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=6, seconds=60 * 60)
@@ -958,7 +968,8 @@ def notify_hr_iqama_expiring(token=None):
     that Employee's Iqama number + expiry SERVER-SIDE, and recomputes
     ``days_left``. The HR notification is raised ONLY when the Iqama is genuinely
     inside the action window (``days_left`` is known and <=
-    ``_IQAMA_NOTIFY_HR_LEAD_DAYS``); a worker whose Iqama is comfortably valid, or
+    ``Salis Settings.iqama_notify_hr_lead_days``); a worker whose Iqama is comfortably
+    valid, or
     has no expiry on file, is a silent no-op (``{"notified": False}``) — the
     client cannot force an alert by faking the threshold.
 
@@ -973,7 +984,7 @@ def notify_hr_iqama_expiring(token=None):
     iqama_no, iqama_expiry = _iqama_of(emp)
     days_left = _days_until(iqama_expiry)
 
-    if days_left is None or days_left > _IQAMA_NOTIFY_HR_LEAD_DAYS:
+    if days_left is None or days_left > _alert_lead("iqama_notify_hr_lead_days", 30):
         return {"notified": False, "days_left": days_left, "recipients": 0}
 
     worker_name = emp.get("employee_name") or employee

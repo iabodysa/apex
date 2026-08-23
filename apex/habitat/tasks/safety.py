@@ -18,16 +18,27 @@ from apex.habitat.tasks.common import (
 
 _ROW_SAVEPOINT = "safety_row"
 
-ZERO_ROUNDS_WINDOW_DAYS = 7
-
 SAFETY_ROLE = "Safety Officer"
+
+
+def _zero_rounds_window_days() -> int:
+    """Trailing days a building may go without a submitted Safety Round.
+
+    Read from ``Habitat Settings.safety_zero_rounds_window_days``. The fallback
+    applies to an unset or zero field, which is what a Single returns before an
+    operator has ever opened it; a site that wants no zero-rounds sweep turns the
+    scheduled task off, never by zeroing the window.
+    """
+    from frappe.utils import cint
+
+    return cint(frappe.db.get_single_value("Habitat Settings", "safety_zero_rounds_window_days")) or 7
 
 
 def _no_recent_round(building):
     """No submitted Safety Round of ANY cadence in the trailing window."""
     from frappe.utils import add_days, getdate, today
 
-    since = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
+    since = str(getdate(add_days(today(), -_zero_rounds_window_days())))
     return not frappe.db.exists(
         "Safety Round", {"docstatus": 1, "building": building, "round_date": [">=", since]}
     )
@@ -99,7 +110,8 @@ def daily_safety_task_compliance_scan() -> None:
 
     Second pass: every ACTIVE Building (``status == "Active"``) with ZERO
     submitted Safety Rounds of ANY cadence dated within the trailing
-    ``ZERO_ROUNDS_WINDOW_DAYS`` is assigned to the Safety Officer, posts the reminder to
+    ``Habitat Settings.safety_zero_rounds_window_days`` window is assigned to the Safety
+    Officer, posts the reminder to
     the building timeline, and alerts the building's own Responsible Facility
     Supervisor. This is broader than
     ``weekly_safety_coverage_gate`` (which only
@@ -382,7 +394,8 @@ def _flag_buildings_without_rounds(logger):
     from frappe.utils import add_days, getdate, today
 
     batch_size = 500
-    window_start = str(getdate(add_days(today(), -ZERO_ROUNDS_WINDOW_DAYS)))
+    window_days = _zero_rounds_window_days()
+    window_start = str(getdate(add_days(today(), -window_days)))
     no_rounds = 0
 
     start = 0
@@ -414,7 +427,7 @@ def _flag_buildings_without_rounds(logger):
                 token = f"zero-rounds::{b.name}"
                 msg = (
                     f"daily_safety_task_compliance_scan [{token}]: building {label} has no "
-                    f"submitted Safety Round in the last {ZERO_ROUNDS_WINDOW_DAYS} days."
+                    f"submitted Safety Round in the last {window_days} days."
                 )
                 newly_assigned = assign_role(
                     "Building", b.name, SAFETY_ROLE, description=msg

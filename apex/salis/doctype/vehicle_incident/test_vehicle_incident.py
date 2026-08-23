@@ -25,6 +25,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
+from apex.tests._helpers import lending_installed
+
 test_dependencies = ["Salis Vehicle"]
 test_ignore = ["Loan"]
 
@@ -111,7 +113,8 @@ class TestVehicleIncident(FrappeTestCase):
             recovery_amount=400,
             worker_signature="sig",
         )
-        doc._guard_cost_recovery()
+        with lending_installed():
+            doc._guard_cost_recovery()
 
     def test_installment_amount_cannot_exceed_the_recovery_amount(self):
         doc = self._incident(
@@ -135,5 +138,6 @@ class TestVehicleIncident(FrappeTestCase):
             worker_signature="sig",
             signed_on=None,
         )
-        doc._guard_cost_recovery()
+        with lending_installed():
+            doc._guard_cost_recovery()
         self.assertEqual(doc.signed_on, today())

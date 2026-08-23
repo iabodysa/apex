@@ -5557,3 +5557,7 @@ Scheduled task {0} ({1}) is overdue (was due {2}).,المهمة المجدولة
 Overdue {0} safety task: {1},مهمة سلامة متأخرة بأولوية {0}: {1}
 Telecom Contract {0} with {1} expires on {2}.,عقد الاتصالات {0} مع {1} ينتهي في {2}.
 SIM {0} was suspended on {1}.,شريحة {0} عُلّقت بتاريخ {1}.
+"Recovering this cost from the driver needs the Lending app, which is not installed on this site. Install it first, or clear Recover From Driver.",خصم هذه التكلفة من السائق يحتاج تطبيق الإقراض، وهو غير مثبّت على هذا الموقع. ثبّته أولاً، أو ألغِ خيار الخصم من السائق.
+Worker Document Alert Lead Days,مهلة تنبيه مستندات العامل (أيام)
+Iqama HR Notice Lead Days,مهلة إشعار الموارد البشرية للإقامة (أيام)
+Zero Rounds Window (Days),نافذة انعدام الجولات (أيام)
