@@ -163,8 +163,7 @@ class TestPushSubscriptionListIsShutToACapacity(FrappeTestCase):
     """
 
     def setUp(self):
-        default_company()
-        self.employee = make_employee()
+        self.employee = make_employee(company=default_company()).name
         self.rows = []
         for endpoint in ("https://fcm.googleapis.com/fcm/send/apex-a", "https://fcm.googleapis.com/fcm/send/apex-b"):
             doc = frappe.get_doc(
