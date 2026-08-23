@@ -261,7 +261,13 @@ def raise_recovery_advance(
 
 
 def _salary_preview(employee: str, payroll_date: str):
-    """Return an unsaved native Salary Slip preview and its active assignment."""
+    """Return an unsaved native Salary Slip preview and its active assignment.
+
+    ``make_salary_slip`` raising is an unexpected native-call failure, not a
+    business "nothing to recover" outcome, so it goes to ``frappe.log_error``
+    (a persisted Error Log entry) rather than a plain logger call that never
+    reaches production (frappe/utils/logger.py:12 floors it above WARNING there).
+    """
     assignment = frappe.db.get_value(
         "Salary Structure Assignment",
         {
@@ -284,9 +290,9 @@ def _salary_preview(employee: str, payroll_date: str):
             for_preview=0,
         )
     except Exception:
-        frappe.logger().warning(
-            "employee_recovery: native Salary Slip preview failed for "
-            f"employee {employee} on {payroll_date}. Recovery deferred."
+        frappe.log_error(
+            title=f"employee_recovery: Salary Slip preview failed for {employee}"[:140],
+            message=frappe.get_traceback(),
         )
         return None, assignment
     return preview, assignment
@@ -458,10 +464,6 @@ def compute_recovery_installment(
         return 0.0
     period = _salary_period(preview)
     if not period:
-        frappe.logger().warning(
-            "employee_recovery: native Salary Slip preview has no valid pay period for "
-            f"employee {advance_doc.employee} on {payroll_date}. Recovery deferred."
-        )
         return 0.0
 
     cap_percent = min(
@@ -569,7 +571,15 @@ def _refuse_while_recovery_is_disabled():
 
 
 def _recovery_component() -> str | None:
-    """Return the configured native deduction component while recovery is enabled."""
+    """Return the configured native deduction component while recovery is enabled.
+
+    A missing or misconfigured component silently no-ops every scheduled run
+    (``monthly_employee_recovery_run`` calls this once per open advance) with no
+    document of its own to carry the outcome, so it is reported through
+    ``frappe.log_error`` — an Error Log entry any System Manager can read in Desk
+    regardless of the site's logger floor (frappe/utils/logger.py:12 floors it at
+    ERROR in production, above where a warning would ever surface).
+    """
     if not bool(
         frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
     ):
@@ -578,15 +588,15 @@ def _recovery_component() -> str | None:
         "Salis Settings", "employee_advance_recovery_component"
     )
     if not component:
-        frappe.logger().warning(
-            "employee_recovery: Salis Settings has no Recovery Salary Component. "
-            "No installment scheduled."
+        frappe.log_error(
+            title="employee_recovery: Recovery Salary Component not configured",
+            message="Salis Settings has no Recovery Salary Component. No installment scheduled.",
         )
         return None
     if frappe.db.get_value("Salary Component", component, "type") != "Deduction":
-        frappe.logger().warning(
-            f"employee_recovery: Salary Component {component} is not of type Deduction. "
-            f"No installment scheduled."
+        frappe.log_error(
+            title="employee_recovery: Recovery Salary Component is not a Deduction",
+            message=f"Salary Component {component} is not of type Deduction. No installment scheduled.",
         )
         return None
     return component
@@ -609,9 +619,12 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     preview, _assignment = _salary_preview(advance_doc.employee, payroll_date)
     period = _salary_period(preview)
     if not period:
-        frappe.logger().warning(
-            "employee_recovery: native Salary Slip preview has no valid pay period for "
-            f"employee {advance_doc.employee} on {payroll_date}. Recovery deferred."
+        advance_doc.add_comment(
+            "Comment",
+            _(
+                "Salary recovery deferred for {0}: no valid Salary Slip preview period "
+                "for {1}."
+            ).format(payroll_date, advance_doc.employee),
         )
         return None
     period_start, period_end = period
@@ -638,8 +651,11 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
         salary_preview=preview,
     )
     if amount <= 0:
-        frappe.logger().info(
-            f"employee_recovery: nothing recoverable from advance {advance} for {payroll_date}. Deferred."
+        advance_doc.add_comment(
+            "Comment",
+            _("Salary recovery deferred for {0}: nothing recoverable this period.").format(
+                payroll_date
+            ),
         )
         return None
 
@@ -651,9 +667,6 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     installment.payroll_date = payroll_date
     installment.overwrite_salary_structure_amount = 0
     installment.insert(ignore_permissions=True)
-    frappe.logger().info(
-        f"employee_recovery: installment {installment.name} ({amount}) queued against advance {advance}."
-    )
     return installment.name
 
 

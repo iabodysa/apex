@@ -205,6 +205,13 @@ def apply_spec(spec):
     ``frappe.db.table_exists`` (frappe/database/database.py:1220) guards the whole
     spec, so a seeder that ships ahead of its DocType reports every record skipped
     rather than failing the install.
+
+    A skipped table or a missing Link target is PRINTED rather than logged, the
+    same reasoning as ``patches/v2_8/retire_unused_apex_roles.py``: this runs
+    inside install/migrate, whose own stdout is what the operator running the
+    upgrade is reading, and ``frappe.logger().warning`` never reaches a
+    production site (``frappe/utils/logger.py:12`` floors the level at ERROR
+    there).
     """
     import frappe
 
@@ -212,7 +219,7 @@ def apply_spec(spec):
     created = skipped = failed = 0
 
     if not frappe.db.table_exists(doctype):
-        frappe.logger().warning(f"seed: DocType '{doctype}' has no table — skipped")
+        print(f"apex: seed skipped — DocType '{doctype}' has no table")
         return {"created": 0, "skipped": len(spec["records"]), "failed": 0}
 
     for record in spec["records"]:
@@ -222,8 +229,8 @@ def apply_spec(spec):
             continue
         unresolved = _unresolved_link(frappe, doctype, record)
         if unresolved:
-            frappe.logger().warning(
-                f"seed: {doctype} '{value}' skipped — missing Link target {unresolved}"
+            print(
+                f"apex: seed skipped — {doctype} '{value}' is missing Link target {unresolved}"
             )
             skipped += 1
             continue

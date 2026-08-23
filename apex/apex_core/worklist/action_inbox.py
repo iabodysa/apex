@@ -117,6 +117,13 @@ def _drop_stale(rows: list) -> list:
     doctype's live workflow state field (never hard-coding ``status``) with ONE bulk
     read per doctype (no N+1) and drop rows whose document no longer matches. On any
     resolution error we KEEP the rows — never hide a legitimately-pending action.
+
+    A DocType that no longer exists at all (an app module removed, a custom
+    DocType deleted) can never resolve a workflow state — there is no document
+    left to re-check, and the row can never become actionable again. Those rows
+    are deleted outright rather than merely excluded from the page: excluding
+    without deleting leaves them Open in the database forever, invisible but
+    still counted by anything that queries ``Workflow Action`` directly.
     """
     if not rows:
         return rows
@@ -128,8 +135,14 @@ def _drop_stale(rows: list) -> list:
     kept: list = []
     for doctype, group in by_doctype.items():
         if not frappe.db.exists("DocType", doctype):
-            frappe.logger().info(
-                f"action_inbox: dropped {len(group)} Open action(s) for missing DocType {doctype!r}"
+            frappe.db.delete("Workflow Action", filters={"reference_doctype": doctype})
+            frappe.log_error(
+                title=f"Workflow Action cleanup: {doctype!r} no longer exists"[:140],
+                message=(
+                    f"Deleted {len(group)} stale Open Workflow Action row(s) referencing "
+                    f"missing DocType {doctype!r}: "
+                    f"{[r['reference_name'] for r in group]}"
+                ),
             )
             continue
         try:

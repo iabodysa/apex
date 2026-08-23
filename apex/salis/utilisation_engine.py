@@ -99,5 +99,3 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                     title=f"Vehicle utilisation snapshot failed for {vehicle_name}"[:140],
                 )
         start += batch_size
-
-    frappe.logger().info("weekly_vehicle_utilisation_snapshot: snapshots written.")

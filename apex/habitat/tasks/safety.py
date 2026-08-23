@@ -144,7 +144,6 @@ def weekly_safety_coverage_gate() -> None:
     )
     require_coverage = require_coverage if require_coverage is not None else 1
     if not require_coverage:
-        frappe.logger().info("weekly_safety_coverage_gate: coverage gate disabled — skipping.")
         return
 
     today_date = getdate(today())

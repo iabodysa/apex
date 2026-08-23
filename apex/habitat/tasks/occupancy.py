@@ -73,8 +73,6 @@ def weekly_occupancy_sync() -> None:
 
         start += batch_size
 
-    frappe.logger().info("weekly_occupancy_sync: room occupancy counters refreshed.")
-
     Room = frappe.qb.DocType("Room")
     rooms_per_building = {
         r["building"]: int(r["n"] or 0)
@@ -135,8 +133,6 @@ def weekly_occupancy_sync() -> None:
                 )
 
         start += batch_size
-
-    frappe.logger().info("weekly_occupancy_sync: building occupancy counters refreshed.")
 
 
 def daily_occupancy_snapshot() -> None:
@@ -245,4 +241,3 @@ def daily_occupancy_snapshot() -> None:
                     title=f"Occupancy snapshot failed for building {building_name}"[:140],
                 )
         start += batch_size
-    frappe.logger().info("daily_occupancy_snapshot: snapshots written.")
