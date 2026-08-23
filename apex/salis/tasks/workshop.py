@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils import add_days, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
+from apex.salis.api.dispatch_board import _permitted_projects
 from apex.salis.tasks.common import (
     _queue_document,
     _reconcile_queue,
@@ -25,10 +28,6 @@ def _overstay_stops() -> list:
     and ``get_workshop_overstay_count`` (the number card) so the rule cannot drift
     between them. Returns the Vehicle Suspension rows (name, vehicle, stop_date).
     """
-    from frappe.utils import add_days, today
-
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     days = get_salis_int("workshop_overstay_days", 14)
     cutoff = add_days(today(), -days)
     rows = frappe.get_all(
@@ -69,8 +68,6 @@ def workshop_overstay_watch() -> None:
     of leaving a row nothing could resolve. This job is the only queuer of Vehicle
     Suspension, so its own findings are the reconcile union.
     """
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     days = get_salis_int("workshop_overstay_days", 14)
     logger = frappe.logger()
     still_overstaying: list[str] = []
@@ -107,8 +104,6 @@ def get_workshop_overstay_count(filters=None) -> dict:
     projects to match the other fleet number cards. ``filters`` is accepted and
     ignored (the Custom Number Card widget always passes it).
     """
-    from apex.salis.api.dispatch_board import _permitted_projects
-
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     vehicles = {r.vehicle for r in _overstay_stops()}
     if not vehicles:

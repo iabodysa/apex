@@ -11,8 +11,10 @@ role who can already read the specific document, from a scheduler's own scan.
 from __future__ import annotations
 
 import frappe
+from frappe.utils.user import get_users_with_role
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
+from apex.apex_core.utils.system_notify import notify_user_system
 
 
 BATCH_SIZE = 500
@@ -134,10 +136,6 @@ def _notify_fleet_role(
     system_notify helper (the single Notification Log writer), which dedupes on
     the source doc link per user. No recipients = no-op.
     """
-    from frappe.utils.user import get_users_with_role
-
-    from apex.apex_core.utils.system_notify import notify_user_system
-
     for user in get_users_with_role(FLEET_ROLE) or []:
         notify_user_system(
             user,

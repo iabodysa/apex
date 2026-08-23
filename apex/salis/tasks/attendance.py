@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import today
 
 from apex.salis.tasks.common import (
     BATCH_SIZE,
@@ -23,8 +24,6 @@ def missing_attendance_watch() -> None:
     is reconciled centrally in ``reconcile_operations_alerts`` (it drains once
     attendance lands or the driver is no longer Active).
     """
-    from frappe.utils import today
-
     today_str = today()
     logger = frappe.logger()
 

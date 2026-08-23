@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import frappe
+from frappe.utils import add_days, today
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 from apex.salis.tasks.common import (
     _reconcile_queue,
 )
@@ -42,10 +44,6 @@ def reconcile_operations_alerts() -> None:
     Idempotent and never aborts: each DocType's drain runs in its own
     try/except with rollback-before-log.
     """
-    from frappe.utils import add_days, today
-
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     today_str = today()
     logger = frappe.logger()
 

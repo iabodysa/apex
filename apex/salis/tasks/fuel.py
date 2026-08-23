@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils import today
 
 from apex.salis.tasks.common import (
     BATCH_SIZE,
@@ -34,8 +35,6 @@ def unreverted_topup_watch() -> None:
     failure never aborts the batch. No ``commit()`` inside the loop — the
     scheduler commits the job transaction on success.
     """
-    from frappe.utils import today
-
     today_str = today()
     logger = frappe.logger()
 

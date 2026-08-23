@@ -6,8 +6,10 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Count, Sum
+from frappe.utils import add_days, getdate, today
 from pypika import Case
 
+from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
 from apex.salis.tasks.common import (
     BATCH_SIZE,
     _queue_document,
@@ -24,10 +26,6 @@ def idle_vehicle_watch() -> None:
     recent trip, and the idle set is the difference in memory: one DB round trip for
     the trip data rather than one ``get_all`` per vehicle (N+1).
     """
-    from frappe.utils import add_days, today
-
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     today_str = today()
     logger = frappe.logger()
     idle_days = get_salis_int("idle_vehicle_days", 7)
@@ -102,10 +100,6 @@ def vehicle_compliance_expiry_watch() -> None:
     reconciled centrally in ``reconcile_operations_alerts`` because the idle
     watches queue the same DocType and a per-job reconcile would close their work.
     """
-    from frappe.utils import add_days, getdate, today
-
-    from apex.apex_core.doctype.salis_settings.salis_settings import get_salis_int
-
     today_str = today()
     today_date = getdate(today_str)
     logger = frappe.logger()
@@ -166,8 +160,6 @@ def vehicle_utilization_summary() -> None:
     skips a vehicle already queued, and the shared Salis Vehicle queue reconciles
     centrally in ``reconcile_operations_alerts``).
     """
-    from frappe.utils import add_days, today
-
     today_str = today()
     window_start = add_days(today_str, -7)
     logger = frappe.logger()
