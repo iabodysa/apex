@@ -16,8 +16,14 @@ import frappe
 
 
 def _field(doctype: str, name: str, fieldname: str):
-    """get_cached_value guarded by meta, so a missing HRMS custom field (e.g. on
-    a site without the payroll field installed) returns None instead of raising."""
+    """One cached field read, guarded by meta.
+
+    ``frappe.get_cached_value`` (frappe/__init__.py:1183) does the read and
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) the guard. The
+    one thing the read cannot do is answer for a column that does not exist — it
+    raises — and several of these live on hrms Custom Fields that a site may not have
+    installed, so an absent field answers ``None`` rather than failing the caller.
+    """
     if not name:
         return None
     if not frappe.get_meta(doctype).has_field(fieldname):

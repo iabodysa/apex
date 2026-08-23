@@ -272,6 +272,10 @@ def rebuild_sim_projection(sim_card: str) -> None:
     current projection. Deterministic and idempotent — the single source of truth
     behind "current SIM state matches the latest submitted custody state".
 
+    Built with ``frappe.qb`` (frappe/query_builder) so the whole event chain arrives
+    ordered in ONE read: the one thing ``frappe.get_all`` cannot do here is guarantee
+    a replay sees every event in submitted order without a second pass.
+
     Retirement is IN the chain (Lost / Terminated are events, not out-of-band status
     edits), so the replay is the whole truth and nothing is preserved from the row
     being overwritten. That is what makes retirement reversible: cancelling the Lost

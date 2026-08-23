@@ -62,7 +62,13 @@ def _clamp(value, low, high, default):
 
 
 def _sanitize_filters(raw):
-    """Keep only whitelisted filter keys with truthy scalar values."""
+    """Keep only whitelisted filter keys with truthy scalar values.
+
+    ``frappe.parse_json`` (frappe/__init__.py:2491) accepts the string the client
+    sends. The one thing it cannot do is decide which keys are permitted — it returns
+    whatever shape arrived — so the allowlist here is what stops a caller filtering on
+    a column the screen never offered.
+    """
     if isinstance(raw, str):
         raw = frappe.parse_json(raw) or {}
     if not isinstance(raw, dict):

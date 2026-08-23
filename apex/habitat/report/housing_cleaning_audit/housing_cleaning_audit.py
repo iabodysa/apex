@@ -105,7 +105,13 @@ def _supervisor_by_building(all_buildings):
 
 
 def _cleaning_logs(date_from, date_to, chosen_building, allowed):
-    """Reads the non-cancelled Cleaning Logs in the window, newest day first."""
+    """Reads the non-cancelled Cleaning Logs in the window, newest day first.
+
+    Built with ``frappe.qb`` (frappe/query_builder) because a Script Report builds its
+    own SQL: ``permission_query_conditions`` applies to ``DatabaseQuery`` and never
+    runs here, so the caller's allowed buildings are passed in and applied explicitly.
+    That is the one thing this query cannot inherit and must state.
+    """
     cl = frappe.qb.DocType("Cleaning Log")
     query = (
         frappe.qb.from_(cl)
@@ -133,7 +139,12 @@ def _cleaning_logs(date_from, date_to, chosen_building, allowed):
 
 
 def _log_counts(log_names):
-    """Returns (rooms cleaned, photos attached) per log, both keyed by Cleaning Log name."""
+    """Returns (rooms cleaned, photos attached) per log, both keyed by Cleaning Log name.
+
+    Two bulk reads keyed by the log names already fetched, rather than a count per
+    log: the one thing a per-row count cannot do is stay bounded, and an audit over a
+    month of logs would issue one query per row twice over.
+    """
     rooms_cleaned_map: dict[str, int] = {}
     photos_map: dict[str, int] = {}
     if not log_names:

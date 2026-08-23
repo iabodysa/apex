@@ -61,6 +61,11 @@ def refresh_sim_count(contract: str | None) -> None:
     Called from SIM Card's own after_insert / on_update / after_delete so the count
     on the contract never drifts from the number of SIMs pointing at it. No-op
     when the contract no longer exists (e.g. deleted in the same transaction).
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) recomputes from the live
+    rows rather than incrementing a stored figure, because the one thing a running
+    total cannot survive is a cancelled or reassigned SIM — an increment that misses
+    one drifts forever, while a recount is self-correcting.
     """
     if not contract or not frappe.db.exists("Telecom Contract", contract):
         return

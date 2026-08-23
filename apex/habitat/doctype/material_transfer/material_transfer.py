@@ -133,7 +133,13 @@ def _notify_finance_on_cost_center_shift(doc):
     """Memo-only: if the source and destination buildings sit on different cost
     centers, the stock liability has shifted between them. We do NOT post any GL
     Entry — we only email Finance so they can record the cross-charge manually,
-    and only when the admin has opted in via Habitat Settings."""
+    and only when the admin has opted in via Habitat Settings.
+
+    ``frappe.sendmail`` (frappe/__init__.py:681) queues the memo and
+    ``frappe.utils.escape_html`` (frappe/utils/data.py:1521) guards every operator
+    string that reaches its body. The send is wrapped and logged through
+    ``frappe.get_traceback`` rather than raised: the transfer is already submitted by
+    then, and a mail fault must not undo a movement of goods."""
     if not frappe.db.get_single_value("Habitat Settings", "notify_finance_on_liability_transfer"):
         return
     from_cc = frappe.db.get_value("Building", doc.from_building, "default_cost_center")
