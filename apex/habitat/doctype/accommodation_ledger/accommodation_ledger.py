@@ -10,6 +10,7 @@ operational memos and no GL Entry is posted.
 from __future__ import annotations
 
 from frappe.model.document import Document
+from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.apex_core.utils.party_link import sync_party_employee
 
 
@@ -38,8 +39,6 @@ def on_doctype_update():
     ``source_doctype``/``source_name`` app-level guards and run on user submit,
     not on a daily loop. Guarded so pre-existing duplicate data logs rather than
     aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Accommodation Ledger",
         ["employee", "posting_date", "assignment", "building", "ledger_type"],

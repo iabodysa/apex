@@ -6,7 +6,11 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import flt
+
+from apex.apex_core.doctype.habitat_settings.habitat_settings import effective_retention_days
 
 
 class OperationalDepreciationSnapshot(Document):
@@ -23,13 +27,6 @@ class OperationalDepreciationSnapshot(Document):
         caller does not pass ``days``. The child ``Depreciation Snapshot Item`` rows
         are deleted explicitly FIRST, because ``frappe.db.delete`` does not cascade
         to a parent's children (unlike ``frappe.delete_doc``)."""
-        from frappe.query_builder import Interval
-        from frappe.query_builder.functions import Now
-
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import (
-            effective_retention_days,
-        )
-
         days = effective_retention_days("depreciation_snapshot_retention_days", days)
         parent = frappe.qb.DocType("Operational Depreciation Snapshot")
         cutoff = Now() - Interval(days=days)

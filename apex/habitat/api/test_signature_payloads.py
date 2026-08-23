@@ -15,10 +15,19 @@ The signature field is OPTIONAL. A validator that fires on a blank turns this fi
 refusal every kiosk user meets, so the blank case is asserted as loudly as the payload.
 """
 
+import ast
+import base64
+import inspect
+import io
+import pathlib
+import re
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils.jinja import get_jenv
+from PIL import Image
 
+from apex.habitat.api import custody_kiosk, front_desk
 from apex.salis.api.driver_portal.images import verified_image_type
 
 PAYLOAD = 'data:x" onerror=alert(1)'
@@ -48,8 +57,6 @@ class TestSignatureIsRefusedAtTheDoor(FrappeTestCase):
         self.assertEqual(verified_image_type(_one_pixel_png()), "image/png")
 
     def test_both_doors_call_this_one_validator(self):
-        from apex.habitat.api import custody_kiosk, front_desk
-
         self.assertIs(custody_kiosk.verified_image_type, verified_image_type)
         self.assertIs(front_desk.verified_image_type, verified_image_type)
 
@@ -63,11 +70,6 @@ class TestBlankSignatureStaysLegal(FrappeTestCase):
     """
 
     def test_the_validator_is_never_reached_for_a_blank(self):
-        import ast
-        import inspect
-
-        from apex.habitat.api import custody_kiosk, front_desk
-
         for module, func in ((custody_kiosk, "issue_cart"), (front_desk, "quick_check_in")):
             with self.subTest(func=func):
                 tree = ast.parse(inspect.getsource(getattr(module, func)))
@@ -101,9 +103,6 @@ class TestTemplateEscapesTheValue(FrappeTestCase):
         self.assertNotIn('src="data:x" onerror', rendered)
 
     def test_every_signature_interpolation_in_a_print_format_is_escaped(self):
-        import pathlib
-        import re
-
         root = pathlib.Path(frappe.get_app_path("apex"))
         unescaped = [
             f"{path}:{i}"
@@ -116,11 +115,6 @@ class TestTemplateEscapesTheValue(FrappeTestCase):
 
 def _one_pixel_png():
     """A minimal real PNG as a data URI, built rather than pasted."""
-    import base64
-    import io
-
-    from PIL import Image
-
     buffer = io.BytesIO()
     Image.new("RGB", (1, 1), (0, 0, 0)).save(buffer, format="PNG")
     return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")

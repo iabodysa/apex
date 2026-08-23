@@ -13,7 +13,9 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
+from frappe.utils.user import get_users_with_role
 
+from apex.apex_core.utils.email_gate import mailable
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     get_store_balance,
     has_stock_entries,
@@ -156,7 +158,6 @@ def _notify_finance_on_cost_center_shift(doc):
     if not recipients:
         return
 
-    from apex.apex_core.utils.email_gate import mailable
     if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):
         return
 
@@ -182,8 +183,6 @@ def _notify_finance_on_cost_center_shift(doc):
 
 def _role_emails(role):
     """Returns the email addresses of every user holding the given role."""
-    from frappe.utils.user import get_users_with_role
-
     users = get_users_with_role(role)
     if not users:
         return []

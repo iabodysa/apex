@@ -25,8 +25,11 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import close_all_assignments
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.model.workflow import apply_workflow
 from frappe.utils import flt
+
+from apex.apex_core.utils.company import resolve_company
 
 _TRANSITION_SAVEPOINT = "maintenance_request_transition"
 
@@ -51,8 +54,6 @@ def validate(doc, method=None):
         doc.reported_by = frappe.session.user
 
     if not doc.company:
-        from apex.apex_core.utils.company import resolve_company
-
         doc.company = resolve_company("Habitat")
 
     _validate_status_rules(doc)
@@ -86,7 +87,6 @@ def make_work_order(source_name, target_doc=None):
     prevents the silent-drop data-loss described above.
     """
     frappe.has_permission("Maintenance Request", "read", doc=source_name, throw=True)
-    from frappe.model.mapper import get_mapped_doc
 
     def set_missing_values(source, target):
         """Sets the mapped Work Order's source request link and status to Planned."""

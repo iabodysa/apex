@@ -21,6 +21,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate
 
+from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.vat import apply_vat
 
 
@@ -32,7 +33,6 @@ class SubcontractorServiceContract(Document):
                 frappe.throw(_("Contract End cannot be before Contract Start."))
 
         if not self.company:
-            from apex.apex_core.utils.company import resolve_company
             self.company = resolve_company("Habitat")
 
         apply_vat(self, flt(self.monthly_retainer) or flt(self.rate_per_visit))

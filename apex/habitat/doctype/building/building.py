@@ -21,6 +21,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import today
 
+from apex.apex_core.utils.addresses import get_address_text, get_address_text_by_name
+from apex.apex_core.utils.company import resolve_company
 from apex.habitat.utils import building_rollup, occupancy, room_generator, safety_setup
 
 
@@ -40,11 +42,6 @@ def get_site_address(building_name, site=None, building_address=None):
     the form cleared it. Empty string when neither resolves to an Address.
     """
     frappe.has_permission("Building", "read", doc=building_name, throw=True)
-    from apex.apex_core.utils.addresses import (
-        get_address_text,
-        get_address_text_by_name,
-    )
-
     if building_address is None:
         building_address = frappe.db.get_value(
             "Building", building_name, "building_address"
@@ -191,7 +188,6 @@ def before_save(doc, method=None):
     """Guards the abbreviation lock, defaults company, and recomputes capacity and occupancy."""
     _guard_abbreviation_lock(doc)
     if not doc.company:
-        from apex.apex_core.utils.company import resolve_company
         doc.company = resolve_company("Habitat")
 
     _recompute_capacity_and_cost(doc)

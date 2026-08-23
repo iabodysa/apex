@@ -21,6 +21,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate, nowdate
 
+from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.vat import apply_vat
 
 
@@ -31,7 +32,6 @@ class SubcontractorServiceOrder(Document):
 def before_save(doc, method=None):
     """Defaults the order's company and restates its cost with VAT."""
     if not doc.company:
-        from apex.apex_core.utils.company import resolve_company
         doc.company = resolve_company("Habitat")
 
     _price_from_lines(doc)

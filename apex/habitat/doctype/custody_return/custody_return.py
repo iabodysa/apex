@@ -6,6 +6,8 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import nowdate
 
 from apex.apex_core.utils.party_link import sync_party_employee
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
@@ -232,8 +234,6 @@ def make_damage_assessment(source_name, target_doc=None):
     only the Damaged/Lost rows carry over, and the back-link + worker derive so the
     coordinator just fills the per-item damage description and replacement cost."""
     frappe.has_permission("Custody Return", "read", doc=source_name, throw=True)
-    from frappe.model.mapper import get_mapped_doc
-    from frappe.utils import nowdate
 
     def set_missing_values(source, target):
         """Stamps the new Custody Damage Assessment's source return link and today's assessment date."""

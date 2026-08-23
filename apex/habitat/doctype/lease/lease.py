@@ -8,6 +8,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_months, flt, getdate
 
+from apex.apex_core.utils.company import resolve_company
+from apex.apex_core.utils.date_ranges import has_overlapping_record
 from apex.apex_core.utils.vat import apply_vat
 
 _CYCLE_MONTHS = {
@@ -25,7 +27,6 @@ class Lease(Document):
 def validate(doc, method=None):
     """Blocks a bad lease date, an out-of-range utility share, or an overlapping building lease."""
     if not doc.company:
-        from apex.apex_core.utils.company import resolve_company
         doc.company = resolve_company("Habitat")
 
     if doc.lease_end_date and doc.lease_start_date:
@@ -41,7 +42,6 @@ def validate(doc, method=None):
         frappe.throw(_("Utility Cost Share must be between 0 and 100."))
 
     if doc.building and doc.lease_start_date and doc.lease_end_date:
-        from apex.apex_core.utils.date_ranges import has_overlapping_record
         conflict = has_overlapping_record(
             "Lease",
             {"building": doc.building},

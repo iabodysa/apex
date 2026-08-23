@@ -32,11 +32,12 @@ ambiguous ones blank).
 from __future__ import annotations
 
 import frappe
-
-from apex.apex_core.utils.company import display_currency
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, fmt_money, today
+
+from apex.apex_core.utils.company import display_currency, resolve_company
+from apex.apex_core.utils.date_ranges import has_overlapping_record
 
 
 class UtilityBillEntry(Document):
@@ -48,7 +49,6 @@ class UtilityBillEntry(Document):
 def validate(doc, method=None):
     """Defaults the company, validates the period, computes readings and variance, blocks negatives."""
     if not doc.company:
-        from apex.apex_core.utils.company import resolve_company
         doc.company = resolve_company("Habitat")
 
     if doc.billing_period_to and doc.billing_period_from:
@@ -56,7 +56,6 @@ def validate(doc, method=None):
             frappe.throw(_("Billing Period To must be on or after Billing Period From."))
 
     if doc.utility_account and doc.billing_period_from and doc.billing_period_to:
-        from apex.apex_core.utils.date_ranges import has_overlapping_record
         overlap = has_overlapping_record(
             "Utility Bill Entry",
             {

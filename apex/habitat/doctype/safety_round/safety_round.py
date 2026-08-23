@@ -13,6 +13,8 @@ from frappe import _
 from frappe.model.document import Document
 
 from apex.apex_core.utils.portal_live import notify_building
+from apex.habitat.safety_engine import post_safety_findings, reverse_safety_findings
+from apex.habitat.tasks.safety import zero_rounds_alert_subject
 
 
 class SafetyRound(Document):
@@ -79,8 +81,6 @@ class SafetyRound(Document):
         """Submits draft executions, stores the derived overall result, and posts safety findings."""
         self._ratify_executions()
         self.db_set("overall_result", self._derive_overall_result())
-        from apex.habitat.safety_engine import post_safety_findings
-
         post_safety_findings(self)
         self._clear_building_scan_alerts()
         notify_building(self.building)
@@ -125,8 +125,6 @@ class SafetyRound(Document):
         carries no link (that role holds no read on Building) and is keyed by subject.
         The weekly-coverage alert has its own subject and stays untouched: a daily round
         does not satisfy weekly coverage."""
-        from apex.habitat.tasks.safety import zero_rounds_alert_subject
-
         label = frappe.db.get_value("Building", self.building, "building_name") or self.building
         try:
             frappe.db.set_value(
@@ -160,8 +158,6 @@ class SafetyRound(Document):
 
     def on_cancel(self):
         """Reverses this round's posted safety findings and rings the building's watchers."""
-        from apex.habitat.safety_engine import reverse_safety_findings
-
         reverse_safety_findings(self.name)
         notify_building(self.building)
 

@@ -16,6 +16,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 
 class MaintenanceCostLedger(Document):
     def on_update(self):
@@ -33,8 +35,6 @@ def on_doctype_update():
     engine's (source_doctype, source_name, source_detail_no) idempotency key;
     reversal rows carry reversal_of (set) and a distinct detail no so they do not
     collide with their original."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Maintenance Cost Ledger",
         ["source_doctype", "source_name", "source_detail_no", "reversal_of"],

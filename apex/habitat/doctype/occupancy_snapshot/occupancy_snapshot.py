@@ -2,6 +2,11 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Now
+
+from apex.apex_core.doctype.habitat_settings.habitat_settings import effective_retention_days
+from apex.apex_core.utils.ledger_index import add_unique_guarded
 
 
 class OccupancySnapshot(Document):
@@ -14,13 +19,6 @@ class OccupancySnapshot(Document):
 		time-series, not a financial ledger, so a one-year retention is safe. The
 		window comes from Habitat Settings ``snapshot_retention_days`` (default 365)
 		when the caller does not pass ``days``."""
-        from frappe.query_builder import Interval
-        from frappe.query_builder.functions import Now
-
-        from apex.apex_core.doctype.habitat_settings.habitat_settings import (
-            effective_retention_days,
-        )
-
         days = effective_retention_days("snapshot_retention_days", days)
         table = frappe.qb.DocType("Occupancy Snapshot")
         frappe.db.delete(table, filters=(table.modified < (Now() - Interval(days=days))))
@@ -33,8 +31,6 @@ def on_doctype_update():
 	check-then-insert is bypassed by a race. Mirrors that job's
 	``frappe.db.exists({building, snapshot_date})`` guard exactly. Guarded so
 	pre-existing duplicate data logs rather than aborting migrate."""
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Occupancy Snapshot",
         ["building", "snapshot_date"],

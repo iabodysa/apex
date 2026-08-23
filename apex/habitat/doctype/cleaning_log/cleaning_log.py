@@ -14,6 +14,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+from apex.habitat.cleaning_engine import post_cleaning_compliance, reverse_cleaning_compliance
+
 REQUIRED_AREAS = ("Bathrooms", "Kitchen", "Corridors")
 
 
@@ -25,14 +28,10 @@ class CleaningLog(Document):
 
     def on_submit(self):
         """Posts the cleaning log's room results to the Cleaning Compliance Ledger."""
-        from apex.habitat.cleaning_engine import post_cleaning_compliance
-
         post_cleaning_compliance(self)
 
     def on_cancel(self):
         """Reverses the cleaning log's posted Cleaning Compliance Ledger entries."""
-        from apex.habitat.cleaning_engine import reverse_cleaning_compliance
-
         reverse_cleaning_compliance(self.name)
 
     def _stamp_area_evidence(self):
@@ -87,8 +86,6 @@ def on_doctype_update():
     Task Instance precedent) so a cancelled log never blocks re-logging the same
     building/day. Idempotent + duplicate-safe via ``add_unique_guarded``.
     """
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     add_unique_guarded(
         "Cleaning Log",
         ["building", "cleaning_date", "docstatus"],

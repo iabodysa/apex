@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+from apex.apex_core.utils.ledger_index import add_unique_guarded
+
 
 class ScheduledTaskInstance(Document):
     pass
@@ -24,8 +26,6 @@ def on_doctype_update():
     Phase B allows multiple assignments per template; that index would block the second
     assignment from creating instances on the same day as the first.
     """
-    from apex.apex_core.utils.ledger_index import add_unique_guarded
-
     try:
         frappe.db.sql(
             "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"

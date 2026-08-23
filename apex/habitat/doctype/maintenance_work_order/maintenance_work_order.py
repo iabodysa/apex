@@ -14,6 +14,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, now, today
 
+from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
+from apex.habitat.maintenance_engine import post_maintenance_cost, reverse_maintenance_cost
+
 
 class MaintenanceWorkOrder(Document):
     def on_cancel(self):
@@ -29,7 +32,6 @@ class MaintenanceWorkOrder(Document):
         owned by newer work."""
         self._reverse_accommodation_memo()
 
-        from apex.habitat.maintenance_engine import reverse_maintenance_cost
         reverse_maintenance_cost(self.name)
 
         if not self.maintenance_request:
@@ -239,7 +241,6 @@ def mark_completed(
             {"status": "Resolved", "resolution_notes": notes},
         )
 
-    from apex.habitat.doctype.housing_inventory.housing_inventory import reflect_completed_maintenance
     reflect_completed_maintenance(doc)
 
     already_posted = frappe.db.exists(
@@ -264,7 +265,6 @@ def mark_completed(
         }).insert(ignore_permissions=True)
         ledger_posted = True
 
-    from apex.habitat.maintenance_engine import post_maintenance_cost
     post_maintenance_cost(doc)
 
     doc.add_comment("Comment", _("Marked Completed via controlled method."))

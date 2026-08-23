@@ -44,6 +44,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
+from apex.apex_core.doctype.apex_stock_settings.apex_stock_settings import policy, validate_posting_allowed
+from apex.apex_core.utils.ledger_index import add_index_guarded
 from apex.habitat.utils.item_master import resolve_item
 
 class AccommodationStockLedger(Document):
@@ -54,8 +56,6 @@ def on_doctype_update():
     stock-balance access path (active rows of an item type for an employee). Added
     here — not only via a patch — so fresh installs, which mark patches complete
     without running them, also get it. Runs on app sync + every migrate; idempotent."""
-    from apex.apex_core.utils.ledger_index import add_index_guarded
-
     add_index_guarded(
         "Accommodation Stock Ledger",
         ["is_cancelled", "item_type", "employee"],
@@ -134,11 +134,6 @@ def _assert_policy_allows(item_type, item, qty, building, party_type, party, pos
     posting whose date has since fallen outside the window, and its own positivity rule
     already lives in ``_assert_reversal_keeps_stock_positive``.
     """
-    from apex.apex_core.doctype.apex_stock_settings.apex_stock_settings import (
-        validate_posting_allowed,
-        policy,
-    )
-
     validate_posting_allowed(building, posting_date)
 
     if flt(qty) >= 0 or policy()["allow_negative"]:

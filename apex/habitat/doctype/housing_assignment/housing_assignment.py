@@ -13,6 +13,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from apex.apex_core.utils.ledger_index import add_index_guarded
 from apex.apex_core.utils.party_link import sync_party_employee
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     get_store_balance,
@@ -34,8 +35,6 @@ def on_doctype_update():
     UNIQUE: MariaDB has no partial/filtered UNIQUE index, so real bed-occupancy
     uniqueness stays an application-level guard (validate() + on_submit()'s
     SELECT ... FOR UPDATE), never a DB constraint."""
-    from apex.apex_core.utils.ledger_index import add_index_guarded
-
     add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
 
     add_index_guarded(
