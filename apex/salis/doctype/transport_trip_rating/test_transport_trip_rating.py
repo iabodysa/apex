@@ -13,6 +13,7 @@ run it.
 from __future__ import annotations
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
 from apex.salis.api.masar import _rating_stars
@@ -20,16 +21,12 @@ from apex.salis.api.masar import _rating_stars
 
 class TestTransportTripRating(FrappeTestCase):
     def _employee(self):
-        from frappe.test_runner import make_test_records
-
         make_test_records("Employee")
         return frappe.get_all("Employee", limit=1, pluck="name")[0]
 
     def _completed_trip_with_rider(self, employee):
         """A submitted, Completed Dispatch Trip carrying ``employee`` as a
         Boarded passenger on its ``boarding_state`` manifest."""
-        from frappe.test_runner import make_test_records
-
         make_test_records("Dispatch Trip")
         vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
         driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
@@ -65,8 +62,6 @@ class TestTransportTripRating(FrappeTestCase):
 
     def test_rating_a_trip_that_is_not_completed_is_refused(self):
         employee = self._employee()
-        from frappe.test_runner import make_test_records
-
         make_test_records("Dispatch Trip")
         vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
         driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
@@ -86,8 +81,6 @@ class TestTransportTripRating(FrappeTestCase):
         self.assertRaises(frappe.ValidationError, doc.insert)
 
     def test_rating_by_an_employee_not_on_the_manifest_is_refused(self):
-        from frappe.test_runner import make_test_records
-
         make_test_records("Employee")
         employees = frappe.get_all("Employee", limit=2, pluck="name")
         rider, outsider = employees[0], employees[-1]

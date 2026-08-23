@@ -10,6 +10,7 @@ here reads only the in-memory document, never the database.
 from __future__ import annotations
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
 
@@ -73,17 +74,13 @@ class TestDispatchTripDriverPositionIsFrozenAfterSubmit(FrappeTestCase):
     ``save()``, never by calling a controller method directly."""
 
     def _submitted_trip(self):
-        from frappe.test_runner import make_test_records
-
         make_test_records("Dispatch Trip")
         vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
         driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
         project = frappe.get_all("Project", limit=1, pluck="name")[0]
         employee = frappe.get_all("Employee", limit=1, pluck="name")
         if not employee:
-            from frappe.test_runner import make_test_records as _mtr
-
-            _mtr("Employee")
+            make_test_records("Employee")
             employee = frappe.get_all("Employee", limit=1, pluck="name")
         doc = frappe.new_doc("Dispatch Trip")
         doc.trip_type = "Ad Hoc"

@@ -12,13 +12,12 @@ controller method directly.
 from __future__ import annotations
 
 import frappe
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
 
 class TestTripStartLogStartDatetimeIsFrozenAfterSubmit(FrappeTestCase):
     def _submitted_log(self):
-        from frappe.test_runner import make_test_records
-
         make_test_records("Salis Vehicle")
         make_test_records("Salis Driver")
         make_test_records("Project")

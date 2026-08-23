@@ -10,6 +10,8 @@ arithmetic is exercised without writing a Fuel Quota record at all.
 from __future__ import annotations
 
 import frappe
+from frappe.model.workflow import apply_workflow
+from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 
 
@@ -145,9 +147,6 @@ class TestFuelRequestApprovedByIsFrozenAfterSubmit(FrappeTestCase):
         return email
 
     def _approved_request(self):
-        from frappe.model.workflow import apply_workflow
-        from frappe.test_runner import make_test_records
-
         make_test_records("Salis Vehicle")
         vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
         approver = self._approver()

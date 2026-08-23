@@ -14,7 +14,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_time, now_datetime
 
+from apex.apex_core.utils.portal_identity import DRIVER, publish_to_portal_subject
 from apex.apex_core.utils.portal_live import notify_doctype
+from apex.salis.boarding_engine import reverse_trip_boarding
 from apex.salis.doctype.dispatch_trip.trip_manifest import (
     ROUTE_STOP_FIELDS,
     copy_route_stops,
@@ -89,11 +91,6 @@ class DispatchTrip(Document):
         except Exception:
             pass
         try:
-            from apex.apex_core.utils.portal_identity import (
-                DRIVER,
-                publish_to_portal_subject,
-            )
-
             if self.driver:
                 publish_to_portal_subject(
                     DRIVER, self.driver, "driver_trip_update", {"name": self.name}
@@ -255,8 +252,6 @@ class DispatchTrip(Document):
             frappe.delete_doc(
                 "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True
             )
-        from apex.salis.boarding_engine import reverse_trip_boarding
-
         reverse_trip_boarding(self.name)
 
     def on_trash(self):
