@@ -44,6 +44,12 @@ def _flag_temporary_worker_past_expiry(doc) -> None:
     Non-blocking on purpose: a supervisor may still need to house an over-window
     worker pending Iqama issuance, so this warns rather than throws. The check-in
     date (or today) is compared against the worker's computed ``expiry_date``.
+
+    ``frappe.utils.getdate`` (frappe/utils/data.py) normalises BOTH sides before the
+    comparison, because a stored date may arrive as a string or a date and comparing
+    the two shapes as text orders them wrongly without raising. The date shown to the
+    supervisor goes through ``formatdate``, an alias for ``format_date``
+    (frappe/utils/data.py:580), so it matches the format the rest of the desk uses.
     """
     if doc.party_type != "Temporary Worker" or not doc.party:
         return
@@ -61,7 +67,15 @@ def _flag_temporary_worker_past_expiry(doc) -> None:
         )
 
 def recalculate_room_occupancy(room_name: str) -> None:
-    """Recounts a room's active assignments and updates its occupancy count and status accordingly."""
+    """Recounts a room's active assignments and updates its occupancy count and status accordingly.
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
+    rather than by the length of a fetched list. ``Document.db_set``
+    (frappe/model/document.py:1235) writes the result WITHOUT running validation or
+    the save hooks: this is a derived figure recomputed from the rows that already
+    exist, so re-validating the room here would re-run rules against a number this
+    function is in the middle of correcting.
+    """
     if not room_name:
         return
     room = frappe.get_doc("Room", room_name)
@@ -80,7 +94,13 @@ def recalculate_building_occupancy(building_name: str) -> None:
     bed-occupancy transaction funnels through via ``recalculate_spatial`` — Housing Assignment
     submit/cancel, Housing Checkout submit/cancel, and Room Bed Transfer submit/cancel all land
     here — so a single ``notify=True`` on the occupant-count write is enough to tell every
-    portal viewer of this building that its bed picture just changed."""
+    portal viewer of this building that its bed picture just changed.
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) does the counting and
+    ``Document.db_set`` (frappe/model/document.py:1235) the write. ``notify=True`` is
+    the reason ``db_set`` is used rather than a bare ``frappe.db.set_value``: only the
+    document method publishes the realtime update, and without it a portal already
+    open shows yesterday's bed picture until it is reloaded."""
     if not building_name:
         return
     building = frappe.get_doc("Building", building_name)

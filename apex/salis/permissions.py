@@ -176,6 +176,12 @@ def _own_driver_trips_condition(user):
     Resolves the user -> Employee -> Salis Driver chain in SQL so the fragment holds
     the row's ``driver`` column to a driver linked to ``user``. A Driver reads the
     trips dispatched to them without needing a Project User Permission.
+
+    The chain is expressed as nested subqueries rather than resolved in Python,
+    because a ``permission_query_conditions`` hook must return a WHERE fragment: it
+    cannot run a query and hand back a list, and a driver id fetched here would be
+    stale for the rest of the request. The user goes through ``frappe.db.escape``
+    (frappe/database/database.py:1371); nothing else is interpolated.
     """
     return (
         "`driver` in ("
@@ -185,6 +191,15 @@ def _own_driver_trips_condition(user):
     )
 
 def _own_trip_actor_condition(user):
+    """SQL fragment matching a trip this user drives OR supervises.
+
+    Three bases OR-ed as ONE fragment: the driver chain, the route assignment's
+    supervisor, and — only when a trip carries no assignment — the route plan's
+    supervisor. Frappe AND-joins the conditions it collects, so returning these
+    separately would demand a user be all three at once and show them nothing.
+
+    The user goes through ``frappe.db.escape`` (frappe/database/database.py:1371).
+    """
     escaped_user = frappe.db.escape(user)
     return (
         "({driver} or `route_assignment` in ("
@@ -198,8 +213,12 @@ def _own_clause(spec, user):
 
     This is what keeps a Driver's own rows reachable when they hold no project at all.
     Frappe AND-s its own ``owner = me`` match onto the fragment for an ``if_owner``
-    DocPerm, so a bare project restriction would collapse such a user's list to
-    nothing; the OR here is what survives that join.
+    DocPerm (frappe/model/db_query.py), so a bare project restriction would collapse
+    such a user's list to nothing; the OR here is what survives that join. That is the
+    one thing the ``if_owner`` DocPerm cannot do on its own — it narrows, and this
+    row basis has to widen.
+
+    Values reach the SQL through ``frappe.db.escape`` (frappe/database/database.py:1371).
     """
     own = spec.get("own")
     if own == "owner":
