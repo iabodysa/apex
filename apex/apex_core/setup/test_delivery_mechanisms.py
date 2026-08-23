@@ -253,3 +253,34 @@ class TestModuleDefsReachAnUpgradedSite(FrappeTestCase):
         ]
         present = frappe.get_all("Module Def", filters={"app_name": "apex"}, pluck="name")
         self.assertEqual(sorted(set(declared) - set(present)), [])
+
+
+class TestSeedersUnfitForAFixtureStayCode(FrappeTestCase):
+    """Every DocType the nine ``apex_core/setup/seeders`` modules write, held out of
+    ``apex/fixtures/`` on purpose: an Auto Email Report and a Salis Settings default
+    resolve a value at runtime a static file cannot hold (the site's own Administrator
+    address, its sole Company or Cost Center); Navbar Settings and the Salis Settings
+    defaults only fill a blank an operator may have already set; Module Profile's
+    ``on_update`` takes a document lock a forced fixture reimport never releases
+    (frappe/core/doctype/module_profile/module_profile.py:29-34,
+    frappe/model/document.py:1590,1623); a Role cannot carry the two portal capacity
+    identities because Role is absent from ``IMPORTABLE_DOCTYPES``
+    (frappe/model/sync.py:17-35); and Maintenance Material Template's required Links
+    depend on a catalogue two files outside this DocType's own module create, in an
+    order ``sync_fixtures`` cannot guarantee — it runs before ``after_migrate`` hooks
+    on migrate (frappe/migrate.py:143,154-156)."""
+
+    def test_none_of_the_nine_doctypes_ship_as_a_fixture_file(self):
+        for doctype in (
+            "Auto Email Report",
+            "Module Profile",
+            "Maintenance Material Template",
+            "User",
+            "Role",
+            "Navbar Settings",
+            "Salis Settings",
+        ):
+            with self.subTest(doctype=doctype):
+                self.assertFalse(
+                    (APP_ROOT / "fixtures" / f"{frappe.scrub(doctype)}.json").exists()
+                )
