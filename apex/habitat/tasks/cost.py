@@ -124,6 +124,12 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
     directly callable). Idempotent — an existing ledger row for the
     (employee, posting_date, assignment, building, ledger_type) key is skipped, so
     retries and overlapping runs never duplicate.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
     from frappe.utils import today, flt
 
@@ -216,6 +222,12 @@ def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
     assignment with no employee), so they are back-dated to the now-linked Employee.
     Mirrors daily_accommodation_cost_allocation's per-assignment-per-date algorithm;
     idempotent (existence-guarded) and per-row error-isolated. Returns days processed.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
     from frappe.utils import today, getdate, add_days, flt
 

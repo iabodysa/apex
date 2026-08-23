@@ -77,6 +77,12 @@ def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, i
     the link: the ToDo carries reference_type and reference_name, so the same document is
     never queued twice and finding it is an indexed lookup.
 
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
+
     Accommodation Manager is the audience because the technician role holds read only on
     this DocType — a queue addressed to someone who cannot act on the record is the
     second inbox this move exists to remove.

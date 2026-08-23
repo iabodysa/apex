@@ -19,7 +19,7 @@ Endpoints:
   building scope covers the building (applies-to-all OR named in the Safety Task
   Building Scope child table). Read-only.
 - :func:`get_due_cadences` returns, for a building, only the cadences that have
-  NO submitted Safety Round in the current period (today / this ISO week / this
+  NO submitted Safety Round in the current period (today / this week / this
   month / this calendar quarter / this year) together with each due cadence's
   expected tasks. Powers the safety portal's "what is due now" view. Read-only.
 - :func:`submit_round` records one round as a single transaction: a Safety Round
@@ -239,7 +239,7 @@ def get_due_cadences(building=None):
 
     So on a fresh building every cadence with tasks is due; after a Daily round
     is submitted today, Daily drops out for the rest of today; at the start of a
-    new ISO week Daily and Weekly are due again.
+    new week Daily and Weekly are due again.
 
     Permission: caller must have ``read`` on Safety Task Catalog (same gate as
     :func:`get_tasks_for_cadence`).

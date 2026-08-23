@@ -102,7 +102,7 @@ def daily_safety_task_compliance_scan() -> None:
     the building timeline, and alerts the building's own Responsible Facility
     Supervisor. This is broader than
     ``weekly_safety_coverage_gate`` (which only
-    checks for a *Weekly*-cadence round in the current ISO week): it catches buildings
+    checks for a *Weekly*-cadence round in the current week): it catches buildings
     with no safety activity whatsoever. Both passes end by reconciling the Building queue
     against ``buildings_needing_safety_attention``, so a building that no longer fails
     EITHER condition has its assignment CLOSED — the half an alert row never had.
@@ -131,7 +131,7 @@ def weekly_safety_coverage_gate() -> None:
     ``value if not None else 1`` — the gate defaults ON, but a falsy stored value on
     the Single turns it off, per the Single new-field caveat). When the gate is ON,
     each ACTIVE Building (``status == "Active"``) with no submitted
-    Weekly-cadence Safety Round dated within the current ISO week is assigned to the
+    Weekly-cadence Safety Round dated within the current week is assigned to the
     Safety Officer with a system Notification beside it, and a building covered later
     has that assignment closed on the next run. Per-row
     error isolation.
@@ -282,6 +282,12 @@ def _flag_overdue_instances(cutoff, logger):
     """Flag Scheduled Task Instances past their grace window and escalate the urgent ones.
 
     Returns (total_overdue, escalated).
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
     total_overdue = 0
     escalated = 0
@@ -354,8 +360,15 @@ def _flag_overdue_instances(cutoff, logger):
 def _flag_buildings_without_rounds(logger):
     """Flag active Buildings with no submitted Safety Round in the trailing window.
 
-    Broader than the weekly coverage gate, which only asks for a Weekly-cadence round in
-    the current ISO week; this catches a building with no safety activity at all.
+    Broader than the weekly coverage gate, which only asks for a Weekly-cadence round
+    in the current week — the site's own week, via ``get_first_day_of_week``
+    (frappe/utils/data.py:427). This catches a building with no safety activity at all.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
     from frappe.utils import add_days, getdate, today
 

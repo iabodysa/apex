@@ -16,6 +16,12 @@ def _notify_operational(source_doctype: str, source_name: str, message: str) -> 
     timeline Comments (plus the configured Notification emails) carry operational
     notices. When the toggle is OFF the scheduler jobs run silently. Technical
     exceptions go to the standard Error Log, not here.
+
+    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
+    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
+    the top: the worker rolls back the whole run, so every unit already completed is
+    lost and the next run repeats them all. The failure is recorded through
+    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
     """
     if not frappe.db.get_single_value("Habitat Settings", "enable_operational_notifications"):
         return
