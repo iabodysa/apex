@@ -526,7 +526,14 @@ def _ocr_image_to_text(image: str) -> str | None:
     might be installed on the bench (``pytesseract`` over Pillow) and returns None
     when none is available — at which point ``parse_passport`` reports that the
     OCR engine must be enabled, and the desk falls back to manual entry. Kept fully
-    defensive so a missing dependency degrades gracefully rather than 500-ing."""
+    defensive so a missing dependency degrades gracefully rather than 500-ing.
+
+    Not a circular import: ``pytesseract`` is not a project dependency and is absent
+    on a bench that has not installed the optional OCR engine. Moving this import to
+    module level would make importing ``arrivals_desk`` itself — and every endpoint
+    on it, OCR or not — raise ``ModuleNotFoundError`` on such a bench. It stays here
+    so only a call to this function needs the engine, and only when it is missing.
+    """
     payload = image.split(",", 1)[1] if image.startswith("data:") and "," in image else image
     try:
         raw = base64.b64decode(payload)
