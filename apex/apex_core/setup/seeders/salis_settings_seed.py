@@ -23,8 +23,6 @@ the last chance to fill these defaults. A seed with no such re-run must raise in
 
 import frappe
 
-from apex.apex_core.setup.seeders import never_stored
-
 
 DOCTYPE = "Salis Settings"
 
@@ -49,22 +47,21 @@ def seed_salis_settings():
 
     try:
         settings = frappe.get_single(DOCTYPE)
+        stored = frappe.db.get_singles_dict(DOCTYPE)
         filled = []
 
         for field, value in DEFAULTS.items():
-            if settings.meta.has_field(field) and never_stored(DOCTYPE, field):
+            if settings.meta.has_field(field) and field not in stored:
                 settings.set(field, value)
                 filled.append(field)
 
-        if settings.meta.has_field("default_company") and never_stored(DOCTYPE, "default_company"):
+        if settings.meta.has_field("default_company") and "default_company" not in stored:
             company = _sole("Company")
             if company:
                 settings.default_company = company
                 filled.append("default_company")
 
-        if settings.meta.has_field("default_cost_center") and never_stored(
-            DOCTYPE, "default_cost_center"
-        ):
+        if settings.meta.has_field("default_cost_center") and "default_cost_center" not in stored:
             filters = {"is_group": 0}
             if settings.get("default_company"):
                 filters["company"] = settings.get("default_company")

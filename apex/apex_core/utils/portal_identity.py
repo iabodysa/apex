@@ -345,15 +345,6 @@ def resolve_portal_subject(audience: str, token=None, required=False):
         _reject_invalid_token()
     return subject
 
-def _deny_issuance(audience: str) -> None:
-    """Raises a permission error naming the audience whose portal credential issuance is denied."""
-    frappe.throw(
-        _("You are not permitted to issue {0} portal credentials.").format(
-            audience
-        ),
-        frappe.PermissionError,
-    )
-
 def _lock_subject_row(audience: str, subject: str, *, require_active=False):
     """Lock and return one portal subject row."""
     _require_audience(audience)
@@ -367,7 +358,10 @@ def _lock_subject_row(audience: str, subject: str, *, require_active=False):
         for_update=True,
     )
     if require_active and (not row or row.status != "Active"):
-        _deny_issuance(audience)
+        frappe.throw(
+            _("You are not permitted to issue {0} portal credentials.").format(audience),
+            frappe.PermissionError,
+        )
     return row
 
 def _lock_subject_token_rows(audience: str, subject: str):
@@ -513,7 +507,10 @@ def authorize_issuance(
 
     subject_row = _lock_subject_row(audience, subject, require_active=require_active)
     if not subject_row:
-        _deny_issuance(audience)
+        frappe.throw(
+            _("You are not permitted to issue {0} portal credentials.").format(audience),
+            frappe.PermissionError,
+        )
     _lock_subject_token_rows(audience, subject)
 
     if user == "Administrator":
@@ -521,7 +518,10 @@ def authorize_issuance(
 
     roles = set(frappe.get_roles(user))
     if not roles.intersection(ISSUER_ROLES[audience]):
-        _deny_issuance(audience)
+        frappe.throw(
+            _("You are not permitted to issue {0} portal credentials.").format(audience),
+            frappe.PermissionError,
+        )
     if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
         return False
 
@@ -559,7 +559,10 @@ def authorize_issuance(
             frappe.PermissionError,
         )
 
-    _deny_issuance(audience)
+    frappe.throw(
+        _("You are not permitted to issue {0} portal credentials.").format(audience),
+        frappe.PermissionError,
+    )
 
 def authorize_revocation(audience: str, subject: str, user=None) -> bool:
     """Authorize a MANUAL revocation: same issuer roles, same project/building scope.

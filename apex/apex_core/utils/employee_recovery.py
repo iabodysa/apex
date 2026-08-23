@@ -66,18 +66,16 @@ AGREED_INSTALLMENT_FIELD = "custom_agreed_installment"
 OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid")
 
 
-def _source_link_available() -> bool:
-    """True once the Employee Advance customization has synced (post-migrate)."""
-    return frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD)
-
-
 def find_recovery_advance(source_doctype: str, source_name: str) -> str | None:
     """The non-cancelled Employee Advance already raised for a source document.
 
     The "maps once" guarantee: keyed on the advance itself, so it holds even when
     the source document is amended (an amendment starts with a blank no_copy link).
     """
-    if not (source_name and _source_link_available()):
+    if not (
+        source_name
+        and frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD)
+    ):
         return None
     return frappe.db.get_value(
         "Employee Advance",
@@ -164,7 +162,7 @@ def raise_recovery_advance(
     if not (employee and amount > 0):
         return None
 
-    if not _source_link_available():
+    if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
         logger.warning(
             f"employee_recovery: {source_doctype} {source_name} — the Employee Advance source "
             f"Customization has not synced yet (run bench migrate). No Employee Advance raised."
@@ -410,7 +408,7 @@ def compute_recovery_installment(
         "docstatus",
         "status",
     ]
-    if _source_link_available():
+    if frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
         fields += [
             SOURCE_DOCTYPE_FIELD,
             SOURCE_DOCNAME_FIELD,
@@ -484,7 +482,7 @@ def validate_recovery_additional_salary(doc, method=None):
     """Revalidate an Apex recovery draft immediately before native HRMS submission."""
     if doc.ref_doctype != "Employee Advance" or not doc.ref_docname:
         return
-    if not _source_link_available():
+    if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
         return
     advance = frappe.get_doc("Employee Advance", doc.ref_docname, for_update=True)
     if not advance.get(SOURCE_DOCTYPE_FIELD):
@@ -531,13 +529,6 @@ def validate_recovery_additional_salary(doc, method=None):
         )
 
 
-def _recovery_enabled() -> bool:
-    """True once Salis Settings turns wage recovery on. Off is the shipped default."""
-    return bool(
-        frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
-    )
-
-
 def _refuse_while_recovery_is_disabled():
     """Refuse a person's deduction, naming the switch that has to be turned on.
 
@@ -548,7 +539,9 @@ def _refuse_while_recovery_is_disabled():
     there is no configured component to compare against, so every one of them fails
     and the reader is sent to inspect a document that is correct.
     """
-    if not _recovery_enabled():
+    if not bool(
+        frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
+    ):
         frappe.throw(
             _(
                 "Salary recovery is switched off. Turn on Employee Advance recovery in "
@@ -561,7 +554,9 @@ def _refuse_while_recovery_is_disabled():
 
 def _recovery_component() -> str | None:
     """Return the configured native deduction component while recovery is enabled."""
-    if not _recovery_enabled():
+    if not bool(
+        frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
+    ):
         return None
     component = frappe.db.get_single_value(
         "Salis Settings", "employee_advance_recovery_component"
@@ -655,7 +650,7 @@ def monthly_employee_recovery_run() -> None:
     """
     if not frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery"):
         return
-    if not _source_link_available():
+    if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
         return
 
     advances = frappe.get_all(

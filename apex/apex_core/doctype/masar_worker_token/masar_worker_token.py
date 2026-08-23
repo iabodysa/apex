@@ -55,11 +55,6 @@ _CREDENTIAL_REISSUE_GUARD = object()
 TOKEN_TTL_DAYS = 180
 
 
-def _token_expiry():
-    """The expiry stamp for a freshly issued/extended link: now + the TTL window."""
-    return frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS)
-
-
 def _new_token() -> str:
     """A fresh url-safe random raw token, whose HASH is unique across the doctype."""
     for _attempt in range(8):
@@ -180,7 +175,7 @@ class MasarWorkerToken(Document):
         }
         self._credential_reissue_guard = _CREDENTIAL_REISSUE_GUARD
         self._plaintext_token = raw
-        self.expires_on = _token_expiry()
+        self.expires_on = frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS)
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
         return raw
@@ -287,7 +282,7 @@ class MasarWorkerToken(Document):
         the window lapsed). Token + QR are unchanged; only ``expires_on`` advances."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
-        self.expires_on = _token_expiry()
+        self.expires_on = frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS)
         self.last_generated_on = frappe.utils.now_datetime()
         self.last_generated_by = frappe.session.user
         self.save()
@@ -305,11 +300,6 @@ def get_or_create_for_employee(employee: str) -> "MasarWorkerToken":
     doc = frappe.get_doc({"doctype": "Masar Worker Token", "employee": employee})
     doc.insert()
     return doc
-
-
-def _worker_link(token: str) -> str:
-    """The shareable personal Masar URL for a RAW token."""
-    return f"{frappe.utils.get_url()}/masar?w={token}"
 
 
 def reshare_worker_link(employee: str) -> str | None:
@@ -344,7 +334,7 @@ def reshare_worker_link(employee: str) -> str | None:
     raw = doc.recover_token()
     if not scoped_issuer:
         doc.extend_expiry()
-    return _worker_link(raw)
+    return f"{frappe.utils.get_url()}/masar?w={raw}"
 
 
 @frappe.whitelist(methods=["POST"])
@@ -360,7 +350,7 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
     doc = get_or_create_for_employee(employee)
     raw = _issue_token(doc, regenerate, scoped_issuer)
 
-    link = _worker_link(raw)
+    link = f"{frappe.utils.get_url()}/masar?w={raw}"
     return {
         "employee": doc.employee,
         "employee_name": doc.employee_name,
@@ -388,7 +378,7 @@ def batch_issue_worker_links(employees_json) -> list:
     for emp in employees:
         doc = get_or_create_for_employee(emp)
         raw = _issue_token(doc, scoped_issuer=scoped_issuers[emp])
-        link = _worker_link(raw)
+        link = f"{frappe.utils.get_url()}/masar?w={raw}"
         out.append(
             {
                 "employee": doc.employee,
@@ -421,11 +411,6 @@ _ELEVATED_DRIVER_USER_ROLES = {
     "HR Manager",
     "Accommodation Manager",
 }
-
-
-def _driver_link(token: str) -> str:
-    """The shareable personal driver-portal URL for a RAW token."""
-    return f"{frappe.utils.get_url()}/driver?d={token}"
 
 
 def _issue_token(
@@ -533,7 +518,7 @@ def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
     raw = _issue_token(doc, regenerate, scoped_issuer)
     _disable_legacy_driver_user(driver)
 
-    link = _driver_link(raw)
+    link = f"{frappe.utils.get_url()}/driver?d={raw}"
     return {
         "driver": doc.driver,
         "driver_name": frappe.db.get_value("Salis Driver", doc.driver, "full_name"),
@@ -563,7 +548,7 @@ def batch_issue_driver_links(drivers_json) -> list:
         doc = get_or_create_for_driver(drv)
         raw = _issue_token(doc, scoped_issuer=scoped_issuers[drv])
         _disable_legacy_driver_user(drv)
-        link = _driver_link(raw)
+        link = f"{frappe.utils.get_url()}/driver?d={raw}"
         out.append(
             {
                 "driver": doc.driver,

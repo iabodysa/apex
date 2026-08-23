@@ -14,8 +14,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model import default_fields
-
-from apex.apex_core.doctype.habitat_settings.habitat_settings import gl_posting_enabled
+from frappe.utils import cint
 
 SETTINGS_DOCTYPE = "Habitat Settings"
 
@@ -297,7 +296,11 @@ def route_payment(payment_request: str) -> str:
     _ensure_target_currency(target, source)
     target.insert(ignore_permissions=True)
 
-    if settings.auto_submit_target and target.meta.is_submittable and gl_posting_enabled():
+    if (
+        settings.auto_submit_target
+        and target.meta.is_submittable
+        and bool(cint(frappe.db.get_single_value("Habitat Settings", "enable_gl_posting")))
+    ):
         target.submit()
 
     source.db_set(

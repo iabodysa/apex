@@ -32,7 +32,9 @@ that touches rate limiting, notifications or request teardown should read all th
 
 from __future__ import annotations
 
-from apex.apex_core.utils.rate_window import charge_window, clear_window, peek_window
+import frappe
+
+from apex.apex_core.utils.rate_window import charge_window, peek_window
 
 
 def _miss_key(doctype: str, name: str) -> str:
@@ -75,4 +77,4 @@ def clear_lockout(doctype: str, name: str) -> None:
     ``otp_attempts`` and ``otp_locked_until`` are not the counter — see this module's
     docstring — so clearing them lifts nothing.
     """
-    clear_window(_miss_key(doctype, name))
+    frappe.cache.delete_value(_miss_key(doctype, name))

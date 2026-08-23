@@ -100,15 +100,3 @@ def effective_retention_days(key: str, days: int | None = None) -> int:
     if days is None or cint(days) == RETENTION_DEFAULTS[key]:
         return retention_days(key)
     return cint(days)
-
-
-def gl_posting_enabled() -> bool:
-    """Single source of truth for the ``enable_gl_posting`` finance gate.
-
-    Read via ``frappe.db.get_single_value`` (no full-doc load) so every caller -
-    the Payment Router, the housing ledger, a report - reads the flag the same
-    way. When this is falsy (the factory default), financial side effects stay
-    OFF: the housing ledger keeps writing operational memos and the Payment
-    Router routes the payment record without driving a GL-posting submit.
-    """
-    return bool(cint(frappe.db.get_single_value(SETTINGS_DOCTYPE, "enable_gl_posting")))
