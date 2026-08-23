@@ -90,14 +90,14 @@ class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
         doc = self._incident(recover_from_driver=1, recovery_amount=400, installment_amount=100)
         with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
             with self.assertRaises(frappe.ValidationError):
-                doc._guard_cost_recovery()
+                doc.insert()
 
     def test_an_unflagged_incident_saves_on_a_site_without_the_lending_app(self):
         """The event of record never depends on ``lending``."""
         doc = self._incident(recover_from_driver=0)
         with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
-            doc._guard_cost_recovery()
-        self.assertFalse(doc.recover_from_driver)
+            doc.insert()
+        self.assertTrue(frappe.db.exists("Vehicle Incident", doc.name))
 
     def test_raising_never_raises_a_legacy_employee_advance(self):
         """The regression this guards: a stray import of the retired call would
