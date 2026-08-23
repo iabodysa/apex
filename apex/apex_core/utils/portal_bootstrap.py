@@ -138,7 +138,13 @@ def publish_portal_context(
     capabilities,
     subject: str | None,
 ):
-    """Publish the shared shell contract after its route authenticated the caller."""
+    """Publish the shared shell contract after its route authenticated the caller.
+
+    ``frappe.get_site_config`` (frappe/__init__.py:329) is read rather than
+    ``frappe.conf`` so a value the site sets after boot is seen; only the keys the
+    shell needs are copied into the context, because everything placed here reaches
+    the browser.
+    """
     conf = frappe.get_site_config()
     context.no_cache = 1
     context.csrf_token = get_csrf_token()

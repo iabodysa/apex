@@ -35,7 +35,12 @@ def _subtitle(body):
 
 
 def _release_from_note(path, version):
-    """Builds a release feed entry from one change-log note's release timestamp, link, and subtitle."""
+    """Builds a release feed entry from one change-log note's release timestamp, link, and subtitle.
+
+    ``frappe.read_file`` (frappe/__init__.py:1720) returns "" for a missing or
+    unreadable path instead of raising, which is why a note that has not been written
+    yet drops out of the feed rather than breaking the whole login modal.
+    """
     body = frappe.read_file(path) or ""
     released = _RELEASED_AT.search(body)
     if not released:
@@ -50,7 +55,13 @@ def _release_from_note(path, version):
 
 
 def shipped_releases():
-    """Every release note on disk, newest version first."""
+    """Every release note on disk, newest version first.
+
+    ``frappe.get_app_path`` (frappe/__init__.py:1484) resolves the installed app's own
+    directory, so this reads the notes that SHIPPED with the running version rather
+    than any path the site happens to be started from. The feed is derived from those
+    files and not from a list in code, so a note cannot exist without appearing.
+    """
     folder = os.path.join(frappe.get_app_path("apex"), "change_log")
     found = []
     for series in sorted(os.listdir(folder)):

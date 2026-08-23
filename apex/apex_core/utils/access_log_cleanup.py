@@ -88,7 +88,12 @@ def _sanitized_record(row: dict) -> dict:
 
 
 def _scan(threshold: int, limit: int) -> list[dict]:
-    """Returns sanitized Access Log rows whose payload exceeds the byte threshold, largest first."""
+    """Returns sanitized Access Log rows whose payload exceeds the byte threshold, largest first.
+
+    Raw SQL rather than ``frappe.get_all``: the selection is by the BYTE LENGTH of a
+    column, which the query builder has no expression for, and the ordering is on that
+    same computed size. Both parameters are bound, never interpolated.
+    """
     rows = frappe.db.sql(SCAN_SQL, {"threshold": threshold, "limit": limit}, as_dict=True)
     return [_sanitized_record(row) for row in rows or []]
 

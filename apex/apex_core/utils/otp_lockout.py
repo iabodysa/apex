@@ -76,5 +76,10 @@ def clear_lockout(doctype: str, name: str) -> None:
     charged against a code that no longer opens anything. The DocType's own
     ``otp_attempts`` and ``otp_locked_until`` are not the counter — see this module's
     docstring — so clearing them lifts nothing.
+
+    ``frappe.cache.delete_value`` (frappe/utils/redis_wrapper.py:133) applies
+    ``make_key`` itself, so the raw key name is passed here exactly as
+    :func:`charge_window` charges it. Passing an already-prefixed name would delete a
+    key nothing wrote and leave the real lockout standing.
     """
     frappe.cache.delete_value(_miss_key(doctype, name))

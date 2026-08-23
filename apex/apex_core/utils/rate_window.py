@@ -26,9 +26,11 @@ def charge_window(name: str, window_seconds: int, limit: int) -> int:
     Raises ``RateLimitExceededError`` (HTTP 429) on the hit that carries the count
     past ``limit``, so a caller only has to decide WHICH bucket to charge.
 
-    ``name`` is the RAW key name: ``make_key`` is applied here so no call site has to
-    remember it, and none can apply it twice (a double-prefixed name counts in a key
-    nothing else reads, and a cleanup aimed at the real one clears nothing).
+    ``name`` is the RAW key name: ``frappe.cache.make_key``
+    (frappe/utils/redis_wrapper.py:41) is applied here so no call site has to remember
+    it, and none can apply it twice — the one thing ``make_key`` cannot do is refuse a
+    key it has already prefixed, and a double-prefixed name counts in a bucket nothing
+    else reads while a cleanup aimed at the real one clears nothing.
 
     The TTL is set only when the window opens, never refreshed, so a steady stream
     cannot hold one window open forever.

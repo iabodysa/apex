@@ -71,6 +71,11 @@ def find_recovery_advance(source_doctype: str, source_name: str) -> str | None:
 
     The "maps once" guarantee: keyed on the advance itself, so it holds even when
     the source document is amended (an amendment starts with a blank no_copy link).
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
+    the custom field is read, because this app's recovery link is a Custom Field on
+    hrms' Employee Advance: on a site where the fixture has not synced yet the column
+    does not exist, and querying it raises instead of answering "no advance".
     """
     if not (
         source_name
@@ -156,6 +161,12 @@ def raise_recovery_advance(
     The advance account is checked to be of type Receivable before the Employee Advance
     is built: HRMS requires a Receivable advance account and throws on submit, so
     catching it here degrades to a logged warning instead of a failed submit.
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) gates the read
+    of this app's Custom Field on hrms' Employee Advance. The one thing the field
+    cannot do is exist before its fixture syncs, so on a site mid-upgrade the column
+    is absent and querying it raises — which would fail the operational submit rather
+    than the advance.
     """
     logger = frappe.logger()
     amount = flt(amount)
@@ -387,6 +398,11 @@ def compute_recovery_installment(
     salary_preview=None,
 ) -> float:
     """The amount recoverable from ONE pay period against ``advance``, in company currency.
+
+    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
+    each optional limit is read: several of the ceilings live on Custom Fields, and a
+    site whose fixtures have not synced must recover a SMALLER amount rather than
+    raise. A missing limit therefore drops out of the minimum instead of aborting it.
 
     The lowest of every binding limit, floored at zero:
 
