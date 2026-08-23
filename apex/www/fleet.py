@@ -23,8 +23,15 @@ from apex.salis.api.fleet_employee import get_context as get_fleet_context
 
 
 def get_context(context):
-    """Redirects guests to login and bootstraps the fleet self-service page for any logged-in user."""
+    """Redirects guests to login and bootstraps the fleet self-service page for any logged-in user.
+
+    The language is pinned on ``frappe.local.lang`` the same way every sibling portal
+    (``www/driver.py``, ``www/masar.py``, ``www/housing.py``, ``www/fleet_os.py``) does:
+    a logged-in User's own ``language`` preference would otherwise override the site
+    default and render this Arabic screen in whatever language their profile carries.
+    """
     guest_redirect("/fleet")
+    frappe.local.lang = "ar"
 
     fleet_context = get_fleet_context()
     grants = ["fleet.self.read"]

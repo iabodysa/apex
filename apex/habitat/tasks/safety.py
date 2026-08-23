@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import frappe
+from frappe import _
 
 from apex.apex_core.utils.role_assignment import assign_role, reconcile_role_queue
 from apex.apex_core.utils.system_notify import notify_user_system
@@ -180,15 +181,15 @@ def weekly_safety_coverage_gate() -> None:
                 if covered:
                     continue
                 label = b.building_name or b.name
-                msg = (
-                    f"weekly_safety_coverage_gate: building {label} ({b.name}) has no submitted "
-                    f"Weekly Safety Round for the week of {week_start} — {week_end}."
-                )
+                msg = _(
+                    "Building {0} ({1}) has no submitted Weekly Safety Round for the "
+                    "week of {2} — {3}."
+                ).format(label, b.name, week_start, week_end)
                 logger.warning(msg)
                 assign_role("Building", b.name, SAFETY_ROLE, description=msg)
                 _notify_role_system(
                     SAFETY_ROLE,
-                    subject=f"Building not covered by a weekly safety round: {label}",
+                    subject=_("Building not covered by a weekly safety round: {0}").format(label),
                     message=msg,
                 )
                 uncovered += 1
@@ -243,22 +244,22 @@ def audit_remediation_deadline_watch() -> None:
                 result = refresh_overall_status(plan.name, today_date)
                 if result["overall_status"] != "Overdue":
                     continue
-                msg = (
-                    f"audit_remediation_deadline_watch: remediation plan {plan.name} "
-                    f"(project {plan.client_project}) passed its deadline {plan.remediation_deadline} "
-                    f"and is now Overdue."
-                )
+                msg = _(
+                    "Remediation plan {0} (project {1}) passed its deadline {2} and is "
+                    "now Overdue."
+                ).format(plan.name, plan.client_project, plan.remediation_deadline)
                 logger.warning(msg)
                 _notify_operational("Audit Remediation Plan", plan.name, msg)
+                subject = _("Audit remediation overdue: {0}").format(plan.name)
                 if plan.internal_owner:
                     notify_user_system(
                         plan.internal_owner,
-                        f"Audit remediation overdue: {plan.name}",
+                        subject,
                         msg,
                     )
                 _notify_role_system(
                     "Accommodation Manager",
-                    subject=f"Audit remediation overdue: {plan.name}",
+                    subject=subject,
                     message=msg,
                     document_type="Audit Remediation Plan",
                     document_name=plan.name,
@@ -312,14 +313,15 @@ def _flag_overdue_instances(cutoff, logger):
                 frappe.db.set_value("Scheduled Task Instance", inst.name, "status", "Overdue")
                 _notify_operational(
                     "Scheduled Task Instance", inst.name,
-                    f"Scheduled task {inst.name} ({inst.template}) is overdue (was due {inst.due_date}).",
+                    _("Scheduled task {0} ({1}) is overdue (was due {2}).").format(
+                        inst.name, inst.template, inst.due_date
+                    ),
                 )
                 priority = _instance_priority(inst.template)
                 if priority in ("High", "Critical"):
-                    msg = (
-                        f"daily_safety_task_compliance_scan: {priority}-priority scheduled task "
-                        f"{inst.name} ({inst.template}) is overdue (was due {inst.due_date})."
-                    )
+                    msg = _(
+                        "{0}-priority scheduled task {1} ({2}) is overdue (was due {3})."
+                    ).format(_(priority), inst.name, inst.template, inst.due_date)
                     assign_role(
                         "Scheduled Task Instance",
                         inst.name,
@@ -330,7 +332,7 @@ def _flag_overdue_instances(cutoff, logger):
                     queued_instances.append(inst.name)
                     _notify_role_system(
                         SAFETY_ROLE,
-                        subject=f"Overdue {priority} safety task: {inst.name}",
+                        subject=_("Overdue {0} safety task: {1}").format(_(priority), inst.name),
                         message=msg,
                     )
                     escalated += 1
