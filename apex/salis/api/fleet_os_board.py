@@ -53,7 +53,12 @@ def driver_pii_visible() -> bool:
     ``driver_id`` and ``phone`` are blanked, not omitted, so the payload shape
     never changes with the reader. Every fleet-OS surface that carries a driver
     asks HERE, so the board, the typeahead and the audit timeline can never
-    disagree about who is allowed to see what."""
+    disagree about who is allowed to see what.
+
+    ``Meta.get_permlevel_access`` (frappe/model/meta.py:633) resolves the levels this
+    caller may read. The one thing a permlevel cannot do is reach a hand-built
+    payload: the framework applies it to a document's own fields, and these columns
+    are assembled into a dict, so the gate has to be asked explicitly here."""
     return 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
 

@@ -49,6 +49,14 @@ def _read(csv_dir, name):
 def run(csv_dir=None):
     """Import the fleet master CSVs, skipping rows a master already holds.
 
+    ``frappe.get_app_path`` (frappe/__init__.py:1484) anchors the default directory to
+    the installed app rather than the process working directory, so the same command
+    reads the same files whichever way the bench was started.
+
+    ``frappe.db.commit`` (frappe/database/database.py:1173) lands each master before
+    the next begins: this is a one-shot migration run by hand, and the one thing a
+    single transaction cannot do is keep the masters that succeeded when a later file
+    turns out to be malformed.
     """
     csv_dir = csv_dir or os.path.join(
         frappe.get_app_path("apex"), "..", "scratch", "data_dumps", "etl_out"

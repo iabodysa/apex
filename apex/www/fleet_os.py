@@ -26,7 +26,12 @@ FLEET_ROLES = {
 def _may_view() -> bool:
     """A fleet role plus live read on Salis Vehicle — the one gate both the /apps tile
     and get_context() apply, so a Role Permission Manager edit to Salis Vehicle can
-    never leave the tile advertising a board the page then refuses."""
+    never leave the tile advertising a board the page then refuses.
+
+    ``frappe.get_roles`` (frappe/permissions.py:497) answers the role half and
+    ``frappe.has_permission`` the live DocPerm half. Both are needed: the one thing a
+    role list cannot tell you is whether that role still HAS read on the vehicle after
+    an administrator edited the Role Permission Manager."""
     return bool(FLEET_ROLES & set(frappe.get_roles())) and bool(
         frappe.has_permission("Salis Vehicle", "read")
     )
