@@ -155,21 +155,58 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
                 if granted == ("select",):
                     self.assertNotIn("read", granted)
 
-    def test_the_seeder_is_idempotent(self):
-        """It runs on every migrate, so a second call must change nothing."""
+    def test_the_seeder_creates_the_rows_when_they_are_absent(self):
+        """Proved from an EMPTY state, not from a site that already holds them.
+
+        A site upgraded before this change still carries the rows the old mechanism
+        wrote, so calling the seeder there adds nothing and a count that does not move
+        proves neither that it works nor that it is idempotent. The rows are cleared
+        first; ``FrappeTestCase`` rolls the transaction back afterwards.
+        """
+        frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
+        frappe.clear_cache(doctype="Employee")
+        self.assertEqual(frappe.db.count("Custom DocPerm", {"parent": "Employee"}), 0)
+
         seed_app_owned_permissions()
-        before = frappe.db.count("Custom DocPerm")
+        frappe.clear_cache(doctype="Employee")
+        created = frappe.db.count("Custom DocPerm", {"parent": "Employee"})
+        self.assertGreater(created, 0)
+
         seed_app_owned_permissions()
-        self.assertEqual(frappe.db.count("Custom DocPerm"), before)
+        self.assertEqual(
+            frappe.db.count("Custom DocPerm", {"parent": "Employee"}), created
+        )
+
+    def test_a_select_only_role_is_not_granted_read_on_the_site(self):
+        """The escalation this file exists to prevent, read back from the database."""
+        frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
+        frappe.clear_cache(doctype="Employee")
+        seed_app_owned_permissions()
+
+        row = frappe.db.get_value(
+            "Custom DocPerm",
+            {"parent": "Employee", "role": "Accommodation Manager", "permlevel": 0},
+            ["select", "read"],
+            as_dict=True,
+        )
+        self.assertTrue(row, "the select-only row was not created")
+        self.assertEqual(row.select, 1)
+        self.assertEqual(row.read, 0)
 
     def test_the_base_roles_survive_the_dropped_block(self):
-        """Asserted directly, because counting apex rows proves nothing about this.
+        """Asserted from an EMPTY state, because that is the state the change creates.
 
-        Custom DocPerm is all-or-nothing per DocType (frappe/model/meta.py:552), so the
-        question is whether a role that exists ONLY in the base DocPerm still resolves.
+        Custom DocPerm is all-or-nothing per DocType (frappe/model/meta.py:552). On a
+        site that still holds rows from the old mechanism this assertion passes for the
+        wrong reason — HR Manager is in those rows — so the rows are cleared first and
+        the STANDARD block is what has to answer.
         """
+        frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
+        frappe.clear_cache(doctype="Employee")
+
         roles = {p.role for p in frappe.get_meta("Employee").permissions}
         self.assertIn("HR Manager", roles)
+        self.assertIn("HR User", roles)
 
 
 class TestModuleDefsReachAnUpgradedSite(FrappeTestCase):
