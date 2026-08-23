@@ -1,7 +1,6 @@
 """Masar personal service for a driver linked to an active Employee."""
 
 import frappe
-from frappe import _
 
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api.driver_portal import _require_enabled, _resolve_driver
@@ -12,18 +11,18 @@ from apex.salis.api.masar_worker import (
 )
 
 
-def _resolve_linked_employee(required=False):
-    """Resolve Driver -> active linked Employee without accepting an employee id."""
+def _resolve_linked_employee():
+    """Resolve Driver -> active linked Employee without accepting an employee id.
+
+    Returns None when the driver has no active linked Employee — a configuration
+    state, not a permission denial. Custody and housing hang off the Employee, so
+    each caller with nothing to show for a None employee returns its own empty
+    shape rather than raising.
+    """
     driver = _resolve_driver()
-    employee = frappe.db.get_value(
+    return frappe.db.get_value(
         "Salis Driver", {"name": driver, "status": "Active"}, "employee"
     )
-    if required and not employee:
-        frappe.throw(
-            _("No active Employee is linked to this driver."),
-            frappe.PermissionError,
-        )
-    return employee
 
 
 @frappe.whitelist(allow_guest=True)
@@ -47,8 +46,16 @@ def get_masar_today():
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_my_accommodation():
+    """The session driver's own active accommodation assignment (read).
+
+    An unlinked driver has no Employee to hang an assignment off, so this returns
+    the same ``{}`` the ``/accommodation`` view already renders as its own no-data
+    case — the DriverPage.vue fields view treats an empty dict as the empty state.
+    """
     _require_enabled()
-    employee = _resolve_linked_employee(required=True)
+    employee = _resolve_linked_employee()
+    if not employee:
+        return {}
     return _active_assignment(employee) or {}
 
 
@@ -57,9 +64,15 @@ def get_my_accommodation():
 def get_my_custody():
     """The session driver's own live custody holding, scoped on ``employee`` —
     resolved from the portal identity via ``_resolve_linked_employee``, never a
-    client-supplied id."""
+    client-supplied id.
+
+    An unlinked driver has no Employee to hold custody, so this returns the same
+    ``{"items": []}`` the query below already returns when the Employee simply
+    holds nothing — the collections view (``/custody``) renders that as empty."""
     _require_enabled()
-    employee = _resolve_linked_employee(required=True)
+    employee = _resolve_linked_employee()
+    if not employee:
+        return {"items": []}
     rows = frappe.get_all(
         "Accommodation Stock Ledger",
         filters={
@@ -95,9 +108,15 @@ def get_my_custody():
 def get_my_resident_requests():
     """The session driver's own Resident Requests, scoped on ``employee`` —
     resolved from the portal identity via ``_resolve_linked_employee``, never a
-    client-supplied id."""
+    client-supplied id.
+
+    An unlinked driver has no Employee to hold requests, so this returns the same
+    ``[]`` the query below already returns when the Employee simply has none — the
+    collections view (``/requests``) renders that as empty."""
     _require_enabled()
-    employee = _resolve_linked_employee(required=True)
+    employee = _resolve_linked_employee()
+    if not employee:
+        return []
     rows = frappe.get_all(
         "Resident Request",
         filters={"employee": employee},
