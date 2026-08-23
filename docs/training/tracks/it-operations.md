@@ -20,9 +20,9 @@ case crosses that boundary.
    [Follow Work from Request to Proof](../foundations.md) and [Settings](../settings.md).
 3. Rehearse safe personal-link handling in
    [Worker and Driver Portals](../portals-masar-driver.md).
-4. Use Installation for service controls and Troubleshooting for diagnosis.
-5. Use Scheduled automation to identify the source and result of the selected
-   background operation.
+4. Check the **Error Log** for diagnosis.
+5. Use the **Scheduled Job Type** and **Scheduled Job Log** screens to identify the
+   source and result of the selected background operation.
 
 ## Capstone
 

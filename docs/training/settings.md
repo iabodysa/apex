@@ -59,7 +59,7 @@ Do not use a production link or capture the training credential in evidence.
 
 ## Background follow-up
 
-Use the scheduled automation reference to identify which Apex
+Use the **Scheduled Job Type** screen to identify which Apex
 job follows a business condition, what enables it, and what record it may create or update.
 Check the source record and **Scheduled Job Log** before rerunning anything.
 

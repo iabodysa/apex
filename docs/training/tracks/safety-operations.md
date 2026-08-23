@@ -18,7 +18,8 @@ canonical guides.
 1. Restore the Safety baseline with [Trainer Setup and Reset](../trainer-setup.md).
 2. Complete the round, finding, and evidence rules in [Safety](../safety.md).
 3. Complete the generated-request handoff in [Maintenance](../maintenance.md).
-4. Review the scheduled source and expected result in Scheduled automation.
+4. Review the scheduled source and expected result in the **Scheduled Job Type** and
+   **Scheduled Job Log** screens.
 
 ## Capstone
 

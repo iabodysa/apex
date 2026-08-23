@@ -5,8 +5,7 @@
 # Apex Documentation
 
 Use Apex documentation to complete a job, prepare a team, or operate the system safely.
-Start with the product journey that matches your work; use administration and reference
-pages when you need exact deployment or configuration detail.
+Start with the product journey that matches your work.
 
 [Start with the role-based training map](training/README.md) when you are preparing a team.
 

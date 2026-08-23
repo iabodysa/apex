@@ -19,7 +19,7 @@ only for training administration.
 2. Confirm the learner's Company scope with
    [Follow Work from Request to Proof](../foundations.md).
 3. Complete the operating and Finance procedures in [Telecom](../telecom.md).
-4. Use Telecom troubleshooting only if the resulting state or Cost Center is unexpected.
+4. Check the **Error Log** only if the resulting state or Cost Center is unexpected.
 
 ## Capstone
 
