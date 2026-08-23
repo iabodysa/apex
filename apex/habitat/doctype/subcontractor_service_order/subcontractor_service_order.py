@@ -64,6 +64,11 @@ def _stamp_confirmation(doc):
     The order is what the contractor invoices against, and a bare checkbox on it names
     nobody. Clearing the tick clears the pair, so a withdrawn confirmation never leaves
     a name printed under it.
+
+    ``frappe.utils.now`` (frappe/utils/data.py) stamps the moment in the site's own
+    timezone rather than the server's. The one thing the framework's own ``modified_by``
+    cannot do is survive the next save: it names whoever touched the document last,
+    while this pair must keep naming whoever confirmed the visit.
     """
     if doc.supervisor_confirmed:
         if not doc.confirmed_by:

@@ -154,7 +154,12 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
     value-in-hands card and the Outstanding-by-Worker report — net signed
     (qty * unit_cost) over non-cancelled Custody Article rows with an employee
     set, grouped by employee. Holders whose net value is not positive are dropped.
-    One bounded grouped query; returns ``[{employee, value}]`` value-desc."""
+    One bounded grouped query; returns ``[{employee, value}]`` value-desc.
+
+    Raw SQL because the answer is a GROUP BY with a signed SUM and a HAVING, and the
+    one thing ``frappe.get_all`` cannot do is aggregate across groups — reading the
+    rows to total them in Python would pull the whole custody history to draw one
+    card. The building scope is applied as a bound fragment, never interpolated."""
     building_cond = _building_condition()
     extra = f"AND {building_cond}" if building_cond else ""
     rows = frappe.db.sql(

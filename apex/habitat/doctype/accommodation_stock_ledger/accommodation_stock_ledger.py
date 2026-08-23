@@ -170,6 +170,10 @@ def get_store_balance(item_type: str, item: str, building: str, employee=None,
     """Live signed-quantity balance for one item in a building's store (employee
     unset) or in an employee's custody (employee set). Sums non-cancelled rows.
 
+    Built with ``frappe.qb`` (frappe/query_builder) because two things
+    ``frappe.get_all`` cannot do are needed together: SUM the signed quantities in the
+    database, and take a row lock on what it summed.
+
     for_update: take a SELECT ... FOR UPDATE on the summed rows so the balance read
     is a locking current-read. A draining caller passes for_update=True to close the
     TOCTOU race where two concurrent transfers/handovers both read the same balance,

@@ -65,7 +65,13 @@ def get_site_address(building_name, site=None, building_address=None):
 def _guard_abbreviation_lock(doc):
     """Once rooms exist under a building its abbreviation is LOCKED: the generator keys
     on the ``room_number`` string and never renames, so changing the code would mint a
-    fresh namespace and ORPHAN every existing room. Delete the rooms first to change it."""
+    fresh namespace and ORPHAN every existing room. Delete the rooms first to change it.
+
+    ``Document.get_doc_before_save`` supplies the previous value and
+    ``frappe.db.count`` (frappe/database/database.py:1269) asks whether any room
+    exists. The one thing a DocField cannot do is be read-only CONDITIONALLY — set
+    after rooms exist and free before — so the lock is a validation, not a field
+    property."""
     if doc.is_new():
         return
     before = doc.get_doc_before_save()
@@ -155,7 +161,12 @@ def _recompute_occupancy_and_structure(doc):
     """Occupancy / room / floor / cctv recompute — several count() queries that don't
     change unless an external writer (the assignment controller, the room/bed
     generator, weekly_occupancy_sync) touched the related rows. Guarded behind the
-    trigger-field check so it doesn't run on every no-op building save."""
+    trigger-field check so it doesn't run on every no-op building save.
+
+    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
+    rather than by the length of a fetched list. The one thing a count cannot do is
+    tell the caller whether anything changed, which is why the trigger-field guard
+    sits above it: without it these queries run on every save of every building."""
     doc.current_occupants = frappe.db.count(
         "Housing Assignment",
         occupancy.active_assignment_filters(building=doc.name),

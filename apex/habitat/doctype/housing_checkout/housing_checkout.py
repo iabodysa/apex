@@ -388,7 +388,11 @@ def _cancel_orphan_damage_assessment(doc):
     (linked back via source_checkout) is orphaned when the checkout is cancelled.
     Cancel a still-draft assessment so it does not linger. A submitted assessment is
     left for the manager to handle: it is an approved valuation served on the worker, and
-    withdrawing it is the manager's decision to record on the assessment itself."""
+    withdrawing it is the manager's decision to record on the assessment itself.
+
+    ``frappe.delete_doc`` is used only on a DRAFT: the one thing cancellation cannot
+    do is reach a submitted document's own audit trail, and deleting one would remove
+    a valuation the worker has already been shown."""
     for cda in frappe.get_all(
         "Custody Damage Assessment",
         filters={"source_checkout": doc.name, "docstatus": 0},
