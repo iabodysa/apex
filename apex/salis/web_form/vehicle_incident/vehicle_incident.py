@@ -36,16 +36,19 @@ def submit_vehicle_incident(
     never fires on a guest submission.
 
     - ``website_field`` is a honeypot; any non-empty value is silently discarded.
-    - ``incident_type`` is restricted to the form's two safe options.
-    The controller's validate() guard force-stamps status="Open" and strips any
-    disposition fields for a Guest author, so this endpoint only has to bound the
-    free-text inputs and reject spam.
+    ``incident_type`` is NOT checked here: it is a Select on the DocType, and
+    ``_validate_selects`` (frappe/model/base_document.py:892) refuses anything outside
+    its options from inside ``insert`` (frappe/model/document.py:310 reaches
+    ``_validate`` at :627). ``ignore_permissions`` skips ``check_permission`` at :300
+    and nothing else, so the field's own refusal still stands. A second list here would
+    silently reject a third incident type the moment one is added to the DocType.
+    ``description`` is a Text column with no server length, so its bound is real and
+    stays. The controller's validate() guard force-stamps status="Open" and strips any
+    disposition fields for a Guest author, so this endpoint only has to bound the free
+    text and reject spam.
     """
     if website_field:
         return {"name": None}
-
-    if incident_type not in ("Accident", "Theft"):
-        frappe.throw(_("Invalid incident type."))
 
     if len(description or "") > 4000:
         frappe.throw(_("Description is too long. Please keep it under 4000 characters."))
