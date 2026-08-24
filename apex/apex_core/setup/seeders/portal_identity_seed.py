@@ -88,9 +88,16 @@ def seed_portal_identities() -> None:
     ``frappe.permissions.get_roles`` reads Has Role without an enabled filter, so the
     DocPerms still grade the portal write.
 
-    An identity seeded before this converges on the next migrate rather than being
-    skipped: this runs from after_migrate, and an existing enabled row would otherwise
+    An identity seeded before this converges rather than being skipped: this runs from
+    both after_install and after_migrate, and an existing enabled row would otherwise
     stay open forever.
+
+    ``frappe.is_setup_complete`` gates the whole function, so on a fresh install this
+    returns before creating anything and the two identities do not exist until the setup
+    wizard has run. Nothing is left open by that: ``create_roles`` has already shipped
+    both capacity roles with ``desk_access`` 0, and ``User.set_system_user`` derives
+    ``user_type`` from the desk_access of the roles a user holds, so whenever these
+    identities are finally created they are born Website Users.
     """
     if not frappe.is_setup_complete():
         return
