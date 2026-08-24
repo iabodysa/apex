@@ -1,8 +1,10 @@
 # Copyright (c) 2026, afmcoltd
 """Data-driven seed loader (Apex Habitat).
 
-The insert passes ``ignore_permissions`` because this is installer context: the loader runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_all`` reaches this loader only from hooks.py's ``after_install``/``after_migrate``,
+so the acting user is always Administrator, who already carries every permission on every
+DocType (frappe/permissions.py:107,273,506) — including the ones this loader does not know
+about in advance, since records span whichever DocType each data file names.
 
 A single, minimal, create-only loader that replaces the hand-written
 ``*_seed.py`` modules for records whose DocType is **not** importable as
@@ -239,7 +241,7 @@ def apply_spec(spec):
         frappe.db.savepoint(savepoint)
         try:
             doc = frappe.get_doc({"doctype": doctype, **record})
-            doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
+            doc.insert(ignore_if_duplicate=True)
             created += 1
         except Exception:
             frappe.db.rollback(save_point=savepoint)

@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed the Maintenance Material catalogue and its default Templates, in that order.
 
-The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_templates`` reaches here only from ``apex/setup.py``'s ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 ``TEMPLATE_SEEDS`` child rows are REQUIRED Links onto Maintenance Material, so a
 template can only be created after every material it names exists — Frappe's
@@ -140,5 +141,5 @@ def seed_templates():
                 for item in tpl["items"]
             ],
         })
-        doc.insert(ignore_permissions=True)
+        doc.insert()
     frappe.db.commit()

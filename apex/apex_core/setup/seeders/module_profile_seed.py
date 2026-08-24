@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Named Module Profiles that keep the other apps' workspaces off an Apex desk.
 
-The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_module_profiles`` reaches here only from hooks.py's ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 Apex's nine Workspaces each declare a roles table. The ones frappe, erpnext and hrms
 ship declare none, so every desk user sees them: an accommodation supervisor holding
@@ -80,7 +81,7 @@ def seed_module_profiles():
             doc.module_profile_name = profile_name
             for module in blocked_modules_for(profile_name):
                 doc.append("block_modules", {"module": module})
-            doc.insert(ignore_permissions=True)
+            doc.insert()
             doc.unlock()
         except Exception:
             frappe.db.rollback(save_point=savepoint)

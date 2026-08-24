@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed portal appearance defaults. Install-safe and idempotent.
 
-The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_salis_portal_theme`` reaches here only from hooks.py's ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 A Single needs a seeder rather than a patch: ``seed_all`` covers the habitat and salis
 data files and not this record, and a stamped patch never runs again, so a patch would
@@ -35,5 +36,5 @@ def seed_salis_portal_theme():
             settings.set(field, value)
             filled.append(field)
     if filled:
-        settings.save(ignore_permissions=True)
+        settings.save()
     return filled

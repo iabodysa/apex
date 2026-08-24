@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed Salis (movement/fleet) quick links into the desk navbar Help dropdown.
 
-The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_salis_navbar_help_links`` reaches here only from hooks.py's ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 Navbar Settings is a global Single, so it must NOT ship as a fixture (that would
 overwrite the customer's own navbar on every migrate). Instead this reads the
@@ -49,7 +50,7 @@ def seed_salis_navbar_help_links():
             })
             changed = True
         if changed:
-            settings.save(ignore_permissions=True)
+            settings.save()
             frappe.db.commit()
     except Exception:
         frappe.log_error(

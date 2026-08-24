@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Seed Salis Settings defaults. Install-safe, idempotent, blank-fields-only.
 
-The save passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_salis_settings`` reaches here only from hooks.py's ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 A patch is a one-time migration for sites that already exist; the defaults every NEW site
 needs belong beside the other seeders, which is why hooks.py runs this on both
@@ -71,7 +72,7 @@ def seed_salis_settings():
                 filled.append("default_cost_center")
 
         if filled:
-            settings.save(ignore_permissions=True)
+            settings.save()
             frappe.db.commit()
         return filled
     except Exception:

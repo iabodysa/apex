@@ -1,8 +1,9 @@
 # Copyright (c) 2026, afmcoltd
 """Shared engine for the per-module Auto Email Report seeders.
 
-The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install and migrate as Administrator, with no session user whose roles could be consulted.
+``seed_auto_email_reports_for`` reaches here only from hooks.py's ``after_install``/
+``after_migrate``, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 Each module ships its own periodic-digest list (Habitat's accommodation/safety
 digests, Salis's movement/fleet digests) but the create-if-absent routine is one
@@ -54,5 +55,5 @@ def seed_auto_email_reports_for(reports):
             "data_modified_till": 0,
             "no_of_rows": 100,
         })
-        doc.insert(ignore_permissions=True)
+        doc.insert()
     frappe.db.commit()
