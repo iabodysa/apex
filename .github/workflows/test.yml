@@ -193,10 +193,11 @@ jobs:
         run: |
           bench get-app --branch version-15 --skip-assets erpnext
           bench get-app --branch version-15 --skip-assets hrms
+          bench get-app --branch version-15 --skip-assets lending
 
       - name: Record the resolved framework versions
         working-directory: frappe-bench
-        # Nothing pins these three, so "which framework did this run get?" has to be
+        # Nothing pins these four, so "which framework did this run get?" has to be
         # answerable from the run itself. Also written to the job summary, where it
         # survives log truncation and is readable without opening the job.
         run: |
@@ -204,7 +205,7 @@ jobs:
           {
             echo "| app | version | commit | committed |"
             echo "| --- | --- | --- | --- |"
-            for app in frappe erpnext hrms; do
+            for app in frappe erpnext hrms lending; do
               d="apps/$app"
               [ -d "$d" ] || continue
               printf '| %s | %s | %s | %s |\n' "$app" \
@@ -224,6 +225,7 @@ jobs:
           bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
           bench --site test.localhost install-app erpnext
           bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app lending
           bench --site test.localhost install-app apex
 
       - name: Migrate (apply fixtures, workflows and patches)
