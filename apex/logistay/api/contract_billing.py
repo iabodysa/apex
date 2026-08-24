@@ -23,12 +23,12 @@ no reversal code and no field to drift out of step with the ledger. That reversa
 only reachable because ``allow_cancel_despite_billing_log`` stops the contract's own
 billing log from vetoing the cancellation; deleting a cited payment stays blocked.
 
-The three writes pass ``ignore_permissions`` because the telecom operator who raises the billing
-is not a finance user and must not become one. The Material Request and the Payment Entry are
-ERPNext documents whose create permission belongs to Purchase and Accounts roles; granting those
-to a telecom coordinator to satisfy this call would hand them the whole procurement and payment
-surface. The write is narrow and the documents land in Draft for finance to review — the eligible
-submitted contract, checked above, is what authorises it.
+The two inserts pass ``ignore_permissions`` because the telecom operator who raises the billing
+is not a finance user and must not become one: the Material Request and Payment Entry create
+permission belongs to Purchase and Accounts roles, and granting those to a coordinator would hand
+them the whole procurement and payment surface. Both land in Draft for finance to review. The
+billing-log append onto the contract carries no such flag — every role reaching this endpoint
+already holds ``write`` on Telecom Contract within its own company scope.
 
 Every action:
   * requires an eligible submitted contract the caller may read (company-scoped),
@@ -116,7 +116,7 @@ def _record_link(contract_doc, billing_period, document_type, document_name, amo
         },
     )
     contract_doc.flags.ignore_validate_update_after_submit = True
-    contract_doc.save(ignore_permissions=True)
+    contract_doc.save()
 
 
 def _result(document_type, document_name, existing):
