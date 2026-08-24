@@ -13,7 +13,7 @@
       as_dict=True) if doc.driver else None) or _dict() -%}
 {%- set vdoc = frappe.get_doc("Salis Vehicle", doc.vehicle) if doc.vehicle else None -%}
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
-{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") -%}
 {%- set emp_name = frappe.db.get_value("Employee", doc.recovery_employee, "employee_name") if doc.recovery_employee else None -%}
 
 {%- set cover = [] -%}

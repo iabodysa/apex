@@ -13,7 +13,7 @@
       ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set liable = emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
 {%- set company = building.get("company") or emp.get("company") -%}
-{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") -%}
 {%- set ret = (frappe.db.get_value("Custody Return", doc.custody_return,
       ["return_date", "custody_issue"], as_dict=True) or {}) if doc.custody_return else {} -%}
 

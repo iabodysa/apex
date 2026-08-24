@@ -17,7 +17,7 @@
 {%- set hnd = (frappe.db.get_value("Vehicle Handover", doc.source_handover,
       ["handover_date", "odometer_reading", "discrepancy_status"],
       as_dict=True) if doc.source_handover else None) or _dict() -%}
-{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") -%}
 {%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
 {%- set threshold = frappe.db.get_single_value("Salis Settings", "writeoff_ops_threshold") or 0 -%}

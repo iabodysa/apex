@@ -20,7 +20,7 @@
 {%- set rec_open = frappe.utils.cint(doc.outstanding_recoveries) -%}
 {%- set rec_amount = frappe.utils.flt(doc.outstanding_recovery_amount) -%}
 {%- set cleared = doc.status == "Cleared" -%}
-{%- set cur = (frappe.db.get_value("Company", emp.company, "default_currency") if emp.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set cur = (frappe.db.get_value("Company", emp.company, "default_currency") if emp.company else None) or frappe.db.get_default("currency") -%}
 {%- set custody = doc.returned_items or [] -%}
 {%- set custody_back = custody | selectattr("returned") | list | length -%}
 

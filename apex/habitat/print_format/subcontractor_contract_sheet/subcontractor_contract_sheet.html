@@ -25,7 +25,7 @@
 {%- set prepared_by = frappe.get_fullname(doc.owner) if doc.owner else None -%}
 {%- set doc_currency = (frappe.db.get_value("Company", company_name, "default_currency") if company_name else None)
       or frappe.db.get_single_value("Habitat Settings", "default_currency")
-      or frappe.db.get_default("currency") or "SAR" -%}
+      or frappe.db.get_default("currency") -%}
 
 <div class="ax" dir="{{ 'rtl' if is_rtl() else 'ltr' }}">
   {{ ax.watermark(doc) }}

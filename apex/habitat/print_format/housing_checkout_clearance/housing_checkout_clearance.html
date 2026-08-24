@@ -26,7 +26,7 @@
       ["worker_name", "iqama_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set resident = emp.get("employee_name") or tmp.get("worker_name") or asg.get("employee_name") or doc.party -%}
 {%- set company = building.get("company") or emp.get("company") -%}
-{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set currency = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") -%}
 {%- set nights = frappe.utils.date_diff(doc.checkout_date, asg.get("check_in_date")) if (doc.checkout_date and asg.get("check_in_date")) else None -%}
 
 {%- set rows = [] -%}

@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SEALED_INDEX_HTML } from "./seal-public-index.js";
 
 const portalRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repositoryRoot = path.resolve(portalRoot, "../..");
@@ -71,10 +70,9 @@ export function verifyGeneratedShell({ outDir = outputRoot, indexPath = shellPat
     }
   }
   assertNonExecutableBootstrap(shell);
-  // The published copy must stay the inert stub: apex/public/ is served with no session.
   const publishedIndex = path.join(outDir, "index.html");
-  if (readFileSync(publishedIndex, "utf8") !== SEALED_INDEX_HTML) {
-    throw new Error(`Published portal index is not the inert stub: ${publishedIndex}`);
+  if (existsSync(publishedIndex)) {
+    throw new Error(`Portal index left in the session-free asset path: ${publishedIndex}`);
   }
   return { manifestPath, indexPath, entry: entry.file };
 }

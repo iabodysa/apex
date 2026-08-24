@@ -27,7 +27,7 @@ class TestScheduleRecoveryDeductionCommentsOnTheAdvance(FrappeTestCase):
         ensure_advance_account(company)
         employee = make_employee(name="Apex Recovery Test Employee", company=company)
         employee_name = employee.name if hasattr(employee, "name") else employee["name"]
-        currency = frappe.db.get_value("Company", company, "default_currency") or "SAR"
+        currency = frappe.db.get_value("Company", company, "default_currency")
 
         advance = frappe.get_doc(
             {

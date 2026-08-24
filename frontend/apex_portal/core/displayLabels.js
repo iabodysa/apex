@@ -46,6 +46,8 @@ const frappeDate = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 const dateStyle = { day: "numeric", month: "long", year: "numeric" };
 const timeStyle = { hour: "numeric", minute: "2-digit" };
+const offsetStyle = { timeZoneName: "longOffset" };
+const gmtOffset = /([+-])(\d{2}):?(\d{2})/;
 const formatters = new Map();
 
 export function portalTimeZone() {
@@ -53,7 +55,7 @@ export function portalTimeZone() {
 }
 
 function clockFormatters() {
-  const language = globalThis.document?.documentElement?.lang || "ar";
+  const language = globalThis.document?.documentElement?.lang || "en";
   const timeZone = portalTimeZone();
   const key = `${language}|${timeZone}`;
   let pair = formatters.get(key);
@@ -62,15 +64,22 @@ function clockFormatters() {
     pair = {
       date: new Intl.DateTimeFormat(locale, { ...dateStyle, timeZone }),
       time: new Intl.DateTimeFormat(locale, { ...timeStyle, timeZone }),
+      offset: new Intl.DateTimeFormat("en-US", { ...offsetStyle, timeZone }),
     };
     formatters.set(key, pair);
   }
   return pair;
 }
 
-function riyadhDate(parts) {
-  const [year, month, day, hour = "00", minute = "00", second = "00"] = parts;
-  return new Date(`${year}-${month}-${day}T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:${second.padStart(2, "0")}+03:00`);
+function siteDate(parts) {
+  const [year, month, day, hour = 0, minute = 0, second = 0] = parts;
+  const wall = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  if (!portalTimeZone()) return new Date(wall);
+  const named = clockFormatters().offset.formatToParts(new Date(wall)).find((part) => part.type === "timeZoneName");
+  const shift = gmtOffset.exec(named?.value || "");
+  if (!shift) return new Date(wall);
+  const minutes = (shift[1] === "-" ? -1 : 1) * (Number(shift[2]) * 60 + Number(shift[3]));
+  return new Date(wall - minutes * 60000);
 }
 
 export function optionLabel(value) {
@@ -169,15 +178,15 @@ export function dateTimeLabel(value) {
   const { date: dateFormatter, time: timeFormatter } = clockFormatters();
   let match = text.match(frappeDateTime);
   if (match) {
-    const moment = riyadhDate(match.slice(1));
+    const moment = siteDate(match.slice(1));
     return __("{0} at {1}", [dateFormatter.format(moment), timeFormatter.format(moment)]);
   }
   match = text.match(frappeTime);
   if (match) {
-    return timeFormatter.format(riyadhDate(["2000", "01", "01", ...match.slice(1)]));
+    return timeFormatter.format(siteDate(["2000", "01", "01", ...match.slice(1)]));
   }
   match = text.match(frappeDate);
-  if (match) return dateFormatter.format(riyadhDate(match.slice(1)));
+  if (match) return dateFormatter.format(siteDate(match.slice(1)));
   return text;
 }
 
@@ -186,7 +195,7 @@ export function remainingSeconds(value, durationSeconds, now = Date.now()) {
   const text = String(value).trim();
   const match = text.match(frappeDateTime);
   const started = match
-    ? riyadhDate(match.slice(1)).getTime()
+    ? siteDate(match.slice(1)).getTime()
     : Date.parse(text);
   if (!Number.isFinite(started)) return null;
   const duration = Math.max(Number(durationSeconds) || 0, 0) * 1000;

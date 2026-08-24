@@ -11,7 +11,7 @@
       ["worker_name", "iqama_number", "passport_number", "labour_supplier"], as_dict=True) or {}) if (doc.party_type == "Temporary Worker" and doc.party) else {} -%}
 {%- set holder = doc.issued_to_name or emp.get("employee_name") or tmp.get("worker_name") or doc.party -%}
 {%- set issuer = frappe.get_fullname(doc.issued_by) if doc.issued_by else keeper -%}
-{%- set currency = (frappe.db.get_value("Company", building.get("company"), "default_currency") if building.get("company") else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set currency = (frappe.db.get_value("Company", building.get("company"), "default_currency") if building.get("company") else None) or frappe.db.get_default("currency") -%}
 
 {%- set rows = [] -%}
 {%- set serial_missing = [] -%}

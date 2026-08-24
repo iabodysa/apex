@@ -15,7 +15,7 @@
       ["period_month", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
       as_dict=True) if doc.fuel_quota else None) or _dict() -%}
 {%- set company = doc.company or veh.company -%}
-{%- set cur = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set cur = (frappe.db.get_value("Company", company, "default_currency") if company else None) or frappe.db.get_default("currency") -%}
 {%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
 {%- set supervisor = frappe.get_fullname(drv.supervisor) if drv.supervisor else None -%}
 {%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}

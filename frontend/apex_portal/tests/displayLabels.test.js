@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { resetMessages } from "../core/i18n.js";
-import { dateTimeLabel, floorLabel, optionLabel, periodLabel, portalTimeZone, statusLabel } from "../core/displayLabels.js";
+import { dateTimeLabel, floorLabel, optionLabel, periodLabel, portalTimeZone, remainingSeconds, statusLabel } from "../core/displayLabels.js";
 
 const catalogue = readCatalogue();
 
@@ -63,12 +63,15 @@ describe("portal display labels", () => {
     expect(periodLabel({ kind: "day" })).toBe(catalogue.Today);
   });
 
-  it("reads the clock in the time zone the page declares", () => {
-    serve(catalogue, "Asia/Riyadh");
-    expect(portalTimeZone()).toBe("Asia/Riyadh");
-    const riyadh = dateTimeLabel("2026-08-24 21:00:00");
+  it("reads a server time as the wall clock of the zone the page declares", () => {
+    const noon = Date.UTC(2026, 7, 24, 12, 0, 0);
     serve(catalogue, "UTC");
-    expect(dateTimeLabel("2026-08-24 21:00:00")).not.toBe(riyadh);
+    expect(portalTimeZone()).toBe("UTC");
+    const shown = dateTimeLabel("2026-08-24 21:00:00");
+    expect(remainingSeconds("2026-08-24 21:00:00", 0, noon)).toBe(32400);
+    serve(catalogue, "Asia/Riyadh");
+    expect(dateTimeLabel("2026-08-24 21:00:00")).toBe(shown);
+    expect(remainingSeconds("2026-08-24 21:00:00", 0, noon)).toBe(21600);
   });
 
   it("serves English when no catalogue reaches the page", () => {

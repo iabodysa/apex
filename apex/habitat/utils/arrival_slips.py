@@ -32,7 +32,7 @@ def slip_context(worker_name, party_type=None) -> dict:
         ctx["party_type"] = party_type
         ctx["party_type_label"] = party_type_label(party_type)
     ctx["dir"] = slip_direction()
-    ctx["lang"] = frappe.local.lang or "en"
+    ctx["lang"] = frappe.local.lang
     ctx["company"] = slip_company()
     ctx["today"] = frappe.utils.formatdate(frappe.utils.today())
     return ctx

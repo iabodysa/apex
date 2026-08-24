@@ -8,7 +8,7 @@
 {%- set office = (frappe.db.get_value("Rental Office", doc.rental_office,
       ["office_name", "supplier", "city", "status", "contact_person", "phone"],
       as_dict=True) if doc.rental_office else None) or _dict() -%}
-{%- set cur = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None) or frappe.db.get_default("currency") or "SAR" -%}
+{%- set cur = (frappe.db.get_value("Company", doc.company, "default_currency") if doc.company else None) or frappe.db.get_default("currency") -%}
 {%- set requester = frappe.get_fullname(doc.requested_by) if doc.requested_by else None -%}
 {%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}
 {%- set office_address = get_address_text("Supplier", office.supplier) if office.supplier else "" -%}
