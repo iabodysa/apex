@@ -1,9 +1,13 @@
 # Copyright (c) 2026, afmcoltd
 """Client Audit Remediation Plan lifecycle.
 
-``refresh_overall_status`` saves with ``ignore_permissions`` because the plan's status is DERIVED
-from its items closing, and the person who closes the last item is rarely the plan's owner. The
-field is machine-maintained; a role able to write it could report a plan complete by hand.
+``refresh_overall_status`` saves with no ``ignore_permissions``: its only caller,
+``habitat.tasks.safety.audit_remediation_deadline_watch``, is wired as a scheduler event.
+``frappe.utils.background_jobs.execute_job`` connects a scheduled job with no ``user`` kwarg,
+so ``frappe.connect``'s ``set_admin_as_user`` default leaves the session at Administrator, who
+already satisfies every DocPerm check (``frappe/permissions.py`` short-circuits on
+``user == "Administrator"``). Internal Auditor holds no write on this DocType, so any other
+actor calling this function directly is still refused.
 """
 
 from __future__ import annotations
@@ -236,7 +240,7 @@ def refresh_overall_status(name: str, on_date=None) -> dict:
     if status != previous_status:
         plan.flags.remediation_rollup_only = True
         plan.overall_status = status
-        plan.save(ignore_permissions=True)
+        plan.save()
     return {
         "name": plan.name,
         "previous_status": previous_status,
