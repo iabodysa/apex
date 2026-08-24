@@ -95,7 +95,13 @@ def _sync_assignment_todo(doc):
     that owns a field of that name (frappe/desk/form/assign_to.py:97, and :228-230 on the
     closing side) with no ``update_modified=False``. The row's ``modified`` therefore
     moves while the caller still holds the pre-assignment value, and its next save of the
-    same handle throws TimestampMismatchError."""
+    same handle throws TimestampMismatchError.
+
+    This stays hand-written rather than moving to a native Assignment Rule, and the
+    reason is one field: ``AssignmentRule.do_assignment`` passes no ``priority`` to
+    ``assign_to.add`` (assignment_rule.py:87-97 names every key it does pass),
+    so converting would silently drop the priority the operator reads on the ToDo. The
+    duplication is invisible to him; losing the priority is not."""
     if doc.status in ("Resolved", "Rejected", "Closed"):
         close_all_assignments(doc.doctype, doc.name)
         doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
