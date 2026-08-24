@@ -10,6 +10,7 @@ A Fuel Claim must be created with status Draft; {0} is reached through the workf
 A Fuel Exception Case must be created with status Open; {0} is reached through the workflow.,يجب إنشاء حالة استثناء الوقود بالحالة مفتوحة؛ يتم الوصول إلى {0} عبر سير العمل.
 A Fuel Request must be created with status Pending; {0} is reached through the workflow.,يجب إنشاء طلب الوقود بالحالة قيد الانتظار؛ يتم الوصول إلى {0} عبر سير العمل.
 A Masar worker link can only be issued to an Employee. This worker is linked once their Iqama is issued and a permanent Employee record exists.,لا يمكن إصدار رابط عامل مسار إلا لموظف. يُربط هذا العامل بمجرد إصدار إقامته ووجود سجل موظف دائم.
+A Portal Device's identity cannot be changed after enrolment.,لا يمكن تغيير هوية جهاز البوابة بعد التسجيل.
 A Reason is required to record SIM {0} as {1}.,يلزم سبب لتسجيل الشريحة {0} بحالة {1}.
 A SIM Card asset belonging to one Telecom Contract. Its mobile number stays editable in place; custody state is projected from the latest submitted SIM Custody Assignment.,أصل شريحة اتصال يتبع عقد اتصالات واحداً. يبقى رقم جواله قابلاً للتعديل في مكانه، وتُشتق حالة العهدة من آخر إسناد عهدة شريحة مُعتمد.
 A SIM can only move to a contract within its own company.,لا يمكن نقل الشريحة إلا إلى عقد ضمن شركتها نفسها.
@@ -40,6 +41,7 @@ A completion photo is required before closing a Maintenance Work Order.,يجب �
 A custody damage assessment has been submitted and may create a salary deduction,تم اعتماد تقييم تلف العهدة وقد يترتب عليه خصم من الراتب
 A deduction is due and no payroll entry has been raised yet.,يوجد مبلغ مستحق ولم يُسجَّل خصم على الراتب حتى الآن.
 A driver clearance is blocked and must be resolved before the driver is redeployed,تم تعليق إخلاء طرف السائق ويجب معالجته قبل إعادة تكليفه.
+A driver device requires exactly one driver.,جهاز السائق يتطلب سائقاً واحداً فقط.
 A failed safety task ({0}) on a task that requires evidence must carry a photo. Please attach an Evidence Photo before submitting.,إذا كانت مهمة السلامة غير المجتازة ({0}) تتطلب إثباتًا، فأرفق صورة إثبات قبل الاعتماد.
 "A fleet incident event (accident or theft) captured against a vehicle, with location, report number and evidence. Distinct from a damage write-off (the disposition) and a vehicle stop (the state change).",حادثة أسطول (حادث أو سرقة) تُسجَّل على مركبة، مع الموقع ورقم البلاغ والمرفقات. وتختلف عن إعدام الأضرار وهو قرار المعالجة، وعن إيقاف المركبة وهو تغيير الحالة.
 A handover discrepancy was recorded. Please raise a Vehicle Damage Write-Off for vehicle {0} to obtain tiered write-off approval.,سُجّل فرق عند التسليم. أنشئ سجل شطب أضرار للمركبة {0} للحصول على الاعتماد حسب مستوى الصلاحية.
@@ -81,6 +83,7 @@ A trip can only be rated once it is completed.,لا يمكن تقييم الرح
 A trip has been scheduled,تمت جدولة رحلة
 A vehicle compliance document is expiring soon — please start renewal,وثيقة امتثال مركبة على وشك الانتهاء — يُرجى بدء التجديد
 A vehicle has been reported stolen,تم الإبلاغ عن سرقة مركبة
+A worker device requires exactly one employee.,جهاز العامل يتطلب موظفاً واحداً فقط.
 A {0} Safety Round already exists for {1} on {2} ({3}). Tick Is Re-inspection to record a follow-up round.,توجد بالفعل جولة سلامة {0} لـ {1} في {2} ({3}). فعّل خيار إعادة الفحص لتسجيل جولة متابعة.
 ABSENT,غائب
 AC,تكييف
@@ -970,6 +973,7 @@ Consumable Lifespan (Months),العمر الافتراضي للمستهلك (ب�
 Consumable past its lifespan: {0},انتهى العمر الافتراضي لمستهلك: {0}
 "Consumable {0} held by {1} since {2} is {3} month(s) old, past its {4}-month lifespan.",المستهلك {0} بحوزة {1} منذ {2} وعمره {3} شهرًا، متجاوزًا عمره الافتراضي البالغ {4} شهرًا.
 Consumed Litres,اللترات المستهلكة
+Consumed On,تاريخ الاستخدام
 Consumed litres ({0}) exceed the monthly quota ({1}).,اللترات المستهلكة ({0}) تتجاوز الحصة الشهرية ({1}).
 Consumed {0} L via Fuel Request {1}.,تم استهلاك {0} لتر عبر طلب الوقود {1}.
 Consuming Vehicle,المركبة المستهلكة
@@ -1163,6 +1167,7 @@ Creating payment...,جارٍ إنشاء الدفعة...
 Creating rooms and beds…,جارٍ إنشاء الغرف والأسرّة…
 Creating target document...,جارٍ إنشاء المستند المستهدف...
 Creating {0}…,جارٍ إنشاء {0}…
+Credential,بيانات الاعتماد
 Credentials Delivered By,سلّم بيانات الدخول
 Critical,حرج
 Critical Alert Aging Hours,مهلة معالجة التنبيه الحرج (بالساعات)
@@ -1400,6 +1405,8 @@ Detail,التفصيل
 Details,التفاصيل
 "Detergent and cleaning supplies. Consumable, routinely purchased per site.",منظفات ومستلزمات تنظيف. صنف استهلاكي يُشترى دورياً لكل موقع.
 Device,الجهاز
+Device Hash,بصمة الجهاز
+Device Label,اسم الجهاز
 Diesel,ديزل
 Difference,الفرق
 Difference Against What Was Authorised,الفرق عن الكمية المصرّح بها
@@ -1613,6 +1620,10 @@ Ends On,ينتهي في
 Ends On cannot be earlier than Starts On.,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
 Engine,المحرّك
 English,الإنجليزية
+Enrolled By,سجّله
+Enrolled On,تاريخ التسجيل
+Enrolment,التسجيل
+Enrolment Source,مصدر التسجيل
 Enter a valid mobile number.,أدخل رقم جوال صحيحاً.
 Enter any deduction for room or asset damage.,أدخل أي خصم مقابل أضرار الغرفة أو الأصول.
 "Enter how many litres are requested, then save.",أدخل عدد اللترات المطلوبة، ثم احفظ.
@@ -2328,6 +2339,7 @@ Last Notified At,آخر إشعار في
 Last Printed On,آخر طباعة في
 Last Renewed On,تاريخ آخر تجديد
 Last Seen,آخر ظهور
+Last Seen On,آخر ظهور
 Last Wait Request At,آخر طلب انتظار في
 Last Working Day,آخر يوم عمل
 Last day this vehicle was on rent in the period. Days alone cannot say which days were charged.,آخر يوم كانت فيه هذه المركبة مؤجّرة في الفترة. عدد الأيام وحده لا يقول أي أيام حُسبت.
@@ -2881,6 +2893,7 @@ On-Site Code,رمز الموقع
 On-call Only,عند الطلب فقط
 "One company item a departing driver held, and the state it came back in.",صنف واحد للشركة كان بيد سائق مغادر، والحال التي عاد بها.
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
+"One enrolled device per worker or driver, minted by a one-time Masar Worker Token enrolment key.",جهاز مسجّل واحد لكل عامل أو سائق، يُنشأ بمفتاح تسجيل يُستخدم مرة واحدة من رمز عامل مسار.
 "One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
 "One kiosk cart submission, named by the client that sent it. The unique index is what makes a retried issue land once instead of decrementing the building store twice.",إرسال سلة واحدة من الكشك، يسمّيها العميل الذي أرسلها. الفهرس الفريد هو ما يجعل التسليم المعاد إرساله يُسجَّل مرة واحدة بدل أن يخصم من مستودع المبنى مرتين.
 "One mapping row for the Payment Router. Sets target[target_fieldname] = static_value when Static is checked, otherwise to the value of source_fieldname on the Salis Payment Request.",صف تعيين واحد لموجّه الدفع. يضبط target[target_fieldname] = static_value عند تحديد «ثابت»، وإلا يستخدم قيمة source_fieldname من طلب دفع ساليس.
@@ -3251,6 +3264,7 @@ Police report PDF or a photo of the scene.,ملف بلاغ الشرطة أو ص�
 Policy Name,اسم السياسة
 Poor,رديء
 Poor Safety Task Executions,مهام سلامة بنتائج ضعيفة
+Portal Device,جهاز البوابة
 Portal Push Subscription,اشتراك تنبيهات البوابة
 Portal Type,نوع البوابة
 Portal User,مستخدم البوابة
@@ -3259,6 +3273,12 @@ Portal credential re-shared for {0} {1},أُعيدت مشاركة بيانات �
 Portal credential reissued for {0} {1},أُعيد إصدار بيانات دخول البوابة لـ {0} {1}
 Portal credential revoked for {0} {1},أُلغيت بيانات دخول البوابة لـ {0} {1}
 Portal credential rotated for {0} {1},جُدِّدت بيانات دخول البوابة لـ {0} {1}
+Portal device enrolled for {0} {1},تم تسجيل جهاز بوابة لـ {0} {1}
+Portal device enrolment refused for {0} {1},رُفض تسجيل جهاز بوابة لـ {0} {1}
+Portal device evicted for {0} {1},تم إخراج جهاز بوابة لـ {0} {1}
+Portal device holder type must be Worker or Driver.,نوع حامل جهاز البوابة يجب أن يكون عاملاً أو سائقاً.
+Portal device not found.,جهاز البوابة غير موجود.
+Portal device revoked for {0} {1},تم إلغاء جهاز بوابة لـ {0} {1}
 Portal notification audience must be Worker or Driver.,نوع مستلم التنبيهات يجب أن يكون عاملاً أو سائقاً.
 Portal token audience must be Worker or Driver.,يجب أن تكون فئة رمز البوابة عاملًا أو سائقًا.
 Portal token subject binding cannot be changed after issuance.,لا يمكن تغيير ارتباط صاحب رمز البوابة بعد إصداره.
@@ -3814,6 +3834,7 @@ Revoke,سحب
 Revoke License,سحب الرخصة
 Revoke Portal Link,إلغاء رابط البوابة
 Revoked,مُلغى
+Revoked On,تاريخ الإلغاء
 Revoking driver link…,جارٍ إلغاء رابط السائق…
 Revoking stops this driver's barcode working immediately. Issue a new one to restore access. Continue?,الإلغاء يوقف باركود السائق فورًا. أصدر باركود جديدًا لإعادة الدخول. هل تريد المتابعة؟
 Rework Required,يلزم إعادة العمل
@@ -3897,6 +3918,7 @@ Rows,الصفوف
 Rule,القاعدة
 Rule Applied,القاعدة المُطبَّقة
 SHA-256 digest of the scanned pass token (the raw token is never stored).,بصمة SHA-256 لرمز البطاقة الممسوح (لا يُخزَّن الرمز الخام أبدًا).
+"SHA-256 hash of the device's own bearer secret, minted once at enrolment. The raw secret is never stored; a direct row read exposes nothing usable.",بصمة SHA-256 لسر الجهاز، تُنشأ مرة واحدة عند التسجيل. السر الأصلي لا يُحفظ أبداً، وقراءة السجل مباشرة لا تكشف شيئاً قابلاً للاستخدام.
 "SHA-256 hash of the worker's personal token — the raw token is never stored, so a direct row read exposes no usable secret. The resolver hashes the presented link and matches it here. Use Regenerate to issue a fresh link (shown once).",بصمة SHA-256 للرمز الشخصي للعامل — لا يُخزَّن الرمز الخام أبداً، لذا لا تكشف قراءة الصف أي سر قابل للاستخدام. يحوّل النظام الرابط المقدَّم إلى بصمة ويطابقه هنا. استخدم إعادة التوليد لإصدار رابط جديد يظهر مرة واحدة.
 SIM Card,شريحة اتصال
 SIM Card {0} does not exist.,شريحة الاتصال {0} غير موجودة.
@@ -4145,12 +4167,14 @@ Set automatically when this request is generated from a safety inspection report
 Set automatically when this request is spawned from a failed safety task execution.,يُحدَّد آلياً عند إنشاء هذا الطلب من تنفيذ مهمة سلامة فاشلة.
 Set by Apex,يحدده أبكس
 Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.,يُعيّنه محرك الاستحقاق بعد ترحيل اللترات إلى سجل استهلاك الوقود. يمنع الترحيل المكرر.
+"Set by the holder from their own device list, or by an issuing supervisor from the desk. Never cleared -- a returning device enrols afresh with a new key.",يضبطه الحامل من قائمة أجهزته، أو المشرف المُصدِر من سطح المكتب. لا يُمسح أبداً — الجهاز العائد يسجّل من جديد بمفتاح جديد.
 Set by the receiving supervisor once every line has been physically checked. Required before approval.,يحدده المشرف المستلم بعد فحص كل بند فعلياً. مطلوب قبل الاعتماد.
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
 Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry. A Dynamic Link because the Payment Routing target is configurable per deployment.,يُحدد خارجيًا بعد ترحيل المالية للدفعة. لا ينشئ هذا المستند قيدًا محاسبيًا أو قيد دفع. وهو رابط ديناميكي لأن وجهة الدفع تختلف حسب البيئة.
 "Set for quota-increase claims, which always require Operations-tier authority.",يُعيَّن لمطالبات زيادة الحصة، التي تتطلب دائمًا صلاحية على مستوى العمليات.
 Set how urgent the repair is.,حدّد مدى إلحاح الإصلاح.
 Set on the reversal row posted when the source movement is cancelled. The original row is preserved for audit.,يُحدد في صف العكس المرحل عند إلغاء الحركة الأصلية. ويُحتفظ بالصف الأصلي للتدقيق.
+"Set once this link/QR has been scanned to enrol a Portal Device. A consumed row refuses a second enrolment attempt; it does not affect the legacy portal cookie flow, which still resolves on token + enabled + expires_on alone until that row is consumed.",يُضبط بمجرد مسح هذا الرابط أو رمز QR لتسجيل جهاز بوابة. السجل المستخدَم يرفض أي محاولة تسجيل ثانية، ولا يؤثر على مسار ملف تعريف الارتباط القديم للبوابة، الذي يظل يعتمد على token و enabled و expires_on وحدها حتى يُستخدم ذلك السجل.
 Set only when the request concerns a specific bed.,يُحدَّد فقط عندما يخص الطلب سريرًا معيّنًا.
 Set the Cadence,حدّد تكرار الجولة
 Set the Check-in Date,حدّد تاريخ التسكين
@@ -4586,6 +4610,7 @@ The Dispatch Trip the scanned pass was issued against.,رحلة التسيير �
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.
 The Incident,الحادث
 "The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",القرض المُنشأ لهذا الحادث مع تفعيل السداد من الراتب. الحادث الواحد يُنشئ قرضاً واحداً على الأكثر، وتدير الموارد البشرية القسط والرصيد المتبقي من جدول السداد الخاص به.
+The Masar Worker Token row consumed as this device's one-time enrolment key.,سجل رمز عامل مسار المستخدَم كمفتاح تسجيل هذا الجهاز لمرة واحدة.
 The Other Party,الطرف الآخر
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا دخول البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة دون حساب مستخدم في فرابي.
@@ -4711,6 +4736,7 @@ The submitted assignment whose receipt or return this document records.,الإس
 The submitted landlord invoice this payment settles.,فاتورة المؤجّر المعتمدة التي تسددها هذه الدفعة.
 The submitted supplier invoice this payment settles.,فاتورة المورّد المعتمدة التي يسددها هذا الدفع.
 The supervisor user who recorded the approval decision.,المستخدم المشرف الذي سجّل قرار الاعتماد.
+The supervisor who issued the enrolment key this device was created from.,المشرف الذي أصدر مفتاح التسجيل الذي أُنشئ منه هذا الجهاز.
 "The supervisor's own signature accepting custody of these assets. A signature can be copied and reused, so only the custody desk roles can see this field.",توقيع المشرف بقبول عهدة هذه الأصول. يمكن نسخ التوقيع وإعادة استخدامه، لذلك لا يظهر هذا الحقل إلا لموظفي مكتب العهدة.
 "The technician certifies that the scope of work above was carried out at the site named, on the actual dates shown, and that the materials listed were the materials consumed. The supervisor certifies that the work was inspected on site and accepted. Work not written on this sheet was not ordered and is not accepted.",يقر الفنّي بأن نطاق العمل أعلاه نُفّذ في الموقع المذكور بالتواريخ الفعلية المبيّنة، وأن المواد المدرجة هي المواد التي استُهلكت. ويقر المشرف بأنه عاين العمل في الموقع وقبله. وأي عمل غير مكتوب في هذه الورقة لم يُطلب ولا يُقبل.
 The telecom operator (e.g. the STC / Mobily / Zain Supplier record).,مشغّل الاتصالات (مثل سجل مورّد STC أو Mobily أو Zain).
@@ -4761,6 +4787,7 @@ This cadence could not be recorded.,ما قدر يسجل هذا التكرار.
 This driver had no live link.,لا يوجد رابط فعّال لهذا السائق.
 "This driver is not cleared. The items marked Faulty above are still open against him, and his final settlement is held until each one is closed and this certificate is re-issued.",هذا السائق ما أُخلي طرفه. البنود المؤشر عليها بخلل أعلاه ما زالت عليه، ويُوقف مستحقه النهائي حتى تُقفل كل واحدة وتُصدر هذه الشهادة من جديد.
 This ends the current custody and retires the SIM. The SIM and its history are kept; the action can be undone by cancelling the custody record.,ينهي هذا الإجراء العهدة الحالية ويُخرج الشريحة من الخدمة. تبقى الشريحة وسجلها محفوظين، ويمكن التراجع بإلغاء سجل العهدة.
+This enrolment key is invalid or has already been used.,مفتاح التسجيل غير صالح أو سبق استخدامه.
 This fuel request has been pending approval for too long,ظل طلب الوقود هذا بانتظار الاعتماد لفترة طويلة جدًا
 "This is a temporary voucher. The vehicle goes back to its standing quota on the revert date shown above, and any litre drawn after that date is an exception.",هذا أمر مؤقت. ترجع المركبة لحصتها الثابتة في تاريخ الرجوع المبين أعلاه، وأي لتر يُسحب بعد هذا التاريخ يُعد استثناء.
 "This license is submitted. Amend it (Cancel, then Amend) with the new expiry date to renew.",هذه الرخصة معتمدة. لتجديدها، ألغها ثم عدلها وأدخل تاريخ الانتهاء الجديد.
@@ -5203,6 +5230,7 @@ What happened?,ماذا حدث؟
 What the Company Loses and Where the Vehicle Goes,ما تخسره الشركة وإلى أين تذهب المركبة
 What the Station Actually Dispensed,ما صرفته المحطة فعلاً
 What the contractor is being asked to do; visit_notes is written after the visit.,ما هو مطلوب من المقاول تنفيذه؛ أما ملاحظات الزيارة فتُكتب بعدها.
+"What the holder sees in their own device list, defaulted from the enrolling device's user agent.",ما يراه الحامل في قائمة أجهزته، ويُؤخذ افتراضياً من معرّف متصفح الجهاز المسجِّل.
 "What the line is called locally, when the number alone does not identify it.",اسم الخط المتداول محلياً، حين لا يكفي الرقم وحده للتعريف به.
 What the worker disputes; the notice preserves his right to object before approval.,ما يعترض عليه العامل؛ الإشعار يحفظ حقه في الاعتراض قبل الاعتماد.
 What the wreck or the salvaged parts are still worth.,ما تساويه الحطام أو القطع المستخرجة.
@@ -5236,6 +5264,7 @@ Whether anybody was hurt. An insurer treats a bodily-injury accident under a dif
 "Which part of the accommodation this cleaning evidence photo covers, so before-and-after proof can be checked per area during cleaning audits.",الجزء من السكن الذي تغطيه صورة دليل التنظيف هذه، ليتسنى فحص إثبات ما قبل وما بعد لكل منطقة أثناء تدقيقات التنظيف.
 Which payment DocType the Pay action creates and how Salis Payment Request fields map onto it. This routes the payment record only; General Ledger posting stays governed by Enable GL Entry Posting.,نوع مستند الدفع الذي ينشئه إجراء الدفع، وكيف تُطابَق حقول طلب دفع ساليس عليه. هذا يوجّه سجل الدفع فقط، ويبقى ترحيل دفتر الأستاذ العام محكوماً بتفعيل ترحيل قيود دفتر الأستاذ العام.
 "Which physical unit came back, for a serialised article.",أي قطعة رجعت، للصنف ذي الرقم التسلسلي.
+Which portal this device belongs to: a housed/transported Worker (Masar) or a fleet Driver.,البوابة التي ينتمي إليها هذا الجهاز: عامل مُسكَن أو منقول (مسار)، أو سائق أسطول.
 "Which subject this access token grants entry for: a housed/transported Worker (Masar) or a fleet Driver (barcode entry, no Frappe User).",الفئة التي يمنحها رمز الدخول صلاحية الوصول: عامل سكن أو نقل عبر مسار، أو سائق أسطول يدخل بالباركود دون حساب مستخدم في Frappe.
 Who answers for this building's store balance.,من يتحمّل مسؤولية رصيد مخزن هذا المبنى.
 Who is arriving?,من القادم؟
