@@ -39,7 +39,7 @@ def active_building_scope(user) -> BuildingScope:
     Active building; a building-scoped user sees only their User-Permission buildings."""
     if permissions._building_is_unscoped(user):
         return BuildingScope(False, {"status": "Active"})
-    allowed = permissions._allowed_buildings(user)
+    allowed = permissions.allowed_buildings(user)
     if not allowed:
         return BuildingScope(True, None)
     return BuildingScope(True, {"status": "Active", "name": ["in", allowed]})
@@ -76,7 +76,7 @@ def assert_party_in_scope(party_type, party) -> None:
     if permissions._building_is_unscoped(user):
         return
 
-    allowed = set(permissions._allowed_buildings(user))
+    allowed = set(permissions.allowed_buildings(user))
 
     if party_type == PARTY_TEMPORARY_WORKER:
         building = frappe.db.get_value("Temporary Worker", party, "building")

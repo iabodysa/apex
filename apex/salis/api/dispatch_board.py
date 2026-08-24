@@ -16,7 +16,7 @@ the state of my fleet right now?" across four panes:
 
 Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
 helpers in :mod:`apex.salis.permissions` (``_is_unscoped`` /
-``_allowed_projects``) so the board never shows a scoped supervisor any project
+``allowed_projects``) so the board never shows a scoped supervisor any project
 they could not already see in the list views:
 
   * Salis Vehicle, Salis Driver and Transport Request carry a direct ``project``
@@ -38,7 +38,7 @@ import frappe
 from frappe.utils import today
 
 from apex.salis.api.enrich import vehicle_driver_titles
-from apex.salis.permissions import _allowed_projects, _is_unscoped
+from apex.salis.permissions import allowed_projects, _is_unscoped
 
 VEHICLE_STATUSES = ["Active", "Stopped", "Under Maintenance", "Released"]
 TRIP_STATUSES = ["Planned", "Dispatched", "Completed", "Cancelled"]
@@ -63,7 +63,7 @@ def _permitted_projects():
     user = frappe.session.user
     if _is_unscoped(user):
         return True, None
-    return False, _allowed_projects(user)
+    return False, allowed_projects(user)
 
 
 def _project_filter(unscoped, projects):

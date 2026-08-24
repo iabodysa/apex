@@ -30,7 +30,7 @@ Two invariants hold on every path and are the reason the edge cases look asymmet
   estate to a supervisor.
 * Fail closed. A doc whose estate cannot be resolved is DENIED, never deferred.
 
-``_allowed_buildings``, ``_building_is_unscoped`` and ``_building_condition`` stay
+``allowed_buildings``, ``_building_is_unscoped`` and ``_building_condition`` stay
 module-level functions: ``apex.habitat.api`` and the Habitat reports import those
 three names directly, and the scoped-permission suite stubs the first two.
 """
@@ -69,7 +69,7 @@ def _is_privileged(user):
     return bool(set(frappe.get_roles(user)) & PRIVILEGED_ROLES)
 
 
-def _allowed_buildings(user):
+def allowed_buildings(user):
     """Building names the user has an explicit User Permission for (request-cached).
 
     Calls ``permission_scope.allowed_for`` with the Building ``allow``
@@ -83,13 +83,13 @@ def _allowed_buildings(user):
 
 
 def _allowed_buildings_for(user, doctype):
-    """``_allowed_buildings`` narrowed to the permissions that apply to ``doctype``.
+    """``allowed_buildings`` narrowed to the permissions that apply to ``doctype``.
 
     A User Permission carrying ``applicable_for`` grants its building for that one
     DocType; without this narrowing it would unlock every building-scoped DocType.
     See ``permission_scope.for_doctype``.
     """
-    return permission_scope.for_doctype(user, "Building", doctype, _allowed_buildings(user))
+    return permission_scope.for_doctype(user, "Building", doctype, allowed_buildings(user))
 
 
 def _building_is_unscoped(user):
@@ -132,7 +132,7 @@ def _building_condition(user=None, column="`building`", doctype=None):
 
     """
     return permission_scope.scope_condition(
-        user, _building_is_unscoped, _allowed_buildings, column, allow="Building", doctype=doctype
+        user, _building_is_unscoped, allowed_buildings, column, allow="Building", doctype=doctype
     )
 
 
@@ -301,7 +301,7 @@ def refuse_a_supervisor_with_no_building(user=None, doctype=None):
     user = permission_scope.resolve_user(user)
     if _building_is_unscoped(user):
         return ""
-    return "" if _allowed_buildings(user) else "1=0"
+    return "" if allowed_buildings(user) else "1=0"
 
 
 def _estate_from_anchor(doc, doctype):
@@ -430,7 +430,7 @@ def report_building_scope(user=None, doctype=None):
     building, i.e. the report should return no rows.
     """
     return permission_scope.report_scope(
-        user, _building_is_unscoped, _allowed_buildings, allow="Building", doctype=doctype
+        user, _building_is_unscoped, allowed_buildings, allow="Building", doctype=doctype
     )
 
 

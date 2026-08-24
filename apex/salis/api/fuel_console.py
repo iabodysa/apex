@@ -23,7 +23,7 @@ mirroring the Habitat Front Desk pattern:
 
 Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
 helpers in :mod:`apex.salis.permissions` (``_is_unscoped`` /
-``_allowed_projects``), exactly like ``salis.api.dispatch_board``: a scoped
+``allowed_projects``), exactly like ``salis.api.dispatch_board``: a scoped
 supervisor only ever sees Fuel Requests in the projects they hold a User
 Permission for, and an out-of-scope ``project`` argument can never widen that
 view (it simply yields an empty queue). A scoped user with no permitted project

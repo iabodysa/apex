@@ -155,8 +155,8 @@ def scope_condition(user, is_unscoped_fn, allowed_fn, column, allow=None, doctyp
     (frappe/database/database.py:1371); no identifier is interpolated, only literals.
 
     ``is_unscoped_fn`` / ``allowed_fn`` are the calling MODULE's own single-arg
-    resolvers (``_building_is_unscoped`` / ``_allowed_buildings`` for Building;
-    ``_is_unscoped`` / ``_allowed_projects`` for Project). They are injected — not
+    resolvers (``_building_is_unscoped`` / ``allowed_buildings`` for Building;
+    ``_is_unscoped`` / ``allowed_projects`` for Project). They are injected — not
     re-derived here from raw config — so each module's oversight-role set and cache
     namespace stay bound in that module, and so those module-level resolvers remain
     the single override/stub point the scoped permission test-suite drives.

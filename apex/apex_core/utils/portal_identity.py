@@ -626,7 +626,7 @@ def authorize_issuance(
     if audience == WORKER and "Resident Supervisor" in roles:
         from apex.habitat import permissions
 
-        allowed = set(permissions._allowed_buildings(user))
+        allowed = set(permissions.allowed_buildings(user))
         assignments = frappe.get_all(
             "Housing Assignment",
             filters={
@@ -650,7 +650,7 @@ def authorize_issuance(
         from apex.salis import permissions
 
         project = frappe.db.get_value("Salis Driver", subject, "project")
-        if project and project in set(permissions._allowed_projects(user)):
+        if project and project in set(permissions.allowed_projects(user)):
             return True
         frappe.throw(
             _("Driver credential issuance requires an allowed Project."),
@@ -709,7 +709,7 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
     if audience == DRIVER:
         from apex.salis import permissions as salis_permissions
 
-        projects = salis_permissions._allowed_projects(user)
+        projects = salis_permissions.allowed_projects(user)
         if not projects:
             return "1=0"
         escaped = ", ".join(frappe.db.escape(v) for v in projects)
@@ -720,7 +720,7 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
 
     from apex.habitat import permissions as habitat_permissions
 
-    buildings = habitat_permissions._allowed_buildings(user)
+    buildings = habitat_permissions.allowed_buildings(user)
     if not buildings:
         return "1=0"
     escaped = ", ".join(frappe.db.escape(v) for v in buildings)
@@ -803,7 +803,7 @@ def masar_worker_token_has_permission(doc, ptype, user=None):
 
         driver = getattr(doc, "driver", None)
         project = frappe.db.get_value("Salis Driver", driver, "project") if driver else None
-        if project and project in set(salis_permissions._allowed_projects(user)):
+        if project and project in set(salis_permissions.allowed_projects(user)):
             return None
         return False
 
@@ -818,7 +818,7 @@ def masar_worker_token_has_permission(doc, ptype, user=None):
         pluck="building",
     )
     buildings = {b for b in assignments if b}
-    allowed = set(habitat_permissions._allowed_buildings(user))
+    allowed = set(habitat_permissions.allowed_buildings(user))
     return None if buildings and buildings.issubset(allowed) else False
 
 def credential_delivery_destination(

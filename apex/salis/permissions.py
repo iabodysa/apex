@@ -51,7 +51,7 @@ UNSCOPED_ROLES = {
 }
 
 PROJECT = "project"
-def _allowed_projects(user):
+def allowed_projects(user):
     """Project names the given user has an explicit User Permission for (cached).
 
     Calls ``permission_scope.allowed_for`` with the Project ``allow``
@@ -65,13 +65,13 @@ def _allowed_projects(user):
     return permission_scope.allowed_for(user, "Project", "apex_allowed_projects")
 
 def _allowed_projects_for(user, doctype):
-    """``_allowed_projects`` narrowed to the permissions that apply to ``doctype``.
+    """``allowed_projects`` narrowed to the permissions that apply to ``doctype``.
 
     A User Permission carrying ``applicable_for`` grants its project for that one
     DocType; without this narrowing it would unlock every project-scoped DocType.
     See ``permission_scope.for_doctype``.
     """
-    return permission_scope.for_doctype(user, "Project", doctype, _allowed_projects(user))
+    return permission_scope.for_doctype(user, "Project", doctype, allowed_projects(user))
 
 def _is_unscoped(user):
     """True when the user holds any oversight role that sees all projects."""
@@ -86,7 +86,7 @@ def report_project_scope(user=None, doctype=None):
     i.e. the report should return no rows.
     """
     return permission_scope.report_scope(
-        user, _is_unscoped, _allowed_projects, allow="Project", doctype=doctype
+        user, _is_unscoped, allowed_projects, allow="Project", doctype=doctype
     )
 
 def _column(rule="scoped", own=None):
