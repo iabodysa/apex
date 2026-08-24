@@ -74,7 +74,7 @@ export function workerParameters({ assetUrls = entryAssets() } = {}) {
       durableAssets: durable,
       versionedAssets: [`${assetBase}/offline.css`, `${assetBase}/icons/driver-icon-192.png`, `${assetBase}/icons/driver-icon-maskable-512.png`, `${assetBase}/icons/driver-apple-touch-icon-180.png`],
       cacheNamespace: "apex:driver:", legacyCachePatterns: ["^driver-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$"],
-      skipWaitingOnInstall: true,
+      skipWaitingOnInstall: false,
       enablePush: true,
       push: { title: "مسار السائق", tag: "salis-driver", icon: `${assetBase}/icons/driver-icon-192.png` },
     },

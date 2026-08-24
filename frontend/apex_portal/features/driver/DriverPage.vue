@@ -6,6 +6,7 @@ import { dateTimeLabel, recordTitle, statusLabel, statusTheme } from "../../core
 import { errorStatus } from "../../core/errorMessage.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
+import { __ } from "../../core/i18n.js";
 
 const route = useRoute();
 let resource;
@@ -28,7 +29,7 @@ async function load() {
   state.value = "loading";
   error.value = null;
   try {
-    if (!spec.value.endpoint) throw new Error("الخدمة غير متاحة حالياً.");
+    if (!spec.value.endpoint) throw new Error(__("The service is not available right now."));
     if (resource?.url !== spec.value.endpoint) {
       resource = createResource({ url: spec.value.endpoint, method: "GET", auto: false });
     }
@@ -47,17 +48,17 @@ watch(() => route.fullPath, load, { immediate: true });
   <section class="feature-page" :aria-busy="state === 'loading' || state === 'saving'">
     <header class="feature-page__heading">
       <div>
-        <p class="feature-page__eyebrow">مسار السائق</p>
+        <p class="feature-page__eyebrow">{{ __("Driver Masar") }}</p>
         <h2>{{ spec.title }}</h2>
         <p>{{ spec.description }}</p>
       </div>
       <span :class="spec.icon || 'lucide-navigation'" aria-hidden="true" />
     </header>
-    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح القسم" :message="error" fallback="هذا القسم غير متاح لحسابك." @retry="load" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الصفحة" :message="error" fallback="تعذّر تحميل البيانات." @retry="load" />
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="__('Loading {0}', [spec.title || __('The data')])" />
+    <PortalErrorState v-else-if="state === 'denied'" :title="__('Could not open the section')" :message="error" :fallback="__('This section is not available for your account.')" @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" :title="__('Could not load the page')" :message="error" :fallback="__('Could not load the data.')" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">
-      {{ spec.empty || "لا توجد بيانات حالياً." }}
+      {{ spec.empty || __("There is no data right now.") }}
     </div>
     <div v-else class="feature-grid">
       <component :is="spec.detail ? RouterLink : 'article'" v-for="row in rows" :key="rowId(row)" class="feature-card record-card" :to="spec.detail ? spec.detail.replace(':trip', rowId(row)) : undefined">
@@ -66,7 +67,7 @@ watch(() => route.fullPath, load, { immediate: true });
           <bdi v-if="rowId(row)" class="record-reference" dir="auto" translate="no">{{ rowId(row) }}</bdi>
           <span v-if="row.description" class="record-card__description">{{ row.description }}</span>
         </div>
-        <Badge :theme="statusTheme(row.status)" :label="statusLabel(row.status || 'جاهز')" />
+        <Badge :theme="statusTheme(row.status)" :label="statusLabel(row.status || __('Ready'))" />
         <span class="record-card__meta">{{ dateTimeLabel(row.depart_time || row.trip_date) }}</span>
       </component>
       <dl v-if="!rows.length" class="feature-details">

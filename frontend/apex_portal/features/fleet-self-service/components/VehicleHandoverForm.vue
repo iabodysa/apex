@@ -4,6 +4,7 @@ import { Button, FileUploader, FormControl, createResource } from "frappe-ui";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 import { createSingleFlight } from "../state.js";
 import {
   buildHandoverPayload,
@@ -47,17 +48,17 @@ const submitted = ref(false);
 const submitOnce = createSingleFlight();
 const actionKey = computed(() => `vehicle-handover-${props.direction.toLowerCase()}`);
 const missingTemplateHelp = computed(() => props.direction === "Receipt"
-  ? "لا يوجد قالب فحص نشط للاستلام. اطلب من مسؤول الأسطول تفعيل قالب الاستلام ثم أعد المحاولة."
-  : "لا يوجد قالب فحص نشط للإرجاع. اطلب من مسؤول الأسطول تفعيل قالب الإرجاع ثم أعد المحاولة.");
+  ? __("No active inspection template exists for receipt. Ask the fleet administrator to activate the receipt template, then try again.")
+  : __("No active inspection template exists for return. Ask the fleet administrator to activate the return template, then try again."));
 // A driver standing at the vehicle reads five preconditions as one grey button. The checklist is
 // the one worth naming: an unanswered item sits far up a long scrolled form, and a "غير سليم" item
 // still owed its note looks answered. `canSubmit` is the reason's negation so they cannot drift.
 const submitReason = computed(() => {
-  if (submitted.value) return "سُجّل هذا الفحص بالفعل.";
+  if (submitted.value) return __("This inspection has already been recorded.");
   if (!checklistData.value?.template) return missingTemplateHelp.value;
-  if (form.odometer === "") return "أدخل قراءة العداد.";
-  if (!isInspectionComplete(rows.value)) return "أجب على كل بنود الفحص، واكتب ملاحظة لكل بند غير سليم.";
-  if (!form.signed_evidence) return "أرفق الإثبات الموقّع.";
+  if (form.odometer === "") return __("Enter the odometer reading.");
+  if (!isInspectionComplete(rows.value)) return __("Answer every inspection item, and write a note for every item that is not OK.");
+  if (!form.signed_evidence) return __("Attach the signed evidence.");
   return "";
 });
 const canSubmit = computed(() => !submitReason.value);
@@ -82,7 +83,7 @@ async function loadChecklist() {
     // configuration problem the driver cannot act on.
     checklistError.value = safeErrorMessage(
       reason,
-      "تعذّر تحميل قالب الفحص. تحقق من الاتصال ثم حاول مرة أخرى.",
+      __("Could not load the inspection template. Check your connection, then try again."),
     );
   } finally {
     loadingChecklist.value = false;
@@ -108,11 +109,11 @@ async function submit() {
     const result = await submitOnce(actionKey.value, () => action.submit(payload));
     submitted.value = true;
     notice.value = props.direction === "Receipt"
-      ? "تم تسجيل استلام المركبة والفحص الموقّع."
-      : "تم تسجيل إرجاع المركبة والفحص الموقّع.";
+      ? __("The vehicle receipt and the signed inspection were recorded.")
+      : __("The vehicle return and the signed inspection were recorded.");
     emit("saved", result);
   } catch (reason) {
-    submitError.value = safeErrorMessage(reason, "تعذّر حفظ الفحص. بقيت إجاباتك ويمكنك المحاولة مرة أخرى.");
+    submitError.value = safeErrorMessage(reason, __("Could not save the inspection. Your answers stayed and you can try again."));
   } finally {
     saving.value = false;
   }
@@ -124,67 +125,67 @@ onMounted(loadChecklist);
 <template>
   <section class="salis-page salis-form-page vehicle-handover" :aria-busy="loadingChecklist">
     <header>
-      <p class="salis-eyebrow">ساليس</p>
+      <p class="salis-eyebrow">{{ __("Salis") }}</p>
       <h2>{{ title }}</h2>
       <p>{{ intro }}</p>
     </header>
 
-    <PortalSkeleton v-if="loadingChecklist" :rows="4" label="جارٍ تحميل قالب الفحص المعتمد" />
+    <PortalSkeleton v-if="loadingChecklist" :rows="4" :label="__('Loading the approved inspection template')" />
     <PortalErrorState
       v-else-if="checklistError"
-      title="تعذّر بدء فحص المركبة"
+      :title="__('Could not start the vehicle inspection')"
       :message="checklistError"
       @retry="loadChecklist"
     />
     <form v-else class="salis-form" @submit.prevent="submit">
       <section class="vehicle-handover__context">
         <div class="record-identity">
-          <strong>قالب الفحص المعتمد</strong>
+          <strong>{{ __("Approved Inspection Template") }}</strong>
           <bdi class="record-reference" dir="auto" translate="no">{{ checklistData.template }}</bdi>
         </div>
         <bdi v-if="checklistData.vehicle" dir="auto" translate="no">{{ checklistData.vehicle }}</bdi>
       </section>
 
-      <FormControl v-model="form.odometer" type="number" size="lg" label="قراءة العداد" min="0" required />
+      <FormControl v-model="form.odometer" type="number" size="lg" :label="__('Current Odometer Reading')" min="0" required />
       <FormControl
         v-model="form.fuel_level"
         type="select"
         size="lg"
-        label="مستوى الوقود"
+        :label="__('Fuel Level')"
         :options="[
-          { label: 'اختر المستوى', value: '' },
-          { label: 'فارغ', value: 'Empty' },
-          { label: 'ربع', value: 'Quarter' },
-          { label: 'نصف', value: 'Half' },
-          { label: 'ثلاثة أرباع', value: 'Three Quarters' },
-          { label: 'ممتلئ', value: 'Full' },
+          { label: __('Select the Level'), value: '' },
+          { label: __('Empty'), value: 'Empty' },
+          { label: __('Quarter'), value: 'Quarter' },
+          { label: __('Half'), value: 'Half' },
+          { label: __('Three Quarters'), value: 'Three Quarters' },
+          { label: __('Full'), value: 'Full' },
         ]"
       />
 
       <fieldset class="vehicle-handover__checklist">
-        <legend>نتائج الفحص</legend>
+        <legend>{{ __("Inspection Results") }}</legend>
         <article v-for="(row, index) in rows" :key="`${index}:${row.check_item}`" class="vehicle-handover__item">
           <div class="record-identity">
             <strong dir="auto">{{ row.check_item }}</strong>
-            <span>البند {{ index + 1 }} من {{ rows.length }}</span>
+            <span>{{ __("Item {0} of {1}", [index + 1, rows.length]) }}</span>
           </div>
-          <div class="vehicle-handover__decisions" role="group" :aria-label="`نتيجة ${row.check_item}`">
-            <Button type="button" variant="outline" :aria-pressed="row.ok === true" @click="decide(row, true)">سليم</Button>
-            <Button type="button" variant="outline" :aria-pressed="row.ok === false" @click="decide(row, false)">غير سليم</Button>
+          <div class="vehicle-handover__decisions" role="group" :aria-label="__('Result for {0}', [row.check_item])">
+            <Button type="button" variant="outline" :aria-pressed="row.ok === true" @click="decide(row, true)">{{ __("OK") }}</Button>
+            <Button type="button" variant="outline" :aria-pressed="row.ok === false" @click="decide(row, false)">{{ __("Not OK") }}</Button>
           </div>
           <FormControl
             v-if="row.ok === false"
             v-model="row.remark"
             type="textarea"
-            :label="`ملاحظة العطل — ${row.check_item}`"
-            :placeholder="row.default_remark || 'صف الحالة غير السليمة'"
+            :label="__('Fault Note — {0}', [row.check_item])"
+            :placeholder="row.default_remark || __('Describe the unsound condition')"
             rows="2"
             required
           />
         </article>
       </fieldset>
 
-      <FormControl v-model="form.condition_notes" type="textarea" size="lg" rows="3" label="ملاحظات عامة على الحالة" />
+      <FormControl v-model="form.condition_notes" type="textarea" size="lg" rows="3" :label="__('General Condition Notes')" />
       <FileUploader
         :file-types="['image/*', 'application/pdf']"
         :upload-args="{ private: 1, folder: 'Home/Attachments' }"
@@ -192,12 +193,12 @@ onMounted(loadChecklist);
       >
         <template #default="{ openFileSelector, uploading, error: uploadError }">
           <div class="salis-upload vehicle-handover__evidence">
-            <strong>الإثبات الموقّع <span aria-hidden="true">*</span></strong>
+            <strong>{{ __("The Signed Evidence") }} <span aria-hidden="true">*</span></strong>
             <Button type="button" variant="outline" :loading="uploading" @click="openFileSelector">
-              {{ form.signed_evidence ? 'تم إرفاق الإثبات' : 'إرفاق الإثبات الموقّع' }}
+              {{ form.signed_evidence ? __("Evidence Attached") : __("Attach the Signed Evidence") }}
             </Button>
             <bdi v-if="form.signed_evidence" class="record-reference" dir="auto" translate="no">{{ form.signed_evidence }}</bdi>
-            <p v-if="uploadError" class="salis-error" role="alert">تعذّر رفع الإثبات. حاول مرة أخرى.</p>
+            <p v-if="uploadError" class="salis-error" role="alert">{{ __("Could not upload the evidence. Try again.") }}</p>
           </div>
         </template>
       </FileUploader>
@@ -206,7 +207,7 @@ onMounted(loadChecklist);
       <p v-if="submitError" class="salis-error" role="alert">{{ submitError }}</p>
       <p v-if="submitReason" class="feature-reason">{{ submitReason }}</p>
       <Button type="submit" variant="solid" theme="green" size="lg" :loading="saving" :disabled="!canSubmit || saving">
-        {{ direction === 'Receipt' ? 'تأكيد الاستلام' : 'تأكيد الإرجاع' }}
+        {{ direction === 'Receipt' ? __('Confirm Receipt') : __('Confirm Return') }}
       </Button>
     </form>
   </section>

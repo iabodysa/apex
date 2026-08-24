@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { __ } from "../core/i18n.js";
+import PortalUpdatePrompt from "../components/PortalUpdatePrompt.vue";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
 
@@ -93,6 +94,7 @@ function groupContainsActiveRoute(group) {
         <div class="operations-shell__actions"><slot name="actions" /></div>
       </header>
       <main id="portal-content" class="operations-shell__main" tabindex="-1">
+        <PortalUpdatePrompt />
         <slot />
       </main>
     </div>

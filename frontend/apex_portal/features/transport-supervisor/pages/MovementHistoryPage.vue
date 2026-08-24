@@ -2,6 +2,7 @@
 import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
+import { __ } from "../../../core/i18n.js";
 
 const history = createListResource({
   doctype: "Dispatch Trip",
@@ -33,24 +34,24 @@ const historyStatusOptions = statusOptions(["Completed", "Cancelled"]);
 
 <template>
   <SupervisorCollection
-    title="سجل الحركة"
-    description="سجل زمني للرحلات المكتملة والملغاة للرجوع السريع."
+    :title="__('Movement History')"
+    :description="__('A chronological log of completed and cancelled trips for quick reference.')"
     icon="lucide-clock"
     :resource="history"
     date-field="trip_date"
     :base-filters="{ status: ['in', ['Completed', 'Cancelled']] }"
     :status-options="historyStatusOptions"
-    empty="لا توجد رحلات سابقة في السجل."
+    :empty="__('No past trips in the log.')"
   >
     <template #default="{ rows }">
       <ol class="supervisor-history">
         <li v-for="trip in rows" :key="trip.name">
           <span class="supervisor-history__marker" aria-hidden="true" />
           <div class="supervisor-history__copy">
-            <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'حركة سابقة') }}</strong>
+            <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], __('Past Movement')) }}</strong>
             <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
-            <span>{{ dateTimeLabel(trip.trip_date) || 'التاريخ غير محدد' }}</span>
-            <small dir="auto">{{ trip.driver_label || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle_label || 'المركبة غير مسندة' }}</bdi></small>
+            <span>{{ dateTimeLabel(trip.trip_date) || __("Date Not Specified") }}</span>
+            <small dir="auto">{{ trip.driver_label || __("Driver Not Assigned") }} · <bdi translate="no">{{ trip.vehicle_label || __("Vehicle Not Assigned") }}</bdi></small>
             <small v-if="trip.project_label || trip.route_template_label || trip.route_assignment_label" dir="auto">
               {{ [trip.project_label, trip.route_template_label, trip.route_assignment_label].filter(Boolean).join(' · ') }}
             </small>

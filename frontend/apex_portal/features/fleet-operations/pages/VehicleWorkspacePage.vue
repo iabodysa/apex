@@ -7,6 +7,7 @@ import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 
 // What each fleet_os action accepts for the operator's text, read from its signature.
 const NOTE_ARGUMENT = Object.freeze({
@@ -57,10 +58,10 @@ const route = useRoute(),
   reason = ref(""),
   once = createSingleFlight();
 const ACTION_LABEL = Object.freeze({
-  stop: "إيقاف",
-  workshopIn: "إدخال الورشة",
-  workshopOut: "إخراج من الورشة",
-  recover: "إعادة للخدمة",
+  stop: __("Stop the vehicle"),
+  workshopIn: __("Workshop In"),
+  workshopOut: __("Workshop Out"),
+  recover: __("Return to Service"),
 });
 // A title attribute is invisible on the tablet these buttons are pressed on, so every
 // refused action names itself and its reason beside the row.
@@ -77,7 +78,7 @@ async function load() {
 async function act(name) {
   const cap = vehicle.value?.capabilities?.[name] || {
     allowed: false,
-    reason: "الإجراء غير متاح لهذه الحالة.",
+    reason: __("This action is not available for this state."),
   };
   const state = actionAvailability(cap);
   if (state.disabled) {
@@ -92,10 +93,10 @@ async function act(name) {
   try {
     await once(`${name}:${route.params.vehicle}`, () => actions[name].submit(payload));
   } catch (error) {
-    notice.value = safeErrorMessage(error, "تعذّر تنفيذ الإجراء. حاول مرة أخرى.");
+    notice.value = safeErrorMessage(error, __("Could not carry out the action. Try again."));
     return;
   }
-  notice.value = "تم تنفيذ الإجراء";
+  notice.value = __("The action was carried out");
   await load();
 }
 onMounted(load);
@@ -104,56 +105,56 @@ onMounted(load);
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>مساحة المركبة</p>
+        <p>{{ __("Vehicle Workspace") }}</p>
         <h2>
           <bdi>{{ vehicle?.plate || route.params.vehicle }}</bdi>
         </h2>
       </div>
       <Badge v-if="vehicle" :theme="statusTheme(vehicle.vehicle_status || vehicle.status)" :label="statusLabel(vehicle.vehicle_status || vehicle.status)" />
     </header>
-    <PortalSkeleton v-if="vehicles.loading" :rows="3" label="جارٍ تحميل المركبة" />
-    <PortalErrorState v-else-if="vehicles.error" title="تعذّر تحميل المركبة" :message="vehicles.error" @retry="load" />
-    <div v-else-if="!vehicle" class="ops-state ops-state--error">المركبة غير موجودة أو خارج نطاق مشروعك.</div>
+    <PortalSkeleton v-if="vehicles.loading" :rows="3" :label="__('Loading the vehicle')" />
+    <PortalErrorState v-else-if="vehicles.error" :title="__('Could not load the vehicle')" :message="vehicles.error" @retry="load" />
+    <div v-else-if="!vehicle" class="ops-state ops-state--error">{{ __("The vehicle does not exist or is outside your project's scope.") }}</div>
     <div v-else class="ops-workspace">
       <main class="ops-panels">
         <article class="ops-card">
-          <h3>الحالة والتشغيل</h3>
+          <h3>{{ __("Status and Operation") }}</h3>
           <p>
             <bdi dir="auto">{{ vehicle.project || "—" }}</bdi> ·
-            <bdi dir="auto">{{ vehicle.current_driver?.name_en || "من دون مندوب" }}</bdi>
+            <bdi dir="auto">{{ vehicle.current_driver?.name_en || __("No representative assigned") }}</bdi>
           </p>
           <div class="ops-actions">
-            <Button variant="outline" label="إيقاف" :disabled="isBlocked('stop')" @click="act('stop')" />
-            <Button variant="outline" label="إدخال الورشة" :disabled="isBlocked('workshopIn')" @click="act('workshopIn')" />
-            <Button variant="outline" label="إخراج من الورشة" :disabled="isBlocked('workshopOut')" @click="act('workshopOut')" />
-            <Button variant="solid" theme="green" label="إعادة للخدمة" :disabled="isBlocked('recover')" @click="act('recover')" />
+            <Button variant="outline" :label="__('OFF')" :disabled="isBlocked('stop')" @click="act('stop')" />
+            <Button variant="outline" :label="__('Workshop In')" :disabled="isBlocked('workshopIn')" @click="act('workshopIn')" />
+            <Button variant="outline" :label="__('Workshop Out')" :disabled="isBlocked('workshopOut')" @click="act('workshopOut')" />
+            <Button variant="solid" theme="green" :label="__('Return to Service')" :disabled="isBlocked('recover')" @click="act('recover')" />
           </div>
           <ul v-if="blockedActions.length" class="ops-blocked-actions">
             <li v-for="entry in blockedActions" :key="entry.name">{{ entry.label }}: {{ entry.reason }}</li>
           </ul>
-          <FormControl v-model="reason" type="textarea" :rows="2" label="ملاحظة الإجراء" />
-          <p class="ops-hint">تُحفظ الملاحظة مع الإيقاف وإدخال الورشة فقط.</p>
+          <FormControl v-model="reason" type="textarea" :rows="2" :label="__('Action Note')" />
+          <p class="ops-hint">{{ __("The note is saved only with Stop and Workshop In.") }}</p>
           <p v-if="notice" class="ops-reason">{{ notice }}</p>
         </article>
         <article class="ops-card">
-          <h3>الالتزام</h3>
+          <h3>{{ __("Vehicle Compliance") }}</h3>
           <p>{{ statusLabel(vehicle.compliance_status || "Not Tracked") }}</p>
         </article>
         <article class="ops-card">
-          <h3>الاسترداد والمعالجة</h3>
-          <p>تظهر قرارات الحوادث والتكاليف هنا من السجلات المعتمدة.</p>
+          <h3>{{ __("Recovery and Processing") }}</h3>
+          <p>{{ __("Incident and cost decisions appear here from approved records.") }}</p>
         </article>
       </main>
       <aside class="ops-card">
-        <h3>السجل الزمني</h3>
-        <PortalSkeleton v-if="vehicleTimeline.loading" :rows="3" label="جارٍ تحميل السجل الزمني" />
+        <h3>{{ __("Vehicle Timeline") }}</h3>
+        <PortalSkeleton v-if="vehicleTimeline.loading" :rows="3" :label="__('Loading the timeline')" />
         <PortalErrorState
           v-else-if="vehicleTimeline.error"
-          title="تعذّر تحميل السجل الزمني"
+          :title="__('Could not load the timeline')"
           :message="vehicleTimeline.error"
           @retry="vehicleTimeline.fetch({ plate: route.params.vehicle })"
         />
-        <p v-else-if="!timeline.length" class="ops-state">لا توجد أحداث مسجلة.</p>
+        <p v-else-if="!timeline.length" class="ops-state">{{ __("No events are recorded.") }}</p>
         <ol v-else>
           <li v-for="event in timeline" :key="`${event.kind}:${event.ref_name}`">
             <strong>{{ event.title }}</strong>

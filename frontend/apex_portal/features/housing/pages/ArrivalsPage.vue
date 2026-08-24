@@ -9,6 +9,7 @@ import ArrivalRegistrationForm from "../components/ArrivalRegistrationForm.vue";
 import { building } from "../building.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import { normalizeWorkerLinkResult, summarizeArrivalSession } from "../arrivalFlow.js";
+import { __ } from "../../../core/i18n.js";
 
 const router = useRouter();
 const capabilities = globalThis.window?.apex_portal?.capabilities || [];
@@ -78,7 +79,7 @@ function continueSession() {
 async function onRegistered(result) {
   registered.value = { ...result, project: selectedManifest.value?.project || "" };
   selectedManifest.value = null;
-  toast.create({ type: "success", message: "تم تسجيل العامل" });
+  toast.create({ type: "success", message: __("The worker was registered") });
   await arrivals.fetch();
 }
 
@@ -87,9 +88,9 @@ async function issueLink(row) {
   try {
     const result = await links.submit({ employees_json: JSON.stringify([row.party]) });
     issuedLink.value = normalizeWorkerLinkResult(result);
-    if (!issuedLink.value) throw new Error("لم يصدر رابط للعامل.");
+    if (!issuedLink.value) throw new Error(__("No link was issued for the worker."));
   } catch (reason) {
-    error.value = safeErrorMessage(reason, "تعذّر إصدار رابط العامل.");
+    error.value = safeErrorMessage(reason, __("Could not issue the worker's link."));
   }
 }
 
@@ -101,13 +102,13 @@ async function printSlip(row) {
       party_type: row.party_type || "Temporary Worker",
       party: row.party || row.temporary_worker,
     });
-    if (!popup) throw new Error("اسمح بفتح نافذة الطباعة ثم حاول مرة أخرى.");
+    if (!popup) throw new Error(__("Allow the print window to open then try again."));
     const url = URL.createObjectURL(new Blob([result.html], { type: "text/html;charset=utf-8" }));
     popup.location.replace(url);
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   } catch (reason) {
     popup?.close();
-    error.value = safeErrorMessage(reason, "تعذّر تجهيز بطاقة الوصول.");
+    error.value = safeErrorMessage(reason, __("Could not prepare the arrival card."));
   }
 }
 
@@ -119,41 +120,41 @@ onBeforeUnmount(stopLive);
 <template>
   <section class="feature-page arrivals-page">
     <header class="feature-page__header arrivals-heading">
-      <div><p class="feature-kicker">مكتب الوصول</p><h2>استقبال العامل حتى سريره</h2><p>سجّل القادم، اختر له سريراً، ثم أكمل العهد.</p></div>
+      <div><p class="feature-kicker">{{ __("Arrival Desk") }}</p><h2>{{ __("Receive the worker through to their bed") }}</h2><p>{{ __("Register the arrival, choose their bed, then complete the custody handover.") }}</p></div>
       <BuildingPicker />
     </header>
 
-    <div v-if="!building" class="feature-page__empty">اختر المبنى لعرض قائمة الوصول.</div>
-    <PortalSkeleton v-else-if="arrivals.loading && !workers.length" :rows="3" label="جارٍ تحميل القادمين" />
-    <ErrorMessage v-else-if="arrivals.error" message="تعذّر تحميل قائمة الوصول." />
+    <div v-if="!building" class="feature-page__empty">{{ __("Select the building to view the arrivals list.") }}</div>
+    <PortalSkeleton v-else-if="arrivals.loading && !workers.length" :rows="3" :label="__('Loading Arrivals')" />
+    <ErrorMessage v-else-if="arrivals.error" :message="__('Could not load the arrivals list.')" />
 
     <template v-else-if="building">
       <div class="arrival-metrics">
-        <article><strong>{{ arrivals.data?.total || 0 }}</strong><span>متوقع اليوم</span></article>
-        <article><strong>{{ session.registered }}</strong><span>تم تسجيله</span></article>
-        <article><strong>{{ session.housed }}</strong><span>تم تسكينه</span></article>
+        <article><strong>{{ arrivals.data?.total || 0 }}</strong><span>{{ __("Expected Today") }}</span></article>
+        <article><strong>{{ session.registered }}</strong><span>{{ __("registered") }}</span></article>
+        <article><strong>{{ session.housed }}</strong><span>{{ __("housed") }}</span></article>
       </div>
       <section v-if="session.total" class="arrival-session" aria-labelledby="arrival-session-title">
         <div class="arrival-session__copy">
-          <span>جلسة الوصول</span>
-          <h3 id="arrival-session-title">{{ session.next ? `التالي: ${session.next.worker_name}` : "اكتملت دفعة اليوم" }}</h3>
-          <p>{{ session.housed }} من {{ session.total }} وصلوا إلى أسرّتهم.</p>
+          <span>{{ __("Arrival Session") }}</span>
+          <h3 id="arrival-session-title">{{ session.next ? __("Next: {0}", [session.next.worker_name]) : __("Today's batch is complete") }}</h3>
+          <p>{{ __("{0} of {1} have reached their beds.", [session.housed, session.total]) }}</p>
         </div>
         <Progress :value="session.progress" :label="`${session.progress}٪`" size="lg" />
         <Button v-if="session.next" theme="green" variant="solid" @click="continueSession">
-          {{ session.nextAction === 'assign-bed' ? 'اختيار سرير' : 'تسجيل الوصول' }}
+          {{ session.nextAction === 'assign-bed' ? __("Choose a Bed") : __("Register Arrival") }}
         </Button>
       </section>
       <ErrorMessage v-if="error" :message="error" />
 
       <article v-if="registered" class="arrival-focus">
-        <div><span>جاهز للتسكين</span><h3>{{ registered.label }}</h3><p>اكتمل تسجيل الهوية. اختر السرير المناسب الآن.</p></div>
-        <Button theme="green" variant="solid" @click="chooseBed(registered)">اختيار سرير</Button>
+        <div><span>{{ __("Ready for Check-in") }}</span><h3>{{ registered.label }}</h3><p>{{ __("Identity registration is complete. Choose the right bed now.") }}</p></div>
+        <Button theme="green" variant="solid" @click="chooseBed(registered)">{{ __("Choose a Bed") }}</Button>
       </article>
 
       <article v-if="issuedLink" class="arrival-link-card">
-        <div><span>رابط العامل</span><h3>جاهز للإرسال</h3><a :href="issuedLink.link" target="_blank" rel="noopener noreferrer">فتح الرابط</a></div>
-        <img v-if="issuedLink.qr" :src="issuedLink.qr" alt="رمز دخول العامل" />
+        <div><span>{{ __("Link the Worker") }}</span><h3>{{ __("Ready to Send") }}</h3><a :href="issuedLink.link" target="_blank" rel="noopener noreferrer">{{ __("Open the Link") }}</a></div>
+        <img v-if="issuedLink.qr" :src="issuedLink.qr" :alt="__('Worker entry code')" />
       </article>
 
       <ArrivalWorkerSearch
@@ -164,17 +165,17 @@ onBeforeUnmount(stopLive);
       />
 
       <section class="arrival-panel">
-        <div class="arrival-panel__title"><h3>قائمة اليوم</h3><span>{{ workers.length }} عامل</span></div>
-        <p v-if="!workers.length" class="feature-page__empty">لا توجد دفعة وصول لهذا المبنى اليوم.</p>
+        <div class="arrival-panel__title"><h3>{{ __("Today's List") }}</h3><span>{{ workers.length }} {{ __("Worker") }}</span></div>
+        <p v-if="!workers.length" class="feature-page__empty">{{ __("No arrival batch for this building today.") }}</p>
         <article v-for="row in workers" :key="row.row" class="arrival-row">
-          <div><strong dir="auto">{{ row.worker_name }}</strong><small><bdi dir="auto" translate="no">{{ row.passport_number || 'لا يوجد رقم جواز' }}</bdi>، <bdi dir="auto">{{ row.labour_supplier || row.project || 'بدون جهة محددة' }}</bdi></small></div>
-          <Badge :theme="row.housed ? 'green' : row.arrived ? 'blue' : 'orange'" :label="row.housed ? 'تم تسكينه' : row.arrived ? 'مسجل' : 'منتظر'" />
+          <div><strong dir="auto">{{ row.worker_name }}</strong><small><bdi dir="auto" translate="no">{{ row.passport_number || __("No passport number") }}</bdi>، <bdi dir="auto">{{ row.labour_supplier || row.project || __("No specific party") }}</bdi></small></div>
+          <Badge :theme="row.housed ? 'green' : row.arrived ? 'blue' : 'orange'" :label="row.housed ? __('housed') : row.arrived ? __('Registered') : __('Waiting')" />
           <div class="feature-actions">
-            <Button v-if="row.arrived" variant="subtle" @click="printSlip(row)">بطاقة الوصول</Button>
-            <Button v-if="row.arrived && !row.housed" theme="green" variant="solid" @click="chooseBed(row)">اختيار سرير</Button>
+            <Button v-if="row.arrived" variant="subtle" @click="printSlip(row)">{{ __("Arrival Card") }}</Button>
+            <Button v-if="row.arrived && !row.housed" theme="green" variant="solid" @click="chooseBed(row)">{{ __("Choose a Bed") }}</Button>
             <!-- Only a worker who has not been registered yet can be registered; a housed
                  row is finished and carries its own badge instead of an action. -->
-            <Button v-else-if="canRegister && !row.arrived" theme="green" variant="solid" @click="prepareManifest(row)">تسجيل الوصول</Button>
+            <Button v-else-if="canRegister && !row.arrived" theme="green" variant="solid" @click="prepareManifest(row)">{{ __("Register Arrival") }}</Button>
           </div>
         </article>
       </section>

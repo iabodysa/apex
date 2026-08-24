@@ -6,6 +6,7 @@ import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
 import { statusLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -32,8 +33,8 @@ const candidate = computed(() => housingCandidateFromQuery(route.query));
 // The two explanations further down belong to the no-permission branches, which do not render
 // while this form is on screen — so a greyed "تسكين" had nothing beside it.
 const checkInReason = computed(() => {
-  if (!checkInForm.party) return "اكتب رقم الساكن لتفعيل التسكين.";
-  if (!checkInForm.project) return "اختر المشروع لتفعيل التسكين.";
+  if (!checkInForm.party) return __("Type the resident number to enable check-in.");
+  if (!checkInForm.project) return __("Select the project to enable check-in.");
   return "";
 });
 const projectOptions = computed(() => (projects.data || []).map((project) => ({
@@ -71,11 +72,11 @@ async function arrive() {
   error.value = "";
   try {
     await checkIn.submit({ bed: route.params.bed, ...checkInForm });
-    toast.create({ type: "success", message: "تم تسكين العامل" });
+    toast.create({ type: "success", message: __("The worker was checked in") });
     Object.assign(checkInForm, { party_type: "Employee", party: "", project: "" });
     await bed.reload();
     if (candidate.value) await router.push("/arrivals");
-  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر التسكين."); }
+  } catch (exception) { error.value = safeErrorMessage(exception, __("Could not check in.")); }
 }
 async function depart() {
   error.value = "";
@@ -83,41 +84,41 @@ async function depart() {
   try {
     const response = await checkOut.submit({ bed: route.params.bed, checkout_reason: "End of Contract" });
     if (response?.requires_full_form) {
-      error.value = "يجب استلام عهد العامل قبل إتمام المغادرة.";
+      error.value = __("The worker's custody items must be received before completing the departure.");
       custodyBlocked.value = true;
       return;
     }
-    toast.create({ type: "success", message: "تم تسجيل المغادرة" });
+    toast.create({ type: "success", message: __("Departure recorded") });
     await bed.reload();
-  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر تسجيل المغادرة."); }
+  } catch (exception) { error.value = safeErrorMessage(exception, __("Could not record the departure.")); }
 }
 </script>
 
 <template>
   <section class="feature-page">
-    <h2>تفاصيل السرير</h2>
-    <PortalSkeleton v-if="bed.get.loading && !bed.doc" :rows="3" label="جارٍ التحميل" />
-    <ErrorMessage v-else-if="bed.get.error" message="تعذر تحميل السرير." />
+    <h2>{{ __("Bed Details") }}</h2>
+    <PortalSkeleton v-if="bed.get.loading && !bed.doc" :rows="3" :label="__('Loading...')" />
+    <ErrorMessage v-else-if="bed.get.error" :message="__('Could not load the bed.')" />
     <template v-else-if="bed.doc">
       <article class="feature-card"><strong><bdi dir="auto" translate="no">{{ bed.doc.bed_code || bed.doc.name }}</bdi></strong><span><bdi dir="auto" translate="no">{{ bed.doc.room }}</bdi></span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>
       <form v-if="!occupied && canCheckIn" class="feature-form" @submit.prevent="arrive">
         <article v-if="candidate" class="selected-resident">
-          <div><span>الساكن المحدد</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
-          <RouterLink to="/arrivals">تغيير العامل</RouterLink>
+          <div><span>{{ __("Selected Resident") }}</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
+          <RouterLink to="/arrivals">{{ __("Change Worker") }}</RouterLink>
         </article>
         <template v-else>
-          <FormControl v-model="checkInForm.party_type" type="select" label="نوع الساكن" :options="[{ label: 'موظف', value: 'Employee' }, { label: 'عامل مؤقت', value: 'Temporary Worker' }]" />
-          <FormControl v-model="checkInForm.party" label="رقم الساكن" required />
+          <FormControl v-model="checkInForm.party_type" type="select" :label="__('Resident Type')" :options="[{ label: __('Emp'), value: 'Employee' }, { label: __('Temporary Worker'), value: 'Temporary Worker' }]" />
+          <FormControl v-model="checkInForm.party" :label="__('Resident Number')" required />
         </template>
-        <FormControl v-if="!candidate?.project" v-model="checkInForm.project" type="select" label="المشروع" :options="projectOptions" required />
+        <FormControl v-if="!candidate?.project" v-model="checkInForm.project" type="select" :label="__('Project')" :options="projectOptions" required />
         <p v-if="checkInReason" class="feature-page__empty">{{ checkInReason }}</p>
-        <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party || !checkInForm.project">{{ candidate ? `تسكين ${candidate.label}` : 'تسكين' }}</Button>
+        <Button type="submit" theme="green" variant="solid" :loading="checkIn.loading" :disabled="!checkInForm.party || !checkInForm.project">{{ candidate ? __("Check In {0}", [candidate.label]) : __("Housing Assignment") }}</Button>
       </form>
-      <p v-else-if="!occupied" class="feature-page__empty">ليس لديك صلاحية تسكين عامل.</p>
-      <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">تسجيل المغادرة</Button>
-      <p v-else class="feature-page__empty">السرير مشغول، وليس لديك صلاحية تسجيل المغادرة.</p>
+      <p v-else-if="!occupied" class="feature-page__empty">{{ __("You do not have permission to check in a worker.") }}</p>
+      <Button v-else-if="canCheckOut" theme="green" variant="solid" :loading="checkOut.loading" @click="depart">{{ __("Register Departure") }}</Button>
+      <p v-else class="feature-page__empty">{{ __("The bed is occupied and you do not have permission to record the departure.") }}</p>
       <ErrorMessage v-if="error" :message="error" />
-      <RouterLink v-if="custodyBlocked" to="/custody">الانتقال إلى العهد</RouterLink>
+      <RouterLink v-if="custodyBlocked" to="/custody">{{ __("Go to Custody") }}</RouterLink>
     </template>
   </section>
 </template>

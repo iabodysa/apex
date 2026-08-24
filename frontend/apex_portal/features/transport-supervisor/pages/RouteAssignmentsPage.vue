@@ -2,6 +2,7 @@
 import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
+import { __ } from "../../../core/i18n.js";
 
 const assignments = createListResource({
   doctype: "Route Assignment",
@@ -35,13 +36,13 @@ const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected"
 
 <template>
   <SupervisorCollection
-    title="التشغيل المتكرر"
-    description="الشفت والمسار والمشروع والإسناد الافتراضي في سجل واحد يعتمد قبل توليد الرحلات."
+    :title="__('Recurring Operations')"
+    :description="__('The shift, route, project, and default assignment in one record approved before generating trips.')"
     icon="lucide-repeat"
     :resource="assignments"
     date-field="starts_on"
     :status-options="assignmentStatusOptions"
-    empty="لا يوجد تشغيل متكرر مسند إليك."
+    :empty="__('No recurring operation assigned to you.')"
   >
     <template #default="{ rows }">
       <div class="supervisor-assignment-grid">
@@ -53,26 +54,26 @@ const assignmentStatusOptions = statusOptions(["Pending", "Approved", "Rejected"
         >
           <header>
             <div class="record-identity">
-              <strong dir="auto">{{ recordTitle(assignment, ['assignment_name', 'shift_name'], 'تشغيل متكرر') }}</strong>
+              <strong dir="auto">{{ recordTitle(assignment, ['assignment_name', 'shift_name'], __('recurring operation')) }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ assignment.name }}</bdi>
             </div>
             <div class="supervisor-assignment-flags">
               <Badge :theme="statusTheme(assignment.status)" :label="statusLabel(assignment.status)" />
               <!-- An approved assignment that is switched off generates no trips, and the
                    status badge alone cannot tell that apart from one that is running. -->
-              <Badge v-if="!assignment.enabled" theme="gray" label="متوقف" />
+              <Badge v-if="!assignment.enabled" theme="gray" :label="__('Stopped')" />
             </div>
           </header>
           <dl>
-            <div><dt>الشفت</dt><dd dir="auto">{{ assignment.shift_name || assignment.work_shift_label || 'غير محدد' }}</dd></div>
-            <div><dt>المسار</dt><dd dir="auto">{{ assignment.route_template_label || 'غير محدد' }}</dd></div>
-            <div><dt>المشروع</dt><dd dir="auto">{{ assignment.project_label || 'غير محدد' }}</dd></div>
-            <div><dt>السائق</dt><dd dir="auto">{{ assignment.driver_label || 'غير مسند' }}</dd></div>
-            <div><dt>المركبة</dt><dd><bdi dir="auto">{{ assignment.vehicle_label || 'غير مسندة' }}</bdi></dd></div>
-            <div><dt>يبدأ في</dt><dd>{{ dateTimeLabel(assignment.starts_on) || 'غير محدد' }}</dd></div>
-            <div><dt>مولّد حتى</dt><dd>{{ dateTimeLabel(assignment.generated_through) || 'لم يبدأ' }}</dd></div>
+            <div><dt>{{ __("Duty Shift") }}</dt><dd dir="auto">{{ assignment.shift_name || assignment.work_shift_label || __("Unspecified") }}</dd></div>
+            <div><dt>{{ __("Route") }}</dt><dd dir="auto">{{ assignment.route_template_label || __("Unspecified") }}</dd></div>
+            <div><dt>{{ __("Project") }}</dt><dd dir="auto">{{ assignment.project_label || __("Unspecified") }}</dd></div>
+            <div><dt>{{ __("driver") }}</dt><dd dir="auto">{{ assignment.driver_label || __("Not Assigned") }}</dd></div>
+            <div><dt>{{ __("vehicle") }}</dt><dd><bdi dir="auto">{{ assignment.vehicle_label || __("Unassigned Vehicle") }}</bdi></dd></div>
+            <div><dt>{{ __("Starts On") }}</dt><dd>{{ dateTimeLabel(assignment.starts_on) || __("Unspecified") }}</dd></div>
+            <div><dt>{{ __("Generated Up To") }}</dt><dd>{{ dateTimeLabel(assignment.generated_through) || __("Not Started") }}</dd></div>
           </dl>
-          <span class="supervisor-open-link">فتح التشغيل <span class="lucide-arrow-left" aria-hidden="true" /></span>
+          <span class="supervisor-open-link">{{ __("Open Operation") }} <span class="lucide-arrow-left" aria-hidden="true" /></span>
         </RouterLink>
       </div>
     </template>

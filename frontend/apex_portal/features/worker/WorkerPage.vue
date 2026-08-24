@@ -6,6 +6,7 @@ import { fieldLabel, recordTitle, statusLabel } from "../../core/displayLabels.j
 import { errorStatus } from "../../core/errorMessage.js";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../components/PortalErrorState.vue";
+import { __ } from "../../core/i18n.js";
 
 const route = useRoute();
 let resource;
@@ -30,7 +31,7 @@ async function load() {
   state.value = "loading";
   error.value = null;
   try {
-    if (!spec.value.endpoint) throw new Error("الخدمة غير متاحة حالياً.");
+    if (!spec.value.endpoint) throw new Error(__("The service is not available right now."));
     if (resource?.url !== spec.value.endpoint) {
       resource = createResource({ url: spec.value.endpoint, method: "GET", auto: false });
     }
@@ -56,11 +57,11 @@ watch(() => route.fullPath, load, { immediate: true });
       <span :class="spec.icon || 'lucide-circle'" aria-hidden="true" />
     </header>
 
-    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="`جارٍ تحميل ${spec.title || 'البيانات'}`" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الصفحة" :message="error" fallback="لا تملك صلاحية عرض هذه الصفحة." @retry="load" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الصفحة" :message="error" fallback="تعذّر تحميل البيانات." @retry="load" />
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="__('Loading {0}', [spec.title || __('The data')])" />
+    <PortalErrorState v-else-if="state === 'denied'" :title="__('Could not open the page')" :message="error" :fallback="__('You do not have permission to view this page.')" @retry="load" />
+    <PortalErrorState v-else-if="state === 'error'" :title="__('Could not load the page')" :message="error" :fallback="__('Could not load the data.')" @retry="load" />
     <div v-else-if="state === 'empty'" class="feature-state">
-      {{ spec.empty || "لا توجد بيانات حالياً." }}
+      {{ spec.empty || __("There is no data right now.") }}
     </div>
     <div v-else class="feature-grid">
       <component :is="spec.detail ? RouterLink : 'article'" v-for="record in records" :key="record.name" class="feature-card record-card" :to="spec.detail ? spec.detail.replace(':name', record.name) : undefined">

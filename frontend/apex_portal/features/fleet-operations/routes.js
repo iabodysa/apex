@@ -1,4 +1,5 @@
 import "./styles.css";
+import { __ } from "../../core/i18n.js";
 const pages = Object.freeze({
     overview: () => import("./pages/SupervisorOverviewPage.vue"),
     vehicles: () => import("./pages/VehicleBoardPage.vue"),
@@ -36,59 +37,59 @@ const route = (path, name, label, icon, component, capability = "fleet.operation
     });
 export function createFleetOperationsRoutes() {
     return Object.freeze([
-        route("/", "supervisor-overview", "نظرة عامة", "lucide-layout-dashboard", pages.overview),
-        route("/vehicles", "vehicle-board", "المركبات", "lucide-truck", pages.vehicles),
+        route("/", "supervisor-overview", __("Overview"), "lucide-layout-dashboard", pages.overview),
+        route("/vehicles", "vehicle-board", __("Vehicles"), "lucide-truck", pages.vehicles),
         route(
             "/vehicles/:vehicle",
             "vehicle-workspace",
-            "مساحة المركبة",
+            __("Vehicle Workspace"),
             "lucide-panel-right",
             pages.vehicle,
         ),
         route(
             "/assignments",
             "assignment-queue",
-            "الإسناد",
+            __("Assignment"),
             "lucide-user-round-check",
             pages.assignments,
         ),
-        route("/handovers", "handover-queue", "الاستلام", "lucide-clipboard-check", pages.handovers),
+        route("/handovers", "handover-queue", __("Handover intake"), "lucide-clipboard-check", pages.handovers),
         route(
             "/handovers/:name",
             "handover-detail",
-            "تفاصيل استلام المركبة",
+            __("Vehicle Receipt Details"),
             "lucide-clipboard-check",
             pages.handover,
         ),
-        route("/returns", "return-queue", "الإرجاع", "lucide-undo-2", pages.returns),
+        route("/returns", "return-queue", __("Vehicle Returns"), "lucide-undo-2", pages.returns),
         route(
             "/returns/:name",
             "return-detail",
-            "تفاصيل إرجاع المركبة",
+            __("Vehicle Return Details"),
             "lucide-undo-2",
             pages.handover,
         ),
         route(
             "/fuel-approvals",
             "fuel-approval-queue",
-            "اعتماد الوقود",
+            __("Fuel Approval"),
             "lucide-fuel",
             pages.fuel,
             "fleet.operations.fuel",
         ),
-        route("/incidents", "incident-queue", "الحوادث", "lucide-triangle-alert", pages.incidents),
+        route("/incidents", "incident-queue", __("Incidents"), "lucide-triangle-alert", pages.incidents),
         route(
             "/incidents/:name",
             "incident-detail",
-            "تفاصيل الحادث",
+            __("Accident Details"),
             "lucide-file-warning",
             pages.incident,
         ),
-        route("/problems", "problem-queue", "المشكلات", "lucide-messages-square", pages.problems),
+        route("/problems", "problem-queue", __("Problems"), "lucide-messages-square", pages.problems),
         route(
             "/problems/:name",
             "problem-detail",
-            "تفاصيل المشكلة",
+            __("Problem Details"),
             "lucide-message-square",
             pages.problem,
         ),

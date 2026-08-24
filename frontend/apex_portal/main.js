@@ -5,7 +5,8 @@ import { createPortalRouter, getPortalContext } from "./core/router.js";
 import { parsePortalBootstrap, readPortalDocumentBootstrap } from "./core/session.js";
 import { configurePortalApi } from "./core/api.js";
 import { createDocSubscriber, createDoctypeSubscriber, createPortalSubscriber } from "./core/realtime.js";
-import { registerPortalWorker } from "./core/serviceWorker.js";
+import { createPortalUpdateController, registerPortalWorker } from "./core/serviceWorker.js";
+import { __ } from "./core/i18n.js";
 import { createPortalPushController } from "./core/pushNotifications.js";
 import { createDraftStore } from "./core/offline.js";
 import { createDriverGateway } from "./features/driver/gateway.js";
@@ -16,12 +17,12 @@ import "./styles/tokens.css";
 import "./styles/frappe-ui-theme.css";
 
 const CONTEXT_TITLES = Object.freeze({
-  worker: "مسار",
-  driver: "رحلاتي",
-  "transport-supervisor": "تشغيل مسار",
-  "fleet-self-service": "ساليس",
-  "fleet-operations": "تشغيل ساليس",
-  housing: "إدارة السكن",
+  worker: "Masar",
+  driver: "My trips",
+  "transport-supervisor": "Masar operations",
+  "fleet-self-service": "Salis",
+  "fleet-operations": "Salis operations",
+  housing: "Housing management",
 });
 
 function navigationFrom(router) {
@@ -62,12 +63,15 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     // apart, and it is read from `meta` because that is the only place vue-router carries a
     // custom record key through to a resolved location; see routes.js.
     const page = to.meta?.label;
-    const persona = CONTEXT_TITLES[to.meta?.feature] || CONTEXT_TITLES[context.id];
-    globalThis.document.title = page && page !== persona ? `${page} · ${persona} | أبكس` : `${persona} | أبكس`;
+    const persona = __(CONTEXT_TITLES[to.meta?.feature] || CONTEXT_TITLES[context.id]);
+    const brand = __("Apex");
+    globalThis.document.title = page && page !== persona
+      ? `${page} · ${persona} | ${brand}`
+      : `${persona} | ${brand}`;
   });
   const application = createApp(App, {
     context,
-    title: CONTEXT_TITLES[context.id],
+    title: __(CONTEXT_TITLES[context.id]),
     navigation: navigationFrom(router),
   });
   const call = configurePortalApi();
@@ -90,6 +94,8 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
   application.provide("portalDrafts", portalDrafts);
+  const portalUpdate = createPortalUpdateController();
+  application.provide("portalUpdate", portalUpdate);
   application.provide(
     "portalBrand",
     Object.freeze({ logo: (shell?.show_brand !== false && shell?.brand_logo) || "" }),
@@ -102,7 +108,10 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   await router.isReady();
   application.mount(target);
   void registerPortalWorker(shell)
-    .then((registration) => portalPush?.initialize(registration))
+    .then((registration) => {
+      portalUpdate.attach(registration);
+      return portalPush?.initialize(registration);
+    })
     .catch(() => {});
   return Object.freeze({ application, router, bootstrap, context });
 }

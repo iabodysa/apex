@@ -8,6 +8,7 @@ import hmac
 import re
 
 import frappe
+from frappe import _
 from frappe.sessions import get_csrf_token
 from frappe.translate import get_translations_from_csv
 from frappe.utils import cint
@@ -23,12 +24,12 @@ PORTAL_PUBLIC_PATHS = {
 }
 
 _PORTAL_TITLES = {
-    "worker": "أبكس | مسار",
-    "driver": "أبكس | السائق",
-    "transport-supervisor": "أبكس | إشراف مسار",
-    "fleet-self-service": "أبكس | سلس",
-    "fleet-operations": "أبكس | تشغيل سلس",
-    "housing": "أبكس | السكن",
+    "worker": "Apex | Masar",
+    "driver": "Apex | Driver",
+    "transport-supervisor": "Apex | Masar supervision",
+    "fleet-self-service": "Apex | Salis",
+    "fleet-operations": "Apex | Salis operations",
+    "housing": "Apex | Housing",
 }
 
 _PWA_META = {
@@ -94,6 +95,7 @@ def build_portal_bootstrap(
 _DEFAULT_THEME_COLOR = "#00844E"
 _SEED_COLOR = re.compile(r"\A#[0-9A-Fa-f]{3,8}\Z")
 _APPEARANCE_FIELDS = ("accent_color", "brand_logo", "show_brand")
+_RTL_LANGUAGES = frozenset({"ar", "fa", "he", "ur"})
 
 def portal_seed_color(raw: str | None) -> str:
     candidate = (raw or "").strip()
@@ -107,8 +109,11 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     ) or frappe._dict()
     seed = portal_seed_color(appearance.get("accent_color"))
     show_brand = bool(cint(appearance.get("show_brand")))
+    language = getattr(frappe.local, "lang", None) or "ar"
     return {
-        "title": _PORTAL_TITLES[entry],
+        "title": _(_PORTAL_TITLES[entry]),
+        "language": language,
+        "direction": "rtl" if language in _RTL_LANGUAGES else "ltr",
         "canonical_path": public_path,
         "manifest_url": pwa.get("manifest_url"),
         "apple_icon_url": pwa.get("apple_icon_url"),

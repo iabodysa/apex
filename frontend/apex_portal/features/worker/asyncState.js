@@ -1,4 +1,5 @@
 import { computed, nextTick, reactive, ref, watch } from "vue";
+import { __ } from "../../core/i18n.js";
 
 export function createDraftAction(initial, { store = null, key = "" } = {}) {
   const defaults = { ...initial };
@@ -37,7 +38,7 @@ export function createDraftAction(initial, { store = null, key = "" } = {}) {
       return result;
     } catch (reason) {
       state.value = "error";
-      error.value = reason?.message || "تعذّر الحفظ. حاول مرة أخرى.";
+      error.value = reason?.message || __("Could not save. Try again.");
       return undefined;
     }
   }

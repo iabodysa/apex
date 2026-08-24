@@ -1,6 +1,7 @@
 import { START_LOCATION, createRouter, createRouterMatcher, createWebHashHistory } from "vue-router";
 import AccessDenied from "../AccessDenied.vue";
 import { can } from "./permissions.js";
+import { __ } from "./i18n.js";
 
 export const FEATURE_SLOTS = Object.freeze([
   "worker",
@@ -87,7 +88,7 @@ export function createPortalRouter({
         // `entry` travels with the refusal because the two passwordless personas have no system
         // administrator to be sent to — a worker or driver whose one-time link is spent is told to
         // see his supervisor, and everyone else keeps the desk wording.
-        meta: { navigation: false, label: "لا تملك صلاحية", entry: activeContext.id },
+        meta: { navigation: false, label: __("You do not have access"), entry: activeContext.id },
       },
       {
         path: "/:pathMatch(.*)*",

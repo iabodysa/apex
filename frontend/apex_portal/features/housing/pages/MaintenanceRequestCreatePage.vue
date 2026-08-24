@@ -5,6 +5,7 @@ import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { maintenanceIssueOptions } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const form = reactive({
   room: "",
@@ -32,10 +33,10 @@ const roomOptions = computed(() =>
 // in ended at a dead button. The first unmet step wins, in the order the form asks for them, and
 // the button reads its disabled state from here so the two can never disagree.
 const submitReason = computed(() => {
-  if (rooms.list.loading) return "جارٍ تحميل غرف المبنى.";
-  if (!building.value) return "اختر المبنى أولاً.";
-  if (!form.room) return "اختر الغرفة.";
-  if (!form.issue_description) return "اكتب وصف المشكلة.";
+  if (rooms.list.loading) return __("Loading the building's rooms.");
+  if (!building.value) return __("Select the building first.");
+  if (!form.room) return __("Select the room.");
+  if (!form.issue_description) return __("Type a description of the problem.");
   return "";
 });
 let roomLoadQueue = Promise.resolve();
@@ -63,7 +64,7 @@ watch(
         if (building.value === value) loadedBuilding.value = value;
       } catch (exception) {
         if (building.value === value) {
-          roomError.value = safeErrorMessage(exception, "تعذّر تحميل غرف المبنى.");
+          roomError.value = safeErrorMessage(exception, __("Could not load the building's rooms."));
         }
       }
     });
@@ -76,7 +77,7 @@ async function submit() {
     const result = await requests.insert.submit({ building: building.value, ...form });
     toast.create({
       type: "success",
-      message: result?.name ? `تم تسجيل طلب الصيانة ${result.name}` : "تم تسجيل طلب الصيانة",
+      message: result?.name ? __("Maintenance request {0} was registered", [result.name]) : __("The maintenance request was registered"),
     });
     Object.assign(form, {
       room: "",
@@ -85,39 +86,39 @@ async function submit() {
       priority: "Medium",
     });
   } catch (exception) {
-    error.value = safeErrorMessage(exception, "تعذر تسجيل الطلب.");
+    error.value = safeErrorMessage(exception, __("Could not register the request."));
   }
 }
 </script>
 <template>
   <section class="feature-page">
-    <h2>طلب صيانة جديد</h2>
+    <h2>{{ __("New Maintenance Request") }}</h2>
     <BuildingPicker />
     <form class="feature-form" @submit.prevent="submit">
       <ErrorMessage v-if="roomError" :message="roomError" />
-      <FormControl v-model="form.room" type="select" label="الغرفة" :options="roomOptions" required />
+      <FormControl v-model="form.room" type="select" :label="__('Room')" :options="roomOptions" required />
       <FormControl
         v-model="form.issue_type"
         type="select"
-        label="نوع المشكلة"
+        :label="__('Problem Type')"
         :options="maintenanceIssueOptions()"
         required
       />
-      <FormControl v-model="form.issue_description" type="textarea" label="وصف المشكلة" required />
+      <FormControl v-model="form.issue_description" type="textarea" :label="__('Problem Description')" required />
       <FormControl
         v-model="form.priority"
         type="select"
-        label="الأولوية"
+        :label="__('Priority')"
         :options="[
-          { label: 'منخفضة', value: 'Low' },
-          { label: 'متوسطة', value: 'Medium' },
-          { label: 'عالية', value: 'High' },
-          { label: 'حرجة', value: 'Critical' },
+          { label: __('Low'), value: 'Low' },
+          { label: __('Medium'), value: 'Medium' },
+          { label: __('High'), value: 'High' },
+          { label: __('Critical Priority'), value: 'Critical' },
         ]"
       />
       <ErrorMessage v-if="error" :message="error" />
       <p v-if="submitReason" class="feature-reason">{{ submitReason }}</p>
-      <Button type="submit" theme="green" variant="solid" :loading="requests.insert.loading" :disabled="Boolean(submitReason)">إرسال الطلب</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="requests.insert.loading" :disabled="Boolean(submitReason)">{{ __("Submit Request") }}</Button>
     </form>
   </section>
 </template>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ shell_meta.language }}" dir="{{ shell_meta.direction }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -14,19 +14,19 @@
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <title>{{ shell_meta.title }}</title>
     {% if shell_meta.seed_color %}<style>:root:root{--c-primary:{{ shell_meta.seed_color }}}</style>{% endif %}
-    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-mQIAvtsY.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/vue-runtime-CrPhouic.js">
-    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-CZq-42Xm.js">
+    <script type="module" crossorigin src="/assets/apex/apex_portal/assets/index-NzHcb1Zy.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/vue-runtime-CKbQOTVh.js">
+    <link rel="modulepreload" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-BnKuguYY.js">
     <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/frappe-ui-runtime-BTUUvaN1.css">
-    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/index-aHEid4Gc.css">
+    <link rel="stylesheet" crossorigin href="/assets/apex/apex_portal/assets/index-DP8KXjCM.css">
   </head>
   <body>
     <div id="app">
       <section class="apex-boot" role="status" aria-live="polite">
         <img src="/assets/apex/icons/brand/apex-mark-reverse.svg" alt="" />
-        <h1>نجهّز أبكس لك…</h1>
+        <h1>{{ _("Getting Apex ready for you…") }}</h1>
         <div class="apex-boot__track" aria-hidden="true"><span></span></div>
-        <p>لحظات ويكون كل شيء جاهز.</p>
+        <p>{{ _("A moment and everything is ready.") }}</p>
       </section>
     </div>
     <script id="apex-portal-bootstrap" type="application/json">{{ boot["apex_portal"] | tojson }}</script>

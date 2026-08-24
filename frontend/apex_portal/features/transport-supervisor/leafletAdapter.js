@@ -1,4 +1,5 @@
 import { coordinatePair } from "./transportMapState.js";
+import { __ } from "../../core/i18n.js";
 
 const LEAFLET_STYLE = "/assets/apex/vendor/leaflet-1.9.4/leaflet.css";
 const LEAFLET_SCRIPT = "/assets/apex/vendor/leaflet-1.9.4/leaflet.js";
@@ -53,7 +54,7 @@ function loadLeaflet({ documentSource, windowSource }) {
     script.src = LEAFLET_SCRIPT;
     script.dataset.apexLeaflet = "";
     script.onload = () => resolve(windowSource.L);
-    script.onerror = () => reject(new Error("تعذّر تحميل الخريطة."));
+    script.onerror = () => reject(new Error(__("Could not load the map.")));
     documentSource.head.append(script);
   });
 }
@@ -63,7 +64,7 @@ function driverPopup(documentSource, item) {
   popup.className = "transport-map-popup";
   popup.dir = "rtl";
   const driverName = documentSource.createElement("strong");
-  driverName.textContent = item.driver_name || "السائق";
+  driverName.textContent = item.driver_name || __("driver");
   const plate = documentSource.createElement("bdi");
   plate.dir = "auto";
   plate.translate = false;
@@ -111,7 +112,7 @@ export function createLeafletAdapter({
           color: theme.ink,
           fillColor: theme.surface,
           fillOpacity: 1,
-        }).bindTooltip(stop.stop_name || "نقطة توقف").addTo(layer);
+        }).bindTooltip(stop.stop_name || __("Stop Point")).addTo(layer);
         bounds.push(point);
       }
       const driver = coordinatePair(item);

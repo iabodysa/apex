@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { Button, createResource } from "frappe-ui";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 const r = createResource({
     url: "apex.salis.api.fleet_os.get_operations_overview",
     method: "GET",
@@ -15,20 +16,20 @@ onMounted(() => r.fetch());
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>تشغيل ساليس</p>
-        <h2>نظرة عامة</h2>
+        <p>{{ __("Salis Go-Live") }}</p>
+        <h2>{{ __("Overview") }}</h2>
       </div>
-      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" :loading="r.loading" @click="r.fetch()" />
+      <Button variant="outline" icon="lucide-refresh-cw" :label="__('Refresh')" :loading="r.loading" @click="r.fetch()" />
     </header>
-    <PortalSkeleton v-if="r.loading" :rows="3" label="جارٍ تحميل مؤشرات التشغيل" />
-    <PortalErrorState v-else-if="r.error" title="تعذّر تحميل المؤشرات" :message="r.error" @retry="r.fetch()" />
+    <PortalSkeleton v-if="r.loading" :rows="3" :label="__('Loading operations metrics')" />
+    <PortalErrorState v-else-if="r.error" :title="__('Could not load the metrics')" :message="r.error" @retry="r.fetch()" />
     <div v-else class="ops-metrics">
       <RouterLink
         v-for="item in [
-          { key: 'vehicles', label: 'المركبات', to: '/vehicles' },
-          { key: 'assignments', label: 'الإسناد', to: '/assignments' },
-          { key: 'fuel_pending', label: 'طلبات الوقود', to: '/fuel-approvals' },
-          { key: 'incidents_open', label: 'الحوادث المفتوحة', to: '/incidents' },
+          { key: 'vehicles', label: __('Vehicles'), to: '/vehicles' },
+          { key: 'assignments', label: __('Assignment'), to: '/assignments' },
+          { key: 'fuel_pending', label: __('Fuel Requests'), to: '/fuel-approvals' },
+          { key: 'incidents_open', label: __('Open Incident Records'), to: '/incidents' },
         ]"
         :key="item.key"
         class="ops-metric"

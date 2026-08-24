@@ -1,3 +1,5 @@
+import { __ } from "./i18n.js";
+
 // frappe-ui builds error.message as "<url> <exc_type> <_error_message>", so the
 // endpoint path and exception class leak unless the composed line is rejected here.
 const INTERNAL_DETAIL = /(?:traceback|most recent call last|\bfile\s+["'][^"']+["']\s*,?\s*line\s+\d+|\/home\/frappe|\/apps\/|\/api\/(?:method|resource)\/|frappe\.|pymysql|mariadb|sqlalchemy|\bselect\b[\s\S]*\bfrom\b|\bat\s+\S+\s*\([^)]*:\d+:\d+\))/i;
@@ -59,7 +61,7 @@ export function isRetryablePortalError(source) {
   return ![401, 403].includes(errorStatus(source));
 }
 
-export function safeErrorMessage(source, fallback = "تحقق من الاتصال ثم حاول مرة أخرى.", title = "") {
+export function safeErrorMessage(source, fallback = __("Check your connection and try again."), title = "") {
   for (const candidate of candidatesFrom(source)) {
     const clean = cleanText(candidate);
     if (!clean || clean === title || clean === "Internal Server Error" || INTERNAL_DETAIL.test(clean)) continue;

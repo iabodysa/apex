@@ -6,6 +6,7 @@ import { routeLocationKey, routerKey } from "vue-router";
 import { filtersFromQuery, queryFromFilters, resultCountLabel } from "../queueState.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -109,7 +110,7 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
   <section class="feature-page supervisor-collection" :aria-busy="loading">
     <header class="feature-page__heading supervisor-collection__heading">
       <div>
-        <p class="feature-page__eyebrow">تشغيل النقل</p>
+        <p class="feature-page__eyebrow">{{ __("Transport Operations") }}</p>
         <h2>{{ title }}</h2>
         <p>{{ description }}</p>
       </div>
@@ -121,32 +122,32 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
           :loading="loading"
           @click="refresh"
         >
-          تحديث
+          {{ __("Refresh") }}
         </Button>
         <span :class="icon" aria-hidden="true" />
       </div>
     </header>
 
-    <form class="supervisor-filters" aria-label="تصفية القائمة" @submit.prevent="updateFilters">
+    <form class="supervisor-filters" :aria-label="__('Filter List')" @submit.prevent="updateFilters">
       <FormControl
         v-if="statusOptions.length"
         v-model="filters.status"
         type="select"
-        label="الحالة"
-        :options="[{ label: 'كل الحالات', value: '' }, ...statusOptions]"
+        :label="__('Status')"
+        :options="[{ label: __('All Statuses'), value: '' }, ...statusOptions]"
       />
       <Link
         v-model="filters.project"
         doctype="Project"
-        label="المشروع"
-        placeholder="ابحث عن مشروع"
+        :label="__('Project')"
+        :placeholder="__('Search for a project')"
       />
-      <FormControl v-if="dateField" v-model="filters.date" type="date" label="التاريخ" />
-      <Button type="submit" variant="outline">تطبيق</Button>
+      <FormControl v-if="dateField" v-model="filters.date" type="date" :label="__('Date')" />
+      <Button type="submit" variant="outline">{{ __("Apply Filters") }}</Button>
     </form>
 
-    <PortalSkeleton v-if="loading && !resource.data" :rows="4" :label="`جارٍ تحميل ${title}`" />
-    <PortalErrorState v-else-if="error" :title="`تعذّر تحميل ${title}`" :message="error" @retry="refresh" />
+    <PortalSkeleton v-if="loading && !resource.data" :rows="4" :label="__('Loading {0}', [title])" />
+    <PortalErrorState v-else-if="error" :title="__('Could not load {0}', [title])" :message="error" @retry="refresh" />
     <div v-else-if="!rows.length" class="feature-state">{{ empty }}</div>
     <template v-else>
       <p class="supervisor-result-count" role="status">{{ resultCountLabel(rows.length, resource.hasNextPage) }}</p>
@@ -158,7 +159,7 @@ watch(() => route.query, applyQuery, { immediate: true, deep: true });
         :loading="loading"
         @click="loadMore"
       >
-        تحميل المزيد
+        {{ __("Load More") }}
       </Button>
     </template>
   </section>

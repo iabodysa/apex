@@ -6,6 +6,7 @@ import { statusLabel } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 const fuelQueue = createResource({
     url: "apex.salis.api.fuel_console.get_pending_fuel_requests",
     method: "GET",
@@ -59,7 +60,7 @@ async function act(kind, row) {
   } catch (caught) {
     // A refused decision must stay on screen with its reason; closing the dialog here
     // would read as success and invite a second press on the same request.
-    actionError.value = safeErrorMessage(caught, "تعذّر تنفيذ القرار. حاول مرة أخرى.");
+    actionError.value = safeErrorMessage(caught, __("Could not carry out the decision. Try again."));
     return;
   }
   rejectOpen.value = false;
@@ -70,20 +71,20 @@ async function act(kind, row) {
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>تشغيل ساليس</p>
-        <h2>اعتماد الوقود</h2>
+        <p>{{ __("Salis Go-Live") }}</p>
+        <h2>{{ __("Fuel Approval") }}</h2>
       </div>
-      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="fuelQueue.fetch()" />
+      <Button variant="outline" icon="lucide-refresh-cw" :label="__('Refresh')" @click="fuelQueue.fetch()" />
     </header>
     <p v-if="actionError && !rejectOpen" class="ops-state ops-state--error" role="alert">{{ actionError }}</p>
-    <PortalSkeleton v-if="fuelQueue.loading" :rows="3" label="جارٍ تحميل طلبات الوقود" />
+    <PortalSkeleton v-if="fuelQueue.loading" :rows="3" :label="__('Loading fuel requests')" />
     <PortalErrorState
       v-else-if="fuelQueue.error"
-      title="تعذّر تحميل طلبات الوقود"
+      :title="__('Could not load fuel requests')"
       :message="fuelQueue.error"
       @retry="fuelQueue.fetch()"
     />
-    <div v-else-if="!rows.length" class="ops-state">لا توجد طلبات بانتظار الاعتماد.</div>
+    <div v-else-if="!rows.length" class="ops-state">{{ __("No requests are awaiting approval.") }}</div>
     <div v-else class="ops-table">
       <article v-for="row in rows" :key="row.name" class="ops-row">
         <div>
@@ -91,32 +92,32 @@ async function act(kind, row) {
             <bdi>{{ row.vehicle_plate || row.vehicle }}</bdi>
           </strong>
           <span>
-            <bdi>{{ row.topup_litres || row.requested_litres }} لتر</bdi>
+            <bdi>{{ __("{0} L", [row.topup_litres || row.requested_litres]) }}</bdi>
             · {{ statusLabel(row.request_type) }}
           </span>
         </div>
         <div class="ops-actions">
           <Badge theme="orange" :label="statusLabel(row.status)" />
-          <Button variant="solid" theme="green" label="اعتماد" :disabled="availability(row, 'approve').disabled" @click="act('approve', row)" />
-          <Button variant="outline" theme="red" label="رفض" :disabled="availability(row, 'reject').disabled" @click="openReject(row)" />
+          <Button variant="solid" theme="green" :label="__('Approve')" :disabled="availability(row, 'approve').disabled" @click="act('approve', row)" />
+          <Button variant="outline" theme="red" :label="__('Reject')" :disabled="availability(row, 'reject').disabled" @click="openReject(row)" />
         </div>
         <!-- Approve and reject are refused independently by the server, so chaining them left the
              second button grey and silent whenever the first was refused too. -->
-        <p v-if="availability(row, 'approve').disabled" class="ops-row__reason">اعتماد: {{ availability(row, "approve").reason }}</p>
-        <p v-if="availability(row, 'reject').disabled" class="ops-row__reason">رفض: {{ availability(row, "reject").reason }}</p>
+        <p v-if="availability(row, 'approve').disabled" class="ops-row__reason">{{ __("Approve") }}: {{ availability(row, "approve").reason }}</p>
+        <p v-if="availability(row, 'reject').disabled" class="ops-row__reason">{{ __("Reject") }}: {{ availability(row, "reject").reason }}</p>
       </article>
     </div>
-    <Dialog v-model="rejectOpen" :options="{ title: 'رفض طلب الوقود' }">
+    <Dialog v-model="rejectOpen" :options="{ title: __('Reject Fuel Request') }">
       <template #body-header>
         <header class="portal-dialog__head">
-          <h3>رفض طلب الوقود</h3>
-          <button type="button" class="portal-dialog__close" aria-label="إغلاق النافذة" @click="rejectOpen = false">×</button>
+          <h3>{{ __("Reject Fuel Request") }}</h3>
+          <button type="button" class="portal-dialog__close" :aria-label="__('Close Dialog')" @click="rejectOpen = false">×</button>
         </header>
       </template>
       <template #body-content>
-        <FormControl v-model="reason" type="textarea" :rows="3" label="سبب الرفض" required />
+        <FormControl v-model="reason" type="textarea" :rows="3" :label="__('Rejection Reason')" required />
         <p v-if="actionError" class="ops-state ops-state--error" role="alert">{{ actionError }}</p>
-        <Button variant="solid" theme="red" label="تأكيد الرفض" :loading="rejectFuel.loading" @click="act('reject', selected)" />
+        <Button variant="solid" theme="red" :label="__('Confirm Rejection')" :loading="rejectFuel.loading" @click="act('reject', selected)" />
       </template>
     </Dialog>
   </section>

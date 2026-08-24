@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { Button, FileUploader, FormControl } from "frappe-ui";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
   task: { type: Object, required: true },
@@ -43,40 +44,40 @@ function uploaded(file) {
       <strong dir="auto">{{ task.task_title || task.name }}</strong>
       <p v-if="task.instructions">{{ task.instructions }}</p>
     </div>
-    <div class="safety-checklist__decisions" role="group" :aria-label="`نتيجة ${task.task_title || task.name}`">
+    <div class="safety-checklist__decisions" role="group" :aria-label="__('Result for {0}', [task.task_title || task.name])">
       <Button
         class="safety-checklist__decision safety-checklist__decision--good"
         variant="outline"
         icon-left="lucide-check"
         :aria-pressed="result.execution_status === 'Good'"
         @click="choose('Good')"
-      >سليم</Button>
+      >{{ __("Sound") }}</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--poor"
         variant="outline"
         icon-left="lucide-alert-triangle"
         :aria-pressed="result.execution_status === 'Poor'"
         @click="choose('Poor')"
-      >يحتاج معالجة</Button>
+      >{{ __("Needs Treatment") }}</Button>
       <Button
         class="safety-checklist__decision safety-checklist__decision--not-done"
         variant="outline"
         icon-left="lucide-minus-circle"
         :aria-pressed="result.execution_status === 'Not Done'"
         @click="choose('Not Done')"
-      >لم يُفحص</Button>
+      >{{ __("Not Checked") }}</Button>
     </div>
     <Button
       class="safety-checklist__note-toggle"
       variant="subtle"
       :aria-expanded="noteOpen"
       @click="noteOpen = !noteOpen"
-    >{{ result.notes ? 'تعديل الملاحظة' : 'إضافة ملاحظة' }}</Button>
+    >{{ result.notes ? __("Edit Note") : __("Add Note") }}</Button>
     <FormControl
       v-if="noteOpen"
       :model-value="result.notes"
       type="textarea"
-      label="ملاحظات"
+      :label="__('Remarks')"
       @update:model-value="updateNotes"
     />
     <div v-if="needsPhoto" class="safety-checklist__evidence">
@@ -87,11 +88,11 @@ function uploaded(file) {
       >
         <template #default="{ openFileSelector, uploading }">
           <Button variant="subtle" :loading="uploading" @click="openFileSelector">
-            {{ result.evidence_photo ? 'تغيير الصورة' : 'إرفاق صورة' }}
+            {{ result.evidence_photo ? __("Change Photo") : __("Attach Photo") }}
           </Button>
         </template>
       </FileUploader>
-      <small>{{ result.evidence_photo ? 'تم إرفاق الصورة.' : 'الصورة مطلوبة لهذا البند.' }}</small>
+      <small>{{ result.evidence_photo ? __("The photo was attached.") : __("A photo is required for this item.") }}</small>
     </div>
   </article>
 </template>

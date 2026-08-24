@@ -43,3 +43,13 @@ class TestPortalTranslationContract(FrappeTestCase):
     def test_an_english_device_receives_no_arabic_and_falls_back_to_the_source(self):
         messages = self._context("en").portal_messages
         self.assertNotIn("Skip to content", messages)
+
+    def test_the_page_turns_around_with_the_language_the_device_chose(self):
+        arabic = self._context("ar").shell_meta
+        self.assertEqual((arabic["language"], arabic["direction"]), ("ar", "rtl"))
+        english = self._context("en").shell_meta
+        self.assertEqual((english["language"], english["direction"]), ("en", "ltr"))
+
+    def test_the_shell_renders_the_language_and_direction_it_is_given(self):
+        markup = _SHELL.read_text(encoding="utf-8")
+        self.assertIn('<html lang="{{ shell_meta.language }}" dir="{{ shell_meta.direction }}">', markup)

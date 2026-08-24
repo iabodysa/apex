@@ -1,5 +1,7 @@
 import { computed, ref } from "vue";
 
+import { __ } from "./i18n.js";
+
 const CONFIG_METHOD = "apex.salis.api.portal_notifications.get_config";
 const SAVE_METHOD = "apex.salis.api.portal_notifications.save_subscription";
 const DELETE_METHOD = "apex.salis.api.portal_notifications.delete_subscription";
@@ -41,7 +43,7 @@ export function createPortalPushController({
   async function save(subscription) {
     const keys = subscriptionKeys(subscription);
     if (!subscription.endpoint || !keys.p256dh || !keys.auth) {
-      throw new Error("بيانات اشتراك التنبيهات غير مكتملة.");
+      throw new Error(__("The notification subscription is incomplete."));
     }
     await call(SAVE_METHOD, {
       entry,
@@ -69,7 +71,7 @@ export function createPortalPushController({
       subscribed.value = true;
     } else if (environment.Notification.permission === "denied") {
       supported.value = false;
-      error.value = "التنبيهات محظورة من إعدادات الجهاز.";
+      error.value = __("Notifications are blocked in your device settings.");
     }
     return supported.value;
   }
@@ -85,7 +87,7 @@ export function createPortalPushController({
       }
       if (permission !== "granted") {
         supported.value = false;
-        error.value = "لم تُفعّل التنبيهات. يمكنك السماح بها من إعدادات الجهاز.";
+        error.value = __("Notifications are off. You can allow them in your device settings.");
         return false;
       }
       const existing = await currentRegistration.pushManager.getSubscription();
@@ -97,7 +99,7 @@ export function createPortalPushController({
       subscribed.value = true;
       return true;
     } catch (reason) {
-      error.value = reason?.message || "تعذّر تفعيل التنبيهات.";
+      error.value = reason?.message || __("Notifications could not be turned on.");
       return false;
     } finally {
       busy.value = false;

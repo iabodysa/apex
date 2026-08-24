@@ -1,7 +1,9 @@
 <script setup>
+import { __ } from "../core/i18n.js";
+
 defineProps({
   rows: { type: Number, default: 3 },
-  label: { type: String, default: "جارٍ تحميل البيانات" },
+  label: { type: String, default: () => __("Loading the data") },
 });
 </script>
 

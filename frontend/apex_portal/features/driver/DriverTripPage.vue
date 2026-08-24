@@ -10,6 +10,7 @@ import DriverTripCommand from "./DriverTripCommand.vue";
 import DriverStopsTimeline from "./DriverStopsTimeline.vue";
 import DriverPassengerList from "./DriverPassengerList.vue";
 import DriverScannerPanel from "./DriverScannerPanel.vue";
+import { __ } from "../../core/i18n.js";
 
 const route = useRoute();
 const gateway = inject("driverGateway");
@@ -56,11 +57,11 @@ const boardedCount = computed(() => workers.value.filter((worker) => worker.stat
 const completedStops = computed(() => (trip.value?.stops || []).filter((stop) => stop.done).length);
 
 const scanMessages = Object.freeze({
-  Valid: "تم تسجيل الصعود.",
-  Duplicate: "تم تسجيل هذا الصعود من قبل.",
-  "Wrong Trip": "البطاقة تخص رحلة أخرى.",
-  Expired: "انتهت صلاحية بطاقة الصعود.",
-  "Invalid Token": "بطاقة الصعود غير صحيحة.",
+  Valid: __("Boarding has been recorded."),
+  Duplicate: __("This boarding was already recorded."),
+  "Wrong Trip": __("The pass belongs to a different trip."),
+  Expired: __("The boarding pass has expired."),
+  "Invalid Token": __("The boarding pass is not valid."),
 });
 
 function stopLive() {
@@ -120,10 +121,10 @@ async function submitScan(token) {
   busy.value = "scan";
   try {
     const result = await gateway.scanPass(token);
-    scanResult.value = scanMessages[result?.result] || "تعذّر قراءة البطاقة.";
+    scanResult.value = scanMessages[result?.result] || __("Could not read the pass.");
     if (["Valid", "Duplicate"].includes(result?.result)) await load(true);
   } catch (reason) {
-    scanResult.value = safeErrorMessage(reason, "تعذّر تسجيل الصعود.");
+    scanResult.value = safeErrorMessage(reason, __("Could not record the boarding."));
   } finally {
     busy.value = "";
   }
@@ -142,28 +143,28 @@ onBeforeUnmount(stopLive);
   <section class="feature-page journey-page driver-journey" :aria-busy="state === 'loading'">
     <header class="feature-page__heading journey-heading">
       <div>
-        <p class="feature-page__eyebrow">تنفيذ الرحلة</p>
-        <h2>{{ trip?.route_name || "خط السير" }}</h2>
-        <p>المحطات والركاب في شاشة واحدة.</p>
+        <p class="feature-page__eyebrow">{{ __("Trip Execution") }}</p>
+        <h2>{{ trip?.route_name || __("Itinerary") }}</h2>
+        <p>{{ __("Stops and passengers on one screen.") }}</p>
       </div>
       <Badge v-if="trip" :label="statusLabel(trip.status)" />
     </header>
 
-    <PortalSkeleton v-if="state === 'loading'" :rows="3" label="جارٍ تجهيز الرحلة" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلة" :message="error" fallback="هذه الرحلة غير متاحة لحسابك." @retry="load()" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلة" :message="error" fallback="تعذّر تحميل الرحلة." @retry="load()" />
-    <div v-else-if="state === 'empty'" class="feature-state">لا توجد بيانات لهذه الرحلة.</div>
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="__('Preparing the trip')" />
+    <PortalErrorState v-else-if="state === 'denied'" :title="__('Could not open the trip')" :message="error" :fallback="__('This trip is not available for your account.')" @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" :title="__('Could not load the trip')" :message="error" :fallback="__('Could not load the trip.')" @retry="load()" />
+    <div v-else-if="state === 'empty'" class="feature-state">{{ __("There is no data for this trip.") }}</div>
 
     <template v-else>
-      <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
+      <ErrorMessage v-if="error" :message="safeErrorMessage(error, __('Could not carry out the action.'))" />
       <DriverTripCommand
         :boarded-count="boardedCount"
         :pending-count="pendingWorkers.length"
         :completed-stops="completedStops"
         :started="Boolean(trip.started)"
         :busy="busy"
-        @start="run('start', () => gateway.startTrip(dispatchTrip), 'بدأت الرحلة')"
-        @finish="run('finish', () => gateway.finishTrip(dispatchTrip), 'انتهت الرحلة')"
+        @start="run('start', () => gateway.startTrip(dispatchTrip), __('The trip has started'))"
+        @finish="run('finish', () => gateway.finishTrip(dispatchTrip), __('The trip has ended'))"
       />
 
       <DriverStopsTimeline
@@ -171,8 +172,8 @@ onBeforeUnmount(stopLive);
         :started="Boolean(trip.started)"
         :busy="busy"
         :maps-route-url="trip.maps_route_url || ''"
-        @arrive="(stop) => run(`arrive:${stop}`, () => gateway.arriveAtStop(dispatchTrip, stop), 'تم تنبيه المنتظرين بوصولك')"
-        @toggle="(stop, done) => run(`stop:${stop}`, () => gateway.setStopProgress(dispatchTrip, stop, !done), done ? 'أعيدت المحطة إلى المسار' : 'اكتملت المحطة')"
+        @arrive="(stop) => run(`arrive:${stop}`, () => gateway.arriveAtStop(dispatchTrip, stop), __('Those waiting have been notified of your arrival'))"
+        @toggle="(stop, done) => run(`stop:${stop}`, () => gateway.setStopProgress(dispatchTrip, stop, !done), done ? __('The stop was returned to the route') : __('The stop was completed'))"
       />
 
       <DriverPassengerList
@@ -183,10 +184,10 @@ onBeforeUnmount(stopLive);
         :now="now"
         :pending-count="pendingWorkers.length"
         :grace-elapsed="Boolean(boarding.grace_elapsed)"
-        @manual-board="(employee) => run(`manual:${employee}`, () => gateway.manualBoard(dispatchTrip, employee), 'تم تسجيل الصعود يدوياً')"
-        @unmark="(employee) => run(`unmark:${employee}`, () => gateway.markNotBoarded(dispatchTrip, employee), 'أعيد العامل إلى قائمة الانتظار')"
-        @notify="run('notify', () => gateway.notifyPassengers(dispatchTrip), 'تم تنبيه المتبقين')"
-        @depart="run('depart', () => gateway.depart(dispatchTrip), 'أغلق الصعود وغادرت الحافلة')"
+        @manual-board="(employee) => run(`manual:${employee}`, () => gateway.manualBoard(dispatchTrip, employee), __('Boarding was recorded manually'))"
+        @unmark="(employee) => run(`unmark:${employee}`, () => gateway.markNotBoarded(dispatchTrip, employee), __('The worker was returned to the waiting list'))"
+        @notify="run('notify', () => gateway.notifyPassengers(dispatchTrip), __('The rest were notified'))"
+        @depart="run('depart', () => gateway.depart(dispatchTrip), __('Boarding was closed and the bus departed'))"
       />
 
       <DriverScannerPanel :busy="busy" :result="scanResult" @scan="submitScan" @error="scanResult = $event" />

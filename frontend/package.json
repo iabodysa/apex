@@ -6,7 +6,8 @@
     "apex_portal"
   ],
   "scripts": {
-    "build": "npm run build -w apex_portal"
+    "build": "npm run build -w apex_portal",
+    "test": "npm run test -w apex_portal"
   },
   "dependencies": {
     "frappe-ui": "^0.1.0",

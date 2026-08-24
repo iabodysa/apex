@@ -5,6 +5,7 @@ import { Badge, Button, createResource } from "frappe-ui";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 const route = useRoute(),
   resource = createResource({
     url: "apex.salis.api.fleet_os.get_incident_detail",
@@ -18,18 +19,18 @@ onMounted(() => resource.fetch({ name: route.params.name }));
   <section class="ops-page">
     <header class="ops-heading">
       <div>
-        <p>حادث</p>
-        <h2 dir="auto">{{ doc?.vehicle_plate || doc?.vehicle || doc?.incident_type || "تفاصيل الحادث" }}</h2>
+        <p>{{ __("Accident") }}</p>
+        <h2 dir="auto">{{ doc?.vehicle_plate || doc?.vehicle || doc?.incident_type || __("Accident Details") }}</h2>
         <bdi class="record-reference" dir="auto" translate="no">{{ route.params.name }}</bdi>
       </div>
-      <Button variant="outline" icon="lucide-refresh-cw" label="تحديث" @click="resource.fetch({ name: route.params.name })" />
+      <Button variant="outline" icon="lucide-refresh-cw" :label="__('Refresh')" @click="resource.fetch({ name: route.params.name })" />
     </header>
-    <PortalSkeleton v-if="resource.loading" :rows="3" label="جارٍ تحميل تفاصيل الحادث" />
+    <PortalSkeleton v-if="resource.loading" :rows="3" :label="__('Loading incident details')" />
     <PortalErrorState
       v-else-if="resource.error"
-      title="تعذّر فتح الحادث"
+      :title="__('Could not open the incident')"
       :message="resource.error"
-      fallback="تعذّر تحميل السجل. تحقق من الاتصال ثم حاول مرة أخرى."
+      :fallback="__('Could not load the record. Check your connection, then try again.')"
       @retry="resource.fetch({ name: route.params.name })"
     />
     <article v-else-if="doc" class="ops-card">
@@ -38,18 +39,18 @@ onMounted(() => resource.fetch({ name: route.params.name }));
       <p>{{ doc.description }}</p>
       <dl>
         <div>
-          <dt>المركبة</dt>
+          <dt>{{ __("The Vehicle") }}</dt>
           <dd>
             <bdi>{{ doc.vehicle_plate || doc.vehicle }}</bdi>
           </dd>
         </div>
         <div>
-          <dt>الموقع</dt>
+          <dt>{{ __("Location") }}</dt>
           <dd>{{ doc.location || "—" }}</dd>
         </div>
       </dl>
-      <p class="ops-reason">إجراءات التأمين والاسترداد والإغلاق تأتي من الصلاحيات التي يرجعها الخادم.</p>
+      <p class="ops-reason">{{ __("Insurance, recovery, and closing actions come from the permissions the server returns.") }}</p>
     </article>
-    <div v-else class="ops-state ops-state--error">السجل غير موجود أو خارج نطاق مشروعك.</div>
+    <div v-else class="ops-state ops-state--error">{{ __("The record does not exist or is outside your project's scope.") }}</div>
   </section>
 </template>

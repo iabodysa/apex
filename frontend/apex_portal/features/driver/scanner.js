@@ -1,3 +1,5 @@
+import { __ } from "../../core/i18n.js";
+
 export function createQrScanner({
   mediaDevices = globalThis.navigator?.mediaDevices,
   detectorFactory = () => new globalThis.BarcodeDetector({ formats: ["qr_code"] }),
@@ -16,7 +18,7 @@ export function createQrScanner({
     async start(video, onCode) {
       stop();
       if (!mediaDevices?.getUserMedia || !globalThis.BarcodeDetector) {
-        throw new TypeError("المسح بالكاميرا غير متاح على هذا الجهاز.");
+        throw new TypeError(__("Camera scanning is not available on this device."));
       }
       const detector = detectorFactory();
       stream = await mediaDevices.getUserMedia({

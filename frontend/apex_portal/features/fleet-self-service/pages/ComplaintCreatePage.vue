@@ -1,6 +1,7 @@
 <script setup>
 import { createResource } from "frappe-ui";
 import ActionForm from "../components/ActionForm.vue";
+import { __ } from "../../../core/i18n.js";
 const resource = createResource({
   url: "apex.salis.api.fleet_employee.create_complaint",
   method: "POST",
@@ -10,20 +11,20 @@ const fields = [
   {
     name: "priority",
     type: "select",
-    label: "الأولوية",
+    label: __("Priority"),
     options: [
-      { label: "منخفضة", value: "Low" },
-      { label: "متوسطة", value: "Medium" },
-      { label: "عالية", value: "High" },
-      { label: "عاجلة", value: "Urgent" },
+      { label: __("Low"), value: "Low" },
+      { label: __("Medium"), value: "Medium" },
+      { label: __("High"), value: "High" },
+      { label: __("Urgent"), value: "Urgent" },
     ],
     default: "Medium",
   },
-  { name: "subject", label: "عنوان البلاغ", required: true },
-  { name: "description", type: "textarea", rows: 5, label: "التفاصيل", required: true },
-  { name: "attachment", type: "file", label: "مرفق" },
+  { name: "subject", label: __("Complaint Subject"), required: true },
+  { name: "description", type: "textarea", rows: 5, label: __("Details"), required: true },
+  { name: "attachment", type: "file", label: __("Attachment") },
 ];
 </script>
 <template>
-  <ActionForm title="بلاغ جديد" intro="يصل البلاغ إلى فريق التشغيل وتظهر الردود في نفس السجل." :fields="fields" :resource="resource" action-key="complaint" />
+  <ActionForm :title="__('New Complaint')" :intro="__('The complaint reaches the operations team and replies appear in the same record.')" :fields="fields" :resource="resource" action-key="complaint" />
 </template>

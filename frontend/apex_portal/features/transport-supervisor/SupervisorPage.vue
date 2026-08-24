@@ -11,6 +11,7 @@ import PortalErrorState from "../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../components/PortalSkeleton.vue";
 import { safeErrorMessage } from "../../core/errorMessage.js";
 import { meaningfulRequestTitle } from "./assignmentState.js";
+import { __ } from "../../core/i18n.js";
 
 const route = useRoute();
 const spec = route.meta.view || {};
@@ -53,12 +54,12 @@ const workflowActions = computed(() => [
 ]);
 
 const actionLabels = Object.freeze({
-  Approve: "اعتماد",
-  Reject: "رفض",
-  Revise: "إعادة للمراجعة",
-  Cancel: "إلغاء",
-  Dispatch: "بدء التشغيل",
-  Complete: "إكمال الرحلة",
+  Approve: __("Approve"),
+  Reject: __("Reject"),
+  Revise: __("Back for Review"),
+  Cancel: __("Cancel"),
+  Dispatch: __("Start Operation"),
+  Complete: __("Complete Trip"),
 });
 
 async function loadTransitions(current) {
@@ -77,7 +78,7 @@ async function applyAction(action) {
     await workflow.submit({ doc: JSON.stringify(doc.value), action });
     await record.reload();
   } catch (reason) {
-    actionError.value = safeErrorMessage(reason, "تعذّر تنفيذ الإجراء.");
+    actionError.value = safeErrorMessage(reason, __("Could not carry out the action."));
   } finally {
     busyAction.value = "";
   }
@@ -90,25 +91,25 @@ watch(doc, loadTransitions, { immediate: true });
   <section class="feature-page supervisor-detail" :aria-busy="state === 'loading'">
     <header class="feature-page__heading supervisor-detail__heading">
       <div>
-        <p class="feature-page__eyebrow">تشغيل النقل</p>
+        <p class="feature-page__eyebrow">{{ __("Transport Operations") }}</p>
         <h2 dir="auto">{{ title }}</h2>
         <bdi v-if="doc?.name" class="record-reference" dir="auto" translate="no">{{ doc.name }}</bdi>
       </div>
       <span :class="spec.icon || 'lucide-activity'" aria-hidden="true" />
     </header>
 
-    <PortalSkeleton v-if="state === 'loading'" :rows="4" label="جارٍ تحميل السجل" />
+    <PortalSkeleton v-if="state === 'loading'" :rows="4" :label="__('Loading Record')" />
     <!-- The raw error, not a sentence about it: PortalErrorState reads the 403 off the error to
          withhold the retry, and a hardcoded string carries no status, so the refusal offered a
          button that re-issues the same denied read. Every other portal denial passes it this way. -->
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح السجل" :message="record.get.error" fallback="لا تملك صلاحية هذا السجل." @retry="record.reload" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل السجل" :message="record.get.error" @retry="record.reload" />
-    <div v-else-if="state === 'empty'" class="feature-state">السجل غير موجود.</div>
+    <PortalErrorState v-else-if="state === 'denied'" :title="__('Could not open the record')" :message="record.get.error" :fallback="__('You do not have permission for this record.')" @retry="record.reload" />
+    <PortalErrorState v-else-if="state === 'error'" :title="__('Could not load the record')" :message="record.get.error" @retry="record.reload" />
+    <div v-else-if="state === 'empty'" class="feature-state">{{ __("The record does not exist.") }}</div>
 
     <template v-else>
       <div class="supervisor-detail__status">
         <Badge :theme="statusTheme(doc.status)" :label="statusLabel(doc.status)" />
-        <span v-if="doc.enabled === 0">متوقف</span>
+        <span v-if="doc.enabled === 0">{{ __("Stopped") }}</span>
       </div>
 
       <SupervisorRecordFacts :doc="doc" :fields="fields" />
@@ -132,7 +133,7 @@ watch(doc, loadTransitions, { immediate: true });
       </SupervisorRecordCollections>
 
       <p v-if="actionError" class="feature-error" role="alert">{{ actionError }}</p>
-      <div v-if="workflowActions.length" class="supervisor-detail__actions" aria-label="إجراءات السجل">
+      <div v-if="workflowActions.length" class="supervisor-detail__actions" :aria-label="__('Record Actions')">
         <Button
           v-for="transition in workflowActions"
           :key="`${transition.action}:${transition.next_state}`"

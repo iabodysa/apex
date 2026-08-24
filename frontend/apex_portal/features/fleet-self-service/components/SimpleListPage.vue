@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { Badge, Button } from "frappe-ui";
 import AsyncPanel from "./AsyncPanel.vue";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
     title: { type: String, required: true },
@@ -23,41 +24,41 @@ onMounted(() => props.resource.fetch());
     <section class="salis-page">
         <header class="salis-page__heading">
             <div>
-                <p class="salis-eyebrow">ساليس</p>
+                <p class="salis-eyebrow">{{ __("Salis") }}</p>
                 <h2>{{ title }}</h2>
             </div>
             <Button
                 variant="ghost"
                 icon="lucide-refresh-cw"
-                label="تحديث"
+                :label="__('Refresh')"
                 :loading="resource.loading"
                 @click="resource.fetch()"
             />
         </header>
         <RouterLink v-if="createTo" class="salis-primary-link" :to="createTo"
-            >إضافة جديد</RouterLink
+            >{{ __("Add New") }}</RouterLink
         >
         <AsyncPanel
             v-if="resource.loading && !rows.length"
             state="loading"
-            title="جاري التحميل"
-            message="نسترجع آخر البيانات المسجلة."
+            :title="__('Loading')"
+            :message="__('Retrieving the latest recorded data.')"
         />
         <AsyncPanel
             v-else-if="resource.error"
             state="error"
-            title="تعذر تحميل البيانات"
+            :title="__('Could not load this data')"
             :message="resource.error"
             @retry="resource.fetch()"
         />
         <AsyncPanel
             v-else-if="!rows.length"
             state="empty"
-            title="لا توجد سجلات"
+            :title="__('No records')"
             :message="empty"
         >
             <template v-if="createTo" #action>
-                <RouterLink class="salis-primary-link" :to="createTo">إضافة جديد</RouterLink>
+                <RouterLink class="salis-primary-link" :to="createTo">{{ __("Add New") }}</RouterLink>
             </template>
         </AsyncPanel>
         <ul v-else class="salis-list">

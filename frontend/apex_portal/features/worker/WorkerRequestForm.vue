@@ -2,16 +2,17 @@
 import { inject } from "vue";
 import { Button, FormControl } from "frappe-ui";
 import { createDraftAction } from "./asyncState.js";
+import { __ } from "../../core/i18n.js";
 
 const props = defineProps({ transport: { type: Boolean, default: false } });
 const gateway = inject("workerGateway", null);
 const drafts = inject("portalDrafts", null);
 const requestTypes = [
-  { label: "صيانة", value: "Maintenance" },
-  { label: "سلامة", value: "Safety" },
-  { label: "عهدة", value: "Custody" },
-  { label: "شكوى", value: "Complaint" },
-  { label: "اقتراح", value: "Suggestion" },
+  { label: __("Maintenance"), value: "Maintenance" },
+  { label: __("safety"), value: "Safety" },
+  { label: __("custody"), value: "Custody" },
+  { label: __("Complaint"), value: "Complaint" },
+  { label: __("Suggestion"), value: "Suggestion" },
 ];
 const action = createDraftAction(props.transport
   ? { pickup_point: "", destination: "", travel_date: "", reason: "" }
@@ -34,25 +35,25 @@ function save() {
 <template>
   <section class="feature-page">
     <header class="feature-page__heading">
-      <div><p class="feature-page__eyebrow">طلب جديد</p><h2>{{ transport ? 'طلب نقل' : 'طلب خدمة' }}</h2></div>
+      <div><p class="feature-page__eyebrow">{{ __("New request") }}</p><h2>{{ transport ? __('Transport Request') : __('Service request') }}</h2></div>
     </header>
     <form class="feature-form" @submit.prevent="save">
       <template v-if="transport">
-        <FormControl v-model="action.draft.pickup_point" label="نقطة الانطلاق" required />
-        <FormControl v-model="action.draft.destination" label="الوجهة" required />
-        <FormControl v-model="action.draft.travel_date" type="date" label="التاريخ" required />
-        <FormControl v-model="action.draft.reason" type="textarea" label="السبب" />
+        <FormControl v-model="action.draft.pickup_point" :label="__('Departure Point')" required />
+        <FormControl v-model="action.draft.destination" :label="__('Destination')" required />
+        <FormControl v-model="action.draft.travel_date" type="date" :label="__('Date')" required />
+        <FormControl v-model="action.draft.reason" type="textarea" :label="__('Reason')" />
       </template>
       <template v-else>
-        <FormControl v-model="action.draft.request_type" type="select" label="نوع الطلب" :options="requestTypes" />
-        <FormControl v-model="action.draft.subject" label="الموضوع" required />
-        <FormControl v-model="action.draft.description" type="textarea" label="التفاصيل" required />
+        <FormControl v-model="action.draft.request_type" type="select" :label="__('Request Type')" :options="requestTypes" />
+        <FormControl v-model="action.draft.subject" :label="__('Subject')" required />
+        <FormControl v-model="action.draft.description" type="textarea" :label="__('Details')" required />
       </template>
-      <p v-if="unavailable" class="feature-error" role="alert">تعذّر تجهيز نموذج الطلب. أعد تحميل الصفحة، وإن تكرر الأمر راجع مشرفك.</p>
+      <p v-if="unavailable" class="feature-error" role="alert">{{ __("Could not prepare the request form. Reload the page, and if it happens again contact your supervisor.") }}</p>
       <p v-else-if="action.state.value === 'error'" class="feature-error" role="alert">{{ action.error.value }}</p>
-      <p v-if="action.state.value === 'saved'" class="feature-success" role="status">تم إرسال الطلب.</p>
+      <p v-if="action.state.value === 'saved'" class="feature-success" role="status">{{ __("The request has been sent.") }}</p>
       <div class="feature-actions">
-        <Button type="submit" theme="green" variant="solid" :disabled="unavailable" :loading="action.state.value === 'saving'">إرسال</Button>
+        <Button type="submit" theme="green" variant="solid" :disabled="unavailable" :loading="action.state.value === 'saving'">{{ __("Send") }}</Button>
         <Button
           v-if="action.dirty.value"
           type="button"
@@ -60,7 +61,7 @@ function save() {
           :disabled="action.state.value === 'saving'"
           @click="action.discard"
         >
-          تجاهل المسودة
+          {{ __("Discard draft") }}
         </Button>
       </div>
     </form>

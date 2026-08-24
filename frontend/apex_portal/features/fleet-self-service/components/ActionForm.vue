@@ -4,6 +4,7 @@ import { Button, FileUploader, FormControl } from "frappe-ui";
 import { createSingleFlight } from "../state.js";
 import { statusLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
     title: { type: String, required: true },
@@ -28,10 +29,10 @@ async function submit() {
     error.value = "";
     try {
         const result = await submitOnce(props.actionKey, () => props.resource.submit({ ...form }));
-        notice.value = `تم الحفظ بالحالة: ${statusLabel(result?.status || "Pending")}`;
+        notice.value = __("Saved with status: {0}", [statusLabel(result?.status || "Pending")]);
         emit("saved", result);
     } catch (caught) {
-        error.value = safeErrorMessage(caught, "تعذر الحفظ. بقيت البيانات كما أدخلتها.");
+        error.value = safeErrorMessage(caught, __("Could not save. Your data stayed as you entered it."));
     }
 }
 </script>
@@ -39,7 +40,7 @@ async function submit() {
 <template>
     <section class="salis-page salis-form-page">
         <header>
-            <p class="salis-eyebrow">ساليس</p>
+            <p class="salis-eyebrow">{{ __("Salis") }}</p>
             <h2>{{ title }}</h2>
             <p>{{ intro }}</p>
         </header>
@@ -58,10 +59,10 @@ async function submit() {
                                 type="button"
                                 variant="outline"
                                 :loading="uploading"
-                                :label="form[field.name] ? 'تم إرفاق الملف' : 'إرفاق ملف'"
+                                :label="form[field.name] ? __('File Attached') : __('Attach File')"
                                 @click="openFileSelector"
                             />
-                            <p v-if="uploadError">تعذر رفع الملف.</p>
+                            <p v-if="uploadError">{{ __("Could not upload the file.") }}</p>
                         </div>
                     </template>
                 </FileUploader>
@@ -85,7 +86,7 @@ async function submit() {
                 variant="solid"
                 theme="green"
                 size="lg"
-                label="إرسال"
+                :label="__('Send')"
                 :loading="resource.loading"
             />
         </form>

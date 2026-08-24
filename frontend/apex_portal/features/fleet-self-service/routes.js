@@ -1,4 +1,5 @@
 import "./styles.css";
+import { __ } from "../../core/i18n.js";
 
 const pages = Object.freeze({
     home: () => import("./pages/RepresentativeHomePage.vue"),
@@ -31,12 +32,12 @@ const route = (path, name, label, icon, component, capability = "fleet.self.read
 
 export function createFleetSelfRoutes() {
     return Object.freeze([
-        route("/", "representative-home", "الرئيسية", "lucide-home", pages.home),
-        route("/vehicle", "current-vehicle", "المركبة", "lucide-truck", pages.vehicle),
+        route("/", "representative-home", __("Home"), "lucide-home", pages.home),
+        route("/vehicle", "current-vehicle", __("The Vehicle"), "lucide-truck", pages.vehicle),
         route(
             "/vehicle/receipt",
             "vehicle-receipt",
-            "استلام المركبة",
+            __("Vehicle Receipt"),
             "lucide-clipboard-check",
             pages.receipt,
             "fleet.self.handover",
@@ -44,16 +45,16 @@ export function createFleetSelfRoutes() {
         route(
             "/vehicle/return",
             "vehicle-return",
-            "إرجاع المركبة",
+            __("Vehicle Return"),
             "lucide-undo-2",
             pages.vehicleReturn,
             "fleet.self.handover",
         ),
-        route("/fuel", "fuel-quota", "الوقود", "lucide-fuel", pages.quota, "fleet.self.fuel"),
+        route("/fuel", "fuel-quota", __("My Fuel"), "lucide-fuel", pages.quota, "fleet.self.fuel"),
         route(
             "/fuel/request",
             "fuel-request",
-            "طلب وقود",
+            __("Fuel Request"),
             "lucide-plus",
             pages.fuel,
             "fleet.self.fuel",
@@ -61,7 +62,7 @@ export function createFleetSelfRoutes() {
         route(
             "/fuel/additional",
             "additional-fuel",
-            "زيادة الوقود",
+            __("Additional Fuel"),
             "lucide-gauge",
             pages.additionalFuel,
             "fleet.self.fuel",
@@ -69,7 +70,7 @@ export function createFleetSelfRoutes() {
         route(
             "/incidents",
             "representative-incidents",
-            "الحوادث",
+            __("Incidents"),
             "lucide-triangle-alert",
             pages.incidents,
             "fleet.self.incident",
@@ -77,7 +78,7 @@ export function createFleetSelfRoutes() {
         route(
             "/incidents/new",
             "incident-report",
-            "بلاغ حادث",
+            __("Incident Report"),
             "lucide-file-warning",
             pages.incident,
             "fleet.self.incident",
@@ -85,7 +86,7 @@ export function createFleetSelfRoutes() {
         route(
             "/complaints",
             "representative-complaints",
-            "البلاغات",
+            __("My Complaints"),
             "lucide-messages-square",
             pages.complaints,
             "fleet.self.complaint",
@@ -93,7 +94,7 @@ export function createFleetSelfRoutes() {
         route(
             "/complaints/new",
             "complaint-create",
-            "بلاغ جديد",
+            __("New Complaint"),
             "lucide-message-square-plus",
             pages.complaintCreate,
             "fleet.self.complaint",
@@ -101,7 +102,7 @@ export function createFleetSelfRoutes() {
         route(
             "/complaints/:name",
             "complaint-detail",
-            "تفاصيل البلاغ",
+            __("Report Details"),
             "lucide-message-square",
             pages.complaint,
             "fleet.self.complaint",

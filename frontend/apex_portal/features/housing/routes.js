@@ -1,4 +1,5 @@
 import "./housing.css";
+import { __ } from "../../core/i18n.js";
 
 const pages = Object.freeze({
   today: () => import("./pages/TodayPage.vue"),
@@ -36,18 +37,18 @@ export const housingRoutes = Object.freeze([
     feature: "housing",
     capability: "estate_read",
     redirect: "/today",
-    meta: { navigation: false, label: "نظرة عامة", capability: "estate_read", group: "اليوم" },
+    meta: { navigation: false, label: __("Overview"), capability: "estate_read", group: __("Day") },
   },
-  route("/today", "housing-today", "مهام اليوم", "today", pages.today, "اليوم"),
-  route("/count", "housing-count", "الجرد", "count", pages.count, "العهد والجرد"),
-  route("/beds", "housing-beds", "الغرف والأسرّة", "estate_read", pages.beds, "السكن"),
-  route("/beds/:bed", "housing-bed-detail", "تفاصيل السرير", "estate_read", pages.bedDetail),
-  route("/arrivals", "housing-arrivals", "القادمون", "check_in", pages.arrivals, "السكن"),
-  route("/transfer", "housing-transfer", "نقل الساكن", "transfer", pages.transfer, "السكن"),
-  route("/custody", "housing-custody", "العهد", "custody_read", pages.custody, "العهد والجرد"),
-  route("/delivery", "housing-delivery", "تسليم الأصول", "delivery_read", pages.delivery, "العهد والجرد"),
-  route("/delivery/:name", "housing-delivery-detail", "تفاصيل التسليم", "delivery_read", pages.deliveryDetail),
-  route("/maintenance", "housing-maintenance", "طلبات الصيانة", "maintenance_read", pages.maintenance, "الصيانة والسلامة"),
-  route("/maintenance/new", "housing-maintenance-new", "طلب صيانة جديد", "maintenance_create", pages.maintenanceNew, "الصيانة والسلامة"),
-  route("/maintenance/:name", "housing-maintenance-detail", "تفاصيل طلب الصيانة", "maintenance_read", pages.maintenanceDetail),
+  route("/today", "housing-today", __("Today's Tasks"), "today", pages.today, __("Day")),
+  route("/count", "housing-count", __("Inventory"), "count", pages.count, __("Custody & Inventory")),
+  route("/beds", "housing-beds", __("Rooms & Beds"), "estate_read", pages.beds, __("Housing")),
+  route("/beds/:bed", "housing-bed-detail", __("Bed Details"), "estate_read", pages.bedDetail),
+  route("/arrivals", "housing-arrivals", __("Arrivals"), "check_in", pages.arrivals, __("Housing")),
+  route("/transfer", "housing-transfer", __("Transfer Resident"), "transfer", pages.transfer, __("Housing")),
+  route("/custody", "housing-custody", __("Custody Items"), "custody_read", pages.custody, __("Custody & Inventory")),
+  route("/delivery", "housing-delivery", __("Asset Handover"), "delivery_read", pages.delivery, __("Custody & Inventory")),
+  route("/delivery/:name", "housing-delivery-detail", __("Handover Details"), "delivery_read", pages.deliveryDetail),
+  route("/maintenance", "housing-maintenance", __("Maintenance Requests"), "maintenance_read", pages.maintenance, __("Maintenance & Safety")),
+  route("/maintenance/new", "housing-maintenance-new", __("New Maintenance Request"), "maintenance_create", pages.maintenanceNew, __("Maintenance & Safety")),
+  route("/maintenance/:name", "housing-maintenance-detail", __("Maintenance Request Details"), "maintenance_read", pages.maintenanceDetail),
 ]);

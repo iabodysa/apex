@@ -1,3 +1,5 @@
+import { __ } from "../../core/i18n.js";
+
 export function createSingleFlight() {
     const pending = new Map();
     return (key, action) => {
@@ -17,6 +19,6 @@ export function createSingleFlight() {
 export function actionAvailability(capability = {}) {
     return {
         disabled: capability.allowed !== true,
-        reason: capability.allowed ? "" : capability.reason || "هذا الإجراء غير متاح.",
+        reason: capability.allowed ? "" : capability.reason || __("This action is not available."),
     };
 }

@@ -7,6 +7,7 @@ import { building } from "../../housing/building.js";
 import SafetyTaskRow from "../components/SafetyTaskRow.vue";
 import { cadenceLabel, periodLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const error = ref("");
 const results = reactive({});
@@ -35,14 +36,14 @@ const checklistComplete = computed(() => taskCount.value > 0
 // unanswered task read as the neutral word "تقدم الجولة" beside a dead button. Counting the
 // remaining tasks says which ones, not merely that some are left.
 const saveReason = computed(() => {
-  if (missingEvidence.value) return "أكمل الصور المطلوبة قبل حفظ الجولة.";
-  if (!taskCount.value) return "لا توجد بنود في هذه الجولة.";
+  if (missingEvidence.value) return __("Complete the required photos before saving the round.");
+  if (!taskCount.value) return __("No items in this round.");
   const remaining = taskCount.value - checkedCount.value;
-  if (remaining > 0) return `تبقّى ${remaining} من ${taskCount.value} بنداً بلا قرار.`;
+  if (remaining > 0) return __("{0} of {1} items left undecided.", [remaining, taskCount.value]);
   return "";
 });
 const progressLabel = computed(() => saveReason.value
-  || (checklistComplete.value ? "اكتملت بنود الجولة." : "تقدم الجولة"));
+  || (checklistComplete.value ? __("The round items are complete.") : __("Round Progress")));
 
 const subscribeBuilding = inject("portalBuildingSubscribe", () => () => {});
 let unsubscribers = [];
@@ -81,8 +82,8 @@ async function saveRound() {
   error.value = "";
   if (!checklistComplete.value) {
     error.value = missingEvidence.value
-      ? "أكمل الصور المطلوبة قبل حفظ الجولة."
-      : "أكمل فحص جميع البنود قبل حفظ الجولة.";
+      ? __("Complete the required photos before saving the round.")
+      : __("Complete checking all items before saving the round.");
     return;
   }
   try {
@@ -91,40 +92,40 @@ async function saveRound() {
       round_date: today(),
       results: JSON.stringify(Object.values(results)),
     });
-    if (!response?.ok) throw new Error(response?.failed?.[0]?.message || "لم تُحفظ الجولة.");
+    if (!response?.ok) throw new Error(response?.failed?.[0]?.message || __("The round was not saved."));
     // ok is true as long as ONE cadence was recorded, so a partial refusal has to be
     // named here or the supervisor walks away believing the whole round was saved.
     const failed = response.failed || [];
     if (failed.length) {
       const names = failed.map((row) => cadenceLabel(row.cadence)).join("، ");
-      error.value = `حُفظ جزء من الجولة فقط. لم تُحفظ: ${names}. راجعها وأعد الإرسال.`;
+      error.value = __("Partial save. Not saved: {0}. Review it and resubmit.", [names]);
     } else {
       toast.create({
         type: "success",
-        message: response.ratified ? "تم اعتماد الجولة" : "حُفظت الجولة وتنتظر المراجعة",
+        message: response.ratified ? __("The round was approved") : __("The round was saved and is awaiting review"),
       });
     }
     Object.keys(results).forEach((key) => delete results[key]);
     await due.fetch();
   } catch (exception) {
-    error.value = safeErrorMessage(exception, "تعذر حفظ الجولة.");
+    error.value = safeErrorMessage(exception, __("Could not save the round."));
   }
 }
 </script>
 
 <template>
   <section class="feature-page safety-rounds-page">
-    <header class="feature-page__header"><h2>جولات السلامة</h2><BuildingPicker /></header>
-    <PortalSkeleton v-if="due.loading" :rows="3" label="جارٍ تحميل جولات السلامة" />
-    <ErrorMessage v-else-if="due.error" message="تعذر تحميل جولات السلامة." />
+    <header class="feature-page__header"><h2>{{ __("Safety Rounds") }}</h2><BuildingPicker /></header>
+    <PortalSkeleton v-if="due.loading" :rows="3" :label="__('Loading Safety Rounds')" />
+    <ErrorMessage v-else-if="due.error" :message="__('Could not load the safety rounds.')" />
     <template v-else-if="building">
       <section v-if="awaiting.length" class="feature-card">
-        <h3>جولات تنتظر المراجعة</h3>
+        <h3>{{ __("Rounds Awaiting Review") }}</h3>
         <RouterLink v-for="item in awaiting" :key="item.round" :to="`/rounds/${item.round}`">
           {{ cadenceLabel(item.cadence) }} · {{ item.round_date }}
         </RouterLink>
       </section>
-      <p v-if="!groups.length" class="feature-page__empty">لا توجد جولات مستحقة لهذا المبنى.</p>
+      <p v-if="!groups.length" class="feature-page__empty">{{ __("No due rounds for this building.") }}</p>
       <section v-for="group in groups" :key="group.cadence" class="safety-group">
         <h3>{{ cadenceLabel(group.cadence) }} · {{ periodLabel(group.period) }}</h3>
         <SafetyTaskRow
@@ -144,7 +145,7 @@ async function saveRound() {
         size="lg"
         hint
       >
-        <template #hint>{{ checkedCount }} من {{ taskCount }}</template>
+        <template #hint>{{ checkedCount }} {{ __("of") }} {{ taskCount }}</template>
       </Progress>
       <p v-if="groups.length && saveReason" class="feature-reason">{{ saveReason }}</p>
       <Button
@@ -154,7 +155,7 @@ async function saveRound() {
         :disabled="!checklistComplete"
         :loading="submit.loading"
         @click="saveRound"
-      >حفظ الجولة</Button>
+      >{{ __("Save Round") }}</Button>
     </template>
   </section>
 </template>

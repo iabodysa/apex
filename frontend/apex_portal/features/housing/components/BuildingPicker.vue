@@ -4,6 +4,7 @@ import { Button, Select } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { building, selectBuilding } from "../building.js";
 import { createSupervisorBuildingsResource } from "../data/buildings.js";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({ resource: { type: Object, default: null } });
 const buildings = props.resource || createSupervisorBuildingsResource();
@@ -35,12 +36,12 @@ onMounted(() => {
 
 <template>
   <template v-if="buildings">
-    <PortalSkeleton v-if="buildings.loading" :rows="1" label="جارٍ تحميل المباني" />
+    <PortalSkeleton v-if="buildings.loading" :rows="1" :label="__('Loading Buildings')" />
     <div v-else-if="buildings.error" class="feature-state feature-state--error">
-      <p>تعذر تحميل المباني.</p>
-      <Button variant="outline" label="إعادة المحاولة" @click="load" />
+      <p>{{ __("Could not load the buildings.") }}</p>
+      <Button variant="outline" :label="__('Retry')" @click="load" />
     </div>
-    <div v-else-if="!options.length" class="feature-state">لا توجد مبانٍ متاحة.</div>
-    <Select v-else :model-value="building" :options="options" placeholder="اختر المبنى" aria-label="المبنى" @update:model-value="selectBuilding" />
+    <div v-else-if="!options.length" class="feature-state">{{ __("No buildings available.") }}</div>
+    <Select v-else :model-value="building" :options="options" :placeholder="__('Choose the Building')" :aria-label="__('Building')" @update:model-value="selectBuilding" />
   </template>
 </template>

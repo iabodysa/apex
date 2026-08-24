@@ -8,6 +8,7 @@ import { building } from "../building.js";
 import { bedAssignmentTarget, housingCandidateFromQuery } from "../arrivalFlow.js";
 import { floorLabel, statusLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const route = useRoute();
 const grid = createResource({
@@ -46,34 +47,34 @@ async function setReady(room) {
   error.value = "";
   try {
     await readiness.submit({ room: room.room, status: "Ready" });
-    toast.create({ type: "success", message: "الغرفة جاهزة" });
+    toast.create({ type: "success", message: __("The room is ready") });
     await grid.fetch();
-  } catch (exception) { error.value = safeErrorMessage(exception, "تعذر تحديث جاهزية الغرفة."); }
+  } catch (exception) { error.value = safeErrorMessage(exception, __("Could not update the room readiness.")); }
 }
 </script>
 
 <template>
   <section class="feature-page">
-    <header class="feature-page__header"><h2>الغرف والأسرّة</h2><BuildingPicker /></header>
+    <header class="feature-page__header"><h2>{{ __("Rooms & Beds") }}</h2><BuildingPicker /></header>
     <article v-if="candidate" class="selected-resident" aria-live="polite">
-      <div><span>اختر سريراً</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
-      <RouterLink to="/arrivals">تغيير العامل</RouterLink>
+      <div><span>{{ __("Pick a Bed") }}</span><strong dir="auto">{{ candidate.label }}</strong><small v-if="candidate.project" dir="auto">{{ candidate.project }}</small></div>
+      <RouterLink to="/arrivals">{{ __("Change Worker") }}</RouterLink>
     </article>
-    <PortalSkeleton v-if="grid.loading && !grid.data" :rows="3" label="جارٍ تحميل الأسرّة" />
-    <ErrorMessage v-else-if="grid.error" message="تعذر تحميل الأسرّة." />
-    <p v-else-if="!rooms.length && building" class="feature-page__empty">لا توجد غرف في هذا المبنى.</p>
+    <PortalSkeleton v-if="grid.loading && !grid.data" :rows="3" :label="__('Loading Beds')" />
+    <ErrorMessage v-else-if="grid.error" :message="__('Could not load the beds.')" />
+    <p v-else-if="!rooms.length && building" class="feature-page__empty">{{ __("No rooms in this building.") }}</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">
       <header>
         <div>
           <strong><bdi dir="auto" translate="no">{{ room.room_number }}</bdi></strong>
           <small>
-            {{ floorLabel(room.floor_label) }} · {{ room.room_type || "غرفة" }} ·
-            {{ room.current_occupancy || 0 }} من {{ room.bed_capacity || room.beds.length }} ·
+            {{ floorLabel(room.floor_label) }} · {{ room.room_type || __("room") }} ·
+            {{ room.current_occupancy || 0 }} {{ __("of") }} {{ room.bed_capacity || room.beds.length }} ·
             {{ statusLabel(room.readiness_status) }}
           </small>
-          <small v-if="room.dominant_project" dir="auto">المشروع الغالب: {{ room.dominant_project }}</small>
+          <small v-if="room.dominant_project" dir="auto">{{ __("Dominant Project: {0}", [room.dominant_project]) }}</small>
         </div>
-        <Button v-if="canSetReadiness && room.readiness_status !== 'Ready'" variant="subtle" :loading="readiness.loading" @click="setReady(room)">تأكيد الجاهزية</Button>
+        <Button v-if="canSetReadiness && room.readiness_status !== 'Ready'" variant="subtle" :loading="readiness.loading" @click="setReady(room)">{{ __("Confirm Readiness") }}</Button>
       </header>
       <div class="bed-grid">
         <component
@@ -86,11 +87,11 @@ async function setReady(room) {
         >
           <strong><bdi dir="auto" translate="no">{{ bed.bed_code || bed.bed }}</bdi></strong>
           <small v-if="bed.occupant" dir="auto">{{ bed.occupant.employee_name }}</small>
-          <small v-else>{{ candidate ? 'اختر هذا السرير' : 'متاح' }}</small>
+          <small v-else>{{ candidate ? __("Choose This Bed") : __("Available") }}</small>
           <!-- An occupant's name is who is here, not why the tile refuses the tap the assignment
                flow just invited. With a candidate chosen the refusal has to say so itself. -->
-          <small v-if="candidate && bed.occupant" class="bed-meta">مشغول، لا يقبل إسناداً</small>
-          <small class="bed-meta">{{ statusLabel(bed.condition) }}<template v-if="bed.is_temporary"> · مؤقت</template></small>
+          <small v-if="candidate && bed.occupant" class="bed-meta">{{ __("Occupied, cannot be assigned") }}</small>
+          <small class="bed-meta">{{ statusLabel(bed.condition) }}<template v-if="bed.is_temporary"> · {{ __("Temporary") }}</template></small>
         </component>
       </div>
     </section>

@@ -2,6 +2,7 @@
 import { FeatherIcon } from "frappe-ui";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
+import { __ } from "../../../core/i18n.js";
 defineProps({
     state: {
         type: String,
@@ -15,10 +16,10 @@ defineEmits(["retry"]);
 </script>
 
 <template>
-    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="title || 'جارٍ تحميل البيانات'" />
+    <PortalSkeleton v-if="state === 'loading'" :rows="3" :label="title || __('Loading Data')" />
     <PortalErrorState
         v-else-if="state === 'error'"
-        :title="title || 'تعذّر تحميل البيانات'"
+        :title="title || __('Could not load the data')"
         :message="message"
         @retry="$emit('retry')"
     />

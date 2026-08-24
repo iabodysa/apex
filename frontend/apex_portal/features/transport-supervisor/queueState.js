@@ -1,3 +1,5 @@
+import { __ } from "../../core/i18n.js";
+
 export function filtersFromQuery(query = {}, {
   base = {},
   dateField = "",
@@ -19,7 +21,7 @@ export function queryFromFilters(filters = {}) {
 }
 
 export function resultCountLabel(count, hasMore) {
-  const suffix = hasMore ? " مع نتائج إضافية" : "";
-  const noun = count === 1 || count > 10 ? "نتيجة" : "نتائج";
+  const suffix = hasMore ? ` ${__("with additional results")}` : "";
+  const noun = count === 1 || count > 10 ? __("result") : __("results");
   return `${count} ${noun}${suffix}`;
 }

@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { createResource } from "frappe-ui";
 import ActionForm from "../components/ActionForm.vue";
+import { __ } from "../../../core/i18n.js";
 const resource = createResource({
   url: "apex.salis.api.fleet_employee.submit_fuel_request",
   method: "POST",
@@ -14,28 +15,28 @@ const stations = createResource({
   auto: true,
 });
 const stationOptions = computed(() =>
-  [{ label: "بدون تحديد", value: "" }].concat(
+  [{ label: __("Not Specified"), value: "" }].concat(
     (stations.data || []).map((name) => ({ label: name, value: name })),
   ),
 );
 const stationField = computed(() => {
-  if (stations.loading) return { disabled: true, description: "جارٍ تحميل محطات الوقود…" };
-  if (stations.error) return { disabled: true, description: "تعذّر تحميل محطات الوقود، ويمكنك الإرسال بدون تحديدها." };
-  if (!stations.data?.length) return { disabled: true, description: "لا توجد محطة وقود نشطة، ويمكنك الإرسال بدون تحديدها." };
+  if (stations.loading) return { disabled: true, description: __("Loading fuel stations…") };
+  if (stations.error) return { disabled: true, description: __("Could not load fuel stations; you can submit without selecting one.") };
+  if (!stations.data?.length) return { disabled: true, description: __("No active fuel station exists; you can submit without selecting one.") };
   return { disabled: false, description: "" };
 });
 const fields = computed(() => [
-  { name: "litres", type: "number", label: "الكمية باللتر", required: true },
+  { name: "litres", type: "number", label: __("Quantity in Litres"), required: true },
   {
     name: "station",
     type: "select",
-    label: "محطة الوقود",
+    label: __("Fuel Station"),
     options: stationOptions.value,
     ...stationField.value,
   },
-  { name: "notes", type: "textarea", rows: 3, label: "ملاحظة" },
+  { name: "notes", type: "textarea", rows: 3, label: __("Note") },
 ]);
 </script>
 <template>
-  <ActionForm title="طلب وقود" intro="الطلب العادي مرتبط بحصتك الشهرية الحالية." :fields="fields" :resource="resource" action-key="standard-fuel" />
+  <ActionForm :title="__('Fuel Request')" :intro="__('The regular request is tied to your current monthly quota.')" :fields="fields" :resource="resource" action-key="standard-fuel" />
 </template>

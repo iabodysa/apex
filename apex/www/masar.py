@@ -3,7 +3,10 @@
 import re
 
 import frappe
-from apex.apex_core.doctype.portal_device.portal_device import consume_enrolment_key
+from apex.apex_core.doctype.portal_device.portal_device import (
+    consume_enrolment_key,
+    device_language,
+)
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 from apex.apex_core.utils.portal_identity import (
     WORKER,
@@ -38,9 +41,8 @@ def get_context(context):
         frappe.local.flags.redirect_location = "/masar/"
         raise frappe.Redirect
 
-    frappe.local.lang = "ar"
-
     cookie_token = presented_token(WORKER)[0]
+    frappe.local.lang = device_language(WORKER, cookie_token) or "ar"
     subject = _resolve_token_subject(cookie_token) if cookie_token else None
     if cookie_token and not subject:
         delete_token_cookie(WORKER)

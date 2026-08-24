@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="{{ shell_meta.language }}" dir="{{ shell_meta.direction }}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -19,9 +19,9 @@
     <div id="app">
       <section class="apex-boot" role="status" aria-live="polite">
         <img src="/assets/apex/icons/brand/apex-mark-reverse.svg" alt="" />
-        <h1>نجهّز أبكس لك…</h1>
+        <h1>{{ _("Getting Apex ready for you…") }}</h1>
         <div class="apex-boot__track" aria-hidden="true"><span></span></div>
-        <p>لحظات ويكون كل شيء جاهز.</p>
+        <p>{{ _("A moment and everything is ready.") }}</p>
       </section>
     </div>
     <script id="apex-portal-bootstrap" type="application/json">{{ boot["apex_portal"] | tojson }}</script>

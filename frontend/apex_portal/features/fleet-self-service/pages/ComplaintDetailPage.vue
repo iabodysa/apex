@@ -6,6 +6,7 @@ import AsyncPanel from "../components/AsyncPanel.vue";
 import { createSingleFlight } from "../state.js";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 const route = useRoute(),
   complaint = createResource({
     url: "apex.salis.api.fleet_employee.get_complaint",
@@ -28,19 +29,19 @@ async function reply() {
   } catch (error) {
     // Without this the rejection was unhandled: the field kept the text, no message appeared, and
     // the driver had no way to tell a sent reply from a refused one.
-    notice.value = safeErrorMessage(error, "تعذّر إرسال الرد. حاول مرة أخرى.");
+    notice.value = safeErrorMessage(error, __("Could not send the reply. Try again."));
     return;
   }
   message.value = "";
-  notice.value = "تم إرسال الرد";
+  notice.value = __("The reply was sent");
   await load();
 }
 onMounted(load);
 </script>
 <template>
   <section class="salis-page">
-    <AsyncPanel v-if="complaint.loading" state="loading" title="جاري تحميل البلاغ" message="نسترجع المحادثة." />
-    <AsyncPanel v-else-if="complaint.error" state="error" title="تعذر فتح البلاغ" message="قد لا يكون ضمن سجلاتك." @retry="load" />
+    <AsyncPanel v-if="complaint.loading" state="loading" :title="__('Loading the complaint')" :message="__('Retrieving the conversation.')" />
+    <AsyncPanel v-else-if="complaint.error" state="error" :title="__('Could not open the complaint')" :message="__('It may not be among your records.')" @retry="load" />
     <article v-else-if="issue" class="salis-card">
       <Badge :theme="statusTheme(issue.status)" :label="statusLabel(issue.status)" />
       <h2>{{ issue.subject }}</h2>
@@ -54,9 +55,9 @@ onMounted(load);
         </li>
       </ul>
       <form class="salis-form" @submit.prevent="reply">
-        <FormControl v-model="message" type="textarea" :rows="3" label="ردك" required />
+        <FormControl v-model="message" type="textarea" :rows="3" :label="__('Your Reply')" required />
         <p v-if="notice" class="salis-notice" role="status">{{ notice }}</p>
-        <Button type="submit" variant="solid" theme="green" label="إرسال الرد" :loading="replyResource.loading" />
+        <Button type="submit" variant="solid" theme="green" :label="__('Send Reply')" :loading="replyResource.loading" />
       </form>
     </article>
   </section>

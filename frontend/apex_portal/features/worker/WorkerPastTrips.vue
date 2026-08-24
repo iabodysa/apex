@@ -2,6 +2,7 @@
 import { inject, reactive, ref, watch } from "vue";
 import { Badge, Button, FormControl, createResource } from "frappe-ui";
 import { dateTimeLabel, workerTransportStatusLabel } from "../../core/displayLabels.js";
+import { __ } from "../../core/i18n.js";
 
 const props = defineProps({ trips: { type: Array, default: () => [] } });
 const emit = defineEmits(["error", "rated"]);
@@ -72,7 +73,7 @@ async function rateTrip(trip) {
     });
     emit("rated", trip);
     drafts?.clear(ratingKey(trip));
-    ratingMessages[trip.dispatch_trip] = "تم إرسال تقييمك، شكراً لك.";
+    ratingMessages[trip.dispatch_trip] = __("Your rating has been sent, thank you.");
   } catch (reason) {
     emit("error", reason);
   } finally {
@@ -84,12 +85,12 @@ async function rateTrip(trip) {
 <template>
   <details v-if="trips.length" class="journey-history">
     <summary>
-      الرحلات السابقة
+      {{ __("Past trips") }}
       <span>{{ trips.length }}</span>
     </summary>
     <article v-for="trip in trips" :key="trip.transport_request" class="journey-history__row">
       <div>
-        <strong>{{ trip.destination?.location || trip.pickup_point || "رحلة مسار" }}</strong>
+        <strong>{{ trip.destination?.location || trip.pickup_point || __("Masar trip") }}</strong>
         <bdi>{{ dateTimeLabel(trip.pickup_datetime) }}</bdi>
         <Badge :label="workerTransportStatusLabel(trip.trip_status)" />
       </div>
@@ -99,13 +100,13 @@ async function rateTrip(trip) {
         @submit.prevent="rateTrip(trip)"
       >
         <fieldset>
-          <legend>قيّم الرحلة</legend>
+          <legend>{{ __("Rate the trip") }}</legend>
           <div class="journey-rating__stars">
             <button
               v-for="score in 5"
               :key="score"
               type="button"
-              :aria-label="`${score} نجوم`"
+              :aria-label="__('{0} stars', [score])"
               :aria-pressed="ratingDraft(trip).rating === score"
               @click="setRating(trip, score)"
             >★</button>
@@ -113,7 +114,7 @@ async function rateTrip(trip) {
         </fieldset>
         <FormControl
           type="textarea"
-          label="ملاحظات اختيارية"
+          :label="__('Optional notes')"
           :model-value="ratingDraft(trip).feedback"
           :data-rating-feedback="trip.dispatch_trip"
           maxlength="2000"
@@ -122,7 +123,7 @@ async function rateTrip(trip) {
         />
         <!-- The stars are a row of unlabelled buttons, so an untouched rating reads as an optional
              flourish rather than the thing holding the submit shut. -->
-        <p v-if="!ratingDraft(trip).rating" class="journey-hint">اختر عدد النجوم أولاً لإرسال التقييم.</p>
+        <p v-if="!ratingDraft(trip).rating" class="journey-hint">{{ __("Choose a star rating first to send the rating.") }}</p>
         <Button
           type="button"
           variant="outline"
@@ -130,16 +131,16 @@ async function rateTrip(trip) {
           :loading="busy === `rating:${trip.dispatch_trip}`"
           :data-rating-submit="trip.dispatch_trip"
           @click="rateTrip(trip)"
-        >إرسال التقييم</Button>
+        >{{ __("Send rating") }}</Button>
         <Button
           type="button"
           variant="ghost"
           :data-rating-dismiss="trip.dispatch_trip"
           @click="dismissRating(trip)"
-        >تجاهل المسودة</Button>
+        >{{ __("Discard draft") }}</Button>
       </form>
       <p v-else-if="trip.has_rated || ratingMessages[trip.dispatch_trip]" class="journey-rating__thanks" role="status">
-        {{ ratingMessages[trip.dispatch_trip] || "تم إرسال تقييمك مسبقاً." }}
+        {{ ratingMessages[trip.dispatch_trip] || __("Your rating has already been sent.") }}
       </p>
     </article>
   </details>

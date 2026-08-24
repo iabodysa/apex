@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { Badge, Button, createResource } from "frappe-ui";
 import QRCode from "qrcode";
 import { dateTimeLabel, workerTransportStatusLabel } from "../../core/displayLabels.js";
+import { __ } from "../../core/i18n.js";
 
 defineProps({ trips: { type: Array, default: () => [] } });
 const emit = defineEmits(["error"]);
@@ -34,48 +35,48 @@ async function showPass(request) {
 <template>
   <div class="journey-section">
     <div class="journey-section__title">
-      <h3>الرحلات القادمة</h3>
+      <h3>{{ __("Upcoming trips") }}</h3>
       <span>{{ trips.length }}</span>
     </div>
     <article v-for="trip in trips" :key="trip.transport_request" class="journey-card">
       <div class="journey-card__main">
         <Badge :label="workerTransportStatusLabel(trip.boarding_window?.state || trip.trip_status)" />
         <h3>
-          {{ trip.destination?.location || trip.destination?.stop_name || trip.pickup_point || "رحلة مسار" }}
+          {{ trip.destination?.location || trip.destination?.stop_name || trip.pickup_point || __("Masar trip") }}
         </h3>
         <p>
-          {{ trip.pickup_point || trip.my_pickup?.stop_name || "نقطة التجمع" }}
+          {{ trip.pickup_point || trip.my_pickup?.stop_name || __("Gathering Point") }}
         </p>
       </div>
       <dl class="journey-facts">
         <div>
-          <dt>الموعد</dt>
+          <dt>{{ __("Time") }}</dt>
           <dd>
-            <bdi>{{ dateTimeLabel(trip.pickup_datetime || trip.depart_time) || "يحدد لاحقاً" }}</bdi>
+            <bdi>{{ dateTimeLabel(trip.pickup_datetime || trip.depart_time) || __("To be determined later") }}</bdi>
           </dd>
         </div>
         <div>
-          <dt>الحافلة</dt>
-          <dd><bdi dir="auto" translate="no">{{ trip.vehicle?.plate_number || "تحت الإسناد" }}</bdi></dd>
+          <dt>{{ __("Bus") }}</dt>
+          <dd><bdi dir="auto" translate="no">{{ trip.vehicle?.plate_number || __("Not yet assigned") }}</bdi></dd>
         </div>
         <div>
-          <dt>السائق</dt>
-          <dd>{{ trip.driver?.full_name || "تحت الإسناد" }}</dd>
+          <dt>{{ __("driver") }}</dt>
+          <dd>{{ trip.driver?.full_name || __("Not yet assigned") }}</dd>
         </div>
       </dl>
       <div class="journey-actions">
-        <a v-if="trip.maps_route_url" class="journey-link" :href="trip.maps_route_url" target="_blank" rel="noopener">عرض المسار</a>
-        <Button variant="outline" :loading="busy === `pass:${trip.transport_request}`" @click="showPass(trip.transport_request)">بطاقة الصعود</Button>
+        <a v-if="trip.maps_route_url" class="journey-link" :href="trip.maps_route_url" target="_blank" rel="noopener">{{ __("View route") }}</a>
+        <Button variant="outline" :loading="busy === `pass:${trip.transport_request}`" @click="showPass(trip.transport_request)">{{ __("Boarding pass") }}</Button>
       </div>
     </article>
   </div>
 
   <article v-if="pass" class="boarding-pass" aria-live="polite">
     <div>
-      <span class="journey-kicker">بطاقة الصعود</span>
-      <h3>{{ pass.destination_label || "رحلة مسار" }}</h3>
+      <span class="journey-kicker">{{ __("Boarding pass") }}</span>
+      <h3>{{ pass.destination_label || __("Masar trip") }}</h3>
       <p>{{ pass.pickup_label }}</p>
     </div>
-    <img v-if="passImage" :src="passImage" alt="رمز بطاقة الصعود" />
+    <img v-if="passImage" :src="passImage" :alt="__('Boarding pass code')" />
   </article>
 </template>

@@ -1,5 +1,6 @@
 import { computed, ref } from "vue";
 import { errorStatus, safeErrorMessage } from "../../core/errorMessage.js";
+import { __ } from "../../core/i18n.js";
 
 export const SAUDI_BOUNDS = Object.freeze({ minLat: 16, maxLat: 33, minLng: 34, maxLng: 56 });
 const POSITION_STALE_SECONDS = 120;
@@ -47,11 +48,11 @@ export function normalizePosition(row) {
 
 export function positionStateLabel(value) {
   return {
-    live: "مباشر",
-    stale: "آخر موقع متأخر",
-    unknown: "حداثة الموقع غير معروفة",
-    offline: "الموقع غير متاح",
-  }[value] || "حالة الموقع غير معروفة";
+    live: __("Direct"),
+    stale: __("Last position delayed"),
+    unknown: __("Position freshness unknown"),
+    offline: __("Position unavailable"),
+  }[value] || __("Position state unknown");
 }
 
 function uniqueValues(rows, key) {
@@ -89,7 +90,7 @@ export function createTransportMapState() {
 
   function fail(reason) {
     phase.value = errorStatus(reason) === 403 ? "denied" : "error";
-    error.value = safeErrorMessage(reason, "تعذّر تحميل حركة المركبات.");
+    error.value = safeErrorMessage(reason, __("Could not load vehicle movement."));
   }
 
   async function load(readPositions) {

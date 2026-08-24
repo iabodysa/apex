@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { Button } from "frappe-ui";
+import { __ } from "../../core/i18n.js";
 
 const LANGUAGES = Object.freeze([
   { code: "ar", label: "العربية" },
@@ -9,9 +10,9 @@ const LANGUAGES = Object.freeze([
 ]);
 
 const HIGHLIGHTS = Object.freeze([
-  { icon: "lucide-home", title: "رحلة اليوم", body: "تشوف رحلتك ووقتها ومحطاتها أول ما تفتح التطبيق." },
-  { icon: "lucide-navigation", title: "تنفيذ الرحلة", body: "تبدأ الرحلة، وتعلّم كل محطة وصلتها، وتنهيها من نفس الشاشة." },
-  { icon: "lucide-user", title: "بياناتك", body: "سكنك وعهدك وطلباتك كلها معك بدون ما تراجع أحد." },
+  { icon: "lucide-home", title: __("Today's trip"), body: __("See your trip, its time and its stops as soon as you open the app.") },
+  { icon: "lucide-navigation", title: __("Trip Execution"), body: __("Start the trip, mark every stop you reach, and end it from the same screen.") },
+  { icon: "lucide-user", title: __("Your info"), body: __("Your housing, custody and requests are all with you without checking with anyone.") },
 ]);
 
 const STEPS = 5;
@@ -79,34 +80,34 @@ async function finish() {
     <div class="journey-card">
       <div v-if="step === 0" class="journey-card__main">
         <span class="welcome-seal lucide-shield-check" aria-hidden="true" />
-        <h3>جهازك صار موثّق</h3>
-        <p>ربطنا هذا الجوال باسمك. ما تحتاج رابط مرة ثانية، ولا اسم مستخدم ولا كلمة مرور.</p>
+        <h3>{{ __("Your device is verified") }}</h3>
+        <p>{{ __("We linked this phone to your name. You won't need a link again, nor a username or password.") }}</p>
       </div>
 
       <div v-else-if="step === 1" class="journey-card__main">
-        <h3>وش تسوي فيه</h3>
+        <h3>{{ __("What you can do in it") }}</h3>
         <p v-for="item in HIGHLIGHTS" :key="item.title">
           <span :class="item.icon" aria-hidden="true" /> <strong>{{ item.title }}</strong> — {{ item.body }}
         </p>
       </div>
 
       <div v-else-if="step === 2" class="journey-card__main">
-        <h3>اختر لغتك</h3>
-        <p>تقدر تغيّرها بعدين من بياناتك.</p>
+        <h3>{{ __("Choose your language") }}</h3>
+        <p>{{ __("You can change it later from your profile.") }}</p>
       </div>
 
       <div v-else-if="step === 3" class="journey-card__main">
         <span class="welcome-seal lucide-bell" aria-hidden="true" />
-        <h3>خلّ التنبيه يوصلك</h3>
-        <p>نرسل لك تنبيه أول ما تنسند لك رحلة أو يتغيّر وقتها، حتى والتطبيق مقفل.</p>
+        <h3>{{ __("Let the alert reach you") }}</h3>
+        <p>{{ __("We send you an alert as soon as a trip is assigned to you or its time changes, even while the app is closed.") }}</p>
         <p v-if="push?.error?.value" class="journey-hint">{{ push.error.value }}</p>
       </div>
 
       <div v-else class="journey-card__main">
         <span class="welcome-seal lucide-download" aria-hidden="true" />
-        <h3>ثبّته على جوالك</h3>
-        <p v-if="isIos">اضغط زر المشاركة تحت، ثم «أضف إلى الشاشة الرئيسية».</p>
-        <p v-else>ثبّته عشان يفتح مثل أي تطبيق، بدون متصفح.</p>
+        <h3>{{ __("Install it on your phone") }}</h3>
+        <p v-if="isIos">{{ __('Tap the share button below, then "Add to Home Screen".') }}</p>
+        <p v-else>{{ __("Install it so it opens like any app, without a browser.") }}</p>
       </div>
 
       <div class="journey-actions">
@@ -124,15 +125,15 @@ async function finish() {
         </template>
         <template v-else-if="step === 3">
           <Button v-if="push?.canOffer?.value" theme="green" variant="solid" :loading="push?.busy?.value" @click="enablePush">
-            فعّل التنبيهات
+            {{ __("Enable alerts") }}
           </Button>
-          <Button variant="subtle" @click="step += 1">بعدين</Button>
+          <Button variant="subtle" @click="step += 1">{{ __("Later") }}</Button>
         </template>
         <template v-else-if="step === 4">
-          <Button v-if="installEvent" theme="green" variant="solid" @click="promptInstall">ثبّت الآن</Button>
-          <Button theme="green" variant="solid" :loading="busy" @click="finish">ابدأ</Button>
+          <Button v-if="installEvent" theme="green" variant="solid" @click="promptInstall">{{ __("Install now") }}</Button>
+          <Button theme="green" variant="solid" :loading="busy" @click="finish">{{ __("Start") }}</Button>
         </template>
-        <Button v-else theme="green" variant="solid" @click="step += 1">كمّل</Button>
+        <Button v-else theme="green" variant="solid" @click="step += 1">{{ __("Continue") }}</Button>
       </div>
     </div>
   </section>

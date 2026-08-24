@@ -6,6 +6,7 @@ import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
 import { conditionLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const values = reactive({});
 const error = ref("");
@@ -43,32 +44,32 @@ async function submit() {
   try {
     const response = await save.submit({ building: building.value, lines: JSON.stringify(Object.values(values)) });
     if (response.failed) {
-      error.value = `حُفظ ${response.saved} وتعذر حفظ ${response.failed}. راجع السطور المعلّمة.`;
+      error.value = __("Saved {0} and failed to save {1}. Check the flagged rows.", [response.saved, response.failed]);
     } else {
-      toast.create({ type: "success", message: "تم حفظ الجرد" });
+      toast.create({ type: "success", message: __("The inventory was saved") });
     }
     await inventory.fetch();
   } catch (exception) {
-    error.value = safeErrorMessage(exception, "تعذر حفظ الجرد.");
+    error.value = safeErrorMessage(exception, __("Could not save the inventory."));
   }
 }
 </script>
 
 <template>
   <section class="feature-page">
-    <header class="feature-page__header"><h2>جرد السكن</h2><BuildingPicker /></header>
-    <PortalSkeleton v-if="inventory.loading" :rows="3" label="جارٍ تحميل الجرد" />
-    <ErrorMessage v-else-if="inventory.error" message="تعذر تحميل الجرد." />
-    <p v-else-if="!rows.length && building" class="feature-page__empty">لا توجد أصناف جرد لهذا المبنى.</p>
+    <header class="feature-page__header"><h2>{{ __("Housing Inventory") }}</h2><BuildingPicker /></header>
+    <PortalSkeleton v-if="inventory.loading" :rows="3" :label="__('Loading Inventory')" />
+    <ErrorMessage v-else-if="inventory.error" :message="__('Could not load the inventory.')" />
+    <p v-else-if="!rows.length && building" class="feature-page__empty">{{ __("No inventory items for this building.") }}</p>
     <form v-else-if="rows.length" class="inventory-form" @submit.prevent="submit">
       <article v-for="row in rows" :key="row.name" class="feature-card inventory-row">
-        <div><strong dir="auto">{{ row.item_label || row.item_name }}</strong><small>{{ row.room_label || 'المبنى' }} · المتوقع {{ row.expected_quantity }}</small></div>
-        <FormControl v-model="values[row.name].counted_quantity" type="number" label="العدد الفعلي" min="0" required />
-        <FormControl v-model="values[row.name].condition" type="select" label="الحالة" :options="conditions" />
-        <FormControl v-model="values[row.name].notes" class="inventory-row__notes" type="textarea" label="ملاحظة" :rows="2" />
+        <div><strong dir="auto">{{ row.item_label || row.item_name }}</strong><small>{{ row.room_label || __("Building") }} · {{ __("Expected {0}", [row.expected_quantity]) }}</small></div>
+        <FormControl v-model="values[row.name].counted_quantity" type="number" :label="__('Actual Count')" min="0" required />
+        <FormControl v-model="values[row.name].condition" type="select" :label="__('Status')" :options="conditions" />
+        <FormControl v-model="values[row.name].notes" class="inventory-row__notes" type="textarea" :label="__('Remark')" :rows="2" />
       </article>
       <ErrorMessage v-if="error" :message="error" />
-      <Button type="submit" theme="green" variant="solid" :loading="save.loading">حفظ الجرد</Button>
+      <Button type="submit" theme="green" variant="solid" :loading="save.loading">{{ __("Save Inventory") }}</Button>
     </form>
   </section>
 </template>

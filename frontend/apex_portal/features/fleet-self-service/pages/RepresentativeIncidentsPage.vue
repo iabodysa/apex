@@ -1,6 +1,7 @@
 <script setup>
 import { createResource } from "frappe-ui";
 import SimpleListPage from "../components/SimpleListPage.vue";
+import { __ } from "../../../core/i18n.js";
 const resource = createResource({
   url: "apex.salis.api.fleet_employee.get_my_incidents",
   method: "GET",
@@ -8,5 +9,5 @@ const resource = createResource({
 });
 </script>
 <template>
-  <SimpleListPage title="الحوادث" :resource="resource" empty="لا توجد حوادث مسجلة على مركبتك." create-to="/incidents/new" />
+  <SimpleListPage :title="__('Incidents')" :resource="resource" :empty="__('No incidents are recorded on your vehicle.')" create-to="/incidents/new" />
 </template>

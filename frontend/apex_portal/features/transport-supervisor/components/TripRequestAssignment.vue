@@ -4,6 +4,7 @@ import { Button, FormControl, createListResource, createResource } from "frappe-
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import { buildTripAssignments, meaningfulRequestTitle } from "../assignmentState.js";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({ trip: { type: Object, required: true } });
 const emit = defineEmits(["saved"]);
@@ -37,7 +38,7 @@ const availableRequests = computed(() => (requests.data || [])
 const selectedNames = computed(() => Object.keys(selections));
 const stopKeys = computed(() => (props.trip.stops || []).map((stop) => stop.stop_key).filter(Boolean));
 const stopOptions = computed(() => [
-  { label: "اختر نقطة توقف", value: "" },
+  { label: __("Choose a Stop"), value: "" },
   ...(props.trip.stops || []).map((stop) => ({
     value: stop.stop_key,
     label: stop.stop_name || stop.stop_key,
@@ -47,13 +48,13 @@ const stopOptions = computed(() => [
 // as the blocker when the real one is an unset stop on one row out of six. `canSubmit` is the
 // reason's negation, so the button cannot be live while a reason is on screen.
 const submitReason = computed(() => {
-  if (!selectedNames.value.length) return "اختر طلباً واحداً على الأقل.";
+  if (!selectedNames.value.length) return __("Choose at least one request.");
   const rows = selectedNames.value.map((name) => selections[name]);
   if (rows.some((row) => !row?.pickup_stop || !row?.dropoff_stop)) {
-    return "حدد نقطة الصعود ونقطة النزول لكل طلب مختار.";
+    return __("Specify the pickup and dropoff stop for each selected request.");
   }
   if (rows.some((row) => row.pickup_stop === row.dropoff_stop)) {
-    return "اختر نقطتين مختلفتين للصعود والنزول في كل طلب.";
+    return __("Choose two different stops for pickup and dropoff in each request.");
   }
   return "";
 });
@@ -74,7 +75,7 @@ async function loadRequests() {
   } catch (reason) {
     loadError.value = safeErrorMessage(
       reason,
-      "تعذّر تحميل طلبات النقل الجاهزة. تحقق من صلاحية الطلبات ثم أعد المحاولة.",
+      __("Could not load the ready transport requests. Check the requests permission then try again."),
     );
   }
 }
@@ -87,7 +88,7 @@ async function loadMoreRequests() {
     await requests.list.fetch();
   } catch (reason) {
     requests.update({ start: previousStart });
-    loadError.value = safeErrorMessage(reason, "تعذّر تحميل طلبات إضافية.");
+    loadError.value = safeErrorMessage(reason, __("Could not load more requests."));
   }
 }
 
@@ -109,7 +110,7 @@ async function save() {
     await loadRequests();
     emit("saved");
   } catch (reason) {
-    error.value = safeErrorMessage(reason, "تعذّر إسناد الطلبات. راجع حالة الطلب ونقاط الرحلة.");
+    error.value = safeErrorMessage(reason, __("Could not assign the requests. Review the request status and the trip stops."));
   } finally {
     saving.value = false;
   }
@@ -120,8 +121,8 @@ onMounted(loadRequests);
 
 <template>
   <section class="supervisor-detail__section supervisor-request-assignment">
-    <header><h3>إسناد طلبات إلى الرحلة</h3><span>{{ selectedNames.length }}</span></header>
-    <p class="feature-state">اختر طلباً أو أكثر وحدد نقطة الصعود والنزول الفعلية لكل طلب.</p>
+    <header><h3>{{ __("Assign Requests to the Trip") }}</h3><span>{{ selectedNames.length }}</span></header>
+    <p class="feature-state">{{ __("Choose one or more requests and specify the actual pickup and dropoff stop for each request.") }}</p>
     <form class="supervisor-request-assignment__form" @submit.prevent="save">
       <!-- One chain, so the pending read cannot render beside the failure or beside the count.
            `fetched` turns true only after a request resolves without throwing
@@ -130,11 +131,11 @@ onMounted(loadRequests);
       <PortalSkeleton
         v-if="!requests.list.fetched && !loadError"
         :rows="3"
-        label="جارٍ تحميل الطلبات المعتمدة"
+        :label="__('Loading Approved Requests')"
       />
       <div v-else-if="loadError" class="feature-error" role="alert">
         <p>{{ loadError }}</p>
-        <Button type="button" variant="outline" @click="loadRequests">إعادة تحميل الطلبات</Button>
+        <Button type="button" variant="outline" @click="loadRequests">{{ __("Reload Requests") }}</Button>
       </div>
       <ul v-else-if="availableRequests.length" class="supervisor-request-assignment__list">
         <li v-for="request in availableRequests" :key="request.name">
@@ -148,18 +149,18 @@ onMounted(loadRequests);
               <strong dir="auto">{{ meaningfulRequestTitle(request) }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ request.name }}</bdi>
             </span>
-            <small>{{ request.worker_count || 0 }} راكب</small>
+            <small>{{ request.worker_count || 0 }} {{ __("passenger") }}</small>
           </label>
           <div v-if="selections[request.name]" class="supervisor-request-assignment__stops">
-            <FormControl v-model="selections[request.name].pickup_stop" type="select" label="نقطة الصعود" :options="stopOptions" required />
-            <FormControl v-model="selections[request.name].dropoff_stop" type="select" label="نقطة النزول" :options="stopOptions" required />
+            <FormControl v-model="selections[request.name].pickup_stop" type="select" :label="__('Pickup Point')" :options="stopOptions" required />
+            <FormControl v-model="selections[request.name].dropoff_stop" type="select" :label="__('Dropoff Point')" :options="stopOptions" required />
           </div>
         </li>
       </ul>
-      <p v-else class="feature-state">لا توجد طلبات معتمدة جاهزة للإسناد.</p>
+      <p v-else class="feature-state">{{ __("No approved requests ready for assignment.") }}</p>
       <p v-if="submitReason && availableRequests.length" class="feature-reason">{{ submitReason }}</p>
       <Button type="submit" theme="green" variant="solid" :loading="saving" :disabled="!canSubmit || saving">
-        إسناد {{ selectedNames.length }} طلب
+        {{ __("Assign {0} Request", [selectedNames.length]) }}
       </Button>
       <Button
         v-if="requests.hasNextPage"
@@ -167,7 +168,7 @@ onMounted(loadRequests);
         variant="outline"
         :loading="requests.list.loading"
         @click="loadMoreRequests"
-      >تحميل المزيد</Button>
+      >{{ __("Load More") }}</Button>
     </form>
     <p v-if="error" class="feature-error" role="alert">{{ error }}</p>
   </section>

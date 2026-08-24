@@ -5,6 +5,7 @@ import { Badge, Button } from "frappe-ui";
 import { recordTitle, statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
+import { __ } from "../../../core/i18n.js";
 const props = defineProps({
     title: { type: String, required: true },
     resource: { type: Object, required: true },
@@ -44,24 +45,24 @@ onBeforeUnmount(() => unsubscribe());
     <section class="ops-page">
         <header class="ops-heading">
             <div>
-                <p>تشغيل ساليس</p>
+                <p>{{ __("Salis Go-Live") }}</p>
                 <h2>{{ title }}</h2>
             </div>
             <Button
                 variant="outline"
                 icon="lucide-refresh-cw"
-                label="تحديث"
+                :label="__('Refresh')"
                 :loading="resource.loading"
                 @click="resource.fetch()"
             />
         </header>
-        <PortalSkeleton v-if="resource.loading && !rows.length" :rows="4" :label="`جارٍ تحميل ${title}`" />
+        <PortalSkeleton v-if="resource.loading && !rows.length" :rows="4" :label="__('Loading {0}', [title])" />
         <PortalErrorState
             v-else-if="resource.error"
             class="ops-state ops-state--error"
-            title="تعذر تحميل القائمة"
+            :title="__('Could not load the list')"
             :message="resource.error"
-            fallback="راجع صلاحيات القائمة أو الاتصال ثم حاول مرة أخرى."
+            :fallback="__('Check permissions on the list or your connection, then try again.')"
             @retry="resource.fetch()"
         />
         <div v-else-if="!rows.length" class="ops-state">{{ empty }}</div>

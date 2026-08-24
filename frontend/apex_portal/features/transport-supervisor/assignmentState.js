@@ -1,4 +1,5 @@
 import { humanLabel } from "../../core/displayLabels.js";
+import { __ } from "../../core/i18n.js";
 
 function text(value) {
   return String(value ?? "").trim();
@@ -10,31 +11,31 @@ function timePart(value) {
   return /^\d{2}:\d{2}(?::\d{2})?$/.test(time) ? time : undefined;
 }
 
-export function meaningfulRequestTitle(request, fallback = "طلب نقل") {
+export function meaningfulRequestTitle(request, fallback = __("Transport Request")) {
   const pickup = text(request?.from_location || request?.pickup_point || humanLabel(
     request,
     "accommodation_building",
     "accommodation_building_label",
   ));
   const destination = text(request?.to_location || request?.destination);
-  if (pickup && destination) return `من ${pickup} إلى ${destination}`;
-  if (destination) return `إلى ${destination}`;
+  if (pickup && destination) return __("From {0} to {1}", [pickup, destination]);
+  if (destination) return __("To {0}", [destination]);
   return text(request?.request_type || request?.service_line || request?.requester_name) || fallback;
 }
 
 export function buildTripAssignments(selectedNames, selections, stopKeys) {
   const validStops = new Set(stopKeys || []);
   const names = [...new Set(selectedNames || [])].filter(Boolean);
-  if (!names.length) throw new Error("اختر طلب نقل واحداً على الأقل.");
+  if (!names.length) throw new Error(__("Select at least one transport request."));
   return names.map((name) => {
     const selection = selections?.[name] || {};
     const pickupStop = text(selection.pickup_stop);
     const dropoffStop = text(selection.dropoff_stop);
     if (!validStops.has(pickupStop) || !validStops.has(dropoffStop)) {
-      throw new Error(`اختر نقطة التوقف الفعلية للصعود والنزول للطلب ${name}.`);
+      throw new Error(__("Select the actual pickup and dropoff stop for request {0}.", [name]));
     }
     if (pickupStop === dropoffStop) {
-      throw new Error(`يجب أن تختلف نقطة الصعود عن نقطة النزول للطلب ${name}.`);
+      throw new Error(__("The pickup stop must differ from the dropoff stop for request {0}.", [name]));
     }
     return {
       transport_request: name,
@@ -53,10 +54,10 @@ export function buildAdHocRequest(request, form) {
   ));
   const destination = text(request?.to_location || request?.destination);
   if (!requestName || !pickup || !destination) {
-    throw new Error("أكمل موقع الانطلاق والوجهة في طلب النقل قبل إنشاء رحلة مخصصة.");
+    throw new Error(__("Complete the origin location and destination in the transport request before creating a custom trip."));
   }
   if (!text(form?.trip_date) || !text(form?.planned_start) || !text(form?.planned_end)) {
-    throw new Error("أدخل تاريخ الرحلة ووقت البداية والنهاية.");
+    throw new Error(__("Enter the trip date and the start and end times."));
   }
   return {
     trip: {

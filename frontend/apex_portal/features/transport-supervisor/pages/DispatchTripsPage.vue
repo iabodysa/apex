@@ -2,6 +2,7 @@
 import { Badge, createListResource } from "frappe-ui";
 import { dateTimeLabel, recordTitle, statusLabel, statusOptions, statusTheme } from "../../../core/displayLabels.js";
 import SupervisorCollection from "../components/SupervisorCollection.vue";
+import { __ } from "../../../core/i18n.js";
 
 const trips = createListResource({
   doctype: "Dispatch Trip",
@@ -34,14 +35,14 @@ const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
 
 <template>
   <SupervisorCollection
-    title="الرحلات"
-    description="رحلات التشغيل الحالية مع السائق والمركبة وحالة التنفيذ."
+    :title="__('Trips')"
+    :description="__('Current operating trips with the driver, vehicle, and execution status.')"
     icon="lucide-navigation"
     :resource="trips"
     date-field="trip_date"
     :base-filters="{ status: ['not in', ['Completed', 'Cancelled']] }"
     :status-options="tripStatusOptions"
-    empty="لا توجد رحلات تشغيل حالياً."
+    :empty="__('No operating trips right now.')"
     live-doctype="Dispatch Trip"
     live-event="driver_trip_update"
   >
@@ -50,13 +51,13 @@ const tripStatusOptions = statusOptions(["Planned", "Dispatched"]);
         <li v-for="trip in rows" :key="trip.name">
           <RouterLink :to="`/trips/${encodeURIComponent(trip.name)}`">
             <div class="supervisor-trip-date">
-              <span>موعد الرحلة</span>
-              <strong><bdi>{{ dateTimeLabel(trip.trip_date) || 'غير محدد' }}</bdi></strong>
+              <span>{{ __("Trip Time") }}</span>
+              <strong><bdi>{{ dateTimeLabel(trip.trip_date) || __("Unspecified") }}</bdi></strong>
             </div>
             <div class="record-identity">
-              <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], 'رحلة تشغيل') }}</strong>
+              <strong dir="auto">{{ recordTitle(trip, ['trip_title', 'shift_name'], __('Operational Trip')) }}</strong>
               <bdi class="record-reference" dir="auto" translate="no">{{ trip.name }}</bdi>
-              <span dir="auto">{{ trip.driver_label || 'السائق غير مسند' }} · <bdi translate="no">{{ trip.vehicle_label || 'المركبة غير مسندة' }}</bdi></span>
+              <span dir="auto">{{ trip.driver_label || __("Driver Not Assigned") }} · <bdi translate="no">{{ trip.vehicle_label || __("Vehicle Not Assigned") }}</bdi></span>
               <small v-if="trip.project_label || trip.route_template_label || trip.route_assignment_label" dir="auto">
                 {{ [trip.project_label, trip.route_template_label, trip.route_assignment_label].filter(Boolean).join(' · ') }}
               </small>

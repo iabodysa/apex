@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { createResource } from "frappe-ui";
 import { dateTimeLabel, statusLabel } from "../../../core/displayLabels.js";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
   doc: { type: Object, required: true },
@@ -29,7 +30,7 @@ function displayValue(field) {
   }
   if (field.link) {
     return {
-      label: props.doc?.[field.labelKey] || linkLabels.value[field.key] || field.link.fallback || "سجل مرتبط",
+      label: props.doc?.[field.labelKey] || linkLabels.value[field.key] || field.link.fallback || __("Linked Record"),
       reference: value,
     };
   }
@@ -54,9 +55,9 @@ async function loadLinkLabels(current) {
         fieldname: [field.link.fieldname],
       });
       const data = result?.message || result || {};
-      next[field.key] = data[field.link.fieldname] || field.link.fallback || "سجل مرتبط";
+      next[field.key] = data[field.link.fieldname] || field.link.fallback || __("Linked Record");
     } catch {
-      next[field.key] = field.link.fallback || "تعذّر جلب الاسم";
+      next[field.key] = field.link.fallback || __("Could not fetch the name");
     }
   }
   if (version === linkLoadVersion) linkLabels.value = next;

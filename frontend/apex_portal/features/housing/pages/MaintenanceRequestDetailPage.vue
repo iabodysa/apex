@@ -3,6 +3,7 @@ import { useRoute } from "vue-router";
 import { createDocumentResource } from "frappe-ui";
 import ResourceListPage from "../components/ResourceListPage.vue";
 import { maintenanceIssueLabel, statusLabel } from "../../../core/displayLabels.js";
+import { __ } from "../../../core/i18n.js";
 const route = useRoute();
 const request = createDocumentResource({
   doctype: "Maintenance Request",
@@ -11,17 +12,17 @@ const request = createDocumentResource({
 </script>
 <template>
   <ResourceListPage
-    title="تفاصيل طلب الصيانة"
+    :title="__('Maintenance Request Details')"
     :rows="request.doc ? [request.doc] : []"
     :loading="request.get.loading"
     :error="request.get.error"
     :refresh="request.reload"
     :title-fields="['issue_type']"
-    fallback-title="طلب صيانة"
+    :fallback-title="__('Maintenance Request')"
   >
     <template #row="{ row }">
       <div class="record-identity">
-        <strong dir="auto">{{ maintenanceIssueLabel(row.issue_type) || "طلب صيانة" }}</strong>
+        <strong dir="auto">{{ maintenanceIssueLabel(row.issue_type) || __("Maintenance Request") }}</strong>
         <bdi class="record-reference" dir="auto" translate="no">{{ row.name }}</bdi>
       </div>
       <p v-if="row.issue_description">{{ row.issue_description }}</p>

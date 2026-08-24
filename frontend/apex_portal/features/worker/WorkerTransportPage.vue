@@ -7,6 +7,7 @@ import PortalErrorState from "../../components/PortalErrorState.vue";
 import WorkerBoardingPanel from "./WorkerBoardingPanel.vue";
 import WorkerUpcomingTrips from "./WorkerUpcomingTrips.vue";
 import WorkerPastTrips from "./WorkerPastTrips.vue";
+import { __ } from "../../core/i18n.js";
 
 const gateway = inject("workerGateway");
 const subscribe = inject("portalSubscribe", () => () => {});
@@ -109,29 +110,29 @@ onBeforeUnmount(stopLive);
   <section class="feature-page journey-page" :aria-busy="state === 'loading'">
     <header class="feature-page__heading journey-heading">
       <div>
-        <p class="feature-page__eyebrow">رحلات مسار</p>
-        <h2>رحلتك من الباب إلى المقعد</h2>
-        <p>تابع وصول الحافلة، اطلب من السائق الانتظار، ثم أكد صعودك.</p>
+        <p class="feature-page__eyebrow">{{ __("Masar trips") }}</p>
+        <h2>{{ __("Your trip from the door to the seat") }}</h2>
+        <p>{{ __("Track the bus arrival, ask the driver to wait, then confirm your boarding.") }}</p>
       </div>
     </header>
 
-    <PortalSkeleton v-if="state === 'loading'" :rows="2" label="جارٍ تحميل الرحلة" />
-    <PortalErrorState v-else-if="state === 'denied'" title="تعذّر فتح الرحلات" :message="error" fallback="هذا القسم غير متاح لحسابك." @retry="load()" />
-    <PortalErrorState v-else-if="state === 'error'" title="تعذّر تحميل الرحلات" :message="error" fallback="تعذّر تحميل الرحلات." @retry="load()" />
+    <PortalSkeleton v-if="state === 'loading'" :rows="2" :label="__('Loading the trip')" />
+    <PortalErrorState v-else-if="state === 'denied'" :title="__('Could not open the trips')" :message="error" :fallback="__('This section is not available for your account.')" @retry="load()" />
+    <PortalErrorState v-else-if="state === 'error'" :title="__('Could not load the trips')" :message="error" :fallback="__('Could not load the trips.')" @retry="load()" />
     <div v-else-if="state === 'empty'" class="feature-state">
-      <strong>يومك هادئ</strong>
-      <p>لا توجد رحلة مجدولة لك حالياً.</p>
+      <strong>{{ __("Your day is quiet") }}</strong>
+      <p>{{ __("There is no trip scheduled for you right now.") }}</p>
     </div>
 
     <template v-else>
-      <ErrorMessage v-if="error" :message="safeErrorMessage(error, 'تعذّر تنفيذ الإجراء.')" />
+      <ErrorMessage v-if="error" :message="safeErrorMessage(error, __('Could not carry out the action.'))" />
       <WorkerBoardingPanel
         v-if="boarding?.dispatch_trip"
         :boarding="boarding"
         :now="now"
         :busy="busy"
-        @wait="run('wait', gateway.requestWait, 'وصل طلب الانتظار إلى السائق')"
-        @confirm="run('boarded', gateway.claimBoarded, 'تم تسجيل صعودك')"
+        @wait="run('wait', gateway.requestWait, __('The wait request reached the driver'))"
+        @confirm="run('boarded', gateway.claimBoarded, __('Your boarding has been recorded'))"
       />
       <WorkerUpcomingTrips :trips="trips" @error="error = $event" />
       <WorkerPastTrips :trips="pastTrips" @error="error = $event" @rated="markRated" />

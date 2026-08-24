@@ -3,6 +3,7 @@ import { computed, inject } from "vue";
 import { useRoute } from "vue-router";
 import { __ } from "../core/i18n.js";
 import PortalPushPrompt from "../components/PortalPushPrompt.vue";
+import PortalUpdatePrompt from "../components/PortalUpdatePrompt.vue";
 
 const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
 const primaryLimit = 4;
@@ -43,6 +44,7 @@ const overflowActive = computed(() => (
       <div class="mobile-shell__actions"><slot name="actions" /></div>
     </header>
     <main id="portal-content" class="mobile-shell__main" tabindex="-1">
+      <PortalUpdatePrompt />
       <PortalPushPrompt />
       <slot />
     </main>
@@ -67,7 +69,7 @@ const overflowActive = computed(() => (
       <details v-if="overflowNavigation.length" class="mobile-shell__more">
         <summary class="portal-nav-link" :aria-current="overflowActive ? 'page' : undefined">
           <span class="portal-nav-icon lucide-more-horizontal" aria-hidden="true" />
-          <span>المزيد</span>
+          <span>{{ __("More") }}</span>
         </summary>
         <div class="mobile-shell__more-menu">
           <RouterLink

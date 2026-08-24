@@ -3,6 +3,7 @@ import { computed, reactive, watch } from "vue";
 import { Button, FormControl, createResource } from "frappe-ui";
 import { arrivalRegistrationParams } from "../arrivalFlow.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
+import { __ } from "../../../core/i18n.js";
 
 const props = defineProps({
   manifest: { type: Object, default: null },
@@ -25,8 +26,8 @@ watch(() => props.manifest, (row) => {
 // `required` on the fields never fires while the submit button is disabled, so the clerk gets no
 // native prompt either. This says which field is still holding the registration.
 const blockedReason = computed(() => {
-  if (!form.worker_name) return "اكتب اسم العامل لتفعيل التسجيل.";
-  if (!form.passport_number) return "اكتب رقم الجواز لتفعيل التسجيل.";
+  if (!form.worker_name) return __("Type the worker's name to enable registration.");
+  if (!form.passport_number) return __("Type the passport number to enable registration.");
   return "";
 });
 
@@ -39,21 +40,21 @@ async function addTemporary() {
     Object.assign(form, { worker_name: "", passport_number: "", nationality: "", cell_number: "" });
     emit("registered", result);
   } catch (reason) {
-    emit("error", safeErrorMessage(reason, "تعذّر تسجيل العامل."));
+    emit("error", safeErrorMessage(reason, __("Could not register the worker.")));
   }
 }
 </script>
 
 <template>
   <form class="arrival-panel arrival-form" @submit.prevent="addTemporary">
-    <div class="arrival-panel__title"><h3>{{ manifest ? `تسجيل ${manifest.worker_name}` : 'إضافة عامل غير موجود في القائمة' }}</h3><Button v-if="manifest" type="button" variant="ghost" @click="$emit('cancel')">إلغاء</Button></div>
+    <div class="arrival-panel__title"><h3>{{ manifest ? __("Register {0}", [manifest.worker_name]) : __("Add a worker not in the list") }}</h3><Button v-if="manifest" type="button" variant="ghost" @click="$emit('cancel')">{{ __("Cancel") }}</Button></div>
     <div class="arrival-form__grid">
-      <FormControl v-model="form.worker_name" label="اسم العامل" required />
-      <FormControl v-model="form.passport_number" label="رقم الجواز" required />
-      <FormControl v-model="form.nationality" label="الجنسية" />
-      <FormControl v-model="form.cell_number" label="رقم الجوال" />
+      <FormControl v-model="form.worker_name" :label="__('Worker Name')" required />
+      <FormControl v-model="form.passport_number" :label="__('Passport Number')" required />
+      <FormControl v-model="form.nationality" :label="__('Nationality')" />
+      <FormControl v-model="form.cell_number" :label="__('Mobile Number')" />
     </div>
     <p v-if="blockedReason" class="feature-state">{{ blockedReason }}</p>
-    <Button type="submit" theme="green" variant="solid" :loading="register.loading" :disabled="!form.worker_name || !form.passport_number">تسجيل العامل</Button>
+    <Button type="submit" theme="green" variant="solid" :loading="register.loading" :disabled="!form.worker_name || !form.passport_number">{{ __("Register Worker") }}</Button>
   </form>
 </template>
