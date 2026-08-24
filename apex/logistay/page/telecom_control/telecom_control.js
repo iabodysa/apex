@@ -9,8 +9,6 @@ frappe.pages['telecom-control'].on_page_load = function (wrapper) {
 	wrapper.telecom_control = new TelecomControl(page);
 };
 
-// frappe.Chart needs real values, not var() strings, so the desk scale is read per render.
-// Bidi moves a leading + to the end of an LTR number inside an Arabic page.
 function TC_LTR(value) {
 	return $('<bdi dir="ltr"></bdi>').text(value == null ? '' : String(value));
 }
@@ -47,8 +45,6 @@ function _tc_cell_text(value) {
 	return frappe.utils.escape_html(value == null ? '' : String(value));
 }
 
-// Mobile numbers are LTR digits; the bdi wrap keeps them left-to-right inside an
-// Arabic row, matching the wrap TC_LTR already applies to the same field in the drawer.
 function _tc_ltr_cell(value) {
 	return `<bdi dir="ltr">${_tc_cell_text(value)}</bdi>`;
 }
@@ -77,19 +73,12 @@ class TelecomControl {
 		this._build_skeleton();
 		this.page.set_primary_action(__('Refresh'), () => this.refresh(), 'refresh');
 		this.ready.then(() => {
-			/* frappe.ui.form.make_control fires df.onchange asynchronously (via
-			   frappe.run_serially) even for the control's own construction-time
-			   set_value(), arriving well after this constructor returns. Until this
-			   flag flips, _on_filter_change ignores that echo instead of persisting
-			   an empty filter set over whatever this.ready is about to restore. */
 			this._filters_ready = true;
 			this._sync_controls();
 			this.refresh();
 		});
 	}
 
-	// A deep link (frappe.route_options) wins over the saved filter set; either way
-	// `this.ready` gates the first refresh and the first control sync until it resolves.
 	_restore_filters() {
 		this.filters = {};
 		const opts = frappe.route_options || {};
@@ -120,8 +109,6 @@ class TelecomControl {
 		});
 	}
 
-	// Saves the active filter set to this user's settings and pushes it into the URL so
-	// the page's current view can be bookmarked or shared.
 	_persist_filters() {
 		const active = {};
 		TC_ROUTE_FILTERS.forEach((k) => {
@@ -142,9 +129,6 @@ class TelecomControl {
 		this.$tableWrap = $('<div class="tc-table-wrap"></div>').appendTo(this.$root);
 		this.$pager = $('<div class="tc-pager"></div>').appendTo(this.$root);
 		this.$empty = $('<div class="tc-empty"></div>').appendTo(this.$root).hide();
-		/* The overlay and the drawer sit on <body> so the fixed drawer is not trapped in
-		   the page's stacking context; both carry the page root class so their rules in
-		   telecom_control.css can be scoped like every other rule in that file. */
 		this.$backdrop = $('<div class="telecom-control tc-backdrop"></div>').appendTo(document.body);
 		this.$drawer = $('<div class="telecom-control tc-drawer" role="dialog" aria-modal="true"></div>')
 			.attr('aria-label', __('SIM details'))
@@ -307,9 +291,6 @@ class TelecomControl {
 			this.$pager.empty();
 			return;
 		}
-		// Custodian has no single backing field on SIM Card — it is the employee name,
-		// falling back to the project, falling back to "Unassigned" — so it is resolved
-		// once per row before the row reaches the grid, same as every other column value.
 		rows.forEach((row) => {
 			row.custodian_display = row.custodian_name || row.current_project || __('Unassigned');
 		});
@@ -326,16 +307,12 @@ class TelecomControl {
 			layout: 'fluid',
 			serialNoColumn: false,
 			checkboxColumn: false,
-			/* The filter row ships an untranslatable English title on every box, and this
-			   page already filters server-side within the operator's company scope. */
 			inlineFilters: false,
 			cellHeight: 35,
 			language: frappe.boot.lang,
 			translations: frappe.utils.datatable.get_translations(),
 			direction: frappe.utils.is_rtl() ? 'rtl' : 'ltr',
 		});
-		/* The row is read from the data index stamped on the cell, not from its rendered
-		   position: sorting a column reorders the view and leaves that index alone. */
 		$mount.on('click', '.dt-scrollable .dt-cell', (e) => {
 			const row = this.table_rows[cint($(e.currentTarget).attr('data-row-index'))];
 			if (row) this._open_drawer(row.name);
@@ -343,8 +320,6 @@ class TelecomControl {
 		this._render_pager(payload);
 	}
 
-	/* The table registers listeners on document, released only by destroy(); emptying the
-	   wrap around it leaks one pair per render. */
 	_clear_grid() {
 		if (this.datatable) {
 			this.datatable.destroy();

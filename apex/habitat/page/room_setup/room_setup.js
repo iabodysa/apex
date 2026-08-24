@@ -15,9 +15,6 @@ const RS_ROOM_TYPES = [
 const RS_FLOOR_TYPES = ["Ground", "Middle", "Roof", "Basement"];
 
 
-/* `doc` is the plain floor/room object this page already keeps in memory. A control built
-   without a frm writes straight back into it (base_control.set_model_value), so the state
-   stays in one place and no change handler has to copy the value across. */
 function rs_control(parent, df, doc) {
 	return frappe.ui.form.make_control({
 		df: Object.assign({ input_class: "input-sm" }, df),
@@ -126,7 +123,6 @@ class RoomSetup {
 			{
 				fieldtype: "Int",
 				fieldname: "rooms_per_floor",
-				// A floor with no rooms cannot be laid out, so an empty or zero entry reads as one.
 				onchange: () => (f.rooms_per_floor = cint(f.rooms_per_floor) || 1),
 			},
 			f
@@ -304,8 +300,6 @@ class RoomSetup {
 			})
 			.then((r) => {
 				frappe.dom.unfreeze();
-				// frappe.call resolves its promise for a server exception too, carrying it in
-				// r.exc. Announcing success here told the operator that rooms exist which do not.
 				if (r && r.exc) return;
 				frappe.show_alert({ message: __("Rooms and beds created."), indicator: "green" });
 				frappe.set_route("Form", "Building", this.building);

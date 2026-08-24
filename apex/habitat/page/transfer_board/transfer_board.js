@@ -26,8 +26,6 @@ class TransferBoard {
 		this.$root = $('<div class="tb-board"></div>').appendTo(this.page.main);
 
 		$('<div class="tb-help text-muted"></div>')
-			// The tap is named first because HTML5 drag-and-drop does not fire on touch at
-			// all, so on a tablet the drag this used to advertise is not a gesture that exists.
 			.text(
 				__(
 					"Tap an occupied bed, then tap an empty bed to transfer the resident. With a mouse you can drag instead."
@@ -147,8 +145,6 @@ class TransferBoard {
 		const pane = this.panes[side];
 		const $grid = pane.$grid;
 		const data = pane.data;
-		// The cards about to be discarded include the selected one. Dropping the selection
-		// with them is what stops a lit bed from outliving the resident behind it.
 		this._set_selection(null);
 		$grid.empty();
 
@@ -222,8 +218,6 @@ class TransferBoard {
 		}
 
 		if (is_available) {
-			// The drop hover carries its OWN class. Sharing `active` with the selection meant
-			// a dragleave cleared the selected bed and a new selection cleared a hover.
 			$card.on("dragover", (e) => {
 				e.preventDefault();
 				e.originalEvent.dataTransfer.dropEffect = "move";
@@ -293,10 +287,6 @@ class TransferBoard {
 		this._begin_transfer(source_bed, bed, building);
 	}
 
-	/* The ONE writer of the transfer selection. The model was assigned from five places and
-	   the highlight painted from a sixth, so a bed could stay lit with nothing behind it and
-	   the next tap would move a resident the supervisor had not chosen. The highlight is
-	   derived here from the model, never set beside it. */
 	_set_selection(ctx) {
 		this.selected_source = ctx || null;
 		if (!this.$root) return;

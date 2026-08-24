@@ -10,10 +10,6 @@ function _renderFloorLayout(frm) {
 			if (r.exc || !r.message) return;
 			var data = r.message;
 
-			/* building.css is injected into the whole app by script_manager.js the first
-			   time a Building form opens, not into this field. The root class below is
-			   what every rule in that file is held under, so it cannot restyle any
-			   other route. */
 			var wrapper = frm.get_field("floor_layout_html").$wrapper.addClass("apex-building-layout");
 			wrapper.empty();
 
@@ -45,8 +41,6 @@ function _renderFloorLayout(frm) {
 				(floor.rooms || []).forEach(function (room) {
 					var occ = (room.current_occupancy != null ? room.current_occupancy : "—");
 					var cap = (room.bed_capacity != null ? room.bed_capacity : "—");
-					/* addClass/attr set the DOM directly, so neither the colour nor the
-					   room number is parsed as markup on its way in. */
 					var tile = $('<div class="apex-room-tile"></div>')
 						.addClass("color-" + (room.room_color || "grey"))
 						.attr("title", room.room_number || room.name);

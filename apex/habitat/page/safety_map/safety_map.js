@@ -61,8 +61,6 @@ class SafetyMap {
 
 	refresh() {
 		if (!this.building) return;
-		// The building this response belongs to. Switching buildings quickly could land the
-		// OLDER response last and paint the previous building's map under the new name.
 		const requested = this.building;
 		this._render_loading();
 		frappe.call({

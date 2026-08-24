@@ -176,9 +176,6 @@ class FleetControl {
 		$sel.empty();
 		$('<option value=""></option>').text(__("All")).appendTo($sel);
 		(values || []).forEach((v) => {
-			// The value attribute stays raw — the server matches it against the stored
-			// Select value — while the text a supervisor reads is translated, the same
-			// way the cards beside this dropdown already render it.
 			const $o = $("<option></option>").attr("value", v).text(__(v));
 			if (v === current) $o.attr("selected", "selected");
 			$o.appendTo($sel);
@@ -669,24 +666,18 @@ class FleetControl {
 			layout: "fluid",
 			serialNoColumn: false,
 			checkboxColumn: false,
-			/* The filter row ships an untranslatable English title on every box, and the
-			   page already filters server-side and inside the operator's project scope. */
 			inlineFilters: false,
 			cellHeight: 35,
 			language: frappe.boot.lang,
 			translations: frappe.utils.datatable.get_translations(),
 			direction: frappe.utils.is_rtl() ? "rtl" : "ltr",
 		});
-		/* The row is read from the data index stamped on the cell, not from its rendered
-		   position: sorting a column reorders the view and leaves that index alone. */
 		$mount.on("click", ".dt-scrollable .dt-cell", (e) => {
 			const v = this.table_rows[cint($(e.currentTarget).attr("data-row-index"))];
 			if (v) this.open_detail(v);
 		});
 	}
 
-	/* The table registers listeners on document, released only by destroy(); emptying the
-	   grid around it leaks one pair per render. */
 	_clear_grid() {
 		if (this.datatable) {
 			this.datatable.destroy();

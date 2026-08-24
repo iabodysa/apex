@@ -24,9 +24,6 @@ class CustodyKiosk {
 		this._reset_return_cart();
 	}
 
-	/* The one place the return cart is written. It was assigned and deleted from eight
-	   sites, including a render function, so what was on screen and what would be sent
-	   could disagree with no single line to read. */
 	_write_return_cart(next) {
 		this.return_cart = next;
 	}
@@ -35,10 +32,6 @@ class CustodyKiosk {
 		this._write_return_cart({});
 	}
 
-	/* Switching the worker type drops EVERYTHING that belonged to the previous worker.
-	   Clearing only the return cart left a fully built issue cart on screen with the party
-	   field blank: pick the next worker, press Issue, and the first worker's articles are
-	   issued to the second. The server cannot catch it — the pair it receives is valid. */
 	_reset_for_party_change() {
 		this.cart = {};
 		this._reset_return_cart();
@@ -384,9 +377,6 @@ class CustodyKiosk {
 		$('<div class="ck-empty text-muted"></div>').text(message).appendTo(this.$tiles);
 	}
 
-	/* The held list is cleared by the caller that knows it is gone, not here: a render
-	   function that writes the model leaves the screen and the model disagreeing about
-	   which of them decided. */
 	_render_held_empty(message) {
 		this._render_empty(message);
 	}
@@ -600,9 +590,6 @@ class CustodyKiosk {
 		this._render_cart();
 	}
 
-	/* The cart names the worker AND the type it will be committed against. Two workers can
-	   share a name, one an Employee and one a Temporary Worker, and the type lived only in a
-	   toolbar field at the far end of the screen from the Issue button. */
 	_render_cart_header() {
 		const who = this.party
 			? this.party + " — " + __(this.party_type)
@@ -763,9 +750,6 @@ class CustodyKiosk {
 
 	_submit_issue(items, signature) {
 		this.$action_btn.prop("disabled", true);
-		// One token per cart submission, reused if the operator retries a request that
-		// timed out: the server returns the issue it already created rather than
-		// decrementing the building store a second time.
 		this._issue_token = this._issue_token || frappe.utils.get_random(24);
 		frappe.call({
 			method: "apex.habitat.api.custody_kiosk.issue_cart",

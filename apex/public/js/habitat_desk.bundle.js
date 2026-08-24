@@ -1,33 +1,15 @@
 // Copyright (c) 2026, afmcoltd
 frappe.provide("apex.habitat");
 
-/**
- * Map a bed colour to the framework's own indicator name.
- *
- * The desk pages that paint beds hold no copy of this table, so recolouring a bed state
- * is one edit and cannot drift between them.
- */
 apex.habitat.indicator_color = function (bed_color) {
 	return { green: "green", red: "red", amber: "orange", grey: "gray" }[bed_color] || "gray";
 };
 
-/**
- * The class list for one bed card, from its colour.
- *
- * The colours themselves live in habitat_desk.bundle.css; an unknown colour falls back to
- * the base class alone, which paints a neutral card rather than nothing.
- */
 apex.habitat.bed_class = function (bed_color) {
 	const known = ["green", "red", "amber", "grey"].includes(bed_color);
 	return known ? `apex-bed apex-bed--${bed_color}` : "apex-bed";
 };
 
-/**
- * Open the quick check-out dialog for one bed and post the checkout.
- *
- * Written out in full on both desks, so one change landed on only one of them. on_busy
- * is the one thing the copies did differently.
- */
 apex.habitat.custody_block_dialog = function (assignment) {
 	const d = new frappe.ui.Dialog({
 		title: __("Quick Check-out"),

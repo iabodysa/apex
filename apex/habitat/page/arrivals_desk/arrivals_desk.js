@@ -20,9 +20,6 @@ class ArrivalsDesk {
 		this.custodyIssued = false;
 		this.cardIssued = false;
 		this.transportStarted = false;
-		/* Held as the promise, not as the flag it resolves to. A clerk who opens the register
-		   modal before this call lands read `false` and got no passport scanner at all, with
-		   nothing to retry — and the faster the clerk, the more likely it was. */
 		this.mrzOcrEnabled = frappe
 			.xcall('apex.habitat.api.arrivals_desk.get_intake_settings')
 			.then((r) => !!(r && r.enable_passport_mrz_ocr))
@@ -628,9 +625,6 @@ class ArrivalsDesk {
 		});
 	}
 
-	/* The highlight is derived from the selection, so the two places that drop the worker
-	   cannot leave a row lit behind them. A lit row with nothing selected tells the clerk
-	   they are still working on someone they have already housed. */
 	_clear_deck() {
 		this.cart = [];
 		this.custodyIssued = false;
@@ -646,12 +640,6 @@ class ArrivalsDesk {
 		if (clearPane && this.$active) this.$active.empty();
 	}
 
-	/* The board is re-read from the server after a housing, never patched in place.
-	   The patch that used to live here built an occupant out of the three fields the clerk
-	   had typed, so the bed it lit carried no has_custody and no assignment. _open_check_out
-	   reads exactly those, which meant the custody block could not fire for anyone housed in
-	   the current session: the clerk checked them out and the kit left with them. A round
-	   trip is slower on a tablet, and that is the trade. */
 	_reload_after_housing() {
 		if (!this.building) return;
 		const requested = this.building;
@@ -902,9 +890,6 @@ class ArrivalsDesk {
 
 		$issue.on('click', () => {
 			if (!c._custody_lines.length) return;
-			// One token per cart submission, reused if the operator retries a request that
-			// timed out: the server returns the issue it already created rather than
-			// decrementing the building store a second time.
 			c._issue_token = c._issue_token || frappe.utils.get_random(24);
 			frappe.call({
 				method: 'apex.habitat.api.custody_kiosk.issue_cart',
@@ -1053,8 +1038,6 @@ class ArrivalsDesk {
 			frappe.show_alert({ message: __('Allow pop-ups to print the slip.'), indicator: 'orange' });
 			return null;
 		}
-		/* The print window is its own document — the Desk page stylesheet never reaches it,
-		   so the one rule it needs travels with it. */
 		w.document.write(
 			`<html><head><title>${frappe.utils.escape_html(title || '')}</title>` +
 				'<style>.ax-print-break{page-break-after:always}</style></head>' +
@@ -1152,9 +1135,6 @@ class ArrivalsDesk {
 		}
 	}
 
-	/* The Transport stage is marked from the SAVE, not from the tap. `frappe.new_doc` only
-	   opens a draft, so marking it beside that call told the clerk transport was arranged
-	   for a form they might close without saving. */
 	_watch_transport_saved() {
 		frappe.ui.form.on('Transport Request', {
 			after_save: (frm) => {

@@ -1,12 +1,6 @@
 // Copyright (c) 2026, afmcoltd
 frappe.provide("apex.web_form");
 
-/**
- * Copy a token from the URL into the form field that carries it.
- *
- * A worker reaches these forms by scanning a poster, so the token is in the link and
- * never typed. Two forms did this from their own copy.
- */
 apex.web_form.adopt_url_token = function (fieldname) {
 	const token = frappe.utils.get_url_arg("token");
 	if (token) {
@@ -14,12 +8,6 @@ apex.web_form.adopt_url_token = function (fieldname) {
 	}
 };
 
-/**
- * Show the anonymous tracking code after a guest submits, once.
- *
- * Written out in full on two forms, differing only in DOM id and heading. A guest has
- * no desk account, so this code is their only handle on what they filed.
- */
 apex.web_form.show_tracking_code = function (doc, options) {
 	const code = doc && doc.anonymous_tracking_code;
 	if (!code) {
@@ -42,8 +30,6 @@ apex.web_form.show_tracking_code = function (doc, options) {
 	const codeEl = document.createElement("code");
 	codeEl.style.cssText =
 		"font-size:17px;letter-spacing:3px;font-weight:bold;margin-top:5px;display:inline-block;";
-	/* textContent assigns a text node and never parses markup, so escaping here
-	   does not protect anything — it just prints the entity. */
 	codeEl.textContent = code;
 
 	const hint = document.createElement("small");

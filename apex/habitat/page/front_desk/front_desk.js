@@ -467,8 +467,6 @@ class FrontDesk {
 		const $card = $(
 			`<div class="fd-bed ${apex.habitat.bed_class(bed.bed_color)}" tabindex="0" role="button"></div>`
 		);
-		// The bed's own name on the element, so a busy state can find the card that is on
-		// screen NOW rather than one a refresh has already replaced.
 		$card.attr("data-bed", bed.bed);
 		$('<bdi class="fd-bed-code" dir="ltr"></bdi>').text(bed.bed_code || bed.bed).appendTo($card);
 
@@ -498,9 +496,6 @@ class FrontDesk {
 		return $card;
 	}
 
-	/* Takes the bed's NAME, not a jQuery handle. A refresh replaces every card, so a handle
-	   captured before a call points at an element that is no longer on the page — the busy
-	   state was being written to a detached node and the operator saw nothing. */
 	_set_bed_updating(bed, busy) {
 		const name = bed && bed.jquery ? bed.attr("data-bed") : bed;
 		if (!name) return;
