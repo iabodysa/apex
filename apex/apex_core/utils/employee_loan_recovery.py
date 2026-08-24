@@ -74,6 +74,14 @@ def _ensure_recovery_loan_account(company: str, fieldname: str, account_type: st
     ``lending`` activate a Loan's repayment schedule (see the module docstring), and
     reusing whatever real bank account a company already has of that type would book a
     damage claim's paper disbursement through the account real cash moves through.
+
+    ``ignore_permissions`` on the insert is PARKED, not accepted: the caller is a fleet
+    or custody supervisor submitting a Vehicle Incident, and the row created is an
+    erpnext Account. Granting that role create on Account would let it build the chart of
+    accounts from the desk, which is a far larger grant than "raise the one account this
+    recovery needs". Frappe has no create-only-through-this-path permission, so the flag
+    stays until the owner rules on it. Remove it without that ruling and every incident
+    on a company missing these accounts fails at submit.
     """
     label = fieldname.replace("_", " ").title()
     account_name = f"{RECOVERY_LOAN_PRODUCT_NAME} {label}"
@@ -112,6 +120,12 @@ def ensure_recovery_loan_product(company: str) -> str | None:
     submittable damage claim would make the operational document unsubmittable on a
     fresh site. ``product_code`` (the Loan Product's own name) is scoped by the
     company's abbreviation so more than one company can each raise this Loan Product.
+
+    ``ignore_permissions`` on the insert is PARKED, not accepted, for the same reason as
+    the accounts above: the caller is a fleet or custody supervisor, and Loan Product is
+    a lending master. Granting that role create on it would let it define lending terms
+    from the desk. Remove the flag without a ruling and the first damage claim on a
+    company fails at submit.
     """
     abbr = frappe.db.get_value("Company", company, "abbr") or company
     product_code = f"{RECOVERY_LOAN_PRODUCT_NAME} - {abbr}"
@@ -172,6 +186,14 @@ def raise_recovery_loan(
     unconditionally and only defers the deduction), this defers the receivable itself;
     the incident stays the event of record and ``recovery_loan`` stays blank until
     payroll is configured for the employee.
+
+    Both ``ignore_permissions`` inserts below — the Loan and its Loan Repayment Schedule
+    — are PARKED, not accepted. The caller is the fleet or custody supervisor who
+    submitted the incident, and the row is an hrms payroll record. A create DocPerm on
+    Loan would let that role raise a loan against any employee straight from the desk,
+    with none of the incident validation this function performs first, so the grant is
+    strictly larger than the need. Frappe cannot express create-only-through-this-path.
+    Remove the flags without a ruling and every damage recovery fails at submit.
     """
     logger = frappe.logger()
     amount = flt(amount)

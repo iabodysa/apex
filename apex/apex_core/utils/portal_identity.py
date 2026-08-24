@@ -534,6 +534,14 @@ def close_capacity_desk_access(audience: str) -> None:
     user holding the role, and it fires only when ``desk_access``'s VALUE changes on a
     document save -- a raw column write would leave the capacity user's stored
     ``user_type`` stale.
+
+    ``ignore_permissions`` on that save is PARKED, not accepted. This runs from an
+    Employee and Salis Driver ``on_change`` hook, so the actor is whichever HR or fleet
+    user saved that record, and the row written is a Role — the document that defines
+    privilege for the whole site. A write DocPerm on Role would let those users edit any
+    role's permissions, not only this one field on these two roles, and Frappe cannot
+    scope a grant to one field of two named records. Remove the flag without a ruling and
+    the capacity roles drift back to desk access on the next Employee save.
     """
     _require_audience(audience)
     for role in _CAPACITY_DESK_ROLES[audience]:
