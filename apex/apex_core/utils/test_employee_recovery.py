@@ -16,6 +16,8 @@ proved directly on it. The paths that need a real Employee Advance are asserted 
 the validator that guards them.
 """
 
+import pathlib
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -87,8 +89,6 @@ class TestTheRetiredDoctypesAreGone(FrappeTestCase):
 
     def test_no_source_file_references_them_outside_the_migration(self):
         """A patch MUST still name them — it is what removes them. Nothing else may."""
-        import pathlib
-
         root = pathlib.Path(frappe.get_app_path("apex"))
         offenders = [
             str(p)

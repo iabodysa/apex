@@ -11,6 +11,7 @@ same bench, and the mismatch surfaces only once a ledger row carries it.
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from apex.apex_core.setup import demo, setup_wizard
 from apex.apex_core.utils import company as company_module
 from apex.apex_core.utils.company import resolve_company_or_any
 
@@ -62,7 +63,5 @@ class TestResolveCompanyOrAny(FrappeTestCase):
 
     def test_both_seed_callers_enter_through_this_one_resolver(self):
         """A second copy in either caller is the defect this guards."""
-        from apex.apex_core.setup import demo, setup_wizard
-
         self.assertIs(demo.resolve_company_or_any, resolve_company_or_any)
         self.assertIs(setup_wizard.resolve_company_or_any, resolve_company_or_any)

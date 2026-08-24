@@ -17,7 +17,10 @@ from apex.apex_core.utils.permission_scope import (
     render_column,
     render_dual,
     render_fragment,
+    resolve_user,
 )
+from apex.habitat import permissions as habitat
+from apex.salis import permissions as salis
 
 
 class TestScopeFragments(FrappeTestCase):
@@ -51,9 +54,6 @@ class TestScopeFragments(FrappeTestCase):
 
     def test_each_module_keeps_its_own_strategy_table(self):
         """The dispatcher takes the table, so Habitat's keys never resolve Salis's."""
-        from apex.habitat import permissions as habitat
-        from apex.salis import permissions as salis
-
         self.assertIn("column", habitat.FRAGMENTS)
         self.assertIn("column", salis.FRAGMENTS)
         self.assertEqual(
@@ -71,12 +71,8 @@ class TestResolveUser(FrappeTestCase):
     """The one answer to "who is asking" that every scope resolver enters through."""
 
     def test_none_falls_back_to_the_session_user(self):
-        from apex.apex_core.utils.permission_scope import resolve_user
-
         self.assertEqual(resolve_user(None), frappe.session.user)
         self.assertEqual(resolve_user(), frappe.session.user)
 
     def test_an_explicit_user_is_returned_unchanged(self):
-        from apex.apex_core.utils.permission_scope import resolve_user
-
         self.assertEqual(resolve_user("someone@example.com"), "someone@example.com")
