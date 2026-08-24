@@ -44,10 +44,6 @@ class MaintenanceInspectionReport(Document):
         frappe.db.set_value("Facility Asset", self.facility_asset, "last_inspection_date", latest)
 
 
-def validate(doc, method=None):
-    """Blocks saving a Maintenance Inspection Report that records no findings."""
-
-
 def before_cancel(doc, method=None):
     """Blocks cancelling a Maintenance Inspection Report without a stated cancellation reason."""
     if not doc.cancellation_reason:
