@@ -472,7 +472,15 @@ def _report(deleted, residue):
 
 def _create_demo_users():
     """The owner key and the scoped persona. Created as the installing user, so
-    they are never swept by the owner filter and are deleted explicitly instead."""
+    they are never swept by the owner filter and are deleted explicitly instead.
+
+    Runs before ``build_demo_data`` switches to ``DEMO_OWNER`` below, so the acting
+    user is still whoever completed the setup wizard's demo checkbox — the only
+    account that could have, since ``setup_demo`` fires from ``setup_wizard_complete``,
+    gated behind ``frappe.is_setup_complete()``
+    (frappe/desk/page/setup_wizard/setup_wizard.py:54-55) — Administrator, who already
+    carries every permission (frappe/permissions.py:107,273,506).
+    """
     for email, full_name, roles in (
         (DEMO_OWNER, "Fahad Al-Dosari", ("System Manager",)),
         (DEMO_SUPERVISOR, "Turki Al-Zahrani", ("Resident Supervisor",)),
@@ -489,7 +497,7 @@ def _create_demo_users():
                 "first_name": full_name,
                 "send_welcome_email": 0,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         installed = [
             role for role in roles if frappe.db.exists("Role", {"name": role})
         ]
@@ -760,6 +768,12 @@ def _grant_demo_scope(context):
     This is what a real deployment does for a scoped supervisor, so granting it here
     exercises the scoping rather than stepping around it: the persona sees the demo
     project and nothing else, which is the behaviour worth demonstrating.
+
+    Runs under ``frappe.set_user(DEMO_OWNER)`` (``build_demo_data``), and ``DEMO_OWNER``
+    holds System Manager, which already carries create on User Permission — granting
+    a permission scope to someone ELSE is an ordinary create, not a right the grantor
+    needs to hold themselves (``user_permission.py`` validates only for duplicates and
+    the record's own shape).
     """
     grants = (
         (DEMO_FLEET_SUPERVISOR, "Project", context["project"]),
@@ -781,7 +795,7 @@ def _grant_demo_scope(context):
                 "for_value": value,
                 "apply_to_all_doctypes": 1,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
 
 
 def _build_driver(context):
