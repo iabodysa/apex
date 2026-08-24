@@ -149,6 +149,34 @@ class TestRaiseRecoveryLoan(FrappeTestCase):
         self.assertEqual(loan.monthly_repayment_amount, expected_cap)
         self.assertLess(loan.monthly_repayment_amount, 5000)
 
+    def test_the_operators_own_narrower_cap_is_honoured(self):
+        """Salis Settings carries the share this site chose to take, inside the statutory
+        ceiling. Remove ``_cap_percent`` from the sizing call and this fails: the installment
+        comes back at the statutory half of gross pay instead of the configured quarter."""
+        settings = frappe.get_single("Salis Settings")
+        restore = settings.employee_advance_recovery_max_percent
+        settings.employee_advance_recovery_max_percent = 25
+        settings.save(ignore_permissions=True)
+        self.addCleanup(frappe.db.set_single_value, "Salis Settings", "employee_advance_recovery_max_percent", restore)
+
+        employee, _structure = _payroll_employee("apex.loan.narrow@apex.test", base=1000)
+        preview, _assignment = _salary_preview(employee, nowdate())
+        narrowed = round(preview.gross_pay * 25 / 100.0, 2)
+        statutory = round(preview.gross_pay * MAX_RECOVERY_PERCENT / 100.0, 2)
+
+        loan_name = raise_recovery_loan(
+            source_doctype="Vehicle Incident",
+            source_name="VI-NARROW-0001",
+            employee=employee,
+            amount=5000,
+            purpose="test",
+            company=_COMPANY,
+            agreed_installment=5000,
+        )
+        loan = frappe.get_doc("Loan", loan_name)
+        self.assertEqual(loan.monthly_repayment_amount, narrowed)
+        self.assertLess(narrowed, statutory)
+
     def test_an_installment_inside_the_cap_is_taken_as_agreed(self):
         employee, _structure = _payroll_employee("apex.loan.agreed@apex.test", base=8000)
         loan_name = raise_recovery_loan(

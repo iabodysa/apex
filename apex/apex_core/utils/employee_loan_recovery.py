@@ -18,9 +18,9 @@ A damage recovery owes the company money the employee was never given, unlike Em
 internal clearing pair (``_RECOVERY_LOAN_ACCOUNTS``) and never the company's real bank account:
 the debt is real and the schedule must be Active, but no cash leaves the company.
 
-The installment is capped once, at ``MAX_RECOVERY_PERCENT`` of gross pay — the KSA Labor Law
-Art. 91 ceiling ``employee_recovery`` enforces every period — from one native Salary Slip
-preview taken while the Loan is built. One cap is not enough, and the gap sits in the primitive:
+The installment is capped once, at ``_cap_percent()`` of gross pay — the operator's own share
+on Salis Settings, itself bounded by the KSA Labor Law Art. 91 ceiling ``employee_recovery``
+enforces every period — from one native Salary Slip preview taken while the Loan is built. One cap is not enough, and the gap sits in the primitive:
 ``lending`` never re-evaluates a term Loan's installment against actual pay. A schedule's rows
 are computed once (``loan_repayment_schedule.py:30-96``) and rebuilt only by that document's own
 ``validate()``, which a submitted Loan never calls again (``loan.py:173-191``). The one primitive that reshapes a live Loan is ``Loan Restructure``, a
@@ -54,6 +54,24 @@ from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 from apex.apex_core.utils.employee_recovery import _salary_preview
 
 RECOVERY_LOAN_PRODUCT_NAME = "Vehicle Damage Recovery"
+
+
+def _cap_percent() -> float:
+    """The share of gross pay one recovery installment may take, this site's own.
+
+    ``MAX_RECOVERY_PERCENT`` is the statutory ceiling (KSA Labor Law Art. 91) and is
+    never exceeded. ``employee_advance_recovery_max_percent`` on Salis Settings is the
+    operator's own, narrower choice inside it; an unset or zero field means he has not
+    narrowed it. Both bounds are applied, so a site configured at 25 recovers a quarter
+    of gross pay and not a half.
+    """
+    return min(
+        flt(
+            frappe.db.get_single_value("Salis Settings", "employee_advance_recovery_max_percent")
+        )
+        or MAX_RECOVERY_PERCENT,
+        MAX_RECOVERY_PERCENT,
+    )
 
 _RECOVERY_LOAN_ACCOUNTS = (
     ("loan_account", "Receivable", "Asset"),
@@ -225,7 +243,7 @@ def raise_recovery_loan(
         )
         return None
 
-    cap = round(flt(getattr(preview, "gross_pay", 0)) * MAX_RECOVERY_PERCENT / 100.0, 2)
+    cap = round(flt(getattr(preview, "gross_pay", 0)) * _cap_percent() / 100.0, 2)
     if cap <= 0:
         logger.warning(
             f"employee_loan_recovery: {source_doctype} {source_name} — {employee}'s gross pay "
@@ -293,8 +311,8 @@ def _is_recovery_loan_product(loan_product: str | None) -> bool:
 @if_lending_app_installed
 def cap_loan_installments_to_current_pay(doc, method=None) -> None:
     """Reduce (never increase) each recovery Loan row on THIS slip to at most
-    ``MAX_RECOVERY_PERCENT`` of THIS period's own gross pay, and recompute the
-    totals hrms derived from it.
+    ``_cap_percent()`` of THIS period's own gross pay, and recompute the totals
+    hrms derived from it.
 
     Wire this as Salary Slip's own ``validate`` doc_event, NOT ``before_validate``:
     ``set_loan_repayment`` (salary_slip_loan_utils.py:25, called from
@@ -312,7 +330,7 @@ def cap_loan_installments_to_current_pay(doc, method=None) -> None:
     that formula derives from ``total_loan_repayment``, which is the one number this
     function changes.
     """
-    cap = round(flt(doc.gross_pay) * MAX_RECOVERY_PERCENT / 100.0, 2)
+    cap = round(flt(doc.gross_pay) * _cap_percent() / 100.0, 2)
     changed = False
 
     for row in doc.get("loans", []) or []:
