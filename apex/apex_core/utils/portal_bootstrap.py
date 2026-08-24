@@ -98,9 +98,8 @@ _SEED_COLOR = re.compile(r"\A#[0-9A-Fa-f]{3,8}\Z")
 _APPEARANCE_FIELDS = ("accent_color", "brand_logo", "show_brand")
 
 def portal_language() -> str:
-    language = getattr(frappe.local, "lang", None) or frappe.db.get_default("lang") or "en"
-    frappe.local.lang = language
-    return language
+    frappe.local.lang = getattr(frappe.local, "lang", None) or frappe.db.get_default("lang") or "en"
+    return frappe.local.lang
 
 def portal_seed_color(raw: str | None) -> str:
     candidate = (raw or "").strip()

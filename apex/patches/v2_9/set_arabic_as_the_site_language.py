@@ -5,9 +5,7 @@ from frappe.translate import set_default_language
 
 
 def execute():
-    if frappe.db.get_single_value("System Settings", "language") not in (None, "", "en"):
-        return
-    if not frappe.db.exists("Language", "ar"):
-        return
-    frappe.db.set_single_value("System Settings", "language", "ar")
-    set_default_language("ar")
+    chosen = frappe.db.get_single_value("System Settings", "language")
+    if chosen in (None, "", "en") and frappe.db.exists("Language", "ar"):
+        frappe.db.set_single_value("System Settings", "language", "ar")
+        set_default_language("ar")
