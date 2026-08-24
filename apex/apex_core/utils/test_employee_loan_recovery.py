@@ -11,8 +11,11 @@ table and ``net_pay`` — the wiring hrms/payroll/doctype/salary_slip/salary_sli
 ``lending`` app is installed, gated by ``if_lending_app_installed``
 (hrms/payroll/doctype/salary_slip/salary_slip_loan_utils.py:13-21).
 
-Nothing here commits: ``FrappeTestCase`` rolls the whole transaction back, so the
-Loan Product this module creates lazily is rebuilt fresh on the next run too.
+``FrappeTestCase`` rolls the whole transaction back, so the Loan Product this module
+creates lazily is rebuilt fresh on the next run too. The one write that outlives a run
+is the site default ``_company_holiday_list`` installs, and only on a site that carries
+none — ``make_holiday_list`` deletes with ``force``, which commits. That is site setup
+hrms performs for its own suite; it is not evidence any test here asserts.
 """
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from hrms.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 from hrms.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from hrms.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
@@ -46,12 +50,30 @@ a site these skip by name; the module they cover returns ``None`` there rather t
 raising, which is what ``if_lending_app_installed`` is for."""
 
 
+def _company_holiday_list() -> None:
+    """``_COMPANY`` names a default Holiday List, which every Salary Slip here needs.
+
+    ``get_holiday_list_for_employee`` throws when neither the Employee nor its Company
+    carries one (erpnext/setup/doctype/employee/employee.py:265-279), and every slip
+    this module builds reaches it. hrms closes the same gap for its own suite in
+    ``set_defaults`` (hrms/tests/test_utils.py:39-44), which apex's runner never calls —
+    so a site that has never run hrms's tests, which is every fresh CI site, has no
+    such default and each of these tests errors instead of proving anything. A site
+    that already names one keeps it: reassigning it would move the working days under
+    a slip another module's test built.
+    """
+    if frappe.get_cached_value("Company", _COMPANY, "default_holiday_list"):
+        return
+    frappe.db.set_value("Company", _COMPANY, "default_holiday_list", make_holiday_list())
+
+
 def _payroll_employee(email: str, base: float) -> tuple[str, str]:
     """A real Employee with a submitted, base-``base`` Salary Structure and Assignment.
 
     ``make_salary_structure`` (hrms's own test helper) builds the assignment itself
     when the employee has none yet, so this is the one call this module needs.
     """
+    _company_holiday_list()
     employee = make_employee(email, company=_COMPANY)
     struct_name = f"Apex Recovery Proof {email}"
     if frappe.db.exists("Salary Structure", struct_name):
