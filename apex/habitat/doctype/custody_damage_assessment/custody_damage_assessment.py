@@ -11,9 +11,12 @@ emails them. It is unscoped, so it reaches every building.
 
 This DocType values the damage; it does not recover it. There is no payroll posting on
 this path — no submit hook, no cancel reversal and no ``Additional Salary`` link — because
-the app has exactly one employee-recovery chain and it is the native HRMS Employee Advance
-one in ``apex.apex_core.utils.employee_recovery``. A second, one-shot deduction raised from
-here would be a parallel path with no receivable behind it and nothing to reverse against.
+recovery from a worker's wage travels one shared chain, the native ``lending`` Loan raised
+by ``apex.apex_core.utils.employee_loan_recovery`` and reached from Vehicle Incident's
+submit. ``apex.apex_core.utils.employee_recovery`` stays only to service the Employee
+Advance rows raised before that move, and raises no new one. A one-shot deduction raised
+from here would be a parallel path with no receivable behind it and nothing to reverse
+against.
 """
 
 from __future__ import annotations
