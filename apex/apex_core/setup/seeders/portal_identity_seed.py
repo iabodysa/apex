@@ -2,8 +2,10 @@
 """One identity per portal CAPACITY, so a portal write can carry a role instead of a bypass.
 
 A worker and a driver reach Apex by token. Neither is a Frappe user and neither is meant to become
-one — the owner ruled that directly. But a write with no user has no roles to consult, which is why
-every portal endpoint passed ``ignore_permissions``: there was nothing for a DocPerm to attach to.
+one — the owner ruled that directly. Every write below runs only from ``seed_portal_identities``,
+reached from ``apex/setup.py``'s ``after_install``/``after_migrate`` or from the one-time
+``setup_wizard_complete`` flow, so the acting user is always Administrator, who already carries
+every permission (frappe/permissions.py:107,273,506).
 
 The identity these seed is per CAPACITY, not per person: two users, `worker` and `driver`. The
 token already carries WHO — it resolves to an Employee — so the user only has to carry WHAT THAT
@@ -42,7 +44,7 @@ def _ensure_role(role: str) -> None:
             "doctype": "Role",
             "role_name": role,
             "desk_access": 0,
-        }).insert(ignore_permissions=True)
+        }).insert()
 
 def _close_login(email: str) -> None:
     """Disable an identity seeded before login was closed, through the User document.
@@ -71,7 +73,7 @@ def _grant_role(email: str, role: str) -> None:
         return
     user = frappe.get_doc("User", email)
     user.append("roles", {"role": role})
-    user.save(ignore_permissions=True)
+    user.save()
 
 def seed_portal_identities() -> None:
     """Create the two capacity users, idempotently, with login closed.
@@ -91,6 +93,11 @@ def seed_portal_identities() -> None:
     An identity seeded before this converges rather than being skipped: this runs from
     both after_install and after_migrate, and an existing enabled row would otherwise
     stay open forever.
+
+    ``user_type`` is deliberately absent from the insert: ``User.set_system_user``
+    (frappe/core/doctype/user/user.py:303-314) overwrites it on every validate, deriving
+    it from the desk_access of the roles held. Naming a value here would state one thing
+    while the record became another.
 
     ``frappe.is_setup_complete`` gates the whole function, so on a fresh install this
     returns before creating anything and the two identities do not exist until the setup
@@ -114,10 +121,9 @@ def seed_portal_identities() -> None:
             "email": email,
             "first_name": first_name,
             "last_name": last_name,
-            "user_type": "System User",
             "enabled": 0,
             "send_welcome_email": 0,
             "roles": [{"role": role}, {"role": capacity_role}],
         })
         user.flags.no_welcome_mail = True
-        user.insert(ignore_permissions=True)
+        user.insert()
