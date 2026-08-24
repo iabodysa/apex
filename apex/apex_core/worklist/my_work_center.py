@@ -1,33 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""My Work Center — Universal My Work workspace aggregator (Phase 1).
-
-ONE read API that unions the surfaces a user cares about, each scoped to the
-*current user* and to that user's *real Frappe permissions*:
-
-  awaiting_action — documents awaiting THIS user's workflow action or assignment.
-                   Source 1: open ``Workflow Action`` rows — the framework's own
-                   ``get_permission_query_conditions`` hook in workflow_action.py
-                   automatically scopes these to the session user's permitted roles
-                   AND enforces ``status='Open'`` at the SQL level.  No additional
-                   manual role or user filter is needed here.
-                   Source 2: open ``ToDo`` rows allocated to this user that reference
-                   a real document (``reference_type`` set).
-  my_open_submitted / my_recent_closed — my own documents, still open and recently
-                   closed, unioned across WORKLIST_REGISTRY.
-  acted_on_my_documents — documents I raised that somebody else moved in the last 24h.
-  my_notifications — the user's own ``Notification Log`` rows (all types), scoped by
-                   ``for_user = session user`` (search-indexed; ORM enforces it too),
-                   unread first.
-  summary        — integer counts for badge display.
-
-This is the live aggregator — NO new DocType, NO cache. Every row is read with
-``frappe.get_list`` (NOT ``get_all``), so DocPerms + ``permission_query_conditions``
-apply. Workflow transitions are applied by the native endpoints; this module only
-reads. WORKLIST_REGISTRY (legacy per-DocType registry) is kept for
-``get_submitted_by_me_count`` / ``get_approved_last_48h_count`` Number Cards that
-still aggregate the user's own submitted documents; it does not source workflow
-actions, which come from Frappe's native Workflow Action DocType instead.
-"""
 
 from __future__ import annotations
 
@@ -82,8 +53,6 @@ _RAISED_ACTIVITY_HOURS = 24
 
 
 def _mine_filters(doctype: str, states: list[str], *, recent: bool) -> dict:
-    """The filter set shared by the row read and the Number Card count, so the two can
-    never drift into answering different questions."""
     filters: dict = {"owner": frappe.session.user, "status": ["in", states]}
     if "docstatus" in WORKLIST_REGISTRY[doctype]:
         filters["docstatus"] = WORKLIST_REGISTRY[doctype]["docstatus"]
@@ -93,16 +62,6 @@ def _mine_filters(doctype: str, states: list[str], *, recent: bool) -> dict:
 
 
 def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict]:
-    """Permission-safe rows of ``doctype`` owned by the current user whose status is
-    in ``states``. ``get_list`` (never ``get_all``) enforces DocPerms +
-    permission_query_conditions; ``owner`` is the creator. ``recent`` adds the
-    48-hour terminal window. A missing/perm-blocked DocType yields no rows, never an
-    error (one bad source must not break the whole worklist).
-
-    ``frappe.get_list`` (frappe/__init__.py:2008) is the primitive. The one thing it
-    cannot do is stay quiet about a DocType the caller may not read — it raises — so
-    the refusal is caught here and turned into an empty section, because a worklist
-    that shows nine of ten sources is more useful than one that shows an error."""
     if not frappe.db.exists("DocType", doctype):
         return []
     if not frappe.has_permission(doctype, "read"):
@@ -123,16 +82,6 @@ def _mine(doctype: str, states: list[str], *, recent: bool = False) -> list[dict
 
 
 def _mine_count(doctype: str, states: list[str], *, recent: bool = False) -> int:
-    """How many rows :func:`_mine` describes — counted in SQL, not by len() over a page.
-
-    ``get_list`` with a ``count()`` field rather than ``frappe.db.count``, because the
-    count still has to pass through DatabaseQuery for DocPerms and
-    permission_query_conditions to narrow it; ``frappe.db.count`` applies neither and
-    would report a scoped user rows they cannot see. Counting the rows ``_mine``
-    returns cannot serve a Number Card at all: that read stops at its own
-    ``limit_page_length``, so past 50 documents per DocType the card simply stopped
-    rising.
-    """
     if not frappe.db.exists("DocType", doctype):
         return 0
     if not frappe.has_permission(doctype, "read"):
@@ -149,8 +98,6 @@ def _mine_count(doctype: str, states: list[str], *, recent: bool = False) -> int
 
 
 def _collect(kind: str) -> list[dict]:
-    """Union one surface ("active" or "terminal") across the WORKLIST_REGISTRY.
-    Used ONLY for the Number Card helpers — NOT for workflow action sourcing."""
     out: list[dict] = []
     recent = kind == "terminal"
     for doctype, spec in WORKLIST_REGISTRY.items():
@@ -160,7 +107,6 @@ def _collect(kind: str) -> list[dict]:
 
 
 def _count(kind: str) -> int:
-    """Total of one surface across the WORKLIST_REGISTRY, counted per DocType in SQL."""
     recent = kind == "terminal"
     return sum(
         _mine_count(doctype, spec[kind], recent=recent)
@@ -170,16 +116,6 @@ def _count(kind: str) -> int:
 
 @frappe.whitelist()
 def get_my_work() -> dict:
-    """Universal My Work surface — every queue the user cares about, in ONE response.
-
-    Response shape, which the Action Inbox page renders section for section:
-      awaiting_action       dict  — {workflow_actions: [...], todos: [...]}
-      my_open_submitted     list  — my still-open submitted documents
-      my_recent_closed      list  — my documents closed/approved in the last 48h
-      acted_on_my_documents list  — documents I raised that SOMEBODY ELSE moved in 24h
-      my_notifications      list  — my Notification Log rows, unread first
-      summary               dict  — integer counts for badge display
-    """
     awaiting_action = get_pending_actions()
 
     my_notifications = frappe.get_list(
@@ -214,13 +150,6 @@ def get_my_work() -> dict:
 
 
 def _acted_on_by_others(doctype: str, since) -> list[dict]:
-    """Rows of ``doctype`` this user RAISED that somebody else last touched after
-    ``since``. ``owner`` is the raiser, ``modified_by`` the actor and ``modified`` the
-    moment — the three audit columns ``frappe.get_meta`` (frappe/model/meta.py:66)
-    confirms exist before they are read, because a DocType may be missing them on a
-    site mid-upgrade. ``frappe.get_list`` (frappe/__init__.py:2008), never
-    ``get_all``, keeps DocPerms and permission_query_conditions in force, and a
-    missing or perm-blocked DocType yields no rows rather than breaking the whole feed."""
     if not frappe.db.exists("DocType", doctype):
         return []
     if not frappe.has_permission(doctype, "read"):
@@ -249,17 +178,6 @@ def _acted_on_by_others(doctype: str, since) -> list[dict]:
 
 @frappe.whitelist()
 def get_activity_on_my_documents() -> dict:
-    """Second feed: documents the user RAISED that somebody ELSE moved in the last 24h.
-
-    Sourced from the framework's own audit columns (``owner`` / ``modified_by`` /
-    ``modified``), which exist on every DocType and stay readable by the raiser. The two
-    obvious alternatives cannot serve this feed: ``Version`` grants read to System
-    Manager and Administrator only, so a raiser cannot read the change log of their own
-    document, and it is written only where ``track_changes`` is on; ``Workflow Action``
-    is narrowed by its own ``get_permission_query_conditions`` to ``status='Open'`` plus
-    the reader's approver roles, so a COMPLETED action on the raiser's document is
-    invisible to the raiser by construction. NO new DocType — this only reads.
-    """
     since = add_to_date(now_datetime(), hours=-_RAISED_ACTIVITY_HOURS)
     rows: list[dict] = []
     for doctype in WORKLIST_REGISTRY:
@@ -280,21 +198,14 @@ def get_activity_on_my_documents() -> dict:
 
 @frappe.whitelist()
 def get_activity_on_my_documents_count(filters=None) -> dict:
-    """Custom Number Card: how many documents I raised did somebody else move in the
-    last 24 hours. Reuses :func:`get_activity_on_my_documents`, so the same source and
-    permission scoping apply. ``filters`` is accepted and ignored — the native Custom
-    Number Card widget always passes it."""
     return {"value": len(get_activity_on_my_documents()["documents"])}
 
 
 @frappe.whitelist()
 def get_submitted_by_me_count(filters=None) -> dict:
-    """Custom Number Card: count of my still-open submitted documents. ``filters`` is
-    accepted and ignored (the native Custom Number Card widget always passes it)."""
     return {"value": _count("active")}
 
 
 @frappe.whitelist()
 def get_approved_last_48h_count(filters=None) -> dict:
-    """Custom Number Card: count of my documents closed/approved in the last 48h."""
     return {"value": _count("terminal")}

@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Image payload validation for the token-scoped portal write endpoints.
-
-``verified_image_type`` proves a base64 data URI carries the image type it declares
-and returns that type. A calling endpoint keeps its own filename policy and size
-ceiling; this module states only what the bytes have to prove.
-"""
 
 from __future__ import annotations
 
@@ -34,7 +28,6 @@ _PIL_FORMATS = {
 
 
 def _has_exact_container_end(decoded, image_format):
-    """Reject bytes appended after an otherwise valid image container."""
     if image_format == "PNG":
         return decoded.endswith(b"\x00\x00\x00\x00IEND\xaeB\x60\x82")
     if image_format == "JPEG":
@@ -50,17 +43,6 @@ def _has_exact_container_end(decoded, image_format):
 
 
 def verified_image_type(photo, expected_type=None, max_bytes=None):
-    """Prove a base64 data URI really carries the image it declares, and name it.
-
-    Returns the verified content type. Refuses anything the BYTES do not support:
-    a declared type outside the accepted set, a payload that is not exact base64, a
-    size or dimension past the ceiling, a container PIL cannot open or whose format
-    disagrees with the declaration, and trailing bytes after a valid container.
-    ``expected_type`` pins the answer to one type when the caller already knows it
-    (the driver door derives it from the filename); left None, the declaration in
-    the URI is what gets verified — which is why a renamed non-image cannot pass.
-    ``max_bytes`` lets a door keep its own published size ceiling.
-    """
     if not isinstance(photo, str):
         frappe.throw(_("The photo data is invalid."), frappe.ValidationError)
     max_bytes = max_bytes or MAX_IMAGE_BYTES

@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Public Transport Request web form.
-
-The insert passes ``ignore_permissions`` because the submitter is a Guest — the form is public by
-design, so there is no user whose roles could authorise it, and a DocPerm here would grant Guest
-create on Transport Request site-wide. The rate limit is what stands in for a permission.
-"""
 import frappe
 from frappe import _
 
@@ -12,7 +6,6 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def get_context(context):
-    """Disables page caching for the Transport Request web form."""
     context.no_cache = 1
 
 
@@ -29,16 +22,6 @@ def submit_transport_request(
     site_token=None,
     website_field=None,
 ):
-    """Rate-limited public endpoint for anonymous Transport Request submission.
-
-    Limit: 5 requests per IP per 60 seconds.
-
-    - ``website_field`` is a honeypot; any non-empty value is silently discarded.
-    - ``passenger_count`` is clamped server-side to 1..50.
-    - ``purpose`` is capped at 2000 characters.
-    The controller (``before_insert``) tags ``source_channel='Web QR'`` and
-    generates the ``anonymous_tracking_code`` for guest submissions.
-    """
     if website_field:
         return {"name": None, "tracking_code": None}
 

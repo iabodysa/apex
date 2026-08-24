@@ -1,36 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Fuel engine for the Salis Movement module.
-
-Background engine that mirrors the Habitat no-GL, system-written ledger pattern
-(``apex.habitat.doctype.accommodation_ledger``) and the batch/idempotent
-scheduled-job style in ``apex.habitat.tasks``.
-
-``reverse_fuel_ledger`` posts its mirror row with ``ignore_permissions``, which is ERPNext's own
-idiom for an immutable subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The
-DocType carries ``in_create``, which removes the New button but refuses nothing on the server
-(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: every role on Fuel
-Consumption Ledger has ``read`` and nothing else, System Manager included, so that reversal write
-is the only path by which a human-triggered cancel can post a row. ``accrue_fuel_consumption``
-runs no such flag: ``scheduler.enqueue_events_for_site`` connects with ``set_admin_as_user=True``
-(frappe/__init__.py:269) before it ever queues a job, so the worker executes as ``Administrator``
-and the framework's own permission check already passes.
-
-Two scheduled jobs:
-
-* ``accrue_fuel_consumption`` (daily) — accrues a Fuel Consumption Ledger row for
-  each Fuel Daily Log and each Done Fuel Request not yet ledgered, however old.
-  Idempotent on ``(source_type, source_name)``.
-* ``monthly_fuel_reconciliation`` (monthly) — for each active Fuel Quota of the
-  period, sums ledgered consumption for that vehicle+period against the quota's
-  monthly litres; if consumption exceeds the quota beyond a tolerance margin the
-  breached Fuel Quota is ASSIGNED to the Fleet Supervisor queue. Idempotent by the
-  framework's own rule (one open assignment per quota+holder); the queue drains in
-  ``reconcile_operations_alerts`` once the breach clears.
-
-No GL is written. The queue helper is imported inside the job so module load keeps
-no ``salis.tasks`` coupling.
-"""
 
 from __future__ import annotations
 
@@ -48,39 +17,14 @@ BATCH_SIZE = 500
 OVERAGE_MARGIN_DEFAULT_PERCENT = 5
 
 def get_overage_margin() -> float:
-    """Return the fuel-quota overage margin as a fraction (e.g. 0.05 for 5%).
-
-    Reads the Int percent ``fuel_overage_margin_percent`` from Salis Settings via
-    the zero-trap helper and divides by 100, so a blank/0 setting keeps today's 5%."""
     percent = get_salis_int("fuel_overage_margin_percent", OVERAGE_MARGIN_DEFAULT_PERCENT)
     return percent / 100.0
 
 def _period_month(date_value) -> str:
-    """Return the YYYY-MM period string for a date/datetime value."""
     return str(date_value)[:7]
 
 
 def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
-    """Reverse the ledgered consumption for a corrected/cancelled fuel source.
-
-    When a fuel source (a Fuel Request whose Done row was already ledgered, or a
-    Fuel Daily Log) is cancelled or deleted, its consumption must not stay in the
-    Fuel Consumption Ledger. This posts a negative mirror row for each original
-    ledger row of that source — negating ``litres`` and ``amount`` — and links it
-    back via ``reversal_of``, so the source nets to zero in every consumption sum
-    while the original row is preserved for audit.
-
-    This mirrors the Habitat ledger reversal idiom (``Accommodation Ledger`` via
-    ``utility_bill_entry.before_cancel``): a negated row with ``reversal_of`` set,
-    not a delete. The Fuel Consumption Ledger carries no ``is_cancelled`` flag, so
-    — exactly like the Accommodation Ledger — the guard against double-reversal is
-    that only an ORIGINAL row (``reversal_of`` unset) is ever mirrored, and a row
-    that already has a reversal pointing at it is skipped.
-
-    Idempotent: calling it twice for the same source posts at most one reversal
-    per original row. Returns the number of reversal rows posted (0 if the source
-    was never ledgered or is already fully reversed).
-    """
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -123,25 +67,6 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
     return posted
 
 def accrue_fuel_consumption() -> None:
-    """Accrue Fuel Consumption Ledger rows for recent fuel activity.
-
-    Sources:
-
-    * Fuel Daily Log rows not yet ledgered.
-    * Fuel Requests in ``Done`` status (submitted) not yet ledgered.
-
-    BOTH halves select on the ``ledgered`` flag, not on a date window. A fixed
-    two-day ``log_date`` window silently dropped work rather than deferring it: a log
-    backdated past yesterday was never in scope on any run, and one missed scheduler
-    day put every log of that day permanently out of reach. The flag turns the job
-    into a backlog drain — anything unledgered is picked up on the next run, however
-    old — and it is what makes catching up possible at all.
-
-    Idempotent on ``(source_type, source_name)`` as well: a source already carrying a
-    ledger row is flagged and skipped rather than double-posted, which is what makes
-    the flag safe to introduce on a site whose rows all start at 0. Per-row
-    try/except isolates failures; no commit inside the loops.
-    """
     logger = frappe.logger()
 
     failed_logs: set[str] = set()
@@ -270,28 +195,6 @@ def accrue_fuel_consumption() -> None:
     logger.info("accrue_fuel_consumption: fuel consumption ledger updated.")
 
 def monthly_fuel_reconciliation() -> None:
-    """Reconcile each active Fuel Quota's allocation against ledgered consumption.
-
-    For the period that has CLOSED, every active Fuel Quota is compared with the
-    summed Fuel Consumption Ledger litres for the same vehicle+period. If consumption
-    exceeds ``monthly_litres`` by more than the tolerance the operator set in
-    ``Salis Settings.fuel_overage_margin_percent``, the
-    breached Fuel Quota — the document whose allocation the supervisor must revisit —
-    is ASSIGNED to the Fleet Supervisor queue.
-
-    The period is the closed month, not the current one, because this job's only firing
-    instant is 00:00 on the 1st: at that moment the month that has just begun holds no
-    ledger rows at all (``accrue_fuel_consumption`` is daily), so a current-month
-    anchor compared every allocation against ~0 litres and no breach could ever be
-    found. This mirrors ``rental_engine.monthly_rental_reconciliation``.
-
-    Idempotent by the framework's assignment dedupe. This job is the only queuer of
-    Fuel Quota, so its own findings ARE the reconcile union and it drains its own queue
-    in the same pass — which is also why the calendar month cannot drift between the
-    two halves the way it did while a daily job owned the drain.
-
-    Per-row try/except isolates failures; no commit inside the loop.
-    """
     period_month = _period_month(add_months(getdate(today()), -1))
     logger = frappe.logger()
 

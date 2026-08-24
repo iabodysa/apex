@@ -1,17 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Fleet Control board API (read-only fleet view with details, for the
-``operations-control`` desk page).
-
-Mirrors the Salis Dispatch Board reader pattern: bounded, N+1-free readers, no
-raw SQL, no writes, permission-gated on ``Salis Vehicle`` / ``read`` on top of
-the Page role grant, and project-scoped server-side through the SAME
-``_permitted_projects`` resolver the dispatch board and the list-view
-``permission_query_conditions`` use, so the board never shows a scoped
-supervisor a project they could not already see.
-
-The board answers "what is every vehicle's state, driver and open-incident load
-right now?" and powers a card/table view and a per-vehicle detail drawer.
-"""
 
 from __future__ import annotations
 
@@ -30,7 +17,6 @@ COMPLIANCE_FILTERS = ("Compliant", "Expiring Soon", "Expired")
 
 
 def _empty_summary(stopped_over_days):
-    """Returns a zeroed fleet summary shape with every vehicle status count at zero."""
     return {
         "total": 0,
         "by_status": {s: 0 for s in VEHICLE_STATUSES},
@@ -42,7 +28,6 @@ def _empty_summary(stopped_over_days):
 
 
 def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
-    """Returns an empty fleet board payload for a caller with no permitted project scope."""
     return {
         "vehicles": [],
         "summary": _empty_summary(stopped_over_days),
@@ -55,18 +40,6 @@ def _empty(offices=None, projects=None, unscoped=False, stopped_over_days=14):
 
 @frappe.whitelist()
 def get_fleet(status=None, rental_office=None, project=None, search=None, compliance=None):
-    """Return the filtered fleet with driver names and open-incident counts.
-
-    All filters are optional. Project scope is enforced server-side: a scoped
-    user with no permitted project gets an empty board. ``compliance`` narrows to
-    one of Compliant / Expiring Soon / Expired (the vehicle's compliance_status).
-
-    Three ``get_all`` reads stay unpaged and unconverted here: Rental Office and
-    Project are filter-dropdown option lists, not project-scoped operational rows;
-    and the Vehicle Incident read is a ``GROUP BY count(name)`` aggregate over the
-    already-scoped ``plates`` — a 20-row page would silently drop the tail of the
-    fleet from the per-vehicle incident tally.
-    """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     unscoped, projects, base_filters = scope_filter()
     stopped_over_days = get_salis_int("workshop_overstay_days", 14)
@@ -150,8 +123,6 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
 
 @frappe.whitelist()
 def get_vehicle_detail(vehicle):
-    """Return one vehicle's detail: master fields, recent incidents and recent
-    custody assignments. Permission- and scope-gated like the board."""
     frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
     v = frappe.db.get_value(
         "Salis Vehicle",
@@ -188,18 +159,6 @@ TIMELINE_LIMIT = 40
 
 @frappe.whitelist()
 def get_vehicle_timeline(vehicle):
-    """Return one vehicle's consolidated operational history as a single date-sorted feed.
-
-    Unions the event sources into one timeline — Vehicle Incident, Vehicle Suspension,
-    Vehicle Assignment and the drained Fleet Supervisor assignment queue — so the drawer shows the whole
-    operational story of a vehicle in one place instead of three disconnected lists.
-    Permission- and scope-gated identically to ``get_vehicle_detail``: read access to
-    the vehicle is the single chokepoint (once you may read the vehicle you may read its
-    own history). Bounded per source and overall, N+1-free (no per-row queries). Each
-    row is a normalised ``{kind, date, ...}`` event; ``date`` is ISO so the client sorts
-    and renders without reparsing per source.
-
-    """
     frappe.has_permission("Salis Vehicle", "read", doc=vehicle, throw=True)
     if not frappe.db.exists("Salis Vehicle", {"name": vehicle}):
         frappe.throw(_("Vehicle not found."))
@@ -270,20 +229,6 @@ def get_vehicle_timeline(vehicle):
 
 @frappe.whitelist(methods=["POST"])
 def release_vehicle(vehicle, return_date=None):
-    """Release a Stopped vehicle back to service from the Fleet Control drawer.
-
-    Closes the vehicle's open (submitted) Vehicle Suspension through the NATIVE
-    submittable lifecycle: the release fields are stamped on the stop and the
-    document is then cancelled, so ``VehicleStop.on_cancel`` is what restores the
-    vehicle to its ``previous_status`` (controllers are not bypassed — we never
-    poke ``Salis Vehicle.status`` directly). Permission is re-checked on the
-    vehicle ("write") on top of the Page role grant.
-
-    ``return_date`` (the workshop-exit date) defaults to today; ``released_on`` is
-    stamped to today and ``released_by`` to the acting user. Returns the closed
-    stop name. Throws when the vehicle has no open stop (e.g. it is not Stopped,
-    or a concurrent release already closed it).
-    """
     frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)
     lock_vehicle(vehicle)
 
@@ -302,21 +247,6 @@ def release_vehicle(vehicle, return_date=None):
 
 @frappe.whitelist(methods=["POST"])
 def reassign_driver(vehicle, driver, start_date=None):
-    """Reassign a vehicle's driver from the Fleet Control drawer.
-
-    Ends the vehicle's current Active Vehicle Assignment and starts a new one
-    through the NATIVE submit lifecycle: VehicleAssignment.on_submit is what
-    stamps Salis Vehicle.current_driver and the driver's current_vehicle, and its
-    validate/on_submit overlap guards still run (controllers are not bypassed). We
-    never poke the driver links directly. Permission is re-checked on the vehicle
-    ("write") on top of the Page role grant, and on the incoming driver ("write")
-    since the new assignment puts the company vehicle in their custody.
-
-    ``driver`` is the Salis Driver name (the detail drawer carries the name, not
-    the external driver_id). ``start_date`` defaults to today and dates the close
-    of the old assignment and the start of the new one. Returns the new
-    assignment name.
-    """
     if not driver:
         frappe.throw(_("Driver is required."))
     frappe.has_permission("Salis Vehicle", "write", doc=vehicle, throw=True)

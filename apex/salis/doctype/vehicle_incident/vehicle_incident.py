@@ -1,24 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Vehicle Incident controller.
-
-Records a fleet incident event - an accident or a theft - against a vehicle.
-This is the event of record (location, report number, fault, evidence); it is
-distinct from a Vehicle Damage Write-Off (the disposition/authority gate) and a
-Vehicle Suspension (the state change). A submitted Theft incident takes the vehicle out
-of service and clears its driver, capturing the prior state so a cancel reverses
-it cleanly. An Accident incident records the event only; stopping the vehicle, if
-needed, is a separate Vehicle Suspension.
-
-Cost recovery is native, no bespoke consent DocType: when the incident is flagged
-``recover_from_driver`` it raises ONE native Loan on submit, with Repay From Salary
-set - see apex.apex_core.utils.employee_loan_recovery. HRMS itself runs the wage
-installment and the outstanding balance from the Loan's own repayment schedule; this
-controller neither computes nor stores either. The worker's signed consent is
-mandatory before that approval (KSA Labor Law), and one incident maps to at most one
-loan. ``recovery_advance`` is legacy: incidents raised before this change may still
-carry an open Employee Advance, which is left to run out rather than migrated (see
-apex.apex_core.utils.employee_recovery); no incident writes that field anymore.
-"""
 
 from __future__ import annotations
 
@@ -46,17 +26,6 @@ _TRANSITION_SAVEPOINT = "vehicle_incident_transition"
 
 class VehicleIncident(Document):
     def validate(self):
-        """Validates the incident date and cost, and enforces public-intake and cost-recovery guards.
-
-        ``status`` carries no hand-written guard: the Vehicle Incident Workflow
-        (apex/fixtures/workflow.json) owns the Close transition natively — a
-        hand-edit that is not a modelled transition is refused by
-        ``frappe.model.workflow.validate_workflow`` (frappe/model/document.py:
-        687-695) before this method ever sees the save. The Open -> Under
-        Review move stays outside the workflow on purpose: it is the native
-        submit lifecycle, not a person choosing a named action, and
-        ``on_submit`` stamps it directly.
-        """
         if self.incident_date and getdate(self.incident_date) > getdate(today()):
             frappe.throw(_("Incident date cannot be in the future."))
         if flt(self.estimated_cost) < 0:
@@ -66,14 +35,6 @@ class VehicleIncident(Document):
         self._sync_third_party()
 
     def _sync_third_party(self):
-        """Keep the third-party block and its flag telling the same story.
-
-        The statement goes to an insurer, so a plate or a policy left over from a
-        correction would name a party who was never in the accident. The flag is the
-        switch: while it is on the four fields stand, and the moment it comes off they
-        are emptied, so the printed block appears only while the record actually holds
-        a third party.
-        """
         if self.third_party_involved:
             return
         for field in (
@@ -85,20 +46,6 @@ class VehicleIncident(Document):
             self.set(field, None)
 
     def _guard_cost_recovery(self):
-        """Consent gate on the wage-recovery decision.
-
-        The signature is the worker's written consent to the deduction, which KSA
-        Labor Law requires before a wage may be touched; the incident cannot be
-        approved (submitted) without it. A draft may still be saved unsigned so the
-        signature can be collected after the case is opened.
-
-        The recovery itself lands on a ``lending`` Loan, and apex declares only frappe,
-        erpnext and hrms, so a site may legitimately have no ``lending``. On such a
-        site ``raise_recovery_loan`` returns ``None`` and the incident would save with
-        the flag ticked and no recovery behind it; the flag is refused here instead,
-        naming the missing app. Clearing the flag saves the incident normally - the
-        event of record never depends on ``lending``.
-        """
         if not self.recover_from_driver:
             for field in ("worker_signature", "signed_on"):
                 self.set(field, None)
@@ -129,15 +76,6 @@ class VehicleIncident(Document):
             )
 
     def _guard_public_intake(self):
-        """Rejects a honeypot-filled submission, resets privileged fields on a new
-        guest-submitted incident, and caps free-text field lengths.
-
-        Runs from validate() on every insert, because the public web form's Guest
-        submission saves through Frappe's own Web Form ``accept``
-        (frappe/website/doctype/web_form/web_form.py:598-663), which builds this
-        document from the POST body and calls ``insert()`` directly — there is no
-        app-owned endpoint in front of it left to check any of this instead.
-        """
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
@@ -166,7 +104,6 @@ class VehicleIncident(Document):
                 frappe.throw(_("{0} is too long.").format(_(self.meta.get_label(field))))
 
     def on_submit(self):
-        """Raises the recovery loan and, for a theft, stops the vehicle and clears its driver."""
         self.db_set("status", "Under Review")
         self._raise_recovery_loan()
         if self.incident_type != "Theft":
@@ -192,13 +129,6 @@ class VehicleIncident(Document):
         )
 
     def _raise_recovery_loan(self):
-        """Map this incident to its ONE Loan.
-
-        Idempotent within this document's lifecycle: the stored link short-circuits a
-        re-submit. A site that cannot yet size the installment (no company, no Loan
-        Product accounts, no active Salary Structure Assignment for the employee) logs
-        and continues — the incident is still the event of record.
-        """
         if not self.recover_from_driver or self.recovery_loan:
             return
         loan = raise_recovery_loan(
@@ -216,13 +146,6 @@ class VehicleIncident(Document):
             self.db_set("recovery_loan", loan)
 
     def _live_recovery_loan(self):
-        """The linked Loan while it is still submitted and untouched by payroll, else None.
-
-        One reader for both halves of the cancel: there is nothing to refuse and
-        nothing to reverse when the incident raised no loan, when the loan is already
-        cancelled, or (defensively; ``before_cancel`` already checked this) once a Loan
-        Repayment has been posted against it.
-        """
         loan = self.recovery_loan
         if not loan:
             return None
@@ -236,11 +159,6 @@ class VehicleIncident(Document):
         return state if state and state.docstatus == 1 else None
 
     def _live_recovery_advance(self):
-        """The legacy linked Employee Advance while it is still submitted, else None.
-
-        Only a pre-migration incident carries ``recovery_advance``; kept so cancelling
-        one of those still refuses and reverses correctly.
-        """
         advance = self.recovery_advance
         if not advance:
             return None
@@ -254,15 +172,6 @@ class VehicleIncident(Document):
         return state if state and state.docstatus == 1 else None
 
     def before_cancel(self):
-        """REFUSAL half of the cancel: once real money has moved - the company has
-        paid, an installment has been recovered, or a Loan Repayment has posted -
-        reversing is an accounting decision, so the cancel is refused instead of
-        silently unwinding a posted balance.
-
-        A Document method with no hooks.py entry: Frappe composes the class method
-        ahead of the app-wide workflow_guard.before_cancel handler.
-
-        """
         loan_state = self._live_recovery_loan()
         if loan_state and (
             flt(loan_state.total_principal_paid)
@@ -285,18 +194,6 @@ class VehicleIncident(Document):
             )
 
     def _release_recovery_loan(self):
-        """RESTORATION half: cancel the Loan (and its Disbursement) when the incident
-        is cancelled.
-
-        The Disbursement is cancelled first: it is what activated the Loan's
-        repayment schedule (see apex.apex_core.utils.employee_loan_recovery), and a
-        submitted Loan Disbursement still linking the Loan would refuse the Loan's own
-        cancel (Loan.on_cancel only ignores GL Entry / Payment Ledger Entry links,
-        lending/loan_management/doctype/loan/loan.py:118). Cancelling the Loan itself
-        then reverses its draft repayment schedule natively (loan.py:115-118). The
-        paid refusal is not re-checked here: ``before_cancel`` already locked the loan
-        row for this transaction, so nothing between the two hooks can pay it.
-        """
         state = self._live_recovery_loan()
         if state:
             for disbursement in frappe.get_all(
@@ -308,14 +205,6 @@ class VehicleIncident(Document):
             frappe.get_doc("Loan", state.name).cancel()
 
     def _release_recovery_advance(self):
-        """RESTORATION half: reverse the legacy receivable when the incident is cancelled.
-
-        Cancelling the advance reverses the recovered balance natively (HRMS reverses
-        each linked Additional Salary's contribution on its own cancel). The paid /
-        recovered refusal is not re-checked here: ``before_cancel`` already locked
-        the advance row for this transaction, so nothing between the two hooks can
-        pay it.
-        """
         state = self._live_recovery_advance()
         if state:
             for installment in frappe.get_all(
@@ -337,8 +226,6 @@ class VehicleIncident(Document):
             frappe.get_doc("Employee Advance", state.name).cancel()
 
     def on_cancel(self):
-        """Reverses the recovery loan (or, for a pre-migration incident, the legacy
-        advance) and, for a theft, restores the vehicle's prior driver and status."""
         self.db_set("status", "Closed")
         self._release_recovery_loan()
         self._release_recovery_advance()
@@ -382,19 +269,6 @@ def close_incident_internal(
     *,
     check_permission: bool = True,
 ) -> dict:
-    """Close one submitted incident through the Vehicle Incident Workflow's
-    Close transition.
-
-    ``apply_workflow`` (frappe/model/workflow.py:99) is what now finds
-    "Under Review -> Closed" among the caller's roles and refuses anything
-    else — the docstatus check stays because it also guards a data edge case
-    ``apply_workflow`` does not: a not-yet-submitted incident.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    wrap the close, because it moves the incident AND writes the vehicle's
-    timeline. The one thing a plain try/except cannot do is undo the workflow
-    transition when the timeline note fails.
-    """
     resolution = str(resolution or "").strip()
     if not resolution:
         frappe.throw(_("A resolution is required to close a Vehicle Incident."))
@@ -425,5 +299,4 @@ def close_incident_internal(
 
 @frappe.whitelist(methods=["POST"])
 def close_incident(name: str, resolution: str) -> dict:
-    """Permission-checked incident close action for Desk and portal clients."""
     return close_incident_internal(name, resolution)

@@ -1,53 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The trust boundary under every per-address limit in this app, made checkable.
-
-``frappe.local.request_ip`` is the bucket key for the portal bad-token throttle
-(portal_identity), the boarding scan limiter (salis/api/boarding.py) and frappe's
-own ``@rate_limit(ip_based=True)``. frappe fills it from the FIRST ``X-Forwarded-For``
-entry with no trusted-proxy check at all.
-
-Nothing in that chain asks who set the header. A caller that forges a fresh value per
-request lands in a fresh window every time and walks through all three limiters, and can
-equally pin the blame for a flood on any address it names. The safety is entirely
-deployment-side: the reverse proxy must OVERWRITE the header with the real peer, never
-append the client's claim to it.
-
-So the requirement cannot be enforced from inside the app; it can only be MEASURED
-against a running deployment. That is what this module is: a deterministic verdict a
-deployer gets from one authenticated request, not a warning in a log nobody opens.
-
-The probe is what makes it decisive, and it takes TWO channels to work. The deployer
-sends a documentation-range address (RFC 5737 / RFC 3849) in ``X-Forwarded-For`` -- a
-value no real client can ever legitimately carry -- and separately asserts having done
-so in the QUERY STRING, which a reverse proxy forwards verbatim. The header alone cannot
-carry that news: a correctly configured edge ERASES it, so its absence would be read as
-"no probe sent" and the passing deployment would grade itself INCONCLUSIVE. Two channels
-turn silence into the signal: the probe was sent, it did not arrive, therefore the edge
-overwrote it. Without the assertion, one header entry is genuinely inconclusive -- an
-overwriting proxy and a wide-open direct exposure produce the identical shape.
-
-Silence in the HEADER is the pass signal; silence on the WIRE is not. A request that
-reaches the app carrying no forwarded header at all measured nothing about overwriting,
-so it is graded incomplete even when a probe was planted and destroyed: the deployment
-where the edge strips the header and sets nothing keys every client onto the proxy's own
-address, which is a different failure, not a pass.
-
-TWO LIMITS ARE IRREDUCIBLE and a passing verdict states the first of them out loud.
-
-The assertion cannot be verified. A header the edge destroyed is precisely what the
-server cannot see, so nothing distinguishes "I planted a probe and the edge erased it"
-from "I asserted the flag and sent an ordinary address". A deployer probing their own
-site cannot be defrauded by that, but an AUTOMATED check keyed on ``trusted`` can drift
-into it -- if the step that injects the header is ever dropped while the query flag
-survives, the check reports a permanent pass. Keep the header and the flag in one
-command, and treat a pass as void whenever they are edited apart.
-
-A bogon-stripping edge is indistinguishable from an overwriting one. Some edges drop
-reserved and documentation ranges from the header as a half-measure while forwarding an
-ordinary forged claim untouched. The probe vanishes in both, so this check reads such an
-edge as correct. Widening the recognised spellings cannot fix it: the blind spot is the
-choice of a non-routable probe, and a routable one could belong to a real client.
-"""
 
 from __future__ import annotations
 
@@ -125,19 +76,10 @@ _DETAIL = {
 
 
 def forwarded_entries(raw: str | None) -> list[str]:
-    """The header split the way an appending proxy builds it: client claim first."""
     return [entry.strip() for entry in (raw or "").split(",") if entry.strip()]
 
 
 def _bare_address(value: str | None) -> ipaddress._BaseAddress | None:
-    """One forwarded entry reduced to the address inside it, or None if there is none.
-
-    Every spelling this fails to recognise is a FALSE PASS, not a missed detail: an
-    unrecognised probe reads as an erased one, and erasure is the pass signal. So the
-    forms edges actually write are unwrapped first -- some load balancers record
-    ``ip:port`` and bracket IPv6, and an IPv4-mapped IPv6 address is the same address
-    in different clothes.
-    """
     text = (value or "").strip()
     if text.startswith("["):
         text = text[1:].split("]", 1)[0]
@@ -151,7 +93,6 @@ def _bare_address(value: str | None) -> ipaddress._BaseAddress | None:
 
 
 def is_documentation_address(value: str | None) -> bool:
-    """Whether a value is reserved for documentation, so no real client can carry it."""
     address = _bare_address(value)
     if address is None:
         return False
@@ -163,34 +104,6 @@ def classify_forwarding(
     resolved_ip: str | None,
     probe_planted: bool = False,
 ) -> dict:
-    """Grade one observed request against the trust boundary.
-
-    ``resolved_ip`` is what frappe actually put in ``request_ip`` -- read, never
-    recomputed here, so this cannot drift from ``auth.py``'s precedence and pass a
-    deployment on a rule the framework has stopped following.
-
-    The discriminator is the probe's ABSENCE, and it is exact. Every appending edge
-    appends to the TAIL (``$proxy_add_x_forwarded_for`` is ``$http_x_forwarded_for,
-    $remote_addr``), so a claim the caller sent can only ever sit at the HEAD, which is
-    the one entry frappe reads. Therefore, once the caller asserts a probe was planted,
-    the probe missing from every entry means the hop facing the caller replaced the
-    header, and entry COUNT no longer bears on safety: a replacement with appends behind
-    it is as safe as a lone replacement. The probe present anywhere means the opposite,
-    whatever address frappe happened to resolve.
-
-    Four shapes must never reach a passing verdict, and each is graded before the
-    passes: no header at all, because an erased header measures nothing about
-    overwriting; a surviving probe, because caller content demonstrably reaches the app;
-    an entry that does not parse as an address, because a probe wearing a rendering this
-    module cannot read is indistinguishable from an erased one and the pass signal is
-    absence; and a resolved address that is not the first entry, because the reasoning
-    above is then about a precedence the framework is not following.
-
-    That third one is why unreadable is REFUSED rather than ignored. Every spelling the
-    parser does not recognise would otherwise count as evidence of erasure, so the set
-    of strings that silently certify a deployment would be unbounded and would grow with
-    every rendering some future edge invents.
-    """
     entries = forwarded_entries(raw)
     probe_seen = any(is_documentation_address(entry) for entry in entries)
     reads_first_entry = bool(entries) and resolved_ip == entries[0]
@@ -225,27 +138,6 @@ def classify_forwarding(
 
 @frappe.whitelist()
 def check_request_ip_trust(probe_planted=None) -> dict:
-    """Report whether this deployment's edge lets a caller choose its own address.
-
-    Read-only and System Manager only: the reply names the address the server believes
-    the caller has, which is the fact an attacker probing the edge is after.
-
-    ``probe_planted`` is the caller's assertion that this same request carried a
-    documentation-range ``X-Forwarded-For``. It rides the query string because the edge
-    under test is expected to destroy the header, and a passing deployment must not be
-    graded inconclusive for having done exactly what it should.
-
-        curl -s --cookie sid=<system-manager-sid> \\
-             -H 'X-Forwarded-For: 192.0.2.7' \\
-             'https://<site>/api/method/apex.apex_core.utils.request_ip_trust.check_request_ip_trust?probe_planted=1'
-
-    Send the digit: ``cint`` reads ``true`` and ``yes`` as 0, so a word spells the
-    assertion away and the reply comes back inconclusive rather than graded.
-
-    ``overwritten`` and ``overwritten-then-appended`` are the passes; both are also
-    reported as ``trusted: true``, which is the field to key an automated check on.
-    Every other verdict, ``no-header`` included, is a refusal to certify.
-    """
     frappe.only_for("System Manager")
     return classify_forwarding(
         frappe.get_request_header(FORWARDED_HEADER),

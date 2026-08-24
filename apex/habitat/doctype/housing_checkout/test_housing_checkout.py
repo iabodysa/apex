@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Housing Checkout's damage-assessment building fallback and its
-server-authoritative damage-deduction rollup.
-
-Patterned on test_lease.py: neither helper inserts a document. The rollup
-runs on an unsaved Housing Checkout with its child table populated via
-``doc.append`` -- no DB row is ever written. The building fallback's one DB
-read (``frappe.db.get_value("Bed", ...)``) is mocked so the "assignment
-carries no building, fall back to the bed's" branch is exercised without a
-live Bed.
-"""
 
 from __future__ import annotations
 

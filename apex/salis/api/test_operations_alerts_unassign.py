@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``unassign_alert`` must not report ``ok: True`` when ``assign_to.remove``
-actually failed. ``assign_to.set_status`` (frappe/desk/form/assign_to.py:203-228)
-already treats "not currently assigned" as a no-op on its own, so a caught
-exception here can only be masking a real failure (a permission check, a
-vanished reference document) as a false success.
-"""
 
 from unittest.mock import patch
 

@@ -1,22 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety Finding Ledger controller.
-
-Read-only, machine-written immutable audit memo. One row is posted per finding
-observed on a Safety Round's executions when the round is submitted, via
-``habitat.safety_engine`` using ignore_permissions. No DocPerm grants
-create/write/delete to any role; rows are never hand-entered.
-
-WHY: safety/audit findings otherwise live only on the mutable parent reports
-(Safety Task Execution finding rows), so a closed finding can silently reopen or
-be rewritten. This ledger captures an immutable snapshot of each finding at
-submit time, so safety reports are stable and the closed/open history is fixed.
-
-A cancelled Safety Round does not delete its rows — the engine posts a negating
-reversal row (``is_cancelled=1``, ``reversal_of`` set), mirroring the Salis fuel
-ledger reversal idiom. The guard below makes the immutability explicit: once a
-row exists it cannot be edited (only the system-set reversal flag may be
-stamped on insert), and it can never be hand-deleted.
-"""
 
 from __future__ import annotations
 
@@ -27,15 +9,6 @@ from frappe.model.document import Document
 
 class SafetyFindingLedger(Document):
     def on_update(self):
-        """Blocks editing a Safety Finding Ledger row after it has already been inserted.
-
-        No Workflow replaces this: nobody holds create/write on this DocType and
-        no person ever chooses a transition — habitat.safety_engine is the only
-        writer, at Safety Round submit. The native primitive for a write-once
-        record is ``is_submittable``, not a Workflow; this DocType stays a plain
-        immutable insert because there is no approval step to model, only a
-        single machine-posted row that must never change again.
-        """
         if self.is_new():
             return
         if not self.flags.ignore_validate_update_after_submit and self.get_doc_before_save():
@@ -45,7 +18,6 @@ class SafetyFindingLedger(Document):
             )
 
     def on_trash(self):
-        """Blocks deleting a Safety Finding Ledger row outside install/migrate; cancel the round instead."""
         if frappe.flags.in_install or frappe.flags.in_migrate:
             return
         frappe.throw(

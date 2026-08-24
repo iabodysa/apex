@@ -1,20 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Masar Worker Token — personal access link for the worker self-service app.
-
-Each row binds ONE Employee to an unguessable random ``token``. The worker opens
-their personal URL ``/masar?w=<token>`` (or scans the matching QR); the Masar
-worker endpoints resolve that token server-side back to this single Employee and
-scope every query to them. The client never supplies an Employee id, so one
-token can only ever surface its own worker's data.
-
-Why a dedicated link DocType (not Custom Fields on Employee): adding fields to
-the standard HRMS Employee needs a Custom Field fixture + hooks wiring and
-clutters the HR form. A small purpose-built record is auto-discovered by Frappe,
-owns its own desk action (generate / regenerate + QR), keeps the access token
-off the Employee master, and makes token-scoping a single indexed lookup.
-
-No financial impact: this is identity/issuance metadata only.
-"""
 
 from __future__ import annotations
 
@@ -59,15 +43,6 @@ TOKEN_TTL_DAYS = 180
 
 
 def _new_token() -> str:
-    """A fresh url-safe random raw token, whose HASH is unique across the doctype.
-
-    ``frappe.generate_hash`` (frappe/__init__.py:1134) supplies the randomness. The
-    one thing it cannot do is promise the value is unused, so the collision probe
-    runs against the stored HASH — never the raw token, which is never persisted.
-    Refusing after eight attempts is deliberate: at this length a real collision run
-    means the entropy source is broken, and issuing anyway would mint a credential
-    that opens someone else's portal.
-    """
     for _attempt in range(8):
         candidate = frappe.generate_hash(length=TOKEN_BYTES * 2)
         if not frappe.db.exists("Masar Worker Token", {"token": hash_token(candidate)}):
@@ -76,25 +51,12 @@ def _new_token() -> str:
 
 
 class MasarWorkerToken(Document):
-    """Controller for the worker and driver access link.
-
-    ``track_changes`` stays 0 on this DocType while the configuration masters carry
-    it, and the reason is the credential itself: ``token`` is a Data field, and
-    ``version.get_diff`` (frappe/core/doctype/version/version.py:138-142) skips only
-    the fieldtypes in ``FIELDTYPES_TO_IGNORE``, so every rotation would copy the old
-    and the new link into a Version row that a System Manager can read. Turning the
-    flag on here would publish the secret the record exists to protect. Rotation is
-    already accounted for by the credential events this controller logs, which name
-    the actor and the subject and never the token.
-    """
 
     def _issuance_subject(self) -> tuple[str, str | None]:
-        """Returns the issuance audience and its bound subject, the driver or the employee."""
         audience = DRIVER if self.holder_type == DRIVER else WORKER
         return audience, self.driver if audience == DRIVER else self.employee
 
     def _set_defaults(self):
-        """Discard legacy Worker defaults only from exact new Driver rows."""
         worker_binding = (
             self.get("party_type"),
             self.get("party"),
@@ -105,13 +67,11 @@ class MasarWorkerToken(Document):
             self.party_type, self.party, self.employee = worker_binding
 
     def _sync_autoname_field(self):
-        """Keep legacy field-based naming from populating Driver.party."""
         if self.holder_type == DRIVER:
             return
         super()._sync_autoname_field()
 
     def _reject_temporary_worker(self) -> None:
-        """Blocks issuing a worker token to a party still on Temporary Worker status."""
         if self.party_type == "Temporary Worker":
             frappe.throw(
                 _(
@@ -121,7 +81,6 @@ class MasarWorkerToken(Document):
             )
 
     def _validate_subject_binding_immutability(self) -> None:
-        """Prevent an issued credential from being reassigned to another subject."""
         if self.is_new():
             return
         persisted = frappe.db.get_value(
@@ -143,7 +102,6 @@ class MasarWorkerToken(Document):
             )
 
     def _validate_disabled_credential_reactivation(self) -> None:
-        """Allow disabled-to-enabled only after server-side credential rotation."""
         reissue_guard = getattr(self, "_credential_reissue_guard", None)
         if hasattr(self, "_credential_reissue_guard"):
             del self._credential_reissue_guard
@@ -182,14 +140,6 @@ class MasarWorkerToken(Document):
             frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     def _mint(self) -> str:
-        """Generates a fresh raw token, stages its hash and encrypted copy, and resets the expiry.
-
-        Also clears ``consumed_on``: a freshly minted value is, by definition, an
-        unconsumed enrolment key -- the stale mark from a PREVIOUS mint would
-        otherwise refuse every future enrolment for this subject forever, since
-        ``consume_enrolment_key`` (portal_device.py) treats a set ``consumed_on``
-        as spent regardless of which raw value it was set against.
-        """
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         if not self.is_new() and frappe.db.table_exists("Portal Push Subscription"):
@@ -211,7 +161,6 @@ class MasarWorkerToken(Document):
         return raw
 
     def _persist_pending_token_fields(self) -> None:
-        """Persist only the generated permlevel-1 fields after issuer policy."""
         pending = getattr(self, "_pending_token_fields", None)
         if not pending:
             return
@@ -230,9 +179,6 @@ class MasarWorkerToken(Document):
             del self._credential_reissue_guard
 
     def recover_token(self) -> str:
-        """Recover the raw token from its encrypted copy (to re-share the SAME link).
-        Falls back to a rotation only when no usable ciphertext exists (a legacy row
-        the hashing migration has not reached, or a key mismatch)."""
         audience, subject = self._issuance_subject()
         if authorize_issuance(audience, subject):
             return self.regenerate()
@@ -244,7 +190,6 @@ class MasarWorkerToken(Document):
         return self.regenerate()
 
     def autoname(self):
-        """Names the record after the bound driver for a Driver token, otherwise after the party."""
         if self.holder_type == DRIVER:
             if not self.driver:
                 frappe.throw(_("A Salis Driver is required for a driver access token."))
@@ -253,7 +198,6 @@ class MasarWorkerToken(Document):
             self.name = self.party
 
     def before_validate(self):
-        """Enforces binding immutability, a required driver or employee, and issuance authorization."""
         self._validate_subject_binding_immutability()
         if self.holder_type == DRIVER:
             if not self.driver:
@@ -269,7 +213,6 @@ class MasarWorkerToken(Document):
         self._validate_disabled_credential_reactivation()
 
     def before_change(self):
-        """Recheck locked database state before Document.db_set updates."""
         if self.is_new() or not self.enabled:
             return
         audience, subject = self._issuance_subject()
@@ -277,26 +220,21 @@ class MasarWorkerToken(Document):
         self._validate_disabled_credential_reactivation()
 
     def _get_missing_mandatory_fields(self):
-        """Exclude only the Worker-specific party type from Driver validation."""
         missing = super()._get_missing_mandatory_fields()
         if self.holder_type == DRIVER:
             return [item for item in missing if item[0] != "party_type"]
         return missing
 
     def before_insert(self):
-        """Syncs the linked party, rejects temporary workers, and mints the token before insert."""
         if self.holder_type != DRIVER:
             sync_party_employee(self)
             self._reject_temporary_worker()
         self._mint()
 
     def after_insert(self):
-        """Persists the freshly minted token's hash and ciphertext after the row is inserted."""
         self._persist_pending_token_fields()
 
     def regenerate(self):
-        """Rotate the token; any link or QR shared before this call stops resolving.
-        Returns the fresh RAW token — the only moment it is available in clear."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         raw = self._mint()
@@ -305,11 +243,6 @@ class MasarWorkerToken(Document):
         return raw
 
     def extend_expiry(self):
-        """Push the expiry out by a fresh TTL window WITHOUT rotating the token.
-
-        Show Link re-shares the SAME distributed link, so it must keep that link
-        alive (a worker who is still active should never lose their link just because
-        the window lapsed). Token + QR are unchanged; only ``expires_on`` advances."""
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         self.expires_on = frappe.utils.add_to_date(frappe.utils.now_datetime(), days=TOKEN_TTL_DAYS)
@@ -320,7 +253,6 @@ class MasarWorkerToken(Document):
 
 
 def get_or_create_for_employee(employee: str) -> "MasarWorkerToken":
-    """Return the worker's token row, creating one on first use."""
     authorize_issuance(WORKER, employee)
     if not frappe.db.exists("Employee", employee):
         frappe.throw(_("Employee {0} does not exist.").format(employee))
@@ -333,17 +265,6 @@ def get_or_create_for_employee(employee: str) -> "MasarWorkerToken":
 
 
 def reshare_worker_link(employee: str) -> str | None:
-    """Return a policy-authorized Worker link, rotating scoped re-shares.
-
-    PERMLEVEL IS NEVER CONSULTED ON THIS PATH, so it protects the stored record and
-    not the credential: every issuer role -- Accommodation Manager, HR User, Resident
-    Supervisor -- still obtains the RAW token here, because ``recover_token`` decrypts
-    ``token_enc`` (or mints a fresh one) and it is returned inside the link. The only
-    gate is ``authorize_issuance``, which checks role and project/building scope alone.
-    That is deliberate: re-sharing a link means handing over the credential. Withdrawing
-    a role's permlevel-1 row stops it reading the hash and ciphertext OFF THE RECORD and
-    nothing more -- see ``test_masar_worker_token_credential_permlevel``.
-    """
     scoped_issuer = authorize_issuance(WORKER, employee)
     name = frappe.db.get_value(
         "Masar Worker Token",
@@ -369,12 +290,6 @@ def reshare_worker_link(employee: str) -> str | None:
 
 @frappe.whitelist(methods=["POST"])
 def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
-    """Desk action: issue (or rotate) a worker's personal Masar link + QR.
-
-    Permission-gated on write access to Masar Worker Token. Returns the link, the
-    token, an SVG data-URI QR image (or None if QR rendering is unavailable), and
-    the worker's phone (Employee.cell_number) so the caller can offer a WhatsApp
-    share. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     scoped_issuer = authorize_issuance(WORKER, employee)
     doc = get_or_create_for_employee(employee)
@@ -395,10 +310,6 @@ def issue_worker_link(employee: str, regenerate: int = 0) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def batch_issue_worker_links(employees_json) -> list:
-    """Issue (or fetch) the Masar link + QR for several Employees in ONE call — the
-    Arrivals Desk group-QR action. Same per-worker behaviour as issue_worker_link
-    (mints a token when missing), permission-checked once. Returns one row per
-    Employee: ``{employee, employee_name, link, qr, phone}``."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     employees = frappe.parse_json(employees_json) or []
     scoped_issuers = {
@@ -446,11 +357,6 @@ _ELEVATED_DRIVER_USER_ROLES = {
 def _issue_token(
     doc: "MasarWorkerToken", regenerate: int = 0, scoped_issuer: bool = False
 ) -> str:
-    """Issue or rotate a token for any holder (worker or driver): the logic is
-    holder-agnostic, keyed only off the MasarWorkerToken doc. Every worker and driver desk issuance funnels through here, so the one
-    audit write lives here too — naming the branch actually taken, because "re-shared
-    the same link" and "rotated, invalidating the old QR" are different events for
-    anyone later reconstructing who held a live credential when."""
     audience, subject = doc._issuance_subject()
     raw = getattr(doc, "_plaintext_token", None)
     if not doc.enabled:
@@ -470,7 +376,6 @@ def _issue_token(
 
 
 def get_or_create_for_driver(driver: str) -> "MasarWorkerToken":
-    """Return the driver's token row (holder_type=Driver), creating one on first use."""
     authorize_issuance(DRIVER, driver)
     if not frappe.db.exists("Salis Driver", driver):
         frappe.throw(_("Salis Driver {0} does not exist.").format(driver))
@@ -487,23 +392,6 @@ def get_or_create_for_driver(driver: str) -> "MasarWorkerToken":
 
 
 def _disable_legacy_driver_user(driver: str) -> bool:
-    """Disable a legacy Website User only after the driver's barcode is live.
-
-    System users and Website Users with elevated operational roles stay enabled.
-    The operation is reversible and idempotent; it never deletes an account.
-
-    Through the User document, not the ``enabled`` column: retiring the login is the
-    whole point, and only ``User.check_enable_disable``
-    (frappe/core/doctype/user/user.py:273-280) ends the account's LIVE sessions. A raw
-    write left a driver already signed in on the old portal working until the session
-    aged out, which is exactly the window the barcode replaces.
-
-    That save carries ``ignore_permissions`` because the caller is the Fleet role
-    ``issue_driver_link`` already gated on write over Masar Worker Token. Removing the
-    flag would mean granting a Fleet role write on User — site-wide account control, to
-    retire one driver login — so the narrower bypass is the safer of the two. Without it
-    the desk action raises and the legacy login outlives the barcode replacing it.
-    """
     if not driver:
         return False
     token = frappe.db.get_value(
@@ -536,12 +424,6 @@ def _disable_legacy_driver_user(driver: str) -> bool:
 
 @frappe.whitelist(methods=["POST"])
 def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
-    """Desk action: issue (or rotate) a driver's personal barcode link + QR.
-
-    Permission-gated on write access to Masar Worker Token (same gate as the worker
-    action). Returns the link, the RAW token (shown ONCE), an SVG data-URI QR, the
-    expiry, and the driver's phone for a WhatsApp share. The raw token is never
-    stored or logged — only its hash + Fernet ciphertext persist. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     scoped_issuer = authorize_issuance(DRIVER, driver)
     doc = get_or_create_for_driver(driver)
@@ -563,11 +445,6 @@ def issue_driver_link(driver: str, regenerate: int = 0) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def batch_issue_driver_links(drivers_json) -> list:
-    """Issue (or fetch) the barcode link + QR for several Salis Drivers in ONE call.
-
-    Same per-driver behaviour as issue_driver_link (mints a token when missing),
-    permission-checked once. Returns one row per driver: ``{driver, driver_name,
-    link, qr, phone}``. Raw tokens appear only in the returned payload, never logged."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     drivers = frappe.parse_json(drivers_json) or []
     scoped_issuers = {
@@ -604,19 +481,6 @@ def batch_issue_driver_links(drivers_json) -> list:
 
 @frappe.whitelist(methods=["POST"])
 def revoke_driver_link(driver: str) -> dict:
-    """Desk action: kill a driver's barcode link now, without waiting for clearance.
-
-    The automatic revocations (clearance submit, suspension, a non-Active status) each
-    need an event to happen first. A lost phone, a shared QR or a driver who walked off
-    site is not one of those events, so without this the only way to withdraw a live
-    passwordless credential from the desk was to ROTATE it — which mints a NEW working
-    link rather than leaving none. Rotation is the wrong tool for withdrawal.
-
-    Authorized by ``authorize_revocation``: the same fleet roles and the same project
-    scope as issuance, minus the still-Active requirement (see that function). Returns
-    how many enabled rows were disabled — 0 is the honest answer for a driver who had
-    no live link, not a failure. The revocation itself is audit-logged inside
-    ``revoke_subject_tokens``, so every path lands one row. No financial impact."""
     frappe.has_permission("Masar Worker Token", "write", throw=True)
     authorize_revocation(DRIVER, driver)
     revoked = revoke_subject_tokens(DRIVER, driver)
@@ -629,21 +493,10 @@ def revoke_driver_link(driver: str) -> dict:
 
 
 def on_driver_clearance_submit(doc, method=None):
-    """doc_events hook (Driver Clearance on_submit): auto-revoke the driver's barcode on
-    exit clearance. A submitted clearance is the exit event, so the passwordless bearer
-    credential is disabled the moment the driver is cleared out. Fail-safe: revoking is
-    the safe direction; re-issue a fresh QR from the desk if a clearance is cancelled."""
     revoke_subject_tokens(DRIVER, getattr(doc, "driver", None))
 
 
 def masar_qr_data_uri(text: str):
-    """Render ``text`` as a base64 SVG data-URI QR, or None if unavailable.
-
-    Uses ``pyqrcode`` (bundled with Frappe — ``frappe.twofactor`` relies on it;
-    the ``qrcode`` package is NOT installed on the bench). pyqrcode emits a crisp,
-    tiny vector SVG that scales cleanly on screen and in print. Kept defensive so a
-    missing optional dependency degrades to a plain link rather than erroring the
-    desk action."""
     try:
         import pyqrcode
 
@@ -656,12 +509,6 @@ def masar_qr_data_uri(text: str):
 
 
 def doc_verify_qr(doctype: str, name: str):
-    """QR data-URI pointing at the document's own desk record, for print verification.
-
-    A printed page leaves the system; the QR is how a reader holding the paper gets back
-    to the record that issued it. It lives beside :func:`masar_qr_data_uri` so one module
-    owns every QR this app draws.
-    """
     if not (doctype and name):
         return None
     return masar_qr_data_uri(

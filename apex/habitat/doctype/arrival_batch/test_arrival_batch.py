@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Arrival Batch's derived expected-count and title.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``validate`` in ``arrival_batch.py`` is what is exercised, not a
-stub.
-"""
 
 from __future__ import annotations
 
@@ -40,7 +34,6 @@ class TestArrivalBatchComputedFields(FrappeTestCase):
 
 class TestArrivalBatchGuestIntake(FrappeTestCase):
     def test_a_guest_submission_cannot_name_the_temporary_worker_a_row_already_is(self):
-        """Reconciliation sets "Arrived As" at the desk; a supplier's POST may not."""
         worker = frappe.get_doc(
             {
                 "doctype": "Temporary Worker",

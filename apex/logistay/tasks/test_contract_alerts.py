@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The telecom contract expiry notice window is the operator's number, not a literal.
-
-The window decides which contracts the daily watch matches, so a site that changes
-it changes who gets warned and when. These cases prove the reader follows the
-Single and that an untouched site keeps the shipped 30 days.
-"""
 
 from __future__ import annotations
 

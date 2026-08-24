@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Safety Finding Ledger's immutability and delete refusal.
-
-Patterned on frappe/tests/test_document.py. Every case crosses
-``insert``/``save``/``delete`` so the two ``on_update``/``on_trash`` guards in
-``safety_finding_ledger.py`` are what is exercised, not a stub. No role holds
-delete on this DocType's own DocPerm, so ``on_trash`` refuses everyone
-outside install/migrate -- Administrator included, unlike Cleaning Compliance
-Ledger's System-Manager carve-out.
-"""
 
 from __future__ import annotations
 

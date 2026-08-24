@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Operational Depreciation Snapshot's book-value computation and
-its cancellation-reason guard.
-
-Patterned on frappe/tests/test_document.py for the computed-field case and on
-erpnext's submittable-document tests for the cancel guard. Every case crosses
-``insert``/``submit``/``cancel`` so the module-level ``validate`` and
-``before_cancel`` in ``operational_depreciation_snapshot.py`` -- wired
-through hooks.py's doc_events, not the class body -- are what is exercised,
-not a stub.
-"""
 
 from __future__ import annotations
 

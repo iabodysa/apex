@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Supplier form-dashboard links for Apex Habitat.
-
-Wired via override_doctype_dashboards in hooks.py. Supplier is an ERPNext
-doctype, so this is the only supported mechanism. Frappe passes the native
-Supplier dashboard (POs, invoices, payments) as `data`; we MERGE our housing,
-subcontracting, and cost-recovery links into it without dropping the native ones.
-
-The Salis (Movement) group is reference links only: the rental office is an ERPNext
-Supplier, and settlement routes through a Payment Request record. No GL Entry is posted
-from here.
-"""
 
 from __future__ import annotations
 
@@ -17,7 +6,6 @@ import frappe
 
 
 def get_data(data=None):
-    """Merges housing, subcontracting and cost-recovery links into the native Supplier dashboard."""
     data = data or {}
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})

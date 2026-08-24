@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Idle Resident Detection — housed workers whose work has ended.
-
-Auto-detection layer the Idle Resident Report DocType lacked: an Idle Resident
-Report only existed once someone created it by hand, so a forgotten resident went
-unseen. This report derives the candidates from the records — an active
-Accommodation Assignment (the canonical active-stay definition: submitted, no
-check-out date) whose linked Project is Completed/Cancelled, or which has no
-Project link at all — and shows whether an Idle Resident Report has already been
-opened, so a manager triages the undetected ones rather than re-logging known
-ones.
-"""
 
 import frappe
 from frappe import _
@@ -24,7 +13,6 @@ OPEN_REPORT_STATUSES = ("Open", "Acknowledged")
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for housed employees whose project has ended."""
     filters = filters or {}
     columns = get_columns()
     data = _get_data(filters)
@@ -42,7 +30,6 @@ def execute(filters=None):
 
 
 def get_columns():
-    """Returns the column definitions for the idle resident detection report."""
     return [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Housing Assignment", "width": 150},
         {"label": _("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 140},
@@ -60,7 +47,6 @@ def get_columns():
 
 
 def _get_data(filters):
-    """Returns idle-resident rows from active assignments with an ended or missing project."""
     query_filters = {"docstatus": 1, "check_out_date": ["is", "not set"]}
 
     restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Housing Assignment")
@@ -121,7 +107,6 @@ def _get_data(filters):
 
 
 def _project_status_map(assignments):
-    """One read for the status of every distinct linked project."""
     project_names = list({a.project for a in assignments if a.project})
     if not project_names:
         return {}
@@ -134,9 +119,6 @@ def _project_status_map(assignments):
 
 
 def _open_idle_reports_by_assignment():
-    """Most-recent open/acknowledged Idle Resident Report per assignment, so each
-    candidate shows whether it is already logged. Ordered ascending so the last
-    write wins and the newest report is kept."""
     rows = frappe.get_all(
         "Idle Resident Report",
         filters={"status": ["in", OPEN_REPORT_STATUSES], "assignment": ["is", "set"]},

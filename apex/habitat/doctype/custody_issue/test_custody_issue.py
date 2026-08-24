@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Custody Issue's holder resolution, return-date default, and the
-serialized-row rule it shares with Custody Return.
-
-Patterned on test_lease.py: every case runs against an unsaved Custody Issue
-built with ``frappe.new_doc``/``doc.append`` -- nothing is inserted.
-``_set_expected_return_date`` and ``validate_serialized_rows`` each make one
-kind of DB read (Custody Article / Custody Asset Category lookups, and a
-serialized-article existence check); both are mocked so the date-window and
-serial-requirement decisions are exercised without an article master record.
-"""
 
 from __future__ import annotations
 

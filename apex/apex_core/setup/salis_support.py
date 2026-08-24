@@ -1,13 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Native support desk wiring for Salis, applied at install and migrate.
-
-``ensure_support_holiday_list`` and ``configure_support_sla`` reach here only from
-``setup_wizard.py``, inside the one-time ``setup_wizard_complete`` flow Frappe gates
-behind ``is_setup_complete()`` (frappe/desk/page/setup_wizard/setup_wizard.py:54-55),
-so the acting user is always the site's sole account, Administrator, who already
-carries every permission (frappe/permissions.py:107,273,506).
-"""
 
 from __future__ import annotations
 
@@ -38,13 +30,6 @@ ISSUE_ROLE_PERMISSIONS = (
 )
 
 def _parse_workdays(value) -> list[str]:
-    """The workdays the operator chose, whatever shape the wizard sent them in.
-
-    ``frappe.parse_json`` (frappe/__init__.py:2491) handles the JSON case. The one
-    thing it cannot do is accept the comma-separated string a plain text field
-    produces — it raises — so the fallback below it splits by comma rather than
-    failing the whole setup step over a formatting difference.
-    """
     if isinstance(value, str):
         value = value.strip()
         if not value:
@@ -64,13 +49,6 @@ def ensure_support_holiday_list(
     country=None,
     subdivision=None,
 ):
-    """Resolve or create the setup calendar through ERPNext's native Holiday List.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the Holiday List and hrms'
-    own ``get_weekly_off_dates`` fills it. Nothing here re-implements a calendar:
-    the one thing the primitive cannot do is decide WHICH list a Salis support SLA
-    should hang off, which is the operator's answer on the wizard slide.
-    """
     name = (name or "").strip()
     if not (name and from_date and to_date):
         frappe.throw(
@@ -174,16 +152,6 @@ def _validate_existing_sla(doc, holiday_list, workdays, start_time, end_time):
 def configure_support_sla(
     *, enabled=False, holiday_list=None, workdays=None, start_time=None, end_time=None
 ):
-    """Create the native Issue SLA only after the operator supplies its site schedule.
-
-    The SLA is a native Service Level Agreement built with ``frappe.new_doc``
-    (frappe/__init__.py:1152); the switch is written with ``frappe.db.set_single_value``
-    (frappe/database/database.py:782) rather than by loading the Single, so enabling
-    support does not re-run that settings document's validation mid-wizard.
-
-    Refuses loudly when the schedule is incomplete: an SLA with no workdays and no
-    hours accepts every ticket and promises nothing, which reads as configured.
-    """
     if not enabled:
         return None
     workdays = _parse_workdays(workdays)
@@ -246,55 +214,18 @@ def configure_support_sla(
     return doc.name
 
 def refuse_shipped_issue_type_edit(doc, method=None, *args, **kwargs):
-    """Refuse renaming or editing an issue type the app ships.
-
-    ``Issue Type`` carries ``allow_rename: 1`` and its only field is ``description``, and
-    the fixture is reimported with ``force=True``, which deletes the row and re-inserts it
-    from a file that carries no description. So an annotation is wiped on the next migrate
-    and a rename leaves the shipped name recreated beside the renamed one. Both are silent.
-
-    Only the six shipped names are covered; an operator's own type is untouched. An Arabic
-    label belongs in the translation file, which is why renaming is refused rather than
-    accommodated.
-    """
     _refuse_if_shipped(doc, _("renamed or edited"), ISSUE_TYPES, _("issue type"))
 
 
 def refuse_shipped_issue_priority_deletion(doc, method=None):
-    """Refuse deleting a priority the app ships, because the next update restores it.
-
-    ``apex/fixtures/issue_priority.json`` travels the same ``force=True`` reimport as the
-    issue types three lines above it in the hooks list, so a deleted priority comes back
-    with nothing said. ``SLA_PRIORITIES`` names all four in the support contract this app
-    builds, so removing one also leaves that contract naming a priority that is gone until
-    the next migrate puts it back.
-
-    Only the four shipped names are covered; a priority the operator adds is untouched.
-    """
     _refuse_if_shipped(doc, _("deleted"), ISSUE_PRIORITIES, _("issue priority"))
 
 
 def refuse_shipped_issue_type_deletion(doc, method=None):
-    """Refuse deleting an issue type the app ships, because the next update restores it.
-
-    ``apex/fixtures/issue_type.json`` is reimported with ``force=True`` on every migrate
-    (data_import.py:288, and import_file.py:130 puts the skip gate behind ``if not
-    force``), so a deleted shipped type comes back with nothing said. ERPNext grants
-    Issue Type write to Support Team as well as System Manager, so an operator can make
-    that deletion, work on the assumption it held, and find the type back after an
-    update.
-
-    Only deletion of a SHIPPED name is refused. An added type is not in the file, so the
-    reimport never touches it and it survives — there is no surprise to prevent there.
-
-    Stands down while Frappe is installing, migrating or patching, so the fixture's own
-    import still lands.
-    """
     _refuse_if_shipped(doc, _("deleted"), ISSUE_TYPES, _("issue type"))
 
 
 def _refuse_if_shipped(doc, attempted_action, shipped_names, family):
-    """Throw when ``doc`` is one the app ships and a person, not Frappe, is writing it."""
     if doc.name not in shipped_names:
         return
     if frappe_is_writing_its_own_records():
@@ -310,7 +241,6 @@ def _refuse_if_shipped(doc, attempted_action, shipped_names, family):
 
 
 def grant_issue_role_permissions():
-    """Create missing native Custom DocPerm rows without rewriting operator-owned rows."""
     if not frappe.db.exists("DocType", "Issue"):
         return
     for role, flags in ISSUE_ROLE_PERMISSIONS:

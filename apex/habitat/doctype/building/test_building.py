@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Building's abbreviation lock.
-
-Patterned on frappe/tests/test_document.py. The building is built and saved
-through ``apex.tests.factories.make_building``/``make_room`` and then
-re-saved so ``before_save``'s ``_guard_abbreviation_lock`` in
-``building.py`` -- wired through hooks.py's doc_events, not the class body
--- is what is exercised, not a stub.
-"""
 
 from __future__ import annotations
 

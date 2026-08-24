@@ -9,7 +9,6 @@ from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Trip Start Register report."""
     columns = [
         {"label": frappe._("Trip Date"), "fieldname": "trip_date", "fieldtype": "Date", "width": 110},
         {"label": frappe._("Status"), "fieldname": "status", "fieldtype": "Data", "width": 110},

@@ -1,12 +1,5 @@
 # Copyright (c) 2026, Apex contributors
 
-"""Shared bootstrap for the www portal host pages.
-
-Portal host pages share a non-secret client contract, appearance projection, and the
-Guest -> /login redirect. Page-specific authentication and authorization stay local.
-
-This module does not validate credentials, grant capabilities, or mint CSRF tokens.
-"""
 
 from __future__ import annotations
 
@@ -75,7 +68,6 @@ def build_portal_bootstrap(
     language: str,
     subject_scope: str,
 ) -> dict:
-    """Return the non-secret state shared by every Apex portal shell."""
     _validate_entry_path(entry, public_path)
     if not isinstance(capabilities, (list, tuple, set, frozenset)) or any(
         not isinstance(capability, str) or not capability
@@ -100,7 +92,6 @@ def build_portal_bootstrap(
     }
 
 def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
-    """Return presentation and PWA metadata without authorization state."""
     _validate_entry_path(entry, public_path)
     pwa = _PWA_META.get(entry, {})
     return {
@@ -114,14 +105,6 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     }
 
 def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
-    """Return a stable client storage namespace without exposing the subject.
-
-    Keyed through ``frappe.utils.password.get_encryption_key`` (frappe/utils/password.py:216),
-    which MINTS and persists the key on a site that has none. Reading
-    ``site_config.encryption_key`` directly cannot open a freshly installed site, because
-    nothing in frappe writes that key until something first asks for it — and on this app
-    the portal is that first caller.
-    """
     _validate_entry_path(entry, next(iter(PORTAL_PUBLIC_PATHS[entry])))
     material = "\x1f".join(
         (frappe.local.site or "site", entry, subject or "unauthenticated")
@@ -138,13 +121,6 @@ def publish_portal_context(
     capabilities,
     subject: str | None,
 ):
-    """Publish the shared shell contract after its route authenticated the caller.
-
-    ``frappe.get_site_config`` (frappe/__init__.py:329) is read rather than
-    ``frappe.conf`` so a value the site sets after boot is seen; only the keys the
-    shell needs are copied into the context, because everything placed here reaches
-    the browser.
-    """
     conf = frappe.get_site_config()
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
@@ -170,11 +146,6 @@ def publish_portal_context(
     return context
 
 def guest_redirect(path: str) -> None:
-    """Redirect an unauthenticated visitor to /login then back to ``path``.
-
-	Raises ``frappe.Redirect`` for Guest; a no-op for a logged-in user, so a page
-	can call this unconditionally at the top of ``get_context``.
-	"""
     if frappe.session.user == "Guest":
         frappe.local.flags.redirect_location = "/login?redirect-to=" + path
         raise frappe.Redirect

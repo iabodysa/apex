@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Operational Depreciation Policy's numeric guards.
-
-Patterned on frappe/tests/test_document.py. Every case crosses ``insert`` so
-``validate`` in ``operational_depreciation_policy.py`` is what is exercised,
-not a stub.
-"""
 
 from __future__ import annotations
 

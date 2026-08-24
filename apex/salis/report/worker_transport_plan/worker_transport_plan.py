@@ -8,7 +8,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Worker Transport Plan report."""
     filters = filters or {}
 
     columns = [

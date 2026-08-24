@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Vehicle Compliance Register report."""
     filters = filters or {}
 
     columns = [

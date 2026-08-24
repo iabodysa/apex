@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Vehicle Handover Checklist Template controller."""
 
 import frappe
 from frappe import _
@@ -12,10 +11,6 @@ class VehicleHandoverChecklistTemplate(Document):
 
 @frappe.whitelist(methods=["POST"])
 def load_template_into_doc(handover, template):
-    """Append a checklist template's items into a Draft Vehicle Handover.
-
-    Safe: only appends rows to handover_check_items. Never submits or mutates the vehicle.
-    """
     doc = frappe.get_doc("Vehicle Handover", handover)
     frappe.has_permission("Vehicle Handover", "write", doc=doc, throw=True)
 

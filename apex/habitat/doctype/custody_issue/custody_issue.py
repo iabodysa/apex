@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Issue controller."""
 
 from __future__ import annotations
 
@@ -23,7 +22,6 @@ class CustodyIssue(Document):
 
 
 def validate(doc, method=None):
-    """Syncs holder user, requires positive-qty items, checks serials, and defaults return date."""
     sync_party_employee(doc, employee_field="issued_to_employee")
     _set_holder_user(doc)
     for row in doc.items:
@@ -35,12 +33,6 @@ def validate(doc, method=None):
 
 
 def _snapshot_unit_values(doc):
-    """Freeze each line's unit value from the article master the first time it is written.
-
-    The worker signs the receipt against the value printed beside each article, so a later
-    edit to the article's standard cost must not move what he signed. Only a blank value is
-    filled, which leaves an operator override and every already-issued line untouched.
-    """
     for row in doc.items:
         if row.unit_value or not row.article:
             continue
@@ -48,10 +40,6 @@ def _snapshot_unit_values(doc):
 
 
 def _set_holder_user(doc):
-    """Mirror the holder's login user from the employee so receipt notifications
-    have a real address to send to (a notification recipient field must hold an
-    email/user, not an Employee docname). Runs after the employee is synced; the
-    declarative fetch_from on the form path can lag the controller-set employee."""
     doc.issued_to_user = (
         frappe.db.get_value("Employee", doc.issued_to_employee, "user_id")
         if doc.issued_to_employee
@@ -60,8 +48,6 @@ def _set_holder_user(doc):
 
 
 def validate_serialized_rows(doc):
-    """A serialized article is one physical unit per line: it needs a serial_no
-    and qty must be 1. Shared by Custody Issue and Custody Return."""
     articles = [row.article for row in doc.items if row.article]
     if not articles:
         return
@@ -80,9 +66,6 @@ def validate_serialized_rows(doc):
 
 
 def _set_expected_return_date(doc):
-    """Default the return due date from the most conservative category window.
-    Only fills when blank so a manual override is preserved; uses the maximum
-    default_custody_days across the issued articles' categories."""
     if doc.expected_return_date or not doc.issue_date:
         return
     max_days = 0
@@ -99,7 +82,6 @@ def _set_expected_return_date(doc):
 
 
 def on_submit(doc, method=None):
-    """Blocks submission when store stock is short, marks the issue Issued, and posts custody stock."""
     _assert_source_availability(doc)
     doc.db_set("issued_by", frappe.session.user)
     doc.db_set("status", "Issued")
@@ -107,13 +89,6 @@ def on_submit(doc, method=None):
 
 
 def _assert_source_availability(doc):
-    """Reject the issue if the building store cannot cover the requested quantity
-    for any article (aggregated per article, in case of duplicate rows).
-
-    Mirrors Custody Handover's source-availability gate: issuing must
-    not drive the store balance negative. Only the case where stock is actually
-    posted is checked — an issue naming no holder at all moves no stock
-    (see ``_post_custody_stock``), so it has nothing to verify."""
     if not _holder(doc)[1]:
         return
     needed = {}
@@ -132,17 +107,12 @@ def _assert_source_availability(doc):
 
 
 def _holder(doc):
-    """The (party_type, party) this issue hands stock to. ``issued_to_employee`` is the
-    older Employee-only field and still wins where it is set; otherwise the document's
-    own party pair carries the holder, which is how a Temporary Worker is named."""
     if doc.get("issued_to_employee"):
         return "Employee", doc.issued_to_employee
     return doc.get("party_type"), doc.get("party")
 
 
 def _post_custody_stock(doc):
-    """Move stock from the building store into the holder's custody (same building) on
-    the Accommodation Stock Ledger. Skipped for a free-text issue naming no holder."""
     party_type, party = _holder(doc)
     if not party or has_stock_entries("Custody Issue", doc.name):
         return
@@ -157,9 +127,6 @@ def _post_custody_stock(doc):
 
 
 def before_cancel(doc, method=None):
-    """Every refusal a cancel can raise lives here, before db_update() stamps
-    docstatus 2 — so a refused issue is left submitted rather than reading as
-    cancelled for the rest of the request. Read-only; writes nothing."""
     returned = frappe.get_all(
         "Custody Return",
         filters={"custody_issue": doc.name, "docstatus": 1},
@@ -175,6 +142,5 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Reverses the posted custody stock movement, unnames the issuer, and marks the issue cancelled."""
     doc.db_set("issued_by", None)
     reverse_and_mark_cancelled(doc, "Custody Issue")

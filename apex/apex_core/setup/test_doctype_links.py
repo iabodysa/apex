@@ -1,22 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A DocType a user opens must reach what hangs off it without a search.
-
-``links`` in a customisation file is synced by ``sync_customizations_for_doctype``
-(frappe/modules/utils.py:157-174): the "DocType Link" branch looks up each row by
-(parent, link_doctype, link_fieldname) and calls ``db_update`` when found, ``db_insert``
-only when absent — it is never deleted, so a row an operator adds through the desk
-Connections editor survives every migrate. This is why the same file may also carry
-``custom_perms`` (frappe/modules/utils.py:183-188, deleted and reinserted whole on every
-migrate) and the two must not be read as one mechanism.
-
-Every test below is derived, not hand-counted: it re-scans every DocType JSON the app
-ships for a genuine ``fieldtype: "Link"`` field whose ``options`` names the customised
-DocType, resolves a child-table field to the parent that embeds it, and compares that
-derived set against the ``links`` array on disk. A new inbound Link field that nobody
-wires into a Connections entry fails this test, and a stale entry pointing at a field
-that no longer exists fails it too.
-"""
 
 import json
 import pathlib
@@ -46,7 +29,6 @@ LINKED_DOCTYPE_BY_FILE = {
 
 
 def _doctype_jsons():
-    """One (name, declaration) pair per DocType JSON the app ships, skipping test fixtures."""
     found = {}
     for path in APP_ROOT.rglob("doctype/*/*.json"):
         if path.stem != path.parent.name:
@@ -59,7 +41,6 @@ def _doctype_jsons():
 
 
 def _child_table_parents(doctypes):
-    """Map a child DocType name to every (parent, table_fieldname) that embeds it."""
     parents = {}
     for name, data in doctypes.items():
         for field in data.get("fields", []):
@@ -69,7 +50,6 @@ def _child_table_parents(doctypes):
 
 
 def _expected_links(target, doctypes, child_parents):
-    """Every genuine inbound Link field to ``target``, as the tuple a links entry declares."""
     expected = set()
     for name, data in doctypes.items():
         if data.get("issingle"):
@@ -88,7 +68,6 @@ def _expected_links(target, doctypes, child_parents):
 
 
 def _declared_links(path):
-    """Every links entry on disk, as the same tuple shape ``_expected_links`` returns."""
     data = json.loads(path.read_text())
     declared = set()
     for entry in data.get("links", []):
@@ -104,8 +83,6 @@ def _declared_links(path):
 
 
 class TestCustomJsonCarriesNoCustomPerms(FrappeTestCase):
-    """``custom_perms`` is deleted and reinserted whole every migrate; Custom DocPerm is
-    seeded instead by ``app_owned_permissions_seed.seed_app_owned_permissions``."""
 
     def test_no_apex_customisation_file_carries_custom_perms(self):
         for path in CUSTOM_JSON_FILES:
@@ -115,8 +92,6 @@ class TestCustomJsonCarriesNoCustomPerms(FrappeTestCase):
 
 
 class TestDocTypeLinksMatchTheFieldsThatActuallyPointHere(FrappeTestCase):
-    """A links entry with no backing field, or a backing field with no links entry,
-    both leave a DocType a user opened unable to reach records that hang off it."""
 
     @classmethod
     def setUpClass(cls):

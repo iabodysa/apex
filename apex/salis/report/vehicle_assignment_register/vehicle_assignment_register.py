@@ -1,24 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Vehicle Assignment Register — who holds which vehicle, and who held it before.
-
-The question this answers is "who has vehicle X today", which nothing could answer from a
-report: Vehicle Assignment had no register at all, so the only way to see a vehicle's
-current holder was to open the vehicle and read a link, and the only way to see its
-history was to filter a list view by hand.
-
-An assignment is LIVE when it is submitted, its status is Active and it carries no end
-date. A submitted row that someone ended keeps its Active status, so the end date is what
-decides — reading the status alone would show a vehicle as held by a driver who returned
-it. That rule is stated once here and used by both the rows and the summary.
-
-Defaults to the live assignments only. Pass ``include_ended`` to see the history beside
-them, and the register then also carries each row's duration in days.
-
-Scoped: a user confined to projects sees only assignments on those projects. The scope
-comes from the same resolver the permission hook uses, so a scope correction reaches this
-report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -31,7 +12,6 @@ LIVE_STATUS = "Active"
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Vehicle Assignment Register report."""
     filters = filters or {}
     columns = get_columns(filters)
 
@@ -86,8 +66,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than
-    blank — a blank strip looks like a page that failed to load."""
     live = [r for r in data if r.get("is_held")]
     return [
         count_card(_("Assignments"), data),
@@ -100,7 +78,6 @@ def get_report_summary(data):
 
 
 def get_columns(filters):
-    """Returns the column definitions for the Vehicle Assignment Register, adding history columns."""
     columns = [
         {"label": _("Assignment"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Assignment", "width": 150},
         {"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Salis Vehicle", "width": 150},

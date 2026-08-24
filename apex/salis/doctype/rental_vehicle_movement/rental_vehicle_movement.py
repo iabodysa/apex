@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Rental Vehicle Movement controller.
-
-Captures the Receipt/Return lifecycle of a rented vehicle from a Rental Office.
-There is no explicit ``accrual_active`` state stored on the vehicle: a vehicle
-is considered in-service whenever it has a submitted Receipt with no later
-submitted Return. The Rental Accrual Ledger engine derives that window directly
-by querying these movements (see ``rental_engine.daily_rental_accrual``).
-
-Posts NO General Ledger / accounting entry of any kind.
-"""
 
 from __future__ import annotations
 
@@ -23,7 +13,6 @@ from apex.salis.utils import add_timeline_note
 
 class RentalVehicleMovement(Document):
     def validate(self):
-        """Validates the vehicle is rented, the daily rate, and the Receipt/Return sequence."""
         if self.vehicle:
             ownership = frappe.db.get_value("Salis Vehicle", self.vehicle, "ownership")
             if ownership != "Rented":
@@ -42,12 +31,6 @@ class RentalVehicleMovement(Document):
         self._guard_lifecycle()
 
     def _guard_lifecycle(self):
-        """Keep the Receipt/Return sequence sane so the accrual engine's in-service
-        window can't be corrupted: a Return needs a prior open Receipt to close,
-        and a second Receipt cannot open while one is already open (the vehicle is
-        in-service whenever it has a submitted Receipt with no later submitted
-        Return). Counts submitted movements only — that is the window the engine
-        derives. Skips amendments of this same document."""
         if not (self.vehicle and self.movement_type):
             return
         open_receipt_date = self._open_receipt_date()
@@ -74,10 +57,6 @@ class RentalVehicleMovement(Document):
             )
 
     def _open_receipt_date(self):
-        """The movement_date of the vehicle's currently-open Receipt (a submitted
-        Receipt with no later submitted Return), or None when not in-service.
-        Excludes this document and its amendment lineage so re-amending a movement
-        does not see itself."""
         exclude = [n for n in (self.name, self.amended_from) if n]
         movements = frappe.get_all(
             "Rental Vehicle Movement",
@@ -98,7 +77,6 @@ class RentalVehicleMovement(Document):
         return open_receipt_date
 
     def on_submit(self):
-        """Adds a vehicle timeline note recording the rental receipt or return."""
         add_timeline_note(
             "Salis Vehicle",
             self.vehicle,
@@ -108,13 +86,6 @@ class RentalVehicleMovement(Document):
         )
 
     def on_cancel(self):
-        """Adds a vehicle timeline note and reverses any accrual this Receipt produced.
-
-        Only a Receipt ever names a Rental Accrual Ledger row's ``source_name`` (see
-        ``rental_engine._currently_received``), so a Return never has ledger rows to
-        reverse. Without this, the accrued days a cancelled Receipt justified would
-        outlive it and still be there for the next settlement to claim.
-        """
         if self.movement_type == "Receipt":
             reverse_rental_accrual("Rental Vehicle Movement", self.name)
 

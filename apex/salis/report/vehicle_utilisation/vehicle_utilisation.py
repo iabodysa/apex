@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Vehicle Utilisation - per-vehicle roll-up of trips, idle days and average
-utilisation, derived from the system-written Vehicle Utilisation Snapshot.
-
-The snapshot is a trailing-window memo (one row per vehicle per snapshot date),
-so this report aggregates snapshots in the chosen window: it sums trips and idle
-days and averages the utilisation percentage per vehicle. It is defensive about
-the source DocType: if Vehicle Utilisation Snapshot is not migrated yet, the
-report returns an empty data set rather than raising.
-
-Optional filters: vehicle, from_date / to_date (applied to snapshot_date).
-"""
 
 import frappe
 from frappe import _
@@ -22,7 +11,6 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
-    """Returns the columns, per-vehicle utilisation totals and summary cards for the report."""
     filters = filters or {}
 
     columns = [

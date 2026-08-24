@@ -1,32 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Housing Cleaning Audit — Script Report.
-
-Columns: date, building, housing_supervisor, status, submitted_at,
-rooms_cleaned (the posted cleaned-room count), photos_attached
-(count of area_photos child rows).
-
-rooms_cleaned is the immutable posted fact: it is read from the Cleaning
-Compliance Ledger (one live row per cleaned room, is_cancelled=0), NOT from the
-mutable Cleaning Log Room Detail child rows. So a historical cleaned-room count
-does not change when the source log's child rows are later edited; a cancel
-posts a negating reversal (flagged is_cancelled) that nets the log out of the
-live count. The status/supervisor/photos columns are review-state and stay
-best-effort from the live log.
-
-Gap detection: for every (date, building) combination in the requested
-[from_date..to_date] window where no Cleaning Log exists (even a draft),
-a synthetic "Missed" row is emitted so managers can see missing coverage at a
-glance without needing to cross-reference the building list manually.
-
-Status derivation (for logs that do exist):
-  - Missed         : missed_cleaning=1
-  - Rework Required: rework_required=1 (and not missed)
-  - Completed      : supervisor_approved=1 (not missed/rework)
-  - Pending        : draft (docstatus=0), none of the above flags set
-
-Permission: Housing Supervisor users see only their own building(s).
-"""
 
 import frappe
 from frappe import _
@@ -39,7 +12,6 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
-    """Returns the rows and summary cards for the audit, with synthetic rows for missed building-days."""
     filters = filters or {}
 
     date_from = getdate(filters.get("from_date") or today())
@@ -86,7 +58,6 @@ def execute(filters=None):
 
 
 def _supervisor_by_building(all_buildings):
-    """Maps each building to its supervisor's full name, falling back to the user id."""
     supervisor_ids = list({b.responsible_supervisor for b in all_buildings
                            if b.responsible_supervisor})
     supervisor_names: dict[str, str] = {}
@@ -105,13 +76,6 @@ def _supervisor_by_building(all_buildings):
 
 
 def _cleaning_logs(date_from, date_to, chosen_building, allowed):
-    """Reads the non-cancelled Cleaning Logs in the window, newest day first.
-
-    Built with ``frappe.qb`` (frappe/query_builder) because a Script Report builds its
-    own SQL: ``permission_query_conditions`` applies to ``DatabaseQuery`` and never
-    runs here, so the caller's allowed buildings are passed in and applied explicitly.
-    That is the one thing this query cannot inherit and must state.
-    """
     cl = frappe.qb.DocType("Cleaning Log")
     query = (
         frappe.qb.from_(cl)
@@ -139,13 +103,6 @@ def _cleaning_logs(date_from, date_to, chosen_building, allowed):
 
 
 def _log_counts(log_names):
-    """Returns (rooms cleaned, photos attached) per log, both keyed by Cleaning Log name.
-
-    Two bulk reads with ``frappe.get_all`` (frappe/__init__.py:1996), keyed by the
-    log names already fetched, rather than a count per log: the one thing a per-row
-    count cannot do is stay bounded, and an audit over a
-    month of logs would issue one query per row twice over.
-    """
     rooms_cleaned_map: dict[str, int] = {}
     photos_map: dict[str, int] = {}
     if not log_names:
@@ -172,7 +129,6 @@ def _log_counts(log_names):
 
 
 def _derive_status(row) -> str:
-    """Derives a log's status as Missed, Rework Required, Completed, or Pending from its flags."""
     if row.missed_cleaning:
         return "Missed"
     if row.rework_required:
@@ -183,7 +139,6 @@ def _derive_status(row) -> str:
 
 
 def _logged_rows(rows, building_supervisor, rooms_cleaned_map, photos_map):
-    """Turns each Cleaning Log into a report row."""
     data = []
     for row in rows:
         building = row.building or ""
@@ -200,7 +155,6 @@ def _logged_rows(rows, building_supervisor, rooms_cleaned_map, photos_map):
 
 
 def _missed_rows(date_from, date_to, building_supervisor, covered):
-    """Builds a synthetic Missed row for every building-day the logs never covered."""
     data = []
     current = date_from
     while current <= date_to:
@@ -221,7 +175,6 @@ def _missed_rows(date_from, date_to, building_supervisor, covered):
 
 
 def get_report_summary(data):
-    """Builds the four summary cards; the labels stay inside _() so the language is per call."""
     missed_count = len([r for r in data if r.get("status") == "Missed"])
     return [
         count_card(_("Cleaning Days"), data),
@@ -237,7 +190,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the housing cleaning audit report."""
     return [
         {
             "label": frappe._("Date"),

@@ -1,47 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Shared authorization boundary for worker and driver portal bearer tokens.
-
-``log_credential_event`` records credential issue, use and revocation — an audit trail
-written about the SUBJECT (the Employee/Salis Driver a token names), never by them. Every
-call site reaches it through ``authorize_issuance`` (``frappe.has_permission("Masar Worker
-Token", "write", throw=True)``) or the ``on_employee_change``/``on_salis_driver_change``/
-``on_driver_suspension_submit`` hooks, so the acting user is always a desk role with write
-on one of those four DocTypes — never the passwordless token holder, who cannot open a
-Frappe session in the first place. ``app_owned_permissions_seed.py`` grants exactly those
-roles ``create`` (no ``read``) on Activity Log, so the DocPerm answers "may this role write
-one audit row" without also answering "may this role browse everyone's".
-
-DECISION (2026-08-16), against the two native alternatives raised for this token: REFUSED,
-both times, and named here so the question is not re-opened without new information.
-
-A Website User per worker would give ``frappe.session.user`` = the worker, a correct
-``owner`` on every record, and User Permission scoping for free. Refused on the
-employee-lifecycle cost, not the code cost: this workforce is provisioned and deprovisioned
-at labour-camp scale, by device, not by desk — a QR scan onto a phone the man already
-carries, no email, no password, no reset flow he can complete unsupervised. A Website User
-account ties identity to a login the framework expects to be recoverable by the holder; this
-one has to be recoverable by re-scanning at the gate. Retiring the token for a session login
-would trade a solved onboarding problem for one this app does not otherwise have to solve.
-
-Against the native token-shaped primitives, one line each: ``User.api_key``/``api_secret``
-(frappe/core/doctype/user/user.py:1345) still requires a User, so it inherits the same
-lifecycle cost above without covering the QR-issued, per-device, revocable shape this token
-exists for. Document Share Key grants one document, not a session's worth of endpoints, and
-carries no holder-type/expiry/revocation model of its own. ``verified_command.get_signed_params``
-/ ``verify_request`` (frappe/utils/verified_command.py) is a stateless HMAC on URL params with
-no server-side row to revoke — right for a one-shot unsubscribe link, wrong for a
-repeatedly-called portal session. Web Form Request (with its references Dynamic Link table and
-``expires_on``) is the closest shape to this token, but it does not exist in the installed
-frappe 15.109.0 on this bench (confirmed: no such DocType anywhere under
-frappe-bench/apps) — it ships on a later frappe than this site runs. Re-open this decision when
-the bench reaches a version that carries it; until then Masar Worker Token is the nearest
-native-equivalent this app can actually run.
-
-DEVICE IDENTITY stands on the SAME refusal above: a Masar Worker Token row now doubles as a
-ONE-TIME enrolment key (``consumed_on``) minting a Portal Device row per physical device, with
-``MAX_DEVICES_PER_SUBJECT`` standing in for ``simultaneous_sessions``. See
-``apex/apex_core/doctype/portal_device/portal_device.py``.
-"""
 
 from __future__ import annotations
 
@@ -96,20 +53,6 @@ BAD_TOKEN_WINDOW_SECONDS = 60
 BAD_TOKEN_WINDOW_KEY = "rl:apex-portal-bad-token:{0}"
 
 def throttle_bad_token_attempt() -> None:
-    """Charge one failed portal-token attempt against this address's window; the
-    (N+1)th raises RateLimitExceededError (HTTP 429). A caller with no request or no
-    remote address cannot be attributed to an address, so it is a no-op there --
-    console, scheduled-job and test callers are never throttled.
-
-    The counting itself is the shared atomic window, NOT rate_limiter.py's
-    read-then-write: this throttle exists to make a parallel flood visible, and the
-    framework's shape goes quiet under exactly that load (see rate_window).
-
-    Public (no leading underscore) because Portal Device's own enrolment-key
-    refusal path (``apex.apex_core.doctype.portal_device.portal_device``) is a
-    second real caller charging the SAME window as a bad Masar Worker Token --
-    one flood counter for every kind of bad portal secret, not one per DocType.
-    """
     if not getattr(frappe.local, "request", None):
         return
     ip = getattr(frappe.local, "request_ip", None)
@@ -123,7 +66,6 @@ def throttle_bad_token_attempt() -> None:
     )
 
 def _require_audience(audience: str) -> None:
-    """Blocks an audience value that is neither Worker nor Driver."""
     if audience not in TOKEN_COOKIES:
         frappe.throw(
             _("Portal token audience must be Worker or Driver."),
@@ -131,25 +73,11 @@ def _require_audience(audience: str) -> None:
         )
 
 def hash_token(raw: str) -> str:
-    """Return the SHA-256 digest persisted for a raw bearer token."""
     return hashlib.sha256((raw or "").encode("utf-8")).hexdigest()
 
 PORTAL_ROOM_PREFIX = "apex-portal-"
 
 def portal_room(audience: str, token=None) -> str:
-    """The realtime room this portal session may join, or "" when it has no token.
-
-    A portal session is a GUEST holding a token, not a permissioned user, so it can
-    never join a doctype room: frappe's socket server gates doctype_subscribe and
-    doc_subscribe on read permission, while task_subscribe
-    (realtime/handlers/frappe_handlers.js) joins with no check at all. The task room is
-    therefore the only native room a Guest may join, and it admits on knowledge of an
-    unguessable id — which is what the token's stored SHA-256 hash already is.
-
-    The RAW token never appears in a room id, and the client is handed this value by
-    the context call that has already authenticated the token; it is never derived
-    client-side.
-    """
     _require_audience(audience)
     raw, was_presented = presented_token(audience, token)
     if not was_presented or not raw:
@@ -157,13 +85,6 @@ def portal_room(audience: str, token=None) -> str:
     return PORTAL_ROOM_PREFIX + hash_token(raw)
 
 def portal_rooms_for_subject(audience: str, subject: str) -> list:
-    """Every live room belonging to one driver or employee.
-
-    The room id is the token's stored hash, so it is read straight off the enabled
-    token rows — the raw token is never needed and never leaves the holder's browser.
-    A subject with a reissued link may hold more than one enabled row, so all of them
-    are rung rather than guessing which browser is open.
-    """
     _require_audience(audience)
     if not subject:
         return []
@@ -176,22 +97,12 @@ def portal_rooms_for_subject(audience: str, subject: str) -> list:
     return [PORTAL_ROOM_PREFIX + h for h in hashes if h]
 
 def publish_to_portal_subject(audience: str, subject: str, event: str, message=None) -> int:
-    """Ring one subject's own rooms. Returns how many were rung.
-
-    ``frappe.publish_realtime`` (frappe/realtime.py:23) delivers to a room, a user or
-    a document. The one thing it cannot do is address a portal SUBJECT: a worker or
-    driver holds a token, not a User record, so ``user=`` reaches nobody and there is
-    no doctype room that means "this person's live devices". The rooms are derived
-    from the subject's own token hashes, and every publish goes ``after_commit`` so a
-    listener is never told about a row the transaction later rolls back.
-    """
     rooms = portal_rooms_for_subject(audience, subject)
     for room in rooms:
         frappe.publish_realtime(event, message or {}, room=room, after_commit=True)
     return len(rooms)
 
 def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
-    """Return the audience credential and whether the request presented one."""
     _require_audience(audience)
     explicit = (explicit or "").strip()
     if explicit:
@@ -207,13 +118,6 @@ def presented_token(audience: str, explicit=None) -> tuple[str, bool]:
     return "", False
 
 def set_token_cookie(audience: str, token: str, max_age_seconds: int) -> None:
-    """Persist a validated ``audience`` bearer token in its httpOnly site cookie.
-
-    Guarded so a missing ``cookie_manager`` (a non-request render path) degrades to
-    leaving the query-string token in place rather than 500-ing the page. No ``path``
-    is passed, so the cookie defaults to ``/`` and rides every request to this site.
-    Shared by the Driver and Worker portal shells so the write mechanics live once.
-    """
     _require_audience(audience)
     cm = getattr(frappe.local, "cookie_manager", None)
     if cm is None:
@@ -227,7 +131,6 @@ def set_token_cookie(audience: str, token: str, max_age_seconds: int) -> None:
     )
 
 def delete_token_cookie(audience: str) -> None:
-    """Remove the ``audience`` bearer-token cookie, guarded like :func:`set_token_cookie`."""
     _require_audience(audience)
     cm = getattr(frappe.local, "cookie_manager", None)
     if cm is not None:
@@ -239,7 +142,6 @@ def validate_subject_binding(
     *,
     exception=frappe.ValidationError,
 ) -> str:
-    """Require one exact audience and one exclusive portal subject binding."""
     _require_audience(audience)
     if audience == WORKER:
         employee = row.get("employee")
@@ -267,7 +169,6 @@ def validate_subject_binding(
     return subject
 
 def _reject_invalid_token() -> None:
-    """Throttles the failed attempt and raises a permission error for an invalid or inactive token."""
     throttle_bad_token_attempt()
     frappe.throw(
         _("This portal access token is invalid or inactive."),
@@ -276,29 +177,6 @@ def _reject_invalid_token() -> None:
 
 @contextmanager
 def as_capacity(audience: str, subject: str | None = None):
-    """Run a block as the capacity user, then hand the session back.
-
-    ``frappe.set_user`` (frappe/__init__.py:641) does the switch. The one thing it
-    cannot do is put it back: it has no scope and no paired restore, so every caller
-    would have to remember the ``finally``. That is what this context manager is —
-    the restore, not the switch.
-
-    Only ever open this AFTER a token has been resolved: the token is the authentication and this
-    is the authorisation that follows it. The restore is in a ``finally`` because a scheduler or a
-    request worker is reused, and a session left elevated would carry into whatever ran next.
-
-    There is deliberately no existence check on the identity. ``portal_identity_seed`` creates it
-    on install and on every migrate, so a missing one is an installation fault, and the write
-    inside would fail with a permission error naming the DocType — which is the more useful
-    message anyway. A guard here would cost a query on every portal write to restate that.
-
-    ``subject`` is the token-resolved Employee or Salis Driver the caller already holds — the one
-    fact the shared capacity user's own identity cannot carry, since every physical worker or
-    driver writes through the SAME row. A ``has_permission`` dispatcher that must tell one
-    holder's record from another's reads it back through :func:`capacity_subject` while this block
-    is open; omitting it (the default) leaves that lookup returning None, which is correct for a
-    write no dispatcher needs to individuate.
-    """
     _require_audience(audience)
     user = CAPACITY_USERS[audience]
     previous = frappe.session.user
@@ -312,13 +190,6 @@ def as_capacity(audience: str, subject: str | None = None):
         frappe.local.apex_capacity_subject = previous_subject
 
 def capacity_subject(audience: str) -> str | None:
-    """The Employee/Salis Driver bound to the open ``as_capacity(audience, subject=...)``
-    block, or None outside one, for a mismatched audience, or when none was passed.
-
-    Reads request-local state rather than re-deriving the subject from
-    ``frappe.session.user``, because the capacity user IS the same row for every physical
-    holder of that audience — there is nothing on the session to individuate from.
-    """
     _require_audience(audience)
     current = getattr(frappe.local, "apex_capacity_subject", None)
     if not current:
@@ -327,21 +198,6 @@ def capacity_subject(audience: str) -> str | None:
     return subject if bound_audience == audience else None
 
 def resolve_portal_subject(audience: str, token=None, required=False):
-    """Resolve a valid audience token to its active Employee or Salis Driver.
-
-    Tries a Masar Worker Token first (the standing bearer this app has always
-    used), then a Portal Device (a device-level bearer minted by
-    :func:`apex.apex_core.doctype.portal_device.portal_device.consume_enrolment_key`).
-    Both live behind the SAME cookie name and the SAME ``presented_token``/
-    ``set_token_cookie`` pair, so every existing caller of this function --
-    ``apex/www/masar.py``, ``apex/www/driver.py``, every Salis/Habitat portal
-    endpoint -- resolves a device-enrolled holder with no change of its own.
-
-    Expiry is compared through ``frappe.utils.get_datetime`` (frappe/utils/data.py:110)
-    rather than by string, because a stored value may be a ``str`` or a ``datetime``
-    depending on how the row was written, and comparing the two shapes as text puts
-    a token's expiry in the wrong order without raising.
-    """
     _require_audience(audience)
     raw, was_presented = presented_token(audience, token)
     if not was_presented:
@@ -395,14 +251,6 @@ def resolve_portal_subject(audience: str, token=None, required=False):
 
 
 def _resolve_portal_device(audience: str, key_hash: str) -> str | None:
-    """Resolve a device-hash bearer (minted at enrolment) to its active subject.
-
-    Guarded by ``frappe.db.table_exists`` exactly like the Portal Push Subscription
-    check inside :func:`revoke_subject_tokens` below -- this module loads before
-    Portal Device's table exists on a fresh install or an interrupted migrate.
-    Updates ``last_seen_on`` on every successful resolution, the one write this
-    function performs, so the device list can show when a device was last live.
-    """
     if not frappe.db.table_exists("Portal Device"):
         return None
     field = "employee" if audience == WORKER else "driver"
@@ -425,7 +273,6 @@ def _resolve_portal_device(audience: str, key_hash: str) -> str | None:
     return subject
 
 def _lock_subject_row(audience: str, subject: str, *, require_active=False):
-    """Lock and return one portal subject row."""
     _require_audience(audience)
     if not subject:
         return None
@@ -444,14 +291,6 @@ def _lock_subject_row(audience: str, subject: str, *, require_active=False):
     return row
 
 def _lock_subject_token_rows(audience: str, subject: str):
-    """Lock exact-audience token rows in a stable order.
-
-    ``frappe.qb`` (frappe/query_builder) is the primitive; the one thing
-    ``frappe.db.get_all`` cannot do is ``for_update``, and without the row lock two
-    concurrent revocations read the same enabled rows and both count them. The
-    ``orderby`` is not cosmetic: two callers locking the same set in different orders
-    deadlock, and a stable order is what makes them queue instead.
-    """
     Token = frappe.qb.DocType("Masar Worker Token")
     subject_field = getattr(Token, _TOKEN_SUBJECT_FIELDS[audience])
     return (
@@ -490,14 +329,6 @@ which A-521.1 already refused; a flat per-audience constant is the nearest nativ
 equivalent this architecture can actually carry."""
 
 def _credential_event_subject(action: str, audience: str, subject: str) -> str:
-    """The Activity Log sentence for one credential action.
-
-    Five whole literal sentences rather than a shared frame plus a translated verb:
-    Arabic inflects a verb with its noun, and the app's existing ``Issued`` row
-    already means dispensed-from-stores, so a shared verb would render the wrong
-    word here. An unknown action raises rather than logging a vague line -- the only
-    callers are the constants above.
-    """
     return {
         ISSUED: _("Portal credential issued for {0} {1}"),
         REISSUED: _("Portal credential reissued for {0} {1}"),
@@ -513,21 +344,6 @@ def log_credential_event(
     token_name=None,
     user=None,
 ) -> str | None:
-    """Record WHO moved a portal credential and FOR WHOM, in the native Activity Log.
-
-    The token row carries only ``last_generated_by``/``last_generated_on`` -- one
-    slot, overwritten by the next action -- and revocation writes with
-    ``update_modified=False``, so before this the strongest surviving statement about
-    a passwordless bearer credential was "someone, at some point". Activity Log is
-    Frappe's own append-only actor trail: System Manager is its ONLY reading role
-    (activity_log.json permissions), native Log Settings ages it out, and
-    ``link_doctype``/``link_name`` make "every move on this driver" one query.
-
-    The raw token is not a parameter here, so no call site can log the secret: the row
-    names the SUBJECT and the token ROW, never the credential. ``operation`` and
-    ``status`` are left to Frappe -- both are closed Selects, and a value outside the
-    set is swallowed silently on insert.
-    """
     _require_audience(audience)
     if not subject:
         return None
@@ -544,9 +360,6 @@ def log_credential_event(
     ).insert(ignore_links=True).name
 
 def _portal_device_event_subject(action: str, audience: str, subject: str | None) -> str:
-    """The Activity Log sentence for one Portal Device event -- see
-    :func:`_credential_event_subject` for why each is a whole literal sentence
-    rather than a shared frame plus a translated verb."""
     return {
         ENROLLED: _("Portal device enrolled for {0} {1}"),
         ENROLMENT_REFUSED: _("Portal device enrolment refused for {0} {1}"),
@@ -564,41 +377,6 @@ def log_portal_device_event(
     user=None,
     ignore_permissions: bool = True,
 ) -> str | None:
-    """Record one enrolment, refusal or revocation against a Portal Device, with
-    STATUS EXPLICIT and never silently overwritten.
-
-    ``ActivityLog.validate`` (frappe/core/doctype/activity_log/activity_log.py:44-49)
-    forces ``status`` to "Linked" on any NEW row that carries both
-    ``reference_doctype`` and ``reference_name`` -- so a refusal that named a
-    device would lose its required "Failed" verdict the instant it saved. Frappe's
-    own failed-login path never hits this either: ``LoginManager.fail``
-    (frappe/auth.py:312-316) calls ``add_authentication_log(..., status="Failed")``
-    with no reference at all. This function follows the same rule: ``device_name``
-    is attached only when ``status`` is not "Failed", so a caller cannot ask for a
-    reference and a Failed verdict in the same call.
-
-    ``ignore_permissions`` defaults True, mirroring Frappe's own
-    ``add_authentication_log`` (frappe/core/doctype/activity_log/activity_log.py:
-    76-81): the enrolment/refusal/eviction/self-revoke callers in
-    ``apex.apex_core.doctype.portal_device.portal_device``, and
-    :func:`revoke_subject_devices` below (fired from an Employee, Salis Driver,
-    Driver Clearance or Driver Suspension save that could belong to ANY role
-    permitted to submit or save THOSE documents, not only the six granted Activity
-    Log ``create`` below), cannot prove the acting identity holds it. Closing that
-    at its source needs a Custom DocPerm row -- for Guest, since every portal
-    endpoint here runs unauthenticated -- which
-    ``apex_core/setup/app_owned_permissions_seed.py`` does not yet carry; adding it
-    is outside this change's write scope and is named in the delivery report.
-
-    The one caller that CAN prove it, passes ``ignore_permissions=False``: Portal
-    Device's own ``on_update`` (the desk supervisor's revoke-by-save), because
-    ``Document.save`` already ran this exact row through
-    :func:`portal_device_has_permission`'s ``write`` gate before ``on_update``
-    fires at all, and every role that gate admits -- Accommodation Manager,
-    Resident Supervisor, HR User, Fleet Supervisor, Fleet Manager, Fleet Project
-    Manager, System Manager -- already holds Activity Log ``create`` in
-    ``app_owned_permissions_seed.APP_OWNED_PERMISSIONS``.
-    """
     _require_audience(audience)
     payload = {
         "doctype": "Activity Log",
@@ -616,18 +394,6 @@ def log_portal_device_event(
 
 
 def revoke_subject_devices(audience: str, subject: str) -> int:
-    """Revoke every un-revoked Portal Device row for one subject, audit-logging
-    each -- the device-row mirror of :func:`revoke_subject_tokens` below, called
-    from the SAME Employee/Salis Driver/Driver Suspension hooks so a subject who
-    loses their Masar Worker Token on a status change loses every enrolled device
-    with it. Rows are REVOKED, never deleted, so the holder's own device list still
-    shows them (goal: "leaves both device rows visible to the holder").
-
-    ``frappe.db.table_exists`` guards the read for the same reason
-    :func:`revoke_subject_tokens` guards its own Portal Push Subscription check:
-    this runs from hooks that fire during install and migrate, before Portal
-    Device's table exists.
-    """
     _require_audience(audience)
     if not subject or not frappe.db.table_exists("Portal Device"):
         return 0
@@ -659,22 +425,6 @@ def revoke_subject_devices(audience: str, subject: str) -> int:
 
 
 def revoke_subject_tokens(audience: str, subject: str) -> int:
-    """Disable enabled credentials for one exact audience and subject.
-
-    ``frappe.db.table_exists`` (frappe/database/database.py:1220) guards the read,
-    because this runs from an Employee and a Salis Driver hook that fire during
-    install and migrate, before the token table is created — and the one thing a
-    hook cannot do is decline to run on a half-built site.
-
-    Writes go through ``frappe.db.set_value`` with ``update_modified=False``: a
-    revocation is a system act, and stamping ``modified`` would show an operator's
-    name against a change no operator made.
-
-    ``apex.salis.api.web_push`` imports ``DRIVER``/``WORKER`` from this module at its
-    own top level, so a module-level import here of ``disable_subject_subscriptions``
-    closes the loop and raises ``ImportError`` on either side's first import; the
-    import stays deferred to this call.
-    """
     _require_audience(audience)
     if not subject or not _lock_subject_row(audience, subject):
         return 0
@@ -705,31 +455,6 @@ _CAPACITY_DESK_ROLES = {
 }
 
 def close_capacity_desk_access(audience: str) -> None:
-    """Correct one portal capacity's roles back to no desk access.
-
-    ``DocType.make_module_and_roles`` (frappe/core/doctype/doctype/doctype.py:1878-1880)
-    hardcodes ``desk_access = 1`` the moment any shipped DocType's permissions table
-    names a role that does not yet exist. Both capacity roles keep reappearing in that
-    position: Salis Driver names ``Driver``; Resident Request, Dispatch Trip, Transport
-    Trip Rating and Transport Request all name ``Worker``; Trip Start Log and Portal
-    Push Subscription name both ``Portal Driver Capacity`` and ``Portal Worker
-    Capacity``. Any one of them can win the race against ``portal_identity_seed``'s
-    create-only guard and leave the shared capacity user -- ``driver@apex.internal`` or
-    ``worker@apex.internal`` -- carrying desk access nobody asked for. The write goes
-    through ``Role.save`` rather than ``frappe.db.set_value`` because ``Role.on_update``
-    (frappe/core/doctype/role/role.py:70-85) is what re-evaluates ``user_type`` on every
-    user holding the role, and it fires only when ``desk_access``'s VALUE changes on a
-    document save -- a raw column write would leave the capacity user's stored
-    ``user_type`` stale.
-
-    ``ignore_permissions`` on that save is PARKED, not accepted. This runs from an
-    Employee and Salis Driver ``on_change`` hook, so the actor is whichever HR or fleet
-    user saved that record, and the row written is a Role — the document that defines
-    privilege for the whole site. A write DocPerm on Role would let those users edit any
-    role's permissions, not only this one field on these two roles, and Frappe cannot
-    scope a grant to one field of two named records. Remove the flag without a ruling and
-    the capacity roles drift back to desk access on the next Employee save.
-    """
     _require_audience(audience)
     for role in _CAPACITY_DESK_ROLES[audience]:
         if frappe.db.get_value("Role", role, "desk_access"):
@@ -738,13 +463,10 @@ def close_capacity_desk_access(audience: str) -> None:
             role_doc.save(ignore_permissions=True)
 
 def close_all_capacity_desk_access() -> None:
-    """Sweep both portal capacities in one migrate-time call, the ``after_migrate`` entry."""
     for audience in _CAPACITY_DESK_ROLES:
         close_capacity_desk_access(audience)
 
 def on_employee_change(doc, method=None) -> int:
-    """Keep the worker capacity identity off the desk, then revoke worker and
-    linked-driver credentials for a non-active Employee."""
     close_capacity_desk_access(WORKER)
     if not doc.name or doc.status == "Active":
         return 0
@@ -761,15 +483,12 @@ def on_employee_change(doc, method=None) -> int:
     return disabled
 
 def on_salis_driver_change(doc, method=None) -> int:
-    """Keep the driver capacity identity off the desk, then revoke credentials
-    whenever a driver is not Active."""
     close_capacity_desk_access(DRIVER)
     if not doc.name or doc.status == "Active":
         return 0
     return revoke_subject_tokens(DRIVER, doc.name)
 
 def on_driver_suspension_submit(doc, method=None) -> int:
-    """Revoke credentials after Driver Suspension performs its raw status write."""
     return revoke_subject_tokens(DRIVER, getattr(doc, "driver", None))
 
 def authorize_issuance(
@@ -779,24 +498,6 @@ def authorize_issuance(
     *,
     require_active: bool = True,
 ) -> bool:
-    """Authorize one issuer and subject, returning whether scope is restricted.
-
-    ``frappe.has_permission`` decides the DocType-level write and is called with
-    ``throw=True`` so refusal is loud. The one thing it cannot do is answer about the
-    SUBJECT: whether this issuer may mint a credential for THIS driver or worker is a
-    row-scope question, which ``frappe.get_roles`` (frappe/permissions.py:497) plus
-    the module's own project scope answers below.
-
-    Both locks are taken BEFORE the verdict, so a concurrent revocation cannot land
-    between the check and the issue.
-
-    ``apex.habitat.permissions`` and ``apex.salis.permissions`` both import
-    ``apex.apex_core.utils.permission_scope`` at their own top level, and
-    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
-    level, so a module-level import here of either sibling closes that loop and
-    raises ``ImportError`` on whichever side imports first; both stay deferred to
-    this call.
-    """
     _require_audience(audience)
     user = user or frappe.session.user
     frappe.has_permission(
@@ -863,46 +564,9 @@ def authorize_issuance(
     )
 
 def authorize_revocation(audience: str, subject: str, user=None) -> bool:
-    """Authorize a MANUAL revocation: same issuer roles, same project/building scope.
-
-    Identical to issuance except that the subject need not still be Active. Requiring
-    Active would make the desk kill switch unreachable in exactly the cases it exists
-    for -- a driver already Released by a clearance, or Stopped mid-investigation --
-    while the automatic hooks that revoke on those transitions are the very reason a
-    non-Active subject is the normal state at revocation time. Withdrawing a bearer
-    credential is the safe direction; the scope check still stops a supervisor
-    reaching a driver outside their project, so this widens WHEN, never WHO.
-
-    Deliberately reuses issuance's deny path so an out-of-scope caller cannot tell
-    the two apart, and so there is only one refusal to keep correct.
-
-    DRIVER only today, and not safe to wire to WORKER unexamined: the Resident
-    Supervisor scope branch admits a worker only through a live Housing Assignment
-    (submitted, no check-out date), so dropping the Active requirement would not
-    actually reach a checked-out worker -- the case a worker revocation is for. That
-    branch needs its own carve-out before this is offered for WORKER.
-    """
     return authorize_issuance(audience, subject, user, require_active=False)
 
 def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
-    """The ``holder_type``-guarded WHERE fragment for one audience the caller may issue for.
-
-    ``audience`` is always ``DRIVER`` or ``WORKER`` here (the loop in
-    :func:`masar_worker_token_scope_query` supplies nothing else), so it is interpolated
-    as a literal rather than escaped, matching every other hardcoded fragment in this
-    module. Every value that does NOT come from that closed set reaches the SQL
-    through ``frappe.db.escape`` (frappe/database/database.py:1371).
-
-    An issuer with no permitted project gets ``1=0`` and not an empty string: an empty
-    fragment is no restriction, which would show one issuer every audience's tokens.
-
-    ``apex.salis.permissions`` and ``apex.habitat.permissions`` both import
-    ``apex.apex_core.utils.permission_scope`` at their own top level, and
-    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
-    level, so a module-level import here of either sibling closes that loop and
-    raises ``ImportError`` on whichever side imports first; both stay deferred to
-    this call.
-    """
     if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
         return "`holder_type` = '{0}'".format(audience)
 
@@ -931,26 +595,6 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
     ).format(escaped)
 
 def masar_worker_token_scope_query(user=None, doctype=None) -> str:
-    """WHERE fragment scoping the Masar Worker Token list/report view.
-
-    Registered in ``hooks.py`` (``permission_query_conditions``), paired with
-    :func:`masar_worker_token_has_permission`. Masar Worker Token has no Project or
-    Building column of its own, and its two holder types sit on two different tenancy
-    axes, so this dispatches per row's ``holder_type`` rather than delegating to
-    ``apex.salis.permissions`` or ``apex.habitat.permissions``' own DocType-keyed
-    fragments: Driver rows scope through ``Salis Driver.project``, Worker rows through
-    the employee's live Housing Assignment building — the SAME two reads
-    :func:`authorize_issuance` performs on write, off the SAME ``ISSUER_ROLES`` /
-    ``_UNSCOPED_ISSUER_ROLES`` tables, so a row a caller may not issue for is never a
-    row they may list.
-
-    A role absent from ``ISSUER_ROLES[audience]`` contributes no clause for that
-    audience, so a caller holding neither set sees no rows at all — "1=0". A role in
-    ``_UNSCOPED_ISSUER_ROLES[audience]`` sees every row of that audience unrestricted
-    (HR User over every Worker row, Fleet Manager over every Driver row), exactly as
-    ``authorize_issuance`` defers those roles' write. Everyone else is confined to the
-    Project / Building they hold a User Permission for.
-    """
     del doctype
     user = user or frappe.session.user
     if user == "Administrator":
@@ -966,26 +610,6 @@ def masar_worker_token_scope_query(user=None, doctype=None) -> str:
     return "({0})".format(" or ".join(clauses))
 
 def masar_worker_token_has_permission(doc, ptype, user=None):
-    """Deny reading, reporting or printing a Masar Worker Token row outside issuer scope.
-
-    Registered in ``hooks.py`` (``has_permission``), paired with
-    :func:`masar_worker_token_scope_query` — same tables, same verdicts, so a row
-    hidden from the list can never still open on the form or print. Only ``read`` /
-    ``report`` / ``print`` are gated: ``create`` / ``write`` / ``delete`` stay exactly
-    as they run today, decided by the DocPerm plus :func:`authorize_issuance`'s own
-    explicit project/building check on every issuance and rotation, which this must
-    not duplicate or disagree with.
-
-    Returns False to block, or None to defer to Frappe's default resolution (the
-    DocPerm). Never True.
-
-    ``apex.salis.permissions`` and ``apex.habitat.permissions`` both import
-    ``apex.apex_core.utils.permission_scope`` at their own top level, and
-    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
-    level, so a module-level import here of either sibling closes that loop and
-    raises ``ImportError`` on whichever side imports first; both stay deferred to
-    this call.
-    """
     if ptype not in ("read", "report", "print"):
         return None
     user = user or frappe.session.user
@@ -997,20 +621,6 @@ def masar_worker_token_has_permission(doc, ptype, user=None):
 
 
 def _issuer_scoped_verdict(doc, audience: str, user: str, roles: set):
-    """Verdict for a desk issuer against one Worker- or Driver-scoped row: False
-    outside the issuer's role or project/building, None (defer to the DocPerm)
-    inside it.
-
-    Shared by :func:`masar_worker_token_has_permission` (``read``/``report``/
-    ``print`` only) and :func:`portal_device_has_permission` (the same three PLUS
-    ``write`` -- a supervisor revokes a device by saving the row, and
-    ``Document.save`` checks exactly this ptype: ``self.check_permission("write",
-    "save")`` at frappe/model/document.py:404 calls ``self.has_permission("write")``
-    at :227-242, which reaches this hook). Both callers' rows carry the identical
-    ``holder_type``/``employee``/``driver`` shape and the identical project/building
-    scoping rule -- extracted here because Portal Device is the second real caller
-    of this exact logic, not duplicated a second time.
-    """
     if audience not in ISSUER_ROLES or not roles.intersection(ISSUER_ROLES[audience]):
         return False
     if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
@@ -1041,20 +651,6 @@ def _issuer_scoped_verdict(doc, audience: str, user: str, roles: set):
 
 
 def portal_device_scope_query(user=None, doctype=None) -> str:
-    """WHERE fragment scoping the Portal Device list/report view.
-
-    A portal capacity gets its OWN fragment first -- confined to the one subject
-    :func:`capacity_subject` bound for this request, never every subject's rows --
-    because :func:`list_devices_for` now reads through ``frappe.get_list`` (a
-    genuinely permission-checked read, replacing the ``frappe.get_all`` this module
-    used to call, which sets ``ignore_permissions=True`` unconditionally --
-    frappe/__init__.py:2050) as the capacity user, and without this branch the
-    desk-issuer loop below would answer "1=0" for it (a capacity holds no role in
-    ``ISSUER_ROLES``), returning the holder's own device list empty.
-
-    Everything else mirrors :func:`masar_worker_token_scope_query` field for field:
-    a desk issuer with no role in ``ISSUER_ROLES`` sees no rows.
-    """
     del doctype
     from apex.apex_core.utils.permission_scope import is_portal_capacity
 
@@ -1080,39 +676,6 @@ def portal_device_scope_query(user=None, doctype=None) -> str:
 
 
 def portal_device_has_permission(doc, ptype, user=None):
-    """Deny a portal capacity every row but its own bound subject's; scope a desk
-    issuer's read/report/print/write to project or building.
-
-    ``write`` is gated here alongside read/report/print -- unlike
-    :func:`masar_worker_token_has_permission`, whose write path is authorized
-    entirely inside ``authorize_issuance``/``authorize_revocation`` at the
-    controller level -- because a supervisor revokes a device by ticking
-    ``revoked`` on the desk form and saving it: ``Document.save`` runs
-    ``self.check_permission("write", "save")`` (frappe/model/document.py:404),
-    which calls this hook with ``ptype="write"`` and the real, populated
-    ``doc``. Without this branch the DocPerm alone would grant every issuer role
-    write on every OTHER project's or building's rows too, not only its own.
-
-    A capacity is checked FIRST and for every ``ptype`` -- it DOES hold
-    ``create``/``write`` DocPerm here (it enrols and revokes its own devices), so
-    this cannot defer to the desk-issuer gate below. ``portal_capacity_verdict``
-    still denies ``read``/``report``/``print`` outright for a capacity: THIS hook
-    never sees :func:`apex.apex_core.doctype.portal_device.portal_device.
-    list_devices_for`'s own read at all, permission-checked or not --
-    ``DatabaseQuery.check_read_permission`` (frappe/model/db_query.py:566-586)
-    calls ``frappe.has_permission`` with no ``doc``, so it resolves off the bare
-    DocPerm (``read: 1`` on both capacity roles) through
-    ``get_role_permissions`` (frappe/permissions.py:137-160) alone, and row
-    scoping comes from ``permission_query_conditions`` (``portal_device_scope_
-    query``'s own capacity branch), never from this per-document hook. A
-    single-document read reaching THIS hook as a capacity therefore still denies,
-    correctly -- the portal's own endpoints never ask for one.
-
-    ``apex.apex_core.utils.permission_scope`` imports this module's own
-    ``CAPACITY_USERS`` at its top level, so a module-level import here of
-    ``permission_scope`` closes that loop and raises ``ImportError`` on whichever
-    side imports first; it stays deferred to this call.
-    """
     from apex.apex_core.utils.permission_scope import is_portal_capacity, portal_capacity_verdict
 
     user = user or frappe.session.user
@@ -1141,7 +704,6 @@ def credential_delivery_destination(
     subject: str,
     requested=None,
 ) -> str | None:
-    """Return the stored subject phone and reject a different caller value."""
     _require_audience(audience)
 
     fieldname = "cell_number" if audience == WORKER else "phone"
@@ -1159,26 +721,6 @@ _PUSH_SUBSCRIPTION_SUBJECT_FIELDS = {WORKER: "employee", DRIVER: "driver"}
 
 
 def portal_push_subscription_scope_query(user=None, doctype=None) -> str:
-    """WHERE fragment shutting the Portal Push Subscription list to a portal capacity.
-
-    Registered in ``hooks.py`` (``permission_query_conditions``), paired with
-    :func:`portal_push_subscription_has_permission`, which denies a capacity every
-    ``read`` / ``report`` / ``print`` on a single row. That pairing is the whole point:
-    ``frappe.has_permission`` reaches ``has_controller_permissions`` only inside
-    ``get_doc_permissions``, which runs under ``if doc:`` (frappe/permissions.py:125-128
-    and :206), so a LIST is decided by the DocPerm alone. Both capacity roles hold
-    ``read`` with no ``if_owner``, so without this fragment one capacity user lists every
-    subject's push endpoint and keys, and the single-row refusal never fires.
-
-    Returns "1=0" for a capacity and None for everyone else, because only System Manager
-    holds any other DocPerm here and its estate is the whole site. Delete this and the
-    list side opens while the form side stays shut.
-
-    ``apex.apex_core.utils.permission_scope`` imports this module's own
-    ``CAPACITY_USERS`` at its top level, so a module-level import here of
-    ``permission_scope`` closes that loop and raises ``ImportError`` on whichever
-    side imports first; it stays deferred to this call.
-    """
     del doctype
     from apex.apex_core.utils.permission_scope import is_portal_capacity, resolve_user
 
@@ -1188,27 +730,6 @@ def portal_push_subscription_scope_query(user=None, doctype=None) -> str:
 
 
 def portal_push_subscription_has_permission(doc, ptype, user=None):
-    """Deny a portal capacity from touching another subject's push registration.
-
-    Registered in ``hooks.py`` (``has_permission``) for Portal Push Subscription. A
-    non-capacity caller (only System Manager holds any DocPerm on this DocType) defers to
-    Frappe's ordinary resolution — this dispatcher answers for the capacity users alone.
-
-    ``portal_identity_seed`` never grants either capacity a create/write DocPerm scoped
-    finer than the role itself, so without this hook one worker's device row would be
-    exactly as writable as every other worker's the moment ``create``/``write`` is
-    granted. The refusal compares the row's own ``employee``/``driver`` to
-    :func:`capacity_subject` — the identity ``as_capacity`` bound for THIS request — never
-    to the capacity user's own name, which is the same row for every holder and so cannot
-    individuate anyone. Read/report/print stay denied for a capacity outright: neither
-    portal endpoint here ever needs a permission-checked read (both resolve the identity
-    first and query ``frappe.db`` directly), so there is nothing to defer.
-
-    ``apex.apex_core.utils.permission_scope`` imports this module's own
-    ``CAPACITY_USERS`` at its top level, so a module-level import here of
-    ``permission_scope`` closes that loop and raises ``ImportError`` on whichever
-    side imports first; it stays deferred to this call.
-    """
     from apex.apex_core.utils.permission_scope import (
         is_portal_capacity,
         portal_capacity_verdict,

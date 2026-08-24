@@ -1,24 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Custody Issue Register — what was issued, to whom, and whether it came back.
-
-Custody Issue had no report. `Custody Outstanding by Worker` answers a different question
-from a different source: it reads the Accommodation Stock Ledger for a net BALANCE per
-(item, worker). That balance cannot say which issue document a holding came from, when it
-was signed for, or whether it is past its expected return date — so a supervisor chasing
-an overdue issue had only the list view and a manual filter.
-
-Two things a balance can never show and this register does:
-
-* AN ISSUE THAT WAS NEVER ACKNOWLEDGED. `acknowledged_on` is stamped when the worker
-  signs; a submitted issue without it means goods left the store against no signature.
-* AN ISSUE PAST ITS EXPECTED RETURN DATE and still not Returned, which is what turns into
-  a damage assessment and a payroll deduction.
-
-Only submitted issues are listed — a draft has not left the store. Scoped by building
-through the same resolver the permission hook uses, so a scope correction reaches this
-report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -31,7 +12,6 @@ RETURNED_STATUSES = ("Returned",)
 
 
 def execute(filters=None):
-    """Returns the rows and cards for the custody issue register, flagging overdue/unsigned issues."""
     filters = filters or {}
     columns = get_columns()
 
@@ -88,8 +68,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     unsigned = [r for r in data if not r.get("is_acknowledged")]
     overdue = [r for r in data if r.get("days_overdue")]
     return [
@@ -101,7 +79,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the custody issue register."""
     return [
         {"label": _("Issue"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Issue", "width": 170},
         {"label": _("Issue Date"), "fieldname": "issue_date", "fieldtype": "Date", "width": 110},

@@ -1,31 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety engine for the Habitat module.
-
-Posts the Safety Finding Ledger: an immutable, system-written record of every
-finding observed on a Safety Round, captured at the moment the round is submitted.
-
-Both writes pass ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
-subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
-``in_create``, which removes the New button but refuses nothing on the server
-(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: every role on Safety
-Finding Ledger has ``read`` and nothing else, System Manager included. So this bypass is the only
-path by which a row can exist, and it is the control rather than a hole in one.
-
-WHY: safety/audit findings otherwise live only on the mutable parent reports
-(Inspection Finding Item rows on each Safety Task Execution), so a closed finding
-can silently reopen or be edited and history is lost. Each finding is mirrored
-here as one read-only row, so safety reports are stable.
-
-Mirrors the Salis fuel ledger pattern
-(``apex.salis.fuel_engine``): an idempotent insert keyed
-on ``(source_doctype, source_name, source_detail_no)`` and a reverse-not-delete
-cancellation that posts a negating mirror row (``is_cancelled=1`` +
-``reversal_of``) rather than deleting the original.
-
-Fired from the Safety Round controller class methods (``on_submit`` /
-``on_cancel``) — no hooks.py doc_events entry is needed because Safety Round
-already owns those lifecycle methods.
-"""
 
 from __future__ import annotations
 
@@ -42,17 +15,6 @@ _RESOLVED_STATUS = "Resolved"
 
 
 def post_safety_findings(safety_round) -> int:
-    """Post one immutable ledger row per finding on a submitted Safety Round.
-
-    Reads every submitted Safety Task Execution linked to the round, then every
-    Inspection Finding Item row on those executions, and posts an immutable
-    snapshot of each. Idempotent on (execution DocType, execution name, finding
-    idx): a finding already ledgered is skipped, so a re-submit-after-amend or a
-    defensive re-run never duplicates a row.
-
-    ``safety_round`` is the Safety Round document. Returns the number of rows
-    posted on this call (0 if every finding was already ledgered).
-    """
     posting_date = safety_round.round_date
     building = safety_round.building
     company = company_for_building(building)
@@ -105,19 +67,6 @@ def post_safety_findings(safety_round) -> int:
 
 
 def reverse_safety_findings(safety_round_name: str) -> int:
-    """Reverse the ledgered findings of a cancelled Safety Round.
-
-    Posts a negating mirror row for each ORIGINAL ledger row of the round —
-    flagged ``is_cancelled=1`` and linked back via ``reversal_of`` — so the
-    finding is voided in any open/closed rollup while the original row is
-    preserved for audit. Mirrors the Salis fuel ledger reversal idiom: a
-    reversal, never a delete.
-
-    Idempotent: only an ORIGINAL row (``reversal_of`` unset) is mirrored, and a
-    row that already has a reversal pointing at it is skipped, so calling twice
-    posts at most one reversal per original. Returns the number of reversal rows
-    posted (0 if the round was never ledgered or is already fully reversed).
-    """
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={

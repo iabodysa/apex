@@ -1,35 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Rental accrual engine for the Salis fleet module.
-
-Background engine — never hand-entered. Mirrors the Habitat daily cost
-allocation pattern (``apex.habitat.tasks.daily_accommodation_cost_allocation``):
-idempotent, per-row error isolation, no commit inside the loop.
-``daily_rental_accrual`` runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site``
-connects with ``set_admin_as_user=True`` (frappe/__init__.py:269) before it queues the job, so
-the worker executes as ``Administrator`` and the framework's own check already passes.
-``reverse_rental_accrual`` keeps the flag — it fires from an interactive on_cancel, and the
-target ledger grants no human write role.
-
-Posts NO General Ledger / accounting entry: each Rental Accrual Ledger row is
-an operational memo, the source for monthly Rental Settlement reconciliation.
-
-Reconciliation (the second half of the documented loop) is the mirror of the
-fuel engine's reconciliation idiom (``fuel_engine``):
-
-* When a Rental Settlement is submitted/approved, its accrual rows for the same
-  rental_office + period are stamped settled (``stamp_settlement`` →
-  ``frappe.db.set_value``; the ledger grants no human write role, so the bypass
-  is correct). Cancelling the settlement releases them again.
-* ``monthly_rental_reconciliation`` (monthly) ASSIGNS any Rental Office that still
-  has unsettled accrual rows for the just-closed period to the Fleet Supervisor
-  queue — exactly as ``monthly_fuel_reconciliation`` queues over-quota Fuel
-  Quotas — and reconciles that queue at the end of the pass so a settled office
-  drains on the next run.
-
-Scheduler hooks:
-    apex.salis.rental_engine.daily_rental_accrual           (daily)
-    apex.salis.rental_engine.monthly_rental_reconciliation  (monthly)
-"""
 
 from __future__ import annotations
 
@@ -48,11 +17,6 @@ BATCH_SIZE = 500
 def _currently_received(
     vehicles: list[str], posting_date: str
 ) -> dict[str, tuple[str | None, float, str | None]]:
-    """A rented vehicle is in-service when its latest submitted Rental Vehicle
-    Movement on or before ``posting_date`` is a Receipt (i.e. there is an open
-    Receipt with no later Return). Returns the in-service vehicles only, keyed
-    by vehicle, each mapped to (rental_office, daily_rate, movement_name).
-    """
     latest: dict = {}
     for row in frappe.get_all(
         "Rental Vehicle Movement",
@@ -73,13 +37,6 @@ def _currently_received(
 
 
 def daily_rental_accrual() -> None:
-    """Post one Rental Accrual Ledger memo per in-service rented vehicle for today.
-
-    For each Salis Vehicle with ownership == "Rented" that is currently received
-    (latest submitted movement is a Receipt with no later Return), insert one
-    Rental Accrual Ledger row dated today with amount = daily_rate. Idempotent:
-    skips any vehicle that already has a row for today.
-    """
     posting_date = today()
     logger = frappe.logger()
 
@@ -156,23 +113,6 @@ def daily_rental_accrual() -> None:
 
 
 def reverse_rental_accrual(source_doctype: str, source_name: str) -> int:
-    """Reverse the ledgered accrual for a corrected/cancelled rental source.
-
-    When a Receipt Rental Vehicle Movement is cancelled, the daily accrual rows it
-    produced (every day the vehicle stayed in-service under that Receipt) must not
-    survive it — an accrued day whose Receipt no longer exists still gets settled
-    and paid otherwise. Mirrors ``fuel_engine.reverse_fuel_ledger``: a negative
-    mirror row per original, dated the SAME ``accrual_date`` as the row it negates
-    (a Receipt spans many days, so one shared date would misplace the reversal into
-    the wrong settlement period) and linked back via ``reversal_of``, so the source
-    nets to zero while the original rows are preserved for audit.
-
-    Idempotent: only an ORIGINAL row (``reversal_of`` unset) is ever mirrored, and a
-    row that already has a reversal pointing at it is skipped, so calling this twice
-    for the same source posts at most one reversal per original row. Returns the
-    number of reversal rows posted (0 if the source was never accrued or is already
-    fully reversed).
-    """
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -206,11 +146,6 @@ def reverse_rental_accrual(source_doctype: str, source_name: str) -> int:
 
 
 def _period_bounds(period_month: str) -> tuple[str, str] | None:
-    """Return (first_day, last_day) as YYYY-MM-DD for a "YYYY-MM" period string,
-    or None when the period is blank/unparseable. The accrual rows carry a full
-    ``accrual_date``; the settlement carries a "YYYY-MM" ``period_month``, so a
-    settlement's rows are those whose accrual_date falls inside this window.
-    """
     if not period_month:
         return None
     try:
@@ -221,10 +156,6 @@ def _period_bounds(period_month: str) -> tuple[str, str] | None:
 
 
 def _settlement_row_filters(rental_office: str, period_month: str) -> dict | None:
-    """The selector for the Rental Accrual Ledger rows a settlement owns: same
-    rental_office, accrual_date inside the period, and ORIGINAL rows only
-    (``reversal_of`` unset — a reversal memo is never settled). Returns None when
-    the office or period is missing/unparseable (nothing to stamp)."""
     if not rental_office:
         return None
     bounds = _period_bounds(period_month)
@@ -239,18 +170,6 @@ def _settlement_row_filters(rental_office: str, period_month: str) -> dict | Non
 
 
 def linked_accrued_total(rental_office: str, period_month: str) -> float:
-    """Sum the ORIGINAL Rental Accrual Ledger amount for an office+period.
-
-    This is the ledger-derived accrued figure the Rental Settlement controller
-    cross-checks its hand-entered vehicle lines against — the source of truth for
-    "what the rental engine actually accrued" for this office and month.
-
-    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
-    ``frappe.get_all`` cannot do is SUM in the database: a month of accrual rows
-    fetched to be added in Python is the whole ledger crossing the wire to produce one
-    figure. Reversals are excluded by filter, so the total is what was ORIGINALLY
-    accrued rather than the net after corrections.
-    """
     bounds = _period_bounds(period_month)
     if not rental_office or not bounds:
         return 0.0
@@ -267,19 +186,6 @@ def linked_accrued_total(rental_office: str, period_month: str) -> float:
 
 
 def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> int:
-    """Stamp the unsettled accrual rows for an office+period onto a settlement.
-
-    For every Rental Accrual Ledger row of ``rental_office`` whose accrual_date is
-    in ``period_month``, that is still ``settled = 0`` and not already linked to
-    another settlement, set ``rental_settlement = settlement`` and ``settled = 1``
-    via ``frappe.db.set_value`` (the ledger grants no human write role, so the
-    permission bypass is correct — same idiom as the engine's inserts).
-
-    Idempotent / no double-stamp: rows already settled (``settled = 1``) are
-    excluded by the filter, so a second call for the same settlement finds none
-    and is a no-op. A row linked to a DIFFERENT settlement is also excluded — it
-    is never silently re-pointed. Returns the number of rows stamped.
-    """
     filters = _settlement_row_filters(rental_office, period_month)
     if not filters:
         return 0
@@ -301,15 +207,6 @@ def stamp_settlement(settlement: str, rental_office: str, period_month: str) -> 
 
 
 def release_settlement(settlement: str) -> int:
-    """Release every accrual row currently linked to ``settlement``.
-
-    The mirror of :func:`stamp_settlement`, used when a settlement is cancelled
-    (or amended): rows stamped to it are set back to ``settled = 0`` and their
-    ``rental_settlement`` link cleared, so the Rental Cost by Office report stops
-    counting them as settled and a re-issued settlement can claim them again.
-    Idempotent: a settlement with no linked rows yields 0. Returns the count
-    released.
-    """
     if not settlement:
         return 0
     names = frappe.get_all(
@@ -327,21 +224,6 @@ def release_settlement(settlement: str) -> int:
 
 
 def monthly_rental_reconciliation() -> None:
-    """Flag rental offices with unsettled accrual rows for the closed period.
-
-    Mirrors ``fuel_engine.monthly_fuel_reconciliation``: for the period that has
-    just closed (last month, YYYY-MM), every Rental Office that still has
-    ORIGINAL Rental Accrual Ledger rows with ``settled = 0`` — i.e. no submitted
-    Rental Settlement has claimed that office's accrued days — is ASSIGNED to the
-    Fleet Supervisor queue, the assignment carrying the outstanding amount.
-    Idempotent by the framework's assignment dedupe. This job is the only queuer
-    of Rental Office, so its own findings are the reconcile union: an office that
-    settles drains from the queue on the next monthly pass.
-
-    Reconciliation only — posts no GL and stamps nothing (stamping is the
-    settlement's job, via :func:`stamp_settlement`). Per-row try/except isolates
-    failures; no commit inside the loop.
-    """
     closed_anchor = getdate(add_months(getdate(today()), -1))
     period_month = str(closed_anchor)[:7]
     first_day, last_day = str(get_first_day(closed_anchor)), str(get_last_day(closed_anchor))

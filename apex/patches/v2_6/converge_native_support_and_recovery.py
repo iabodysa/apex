@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Converge the support desk and the advance-recovery records onto the native path.
-
-The writes and the rename pass ``ignore_permissions`` because a patch is migrate context: it runs
-once as Administrator with no session user, over records that already exist. The top-level
-``frappe.rename_doc`` refuses the flag, which is why the model-level primitive is imported here.
-"""
 
 from __future__ import annotations
 
@@ -52,7 +46,6 @@ _CANONICAL_UTILITY_CARD_VALUES = {
 }
 
 def execute():
-    """Converge upgraded sites on native fixtures, Issue SLA, and Employee Advance recovery."""
     grant_issue_role_permissions()
     _retire_untouched_legacy_sla()
     seed_recovery_component()

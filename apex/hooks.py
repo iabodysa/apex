@@ -1,19 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Apex hook declarations. Three of these carry a framework fact worth keeping.
-
-``default_log_clearing_doctypes`` lists only non-financial, submittable point-in-time
-snapshots; the retention windows cap their growth. ``clear_old_logs`` purges submitted
-rows and their child items, so drafts and every financial ledger stay untouched.
-
-``after_install`` and ``after_sync`` are not interchangeable. ``frappe.installer``
-``install_app`` runs ``after_install`` at :327 and ``sync_fixtures`` only at :334, so an
-``after_install`` entry cannot see a fixture row; ``after_sync`` at :338 can. Anything
-reading a shipped Workflow, Issue Type or Custody master belongs in the second list.
-
-``after_migrate`` never runs on a fresh install — ``frappe/migrate.py:156`` is its only
-caller. An entry that must hold on a new site is registered in ``after_install`` or
-``after_sync`` as well, never in ``after_migrate`` alone.
-"""
 
 from apex.apex_core.setup.support_names import (
     ISSUE_PRIORITIES,

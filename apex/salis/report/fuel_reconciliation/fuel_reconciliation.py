@@ -1,12 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Fuel Reconciliation report.
-
-ORM report grouping Fuel Consumption Ledger rows by vehicle + period (month):
-total litres, total amount, the allocated quota litres (looked up from Fuel
-Quota), and the variance (quota litres - consumed litres). A negative variance
-means consumption exceeded the quota.
-"""
 
 import frappe
 from frappe import _
@@ -17,7 +10,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, per-vehicle-period rows, chart and summary cards for fuel reconciliation."""
     filters = filters or {}
 
     columns = [
@@ -100,7 +92,6 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Bar chart of the largest fuel variance (quota - consumed) per vehicle/period."""
     if not data:
         return None
     ranked = sorted(data, key=lambda r: abs(r.get("variance") or 0.0), reverse=True)[:10]

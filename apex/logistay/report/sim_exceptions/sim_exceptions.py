@@ -1,6 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""SIM Exceptions: SIMs that need attention (suspended, lost, assigned without a
-cost center, or missing an ICCID), company-scoped."""
 
 import frappe
 from frappe import _
@@ -10,7 +8,6 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
-    """Lists SIM Cards that are suspended, lost, missing a cost center, or missing an ICCID."""
     filters = filters or {}
     columns = [
         {"label": frappe._("Mobile Number"), "fieldname": "mobile_number", "fieldtype": "Data", "width": 140},

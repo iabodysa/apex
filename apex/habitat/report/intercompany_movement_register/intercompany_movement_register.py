@@ -9,7 +9,6 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
-    """Returns intercompany Facility Asset Movements scoped by permission with acknowledgement counts."""
     filters = filters or {}
 
     columns = [

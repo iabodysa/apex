@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled Task Instance controller."""
 
 from __future__ import annotations
 
@@ -15,17 +14,6 @@ class ScheduledTaskInstance(Document):
 
 
 def on_doctype_update():
-    """Hard idempotency backstop for Scheduled Task Instance.
-
-    UNIQUE on ``(assignment, task_catalog, due_date, docstatus)``: one non-cancelled
-    instance per (assignment, task_catalog, due_date). ``docstatus`` in the key lets a
-    Cancelled(2) row coexist with a new Draft(0) for the same slot (amendment pattern)
-    while still blocking duplicate Drafts the generator could race-insert.
-
-    The legacy UNIQUE on ``(template, due_date, docstatus)`` is DROPPED here because
-    Phase B allows multiple assignments per template; that index would block the second
-    assignment from creating instances on the same day as the first.
-    """
     try:
         frappe.db.sql(
             "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"
@@ -41,20 +29,17 @@ def on_doctype_update():
 
 
 def on_submit(doc, method=None):
-    """Defaults the status to Open on submit unless it is already In Progress, Completed or Cancelled."""
     if doc.status not in ("In Progress", "Completed", "Cancelled"):
         doc.db_set("status", "Open")
 
 
 def before_cancel(doc, method=None):
-    """Blocks cancellation of a Scheduled Task Instance that has no cancellation reason."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Scheduled Task Instance."))
 
 
 @frappe.whitelist(methods=["POST"])
 def start_task(task_instance):
-    """Transition Scheduled Task Instance from Open to In Progress."""
     doc = frappe.get_doc("Scheduled Task Instance", task_instance, for_update=True)
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 
@@ -70,7 +55,6 @@ def start_task(task_instance):
 
 @frappe.whitelist(methods=["POST"])
 def mark_completed(task_instance):
-    """Transition Scheduled Task Instance from Open/In Progress to Completed."""
     doc = frappe.get_doc("Scheduled Task Instance", task_instance, for_update=True)
     frappe.has_permission("Scheduled Task Instance", "write", doc=doc, throw=True)
 

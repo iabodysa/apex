@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Custody Return's issue-progress classifier and issue-line matcher.
-
-Patterned on test_lease.py. ``_progress_from`` is pure arithmetic over two
-plain dicts -- no document, no DB. ``_link_issue_lines`` reads the linked
-Custody Issue's child rows via ``frappe.get_all``; that one call is mocked so
-the serial-first / single-candidate-article matching is exercised without a
-real Custody Issue.
-"""
 
 from __future__ import annotations
 

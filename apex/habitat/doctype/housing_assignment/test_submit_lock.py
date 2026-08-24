@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""``terms_signature`` and ``terms_accepted_on`` are the resident's written consent
-to the housing terms, written ONCE at check-in by ``front_desk.check_in``'s
-``insert()`` (apex/habitat/api/front_desk.py:745-746) and by nothing else. Both
-carried ``allow_on_submit: 1``, which opened a plain ``save()`` edit on a submitted
-assignment — a path that could replace a signature after the fact. Removing the flag
-closes it; this proves the framework itself refuses the edit
-(``_validate_update_after_submit``, frappe/model/base_document.py:1050-1083).
-"""
 
 from __future__ import annotations
 
@@ -16,9 +8,6 @@ from frappe.tests.utils import FrappeTestCase
 
 class TestTermsConsentIsSubmitLocked(FrappeTestCase):
     def _submitted_assignment(self):
-        """The fixture assignment itself, submitted: this module never inserts one,
-        because Housing Assignment refuses a second active assignment per employee and
-        the fixture already holds the only one."""
         name = frappe.db.get_value(
             "Housing Assignment",
             {

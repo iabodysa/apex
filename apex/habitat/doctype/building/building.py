@@ -1,18 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Accommodation Building controller.
-
-Top-level spatial entity. Auto-sums annual cost and recomputes occupancy, and hosts
-the whitelisted entry points for the room/bed and safety-setup generators. The
-generators themselves live in ``habitat.utils.room_generator`` and
-``habitat.utils.safety_setup``; the derived-figure arithmetic in
-``habitat.utils.building_rollup``.
-
-The two writes in ``on_update`` pass ``ignore_permissions`` because they maintain **User
-Permission** — the framework's own access records — to keep a supervisor scoped to the building
-they hold. Granting the Accommodation Manager role create and delete on User Permission to make
-these legal would let that role widen anyone's access, including its own. This is the one write
-where a DocPerm would be strictly more dangerous than the bypass.
-"""
 
 from __future__ import annotations
 
@@ -32,15 +18,6 @@ class Building(Document):
 
 @frappe.whitelist()
 def get_site_address(building_name, site=None, building_address=None):
-    """Plain-text address shown on the building form.
-
-    Prefers the building's own selected Address (``building_address``); else
-    falls back to the Accommodation Site's address. ``site`` / ``building_address`` are
-    the form's current (possibly unsaved) values so the display tracks a change before
-    save; both are permission-gated, never trusted from the client. A ``None``
-    arg means "not supplied" and is read from the saved record; an empty string means
-    the form cleared it. Empty string when neither resolves to an Address.
-    """
     frappe.has_permission("Building", "read", doc=building_name, throw=True)
     if building_address is None:
         building_address = frappe.db.get_value(
@@ -60,15 +37,6 @@ def get_site_address(building_name, site=None, building_address=None):
 
 
 def _guard_abbreviation_lock(doc):
-    """Once rooms exist under a building its abbreviation is LOCKED: the generator keys
-    on the ``room_number`` string and never renames, so changing the code would mint a
-    fresh namespace and ORPHAN every existing room. Delete the rooms first to change it.
-
-    ``Document.get_doc_before_save`` supplies the previous value and
-    ``frappe.db.count`` (frappe/database/database.py:1269) asks whether any room
-    exists. The one thing a DocField cannot do is be read-only CONDITIONALLY — set
-    after rooms exist and free before — so the lock is a validation, not a field
-    property."""
     if doc.is_new():
         return
     before = doc.get_doc_before_save()
@@ -85,11 +53,6 @@ def _guard_abbreviation_lock(doc):
 
 
 def apply_active_lease(doc):
-    """The active Accommodation Lease is the single source of truth for rent and the
-    landlord, so the building never duplicates them by hand. Derive ``annual_rent``
-    from the lease (annualized by billing cycle, then the company's share) and back-fill
-    ``landlord`` when it is unset. With no active lease there is no system-of-record
-    rent, so the existing value is left untouched rather than zeroed."""
     lease = frappe.db.get_value(
         "Lease",
         {"building": doc.name, "status": ["in", ["Approved", "Active"]], "docstatus": ["<", 2]},
@@ -107,9 +70,6 @@ def apply_active_lease(doc):
 
 
 def on_update(doc, method=None):
-    """Reconcile the building-scoped User Permission to the supervisor field:
-    grant the new supervisor's permission for this building, drop the previous
-    supervisor's; other users and other buildings are untouched."""
     before = doc.get_doc_before_save()
     old_sup = before.responsible_supervisor if before else None
     new_sup = doc.responsible_supervisor
@@ -138,10 +98,6 @@ def on_update(doc, method=None):
 
 
 def _recompute_capacity_and_cost(doc):
-    """Capacity + cost-per-capacity recompute. total_capacity is read-only and
-    system-derived from the live bed count, so every save must re-derive it (a bed
-    going Out-of-Service is an external change the building's own field-diff can't
-    see). Cheap: one count() + arithmetic — safe to run on every save."""
     apply_active_lease(doc)
 
     _capacity_count = building_rollup.derive_total_capacity(doc.name)
@@ -155,15 +111,6 @@ def _recompute_capacity_and_cost(doc):
 
 
 def _recompute_occupancy_and_structure(doc):
-    """Occupancy / room / floor / cctv recompute — several count() queries that don't
-    change unless an external writer (the assignment controller, the room/bed
-    generator, weekly_occupancy_sync) touched the related rows. Guarded behind the
-    trigger-field check so it doesn't run on every no-op building save.
-
-    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
-    rather than by the length of a fetched list. The one thing a count cannot do is
-    tell the caller whether anything changed, which is why the trigger-field guard
-    sits above it: without it these queries run on every save of every building."""
     doc.current_occupants = frappe.db.count(
         "Housing Assignment",
         occupancy.active_assignment_filters(building=doc.name),
@@ -185,7 +132,6 @@ def _recompute_occupancy_and_structure(doc):
 
 
 def before_save(doc, method=None):
-    """Guards the abbreviation lock, defaults company, and recomputes capacity and occupancy."""
     _guard_abbreviation_lock(doc)
     if not doc.company:
         doc.company = resolve_company("Habitat")
@@ -203,14 +149,6 @@ def before_save(doc, method=None):
 
 @frappe.whitelist(methods=["POST"])
 def setup_building_rooms(building_name, floors):
-    """Persist the Room Setup wizard's plan onto the building, then generate
-    rooms + beds via the safe generator.
-
-    ``floors`` is a JSON list of floor_plan rows (floor_number, floor_type,
-    room_type, room_count, bed_capacity_per_room, starting_room_number,
-    generate_beds). One transaction: the building's floor_plan is replaced with
-    these rows, then generate_rooms_and_beds runs with confirmation granted.
-    """
     rows = frappe.parse_json(floors) or []
     doc = frappe.get_doc("Building", building_name)
     doc.check_permission("write")
@@ -233,20 +171,6 @@ def setup_building_rooms(building_name, floors):
 
 @frappe.whitelist(methods=["POST"])
 def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity_reduction=0):
-    """
-    Bulk generator for Accommodation Room/Bed records from the floor plan.
-
-    Behaviour:
-    - First generation (building has no rooms yet): creates everything in the plan.
-    - Re-run: brings EXISTING rooms' room_type / bed_capacity in line with the plan
-      (so changing a room type in the floor plan takes effect), but creating NEW
-      rooms/beds (e.g. the plan's room_count was increased) requires the caller to
-      pass confirm_new_rooms=1. Without it, new rooms are reported as "pending" and
-      NOT created, so the building cannot silently grow from an edited floor plan.
-
-    Returns a summary dict with created/updated/skipped/pending counts and a
-    needs_confirmation flag. Never deletes existing records.
-    """
     doc = frappe.get_doc("Building", building_name)
     frappe.has_permission("Building", "write", doc=doc, throw=True)
 
@@ -273,28 +197,6 @@ def generate_rooms_and_beds(building_name, confirm_new_rooms=0, confirm_capacity
 
 @frappe.whitelist(methods=["POST"])
 def generate_safety_setup(building_name):
-    """Idempotent safety-setup generator on the assignment-based model.
-
-    For each active Safety Task Catalog entry:
-      1. If not applicable_to_all_buildings, add this building to the catalog's scope
-         (Safety Task Building Scope child row).
-      2. Get-or-create the ONE reusable Scheduled Task Template for the catalog task
-         (carrying the catalog as a template_items row), then create a Scheduled Task
-         Assignment linking that template to this building. The daily generator turns
-         each active assignment × item into Scheduled Task Instances.
-
-    Frequency: catalog periods map to the template Select via ``SAFETY_FREQ_MAP``;
-    event-driven catalog tasks (``EVENT_DRIVEN_FREQUENCIES``) have no calendar period
-    and are excluded from scheduling (reported, not scheduled); any other/unknown
-    frequency fails loudly rather than being silently swallowed by the closed Select.
-
-    Idempotent: template keyed on the catalog, assignment on ``(template, building)``,
-    scope on ``(catalog, building)`` — a re-run creates no duplicates. Updates the
-    building's safety_setup_* stamp fields.
-
-    Building License records are NOT created — they need a real license_number; the
-    summary lists the recommended types for the operator to create manually.
-    """
     frappe.has_permission("Building", "write", doc=building_name, throw=True)
 
     catalogs = frappe.get_all(

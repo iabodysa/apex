@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
 
@@ -14,16 +13,6 @@ _ROW_SAVEPOINT = "residency_row"
 
 
 def lease_expiry_watchlist() -> None:
-    """Flip an expired Lease's status to Expired (residual of the notification refactor).
-
-    Operator alerting for expiring and expired leases is owned by the native
-    Notifications ``Habitat - Building Lease Expiring`` (Days Before, per Habitat
-    Settings lead) and ``Habitat - Building Lease Expired`` (Days Before 0). Those
-    cannot flip the status: ``set_property_after_alert`` is a no-op on a submitted,
-    workflow-driven document whose ``status`` field is not ``allow_on_submit``. So
-    this job keeps only the single-field flip to ``Expired`` (via ``db_set`` — the
-    same out-of-workflow write it always did) once ``lease_end_date`` has passed.
-    """
     today_str = today()
 
     cursor = ""
@@ -56,15 +45,6 @@ def lease_expiry_watchlist() -> None:
 
 
 def idle_resident_aging() -> None:
-    """Accrue days-idle and the estimated accommodation cost bleed for every open
-    Idle Resident Report.
-
-    days_idle = today - reported_on. Cost bleed = sum of the per-resident daily
-    share already posted to the Accommodation Ledger (Operational Memo) for the
-    linked assignment over the idle window — no GL, reuses existing memo data.
-    Paginated 500/batch with per-row error isolation; posts a timeline note every
-    7 idle days when operational notifications are enabled.
-    """
     today_str = today()
     start = 0
     batch_size = 500

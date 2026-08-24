@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""``start_datetime`` (and its siblings ``boarded_count``, ``boarding_events``,
-``stop_progress``) carried ``allow_on_submit: 1`` though every app write path
-(the worker/driver boarding endpoints) only ever touches them on a strictly
-draft log (``docstatus: 0`` — see apex/salis/api/driver_portal/__init__.py:197-205
-and apex/salis/api/boarding_flow.py:621/821: "a submitted/cancelled log is
-closed"). Removing the flag lets the framework refuse a post-submit edit again.
-Proven through ``insert()``/``submit()``/``save()``, never by calling a
-controller method directly.
-"""
 
 from __future__ import annotations
 

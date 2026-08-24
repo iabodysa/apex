@@ -1,38 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The worker's boarding window — when a self-confirm is evidence, and when it is a lie.
-
-A worker tapping "I'm on the bus" is only evidence if the bus is at HIS stop when he
-taps. Scoping that to the calendar day is not enough: a 07:00 trip stays confirmable
-at 23:00, and a bus that has already served his stop still accepts him, so the gate
-manifest reports a headcount that includes a man standing at the camp.
-
-The window is tied to ONE stop — the worker's own pickup, the Route Stop whose
-``accommodation_building`` is the building his transport request collects him from —
-and that stop moves through five states:
-
-``scheduled``  the trip has not started; there is nothing to board.
-``en_route``   the driver has started but has not reached this worker's stop.
-``at_stop``    the window is OPEN. This is the only state a self-confirm is accepted in.
-``departed``   the driver marked this stop done, marked a LATER stop, or closed the
-               trip's manifest. The bus has gone, and a confirm now is the lie the
-               gate manifest would read as a headcount.
-``finished``   the trip itself is Completed or Cancelled.
-
-It opens at the EARLIER of the driver's recorded arrival at that stop and
-``boarding_grace_minutes`` before the stop's planned time, and closes when the driver
-marks that stop done. Both ends read Trip Stop Progress — the per-stop rail the driver
-portal already writes through ``mark_arrived`` and ``mark_stop_progress`` — and every
-threshold is read from Salis Settings. The clock only ever OPENS the window; every one
-of its closes is something a driver recorded.
-
-MISSING EVIDENCE OPENS THE WINDOW; IT NEVER CLOSES IT. A driver who forgets to tap
-arrival, a trip whose stop progress was never written, a route with no per-stop
-planned time and a trip with no departure time: each of those falls through to the
-time branch or straight to ``at_stop`` rather than refusing. A refusal that is wrong
-strands a real worker at a real stop with no way to be counted, while a confirm that
-is wrong is already reversible through the driver's ``driver_mark_not_boarded``
-override. That asymmetry is the whole reason the gate leans open.
-"""
 
 from __future__ import annotations
 
@@ -56,19 +22,19 @@ FINISHED = "finished"
 
 
 class BoardingWindowClosed(frappe.ValidationError):
-    """A boarding self-confirm that landed outside the worker's own stop window."""
+    pass
 
 
 class BoardingNotOpenYet(BoardingWindowClosed):
-    """The bus has not reached the worker's stop yet."""
+    pass
 
 
 class BoardingStopDeparted(BoardingWindowClosed):
-    """The bus has already served the worker's stop and moved on."""
+    pass
 
 
 class BoardingTripFinished(BoardingWindowClosed):
-    """The trip itself is over."""
+    pass
 
 
 _REFUSALS = {
@@ -80,8 +46,6 @@ _REFUSALS = {
 
 
 def _refusal_message(state):
-    """The worker-facing sentence for a refused self-confirm, naming which end of the
-    window it fell outside of."""
     if state == DEPARTED:
         return _("This bus has already left your stop. Ask for a pickup instead of confirming.")
     if state == FINISHED:
@@ -90,10 +54,6 @@ def _refusal_message(state):
 
 
 def _seconds_of_day(value):
-    """A Time field as seconds since midnight, or None when it carries no time.
-
-    Frappe hands a Time column back as a ``datetime.timedelta``, which is already the
-    offset from midnight; anything else is parsed."""
     if value in (None, ""):
         return None
     if isinstance(value, timedelta):
@@ -109,21 +69,6 @@ _OWN_STOP_FIELDS = ["name", "idx", "stop_name", "planned_time"]
 
 
 def _own_stop(dispatch_trip, transport_request, building):
-    """The worker's OWN Route Stop on this trip: its stable row name (the key the
-    driver's Trip Stop Progress rows are written against), its position on the route
-    and its planned time.
-
-    Read from the trip's OWN copy of the route first, and from the Route Plan only for a
-    legacy trip that has none — the same order ``masar_routes._ordered_trip_stops`` uses.
-    Every trip since ``copy_route_stops`` carries its own stops, and the driver's Trip
-    Stop Progress rows key on THOSE row names. Resolving the worker's stop off the Route
-    Plan instead produced a name from a different parent, so the join in ``resolve``
-    never matched: the per-stop half of the window never closed when the driver marked
-    the stop done, and the worker's arrival signal never reached his own window.
-
-    None when the worker has no pickup building, or no stop on either parent carries it —
-    each of which leaves the caller unable to identify his stop, and therefore unable to
-    refuse him."""
     if not (dispatch_trip and building):
         return None
     stop = frappe.db.get_value(
@@ -157,8 +102,6 @@ def _own_stop(dispatch_trip, transport_request, building):
 
 
 def _open_log(dispatch_trip):
-    """The trip's open (draft) Trip Start Log with its status — the record the driver's
-    per-stop progress hangs off, and the one ``depart_and_finalize`` closes."""
     if not dispatch_trip:
         return None
     return frappe.db.get_value(
@@ -170,9 +113,6 @@ def _open_log(dispatch_trip):
 
 
 def _progress_rows(log):
-    """Every Trip Stop Progress row on the trip's open log. One read serves both
-    questions the window asks: what the driver recorded at THIS worker's stop, and
-    whether he has recorded anything at a stop further down the route."""
     if not log:
         return []
     return frappe.get_all(
@@ -183,12 +123,6 @@ def _progress_rows(log):
 
 
 def _bus_is_past(rows, own_stop):
-    """True when the driver has marked a stop LATER on the route than this worker's.
-
-    The bus cannot be at stop three and still at stop one, so a later mark is
-    recorded proof that this worker's stop is behind it — the case the per-stop
-    ``done`` flag misses when a driver marks arrival onward but never closes the
-    stop he left. An earlier stop's mark says nothing and is ignored."""
     if not own_stop:
         return False
     own_sequence = cint(own_stop.get("idx"))
@@ -201,7 +135,6 @@ def _bus_is_past(rows, own_stop):
 
 
 def _window_anchor(trip, own_stop):
-    """The instant the window opens from, before the grace is taken off it."""
     trip_date = trip.get("trip_date")
     if not trip_date:
         return None
@@ -219,17 +152,6 @@ def _window_anchor(trip, own_stop):
 
 
 def resolve(dispatch_trip, transport_request=None, building=None, now=None):
-    """The worker's boarding-window state on one trip, as one of the five states.
-
-    ``building`` is the worker's own pickup building — the axis the whole window turns
-    on. Without a dispatch trip there is nothing to board and the answer is
-    ``scheduled``. Without an identifiable stop the trip's own departure governs and
-    no per-stop mark can close anything, so a worker whose stop the data cannot name
-    is never shut out by a mark that was not about him.
-
-    Returns a JSON-safe dict the SPAs render directly: the ``state``, whether a
-    self-confirm is accepted (``can_confirm``), the machine ``reason`` it is not, the
-    stop it is about, and the timestamps behind the verdict."""
     now = now or now_datetime()
     trip = (
         frappe.db.get_value(
@@ -285,12 +207,6 @@ def resolve(dispatch_trip, transport_request=None, building=None, now=None):
 
 
 def validate_window_is_open(window):
-    """Refuse a boarding self-confirm outside the window, naming WHY.
-
-    Raises the state's own exception class, so the caller — and the SPA, which reads
-    the thrown ``exc_type`` — gets the reason rather than a bare failure. A no-op
-    while the window is open, so a write path guards itself with one line before it
-    touches the manifest log."""
     if window.get("can_confirm"):
         return
     exc = _REFUSALS.get(window.get("state"), (BoardingWindowClosed, None))[0]

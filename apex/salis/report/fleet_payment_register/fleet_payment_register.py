@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Fleet Payment Register report."""
     columns = [
         {"label": frappe._("Payment"), "fieldname": "name", "fieldtype": "Link", "options": "Salis Payment Request", "width": 180},
         {"label": frappe._("Expense Type"), "fieldname": "expense_type", "fieldtype": "Data", "width": 150},

@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain).
-
-The ledger insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
-connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
-default leaves the session at Administrator, who already satisfies every DocPerm check
-(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
-create on Accommodation Ledger, so any other actor is refused, unchanged by this module.
-"""
 
 from __future__ import annotations
 
@@ -42,17 +34,6 @@ def _post_accommodation_ledger_row(
     capacity,
     days_in_year,
 ) -> None:
-    """Insert ONE daily Operational-Memo Accommodation Ledger row from explicit
-    params. Idempotent: an existing row for the (employee, posting_date,
-    assignment, building, ledger_type) key is skipped. This is the ONLY writer of
-    the daily accommodation-cost ledger row — both the batch allocator and the
-    back-dating path route through it so the 18-key row and the
-    daily-share rounding stay byte-identical.
-
-    Callers OWN the try/except around this call: the batch allocator splits
-    DuplicateEntryError from other errors; the back-dating path uses a single
-    Exception guard. This helper deliberately does no exception handling.
-    """
     daily_share = flt(flt(annual_cost / days_in_year, 5) / capacity, 5)
 
     if frappe.db.exists(
@@ -90,11 +71,6 @@ def _post_accommodation_ledger_row(
 
 
 def daily_accommodation_cost_allocation() -> None:
-    """Scheduler entry — fan daily accommodation cost allocation out PER BUILDING
-    to the native ``long`` queue, so the scheduler worker is never blocked on a
-    large dataset and buildings allocate in parallel. Buildings are discovered
-    once; one idempotent job is enqueued per building (safe to retry).
-    """
     posting_date = today()
     buildings = frappe.get_all(
         "Housing Assignment",
@@ -120,18 +96,6 @@ def daily_accommodation_cost_allocation() -> None:
 
 
 def allocate_building_accommodation_cost(building, posting_date=None) -> None:
-    """Allocate ONE building's daily accommodation costs to the Accommodation
-    Ledger. Enqueued per building by ``daily_accommodation_cost_allocation`` (also
-    directly callable). Idempotent — an existing ledger row for the
-    (employee, posting_date, assignment, building, ledger_type) key is skipped, so
-    retries and overlapping runs never duplicate.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
-    the top: the worker rolls back the whole run, so every unit already completed is
-    lost and the next run repeats them all. The failure is recorded through
-    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
-    """
     posting_date = posting_date or today()
     logger = frappe.logger()
 
@@ -212,21 +176,6 @@ def allocate_building_accommodation_cost(building, posting_date=None) -> None:
 
 
 def backdate_assignment_cost(assignment_name, from_date, to_date=None) -> int:
-    """Post the missed daily Operational-Memo accommodation-cost rows for ONE
-    assignment over [from_date, to_date] (default to_date = today).
-
-    Used when a Temporary Worker is linked to a real Employee (Batch 5): the days he
-    was housed on a passport were skipped by the daily allocator (it skips an
-    assignment with no employee), so they are back-dated to the now-linked Employee.
-    Mirrors daily_accommodation_cost_allocation's per-assignment-per-date algorithm;
-    idempotent (existence-guarded) and per-row error-isolated. Returns days processed.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
-    the top: the worker rolls back the whole run, so every unit already completed is
-    lost and the next run repeats them all. The failure is recorded through
-    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
-    """
     to_date = to_date or today()
     asgn = frappe.db.get_value(
         "Housing Assignment",

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Housing Inventory controller."""
 
 from __future__ import annotations
 
@@ -10,7 +9,6 @@ from frappe.utils import flt, getdate
 
 class HousingInventory(Document):
     def before_save(self):
-        """Recomputes the quantity variance and stamps last_count_date when the counted quantity changes."""
         self.quantity_variance = flt(self.counted_quantity) - flt(self.expected_quantity)
         if self.counted_quantity is not None and (
             self.last_count_date is None or self.has_value_changed("counted_quantity")
@@ -19,16 +17,6 @@ class HousingInventory(Document):
 
 
 def reflect_completed_maintenance(doc, method=None):
-    """Reflect a completed Maintenance Work Order onto the housing item that links its asset.
-
-    Call from the Work Order completion chokepoint (mark_completed): completion sets
-    status via db_set, which fires no on_update doc_event, so a hooks wiring would not
-    catch it. The Work Order reaches its asset through the Maintenance Request's
-    related_facility_asset; every Housing Inventory row whose facility_asset
-    matches gets its maintenance stamps advanced. Idempotent and order-safe: only
-    advance last_maintenance_date (never roll it back) and clear a maintenance
-    condition/status, so a re-run or an out-of-order completion leaves the latest.
-    """
     if doc.status != "Completed" or not doc.maintenance_request:
         return
     asset = frappe.db.get_value(

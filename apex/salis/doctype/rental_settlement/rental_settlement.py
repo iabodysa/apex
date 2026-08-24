@@ -1,38 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Rental Settlement controller.
-
-Monthly reconciliation of a Rental Office's claim against accrued rental days.
-``validate`` recomputes ``accrued_total`` from the vehicle lines (and the line
-amounts themselves), cross-checks it against the LINKED Rental Accrual Ledger
-total for the same office+period (``ledger_accrued_total`` /
-``ledger_variance``), and the ``variance`` against the claimed total. On submit,
-``create_payment_request`` may raise a finance-exclusive Salis Payment Request
-(expense_type "Rental") referencing this settlement.
-
-Settlement <-> Accrual reconciliation (the second half of the documented
-rental-accrual loop): when this settlement reaches a settled state (it is
-submitted/Approved, or later marked Paid), the unsettled Rental Accrual Ledger
-rows for the same ``rental_office`` + ``period_month`` are stamped
-``rental_settlement = <this> / settled = 1`` (``rental_engine.stamp_settlement``;
-the ledger grants no human write role so the ``frappe.db.set_value`` bypass is
-the correct write path). Cancelling the settlement releases those rows again
-(``rental_engine.release_settlement``). The stamp is idempotent — a row already
-settled is never re-stamped, and a row owned by another settlement is never
-silently re-pointed.
-
-Status transitions are owned by the native **Rental Settlement Workflow** (see
-``salis/workflow/rental_settlement_workflow/``), not by this controller. In
-particular the "Mark Paid" transition is restricted to the **Finance Manager**
-role and carries the Segregation-of-Duties condition ``requested_by !=
-session.user`` so the finance approver can never be the (server-stamped)
-requester. This controller keeps only the *data* guards (totals, variance, the
-known-status check), the server-side requester stamp that the SoD gate relies
-on, and the accrual-ledger stamping described above.
-
-This controller posts NO General Ledger / accounting entry. The Salis Payment
-Request it raises is a payment request record; Finance posts the actual
-payment externally.
-"""
 
 from __future__ import annotations
 
@@ -60,14 +26,6 @@ SETTLED_STATUSES = ("Approved", "Paid")
 
 class RentalSettlement(Document):
     def validate(self):
-        """Recomputes accrued and variance totals against the linked rental accrual ledger.
-
-        The requester re-stamp here outlives the field's ``__user`` default: that default
-        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
-        and fills a field only when it is None (``frappe/model/document.py:836``), so it
-        covers neither a later save nor a request body carrying ``requested_by = ""``. A
-        blank requester silently satisfies every ``requested_by != session.user`` gate.
-        """
         self._guard_duplicate()
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
@@ -103,15 +61,6 @@ class RentalSettlement(Document):
         self._stamp_approval()
 
     def _guard_duplicate(self):
-        """One live settlement per office per period.
-
-        The ledger cross-check below reconciles this settlement against the SAME
-        unsettled Rental Accrual Ledger rows a sibling settlement for the same office and
-        month reconciles against, so two of them each read as fully supported and the
-        office is paid twice for one month's accrual. Scoped to ``docstatus < 2``, so a
-        cancelled settlement can be re-raised and an amendment of this one passes —
-        the same scope ``FuelQuota._guard_duplicate`` uses for the same reason.
-        """
         if not (self.rental_office and self.period_month):
             return
         duplicate = frappe.db.exists(
@@ -131,22 +80,11 @@ class RentalSettlement(Document):
             )
 
     def _stored_vehicle_rows(self):
-        """Index the vehicle rows as the database still holds them, by child row name."""
         before = self.get_doc_before_save()
         return {row.name: row for row in (before.vehicles if before else [])}
 
     @staticmethod
     def _amount_was_derived(row, stored_rows):
-        """Say whether this line's amount is ours to recompute or the operator's to keep.
-
-        A Currency child column is NOT NULL DEFAULT 0, so the row as stored cannot tell a
-        typed 0 from a blank. Only the incoming request can: a field the caller omitted
-        arrives as None, a typed 0 arrives as 0. On a re-save the form posts the stored
-        number back, so ``stored`` — the doc-before-save row this method looks up —
-        answers instead: an amount that still equals its own days x daily_rate was ours
-        and follows an edit to either input, one that differs was asserted by hand and
-        stands.
-        """
         if row.amount is None:
             return True
         stored = stored_rows.get(row.name)
@@ -155,15 +93,6 @@ class RentalSettlement(Document):
         return flt(stored.amount) == flt(stored.days) * flt(stored.daily_rate)
 
     def _stamp_approval(self, persist=False):
-        """Record who approved the settlement and the moment they did, and clear both when it is withdrawn.
-
-        A Saudi rental office reads this statement as its settlement advice, so the paper
-        has to name the officer who committed the company and when. Both fields are
-        read-only; they go on as the settlement reaches Approved or Paid and come off if
-        it is pushed back to Draft or Disputed, so a statement never prints an approval
-        the record no longer holds. ``persist`` writes straight to the row for the
-        post-submit Mark Paid transition, where validate no longer runs.
-        """
         approved = self.status in SETTLED_STATUSES
         if approved and not self.approved_by:
             approved_by, approved_on = frappe.session.user, now_datetime()
@@ -180,40 +109,22 @@ class RentalSettlement(Document):
         self.approved_on = approved_on
 
     def on_submit(self):
-        """Stamps this settlement onto its matching rental accrual ledger rows once settled."""
         self._sync_accrual_stamp()
 
     def on_update_after_submit(self):
-        """Re-stamps the accrual ledger rows and the approval as the settlement moves through its settled states."""
         self._sync_accrual_stamp()
         self._stamp_approval(persist=True)
 
     def on_cancel(self):
-        """Releases this settlement's stamped rental accrual ledger rows so they can be re-settled."""
         release_settlement(self.name)
 
     def _sync_accrual_stamp(self):
-        """Stamp this settlement's accrual rows once it is in a settled state.
-
-        Idempotent: ``stamp_settlement`` only touches rows that are still
-        ``settled = 0`` and unlinked (or already linked to THIS settlement), so
-        repeated post-submit saves (Approve, then Mark Paid) never double-stamp,
-        and a row already owned by another settlement is never re-pointed. A
-        not-yet-settled docstatus=1 state (none today, but future-proof) stamps
-        nothing.
-        """
         if self.status not in SETTLED_STATUSES:
             return
         stamp_settlement(self.name, self.rental_office, self.period_month)
 
     @frappe.whitelist(methods=["POST"])
     def create_payment_request(self):
-        """Raise a finance-exclusive Salis Payment Request for this settlement.
-
-        Posts NO GL: the Salis Payment Request is a payment request record
-        that routes through the Finance approval gate. Idempotent — returns the
-        existing linked request if one is already attached.
-        """
         if self.docstatus != 1:
             frappe.throw(_("Submit the settlement before raising a payment request."))
 

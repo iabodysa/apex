@@ -1,9 +1,5 @@
 # Copyright (c) 2026, Apex contributors
 
-"""``/fleet`` must render Arabic like every sibling portal
-(``www/driver.py``, ``www/masar.py``, ``www/housing.py``, ``www/fleet_os.py``),
-regardless of the logged-in User's own ``language`` preference.
-"""
 
 from unittest.mock import patch
 

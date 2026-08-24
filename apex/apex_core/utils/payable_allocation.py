@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Payment Entries that settle a real payable, shared by every surface that raises one.
-
-Boundary: nothing here inserts, submits, or posts GL. Each caller keeps what only it
-knows — which contract or lease is eligible, what identifies one billing period, and how
-the raised payment is found again. Settlement is never returned as a stored value:
-:func:`settlement_of` reads it off the live Payment Entry every time, so a cancellation
-in Accounts reverses the operational status with no reversal code anywhere.
-"""
 
 from __future__ import annotations
 
@@ -28,16 +20,12 @@ REVERSED = "Payment Cancelled"
 
 
 def validate_target(doctype: str) -> None:
-    """Fail closed when the target DocType is not installed, or the caller lacks create
-    permission on it."""
     if not frappe.db.exists("DocType", doctype):
         frappe.throw(_("The {0} DocType is not available on this site.").format(_(doctype)))
     frappe.has_permission(doctype, "create", throw=True)
 
 
 def payable_filters(company: str, supplier: str) -> dict:
-    """Filters selecting the submitted, still-outstanding Purchase Invoices a payment
-    from this (company, supplier) may settle."""
     return {
         "docstatus": 1,
         "company": company,
@@ -47,17 +35,6 @@ def payable_filters(company: str, supplier: str) -> dict:
 
 
 def list_payables(company: str, supplier: str, limit: int = 50) -> list:
-    """The submitted Purchase Invoices a payment may settle.
-
-    Read-only. An empty list is the "fail closed / hide the action" signal: with no
-    approved payable there is nothing a payment could legitimately be allocated to.
-
-    ``frappe.get_list`` (frappe/__init__.py:2008) applies row scope; the explicit
-    ``has_permission(..., throw=True)`` above it is not redundant, because
-    ``get_list`` on a doctype the caller cannot read returns an EMPTY list rather
-    than refusing, and an empty list here already means "nothing to pay". Without the
-    throw the two answers are indistinguishable.
-    """
     if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
         return []
     frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read", throw=True)
@@ -71,15 +48,6 @@ def list_payables(company: str, supplier: str, limit: int = 50) -> list:
 
 
 def payable_count(company: str, supplier: str):
-    """How many eligible payables exist, or ``None`` when the caller may not read
-    invoices at all — so a status read never throws for an operations user who can see
-    the contract or lease but not the finance documents behind it.
-
-    ``frappe.db.count`` would be the shorter primitive and is deliberately not used:
-    it applies no permission at all, so it cannot tell "no payables" from "not
-    allowed to look". The three answers here are distinct on purpose — 0 when the
-    doctype is absent, ``None`` when the caller may not read, a real count otherwise.
-    """
     if not frappe.db.exists("DocType", PAYABLE_SOURCE_DOCTYPE):
         return 0
     if not frappe.has_permission(PAYABLE_SOURCE_DOCTYPE, "read"):
@@ -94,12 +62,6 @@ def payable_count(company: str, supplier: str):
 
 
 def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | None):
-    """Return the submitted Purchase Invoice this payment may settle, or throw.
-
-    Every condition is re-checked here rather than trusted from the picker: the caller
-    is a browser and the eligible set can change between listing and paying.
-
-    """
     if not purchase_invoice:
         frappe.throw(
             _(
@@ -143,9 +105,6 @@ def load_eligible_payable(company: str, supplier: str, purchase_invoice: str | N
 
 
 def validate_money_source(company: str) -> None:
-    """Fail closed unless the company has a default Cash or Bank account.
-
-    """
     source = get_default_bank_cash_account(company, "Cash") or get_default_bank_cash_account(
         company, "Bank"
     )
@@ -158,18 +117,10 @@ def validate_money_source(company: str) -> None:
 
 
 def allocated_total(payment) -> float:
-    """Returns the sum of allocated amounts across a Payment Entry's reference rows."""
     return sum(flt(row.allocated_amount) for row in (payment.references or []))
 
 
 def build_allocated_payment(company: str, supplier: str, purchase_invoice: str | None):
-    """Return an UNSAVED Payment Entry allocated against the eligible invoice, plus the
-    invoice itself so the caller can name it in its own remarks.
-
-    The ``references`` row and its allocated amount come from ERPNext's own payable
-    logic rather than from an amount copied off the source document — an amount copied
-    off a contract or a rent schedule looks correct while settling nothing.
-    """
     invoice = load_eligible_payable(company, supplier, purchase_invoice)
     validate_money_source(company)
 
@@ -184,17 +135,6 @@ def build_allocated_payment(company: str, supplier: str, purchase_invoice: str |
 
 
 def settlement_of(payment_name: str | None) -> dict:
-    """The settlement this payment actually represents right now.
-
-      * no payment at all                     -> Not Raised
-      * raised but still Draft                -> Awaiting Finance Approval
-      * submitted WITH an allocated reference -> Settled
-      * cancelled                             -> Payment Cancelled
-
-    A submitted Payment Entry carrying no allocation is deliberately NOT reported as
-    settled: it moved money on account and closed no invoice, so calling it a settlement
-    would be the exact claim this module exists to stop.
-    """
     if not payment_name:
         return {"payment_entry": None, "settlement": NOT_RAISED, "allocated_amount": 0.0}
 

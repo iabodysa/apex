@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Rental Settlement Item controller."""
 
 from __future__ import annotations
 

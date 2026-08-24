@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety Task Catalog controller."""
 
 from __future__ import annotations
 

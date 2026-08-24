@@ -1,26 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Vehicle Incident's own draft guards and cost-recovery arithmetic.
-
-Patterned on frappe/tests/test_document.py. Most cases build an unsaved
-Document via frappe.new_doc and call one guard method directly. The
-status-transition case is the exception: it travels through the Vehicle
-Incident Workflow (apex/fixtures/workflow.json), so those cases insert a
-minimal incident against the fixture vehicle, submit it, and drive the Close
-action through ``frappe.model.workflow.apply_workflow`` — the same
-production path ``close_incident`` calls — asserting the framework's own
-``validate_workflow`` (frappe/model/document.py:687-695) refuses a
-hand-edited jump instead of a bespoke check.
-
-WHY ``test_ignore`` NAMES ``Loan``. ``get_dependencies`` (frappe/test_runner.py:359-381)
-builds a test record for every Link on the DocType under test, whether or not a case
-touches it. ``recovery_loan`` Links to ``Loan``, which the ``lending`` app owns, and
-apex declares only frappe, erpnext and hrms — so on a site without lending the walk
-aborts the WHOLE suite with ``DocType Loan not found`` before one case runs, which
-reads as UNKNOWN rather than as a failure. ``test_ignore`` (test_runner.py:374-377) is
-the framework's own hatch for this and is scoped to this module alone. It is honest
-here because nothing below reads ``recovery_loan``; the cases that do live in
-``test_vehicle_incident_loan_recovery.py`` and skip themselves when lending is absent.
-"""
 
 from __future__ import annotations
 
@@ -58,17 +36,12 @@ class TestVehicleIncident(FrappeTestCase):
 
 
     def test_a_new_incident_defaults_to_open_with_no_python_default(self):
-        """The DocType JSON's ``default: Open`` on the status field does this
-        alone now that ``_guard_status``'s ``is_new()`` branch is gone."""
         doc = self._incident()
         doc.insert()
         self.addCleanup(self._delete_incident, doc.name)
         self.assertEqual(doc.status, "Open")
 
     def test_a_hand_edited_status_is_refused(self):
-        """Break the removed guard's job on purpose: a plain save() that jumps
-        the field to a state with no modelled transition from Open must still
-        fail — now via the Workflow, not a ``has_value_changed`` throw."""
         doc = self._incident()
         doc.insert()
         self.addCleanup(self._delete_incident, doc.name)
@@ -77,10 +50,6 @@ class TestVehicleIncident(FrappeTestCase):
             doc.save()
 
     def test_close_travels_through_apply_workflow(self):
-        """Proves the production path: ``close_incident`` calls
-        ``close_incident_internal``, which drives the Close transition through
-        ``frappe.model.workflow.apply_workflow`` rather than setting the field
-        directly."""
         doc = self._incident()
         doc.insert()
         self.addCleanup(self._delete_incident, doc.name)

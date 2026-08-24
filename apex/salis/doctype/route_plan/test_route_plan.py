@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Route Plan's ``supervisor_approval`` (and its three sibling decision fields)
-carried ``allow_on_submit: 1`` with no writer anywhere in the app — a plain
-``save()`` on a submitted Route Plan could still rewrite them from the desk.
-Removing the flag lets the framework's own
-``BaseDocument._validate_update_after_submit``
-(frappe/model/base_document.py:1049-1082) refuse that edit again. Proven here
-through ``insert()``/``submit()``/``save()`` only, never by calling a controller
-method directly.
-"""
 
 from __future__ import annotations
 

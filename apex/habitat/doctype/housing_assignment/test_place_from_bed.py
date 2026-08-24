@@ -1,19 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""An assignment created in code must know its building, exactly as one typed does.
-
-``building`` fetches from ``room.building`` and ``room`` fetches from ``bed.room`` — a
-two-hop ``fetch_from`` chain. A chain only resolves in the desk, where the browser
-fetches one hop, writes the field, and the next hop fires off that write. On the server
-each ``fetch_from`` resolves once against the values present when validation starts, so
-the second hop reads a room that is still blank and building never fills.
-
-Every desk save therefore worked while every programmatic one — an API call, an import, a
-scheduled job, the demo builder — produced an assignment with no building. The controller
-returns early on a blank building, so such a row skipped its cost centre, its capacity
-check and its duplicate-occupancy check in silence; only ``reqd`` on the field turned that
-into a refusal rather than a bad row.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -24,7 +10,6 @@ from apex.habitat.doctype.housing_assignment.housing_assignment import (
 
 
 def _bed_with_a_building():
-    """Any bed whose room names a building, or None when the site has none."""
     for bed in frappe.get_all("Bed", pluck="name"):
         room = frappe.db.get_value("Bed", bed, "room")
         if room and frappe.db.get_value("Room", room, "building"):
@@ -43,8 +28,6 @@ class TestPlaceIsDerivedFromTheBed(FrappeTestCase):
         self.assertEqual(doc.building, building)
 
     def test_a_caller_supplied_value_is_never_overwritten(self):
-        """A transfer names the destination explicitly; deriving over it would send the
-        worker back to the bed they came from."""
         bed, room, _building = _bed_with_a_building()
         self.assertIsNotNone(bed)
 
@@ -59,8 +42,6 @@ class TestPlaceIsDerivedFromTheBed(FrappeTestCase):
         self.assertIsNone(doc.building)
 
     def test_the_chain_still_does_not_resolve_on_its_own(self):
-        """The positive control for the whole file: if Frappe ever starts cascading
-        fetch_from server-side, this fails and the derivation can be deleted."""
         doc = frappe.get_doc({"doctype": "Housing Assignment"})
         bed, _room, _building = _bed_with_a_building()
         doc.bed = bed

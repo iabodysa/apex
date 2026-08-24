@@ -1,17 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Assignment-queue reader for the operations board, the /fleet-os drawer and the
-vehicle timelines.
-
-A condition about a document ASSIGNS that document to the Fleet Supervisor queue
-(the ToDo carries reference_type/reference_name), and a non-document condition
-notifies the role. The board and the drawer still speak the row shape of the
-retired alert DocType, and their built JS predates its retirement — so this
-module reads the open assignment queue and renders it in that exact shape.
-Severity round-trips through the ToDo priority the writers set; ``alert_type``
-is derived from the reference DocType for display only — it is never a dedupe or
-filter key, so the retired fragile text-matching dedupe cannot come back through
-here.
-"""
 
 from __future__ import annotations
 
@@ -30,17 +17,12 @@ _REFTYPE_ALERT_TYPE = {
 
 
 def _alert_type_for(reference_type: str, description: str | None) -> str:
-    """Display label for a queue row. Salis Vehicle is queued by two watchers
-    (idle and compliance), so its label alone is read off the description the
-    writer set — display only, never matched against."""
     if reference_type in _REFTYPE_ALERT_TYPE:
         return _REFTYPE_ALERT_TYPE[reference_type]
     return "License Expiry" if "compliance" in (description or "").lower() else "Idle Vehicle"
 
 
 def _vehicle_driver_refs(groups: list[dict]) -> None:
-    """Stamp ``vehicle``/``driver`` onto each grouped queue row from its reference
-    document, batched per DocType (no per-row queries)."""
     names_by_type: dict[str, list[str]] = {}
     for g in groups:
         names_by_type.setdefault(g["reference_type"], []).append(g["reference_name"])
@@ -72,18 +54,6 @@ def _vehicle_driver_refs(groups: list[dict]) -> None:
 
 
 def open_queue_rows() -> list:
-    """The open Fleet Supervisor queue rendered as alert-shaped rows.
-
-    One row per queued DOCUMENT (a role assignment is one ToDo per holder, so the
-    holders collapse into the row's assignee list). The row ``name`` is the oldest
-    ToDo's name — an id the action endpoints resolve back to the reference
-    document. Caller applies its own scope filtering.
-
-    ``frappe.as_json`` (frappe/__init__.py:2071) serialises the payload the screen
-    reads, so a value's shape on the wire matches what every other Frappe response
-    sends. The queue itself is native ToDo rows — nothing here maintains a second
-    inbox, which is the one thing a hand-built alert table could not avoid becoming.
-    """
     todos = frappe.get_all(
         "ToDo",
         filters={
@@ -139,8 +109,6 @@ def open_queue_rows() -> list:
 
 
 def queue_ref(name: str):
-    """The (reference_type, reference_name) behind a queue-backed row id, or None
-    when ``name`` is not a queue ToDo."""
     row = frappe.db.get_value(
         "ToDo", name, ["reference_type", "reference_name"], as_dict=True
     )
@@ -150,13 +118,6 @@ def queue_ref(name: str):
 
 
 def queue_events_for_vehicle(vehicle: str, statuses, limit: int) -> list:
-    """Queue history for one vehicle as alert-shaped events, for the timelines.
-
-    Covers the references that anchor to a vehicle: the Salis Vehicle itself, its
-    Vehicle Suspensions and its Fuel Quotas. ``statuses`` picks open and/or closed
-    ToDos; closed rows are the resolved half the legacy timeline read from
-    ``status = Resolved`` alert rows.
-    """
     refs = {("Salis Vehicle", vehicle)}
     for doctype in ("Vehicle Suspension", "Fuel Quota"):
         for n in frappe.get_all(

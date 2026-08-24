@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Boarding Scan Register report."""
     columns = [
         {"label": frappe._("Scanned At"), "fieldname": "scanned_at", "fieldtype": "Datetime", "width": 165},
         {"label": frappe._("Result"), "fieldname": "result", "fieldtype": "Data", "width": 120},

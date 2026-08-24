@@ -23,11 +23,6 @@ class TransportTripRating(Document):
         transport_request: DF.Link | None
 
     def validate(self):
-        """Requires the trip to be Completed and the rated employee to have
-        actually ridden it. Both are pure data invariants — no caller identity
-        needed once ``employee`` is set on the record — so they apply to every
-        insertion path, not only the worker portal's rating endpoint (which
-        keeps the identity-bound check: resolving WHO ``employee`` is)."""
         self._require_trip_completed()
         self._require_employee_on_trip()
 
@@ -44,8 +39,6 @@ class TransportTripRating(Document):
 
 
 def on_doctype_update():
-    """One rating per worker per trip, enforced by the database rather than by a
-    read-then-insert that two taps can both pass."""
     add_unique_guarded(
         "Transport Trip Rating",
         ["employee", "dispatch_trip"],

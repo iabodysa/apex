@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
 
 from __future__ import annotations
 
@@ -18,14 +17,6 @@ from apex.salis.tasks.common import (
 _ROW_SAVEPOINT = "salis_vehicle_row"
 
 def idle_vehicle_watch() -> None:
-    """Flag Active vehicles with no dispatch trip in the last ``idle_vehicle_days``.
-
-    A vehicle is idle if it has no submitted Dispatch Trip (status
-    Dispatched/Completed) on or after the cutoff (``idle_vehicle_days``; Salis
-    Settings, default 7). A single grouped query returns the set of vehicles WITH a
-    recent trip, and the idle set is the difference in memory: one DB round trip for
-    the trip data rather than one ``get_all`` per vehicle (N+1).
-    """
     today_str = today()
     logger = frappe.logger()
     idle_days = get_salis_int("idle_vehicle_days", 7)
@@ -90,16 +81,6 @@ def idle_vehicle_watch() -> None:
         start += BATCH_SIZE
 
 def vehicle_compliance_expiry_watch() -> None:
-    """Alert on vehicle compliance documents at or past their expiry window.
-
-    Reads Salis Vehicle Compliance child rows whose ``expiry_date`` is within
-    ``alert_lead_days`` (Salis Settings; default 30) of today. For each row the
-    parent vehicle is ASSIGNED to the Fleet Supervisor queue — Critical (High
-    priority) if already expired, otherwise Warning. De-dup is the framework's
-    (one open assignment per vehicle+holder); the shared Salis Vehicle queue is
-    reconciled centrally in ``reconcile_operations_alerts`` because the idle
-    watches queue the same DocType and a per-job reconcile would close their work.
-    """
     today_str = today()
     today_date = getdate(today_str)
     logger = frappe.logger()
@@ -151,15 +132,6 @@ def vehicle_compliance_expiry_watch() -> None:
         start += BATCH_SIZE
 
 def vehicle_utilization_summary() -> None:
-    """Write a trailing-7-day utilisation summary per Active vehicle.
-
-    For each Active vehicle, aggregates the count of Dispatch Trips and the
-    distance (sum of ``odometer_end - odometer_start``) over the last 7 days and
-    logs the result. Vehicles with zero trips are additionally ASSIGNED to the
-    Fleet Supervisor queue as a weekly recap (the actionable output; the framework
-    skips a vehicle already queued, and the shared Salis Vehicle queue reconciles
-    centrally in ``reconcile_operations_alerts``).
-    """
     today_str = today()
     window_start = add_days(today_str, -7)
     logger = frappe.logger()

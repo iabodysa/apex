@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Normalized monthly telecom commitment grouped by cost center, company-scoped."""
 
 import frappe
 from frappe import _
@@ -10,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Lists normalized monthly telecom commitment and active contract count grouped by cost center."""
     filters = filters or {}
     columns = [
         {"label": frappe._("Cost Center"), "fieldname": "cost_center", "fieldtype": "Data", "width": 220},

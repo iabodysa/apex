@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
 
@@ -13,17 +12,6 @@ _ROW_SAVEPOINT = "maintenance_row"
 
 
 def daily_building_license_expiry_check() -> None:
-    """Keep submitted Building License validity status aligned with its expiry date.
-
-    Operator alerting is owned by the native Notifications ``Habitat - Building
-    License Expiring Soon`` and ``Habitat - Building License Expired``. This
-    job carries ONLY the residual status flip those Notifications cannot perform:
-    ``set_property_after_alert`` is a no-op on a submitted document whose ``status``
-    field is not ``allow_on_submit`` (Building License is submitted), and it cannot
-    honour the per-record ``renewal_lead_days`` override. So the sweep is kept —
-    stripped of the old notify/message boilerplate — purely to keep the persisted
-    status accurate. Revoked is terminal and is never recalculated.
-    """
     today_str = today()
 
     cursor = ""
@@ -68,30 +56,6 @@ MAINTENANCE_ROLE = "Accommodation Manager"
 
 
 def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, issue_type, status):
-    """Put an overdue Maintenance Request in the queue of the role that can close it.
-
-    This replaces an Operations Alert row whose only link to its subject was the record
-    name inside the message text, deduped with a leading-wildcard LIKE that used no index
-    and collided whenever a name appeared in an unrelated alert. A native assignment IS
-    the link: the ToDo carries reference_type and reference_name, so the same document is
-    never queued twice and finding it is an indexed lookup.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
-    the top: the worker rolls back the whole run, so every unit already completed is
-    lost and the next run repeats them all. The failure is recorded through
-    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
-
-    Accommodation Manager is the audience because the technician role holds read only on
-    this DocType — a queue addressed to someone who cannot act on the record is the
-    second inbox this move exists to remove.
-
-    The comment is written only the pass the request is NEWLY queued (``assign_role``
-    returns how many assignees were actually ADDED). This job runs on a cadence, so a
-    request still overdue is re-seen every pass; commenting unconditionally would grow
-    one identical comment per run for as long as it stayed overdue, on top of the
-    assignment the technician already has open.
-    """
     message = (
         f"Maintenance Request {req_name} ({issue_type}, status: {status}) is overdue. "
         f"Priority: {priority}, hours open: {elapsed_hours:.1f} "
@@ -118,14 +82,6 @@ def _queue_overdue_request(req_name, priority, elapsed_hours, threshold_hours, i
 
 
 def open_maintenance_escalation() -> None:
-    """Escalate overdue open Maintenance Requests.
-
-    Checks open requests (docstatus != 2, status in ('Open', 'In Progress'))
-    and logs escalations based on priority and elapsed time.
-    Each overdue ticket is ASSIGNED to the role that can close it, and the queue is
-    reconciled at the end of the pass, so a request that is no longer overdue has its
-    assignment closed instead of leaving a row nothing could resolve.
-    """
     now = now_datetime()
     logger = frappe.logger()
 

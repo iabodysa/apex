@@ -1,16 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Maintenance Cost Ledger's post-insert immutability.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-re-saved so ``on_update`` in ``maintenance_cost_ledger.py`` is what is
-exercised, not a stub.
-
-``Item``, ``Maintenance Material``, ``Maintenance Work Order`` and
-``Maintenance Request`` are excluded from the dependency walk: no case here
-sets any of the four, and each one's own closure reaches Purchase Invoice,
-which resolves an unmigrated ``Payment Gateway`` and kills record-building
-before a single test runs.
-"""
 
 from __future__ import annotations
 

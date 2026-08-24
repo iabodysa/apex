@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Accommodation Occupancy Summary — one counted row per building.
-
-The gate is not the row boundary, and is not relied on as one. Every Building row is put
-through ``permissions.report_building_scope`` below, and the Room query is confined to
-the buildings that scope already returned, so a building-scoped Resident Supervisor sees
-only their own estate on both reads. Nothing here depends on the Housing Assignment
-DocPerm to keep another estate's rows out.
-
-The output carries no resident identity — one row per building, counts only — so the
-Housing Assignment rows behind the count are never themselves exposed.
-"""
 
 import frappe
 from frappe import _
@@ -21,7 +10,6 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
-    """Returns one row per building with resident counts and room status split, scoped by permission."""
     columns = [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
         {"label": frappe._("Active Residents"), "fieldname": "active_residents", "fieldtype": "Int", "width": 130},

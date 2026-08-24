@@ -1,29 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Duplicate-safe composite UNIQUE index helper for the machine-written Habitat
-ledgers/snapshots.
-
-The Habitat engines (``habitat.tasks``) and submit-time hooks insert ledger,
-occupancy-snapshot and scheduled-task-instance rows under an app-level
-check-then-insert guard. Those guards can be defeated by a race (two scheduler
-threads, an overlapping manual run), so each controller adds a composite UNIQUE
-index on its natural idempotency columns via ``on_doctype_update`` — the same
-hard backstop the Salis ledgers already carry.
-
-``frappe.db.add_unique`` runs a raw ``ALTER TABLE ... ADD UNIQUE``. If the table
-already holds duplicate rows for the chosen columns, MariaDB raises error 1062
-and ``bench migrate`` would abort. That is unacceptable on an existing site, so
-this helper:
-
-* is a no-op when the named constraint already exists (so it is idempotent
-  across repeated migrates), and
-* on failure (duplicate data or any DDL error) rolls back, logs the blocking
-  duplicate key groups to the Error Log, and returns ``False`` instead of
-  letting the exception abort the migration.
-
-The app-level guard remains the first line of defence; the index is the backstop
-once the data is clean.
-"""
 
 from __future__ import annotations
 
@@ -33,13 +9,6 @@ from pypika import Order
 
 
 def _constraint_exists(doctype: str, constraint_name: str) -> bool:
-    """True if a UNIQUE constraint with this name already exists on the table.
-
-    Read from ``information_schema.TABLE_CONSTRAINTS`` rather than through
-    ``frappe.db.has_index``, which reports indexes and cannot tell a UNIQUE
-    constraint from a plain one. Best-effort: a probe failure answers ``False``
-    and the caller falls through to its own guarded DDL.
-    """
     try:
         return bool(
             frappe.db.sql(
@@ -58,14 +27,6 @@ def _constraint_exists(doctype: str, constraint_name: str) -> bool:
 
 
 def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: str) -> None:
-    """Find and log the row groups that violate the intended uniqueness, so the
-    operator/orchestrator can clean them up. Best-effort: never raises.
-
-    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
-    ``frappe.get_all`` cannot do is GROUP BY with a HAVING: the answer is "which key
-    values appear more than once", which no list filter expresses. Never raises,
-    because this runs only after a constraint has already failed — a second failure
-    here would hide the first."""
     try:
         tbl = frappe.qb.DocType(doctype)
         cols = [getattr(tbl, f) for f in fields]
@@ -96,19 +57,6 @@ def _log_blocking_duplicates(doctype: str, fields: list[str], constraint_name: s
 
 
 def _column_set_indexed(doctype: str, fields: list[str]) -> bool:
-    """True if ANY index on the table spans exactly this ordered column set.
-
-    EXACT ordered equality, never leading-prefix coverage: ``get_column_index``
-    (frappe/database/mariadb/database.py:381) answers only for a SINGLE column at
-    ``Seq_in_index = 1`` and discards any key that has a second column, so a
-    composite never satisfies the framework's single-column ``search_index`` and
-    must not be treated here as covering one.
-    ``(a, b)`` and ``(b, a)`` are likewise different indexes.
-
-    Table name is BOUND, not interpolated, so no identifier reaches the SQL text.
-    Best-effort: any probe failure answers "not indexed" and the caller falls
-    through to its own guarded DDL.
-    """
     wanted = [f.lower() for f in fields]
     by_index: dict[str, list[str]] = {}
     try:
@@ -132,14 +80,6 @@ def _column_set_indexed(doctype: str, fields: list[str]) -> bool:
 
 
 def _index_exists(doctype: str, index_name: str, fields: list[str] | None = None) -> bool:
-    """True if the table already carries this index.
-
-    Matches on NAME first; when ``fields`` is given, an index over exactly that
-    ordered column set counts too, whatever its name (see ``_column_set_indexed``)
-    — so an equivalent index Frappe already maintains is reused, not duplicated.
-    ``frappe.db.has_index`` matches by NAME only, which is the one thing it cannot
-    do: two names over the same columns read as two different indexes to it.
-    """
     try:
         named = frappe.db.sql(
             "SHOW INDEX FROM `tab{dt}` WHERE Key_name = %s".format(dt=doctype),
@@ -155,21 +95,6 @@ def _index_exists(doctype: str, index_name: str, fields: list[str] | None = None
 
 
 def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
-    """Add a plain composite (non-unique) performance index idempotently.
-
-    ``frappe.db.add_index`` (frappe/database/mariadb/database.py:411) is the
-    primitive and is itself idempotent. Three things it cannot do here: it matches
-    an existing index by NAME alone, so an equivalent composite under another name
-    is duplicated; it calls ``self.commit()`` before the DDL, which ends the
-    migrate transaction mid-flight; and it returns nothing, so a caller cannot tell
-    a created index from a failed one.
-
-    Called from a controller ``on_doctype_update`` so BOTH fresh installs (app
-    sync applies it) and existing sites (``bench migrate``) get the index — a
-    patch alone never reaches fresh installs, which mark patches complete without
-    running them. Best-effort on DDL error: logs and returns ``False`` rather than
-    aborting migrate.
-    """
     if _index_exists(doctype, index_name, fields):
         return True
 
@@ -191,14 +116,6 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
 
 
 def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) -> bool:
-    """Add a composite UNIQUE index, guarding against pre-existing duplicate data.
-
-    ``frappe.db.add_unique`` (frappe/database/mariadb/database.py:436) writes the
-    constraint. The one thing it cannot do is survive a table that already holds
-    duplicates: it raises, and inside ``on_doctype_update`` that aborts the whole
-    migrate. This answers ``False`` instead and logs the blocking row groups, so
-    the operator learns which rows to clean rather than which migrate to re-run.
-    """
     if _constraint_exists(doctype, constraint_name):
         return True
 

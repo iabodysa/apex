@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain).
-
-The save runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site`` connects with
-``set_admin_as_user=True`` (frappe/__init__.py:269) before the job is queued, so the worker
-already executes as ``Administrator`` before the row-level ``frappe.set_user("Administrator")``
-below ever runs. The record this watch touches belongs to the operator who raised the request,
-not to the job, so ``Administrator`` — not that operator — is who saves the auto-revert; the
-explicit ``set_user`` swap states that, and the framework's own check is what then runs.
-"""
 
 from __future__ import annotations
 
@@ -23,21 +14,6 @@ from apex.salis.tasks.common import (
 _ROW_SAVEPOINT = "salis_fuel_row"
 
 def unreverted_topup_watch() -> None:
-    """Auto-revert temporary fuel top-ups that are past their revert-due date,
-    then raise an alert for each.
-
-    Reads Fuel Request ``{request_type: Top-up, is_temporary: 1, reverted: 0,
-    status in [Approved, Done], revert_due_date: < today}``. For each overdue
-    row it loads the document, sets ``reverted = 1`` and ``status = Reverted``,
-    saves it (the change is captured natively by Version / track_changes), and
-    NOTIFIES the Fleet Supervisors. Notify, not assign: the job has already fixed
-    the condition it found, so this is a notice of an action taken — an assignment
-    would be born settled and the next reconcile pass would close it unread.
-
-    Each row is guarded in its own ``try/except`` (rollback + log) so one
-    failure never aborts the batch. No ``commit()`` inside the loop — the
-    scheduler commits the job transaction on success.
-    """
     today_str = today()
     logger = frappe.logger()
 
@@ -101,12 +77,6 @@ def unreverted_topup_watch() -> None:
     _flag_overdue_approved_topups(today_str, logger)
 
 def _flag_overdue_approved_topups(today_str: str, logger) -> None:
-    """Tell the fleet about overdue temporary top-ups still sitting at Approved.
-
-    These cannot be auto-reverted: nothing was dispensed yet, and the workflow offers no
-    Approved-to-Reverted transition. Someone has to Complete or Cancel them, so they are
-    surfaced rather than left for a reader who would have to know to look.
-    """
     stranded = frappe.get_all(
         "Fuel Request",
         filters={

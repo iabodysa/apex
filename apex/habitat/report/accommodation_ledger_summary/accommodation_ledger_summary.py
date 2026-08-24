@@ -7,7 +7,6 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the ledger over a required date range."""
     filters = filters or {}
 
     columns = [

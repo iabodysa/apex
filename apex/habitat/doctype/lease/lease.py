@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Accommodation Lease controller."""
 
 from __future__ import annotations
 
@@ -25,7 +24,6 @@ class Lease(Document):
 
 
 def validate(doc, method=None):
-    """Blocks a bad lease date, an out-of-range utility share, or an overlapping building lease."""
     if not doc.company:
         doc.company = resolve_company("Habitat")
 
@@ -69,10 +67,6 @@ _SCHEDULE_DRIVER_FIELDS = ("rent_amount", "billing_cycle", "first_payment_date",
 
 
 def _maybe_build_schedule(doc):
-    """Build the payment schedule when none exists, or rebuild it on a still-draft
-    lease when a driving input (rent/cycle/dates) changed — otherwise editing those
-    fields would silently leave a stale schedule. A submitted lease is never
-    auto-rebuilt; use the regenerate_schedule action on a draft instead."""
     if not doc.payment_schedule:
         _build_schedule(doc)
         return
@@ -83,16 +77,6 @@ def _maybe_build_schedule(doc):
 
 
 def _build_schedule(doc):
-    """Populate payment_schedule rows from first_payment_date + billing_cycle.
-
-    Each due date is ``first_payment_date`` + n*step months, computed fresh from
-    the ORIGINAL anchor every time rather than by repeatedly advancing the
-    previous due date. ``add_months`` clamps a day that does not exist in the
-    target month (the 31st lands on Feb 28), and compounding from that clamped
-    result would carry the shorter day forward for every remaining instalment —
-    a lease starting on the 31st would keep billing on the 28th for its whole
-    term instead of returning to the 31st once a longer month is reached.
-    """
     if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount) > 0):
         return
 
@@ -117,7 +101,6 @@ def _build_schedule(doc):
 
 @frappe.whitelist(methods=["POST"])
 def regenerate_schedule(name):
-    """Force-rebuild the payment schedule (clears existing rows)."""
     doc = frappe.get_doc("Lease", name)
     frappe.has_permission("Lease", "write", doc=doc, throw=True)
 

@@ -21,7 +21,6 @@ RETIRED_REPORTS = [
 
 
 def execute():
-    """Deletes the Auto Email Reports, Report records, and onboarding step for the retired reports."""
     for aer in frappe.get_all(
         "Auto Email Report", filters={"report": ["in", RETIRED_REPORTS]}, pluck="name"
     ):

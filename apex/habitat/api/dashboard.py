@@ -9,13 +9,6 @@ from apex.habitat.permissions import _building_condition, report_building_scope
 
 @frappe.whitelist()
 def get_compliance_percent(filters=None):
-    """Returns the percentage of non-cancelled Scheduled Task Instances marked Completed.
-
-    Row scope is spliced explicitly for the same reason the card below states: neither
-    ``frappe.db.count`` nor ``frappe.qb`` consults ``permission_query_conditions`` — those
-    apply on the ``get_list`` path only (``frappe/model/db_query.py:646``) — so counting
-    without it told a building-scoped supervisor the compliance of the whole estate.
-    """
     frappe.has_permission("Scheduled Task Instance", "read", throw=True)
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Scheduled Task Instance")
     if restrict and not allowed:
@@ -33,17 +26,6 @@ def get_compliance_percent(filters=None):
 
 @frappe.whitelist()
 def get_buildings_over_threshold(filters=None):
-    """Count buildings whose occupancy exceeds their OWN over-capacity threshold.
-
-    Row-relative (each building's occupancy_percent vs its own
-    over_capacity_threshold_percent) — a static Document Type filter cannot
-    compare two fields, so this is a Custom Number Card. An unset/zero threshold
-    falls back to the field default (120) rather than counting as a 0% threshold.
-
-    Row scope is spliced explicitly: ``frappe.qb`` never consults
-    ``permission_query_conditions``, so without this a building-scoped supervisor
-    would be told how many buildings are over capacity ACROSS the whole estate.
-    """
     frappe.has_permission("Building", "read", throw=True)
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Building")
     if restrict and not allowed:
@@ -64,13 +46,6 @@ def get_buildings_over_threshold(filters=None):
 
 @frappe.whitelist()
 def get_arrivals_today(filters=None):
-    """Count workers housed today: submitted Accommodation Assignments whose
-    check_in_date is today. Custom (not a Document Type filter) so the date is
-    resolved server-side on each render rather than frozen into a saved filter.
-
-    Row scope is spliced explicitly: ``frappe.db.count`` builds its query through
-    ``frappe.qb.get_query``, which never consults ``permission_query_conditions``,
-    so the estate filter the Assignment LIST gets is absent here."""
     frappe.has_permission("Housing Assignment", "read", throw=True)
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Housing Assignment")
     if restrict and not allowed:
@@ -85,19 +60,6 @@ def get_arrivals_today(filters=None):
 
 @frappe.whitelist()
 def get_pending_on_manifest(filters=None):
-    """Workers still unhoused against arrival manifests due on/before today.
-
-    Mirrors ArrivalBatch.pending_arrival_count (expected_count minus those
-    actually housed in the building on the expected date), summed across all
-    Arrival Batches whose expected_date has arrived. One bounded grouped query
-    instead of loading each batch; negatives (over-arrival) clamp to 0 so they
-    never offset another batch's shortfall.
-
-    Row scope is spliced explicitly: raw SQL never consults
-    ``permission_query_conditions``, so without the estate predicate a scoped
-    supervisor would be shown the whole estate's manifest gap. Scoping the outer
-    Arrival Batch is enough — the housed subquery only ever joins back on an
-    in-scope building."""
     frappe.has_permission("Arrival Batch", "read", throw=True)
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Arrival Batch")
     if restrict and not allowed:
@@ -127,12 +89,6 @@ def get_pending_on_manifest(filters=None):
 
 @frappe.whitelist()
 def get_custody_value_in_employee_hands(filters=None):
-    """Value-at-risk: the amount currently held in employee custody.
-
-    Sums signed (qty * unit_cost) over non-cancelled Custody Article rows of
-    the Accommodation Stock Ledger where an employee is set — issue rows add,
-    return rows reverse, so the net is exactly what workers still hold. One bounded
-    grouped query."""
     frappe.has_permission("Accommodation Stock Ledger", "read", throw=True)
     building_cond = _building_condition()
     extra = f"AND {building_cond}" if building_cond else ""
@@ -150,17 +106,6 @@ def get_custody_value_in_employee_hands(filters=None):
 
 
 def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
-    """Top holders by outstanding custody value, same definition as the
-    value-in-hands card and the Outstanding-by-Worker report — net signed
-    (qty * unit_cost) over non-cancelled Custody Article rows with an employee
-    set, grouped by employee. Holders whose net value is not positive are dropped.
-    One bounded grouped query; returns ``[{employee, value}]`` value-desc.
-
-    Raw SQL because the answer is a GROUP BY with a signed SUM and a HAVING, and the
-    one thing ``frappe.get_all`` (frappe/__init__.py:1996) cannot do is aggregate
-    across groups — reading the
-    rows to total them in Python would pull the whole custody history to draw one
-    card. The building scope is applied as a bound fragment, never interpolated."""
     building_cond = _building_condition()
     extra = f"AND {building_cond}" if building_cond else ""
     rows = frappe.db.sql(
@@ -184,13 +129,6 @@ def get_top_custody_holders_by_value(limit: int = 10) -> list[dict]:
 
 @frappe.whitelist()
 def get_cleaning_compliance_today(filters=None):
-    """Returns today's percentage of Cleaning Log room rows marked cleaned for the user's buildings.
-
-    Counts every matching Cleaning Log name via ``get_all`` (never a page of them) to
-    feed the child-row completion count below; the building restriction is already
-    folded into ``log_filters`` by ``report_building_scope``, so ``get_list``'s own
-    scope engine would only repeat it, not add to it.
-    """
     frappe.has_permission("Cleaning Log", "read", throw=True)
     log_filters = {"cleaning_date": today(), "docstatus": ["<", 2]}
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Cleaning Log")
@@ -211,7 +149,6 @@ def get_cleaning_compliance_today(filters=None):
 
 @frappe.whitelist()
 def get_safety_tasks_done_week(filters=None):
-    """Returns the past week's percentage of Safety Task Executions not rated Poor or Not Done."""
     frappe.has_permission("Safety Task Execution", "read", throw=True)
     query_filters = {"docstatus": 1, "execution_date": [">=", add_days(today(), -7)]}
     restrict, allowed = report_building_scope(frappe.session.user, doctype="Safety Task Execution")

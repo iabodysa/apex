@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain).
-
-The snapshot insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
-connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
-default leaves the session at Administrator, who already satisfies every DocPerm check
-(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
-create on Occupancy Snapshot, so any other actor is refused, unchanged by this module.
-"""
 
 from __future__ import annotations
 
@@ -21,11 +13,6 @@ _ROW_SAVEPOINT = "occupancy_row"
 
 
 def weekly_occupancy_sync() -> None:
-    """Recalculate occupancy counters on all Accommodation Rooms and Buildings.
-
-    Runs a full reconciliation pass to correct any counter drift caused by
-    out-of-band data changes.
-    """
     batch_size = 500
 
     HA = frappe.qb.DocType("Housing Assignment")
@@ -139,15 +126,6 @@ def weekly_occupancy_sync() -> None:
 
 
 def daily_occupancy_snapshot() -> None:
-    """Write a daily point-in-time occupancy row per building to the read-only
-    Occupancy Snapshot engine, so occupancy history/trends survive
-    (the live occupancy_percent field is overwritten and keeps no history).
-
-    The per-building inputs (already-snapshotted set, room counts by status,
-    active occupants, capacity, cost-per-capacity) are pre-aggregated once via a
-    few grouped queries and looked up in memory, instead of issuing ~7
-    ``count``/``exists``/``get_value`` calls per building (N+1). Behaviour and the
-    one-row-per-building-per-day idempotency guard are preserved."""
     snapshot_date = today()
     year = int(snapshot_date[:4])
     days_in_year = 366 if calendar.isleap(year) else 365

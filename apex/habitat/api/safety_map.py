@@ -1,25 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Safety Map API.
-
-A READ-ONLY presentation layer over Room, Maintenance Request and Custody Damage
-Assessment. This module adds NO maintenance-request, posting, or ledger logic of
-its own, and since the Safety Inspection Report retirement it writes nothing at
-all — the page has exactly one whitelisted endpoint, :func:`get_safety_map`.
-
-Room tiles get a server-computed ``signal`` (red / amber / green) driven by open
-Maintenance Requests and a building-level recent-damage flag. The client must NOT
-recompute the signal.
-
-Safety EVIDENCE is not written here. Safety Inspection Report is deprecated in
-favour of Safety Round: common-area findings go through Safety Round and its
-Safety Task Execution rows, which this page only links to. A write path here that
-both creates and submits Safety Round evidence in a single request would bypass
-its maker-checker gate, letting a caller ratify its own evidence.
-
-:func:`get_safety_map` is read-only and built from a BOUNDED set of bulk queries
-(no N+1): one rooms query, one open-Maintenance-Request query grouped by room in
-Python, and one recent Custody Damage Assessment count (building-level).
-"""
 
 from __future__ import annotations
 
@@ -36,40 +15,6 @@ _DAMAGE_RECENCY_DAYS = 14
 
 @frappe.whitelist()
 def get_safety_map(building=None):
-    """Return the floor -> room safety map for one building (read-only, N+1-free).
-
-    Built from a BOUNDED set of bulk queries:
-      Q1  rooms in the building (name, room_number, floor).
-      Q2  open Maintenance Requests in the building (docstatus == 1, status in
-          the open set), grouped by room in Python: per-room count + whether any
-          line is High/Critical priority.
-      Q3  recent Custody Damage Assessments in the building (docstatus == 1,
-          assessment_date >= today - N days). Custody Damage Assessment has no
-          room link, so this raises a BUILDING-level amber signal surfaced on the
-          summary, not per individual room.
-
-    Each room's ``signal`` is computed server-side (first match wins):
-      red   -> any open High/Critical maintenance request on the room;
-      amber -> any open maintenance request on the room (lower priority), OR the
-               building has a recent damage signal;
-      green -> no open signals.
-    The client must NOT recompute the signal.
-
-    Each floor also gets a per-floor common-zone tile standing for the shared
-    areas (corridors, fire exits, extinguishers) that no bedroom covers. It is a
-    navigation affordance only: the page routes it to Safety Round, it does not
-    write safety evidence.
-
-    Args:
-        building: Accommodation Building docname (source of truth).
-
-    Returns:
-        dict shaped as ``{building, building_title, generated_on,
-        recent_damage_count, has_recent_damage, summary, floors}`` where each
-        floor carries ``rooms`` (with flags ``has_open_maintenance``,
-        ``maintenance_count``, ``has_recent_damage``, ``signal``) and a
-        ``common_zone`` tile.
-    """
     if not building:
         frappe.throw(_("A building is required to draw the safety map."))
     frappe.has_permission("Building", "read", doc=building, throw=True)
@@ -167,7 +112,6 @@ def get_safety_map(building=None):
 
 
 def _build_floor(floor, rooms_list, floor_label):
-    """Assemble one floor payload: its rooms plus a single common-zone tile."""
     rooms_sorted = sorted(rooms_list, key=lambda r: str(r.get("room_number") or ""))
     return {
         "floor": floor,

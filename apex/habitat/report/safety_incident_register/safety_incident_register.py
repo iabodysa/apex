@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Safety Incident Register — what happened in each building, how serious it was, and
-whether it is closed.
-
-The rows are DOCUMENT rows: one incident is one record with its own severity, status
-and casualty count, and there is no child line to unfold. Only submitted incidents are
-listed — a draft has not been formally reported, and a cancelled incident is out with
-docstatus 2.
-
-Scoped by building through the same resolver the permission hook uses, so a scope
-correction reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -23,7 +12,6 @@ HIGH_SEVERITIES = ("High", "Severe", "Critical")
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for submitted safety incidents in scope."""
     filters = filters or {}
     columns = get_columns()
 
@@ -64,8 +52,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     open_incidents = [r for r in data if r.get("status") != "Closed"]
     high = [r for r in data if r.get("severity") in HIGH_SEVERITIES]
     return [
@@ -77,7 +63,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the safety incident register."""
     return [
         {"label": _("Incident"), "fieldname": "name", "fieldtype": "Link", "options": "Safety Incident", "width": 160},
         {"label": _("Incident Date and Time"), "fieldname": "incident_datetime", "fieldtype": "Datetime", "width": 165},

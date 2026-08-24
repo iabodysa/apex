@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Article controller."""
 
 from __future__ import annotations
 

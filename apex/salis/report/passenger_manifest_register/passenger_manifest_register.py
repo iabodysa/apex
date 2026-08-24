@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Passenger Manifest Register — who was on which vehicle, and who never boarded.
-
-The rows are PASSENGER rows, not documents: a manifest of forty passengers where one
-never boarded is one document and forty lines, and rolling it up to the document would
-hide the passenger that matters. Only submitted manifests are listed — a draft has not
-dispatched, and a cancelled manifest is out with docstatus 2.
-
-Scoped through the actual trip, with a Route Plan fallback when a manifest carries no
-dispatch_trip -- the same axis SALIS_SCOPE["Passenger Manifest"] (permissions.py
-_manifest()) projects the desk list through, so a scope correction reaches both together.
-"""
 
 import frappe
 from frappe import _
@@ -20,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card, percent_card
 from apex.salis import permissions
 
 def execute(filters=None):
-    """Returns the columns, per-passenger rows and summary cards for the Passenger Manifest Register."""
     filters = filters or {}
     columns = get_columns()
 
@@ -102,8 +90,6 @@ def execute(filters=None):
     return columns, data, None, None, get_report_summary(data)
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     manifests = {r.get("name") for r in data if r.get("name")}
     boarded = [r for r in data if r.get("boarded")]
     return [
@@ -114,7 +100,6 @@ def get_report_summary(data):
     ]
 
 def get_columns():
-    """Returns the column definitions for the Passenger Manifest Register report."""
     return [
         {"label": _("Manifest"), "fieldname": "name", "fieldtype": "Link", "options": "Passenger Manifest", "width": 150},
         {"label": _("Dispatch Date"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 115},

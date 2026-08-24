@@ -1,33 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Seed Salis Settings defaults. Install-safe, idempotent, blank-fields-only.
-
-``seed_salis_settings`` reaches here only from hooks.py's ``after_install``/
-``after_migrate``, so the acting user is always Administrator, who already carries
-every permission (frappe/permissions.py:107,273,506).
-
-A patch is a one-time migration for sites that already exist; the defaults every NEW site
-needs belong beside the other seeders, which is why hooks.py runs this on both
-after_install and after_migrate.
-
-Only fields the Single has NEVER stored are filled, so an administrator's later edit is
-never clobbered. "Never stored" is not the same as falsy: a Check the administrator
-turned OFF stores a real ``0``, and a seeder that tests falsiness cannot tell that
-from silence, so it re-forces every deliberate off back on at the next migrate.
-``default_company`` and ``default_cost_center`` are linked ONLY when exactly one candidate
-exists — with two or more there is no safe guess, and a wrong default on a money field is
-worse than an empty one the operator has to fill.
-
-The failure is swallowed rather than raised because this same function runs on EVERY
-migrate: a run that silently did nothing is re-attempted by the next one, so it is never
-the last chance to fill these defaults. A seed with no such re-run must raise instead.
-
-Blocked from a fixture by two properties. Gap-filler: a fixture-shipped Single is
-deleted and reinserted whole on every migrate (frappe/modules/import_file.py:230-239,
-forced by frappe/utils/fixtures.py:41), overwriting a value an administrator already
-set. Runtime-resolved value: ``default_company`` and ``default_cost_center`` name
-whichever Company or Cost Center is the sole one on THIS site, a fact no file can hold
-for every site.
-"""
 
 import frappe
 
@@ -43,13 +14,11 @@ DEFAULTS = {
 
 
 def _sole(doctype, filters=None):
-    """The only candidate of ``doctype``, or None when there are none or several."""
     rows = frappe.get_all(doctype, filters=filters or {}, pluck="name", limit=2)
     return rows[0] if len(rows) == 1 else None
 
 
 def seed_salis_settings():
-    """Fill any blank Salis Settings default. Returns the fieldnames set on this call."""
     if not frappe.db.exists("DocType", DOCTYPE):
         return []
 

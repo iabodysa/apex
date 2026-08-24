@@ -1,36 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Facility Asset Delivery controller — delivers a tracked Facility Asset
-from a procurement intake store to an accommodation, gated behind a 3-exit
-transfer lock and an on-site code receipt.
-
-This is the ASSET-level analogue of Custody Handover (which code-receipts stock
-*quantities* through the Accommodation Stock Ledger). A Facility Asset is a
-serialized, individually tracked record, so the "move" is an in-place location
-update on the asset plus an immutable Facility Asset Movement Ledger row — the
-same engine Facility Asset Movement uses — NOT a stock-quantity post.
-
-Lifecycle (guarded controller state machine, mirroring Custody Handover):
-  Draft
-   -> (submit)            Pending Exits
-   -> exit 1 (hand-over)  Pending Exits
-   -> exit 2 (receiving)  Released        [both exits passed; lock open, code issued]
-   -> (confirm on-site code, by the receiving side, NOT the initiator)
-                          Delivered       [asset location/custody actually moves]
-  cancel -> Cancelled (reverses the movement ledger if the asset already moved).
-
-THE 2-EXIT TRANSFER LOCK: the asset is NOT released and does NOT move until both
-checkpoints pass, one on each side of the hand-over:
-  exit 1  Gate / hand-over      Procurement Supervisor (source gate-out)
-  exit 3  Receiving Acceptance  receiving supervisor OR Resident Supervisor
-The numbers are the stored field numbers, not positions — the middle checkpoint was
-retired and its fields are hidden rather than dropped. The exits MUST be cleared in
-order; clearing the last opens the lock (status -> Released) and issues the code.
-
-Lifecycle logic lives as Document methods so Frappe runs it natively with no
-hooks.py doc_events wiring (the Goods Receipt / Custody Handover convention). The
-exit-clearing + on-site confirm whitelisted APIs live in the
-habitat.api.facility_asset_delivery module. OTP generation/hashing are REUSED
-from custody_handover (DRY) — there is one on-site-code mechanism in the app."""
 
 from __future__ import annotations
 
@@ -54,13 +22,6 @@ LEDGER_SOURCE = "Facility Asset Delivery"
 
 class FacilityAssetDelivery(Document):
     def validate(self):
-        """Blocks a delivery that shares its source and destination, or its initiator and receiver.
-
-        The origin is reconciled FIRST — the same order Facility Asset Movement.validate
-        uses — because ``from_building`` is fetch_if_empty: a server-side insert arrives
-        with it blank, and a same-building guard that runs before the fill sees a falsy
-        origin, skips, and lets a delivery whose source and destination are the SAME
-        building through."""
         self._reconcile_origin()
         if self.from_building and self.to_building and self.from_building == self.to_building:
             frappe.throw(_("Source and destination buildings must be different."))
@@ -74,10 +35,6 @@ class FacilityAssetDelivery(Document):
             )
 
     def _reconcile_origin(self):
-        """Default a blank from_building from the asset's current location, and
-        reject a hand-entered origin that contradicts where the asset actually is
-        — so the delivery can't start from a phantom location (the same guard
-        Facility Asset Movement applies)."""
         asset_building = frappe.db.get_value("Facility Asset", self.facility_asset, "building")
         if not asset_building:
             return
@@ -91,25 +48,9 @@ class FacilityAssetDelivery(Document):
             )
 
     def on_submit(self):
-        """Open the exit lock (status Pending Exits). The asset does NOT move yet — it
-        moves only when the exits pass (Released) and the receiving side confirms the
-        code. The code is issued at release, not here: confirm_receipt refuses anything
-        that is not Released, so a code minted at submit could never be used, and the
-        release step replaced it anyway."""
         self.db_set("status", "Pending Exits")
 
     def on_cancel(self):
-        """Reverse the movement ledger if the asset already moved (Delivered), then
-        mark Cancelled. A delivery cancelled before Delivered never moved the asset,
-        so the reversal is a no-op there (idempotent).
-
-        Restores the ROOM as well as the building: move_asset_on_delivery writes
-        both, so restoring only the building left the asset back at the origin
-        while still reporting the destination's room. The room comes from the
-        delivery's own ledger row because the record carries no origin-room field.
-
-        Safe to restore the origin unconditionally because ``before_cancel`` has
-        already refused any cancel whose asset has since moved on."""
         if self.status == "Delivered":
             origin = ledgered_origin(LEDGER_SOURCE, self.name)
             reverse_asset_movement(LEDGER_SOURCE, self.name)
@@ -126,7 +67,6 @@ class FacilityAssetDelivery(Document):
         self.db_set("status", "Cancelled")
 
     def before_cancel(self):
-        """Requires a cancellation reason and confirms a delivered asset has not since moved elsewhere."""
         if not self.cancellation_reason:
             frappe.throw(_("Cancellation Reason is required before cancelling a delivery."))
         if self.status == "Delivered":
@@ -137,18 +77,6 @@ class FacilityAssetDelivery(Document):
 
 
 def move_asset_on_delivery(doc) -> None:
-    """Actually move the tracked asset into the destination on a confirmed receipt.
-
-    Posts the immutable Facility Asset Movement Ledger row (the same engine
-    Facility Asset Movement uses) and updates the asset's current location +
-    previous_* audit fields in place. Idempotent: the ledger engine skips a source
-    already ledgered, and the in-place update is guarded by the Delivered-status
-    short-circuit in the confirm API.
-
-    The ledger's origin room is the room the asset is leaving, read off the asset:
-    the delivery record has no origin-room field, so a NULL there would erase the
-    only record of where the asset came from and leave cancel unable to put it
-    back."""
     asset = frappe.db.get_value(
         "Facility Asset",
         doc.facility_asset,

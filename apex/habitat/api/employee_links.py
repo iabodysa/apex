@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Employee form-dashboard links for Apex Habitat.
-
-Wired via override_doctype_dashboards in hooks.py. Frappe calls this with the
-DocType's native dashboard dict as `data`, so we MERGE into it (append our
-transaction groups) instead of replacing — preserving ERPNext's native Employee
-dashboard. The previous no-arg signature raised a TypeError when the Employee
-form loaded.
-"""
 
 from __future__ import annotations
 
@@ -14,7 +6,6 @@ import frappe
 
 
 def get_data(data=None):
-    """Adds Accommodation, Custody, Tasks and Salis transaction groups to the Employee dashboard data."""
     data = data or {}
     data.setdefault("transactions", [])
     data.setdefault("non_standard_fieldnames", {})

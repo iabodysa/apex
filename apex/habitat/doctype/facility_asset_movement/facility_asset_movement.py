@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Facility Asset Movement controller."""
 
 from __future__ import annotations
 
@@ -22,7 +21,6 @@ class FacilityAssetMovement(Document):
 
 
 def validate(doc, method=None):
-    """Reconciles origin, sets company fields, flags intercompany moves, and blocks bad transfers."""
     _reconcile_origin(doc)
     _populate_company_fields(doc)
     _detect_intercompany(doc)
@@ -35,13 +33,6 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    """Actually move the asset: snapshot its current location into previous_*, set the
-    new building/location from this movement, and bump the movement audit fields.
-
-    The previous code wrote ``current_building``/``current_room``, which do NOT exist
-    on Facility Asset (its fields are ``building``/``location_in_building``), so the
-    guarded ``updates`` dict stayed empty — every movement was a silent no-op and the
-    audit fields (previous_*/movement_count/last_movement_date) never populated."""
     asset = frappe.db.get_value(
         "Facility Asset",
         doc.facility_asset,
@@ -74,17 +65,6 @@ def on_submit(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Revert the asset to where it came from when a submitted movement is cancelled,
-    and re-derive the audit trail from the movements that still stand.
-
-    The room comes from this movement's own ledger row, not from ``from_room``: the
-    Link cannot hold an origin that is not a Room record, so restoring from it blanked
-    the location of any asset delivered to a free-text room. The ledger keeps the room
-    the asset really left (Data), which is how Facility Asset Delivery.on_cancel
-    already restores its own origin.
-
-    Safe to restore the origin unconditionally because ``before_cancel`` has already
-    refused any cancel whose asset no longer sits where this movement left it."""
     origin = ledgered_origin(doc.doctype, doc.name)
     reverse_asset_movement(doc.doctype, doc.name)
     if not frappe.db.exists("Facility Asset", doc.facility_asset):
@@ -99,7 +79,6 @@ def on_cancel(doc, method=None):
 
 
 def before_cancel(doc, method=None):
-    """Blocks cancelling without a reason or if the asset has moved from this movement's destination."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Facility Asset Movement."))
     ensure_asset_still_at(
@@ -110,9 +89,6 @@ def before_cancel(doc, method=None):
 
 
 def _reconcile_origin(doc):
-    """The origin is hand-entered and can drift from where the asset actually is.
-    Default blank from_* from the asset's recorded location, and reject a hand-entered
-    origin that contradicts it so the move can't start from a phantom location."""
     if not doc.facility_asset:
         return
     asset = frappe.db.get_value(
@@ -141,7 +117,6 @@ def _reconcile_origin(doc):
 
 
 def _populate_company_fields(doc):
-    """Fills in blank from/to company fields from each building's own company."""
     if doc.from_building and not doc.from_company:
         doc.from_company = frappe.db.get_value("Building", doc.from_building, "company") or None
     if doc.to_building and not doc.to_company:
@@ -149,7 +124,6 @@ def _populate_company_fields(doc):
 
 
 def _detect_intercompany(doc):
-    """Sets is_intercompany to 1 when the from and to companies differ, otherwise clears it to 0."""
     if doc.from_company and doc.to_company and doc.from_company != doc.to_company:
         doc.is_intercompany = 1
     else:
@@ -157,7 +131,6 @@ def _detect_intercompany(doc):
 
 
 def _validate_intercompany_gates(doc):
-    """Block intercompany submissions without release approval and receiving confirmation."""
     if not doc.release_approved_by:
         frappe.throw(_("Release Approved By is required for intercompany asset movement."))
     if not doc.receiving_confirmed_by:
@@ -170,7 +143,6 @@ def _validate_intercompany_gates(doc):
 
 @frappe.whitelist(methods=["POST"])
 def acknowledge_intercompany_movement(movement: str) -> dict:
-    """Record the permitted accounting sign-off on a submitted intercompany movement."""
     doc = frappe.get_doc("Facility Asset Movement", movement, for_update=True)
 
     doc.check_permission("read")

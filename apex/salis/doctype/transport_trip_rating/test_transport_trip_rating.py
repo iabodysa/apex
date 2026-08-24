@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Transport Trip Rating's own record-level guards.
-
-"Trip must be Completed" and "the rated employee actually rode the trip" are pure
-data invariants — apex/salis/doctype/transport_trip_rating/transport_trip_rating.py
-``validate()`` — reachable from ANY insertion path, not only the worker portal's
-``masar.submit_trip_rating`` endpoint (which keeps only the identity-bound check:
-resolving WHO the caller is). Every case here goes through ``insert()``, never a
-controller method directly, so it proves the guard as the framework will actually
-run it.
-"""
 
 from __future__ import annotations
 
@@ -25,8 +15,6 @@ class TestTransportTripRating(FrappeTestCase):
         return frappe.get_all("Employee", limit=1, pluck="name")[0]
 
     def _completed_trip_with_rider(self, employee):
-        """A submitted, Completed Dispatch Trip carrying ``employee`` as a
-        Boarded passenger on its ``boarding_state`` manifest."""
         make_test_records("Dispatch Trip")
         vehicle = frappe.get_all("Salis Vehicle", limit=1, pluck="name")[0]
         driver = frappe.get_all("Salis Driver", limit=1, pluck="name")[0]
@@ -97,14 +85,10 @@ class TestTransportTripRating(FrappeTestCase):
 
 
 class TestTheStoredRatingIsOnTheFieldsOwnScale(FrappeTestCase):
-    """A Rating field holds a 0-1 fraction and the desk multiplies it by the field's
-    ``options`` star count to draw it, so a whole star count written straight through
-    would render as a full five however few stars the worker tapped."""
 
     def test_the_endpoint_reads_its_star_count_from_the_field(self):
         declared = frappe.get_meta("Transport Trip Rating").get_field("rating").options
         self.assertEqual(str(_rating_stars()), str(declared))
 
     def test_a_stored_rating_never_exceeds_one(self):
-        """The whole point of the scale: the top of the range stores 1.0, not 5."""
         self.assertEqual(_rating_stars() / _rating_stars(), 1.0)

@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Employees currently holding more than one SIM, company-scoped."""
 
 import frappe
 from frappe import _
@@ -9,7 +8,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Lists employees currently holding more than one SIM Card, scoped to the caller's companies."""
     filters = filters or {}
     columns = [
         {"label": frappe._("Employee"), "fieldname": "employee", "fieldtype": "Link", "options": "Employee", "width": 160},

@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The printable slips the Arrivals Desk hands a worker, and the header they share.
-
-Three slips carry the same masthead — worker, company, date, text direction and
-language — so the masthead is built once by ``slip_context`` and each endpoint adds
-only the rows peculiar to it. The templates sit beside it so the print chrome (the
-``@media print`` rule, the frame, the type) can be compared across all three at
-once; each template still carries its own copy of that chrome.
-"""
 
 from __future__ import annotations
 
@@ -18,19 +10,15 @@ from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORK
 
 
 def slip_company() -> str:
-    """The operating company for slip headers, via the shared Habitat resolver
-    (explicit Habitat Settings company -> user default -> global default)."""
     return resolve_company("Habitat") or ""
 
 
 def slip_direction() -> str:
-    """Text direction for a printed slip, from the boot/user language (rtl for ar*)."""
     lang = (frappe.local.lang or "en").lower()
     return "rtl" if lang.startswith("ar") else "ltr"
 
 
 def party_type_label(party_type) -> str:
-    """Translatable label for a raw party-type doctype name."""
     if party_type == PARTY_EMPLOYEE:
         return _("Employee")
     if party_type == PARTY_TEMPORARY_WORKER:
@@ -39,15 +27,6 @@ def party_type_label(party_type) -> str:
 
 
 def slip_context(worker_name, party_type=None) -> dict:
-    """The masthead every slip carries. ``party_type`` is omitted on slips that
-    identify the worker by a document reference instead of a party.
-
-    Dates are rendered with ``frappe.utils.formatdate``, an alias for ``format_date``
-    (frappe/utils/data.py:580), so a printed slip carries the site's date format
-    rather than one this module invents. The direction and language are read from
-    ``frappe.local.lang``, because a slip printed from a background job has no request
-    to infer them from.
-    """
     ctx = {"worker_name": worker_name}
     if party_type is not None:
         ctx["party_type"] = party_type

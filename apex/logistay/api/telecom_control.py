@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Read API behind the Telecom Control Desk Page.
-
-Every endpoint is read-only, role-gated (``read`` permission on the underlying
-DocType), and company-scoped through the same allowed-companies set the list
-views use — so a scoped user's cards, charts, rows, expiry data and drawer never
-include another company's SIMs. All inputs are bounded: filters are whitelisted to
-known fields, the page size and expiry window are clamped, and aggregates run as
-single grouped queries so the query count stays flat regardless of dataset size.
-Unrelated employee fields are never exposed — only the custodian's name.
-"""
 
 from __future__ import annotations
 
@@ -53,7 +43,6 @@ _SIM_ROW_FIELDS = [
 
 
 def _clamp(value, low, high, default):
-    """Clamps a value to the given integer range, falling back to a default when it is not numeric."""
     try:
         value = int(value)
     except (TypeError, ValueError):
@@ -62,13 +51,6 @@ def _clamp(value, low, high, default):
 
 
 def _sanitize_filters(raw):
-    """Keep only whitelisted filter keys with truthy scalar values.
-
-    ``frappe.parse_json`` (frappe/__init__.py:2491) accepts the string the client
-    sends. The one thing it cannot do is decide which keys are permitted — it returns
-    whatever shape arrived — so the allowlist here is what stops a caller filtering on
-    a column the screen never offered.
-    """
     if isinstance(raw, str):
         raw = frappe.parse_json(raw) or {}
     if not isinstance(raw, dict):
@@ -82,22 +64,11 @@ def _sanitize_filters(raw):
 
 
 def _company_scope(doctype, user=None):
-    """Return the list of allowed companies for ``doctype``, or None for an oversight user.
-
-    ``None``  -> no company restriction (oversight role).
-    ``[]``    -> a scoped user with no company permission: caller returns nothing.
-    ``[...]`` -> restrict to these companies.
-
-    ``doctype`` is REQUIRED and positional: it is the ``applicable_for`` narrowing key,
-    and the endpoints below read two different DocTypes (SIM Card, Telecom Contract), so
-    a default here would silently widen whichever of them it did not name.
-    """
     restrict, allowed = permissions.report_company_scope(user or frappe.session.user, doctype=doctype)
     return allowed if restrict else None
 
 
 def _apply_scope(filters, allowed):
-    """Fold the company scope into a filters dict. Returns (filters, has_access)."""
     if allowed is None:
         return filters, True
     if not allowed:
@@ -112,7 +83,6 @@ def _apply_scope(filters, allowed):
 
 
 def _grouped_counts(filters, group_field, limit=None):
-    """Returns SIM Card counts grouped by one field as label and value rows, unassigned labeled."""
     rows = frappe.get_all(
         "SIM Card",
         filters=filters,
@@ -126,13 +96,6 @@ def _grouped_counts(filters, group_field, limit=None):
 
 @frappe.whitelist()
 def get_summary_cards(filters=None):
-    """Returns SIM and active-contract summary counts and monthly commitment for the control desk.
-
-    The Telecom Contract read must see every contract matching ``contract_filters``
-    (company-scoped above), never a page of them: ``commitment`` and ``expiring``
-    are summed/counted over the full set, and a truncated fetch would silently
-    undercount both for a company with more than one page of active contracts.
-    """
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -180,7 +143,6 @@ def get_summary_cards(filters=None):
 
 @frappe.whitelist()
 def get_charts(filters=None):
-    """Returns SIM Card counts grouped by status, supplier, project, and cost center for the charts."""
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -196,7 +158,6 @@ def get_charts(filters=None):
 
 @frappe.whitelist()
 def get_sim_rows(filters=None, page=1, page_size=DEFAULT_PAGE_SIZE):
-    """Returns a paged, filtered, company-scoped list of SIM Cards with custodian names attached."""
     frappe.has_permission("SIM Card", "read", throw=True)
     allowed = _company_scope("SIM Card")
     sim_filters, access = _apply_scope(_sanitize_filters(filters), allowed)
@@ -219,8 +180,6 @@ def get_sim_rows(filters=None, page=1, page_size=DEFAULT_PAGE_SIZE):
 
 
 def _attach_custodian_names(rows):
-    """Resolve custodian employee names in ONE query — only the display name, no
-    other employee fields."""
     employee_ids = {r.current_custodian_employee for r in rows if r.get("current_custodian_employee")}
     names = {}
     if employee_ids:
@@ -238,7 +197,6 @@ def _attach_custodian_names(rows):
 
 @frappe.whitelist()
 def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
-    """Returns active or expired Telecom Contracts ending within the given day window."""
     frappe.has_permission("Telecom Contract", "read", throw=True)
     allowed = _company_scope("Telecom Contract")
     within_days = _clamp(within_days, 1, MAX_EXPIRY_DAYS, DEFAULT_EXPIRY_DAYS)
@@ -281,12 +239,6 @@ def get_contract_expiry(filters=None, within_days=DEFAULT_EXPIRY_DAYS):
 
 @frappe.whitelist()
 def get_cost_center_totals(filters=None):
-    """Normalized monthly commitment per cost center across active contracts.
-
-    Reads every matching Telecom Contract (``limit_page_length=0``, explicit): the
-    per-cost-center total is a running sum over the whole company-scoped set, and a
-    paged fetch would silently under-total whichever cost centers fell past the page.
-    """
     frappe.has_permission("Telecom Contract", "read", throw=True)
     allowed = _company_scope("Telecom Contract")
     sim_filters = _sanitize_filters(filters)
@@ -319,11 +271,6 @@ def get_cost_center_totals(filters=None):
 
 @frappe.whitelist()
 def get_sim_detail(sim_card):
-    """Drawer data for one SIM: its own fields plus custody history. Company and
-    document permission are enforced by loading the doc through the permission
-    layer; unrelated employee fields are never returned.
-
-    """
     if not sim_card or not frappe.db.exists("SIM Card", {"name": sim_card}):
         frappe.throw(_("SIM Card {0} does not exist.").format(sim_card))
     doc = frappe.get_doc("SIM Card", sim_card)
@@ -357,7 +304,6 @@ def get_sim_detail(sim_card):
 
 
 def _attach_history_names(history):
-    """Resolves and attaches each custody history row's employee display name in one query."""
     employee_ids = {r.employee for r in history if r.get("employee")}
     names = {}
     if employee_ids:

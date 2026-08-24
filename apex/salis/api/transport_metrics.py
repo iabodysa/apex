@@ -7,13 +7,6 @@ from apex.salis import permissions
 
 @frappe.whitelist()
 def get_transport_requests_served_pct(filters=None):
-    """Returns the percentage of this month's transport requests that got a trip, scoped by project.
-
-    Both ``get_all`` calls must see every matching name, never a page of them:
-    the project restriction already comes from ``report_project_scope`` above, so
-    a truncated fetch would not leak another project, it would just corrupt the
-    ratio by dividing a full ``raised`` count against a partial ``served`` set.
-    """
     frappe.has_permission("Transport Request", "read", throw=True)
     tr_filters = {"pickup_datetime": [">=", str(get_first_day(today()))]}
     restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Transport Request")

@@ -1,36 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Dispatch Board API (read-only glance board).
-
-A thin presentation layer over the Salis fleet DocTypes, mirroring the Habitat
-Transfer Board / Front Desk pattern: a single bounded reader per board load (no
-N+1), no write/posting/status logic of its own, and no raw SQL against the data
-tables. The board answers one operational question for a fleet manager: "what is
-the state of my fleet right now?" across four panes:
-
-  * vehicles grouped by status (Active / Stopped / Under Maintenance / Released);
-  * today's Dispatch Trips, grouped by trip status;
-  * driver availability (Active drivers split into assigned vs available, where
-    "assigned" means the driver has a non-cancelled Dispatch Trip today);
-  * open Transport Requests (intake not yet Scheduled / Fulfilled / Rejected /
-    Cancelled).
-
-Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
-helpers in :mod:`apex.salis.permissions` (``_is_unscoped`` /
-``allowed_projects``) so the board never shows a scoped supervisor any project
-they could not already see in the list views:
-
-  * Salis Vehicle, Salis Driver and Transport Request carry a direct ``project``
-    Link, so they are filtered by the permitted project set;
-  * Dispatch Trip has NO own ``project`` — it is scoped through its parent Route
-    Plan's project, exactly as ``permissions.dispatch_trip_query`` does for the
-    list view.
-
-A scoped user with no allowed projects sees an empty board (mirroring the
-``1=0`` fragment the list-view query condition would apply).
-
-This endpoint is read-only and stays GET. It is permission-gated on
-``Salis Vehicle`` / ``read`` as defence in depth on top of the Page role grant.
-"""
 
 from __future__ import annotations
 
@@ -47,19 +15,6 @@ CLOSED_REQUEST_STATUSES = {"Scheduled", "Fulfilled", "Rejected", "Cancelled"}
 
 
 def _permitted_projects():
-    """Resolve the project scope for the current user.
-
-    Returns a tuple ``(unscoped, projects)``:
-
-      * ``unscoped`` is True for oversight roles that see every project, in which
-        case ``projects`` is ``None`` (no project filter applied);
-      * otherwise ``projects`` is the list of Project names the user holds a User
-        Permission for. An empty list means the user is scoped but granted no
-        project, so the board must be empty.
-
-    This delegates to the same helpers the ``permission_query_conditions`` hooks
-    use, so the board scope and the list-view scope can never diverge.
-    """
     user = frappe.session.user
     if _is_unscoped(user):
         return True, None
@@ -67,11 +22,6 @@ def _permitted_projects():
 
 
 def _project_filter(unscoped, projects):
-    """Build an ORM filter clause for a direct ``project`` Link column.
-
-    Returns an empty dict for unscoped users (no restriction), or a
-    ``{"project": ["in", [...]]}`` clause for scoped users.
-    """
     if unscoped:
         return {}
     return {"project": ["in", projects]}
@@ -79,29 +29,6 @@ def _project_filter(unscoped, projects):
 
 @frappe.whitelist()
 def get_dispatch_board(project: str | None = None) -> dict:
-    """Return the full dispatch glance board for the permitted project scope.
-
-    Read-only. One bounded query per pane (no N+1); display titles for trips are
-    resolved through bulk lookups. Permission-gated on ``Salis Vehicle`` /
-    ``read``.
-
-    Args:
-        project: Optional Project docname to narrow the board to a single
-            project. It is intersected with the caller's permitted scope — a
-            scoped user cannot widen their view by passing a project they are not
-            granted (an out-of-scope project simply yields an empty board).
-
-    Returns:
-        dict with keys:
-          * ``scope``: ``{"unscoped", "projects", "project"}`` echoing the
-            resolved scope (useful for the UI and for tests);
-          * ``vehicles``: ``{"groups": [...], "total"}`` grouped by status;
-          * ``trips_today``: ``{"groups": [...], "total", "trip_date"}`` grouped
-            by Dispatch Trip status for today;
-          * ``drivers``: ``{"assigned", "available", "assigned_count",
-            "available_count", "active_total"}``;
-          * ``transport_requests``: ``{"open": [...], "open_count"}``.
-    """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     frappe.has_permission("Dispatch Trip", "read", throw=True)
 
@@ -129,7 +56,6 @@ def get_dispatch_board(project: str | None = None) -> dict:
 
 
 def _empty_board(unscoped, projects, project) -> dict:
-    """A fully-formed empty board for a scoped user with no permitted project."""
     return {
         "scope": {"unscoped": unscoped, "projects": projects, "project": project},
         "vehicles": {"groups": [], "total": 0},
@@ -146,13 +72,6 @@ def _empty_board(unscoped, projects, project) -> dict:
 
 
 def _group_by_status(rows, ladder, status_key="status"):
-    """Bucket ``rows`` by their status into the given ladder order.
-
-    Statuses not present in ``ladder`` are collected under a trailing "Other"
-    group so nothing is silently dropped. Empty ladder buckets are still emitted
-    (with an empty ``items`` list and zero ``count``) so the UI can render a
-    stable set of columns; the "Other" bucket is only emitted when non-empty.
-    """
     buckets: dict[str, list] = {status: [] for status in ladder}
     other: list = []
     for row in rows:
@@ -172,7 +91,6 @@ def _group_by_status(rows, ladder, status_key="status"):
 
 
 def _vehicles_pane(unscoped, projects) -> dict:
-    """Vehicles grouped by operational status within the permitted scope."""
     rows = frappe.get_all(
         "Salis Vehicle",
         filters=_project_filter(unscoped, projects),
@@ -197,14 +115,6 @@ def _vehicles_pane(unscoped, projects) -> dict:
 
 
 def _trips_today_pane(unscoped, projects) -> dict:
-    """Today's Dispatch Trips grouped by trip status.
-
-    Dispatch Trip has no own ``project`` field, so scoping is applied through
-    the parent Route Plan exactly as ``permissions.dispatch_trip_query`` does:
-    the trip's ``route_plan`` must belong to a Route Plan whose ``project`` is in
-    the permitted set. Vehicle plate and driver name are resolved with bounded
-    bulk reads (no per-row round trips).
-    """
     trip_date = today()
     filters: dict = {"trip_date": trip_date}
 
@@ -250,20 +160,6 @@ def _trips_today_pane(unscoped, projects) -> dict:
 
 
 def _drivers_pane(unscoped, projects) -> dict:
-    """Active drivers split into assigned vs available within scope.
-
-    A driver is "assigned" when they have at least one non-cancelled Dispatch
-    Trip dated today (the operational dispatch sense); every other Active driver
-    is "available". ``current_vehicle`` is surfaced on each row so the board can
-    show the bound vehicle without an extra round trip. Only ``Active`` drivers
-    are considered for the availability split (Stopped / Released
-    drivers are out of the dispatchable pool).
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) gates the
-    optional driver columns, because several are Custom Fields a site may not carry;
-    the one thing reading them unguarded cannot do is degrade — it raises, and the
-    dispatch board would go blank rather than lose one column.
-    """
     driver_filters = _project_filter(unscoped, projects)
     driver_filters["status"] = "Active"
     show_pii = 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
@@ -326,12 +222,6 @@ def _drivers_pane(unscoped, projects) -> dict:
 
 
 def _transport_requests_pane(unscoped, projects) -> dict:
-    """Open Transport Requests (intake not yet closed) within scope.
-
-    "Open" = status NOT in {Scheduled, Fulfilled, Rejected, Cancelled}. Only
-    submitted or draft intake is shown (cancelled documents are excluded both by
-    status and by the ``docstatus < 2`` guard).
-    """
     filters = _project_filter(unscoped, projects)
     filters["status"] = ["not in", list(CLOSED_REQUEST_STATUSES)]
     filters["docstatus"] = ["<", 2]

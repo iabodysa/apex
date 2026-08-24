@@ -1,28 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Whitelisted API for the Facility Asset Delivery 3-exit transfer lock and the
-on-site code receipt.
-
-THE 2-EXIT TRANSFER LOCK, the core of this module: a submitted delivery sits in
-``Pending Exits`` until BOTH exit checkpoints pass IN ORDER, one on each side of
-the hand-over. Only clearing the last exit opens the lock — status flips to
-``Released`` and the on-site code is issued. Until then the asset has NOT moved.
-
-  exit 1  Gate / hand-over      Procurement Supervisor    pass_exit_1
-  exit 3  Receiving Acceptance  receiving supervisor      pass_exit_3
-                                OR Resident Supervisor
-
-Each ``pass_exit_N`` is fail-closed: it requires the delivery to be submitted and
-in ``Pending Exits``, requires the PRIOR exit to already be cleared, and requires
-the caller to hold the exit's role (or be System Manager). An exit cannot be
-cleared twice and cannot be skipped.
-
-THE ON-SITE CODE RECEIPT: once Released, the receiving side confirms an on-site
-6-digit code (the SAME mechanism as Custody Handover, reused via ``hash_otp`` /
-``generate_otp``) to flip the delivery to ``Delivered`` and ACTUALLY move the
-tracked asset into the destination. Separation of duties: the initiator who
-shipped the asset cannot confirm its own receipt. The confirm is fail-closed:
-lockout -> expiry -> released-state gate -> code match, and a mismatch reveals
-nothing about which check failed."""
 
 from __future__ import annotations
 
@@ -58,7 +34,6 @@ LAST_EXIT = EXIT_ORDER[-1]
 
 
 def _get_submitted(delivery: str):
-    """Returns the submitted Facility Asset Delivery, or blocks the action if it is not submitted."""
     doc = frappe.get_doc(DELIVERY_DOCTYPE, delivery)
     if doc.docstatus != 1:
         frappe.throw(_("Only a submitted delivery can be actioned."))
@@ -66,15 +41,6 @@ def _get_submitted(delivery: str):
 
 
 def _pass_exit(delivery: str, n: int):
-    """Clear exit ``n`` of the 3-exit lock. Fail-closed: submitted + Pending Exits,
-    the prior exit already cleared, the caller holds exit ``n``'s role, and the
-    exit is not already cleared. Clearing exit 3 opens the lock (Released) and
-    issues the on-site code.
-
-    ``frappe.only_for`` (frappe/__init__.py:936) enforces the exit's own role. The one
-    thing a DocPerm cannot express is a per-EXIT gate inside one document: write on
-    the delivery is a single permission, while three different roles must each clear
-    their own step in order."""
     doc = _get_submitted(delivery)
     frappe.has_permission(DELIVERY_DOCTYPE, "write", doc=doc, throw=True)
 
@@ -114,32 +80,21 @@ def _pass_exit(delivery: str, n: int):
 
 
 def _exit_slug(n: int) -> str:
-    """Returns the slug name (security, logistics or receiving) for a given exit checkpoint number."""
     return {1: "security", 2: "logistics", 3: "receiving"}[n]
 
 
 @frappe.whitelist(methods=["POST"])
 def pass_exit_1(delivery: str):
-    """Exit 1 of 2 — Gate clearance at the source (Procurement Supervisor)."""
     return _pass_exit(delivery, 1)
 
 
 @frappe.whitelist(methods=["POST"])
 def pass_exit_3(delivery: str):
-    """Exit 2 of 2 — Receiving acceptance (Resident Supervisor). Opens the lock
-    (status -> Released) and issues the on-site code."""
     return _pass_exit(delivery, 3)
 
 
 @frappe.whitelist(methods=["POST"])
 def confirm_receipt(delivery: str, code: str):
-    """Confirm the on-site code receipt and actually move the asset.
-
-    Only valid once the 3-exit lock is open (status Released). Fail-closed gate
-    order: lockout -> expiry -> released-state gate -> code match. Separation of
-    duties: the initiator who shipped the asset cannot confirm its own receipt. A
-    wrong code increments the attempt counter and, on the third miss, locks the
-    delivery for a few minutes; the thrown error is deliberately generic."""
     doc = _get_submitted(delivery)
     frappe.has_permission(DELIVERY_DOCTYPE, "write", doc=doc, throw=True)
 
@@ -191,9 +146,6 @@ def confirm_receipt(delivery: str, code: str):
 
 
 def _move_and_deliver(doc):
-    """Move the asset into the destination, mark the delivery Delivered, stamp the
-    verification time, and clear the stored hash. Idempotent on the move (the
-    movement-ledger engine skips a source already ledgered)."""
     move_asset_on_delivery(doc)
     doc.db_set(
         {
@@ -207,8 +159,6 @@ def _move_and_deliver(doc):
 
 @frappe.whitelist(methods=["POST"])
 def regenerate_code(delivery: str):
-    """Issue a fresh on-site code + expiry window and clear any lockout. Restricted
-    to the initiator side; only valid once Released; returns the new plaintext ONCE."""
     doc = _get_submitted(delivery)
     frappe.has_permission(DELIVERY_DOCTYPE, "write", doc=doc, throw=True)
     user = frappe.session.user

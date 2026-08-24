@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Vehicle Handover controller.
-
-Transfers a vehicle from one driver to another, updating the vehicle's
-current_driver mirror and odometer. The submitted Vehicle Assignment remains
-the authoritative pairing; this controller only updates the denormalized mirror.
-"""
 
 from __future__ import annotations
 
@@ -24,18 +18,10 @@ from apex.salis.utils import (
 
 class VehicleHandover(Document):
     def before_insert(self):
-        """Default the handover time to the moment the receipt is raised.
-
-        Two handovers of the same vehicle on the same day cannot be ordered by a date
-        alone, and a receipt that states no time cannot say which one came second. The
-        operator may overwrite it with the real clock time; left alone it carries the
-        time the paper was raised, which is what a desk log would have written.
-        """
         if not self.handover_time:
             self.handover_time = nowtime()
 
     def validate(self):
-        """Validates the two drivers differ, the incoming rider is active, and the odometer only rises."""
         self.direction = self.direction or "Transfer"
         if self.direction == "Receipt":
             self.from_driver = None
@@ -87,7 +73,6 @@ class VehicleHandover(Document):
                 )
 
     def _validate_native_checklist(self):
-        """Require exact active native-template parity for receipts and returns."""
         if self.direction not in ("Receipt", "Return"):
             return
         if not self.checklist_template:
@@ -121,7 +106,6 @@ class VehicleHandover(Document):
                 frappe.throw(_("Explain the failed check: {0}.").format(row.check_item))
 
     def _derive_discrepancy(self):
-        """Derive the receipt state from the native checklist; never trust a caller."""
         if self.direction not in ("Receipt", "Return"):
             return
         failed = [row for row in (self.handover_check_items or []) if not row.ok]
@@ -134,7 +118,6 @@ class VehicleHandover(Document):
         )
 
     def _validate_assignment_event(self):
-        """Serialize one receipt and one return against the exact assignment."""
         if self.direction not in ("Receipt", "Return"):
             return None
         if not self.vehicle_assignment:
@@ -183,7 +166,6 @@ class VehicleHandover(Document):
         return assignment
 
     def before_submit(self):
-        """Requires signed evidence, and discrepancy notes when a discrepancy is recorded."""
         self._validate_assignment_event()
         if not self.signed_evidence:
             frappe.throw(_("Signed handover evidence is required before submitting."))
@@ -199,7 +181,6 @@ class VehicleHandover(Document):
             )
 
     def on_submit(self):
-        """Moves the vehicle's current driver and odometer to the new driver and reading."""
         lock_vehicle(self.vehicle)
 
         set_current_driver(self.vehicle, self.to_driver, odometer=self.odometer_reading)
@@ -252,7 +233,6 @@ class VehicleHandover(Document):
         )
 
     def on_cancel(self):
-        """Restore mirrors from the assignment that remains authoritative."""
         lock_vehicle(self.vehicle)
 
         active_receipt_assignment = None

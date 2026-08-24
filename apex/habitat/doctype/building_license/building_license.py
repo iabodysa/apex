@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Building License controller."""
 
 from __future__ import annotations
 
@@ -16,7 +15,6 @@ def derive_license_status(
     renewal_lead_days: int | None,
     on_date: str | None = None,
 ) -> str:
-    """Return the canonical validity status for an expiry date."""
     days_to_expiry = date_diff(expiry_date, on_date or today())
     if days_to_expiry <= 0:
         return "Expired"
@@ -28,13 +26,11 @@ def derive_license_status(
 
 class BuildingLicense(Document):
     def validate(self) -> None:
-        """Validates the license dates and stamps the renewal date when the expiry moved forward."""
         self._validate_dates()
         self._stamp_renewal_date()
         self._sync_status()
 
     def _sync_status(self) -> None:
-        """Derive draft status while preserving a persisted terminal revocation."""
         previous = None if self.is_new() else self.get_doc_before_save()
         if previous and previous.status == "Revoked":
             self.status = "Revoked"
@@ -46,29 +42,14 @@ class BuildingLicense(Document):
             )
 
     def _validate_dates(self) -> None:
-        """Blocks saving when the expiry date does not fall after the issue date."""
         if self.issue_date and self.expiry_date and getdate(self.expiry_date) <= getdate(self.issue_date):
             frappe.throw(_("Expiry Date must be after the Issue Date."))
 
     def before_cancel(self) -> None:
-        """Keep a revoked regulatory record terminal."""
         if self.status == "Revoked":
             frappe.throw(_("A revoked Building License cannot be cancelled or reinstated."))
 
     def _stamp_renewal_date(self) -> None:
-        """Stamp ``last_renewal_date`` whenever the license is renewed.
-
-        A renewal is recorded when the validity (``expiry_date``) is pushed
-        forward versus the last-recorded value — the operator has
-        extended the license. Two real renewal paths are covered:
-
-        * editing a still-draft license and pushing ``expiry_date`` forward; and
-        * amending a submitted license (cancel -> amend) with a later expiry,
-          where the prior value is read from the ``amended_from`` original.
-
-        ``last_renewal_date`` is read-only in the form, so it is only ever
-        written here (or by the ``renew`` action below), never by a human.
-        """
         if not self.expiry_date:
             return
 
@@ -88,14 +69,6 @@ class BuildingLicense(Document):
 
 @frappe.whitelist(methods=["POST"])
 def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None = None) -> dict:
-    """Renew a Building License: roll ``expiry_date`` forward, stamp
-    ``last_renewal_date`` = today, and derive status from the new expiry.
-
-    Pass either an explicit ``new_expiry_date`` or ``extend_days`` (number of
-    days to add to the current expiry). Used by the "Renew License" form button
-    on a draft license; a submitted license is renewed by amending it (the
-    controller stamps ``last_renewal_date`` from the amended expiry).
-    """
     frappe.has_permission("Building License", "write", doc=name, throw=True)
     doc = frappe.get_doc("Building License", name)
 
@@ -129,7 +102,6 @@ def renew(name: str, new_expiry_date: str | None = None, extend_days: int | None
 
 @frappe.whitelist(methods=["POST"])
 def mark_revoked(name: str, reason: str) -> dict:
-    """Permanently revoke one submitted license with an audit reason."""
     reason = str(reason or "").strip()
     if not reason:
         frappe.throw(_("A reason is required to revoke a Building License."))

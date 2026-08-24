@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Vehicle Handover's direction guards, checklist-derived state, and
-the default handover time.
-
-Patterned on frappe/tests/test_document.py. Each case builds an unsaved
-Document via frappe.new_doc. The direction-requirement cases call the whole
-``validate()`` with a direction/driver combination that throws before any
-database-backed helper (the assignment lookup, the checklist template, the
-rider-block query) is reached, so no fixtures are needed to prove them.
-"""
 
 from __future__ import annotations
 
@@ -79,11 +70,6 @@ class TestVehicleHandoverDiscrepancyDerivation(FrappeTestCase):
         self.assertIn("Front-left worn.", doc.discrepancy_notes)
 
     def test_a_transfer_is_never_graded_by_the_checklist(self):
-        """A stale Discrepancy status from before the direction was corrected
-        to Transfer must survive unchanged: the derivation only runs for a
-        Receipt or a Return, so it must not silently launder a real
-        discrepancy into "untouched" just because it happens to also be
-        absent."""
         doc = self._handover("Transfer", [{"check_item": "Tyres", "ok": 0}])
         doc.discrepancy_status = "Discrepancy"
         doc.discrepancy_notes = "Pre-existing note."
@@ -93,13 +79,6 @@ class TestVehicleHandoverDiscrepancyDerivation(FrappeTestCase):
 
 
 class TestVehicleHandoverDefaultTime(FrappeTestCase):
-    """``frappe.new_doc`` itself stamps every Time field with the current
-    clock time (frappe/model/create_new.py:148-149) before the controller
-    ever runs, so building the case that way would test the framework, not
-    this guard. A payload built via ``frappe.get_doc({...})`` — the shape a
-    whitelisted API handler constructs from a request body — carries no such
-    stamp, which is exactly the gap ``before_insert`` closes.
-    """
 
     def test_an_unset_handover_time_defaults_at_insert(self):
         doc = frappe.get_doc({"doctype": "Vehicle Handover"})

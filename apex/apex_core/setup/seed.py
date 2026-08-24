@@ -1,45 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Data-driven seed loader (Apex Habitat).
-
-``seed_all`` reaches this loader only from hooks.py's ``after_install``/``after_migrate``,
-so the acting user is always Administrator, who already carries every permission on every
-DocType (frappe/permissions.py:107,273,506) — including the ones this loader does not know
-about in advance, since records span whichever DocType each data file names.
-
-A single, minimal, create-only loader that replaces the hand-written
-``*_seed.py`` modules for records whose DocType is **not** importable as
-``is_standard`` module JSON — Email Template, Kanban Board, Assignment Rule,
-Role, Auto Email Report, navbar links, Single defaults, and issue permissions.
-
-(Dashboards, Dashboard Charts, Number Cards and Notifications are NOT handled
-here: those DocTypes carry an ``is_standard`` field and ship as native module
-JSON imported by ``bench migrate``.)
-
-Records live as plain JSON data under ``apex_core/setup/data/<module>/<file>.json``,
-one DocType per file::
-
-    {
-        "doctype": "Email Template",
-        "key": "name",            # natural-key field for the existence guard
-        "create_only": true,      # skip if a record with that key already exists
-        "records": [ { ... }, ... ]
-    }
-
-Contract — deliberately identical to the legacy ``*_seed.py`` modules so the
-switch is behaviour-preserving:
-
-- **create-only by default**: a record matched on ``key`` is never overwritten,
-  so admin edits survive both re-runs and ``bench migrate``;
-- **existence-guarded**: a record is skipped (never fatal) if its DocType or any
-  Link target — top-level *or* on a child row — is missing, and the log names the
-  target that could not be resolved;
-- **per-record savepoint + log-then-rollback**: one bad record cannot abort the
-  rest (the proven pattern from the workflow / movement seeders).
-
-``load_specs`` is intentionally free of any ``frappe`` dependency so it can be
-unit-tested without a site; ``frappe`` is imported lazily inside the functions
-that actually write.
-"""
 
 import json
 import os
@@ -51,18 +10,9 @@ DATA_ROOT = os.path.join(os.path.dirname(__file__), "data")
 _REQUIRED_KEYS = ("doctype", "key", "records")
 
 class SeedDataError(ValueError):
-    """A seed JSON file is missing a required key or is malformed."""
+    pass
 
 def load_specs(module_dir, only=None, data_root=None):
-    """Read and validate every seed JSON file for one module.
-
-    Pure function (no ``frappe``): returns a list of validated spec dicts, each
-    ``{"doctype", "key", "create_only", "records", "__source__"}``.
-
-    :param module_dir: the data sub-directory name, e.g. ``"habitat"``.
-    :param only: optional iterable of DocType names to keep (others skipped).
-    :param data_root: override the data root (for tests).
-    """
     root = os.path.join(data_root or DATA_ROOT, module_dir)
     if not os.path.isdir(root):
         return []
@@ -99,7 +49,6 @@ def load_specs(module_dir, only=None, data_root=None):
     return specs
 
 def _record_key_value(spec, record):
-    """The natural-key value used for the existence guard."""
     key = spec["key"]
     if key not in record:
         raise SeedDataError(
@@ -108,25 +57,11 @@ def _record_key_value(spec, record):
     return record[key]
 
 def _exists(frappe, doctype, key, value):
-    """True only when a real row already carries this natural key.
-
-    """
     if key == "name" and value != doctype:
         return bool(frappe.db.exists(doctype, value))
     return bool(frappe.db.exists(doctype, {key: value}))
 
 def _unresolved_link(frappe, doctype, record):
-    """Name the first Link target this record cannot resolve, or None if all resolve.
-
-    Child rows are walked too: a Table row's Link is as fatal as a top-level one —
-    ``Document._validate_links`` (frappe/model/document.py:969) checks children, so a
-    record whose rows dangle must be refused here rather than raising mid-batch.
-
-    ``frappe.get_meta`` (frappe/model/meta.py:66) supplies the Link fields. The one
-    thing the framework's own validation cannot do is answer BEFORE the insert: it
-    raises during save, which in a seed batch aborts the records that would have
-    succeeded after it.
-    """
     meta = frappe.get_meta(doctype)
     for field in meta.get("fields", {"fieldtype": "Link"}):
         value = record.get(field.fieldname)
@@ -148,17 +83,6 @@ def _unresolved_link(frappe, doctype, record):
     return None
 
 def _linked_doctypes(frappe, doctype):
-    """Every DocType this one points at through a Link, its own and its child rows'.
-
-    Read off the schema rather than guessed: a Link field declares its target in
-    ``options``, which is the same metadata ``_unresolved_link`` already reads to decide
-    whether a record can be created. Dynamic Link is deliberately absent — its target is a
-    value in a sibling field, so no static reading of the schema can name it.
-
-    ``Meta.get_table_fields`` (frappe/model/meta.py:214) supplies the child tables, so
-    a Link that lives only on a child row is still counted; a targets set built from
-    top-level fields alone would order a parent before the DocType its rows point at.
-    """
     meta = frappe.get_meta(doctype)
     targets = {f.options for f in meta.get("fields", {"fieldtype": "Link"}) if f.options}
     for table in meta.get_table_fields():
@@ -167,20 +91,6 @@ def _linked_doctypes(frappe, doctype):
     return targets - {doctype}
 
 def order_specs(frappe, specs):
-    """Sort specs so a DocType is seeded after everything it links to.
-
-    The order is DERIVED, not declared: seeding Room before Building fails because Room
-    carries a Link to Building, and the schema already says so. Deriving it means nobody
-    maintains a hand-written list that silently rots when a field is added.
-
-    ``frappe.db.table_exists`` (frappe/database/database.py:1220) drops a DocType whose
-    table is not on this site, because the order must be derivable during install when
-    a later app's DocTypes do not exist yet.
-
-    Returns ``(ordered, cyclic)``. A cycle — two DocTypes that Link to each other — cannot
-    be ordered at all, so those specs come back separately for the caller's retry loop
-    rather than being forced into an order that is a guess.
-    """
     provided = {spec["doctype"]: spec for spec in specs}
     needs = {
         dt: _linked_doctypes(frappe, dt) & set(provided) for dt in provided if frappe.db.table_exists(dt)
@@ -197,26 +107,6 @@ def order_specs(frappe, specs):
     return ordered, cyclic
 
 def apply_spec(spec):
-    """Create the records for one spec. Returns ``{created, skipped, failed}``.
-
-    create-only, existence-guarded, per-record savepoint with log-then-rollback.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    are taken PER RECORD, because the one thing a plain try/except cannot do is undo a
-    partial write: a failed insert leaves child rows behind, and without a savepoint
-    the next record in the batch inherits them.
-
-    ``frappe.db.table_exists`` (frappe/database/database.py:1220) guards the whole
-    spec, so a seeder that ships ahead of its DocType reports every record skipped
-    rather than failing the install.
-
-    A skipped table or a missing Link target is PRINTED rather than logged, the
-    same reasoning as ``patches/v2_8/retire_unused_apex_roles.py``: this runs
-    inside install/migrate, whose own stdout is what the operator running the
-    upgrade is reading, and ``frappe.logger().warning`` never reaches a
-    production site (``frappe/utils/logger.py:12`` floors the level at ERROR
-    there).
-    """
     doctype, key = spec["doctype"], spec["key"]
     created = skipped = failed = 0
 
@@ -251,22 +141,6 @@ def apply_spec(spec):
     return {"created": created, "skipped": skipped, "failed": failed}
 
 def seed(module_dir, only=None):
-    """Load and apply every seed spec for one module. Safe to re-run.
-
-    Wire from ``hooks.py`` ``after_install`` / ``after_migrate`` as
-    ``apex.apex_core.setup.seed.seed("habitat")`` (and ``"salis"``).
-
-    ORDER FIRST, RETRY ONLY FOR WHAT ORDER CANNOT SEE. ``order_specs`` derives the sequence
-    from the schema — a DocType is seeded after everything its Link fields point at — so
-    Room follows Building because Room's own metadata says it must. What that reading
-    cannot express is a Dynamic Link, whose target is a value in a sibling field, or a
-    cycle; those come back as ``cyclic`` and go through the retry loop below, which repeats
-    the remainder after every productive round and stops on NO PROGRESS rather than after a
-    fixed number of tries, so a real defect still surfaces as a failure instead of being
-    buried under repeated attempts. Frappe's own make_records
-    (frappe/desk/page/setup_wizard/setup_wizard.py:504-541) does neither: it logs a failing
-    record and moves on.
-    """
     totals = {"created": 0, "skipped": 0, "failed": 0}
     specs = [spec for spec in load_specs(module_dir, only=only) if spec.get("apply", True)]
     ordered, cyclic = order_specs(frappe, specs)
@@ -292,6 +166,4 @@ def seed(module_dir, only=None):
 _MODULES = ("habitat", "salis")
 
 def seed_all():
-    """Seed every module's data files. Zero-arg hook entry for ``hooks.py``
-    ``after_install`` / ``after_migrate`` — create-only, so safe on every run."""
     return {module_dir: seed(module_dir) for module_dir in _MODULES}

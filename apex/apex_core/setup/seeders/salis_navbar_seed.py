@@ -1,30 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Seed Salis (movement/fleet) quick links into the desk navbar Help dropdown.
-
-``seed_salis_navbar_help_links`` reaches here only from hooks.py's ``after_install``/
-``after_migrate``, so the acting user is always Administrator, who already carries
-every permission (frappe/permissions.py:107,273,506).
-
-Navbar Settings is a global Single, so it must NOT ship as a fixture (that would
-overwrite the customer's own navbar on every migrate). Instead this reads the
-existing Single and APPENDS our help links only if absent — additive and
-idempotent, never clobbering existing items.
-
-This is the gap-filler property: a fixture-shipped Single is deleted and
-reinserted whole on every migrate (frappe/modules/import_file.py:230-239, forced
-by frappe/utils/fixtures.py:41), wiping any help-dropdown row a customer added.
-
-The seed logic lives here (single source of truth) and is reused by the app's
-``after_install`` / ``after_migrate`` hooks, exactly like the other Salis seeds
-(notifications, kanban, assignment rules). A fresh install gets the links
-immediately while already-installed sites pick them up on migrate. Re-running is
-safe: each link is keyed on its label and added only when missing.
-
-Routes are verified against the shipped artifacts:
-- Salis workspace ``salis/workspace/salis/salis.json`` (name "Salis") -> /app/salis
-- Salis Dispatch Board page ``salis/page/salis_dispatch_board`` (name
-  "salis-dispatch-board") -> /app/salis-dispatch-board
-"""
 
 import frappe
 
@@ -36,7 +10,6 @@ _LINKS = [
 
 
 def seed_salis_navbar_help_links():
-    """Append the Salis Help-dropdown links if absent. Safe to re-run."""
     try:
         if not frappe.db.exists("DocType", "Navbar Settings"):
             return

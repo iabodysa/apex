@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Safety Incident's close-without-notes guard.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``validate`` in ``safety_incident.py`` is what is exercised, not
-a stub.
-"""
 
 from __future__ import annotations
 

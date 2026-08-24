@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""No site gets a support contract it was never asked about.
-
-An SLA that appears on its own promises a response time nobody agreed to, and it is
-worse than none: a ticket then looks answered-on-time or late against hours the operator
-never chose. So the rule is that a site-specific schedule — the SLA, the Holiday List and
-the support hours — is CHOSEN in setup, while the site-independent defaults are seeded
-idempotently.
-
-These assert the choosing, the refusal and the idempotency. The Issue Type and Issue
-Priority refusals are covered where they live.
-"""
 
 import ast
 import inspect
@@ -33,21 +22,11 @@ from apex.apex_core.setup.salis_support import (
 
 
 class TestNoSlaWithoutAnAnswer(FrappeTestCase):
-    """The defect this guards: an after_migrate seed creating a 24x7 SLA silently."""
 
     def test_disabled_never_creates_the_sla(self):
         self.assertIsNone(configure_support_sla(enabled=False))
 
     def test_an_incomplete_schedule_is_refused_loudly(self):
-        """Half a schedule is the dangerous case: workdays with no hours accepts every
-        ticket and promises nothing, which reads on screen as configured.
-
-        The refusal is matched on ITS OWN MESSAGE, not on the exception class. Every
-        later step of this function also raises ValidationError — a missing Holiday
-        List row, a bad time — so asserting the class alone passes even when the
-        completeness check is deleted. Measured: with the check removed the
-        class-only assertion still went green.
-        """
         for kwargs in (
             {"holiday_list": None, "workdays": ["Monday"], "start_time": "08:00:00", "end_time": "17:00:00"},
             {"holiday_list": "Any", "workdays": [], "start_time": "08:00:00", "end_time": "17:00:00"},
@@ -68,8 +47,6 @@ class TestNoSlaWithoutAnAnswer(FrappeTestCase):
                 )
 
     def test_the_wizard_is_the_only_caller_that_enables_it(self):
-        """Read from the source: an enable that reaches a seeder instead of the wizard
-        is exactly the silent creation this card retired."""
         source = inspect.getsource(setup_wizard._apply_salis_support)
         self.assertIn("apex_enable_salis_support_sla", source)
         tree = ast.parse(source)
@@ -82,7 +59,6 @@ class TestNoSlaWithoutAnAnswer(FrappeTestCase):
 
 
 class TestSupportDefaultsAreIdempotent(FrappeTestCase):
-    """They run at install AND at migrate, so a second run must change nothing."""
 
     def test_granting_issue_permissions_twice_adds_nothing(self):
         grant_issue_role_permissions()
@@ -104,11 +80,8 @@ class TestSupportDefaultsAreIdempotent(FrappeTestCase):
 
 
 class TestShippedSupportRecordsAreNamedOnce(FrappeTestCase):
-    """The refusals and the SLA read their names from one place, so they cannot drift."""
 
     def test_every_sla_priority_is_a_shipped_issue_priority(self):
-        """An SLA naming a priority the app does not ship would reference a row that
-        disappears the moment nobody recreates it."""
         named = {priority for priority, _r, _res, _default in SLA_PRIORITIES}
         self.assertEqual(named - set(ISSUE_PRIORITIES), set())
 
@@ -117,15 +90,11 @@ class TestShippedSupportRecordsAreNamedOnce(FrappeTestCase):
         self.assertEqual(len(defaults), 1)
 
     def test_the_shipped_names_are_not_empty(self):
-        """The positive control: a refusal over an empty tuple refuses nothing."""
         self.assertTrue(ISSUE_TYPES)
         self.assertTrue(ISSUE_PRIORITIES)
         self.assertTrue(SLA_NAME)
 
     def test_the_fixture_hook_ships_exactly_the_shipped_names(self):
-        """The third consumer, and the one that used to hold its own copy: a name the
-        fixtures hook does not select is never installed, so the refusal guards a row
-        that is not there and the SLA hangs off a priority that does not exist."""
         selected = {
             entry["dt"]: set(entry["filters"][0][2])
             for entry in frappe.get_hooks("fixtures", app_name="apex")
@@ -135,9 +104,6 @@ class TestShippedSupportRecordsAreNamedOnce(FrappeTestCase):
         self.assertEqual(selected.get("Issue Priority"), set(ISSUE_PRIORITIES))
 
     def test_the_shipped_fixture_files_carry_exactly_the_shipped_names(self):
-        """The fixture FILE is what installs; the tuple only selects. A name in the
-        tuple with no row in the file selects nothing and installs nothing, and the
-        refusal then guards a record the site never received."""
         fixtures = frappe.get_app_path("apex", "fixtures")
         for filename, expected in (
             ("issue_type.json", ISSUE_TYPES),

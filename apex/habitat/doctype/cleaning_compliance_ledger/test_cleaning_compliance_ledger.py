@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Cleaning Compliance Ledger's immutability guards.
-
-Patterned on frappe/tests/test_document.py for a write-once, no-trash record.
-Every row crosses ``insert``/``save``/``delete`` so the doc_events guards in
-``cleaning_compliance_ledger.py`` are what is exercised, not a stub.
-
-``Cleaning Log`` is excluded from the dependency walk: no case here sets it,
-and its own link field to Subcontractor Service Order reaches Purchase
-Invoice's ERPNext closure, which resolves an unmigrated ``Payment Gateway``
-and kills record-building before a single test runs.
-"""
 
 from __future__ import annotations
 

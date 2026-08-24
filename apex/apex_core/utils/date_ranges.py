@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Date-range helpers shared across DocTypes."""
 
 from __future__ import annotations
 
@@ -15,17 +14,6 @@ def has_overlapping_record(
     end_value,
     exclude_name: str | None = None,
 ) -> str | None:
-    """Return the name of an existing ``doctype`` record whose [start, end]
-    interval intersects [start_value, end_value] within ``scope_filters``, else
-    None.
-
-    Intersection is inclusive on both ends — existing.start <= new.end AND
-    existing.end >= new.start — matching the callers' original predicate.
-    Cancelled rows (docstatus == 2) and ``exclude_name`` (the row being saved)
-    are excluded. Scope semantics stay caller-side: each caller supplies its own
-    ``scope_filters`` (e.g. lease scopes by building; utility bill by
-    company + building + utility_account) and its own start/end field names.
-    """
     return frappe.db.get_value(
         doctype,
         {

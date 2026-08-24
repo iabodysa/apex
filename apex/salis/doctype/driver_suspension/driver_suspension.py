@@ -1,9 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Driver Suspension controller.
-
-Stops a driver, optionally releasing the linked vehicle. Prior driver status is
-captured into previous_status for a reliable revert on cancel.
-"""
 
 from __future__ import annotations
 
@@ -20,24 +15,17 @@ from apex.salis.utils.driver_availability import (
 
 class DriverSuspension(Document):
     def validate(self):
-        """Requires a vehicle to release, and a driver whose planned trips are handed over.
-
-        The trip check runs here rather than on submit so the operator is told while
-        he is still filling the form, not after he has asked for the stop to take effect.
-        """
         validate_driver_has_no_planned_trips(self.driver)
         if self.release_vehicle and not self.related_vehicle:
             frappe.throw(_("Select the vehicle to release."))
 
     def before_submit(self):
-        """Requires evidence before a stop for Violation or Termination can be submitted."""
         if self.stop_reason in ("Violation", "Termination") and not self.evidence:
             frappe.throw(
                 _("Evidence is required to submit a stop with reason {0}.").format(_(self.stop_reason))
             )
 
     def on_submit(self):
-        """Stops the driver, records their prior status, and releases the vehicle when requested."""
         lock_driver(self.driver)
 
         self.db_set("previous_status", frappe.db.get_value("Salis Driver", self.driver, "status"))
@@ -59,11 +47,6 @@ class DriverSuspension(Document):
         self._report_any_trip_he_is_still_running()
 
     def _report_any_trip_he_is_still_running(self):
-        """Name the trips already on the road, which a stop does not and cannot recall.
-
-        A planned trip refuses the stop; a dispatched one is a vehicle in motion, and
-        an accident cannot wait for it to finish. The supervisor is told instead.
-        """
         running = dispatched_trips_for_driver(self.driver)
         if not running:
             return
@@ -75,7 +58,6 @@ class DriverSuspension(Document):
         )
 
     def on_cancel(self):
-        """Restores the driver's prior status and re-links the released vehicle if it is still free."""
         lock_driver(self.driver)
 
         another_stop_in_force = frappe.db.exists(

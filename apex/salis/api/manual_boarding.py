@@ -1,15 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Driver fallback when a worker cannot present a scannable boarding pass.
-
-The Boarding Scan Log write keeps ``ignore_permissions`` for the reason in ``boarding.py``: it is
-an ``in_create`` audit record no role may write by hand, and this is the fallback path, so every
-attempt is logged whether it succeeds or fails — a DocPerm that made the write legal would also
-let the log be edited afterwards, which is the one thing it must not. The Trip Start Log write
-runs inside ``as_capacity(DRIVER, driver)`` instead: it is the driver's own execution record, and
-``apex.salis.permissions._trip_start_log_capacity_verdict`` refuses it when the log's own driver
-is not the resolved identity.
-"""
 
 import frappe
 from frappe import _
@@ -22,12 +12,6 @@ from apex.salis.api.driver_portal import _require_enabled
 
 
 def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, created=0):
-    """Write one immutable Boarding Scan Log row for this manual scan attempt.
-
-    ``board_worker`` is ``allow_guest=True``: the caller is a credential-scoped driver trip, not a
-    signed-in account, so there is no role to grant a DocPerm to in the first place. See
-    ``log_credential_event`` (apex/apex_core/utils/portal_identity.py:1) for the same shape.
-    """
     doc = frappe.get_doc(
         {
             "doctype": "Boarding Scan Log",
@@ -49,7 +33,6 @@ def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, cre
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
 def board_worker(dispatch_trip, employee):
-    """Board one manifest worker manually on the credential-scoped driver trip."""
     _require_enabled()
     trip = boarding._resolve_trip(dispatch_trip, "write")
     employee = (employee or "").strip()

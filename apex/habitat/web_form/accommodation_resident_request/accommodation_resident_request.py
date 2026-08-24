@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Public Resident Request web form: the QR a worker scans on a building wall.
-
-The insert passes ``ignore_permissions`` because the submitter is a Guest — the form is reached
-without signing in, by design, so there is no user whose roles could authorise it. A DocPerm that
-made this legal would grant Guest create on Resident Request site-wide. The rate limit above is
-what stands in for a permission here.
-"""
 import frappe
 from frappe import _
 
@@ -13,7 +6,6 @@ from apex.apex_core.utils.rate_limit_identity import rate_limit
 
 
 def get_context(context):
-    """Disables caching on the resident request web form so every visit renders fresh."""
     context.no_cache = 1
 
 
@@ -26,18 +18,6 @@ def submit_resident_request(
     contact_number=None,
     website_field=None,
 ):
-    """Rate-limited public endpoint for resident request submission.
-
-    Replaces direct Web Form submit for programmatic callers.
-    Limit: 5 requests per IP per 60 seconds.
-
-    Parameter notes:
-    - ``request_type`` maps to the DocType field ``request_category``.
-    - ``contact_number`` maps to the DocType field ``mobile_number``.
-      The public parameter names are kept for backward compatibility with
-      existing QR forms and external callers.
-    - ``website_field`` is a honeypot; any non-empty value is rejected.
-    """
     if website_field:
         return {"name": None, "tracking_code": None}
 

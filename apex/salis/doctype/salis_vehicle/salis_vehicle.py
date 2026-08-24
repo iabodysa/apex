@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Vehicle controller."""
 
 from __future__ import annotations
 
@@ -19,7 +18,6 @@ _STATUS_RANK = {"Compliant": 0, "Expiring Soon": 1, "Expired": 2}
 
 class SalisVehicle(Document):
     def validate(self):
-        """Defaults the company, normalizes the plate, recomputes compliance, and guards the machine-owned fields."""
         self._set_company_default()
         self._set_plate_normalized()
         self._set_compliance_status()
@@ -27,11 +25,6 @@ class SalisVehicle(Document):
         self._refuse_a_status_edit_while_a_stop_owns_the_vehicle()
 
     def _refuse_a_hand_written_pairing(self):
-        """``current_driver`` is half of a mirror Vehicle Assignment owns; writing it alone
-        splits the pair, leaving Salis Driver's ``current_vehicle`` pointing elsewhere. It is a
-        plain editable Link on a non-submittable DocType, so nothing else refuses a Desk edit or
-        a ``frappe.client.set_value``; the sanctioned writers stamp both sides with
-        ``frappe.db.set_value``, which runs no controller method and never reaches here."""
         if self.is_new():
             if self.current_driver:
                 frappe.throw(
@@ -46,17 +39,6 @@ class SalisVehicle(Document):
             )
 
     def _refuse_a_status_edit_while_a_stop_owns_the_vehicle(self):
-        """Suspension and Incident ``on_submit`` write ``status`` to Stopped, and the field is
-        editable on a non-submittable DocType — so a plain save puts a stopped or stolen vehicle
-        back to Active while the stop has no ``return_date`` and the incident is still Open, and
-        every board that offers Active vehicles for dispatch believes it. Only the interval a
-        machine owns is refused; the operator keeps the field the rest of the time.
-
-        No Workflow replaces this: Vehicle Suspension and Vehicle Incident, not a
-        person choosing an action on THIS document, drive the stop — a Workflow
-        only governs a save() on its own document, and both write this field on
-        someone else's record.
-        """
         if self.is_new() or not self.has_value_changed("status"):
             return
         if frappe.db.exists(
@@ -77,20 +59,16 @@ class SalisVehicle(Document):
             )
 
     def _set_company_default(self):
-        """Default the owning company from Salis Settings (asset ownership /
-        reporting context). Reference field only - no GL is posted."""
         if not self.company:
             self.company = resolve_company("Salis")
 
     def _set_plate_normalized(self):
-        """Sets the normalized plate number from the raw plate number, or clears it when blank."""
         if self.plate_number:
             self.plate_normalized = normalize_plate(self.plate_number)
         else:
             self.plate_normalized = None
 
     def _set_compliance_status(self):
-        """Derives the vehicle's worst compliance state and nearest expiry from its compliance rows."""
         rows = self.get("compliance_documents") or []
         if not rows:
             self.compliance_status = "Not Tracked"
@@ -149,5 +127,4 @@ class SalisVehicle(Document):
 
     @staticmethod
     def _get_alert_lead_days():
-        """Returns the configured number of lead days before an expiry counts as Expiring Soon."""
         return get_salis_int("alert_lead_days", DEFAULT_ALERT_LEAD_DAYS)

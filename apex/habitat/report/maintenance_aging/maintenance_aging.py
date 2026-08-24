@@ -14,7 +14,6 @@ _OPEN_MAINTENANCE_STATUSES = ["Open", "In Progress", "Resolved"]
 
 
 def execute(filters=None):
-    """Returns open maintenance requests with age, SLA and breach status, sorted by breach, priority."""
     filters = filters or {}
 
     columns = [
@@ -99,7 +98,6 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Stacked bar of within-SLA vs SLA-breached open requests, by priority."""
     if not data:
         return None
     order = sorted(_PRIORITY_ORDER, key=lambda p: _PRIORITY_ORDER[p])

@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns approved and active leases with days-to-expiry and rent-at-risk cards, nearest first."""
     filters = filters or {}
 
     columns = [

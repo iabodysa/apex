@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Settings controller."""
 
 from __future__ import annotations
 
@@ -29,7 +28,6 @@ _BRAND_LOGO_RE = re.compile(r"^/files/[^\"'<>\s]+$")
 
 class SalisSettings(Document):
     def validate(self):
-        """Bounds the advance recovery percent and checks its salary component and the VAPID key."""
         if self.employee_advance_recovery_max_percent is not None and not (
             0 < self.employee_advance_recovery_max_percent <= MAX_RECOVERY_PERCENT
         ):
@@ -51,18 +49,9 @@ class SalisSettings(Document):
         self._validate_frontend_base_url()
 
     def on_update(self):
-        """Applies the approvals switch to the Salis workflows."""
         apply_approval_switch()
 
     def _validate_portal_appearance(self):
-        """Refuse an accent colour or brand logo that is unsafe to render.
-
-        Both values are written straight into the portal shell — the accent into a CSS
-        custom property, the logo into an ``img`` src — and neither the Color nor the
-        Attach Image fieldtype validates its own content. This guard is the only thing
-        between a typed value and the page, so a non-CSS colour or an off-site,
-        markup-bearing or private-file path is refused at save rather than at render.
-        """
         accent = (self.accent_color or "").strip()
         if accent and not _CSS_COLOR_RE.match(accent):
             frappe.throw(_("Accent Color must be a valid CSS colour."))
@@ -72,14 +61,6 @@ class SalisSettings(Document):
             frappe.throw(_("Brand Logo must be an uploaded file (a /files/ path)."))
 
     def _validate_web_push_public_key(self):
-        """Refuse a VAPID public key the browser will reject at subscribe time.
-
-        ``PushManager.subscribe`` needs the uncompressed P-256 point: 65 bytes whose
-        first byte is 0x04. A truncated or re-encoded key decodes to some other length
-        and the browser answers "Invalid raw ECDSA P-256 public key" — to the driver
-        turning notifications on, never to the person who pasted the key. Checked here
-        so the refusal reaches whoever can fix it.
-        """
         if not self.enable_web_push:
             return
         raw = (self.web_push_vapid_public_key or "").strip()
@@ -101,7 +82,6 @@ class SalisSettings(Document):
             )
 
     def _validate_frontend_base_url(self):
-        """Ensure the frontend base URL looks like an http(s) URL when set."""
         url = (self.frontend_base_url or "").strip()
         if not url:
             return
@@ -112,28 +92,6 @@ class SalisSettings(Document):
 
 
 def apply_approval_switch():
-    """Activate or deactivate every Salis workflow to match ``enable_approvals``.
-
-    ``Workflow.is_active`` is the framework's own switch and the only one there is —
-    ``get_workflow_name`` reads it and returns nothing when it is 0, so a document then
-    saves with no state gate. A setting that does not reach this field decides nothing.
-
-    The workflows are found through their document type's module rather than a list, so a
-    new Salis workflow is covered on the day it ships.
-
-    Each write is followed by ``frappe.clear_cache`` on the document type, because
-    ``get_workflow_name`` answers from ``frappe.cache.hget("workflow", doctype)``
-    (frappe/model/workflow.py:29-35) and ``db_set`` never invalidates it. Without that call
-    the row changes and the application keeps gating on the old answer until a restart —
-    the switch would appear to work in the database and do nothing on screen. ``"workflow"``
-    is one of ``doctype_cache_keys`` (frappe/cache_manager.py:68-75), so the one call clears
-    both that hash and the doctype meta.
-
-    CONTRACT: an administrator's own change to ``is_active`` on the Workflow list does not
-    survive a migrate, because the workflows ship in ``apex/fixtures/`` and a fixture is
-    reimported with ``force=True``. This function is what puts the setting's answer back;
-    without it the fixture's ``is_active`` of 1 is the only answer any site ever has.
-    """
     if not frappe.db.exists("DocType", "Workflow"):
         return
     enabled = cint(frappe.db.get_single_value("Salis Settings", "enable_approvals"))
@@ -149,8 +107,6 @@ def apply_approval_switch():
 
 
 def get_salis_int(field: str, default: int) -> int:
-    """Read an Int from the Salis Settings single, falling back to ``default``
-    when the stored value is blank or zero (the new-Single-Int-stores-0 trap)."""
     try:
         value = frappe.db.get_single_value("Salis Settings", field)
     except Exception:
@@ -164,8 +120,6 @@ def get_salis_int(field: str, default: int) -> int:
 
 
 def get_salis_float(field: str, default: float) -> float:
-    """Read a Float/Currency from the Salis Settings single, falling back to
-    ``default`` when the stored value is blank or zero (the zero-trap)."""
     try:
         value = frappe.db.get_single_value("Salis Settings", field)
     except Exception:
@@ -190,8 +144,6 @@ BOARDING_FLOW_DEFAULTS = {
 
 
 def get_boarding_setting(key: str) -> int:
-    """Return a boarding-flow Int setting, falling back to its built-in default
-    when the stored value is blank or zero (the new-Single-Int-stores-0 trap)."""
     if key not in BOARDING_FLOW_DEFAULTS:
         raise KeyError(key)
     value = frappe.db.get_single_value("Salis Settings", key)
@@ -199,19 +151,10 @@ def get_boarding_setting(key: str) -> int:
 
 
 def get_boarding_settings() -> dict:
-    """All six boarding-flow tunables as a single dict (value-or-default applied),
-    for the SPAs to fetch the limits/window/poll cadence in one read."""
     return {key: get_boarding_setting(key) for key in BOARDING_FLOW_DEFAULTS}
 
 
 def get_default_cost_center():
-    """Resolve the default cost center for fleet cost references.
-
-    ``erpnext.get_default_cost_center`` (erpnext/__init__.py:33) answers only
-    "what is this company's cost center". This asks the Salis Settings default
-    first, so an operator can point fleet cost at a cost center that is not the
-    company's own — which the primitive has no argument for.
-    """
     cost_center = frappe.db.get_single_value("Salis Settings", "default_cost_center")
     if not cost_center:
         company = resolve_company("Salis")

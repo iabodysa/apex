@@ -1,17 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A Workspace's audience comes from its own file, never from a derivation.
-
-Workspace sits in ``IMPORTABLE_DOCTYPES`` (frappe/model/sync.py:17-37), so ``sync_all``
-ships each one from its JSON on install and on every migrate. A seeder that derives the
-audience instead cannot be read from the repository: the file says one thing and the site
-says another, with nothing to explain the gap.
-
-The derivation that was retired kept only DocPerm rows with ``if_owner: 0``. A PERSONAL
-workspace rests on the opposite rule — a person sees their own rows — so the derivation
-was blind to exactly the permission that makes it personal, concluded that nobody could
-see it, and restricted the personal task queue to System Manager.
-"""
 
 import json
 import pathlib
@@ -23,7 +11,6 @@ APP_ROOT = pathlib.Path(frappe.get_app_path("apex"))
 
 
 def _shipped_workspaces():
-    """Every public Workspace this app ships, read from the files themselves."""
     found = {}
     for path in APP_ROOT.rglob("workspace/*/*.json"):
         data = json.loads(path.read_text())
@@ -34,7 +21,6 @@ def _shipped_workspaces():
 
 class TestTheFileIsTheSourceOfTruth(FrappeTestCase):
     def test_no_seeder_derives_workspace_roles(self):
-        """The retired module must not come back under any name."""
         offenders = [
             str(p)
             for p in APP_ROOT.rglob("*.py")
@@ -43,7 +29,6 @@ class TestTheFileIsTheSourceOfTruth(FrappeTestCase):
         self.assertEqual(offenders, [])
 
     def test_every_shipped_workspace_matches_its_file_on_this_site(self):
-        """The gap this closes: a role row on the site that no file declares."""
         for name, data in _shipped_workspaces().items():
             with self.subTest(workspace=name):
                 if not frappe.db.exists("Workspace", name):
@@ -59,8 +44,6 @@ class TestTheFileIsTheSourceOfTruth(FrappeTestCase):
                 )
 
     def test_the_personal_queue_is_open_to_every_desk_user(self):
-        """A personal workspace restricted to one role costs every other operator
-        their own task list, and an empty roles array is what says 'anyone'."""
         data = _shipped_workspaces().get("My Tasks")
         self.assertIsNotNone(data, "My Tasks is no longer shipped")
         self.assertEqual(data.get("roles") or [], [])
@@ -68,8 +51,6 @@ class TestTheFileIsTheSourceOfTruth(FrappeTestCase):
             self.assertEqual(len(frappe.get_doc("Workspace", "My Tasks").roles), 0)
 
     def test_a_restricted_workspace_still_declares_its_own_audience(self):
-        """The positive control: if every workspace came back roleless, the test
-        above would pass while the estate lost every restriction it had."""
         declared = {
             name: len(data.get("roles") or [])
             for name, data in _shipped_workspaces().items()

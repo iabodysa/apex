@@ -1,22 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Resident Request Register — the open queue, and how long it has been waiting.
-
-Resident Request had no report at all. A coordinator could only see the queue as a list
-view, which shows rows but never the two things that decide what to do next: how long a
-request has been sitting, and which of them nobody has taken.
-
-An OPEN request is one whose status is not a settled one. The settled set is named here
-rather than inferred from `closed_on`, because a Rejected request is settled without ever
-being closed, and reading the date alone would leave it in the queue forever.
-
-UNASSIGNED is its own figure and not a status: a request can be Triaged, In Progress or
-Waiting Evidence and still carry no `assigned_to`, which is the state where a queue quietly
-stops moving because everyone assumes someone else has it.
-
-Scoped by building through the same resolver the permission hook uses, so a scope
-correction reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -31,7 +14,6 @@ AGEING_DAYS = 7
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the open resident request queue and wait times."""
     filters = filters or {}
     columns = get_columns()
 
@@ -89,8 +71,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty queue reads 0 rather than a blank
-    strip that looks like a page which failed to load."""
     unassigned = [r for r in data if not r.get("is_owner_taken")]
     urgent = [r for r in data if r.get("priority") in URGENT_PRIORITIES]
     ageing = [r for r in data if (r.get("days_waiting") or 0) > AGEING_DAYS]
@@ -103,7 +83,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the resident request register."""
     return [
         {"label": _("Request"), "fieldname": "name", "fieldtype": "Link", "options": "Resident Request", "width": 170},
         {"label": _("Raised On"), "fieldname": "raised_on", "fieldtype": "Date", "width": 110},

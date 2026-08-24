@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import percent_card, total_card
 from apex.salis import permissions
 
 def execute(filters=None):
-    """Returns the columns, per-recovery-type totals and summary cards for the report."""
     columns = [
         {"label": frappe._("Recovery Type"), "fieldname": "recovery_type", "fieldtype": "Data", "width": 200},
         {"label": frappe._("Count"), "fieldname": "count", "fieldtype": "Int", "width": 110},

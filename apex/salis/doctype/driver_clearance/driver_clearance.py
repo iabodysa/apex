@@ -1,24 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Driver Clearance controller.
-
-Movement-domain exit clearance for a driver. Confirms the driver has returned
-the vehicle, fuel chip, and custody items, and blocks clearance while any open
-Fuel Exception Case or Movement Cost Recovery remains against the driver. HR
-end-of-service and visa clearance are handled outside this module.
-
-Status transitions are owned by the native **Driver Clearance Workflow** (see
-``salis/workflow/driver_clearance_workflow/``), not by this controller. The
-"Clear" transition (which submits the document) is gated by a workflow
-``condition`` mirroring the precondition guard below — it is only offered once
-the vehicle, fuel chip and custody are returned and no open Fuel Exception Case
-or Movement Cost Recovery remains. ``_guard_cleared_status`` stays as the hard
-server-side block (defence in depth: it fires on any save that lands the
-document in Cleared, including a path that bypasses the workflow action).
-
-On submit of a Cleared clearance the linked Salis Driver is moved to Released
-and its current vehicle reference is cleared (guarded), so the released driver
-no longer holds an assignment.
-"""
 
 from __future__ import annotations
 
@@ -39,7 +19,6 @@ VALID_STATUSES = ("Open", "In Progress", "Cleared", "Blocked", "Cancelled")
 
 class DriverClearance(Document):
     def validate(self):
-        """Recomputes the driver's open fuel-exception and recovery counts and blocks marking Cleared."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
         self._compute_outstanding()
@@ -47,17 +26,14 @@ class DriverClearance(Document):
         self._stamp_clearance_date()
 
     def on_submit(self):
-        """Releases the driver to Released status and clears their vehicle when submitted as Cleared."""
         if self.status == "Cleared":
             self._release_driver()
 
     def on_cancel(self):
-        """Restores a Released driver back to Active when a Cleared clearance is cancelled."""
         if self.status == "Cleared":
             self._restore_driver()
 
     def _compute_outstanding(self):
-        """Recompute the outstanding open-case counters for the driver."""
         self.outstanding_fuel_exceptions = self._count_open(
             "Fuel Exception Case", _CLOSED_FUEL_EXCEPTION_STATUSES
         )
@@ -67,13 +43,6 @@ class DriverClearance(Document):
         self.outstanding_recovery_amount = self._sum_open_recoveries()
 
     def _sum_open_recoveries(self):
-        """The money still open against the driver, not the number of cases.
-
-        HR withholds a sum from a final settlement, and a count of three open cases does
-        not say whether to hold ten riyals or ten thousand. Returns zero when the driver
-        is unset or the recovery DocType is not on the site, so the certificate reads
-        nothing owed rather than refusing to print.
-        """
         if not self.driver or not frappe.db.exists("DocType", "Movement Cost Recovery"):
             return 0
         rows = frappe.get_all(
@@ -88,13 +57,6 @@ class DriverClearance(Document):
         return sum(flt(row.amount) for row in rows)
 
     def _stamp_clearance_date(self):
-        """Record the day the clearance was granted, and clear it if the clearance is withdrawn.
-
-        A certificate that releases a final settlement must say when it was granted; HR
-        pays against a date, not against a status. The stamp goes on the moment the
-        clearance reads Cleared and comes off the moment it does not, so a blocked or
-        reopened clearance never prints a release date it no longer has.
-        """
         if self.status == "Cleared":
             if not self.clearance_date:
                 self.clearance_date = nowdate()
@@ -102,9 +64,6 @@ class DriverClearance(Document):
         self.clearance_date = None
 
     def _count_open(self, doctype, closed_statuses):
-        """Count records of ``doctype`` for this driver whose status is not in
-		``closed_statuses``. Returns 0 when the driver is unset or the doctype
-		does not yet exist (it may be delivered in a parallel slice)."""
         if not self.driver:
             return 0
         if not frappe.db.exists("DocType", doctype):
@@ -119,7 +78,6 @@ class DriverClearance(Document):
         )
 
     def _guard_cleared_status(self):
-        """Refuse to mark a clearance Cleared while any precondition is unmet."""
         if self.status != "Cleared":
             return
 
@@ -148,11 +106,6 @@ class DriverClearance(Document):
             )
 
     def _release_driver(self):
-        """Move the driver to Released and clear both sides of the current vehicle link.
-
-		Guarded: only releases an existing driver, and only clears a vehicle
-		reference when one is set. Row-locks the driver to avoid races with
-		concurrent assignment/handover."""
         if not self.driver or not frappe.db.exists("Salis Driver", self.driver):
             return
 
@@ -180,10 +133,6 @@ class DriverClearance(Document):
         )
 
     def _restore_driver(self):
-        """Reverse _release_driver on cancel: move a still-Released driver back to
-		Active. Row-locked; a no-op if the driver no longer exists or has already
-		moved off Released (e.g. a later assignment), so a fresh assignment is never
-		clobbered."""
         if not self.driver or not frappe.db.exists("Salis Driver", self.driver):
             return
         lock_driver(self.driver)

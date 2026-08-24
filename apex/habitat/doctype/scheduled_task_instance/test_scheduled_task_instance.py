@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Scheduled Task Instance's cancellation-reason guard.
-
-Patterned on frappe/tests/test_document.py for the cancel guard. The row is
-built, submitted and cancelled so the module-level ``before_cancel`` in
-``scheduled_task_instance.py`` -- wired through hooks.py's doc_events, not
-the class body -- is what is exercised, not a stub.
-"""
 
 from __future__ import annotations
 

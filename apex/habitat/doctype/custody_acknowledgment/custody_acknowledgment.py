@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Acknowledgment controller.
-
-Records a holder's receipt confirmation for a Custody Issue. Written from the
-My Custody Acknowledgment Web Form; the acknowledgment lives on its own target
-(not on the Custody Issue itself). Validation is a class method so it fires
-without a doc_events hook.
-"""
 
 from __future__ import annotations
 
@@ -17,7 +10,6 @@ from frappe.utils import now_datetime
 
 class CustodyAcknowledgment(Document):
     def validate(self):
-        """Requires a submitted Custody Issue and a signature or confirmed receipt, then stamps the time."""
         docstatus = frappe.db.get_value("Custody Issue", self.custody_issue, "docstatus")
         if docstatus != 1:
             frappe.throw(

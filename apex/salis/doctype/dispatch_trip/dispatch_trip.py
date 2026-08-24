@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Dispatch Trip lifecycle and atomic request assignment.
-
-The ledger insert and its matching delete on cancel pass ``ignore_permissions`` for the subledger
-reason: Trip Fulfilment Ledger is an ``in_create`` DocType on which no role holds create or write,
-so the controller is the only path a row can take. Granting the dispatcher create would let a
-fulfilment row exist with no trip behind it.
-"""
 
 from __future__ import annotations
 
@@ -36,7 +29,6 @@ from apex.salis.utils import (
 
 class DispatchTrip(Document):
     def validate(self):
-        """Resolve immutable trip context, then validate execution facts."""
         self._resolve_route_context()
         self._copy_route_stops()
         self._validate_request_stop_mappings()
@@ -64,7 +56,6 @@ class DispatchTrip(Document):
         sync_passengers(self)
 
     def _enforce_capacity(self):
-        """Reject request groups larger than a known vehicle capacity."""
         if not (self.vehicle and self.assigned_requests):
             return
         capacity = (
@@ -81,11 +72,9 @@ class DispatchTrip(Document):
             )
 
     def on_update(self):
-        """Notify subscribed driver portals after a trip change."""
         self._publish_driver_update()
 
     def _publish_driver_update(self):
-        """Tell authorised desk and portal clients to refetch after commit."""
         try:
             notify_doctype("Dispatch Trip", "driver_trip_update", {"name": self.name})
         except Exception:
@@ -99,11 +88,9 @@ class DispatchTrip(Document):
             pass
 
     def before_submit(self):
-        """Blocks submission until the trip has stops, resources, date and riders."""
         self._enforce_dispatch_readiness()
 
     def _enforce_dispatch_readiness(self):
-        """A trip must carry its executable route and resources before submission."""
         required = {
             "vehicle": _("Vehicle"),
             "driver": _("Driver"),
@@ -131,14 +118,12 @@ class DispatchTrip(Document):
             )
 
     def _require_completion_notes(self):
-        """Completion Notes are mandatory once the trip is marked Completed."""
         if self.status == "Completed" and not (self.completion_notes or "").strip():
             frappe.throw(
                 _("Completion Notes are required when the trip status is Completed.")
             )
 
     def _guard_initial_status(self):
-        """Force new trips through the native workflow from Planned."""
         if self.is_new() and self.status and self.status != "Planned":
             frappe.throw(
                 _(
@@ -147,7 +132,6 @@ class DispatchTrip(Document):
             )
 
     def _validate_odometer(self):
-        """Requires odometer start and end to be set together, with end not less than start."""
         start_set = bool(self.odometer_start)
         end_set = bool(self.odometer_end)
         if start_set != end_set:
@@ -162,7 +146,6 @@ class DispatchTrip(Document):
             )
 
     def _validate_trip_times(self):
-        """Validate recorded same-day execution times at completion."""
         if self.status != "Completed":
             return
         if not (self.depart_time and self.return_time):
@@ -171,7 +154,6 @@ class DispatchTrip(Document):
             frappe.throw(_("Return Time cannot be earlier than Depart Time."))
 
     def on_submit(self):
-        """Advances the vehicle's odometer and fulfils the linked transport request once a trip completes."""
         if self.status == "Completed" and self.odometer_end and self.vehicle:
             lock_vehicle(self.vehicle)
             current = (
@@ -194,7 +176,6 @@ class DispatchTrip(Document):
             self._post_fulfilment_ledger()
 
     def _fulfil_transport_requests(self):
-        """Fulfil every request; any failure aborts the whole transaction."""
         for request in self._request_names():
             drive_transport_request(
                 request,
@@ -209,7 +190,6 @@ class DispatchTrip(Document):
             )
 
     def _post_fulfilment_ledger(self):
-        """Write the immutable completion ledger once."""
         if frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": self.name}):
             return
         request_names = self._request_names()
@@ -242,7 +222,6 @@ class DispatchTrip(Document):
         ledger.insert(ignore_permissions=True)
 
     def on_cancel(self):
-        """Reverse request and boarding effects; odometer stays monotonic."""
         self._revert_transport_requests()
         for row in frappe.get_all(
             "Trip Fulfilment Ledger",
@@ -255,14 +234,6 @@ class DispatchTrip(Document):
         reverse_trip_boarding(self.name)
 
     def on_trash(self):
-        """Release the requests a draft trip claimed.
-
-        ``assign_requests_to_trip`` stamps ``is_assigned``/``assigned_to_trip``
-        while the trip is still a draft, and the re-assignment guard then refuses
-        the request to any other trip. Cancellation clears them, but a draft is
-        deleted rather than cancelled, so without this the request is locked to a
-        trip that no longer exists and no desk field can free it.
-        """
         for request in self._request_names():
             frappe.db.set_value(
                 "Transport Request",
@@ -272,7 +243,6 @@ class DispatchTrip(Document):
             )
 
     def _revert_transport_requests(self):
-        """Reverse every request still fulfilled by this trip."""
         for request in self._request_names():
             revert_transport_request(
                 request,
@@ -322,12 +292,6 @@ def _request_rider_count(request):
 
 @frappe.whitelist(methods=["POST"])
 def create_ad_hoc_trip(trip, transport_requests):
-    """Create one ad-hoc trip and attach approved requests in one transaction.
-
-    The caller controls only ad-hoc planning fields and stop facts. Workflow,
-    assignment, passenger, and status fields continue through the Dispatch Trip
-    controller and ``assign_requests_to_trip`` invariants.
-    """
     if not (set(frappe.get_roles()) & set(ASSIGNMENT_ROLES)):
         frappe.throw(
             _("You are not permitted to create ad-hoc dispatch trips."),
@@ -384,7 +348,6 @@ def create_ad_hoc_trip(trip, transport_requests):
 
 @frappe.whitelist(methods=["POST"])
 def assign_requests_to_trip(dispatch_trip, transport_requests):
-    """Atomically attach requests and their pickup/drop-off stops to one trip."""
     if not (set(frappe.get_roles()) & set(ASSIGNMENT_ROLES)):
         frappe.throw(
             _("You are not permitted to assign transport requests."),
@@ -507,14 +470,6 @@ def _normalise_request_assignments(value, trip):
 
 
 def _parse_request_assignment_rows(value):
-    """Parse the request collection before any trip row is inserted.
-
-    ``frappe.parse_json`` (frappe/__init__.py:2491) handles the JSON case, but only
-    when the value LOOKS like JSON: the one thing it cannot do is accept a bare
-    document name — it raises — so a single request passed as a plain string is
-    wrapped rather than parsed. Parsing before any insert is the point: a malformed
-    collection must refuse the whole trip, not leave half its rows written.
-    """
     if isinstance(value, str):
         value = (
             frappe.parse_json(value)

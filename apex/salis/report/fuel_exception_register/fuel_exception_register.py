@@ -8,7 +8,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Fuel Exception Register report."""
     columns = [
         {"label": frappe._("Case"), "fieldname": "name", "fieldtype": "Link", "options": "Fuel Exception Case", "width": 180},
         {"label": frappe._("Exception Type"), "fieldname": "exception_type", "fieldtype": "Data", "width": 160},

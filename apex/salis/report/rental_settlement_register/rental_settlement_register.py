@@ -9,7 +9,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows, chart and summary cards for the Rental Settlement Register report."""
     columns = [
         {"label": frappe._("Settlement"), "fieldname": "name", "fieldtype": "Link", "options": "Rental Settlement", "width": 180},
         {"label": frappe._("Rental Office"), "fieldname": "rental_office", "fieldtype": "Link", "options": "Rental Office", "width": 180},
@@ -56,11 +55,6 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Bar chart of accrued-vs-claimed variance per rental office.
-
-    Ported from the merged variance twin report, which duplicated this
-    register's columns and only added this chart.
-    """
     if not data:
         return None
     by_office = {}

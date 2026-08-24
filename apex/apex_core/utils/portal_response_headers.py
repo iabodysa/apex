@@ -27,7 +27,6 @@ _WORKER_SCOPES = {
 
 
 def apply_portal_response_headers(response, request):
-    """Prevent shared storage of portal identity and grant exact worker scopes."""
     path = request.path
     if not _is_private_portal_path(path):
         return

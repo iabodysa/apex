@@ -1,42 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Fuel Approval Console API (Salis).
-
-A thin presentation + orchestration layer over the Fuel Request controller,
-mirroring the Habitat Front Desk pattern:
-
-- ``get_pending_fuel_requests`` is read-only and built from a single bounded
-  query (no N+1). It returns submitted Fuel Requests still in ``Pending``
-  status together with the joined vehicle plate and driver name, plus an
-  ``over_threshold`` flag computed against
-  ``Salis Settings.fuel_request_approval_threshold_litres``.
-- ``approve_fuel_request`` / ``reject_fuel_request`` load the real Fuel Request
-  document and drive the native **Fuel Request Workflow** (the ``Approve`` /
-  ``Reject`` transitions) via ``frappe.model.workflow.apply_workflow``, so the
-  workflow's role gate, Segregation-of-Duties condition
-  (``requested_by != session.user``) and docstatus transition all apply — the
-  console can never bypass them. They add NO posting or status logic of their
-  own, and never touch the database with raw SQL. When the gate blocks the
-  caller, ``_drive_fuel_action`` inspects the available transitions first and
-  raises a typed ``PermissionError`` naming the cause (missing approver role vs
-  self-approval) instead of the framework's opaque "Not a valid Workflow Action"
-  (HTTP 417); the gate itself is still fully enforced.
-
-Project scoping is enforced SERVER-SIDE and reuses the canonical Salis row-scope
-helpers in :mod:`apex.salis.permissions` (``_is_unscoped`` /
-``allowed_projects``), exactly like ``salis.api.dispatch_board``: a scoped
-supervisor only ever sees Fuel Requests in the projects they hold a User
-Permission for, and an out-of-scope ``project`` argument can never widen that
-view (it simply yields an empty queue). A scoped user with no permitted project
-sees an empty queue (mirroring the ``1=0`` fragment the list-view query
-condition applies). Approve/reject additionally run a per-document
-``frappe.has_permission("Fuel Request", "write", doc=...)`` so the same project
-boundary is enforced on the individual document, not just a blanket write grant.
-
-The approve/reject mutations run through ``doc.save()``, so the change is
-captured natively by Version (track_changes is enabled on Fuel Request) plus the
-automatic timeline comment.
-
-"""
 
 from __future__ import annotations
 
@@ -51,17 +13,6 @@ from apex.salis.api.enrich import vehicle_driver_titles
 
 
 def _drive_fuel_action(doc, action: str) -> None:
-    """Apply a Fuel Request Workflow ``action``, degrading the gate gracefully.
-
-    ``apply_workflow`` throws a raw ``WorkflowTransitionError`` ("Not a valid
-    Workflow Action", surfaced as HTTP 417) whenever the action is not an
-    available transition for the caller — which happens both when the caller
-    lacks an approver role AND when the Segregation-of-Duties condition
-    (``requested_by != session.user``) blocks self-approval. We first inspect the
-    available transitions (the same framework path, so the role + SoD gate is
-    NEVER bypassed) and, when the action is absent, throw a typed message that
-    names the actual cause instead of the opaque framework error.
-    """
     available = {t.action for t in get_transitions(doc)}
     if action in available:
         apply_workflow(doc, action)
@@ -83,50 +34,11 @@ def _drive_fuel_action(doc, action: str) -> None:
 
 
 def _approval_threshold() -> float:
-    """Litre threshold above which a Fuel Request needs explicit approval.
-
-    Read from the Salis Settings single via the canonical helper. Returns 0.0 when
-    unset, which means "no threshold" (every request auto-flows) — here a 0 IS the
-    semantic default, so the zero-coalesce is behaviour-preserving.
-    """
     return get_salis_float("fuel_request_approval_threshold_litres", 0.0)
 
 
 @frappe.whitelist()
 def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
-    """Return Fuel Requests awaiting approval (the draft ``Pending`` queue).
-
-    Under the Fuel Request Workflow a request awaiting approval is a draft
-    (``Pending`` maps to docstatus 0); the ``Approve`` transition is what submits
-    it. The queue therefore lists ``status == Pending`` drafts (docstatus 0).
-
-    Read-only. Permission-gated on ``Fuel Request`` / ``read``. Built from a
-    single ORM query with the vehicle plate and driver name resolved via
-    ``Salis Vehicle`` / ``Salis Driver`` title lookups in bounded bulk reads
-    (no per-row round trips). Each row carries an ``over_threshold`` flag
-    computed against the Salis Settings approval threshold.
-
-    Project scoping is enforced server-side: a scoped supervisor only ever sees
-    Fuel Requests in their permitted projects. The ``project`` argument can only
-    NARROW that scope (it is intersected with the permitted set), never widen it.
-
-    THE CLIENT CONTRACT this endpoint exists to keep, in
-    ``salis/page/fuel_approval_console``: a standard Frappe page built from
-    ``frappe.ui.Page`` primitives and a native ``frappe.ui.Dialog`` — no SPA, no Vue or
-    React, no external library. This reader is its ONLY read, and every write routes
-    through ``approve_fuel_request`` / ``reject_fuel_request``. The server is the source
-    of truth: after any write the page re-fetches this queue rather than mutating the
-    DOM optimistically, and it renders through ``.text()`` / ``textContent`` only, never
-    ``innerHTML`` with unescaped data.
-
-    Args:
-        project: Optional Project docname to narrow the queue to a single
-            project. Intersected with the caller's permitted scope — an
-            out-of-scope project yields an empty queue.
-
-    Returns:
-        list of dicts, newest request first.
-    """
     frappe.has_permission("Fuel Request", "read", throw=True)
 
     unscoped, projects = _permitted_projects()
@@ -223,26 +135,6 @@ def get_pending_fuel_requests(project: str | None = None) -> list[dict]:
 
 @frappe.whitelist(methods=["POST"])
 def approve_fuel_request(name: str) -> dict:
-    """Approve a Pending Fuel Request by driving the workflow ``Approve`` action.
-
-    Loads the real Fuel Request document and applies the native Fuel Request
-    Workflow ``Approve`` transition (Pending -> Approved, which submits the
-    request). The workflow enforces the role gate and the Segregation-of-Duties
-    condition (the approver cannot be the requester); the controller stamps
-    ``approved_by`` on entering Approved. No raw SQL.
-
-    Permission: caller must have ``write`` on this specific Fuel Request. The
-    per-document check (``doc=doc``) runs the project row-scope ``has_permission``
-    hook, so a scoped supervisor cannot approve a request outside their permitted
-    projects even though they hold a blanket Fuel Request write grant. The
-    workflow transition then applies its own role + SoD gate on top.
-
-    Args:
-        name: Fuel Request docname.
-
-    Returns:
-        dict: ``{"name": <docname>, "status": "Approved"}``.
-    """
     doc = frappe.get_doc("Fuel Request", name)
     frappe.has_permission("Fuel Request", "write", doc=doc, throw=True)
 
@@ -260,27 +152,6 @@ def approve_fuel_request(name: str) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def reject_fuel_request(name: str, reason: str | None = None) -> dict:
-    """Reject a Pending Fuel Request by driving the workflow ``Reject`` action.
-
-    Loads the real Fuel Request document and applies the native Fuel Request
-    Workflow ``Reject`` transition (Pending -> Failed). The workflow enforces the
-    role gate and the Segregation-of-Duties condition (the reviewer cannot be the
-    requester). The reason, if given, is recorded as a timeline comment. No raw
-    SQL.
-
-    Permission: caller must have ``write`` on this specific Fuel Request. The
-    per-document check (``doc=doc``) runs the project row-scope ``has_permission``
-    hook, so a scoped supervisor cannot reject a request outside their permitted
-    projects even though they hold a blanket Fuel Request write grant. The
-    workflow transition then applies its own role + SoD gate on top.
-
-    Args:
-        name: Fuel Request docname.
-        reason: Optional human-readable rejection reason.
-
-    Returns:
-        dict: ``{"name": <docname>, "status": "Failed"}``.
-    """
     doc = frappe.get_doc("Fuel Request", name)
     frappe.has_permission("Fuel Request", "write", doc=doc, throw=True)
 

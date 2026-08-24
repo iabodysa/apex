@@ -1,10 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``_queue_document`` must not grow one new Comment per day a live alert
-predicate keeps re-firing while its ToDo assignment is idempotently skipped
-(``assign_role`` never re-assigns a holder who already has an open ToDo). The
-comment is written only the pass a document is NEWLY queued.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase

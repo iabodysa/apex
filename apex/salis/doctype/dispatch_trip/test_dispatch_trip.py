@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Dispatch Trip's own validation guards.
-
-Patterned on frappe/tests/test_document.py: each case builds an unsaved
-Document via frappe.new_doc and calls one guard method directly, asserting
-the refusal or its absence. Nothing is inserted — every guard under test
-here reads only the in-memory document, never the database.
-"""
 
 from __future__ import annotations
 
@@ -67,11 +60,6 @@ class TestDispatchTrip(FrappeTestCase):
 
 
 class TestDispatchTripDriverPositionIsFrozenAfterSubmit(FrappeTestCase):
-    """``driver_lat``/``driver_lng``/``driver_position_updated_at`` carried
-    ``allow_on_submit: 1`` with no writer anywhere in the app (see
-    apex/salis/api/route_supervisor.py:4-12). Removing the flag lets the framework
-    refuse a post-submit edit again. Proven through ``insert()``/``submit()``/
-    ``save()``, never by calling a controller method directly."""
 
     def _submitted_trip(self):
         make_test_records("Dispatch Trip")

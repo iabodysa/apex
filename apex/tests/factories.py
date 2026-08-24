@@ -1,17 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared test fixture helpers.
-
-Mostly Habitat doctype builders, plus the app-wide site-free stubs a probe suite
-needs (``ExistsShortCircuitDB``). This module is the ONE sanctioned home for a
-fixture two test modules share: ``test_no_cross_test_imports.py`` bans importing a
-``test_*`` sibling outright, and the colocation ratchet counts only ``test_*.py``
-under ``apex/tests/``, so promoting into this existing non-``test_`` module is the
-only route that clears both.
-
-Usage:
-    from apex.tests.factories import make_building, make_room, make_bed, make_assignment
-    from apex.tests.factories import ExistsShortCircuitDB
-"""
 
 from __future__ import annotations
 import frappe
@@ -25,34 +12,18 @@ except Exception:
     _UnitTestCase = object
 
 class ApexHabitatTestCase(FrappeTestCase):
-    """Base test case for apex integration tests."""
+    pass
 
 class ApexHabitatUnitTestCase(_UnitTestCase):
-    """Base test case for apex unit tests (no database)."""
+    pass
 
 class ExistsShortCircuitDB:
-    """A site-free ``frappe.db`` that reproduces the ``exists`` short-circuit.
-
-    ``frappe.db.exists(dt, dn)`` answers ``dn`` back WITHOUT touching the database
-    when the two are equal (database.py:1259 — the deliberate "a Single always
-    exists" rule), so any gate probing POSITIONALLY clears itself on the literal
-    DocType string. Six probe suites across habitat/, logistay/ and salis/ pin that
-    defect for their own module; each had written this same stub, which is what the
-    copy-pasted-body guard caught.
-
-    ``present`` maps DocType -> the set of names on file. ``queried`` records every
-    call that actually REACHED the database, which is how a case asserts the probe
-    queried rather than short-circuited. The return follows real Frappe: the name
-    when found, ``None`` when not — never a bare bool, so a case that asserts on the
-    value is not lied to. A suite holding a richer row shape overrides ``names``.
-    """
 
     def __init__(self, present=None):
         self.present = {} if present is None else present
         self.queried = []
 
     def names(self, doctype):
-        """The set of names on file for ``doctype``."""
         return self.present.get(doctype, set())
 
     def exists(self, doctype, key=None, **_kwargs):
@@ -83,17 +54,6 @@ test_ignore = [
 ]
 
 def make_company(name="Test AFMCO", **kwargs):
-    """The test Company, created once and reused after.
-
-    Existence-guarded because ``insert`` raises on a name that already exists, and a
-    test module may be run after another that built the same fixture. Nothing here
-    commits: ``FrappeTestCase`` rolls the transaction back, which is the one thing a
-    committed fixture would defeat.
-
-    The site's own default is read through ``frappe.defaults.get_global_default``
-    (frappe/defaults.py) before a new Company is built, so a bench that already
-    carries one is reused rather than duplicated.
-    """
     if frappe.db.exists("Company", name):
         return frappe.get_doc("Company", name)
     doc = frappe.get_doc({
@@ -170,8 +130,6 @@ def make_employee(name=None, company=None, **kwargs):
     return doc
 
 def make_supplier(name, **kwargs):
-    """Get-or-create a Supplier by name (named by supplier_name on a default
-    ERPNext site); return its name. Idempotent — a re-run never duplicates."""
     if frappe.db.exists("Supplier", name):
         return name
     frappe.get_doc(
@@ -185,12 +143,6 @@ def make_supplier(name, **kwargs):
     return name
 
 def service_item(name):
-    """Get-or-create the non-stock service Item a telecom contract bills through.
-
-    Lives here rather than beside either caller: two test modules need it, and a
-    colocated copy is what the duplicate-code guard exists to stop while importing
-    one test module from another is what the cross-test-import guard exists to stop.
-    """
     if frappe.db.exists("Item", name):
         return name
     group = frappe.db.get_value("Item Group", {"is_group": 0}, "name")
@@ -207,19 +159,12 @@ def service_item(name):
     return name
 
 def default_company():
-    """The site's default company name (global default, else the first Company).
-
-    ``frappe.defaults.get_global_default`` (frappe/defaults.py) is asked first so a
-    test reads the same company the product would. The one thing the global default
-    cannot do is exist on a bare site, hence the fallback to any Company.
-    """
     return (
         frappe.defaults.get_global_default("company")
         or frappe.get_all("Company", limit=1)[0].name
     )
 
 def make_project(name):
-    """Get-or-create a Project by ``project_name``; return its name."""
     p = frappe.db.get_value("Project", {"project_name": name}, "name")
     if not p:
         p = frappe.get_doc(
@@ -228,18 +173,6 @@ def make_project(name):
     return p
 
 def purge_doc(doctype, name):
-    """Cancel (if submitted) then force-delete ``name`` as Administrator; a no-op
-    when the record is already gone.
-
-    A submitted document cannot be force-deleted directly, and a cancel the
-    workflow guard refuses must not break an ``addCleanup`` chain, so the cancel is
-    best-effort and the delete runs either way.
-
-    ``frappe.set_user`` (frappe/__init__.py:641) elevates for teardown only, and
-    ``frappe.delete_doc`` (frappe/model/delete_doc.py:23) runs with ``force`` because
-    the one thing an ordinary delete cannot do is remove a document whose links a
-    half-built fixture left dangling.
-    """
     frappe.set_user("Administrator")
     if not frappe.db.exists(doctype, name):
         return
@@ -252,13 +185,6 @@ def purge_doc(doctype, name):
     frappe.delete_doc(doctype, name, ignore_permissions=True, force=True)
 
 def purge_trip_request(tr_name, rp_name):
-    """Tear down a Transport Request together with its Route Plan.
-
-    Trip Fulfilment Ledger rows link the request, so they go first or the request's
-    delete is refused by link validation — the one thing ``frappe.delete_doc``
-    (frappe/model/delete_doc.py:23) will not do for the caller is work out its own
-    order. ``frappe.set_user`` (frappe/__init__.py:641) elevates for teardown only.
-    """
     frappe.set_user("Administrator")
     for ledger in frappe.get_all(
         "Trip Fulfilment Ledger", filters={"transport_request": tr_name}, pluck="name"
@@ -270,7 +196,6 @@ def purge_trip_request(tr_name, rp_name):
     purge_doc("Transport Request", tr_name)
 
 def make_rental_office(name):
-    """Get-or-create an Active Rental Office by ``office_name``; return its name."""
     office = frappe.db.get_value("Rental Office", {"office_name": name}, "name")
     if not office:
         office = frappe.get_doc(
@@ -279,13 +204,6 @@ def make_rental_office(name):
     return office
 
 def make_vehicle(plate, odometer=None, project=None, ownership=None):
-    """Get-or-create an Active Salis Vehicle by ``plate_number``; return its name.
-
-    Every optional field is applied on the EXISTING row too, not only on a freshly
-    created one: the dispatch-trip workflow tests pass ``odometer=0`` to assert a
-    reading a previous module may already have moved, and a rental test asking for
-    ``ownership="Rented"`` needs that to hold whoever created the plate first.
-    """
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
     values = {
         k: v
@@ -310,13 +228,10 @@ def make_vehicle(plate, odometer=None, project=None, ownership=None):
     return name
 
 def driver_user(driver):
-    """The login user behind a Salis Driver (via its Employee.user_id)."""
     emp = frappe.db.get_value("Salis Driver", driver, "employee")
     return frappe.db.get_value("Employee", emp, "user_id")
 
 def make_test_driver():
-    """Get-or-create the canonical portal-test driver (User+Employee+Salis Driver
-    +Vehicle) keyed on a fixed user; return the driver name. Idempotent."""
     user = "drv_dp@example.com"
     if not frappe.db.exists("User", user):
         try:
@@ -353,9 +268,6 @@ def make_test_driver():
     return drv
 
 def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
-    """A SUBMITTED Goods Receipt bringing ``qty`` of ``article`` into
-    ``intake_building``; returns the document. Submitted because the custody tests
-    need stock actually on hand, which only the submit posts."""
     gr = frappe.get_doc(
         {
             "doctype": "Goods Receipt",
@@ -371,9 +283,6 @@ def make_goods_receipt(intake_building, article, procurement_supervisor, qty=5):
     return gr
 
 def make_maintenance_request(building, room):
-    """A SUBMITTED Maintenance Request against ``building``/``room``; returns the
-    document. The plumbing issue text is arbitrary — every caller asserts on the
-    downstream work order / cost ledger, never on the issue itself."""
     mr = frappe.get_doc(
         {
             "doctype": "Maintenance Request",
@@ -390,9 +299,6 @@ def make_maintenance_request(building, room):
     return mr
 
 def make_safety_round(building, **overrides):
-    """A draft Weekly Safety Round on ``building`` dated today; returns the
-    document. ``overrides`` replace any of those defaults (the re-inspection tests
-    pass ``is_reinspection=1``)."""
     data = {
         "doctype": "Safety Round",
         "building": building,
@@ -403,13 +309,6 @@ def make_safety_round(building, **overrides):
     return frappe.get_doc(data).insert(ignore_permissions=True)
 
 def make_scoped_supervisor(make_user, building, add_cleanup):
-    """A Resident Supervisor scoped to ``building`` by a Building User Permission;
-    returns the login email.
-
-    ``make_user`` mints the login and ``add_cleanup`` registers the permission's
-    teardown (normally ``cls.addClassCleanup``) — both are injected because each
-    test class names its own users and owns its own cleanup scope.
-    """
     email = make_user("Resident Supervisor")
     up = frappe.get_doc(
         {
@@ -425,8 +324,6 @@ def make_scoped_supervisor(make_user, building, add_cleanup):
     return email
 
 def make_assignment(employee, building, project, room_number=None, bed_code=None, stay_type="Permanent"):
-    """A submitted Accommodation Assignment placing ``employee`` in ``building``
-    (creating the room + bed if needed). Returns the assignment name."""
     room_number = room_number or f"{building}-GPS-R"
     bed_code = bed_code or f"{building}-GPS-B"
     if not frappe.db.exists("Room", room_number):
@@ -482,24 +379,6 @@ def make_worker_trip(
     status="Planned",
     link_route_plan_on_request=False,
 ):
-    """Build a complete Workers-line trip (Transport Request + Route Plan +
-    Dispatch Trip) and return the three docs ``(tr, rp, dt)``.
-
-    Defaults reproduce the Masar worker-trip fixture; the GPS/ETA tests override
-    ``from_location``/``pickup_datetime``/``status``/``link_route_plan_on_request``
-    to build a *dispatched* trip whose Route Plan is linked back on the request.
-    A new Dispatch Trip must start ``Planned`` (controller guard); a non-Planned
-    target ``status`` is applied afterward via a direct write.
-
-    ``depart_time`` defaults to NOW rather than a fixed clock time: boarding is gated
-    on the worker's own stop being served (salis/api/boarding_window.py), so a trip
-    pinned to 06:30 is boardable or not depending on what time the suite happens to
-    run. A caller that is testing the window itself passes the time it needs.
-
-    ``frappe.utils.nowtime`` (frappe/utils/data.py) is read at call time rather than
-    pinned, because the one thing a fixed clock cannot do is stay inside a window the
-    product computes from the current moment.
-    """
     from_location = building if from_location is None else from_location
     depart_time = frappe.utils.nowtime() if depart_time is None else depart_time
     passengers = len(workers) if passengers is None else passengers
@@ -564,12 +443,6 @@ def make_worker_trip(
     return tr, rp, dt
 
 class WorkerTripMixin:
-    """Builds a complete Workers-line trip for a given driver and returns the
-    handle records, registering cleanup. Record creation is delegated to
-    ``make_worker_trip``; everything is created as Administrator.
-
-    Promoted from salis/api/test_masar_worker_movement.py so the Masar test
-    modules share one mixin without a cross-test-module import."""
 
     def _worker_trip(self, driver, project, building, workers, route_name, **kwargs):
         tr, rp, dt = make_worker_trip(
@@ -596,22 +469,9 @@ class WorkerTripMixin:
                 frappe.delete_doc(*dtp, ignore_permissions=True, force=True)
 
 def fixture_tag():
-    """A collision-free fixture suffix: at least 12 random characters, because a
-    shorter one collides across a parallel run and reads as a logic bug.
-
-    ``frappe.generate_hash`` (frappe/__init__.py:1134) supplies the randomness; the
-    one thing a counter cannot do is stay unique across processes, which is what a
-    parallel suite runs in.
-    """
     return frappe.generate_hash(length=12)
 
 def ensure_company(name_prefix="Apex Test"):
-    """The site's Company, created when the site has none. Returns its name.
-
-    ``before_tests`` normally provisions one, so this usually returns what is
-    already there; the create path is what keeps a test off ``skipTest`` on a site
-    that was never wizard-bootstrapped.
-    """
     existing = frappe.db.get_value("Company", {}, "name")
     if existing:
         return existing
@@ -627,15 +487,6 @@ def ensure_company(name_prefix="Apex Test"):
     ).insert(ignore_permissions=True).name
 
 def ensure_account(company, account_type, root_type, account_currency=None):
-    """A non-group Account of ``account_type`` on ``company``; created under the
-    chart's ``root_type`` group when the chart has none. Returns its name.
-
-    HRMS refuses to submit an Employee Advance whose advance account is not
-    Receivable, and a Journal Entry party proof needs a real Payable/Cash pair, so
-    this account type is what those chains actually depend on. ``account_currency``
-    narrows both the lookup and the created row when a caller needs the company's
-    base currency specifically.
-    """
     filters = {"company": company, "account_type": account_type, "is_group": 0}
     if account_currency:
         filters["account_currency"] = account_currency
@@ -663,11 +514,6 @@ def ensure_account(company, account_type, root_type, account_currency=None):
     return frappe.get_doc(values).insert(ignore_permissions=True).name
 
 def make_submitted_custody_issue():
-    """A submitted Custody Issue for the QA building, the anchor an acknowledgment needs.
-
-    Shared because the acknowledgment's behaviour suite and its signature-permlevel suite
-    both need one and neither may import the other.
-    """
     issue = frappe.get_doc(
         {
             "doctype": "Custody Issue",

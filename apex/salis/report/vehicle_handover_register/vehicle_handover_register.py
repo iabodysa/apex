@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Vehicle Handover Register — which vehicle changed hands, between whom, and whether
-the handover is clean.
-
-The rows are DOCUMENT rows: the fact is the handover itself, and the checklist under it
-is evidence for that fact, so each row carries the count of failed check items rather
-than a line per check. Only submitted handovers are listed — a draft has not changed
-hands, and a cancelled one is out with docstatus 2.
-
-Scoped by the vehicle's project through the same resolver the permission hook uses, so
-a scope correction reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -21,7 +10,6 @@ from apex.salis import permissions
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Vehicle Handover Register report."""
     filters = filters or {}
     columns = get_columns()
 
@@ -102,8 +90,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     unsigned = [r for r in data if not r.get("is_signed")]
     discrepancies = [r for r in data if r.get("discrepancy_status") == "Discrepancy"]
     return [
@@ -115,7 +101,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the Vehicle Handover Register report."""
     return [
         {"label": _("Handover"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Handover", "width": 150},
         {"label": _("Handover Date"), "fieldname": "handover_date", "fieldtype": "Date", "width": 115},

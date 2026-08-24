@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Housing Assignment's pure rate-snapshot and expiry-flag decisions.
-
-Patterned on test_lease.py: both helpers run against an in-memory, unsaved
-Document (or a bare ``frappe._dict`` standing in for one), so neither the
-parent Assignment nor a Building/Temporary Worker record is ever inserted.
-``_snapshot_agreed_rate`` needs no mock at all -- it only reads its two
-arguments. ``_flag_temporary_worker_past_expiry``'s one DB read
-(``frappe.db.get_value("Temporary Worker", ...)``) is mocked so the
-expiry-vs-check-in comparison is exercised without a Temporary Worker record.
-"""
 
 from __future__ import annotations
 

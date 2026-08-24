@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Route Stop child table controller."""
 
 from __future__ import annotations
 

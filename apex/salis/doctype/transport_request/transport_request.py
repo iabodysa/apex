@@ -1,26 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Transport Request controller.
-
-Transitions are owned by the native **Transport Request Workflow** (see
-``salis/workflow/transport_request_workflow/``), not by this controller. The
-workflow enforces the role per transition, the Segregation-of-Duties gate
-(approver != requester) and the Delegation-of-Authority tier escalation via its
-transition ``condition``s.
-
-This controller keeps only the *data* guards: the transport-type (``service_line``)
--> request_type consistency, the per-request-type required fields/evidence, and the
-**server-side DoA derivation** that sets ``needs_operations`` so the workflow's tier
-gate cannot be under-stated by a client. ``worker_count`` and ``trips_this_month``
-are likewise derived server-side, never trusted from the form.
-
-``service_line`` is the **transport type** (AFMCO Movement Department
-coordination): ``Site Transport`` (gov item 60 — accommodation->site workforce
-transport), ``Inter-City Relocation`` (gov item 61 — inter-city workforce
-relocation) and ``Administrative Trip`` (gov item 62 — document/administrative
-trips). The first two carry a worker manifest; an Administrative Trip is a simple
-trip and carries none. Rider-vehicle custody (gov item 63) is NOT a transport
-request — it is handled by Vehicle Assignment + Vehicle Handover.
-"""
 
 from __future__ import annotations
 
@@ -52,7 +30,6 @@ SERVICE_LINE_REQUEST_TYPE = {
 
 class TransportRequest(Document):
     def before_insert(self):
-        """Rejects a honeypot-filled submission and sets the source channel for a guest request."""
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
@@ -72,7 +49,6 @@ class TransportRequest(Document):
             self.status = "New"
 
     def validate(self):
-        """Cross-checks the request type against the transport type and requires the type's fields."""
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -124,8 +100,6 @@ class TransportRequest(Document):
             frappe.throw(_("Purpose is too long. Please keep it under 2000 characters."))
 
     def _derive_trips_this_month(self):
-        """Count submitted Administrative Trips this month for the same project (or
-        requester), including this one — server-derived so the DoA gate is reliable."""
         if self.request_type != "Administrative Trip / Document Signing":
             self.trips_this_month = 0
             return
@@ -148,14 +122,6 @@ class TransportRequest(Document):
         self.trips_this_month = len(existing) + 1
 
     def _derive_needs_operations(self):
-        """Server-side Delegation-of-Authority derivation.
-
-        Sets ``needs_operations`` when the request's scope crosses the tier
-        threshold so the workflow's "Authorize (Regional)" transition is gated
-        off (only "Authorize (Operations)", allowed for the Operations tier,
-        remains). Derived here — never trusted from the client — so the gate
-        cannot be under-stated. Mirrors the previous before_submit tier logic.
-        """
         worker_count = self.worker_count or 0
         trips = self.trips_this_month or 0
 

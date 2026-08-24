@@ -1,48 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Guarded billing actions on a submitted Telecom Contract.
-
-Two POST-only actions turn an in-force contract into draft procurement/finance
-paperwork, one set per billing period:
-
-* ``create_purchase_request`` -> a draft native **Material Request** (Purchase),
-* ``create_payment_entry``    -> a draft native **Payment Entry** ALLOCATED against
-  a submitted **Purchase Invoice**.
-
-Why a Purchase Invoice is required, and how one is chosen and guarded, is
-``apex_core.utils.payable_allocation`` — the shared engine a building Lease raises its
-rent payment through as well. This module contributes only what is telecom's: which
-contract is eligible, that a billing period is one YYYY-MM, and the billing log that
-records one document per (contract, period, type).
-
-Boundary — this layer posts NO GL and submits NOTHING. Both targets are created in
-Draft and left for finance to review and submit; a Payment Entry posts its ledger
-only on its own submit, which never happens here. Settlement is therefore never
-stored on the contract: it is DERIVED from the live Payment Entry by
-``get_billing_status``, so a cancelled payment reverses the operational status with
-no reversal code and no field to drift out of step with the ledger. That reversal is
-only reachable because ``allow_cancel_despite_billing_log`` stops the contract's own
-billing log from vetoing the cancellation; deleting a cited payment stays blocked.
-
-Neither insert bypasses a permission check. ``app_owned_permissions_seed`` grants SIM
-Operations User ``create`` and NOTHING else on Material Request and Payment Entry, so the
-coordinator raises the draft the framework's own way without gaining read, write or submit
-over the procurement and payment surface. Both land in Draft for finance to review. The
-billing-log append onto the contract carries no flag either — every role reaching this endpoint
-already holds ``write`` on Telecom Contract within its own company scope.
-
-Every action:
-  * requires an eligible submitted contract the caller may read (company-scoped),
-  * requires the caller's create permission on the target DocType,
-  * fails closed when the target DocType or a prerequisite (service item, company
-    accounts, an eligible payable invoice) is missing,
-  * is duplicate-safe: a second call for the same (contract, period, type) returns
-    the existing draft rather than creating another, serialized by a row lock.
-
-The lock and the duplicate check must be the SAME read: ``get_doc(..., for_update=True)``
-locks the contract row and reads its ``billing_documents`` children under that lock. A
-discarded lock followed by a plain ``reload()`` still answers from the opening snapshot
-under REPEATABLE READ, so the loser raises a second draft and deletes the winner's row.
-"""
 
 from __future__ import annotations
 
@@ -62,9 +18,6 @@ PAYMENT_ENTRY_DOCTYPE = payable_allocation.PAYMENT_ENTRY_DOCTYPE
 
 
 def _load_eligible_contract(contract: str):
-    """Return the submitted Telecom Contract the caller may read, or throw.
-
-    """
     if not contract or not frappe.db.exists("Telecom Contract", {"name": contract}):
         frappe.throw(_("Telecom Contract {0} does not exist.").format(contract))
     doc = frappe.get_doc("Telecom Contract", contract)
@@ -75,7 +28,6 @@ def _load_eligible_contract(contract: str):
 
 
 def _normalize_period(billing_period: str) -> str:
-    """Validate a YYYY-MM billing period and return it normalized."""
     period = (billing_period or "").strip()
     try:
         parsed = datetime.datetime.strptime(period, "%Y-%m")
@@ -85,16 +37,12 @@ def _normalize_period(billing_period: str) -> str:
 
 
 def _period_end(billing_period: str):
-    """Last calendar day of a YYYY-MM period."""
     parsed = datetime.datetime.strptime(billing_period, "%Y-%m")
     last_day = calendar.monthrange(parsed.year, parsed.month)[1]
     return datetime.date(parsed.year, parsed.month, last_day)
 
 
 def _existing_link(contract_doc, billing_period: str, document_type: str):
-    """Return an already-recorded draft for this (period, type) if it still exists.
-
-    """
     for row in contract_doc.billing_documents or []:
         if row.billing_period == billing_period and row.document_type == document_type:
             if row.document_name and frappe.db.exists(document_type, {"name": row.document_name}):
@@ -103,7 +51,6 @@ def _existing_link(contract_doc, billing_period: str, document_type: str):
 
 
 def _record_link(contract_doc, billing_period, document_type, document_name, amount, currency):
-    """Log the created draft onto the (submitted) contract's billing table."""
     contract_doc.append(
         "billing_documents",
         {
@@ -120,13 +67,11 @@ def _record_link(contract_doc, billing_period, document_type, document_name, amo
 
 
 def _result(document_type, document_name, existing):
-    """Builds the standard document_type, document_name, and existing response for a billing action."""
     return {"document_type": document_type, "document_name": document_name, "existing": existing}
 
 
 @frappe.whitelist(methods=["POST"])
 def create_purchase_request(contract: str, billing_period: str):
-    """Create (or return) a draft Material Request (Purchase) for one billing period."""
     contract_doc = _load_eligible_contract(contract)
     payable_allocation.validate_target(PURCHASE_REQUEST_DOCTYPE)
     billing_period = _normalize_period(billing_period)
@@ -182,20 +127,12 @@ def create_purchase_request(contract: str, billing_period: str):
 
 @frappe.whitelist()
 def list_payable_invoices(contract: str):
-    """The submitted Purchase Invoices a payment for this contract may settle."""
     contract_doc = _load_eligible_contract(contract)
     return payable_allocation.list_payables(contract_doc.company, contract_doc.supplier)
 
 
 @frappe.whitelist(methods=["POST"])
 def create_payment_entry(contract: str, billing_period: str, purchase_invoice: str | None = None):
-    """Create (or return) a draft Payment Entry ALLOCATED against ``purchase_invoice``.
-
-    Built by the shared ``payable_allocation`` engine, so the ``references`` row and
-    its allocated amount come from ERPNext's own payable logic rather than from an
-    amount copied off the contract. Left in Draft — Apex posts no GL and never
-    submits it.
-    """
     contract_doc = _load_eligible_contract(contract)
     payable_allocation.validate_target(PAYMENT_ENTRY_DOCTYPE)
     billing_period = _normalize_period(billing_period)
@@ -232,11 +169,6 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
 
 @frappe.whitelist()
 def get_billing_status(contract: str, billing_period: str):
-    """What this contract's billing period actually looks like right now.
-
-    ``settlement`` is derived by the shared engine, never stored — so a payment
-    cancelled in Accounts reverses the operational status here with no reversal code.
-    """
     contract_doc = _load_eligible_contract(contract)
     billing_period = _normalize_period(billing_period)
 
@@ -250,9 +182,6 @@ def get_billing_status(contract: str, billing_period: str):
 
 
 def allow_cancel_despite_billing_log(doc, method=None):
-    """Stop the contract's billing log from vetoing a Payment Entry cancellation.
-
-    """
     existing = tuple(doc.get("ignore_linked_doctypes") or ())
     if CONTRACT_DOCTYPE not in existing:
         doc.ignore_linked_doctypes = (*existing, CONTRACT_DOCTYPE)

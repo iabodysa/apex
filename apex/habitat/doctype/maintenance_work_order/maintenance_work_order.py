@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Maintenance Work Order controller.
-
-Both writes pass ``ignore_permissions`` for the subledger reason: they post and reverse
-Accommodation Ledger memo rows on completion and cancellation. That DocType is ``in_create`` with
-no role holding create or write, so the controller is the only path a row can take, and the
-permission that mattered was checked when the work order was completed.
-"""
 
 from __future__ import annotations
 
@@ -20,16 +13,6 @@ from apex.habitat.maintenance_engine import post_maintenance_cost, reverse_maint
 
 class MaintenanceWorkOrder(Document):
     def on_cancel(self):
-        """Reverse the completion side-effects so a cancelled Work Order does not
-        leave an orphan Accommodation Ledger memo or a Maintenance Request stuck
-        Closed/In Progress.
-
-        Native class method (Frappe fires it on cancel; no hooks.py doc_event is
-        needed). Mirrors the Dispatch Trip / Fuel Request cancel-reversal pattern:
-        net out the operational memo this Work Order posted (keyed by
-        source_doctype/source_name). An active cancelled order releases its linked
-        request back to Open; a completed older order cannot reopen a request now
-        owned by newer work."""
         self._reverse_accommodation_memo()
 
         reverse_maintenance_cost(self.name)
@@ -49,8 +32,6 @@ class MaintenanceWorkOrder(Document):
             request.db_set("status", "Open")
 
     def _reverse_accommodation_memo(self):
-        """Post a negative mirror for the live completion memo this Work Order
-        posted. Idempotent: skips if the original was already reversed."""
         original = frappe.db.get_value(
             "Accommodation Ledger",
             {
@@ -82,7 +63,6 @@ class MaintenanceWorkOrder(Document):
 
 
 def validate(doc, method=None):
-    """Draft-time field checks, including the draft half of the actual-date ordering rule."""
     if doc.planned_end_date and doc.planned_start_date:
         if doc.planned_end_date < doc.planned_start_date:
             frappe.throw(_("Planned End Date must be on or after Planned Start Date."))
@@ -111,7 +91,6 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    """Marks the work order Planned and advances its linked Maintenance Request to In Progress."""
     request = None
     if frappe.db.exists("DocType", "Maintenance Request") and doc.maintenance_request:
         request = frappe.get_doc(
@@ -130,21 +109,12 @@ def on_submit(doc, method=None):
 
 
 def before_cancel(doc, method=None):
-    """Blocks cancellation unless a Cancellation Reason has been provided."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Maintenance Work Order."))
 
 
 @frappe.whitelist(methods=["POST"])
 def start_work(work_order):
-    """Transition Maintenance Work Order from Planned to In Progress, stamping the
-    actual start date.
-
-    Starting the job IS its actual start, so the date is recorded here rather than
-    asked for. That matters because ``actual_start_date`` is deliberately not an
-    allow_on_submit field — see ``mark_completed`` for why — which leaves this method
-    and ``mark_completed`` its only writers once the Work Order is submitted.
-    """
     doc = frappe.get_doc("Maintenance Work Order", work_order, for_update=True)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 
@@ -169,20 +139,6 @@ def mark_completed(
     completion_photo=None,
     actual_start_date=None,
 ):
-    """Record the technician's completion evidence and transition to Completed.
-
-    So the date fields stay non-allow_on_submit and this method is their only writer
-    at docstatus 1. It re-checks write itself because ``db_set`` goes straight to the
-    database, skipping both the permission check and validate(), and it enforces the
-    actual-date ordering here because validate() does not run on the after-submit path.
-
-    The transition posts a one-time operational memo row. No GL Entry, Payment Entry,
-    Purchase Invoice, or salary document is created. "One-time" holds because the work
-    order is loaded ``for_update``: without that lock two concurrent calls both read
-    status "In Progress" and both post, and the Accommodation Ledger's unique key does
-    not cover this writer, which posts with no employee and no assignment.
-
-    """
     doc = frappe.get_doc("Maintenance Work Order", work_order, for_update=True)
     frappe.has_permission("Maintenance Work Order", "write", doc=doc, throw=True)
 

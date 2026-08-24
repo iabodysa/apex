@@ -1,17 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Accommodation Stock Ledger's holder resolution and balance sum.
-
-Patterned on frappe/tests/test_document.py for the pure ``_resolve_holder``
-cases, and on erpnext's stock-ledger balance tests for ``get_store_balance``.
-``_resolve_holder`` is exercised directly with no database at all. The
-balance sum needs live rows, so those cases post the minimum through
-``post_stock_entry``/direct insert against the ``_Test Ledger Article``
-fixture kept for this purpose, and delete every row they add in
-``addCleanup`` — this module has no per-test rollback (``FrappeTestCase``
-only rolls back at class teardown), so a row left behind would poison a
-later test's sum. Each assertion compares against a baseline balance taken
-before posting, so a stray row from elsewhere never falsifies the result.
-"""
 
 from __future__ import annotations
 

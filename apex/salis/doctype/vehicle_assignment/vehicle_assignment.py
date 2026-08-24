@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Vehicle Assignment controller.
-
-The submitted Vehicle Assignment is the authoritative vehicle<->driver pairing.
-Salis Vehicle.current_driver and Salis Driver.current_vehicle are denormalized
-mirrors written from here via set_value.
-"""
 
 from __future__ import annotations
 
@@ -25,20 +19,12 @@ from apex.salis.utils import (
 
 class VehicleAssignment(Document):
     def validate(self):
-        """Validates dates, blocks an overlapping assignment, checks compliance and rider status."""
         self._validate_dates()
         self._validate_no_overlap()
         validate_vehicle_compliance(self)
         self._enforce_rider_active()
 
     def _enforce_rider_active(self):
-        """Block assigning a vehicle to a rider who is on leave / inactive.
-
-        Source of truth is the rider's HRMS Employee status and any approved
-        Leave Application covering the assignment start date (falls back to the
-        local Salis Driver status). A new assignment puts a company vehicle in
-        the rider's custody, so an offboarded / on-leave rider must be rejected.
-        """
         if not self.driver:
             return
         reason = rider_block_reason(self.driver, self.start_date)
@@ -46,18 +32,10 @@ class VehicleAssignment(Document):
             frappe.throw(reason)
 
     def _validate_dates(self):
-        """Requires the end date to be no earlier than the start date."""
         if self.start_date and self.end_date and self.end_date < self.start_date:
             frappe.throw(_("End Date cannot be earlier than Start Date."))
 
     def _overlapping(self, field, value):
-        """Return the name of a submitted, Active assignment for the same
-        vehicle/driver whose period overlaps this document's period.
-
-        Open-ended periods (no end_date) run to infinity. Two ranges
-        [a_start, a_end] and [b_start, b_end] overlap when
-        a_start <= b_end AND b_start <= a_end.
-        """
         if not value:
             return None
         candidates = frappe.get_all(
@@ -80,7 +58,6 @@ class VehicleAssignment(Document):
         return None
 
     def _validate_no_overlap(self):
-        """Blocks the assignment when its vehicle or driver already has an overlapping active one."""
         clash = self._overlapping("vehicle", self.vehicle)
         if clash:
             frappe.throw(
@@ -93,14 +70,6 @@ class VehicleAssignment(Document):
             )
 
     def on_submit(self):
-        """Links the vehicle and driver as each other's current pairing and rechecks for a race overlap.
-
-        The vehicle is promoted to Active as part of that pairing, but only when nothing
-        is holding it off the road. This write is a ``frappe.db.set_value``, so it runs no
-        controller and the guard that refuses an operator's own status edit during an open
-        stop or incident never sees it — a stolen or suspended vehicle was silently
-        returned to the dispatch board by assigning a driver to it.
-        """
         lock_vehicle(self.vehicle)
         lock_driver(self.driver)
 
@@ -131,7 +100,6 @@ class VehicleAssignment(Document):
         )
 
     def on_cancel(self):
-        """Clears the vehicle-driver pairing this assignment set, if it is still in place."""
         if frappe.db.get_value("Salis Vehicle", self.vehicle, "current_driver") == self.driver:
             set_current_driver(self.vehicle, None)
         if frappe.db.get_value("Salis Driver", self.driver, "current_vehicle") == self.vehicle:

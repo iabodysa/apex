@@ -1,18 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Subcontractor Service Order controller.
-
-Why Finance Manager holds a permlevel-1 row here and NO permlevel-0 row.
-It is a deliberate field overlay, not an omission: the role may read and set
-``service_cost`` on an order that Accommodation Manager opens, and may not open,
-create, submit or cancel it. Document access is resolved from permlevel-0 rows only,
-field access is resolved separately and unions every permlevel across the user's roles,
-so the two are independent grants -- the row activates the moment one user holds both
-roles, with no DocPerm edit. No shipped role profile bundles them today, so this
-overlay is dormant until an administrator does. The framework's rule, written here rather
-than pointed at: permlevel access is the UNION of the caller's roles
-(frappe/permissions.py get_role_permissions), so a user holding both roles reads the
-union of both field sets and no DocPerm edit is needed to widen him.
-"""
 
 from __future__ import annotations
 
@@ -30,7 +16,6 @@ class SubcontractorServiceOrder(Document):
 
 
 def before_save(doc, method=None):
-    """Defaults the order's company and restates its cost with VAT."""
     if not doc.company:
         doc.company = resolve_company("Habitat")
 
@@ -40,14 +25,6 @@ def before_save(doc, method=None):
 
 
 def _price_from_lines(doc):
-    """Amount each line, and let the lines set the service cost when there are any.
-
-    An order with no lines is a flat call-off against the contract rate, and
-    ``service_cost`` stays what Finance typed — that permlevel-1 grant is the field
-    overlay this controller's own header describes, and deriving unconditionally
-    would take it away. The moment a line exists the total is arithmetic, not an
-    opinion, so the typed figure gives way to it.
-    """
     rows = doc.get("service_items") or []
     if not rows:
         return
@@ -59,17 +36,6 @@ def _price_from_lines(doc):
 
 
 def _stamp_confirmation(doc):
-    """Record who confirmed the visit and when, so the tick binds a person.
-
-    The order is what the contractor invoices against, and a bare checkbox on it names
-    nobody. Clearing the tick clears the pair, so a withdrawn confirmation never leaves
-    a name printed under it.
-
-    ``frappe.utils.now`` (frappe/utils/data.py) stamps the moment in the site's own
-    timezone rather than the server's. The one thing the framework's own ``modified_by``
-    cannot do is survive the next save: it names whoever touched the document last,
-    while this pair must keep naming whoever confirmed the visit.
-    """
     if doc.supervisor_confirmed:
         if not doc.confirmed_by:
             doc.confirmed_by = frappe.session.user
@@ -81,7 +47,6 @@ def _stamp_confirmation(doc):
 
 @frappe.whitelist(methods=["POST"])
 def start_work(service_order):
-    """Transition Subcontractor Service Order from Scheduled to In Progress."""
     doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
@@ -103,13 +68,6 @@ def mark_completed(
     visit_notes=None,
     actual_visit_date=None,
 ):
-    """Transition Subcontractor Service Order from In Progress to Completed, and
-    record the visit evidence in the same call.
-
-    Controlled completion gate mirroring start_work / mark_missed: only a submitted
-    order that is In Progress may be marked Completed, so the terminal state is
-    reached through a guarded chokepoint rather than a free-form status edit.
-    """
     doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 
@@ -135,7 +93,6 @@ def mark_completed(
 
 @frappe.whitelist(methods=["POST"])
 def mark_missed(service_order):
-    """Transition Subcontractor Service Order from In Progress to Missed."""
     doc = frappe.get_doc("Subcontractor Service Order", service_order, for_update=True)
     frappe.has_permission("Subcontractor Service Order", "write", doc=doc, throw=True)
 

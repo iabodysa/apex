@@ -1,37 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Apex first-install Setup Wizard integration (native Frappe setup wizard).
-
-``setup_wizard_complete`` runs once, gated by Frappe's own ``is_setup_complete()``
-(frappe/desk/page/setup_wizard/setup_wizard.py:54-55), and only the site's sole account —
-Administrator — can still be logged in the first time it fires. Administrator already
-carries every permission (frappe/permissions.py:107,273,506), so the settings saves below
-need no flag, and no DocPerm would let an operator repeat them afterwards.
-
-On a fresh site, Frappe's setup wizard renders extra "Apex Configuration" slides
-(registered by public/js/apex_setup_wizard.js via the `setup_wizard_requires` hook).
-The operator's choices flow into the wizard args and land here at completion
-(`setup_wizard_complete` hook), where they are applied — ONCE — across every
-re-engineered Apex Single:
-
-  - Habitat Settings        — default company, the email/operational kill-switches, the
-    app-wide GL-posting finance gate and the Pay-action target payment DocType.
-  - Salis Settings          — default company, cost center, driver portal, approvals.
-  - native Employee Advance recovery — disabled until payroll/account settings exist.
-  - native ERPNext Issue SLA — created only with an operator-selected schedule.
-
-The company and its cost center are NOT among the operator's answers. They are read
-from the records ERPNext's own stage created, which run before this hook.
-
-Safe-by-default + skip-safe: a field the operator leaves blank (or a toggle left
-at its pre-filled value) keeps the Single's own default — the wizard never writes
-a phantom value. The deduction master switch and the GL gate stay OFF unless the
-operator explicitly opts in. Idempotent: re-running with the same args is harmless.
-
-Skip-safe is NOT fail-open: a payment target the operator actually named but that
-cannot build a payment stops setup with an actionable message rather than being
-dropped, because a dropped choice leaves the router pointing somewhere the
-operator never picked.
-"""
 
 import frappe
 from frappe.utils import cint
@@ -47,23 +14,11 @@ from apex.apex_core.utils.company import resolve_company_or_any
 from apex.setup import create_accommodation_item_defaults
 
 def setup_wizard_complete(args=None):
-    """`setup_wizard_complete` hook — apply the operator's first-run choices."""
     apply_apex_setup(args)
     seed_portal_identities()
     create_accommodation_item_defaults()
 
 def apply_apex_setup(args=None):
-    """Write the operator's Setup-Wizard choices across every Apex Single.
-
-    Skip-safe: a blank/absent field keeps the Single's shipped default (the helpers
-    below only write a Link when the arg is present and the target exists). No commit
-    — Frappe commits after all setup stages succeed.
-
-    Company and cost center are READ here rather than asked for on the slide. The Apex
-    slide carries no Link field at either: Frappe renders every slide before it runs a
-    single stage, and ERPNext creates the company in a stage, so a picker would query an
-    empty table and force the operator to leave blank a choice he could not make.
-    ERPNext's stage runs before this completion hook, so both values already exist."""
     args = frappe._dict(args or {})
     company = resolve_company_or_any()
     cost_center = _created_cost_center(company)
@@ -75,20 +30,9 @@ def apply_apex_setup(args=None):
     _apply_salis_support(args)
 
 def _created_cost_center(company):
-    """The default cost center ERPNext attached to that company."""
     return frappe.get_cached_value("Company", company, "cost_center") if company else None
 
 def _apply_habitat_settings(args, company):
-    """Habitat Settings — default company, the email/operational notification
-    kill-switches and the app-wide GL-posting finance gate (default OFF). Company is
-    only written when one exists so the Single default holds.
-
-    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole document rather than
-    writing field by field with ``set_single_value``, because the Single's own
-    ``validate`` must run once over the FINAL combination — several of these switches
-    only make sense together, and per-field writes would validate each against the
-    half-applied state of the others.
-    """
     habitat = frappe.get_single("Habitat Settings")
     if company:
         habitat.company = company
@@ -100,18 +44,6 @@ def _apply_habitat_settings(args, company):
     habitat.save()
 
 def _apply_salis_settings(args, company, cost_center):
-    """Salis Settings — default company + cost center and the driver-portal /
-    approvals switches.
-
-    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole document rather than
-    writing field by field with ``set_single_value``, because the Single's own
-    ``validate`` must run once over the FINAL combination — several of these switches
-    only make sense together, and per-field writes would validate each against the
-    half-applied state of the others.
-
-    ``enable_approvals`` is written only when the wizard actually carried it, so a
-    slide that never asked cannot silently switch twelve workflows off.
-    """
     salis = frappe.get_single("Salis Settings")
     if company:
         salis.default_company = company
@@ -123,18 +55,6 @@ def _apply_salis_settings(args, company, cost_center):
     salis.save()
 
 def _apply_payment_routing(args):
-    """Habitat Settings — route the operator's chosen payment DocType to the
-    Pay-action target, REFUSING anything that cannot be a payment document.
-
-    Blank keeps the native Payment Request default. A named target is validated by
-    the router's own guard and the setup fails loudly if it does not hold: silently
-    dropping the choice lets setup report success while every later payment is built
-    as a different document than the operator selected, so it refuses instead.
-
-    ``frappe.get_single`` (frappe/__init__.py:1335) loads the settings; the validation
-    is the router's own guard rather than a field check, because the one thing the
-    Single cannot do is know whether a DocType name can behave as a payment.
-    """
     payment_method = (args.get("apex_default_payment_method") or "").strip()
     if not payment_method:
         return
@@ -144,7 +64,6 @@ def _apply_payment_routing(args):
     router.save()
 
 def _apply_employee_advance_recovery(args, company):
-    """Enable the Apex scheduler only after native HRMS accounts and component exist."""
     configure_recovery(
         enabled=bool(cint(args.get("apex_enable_employee_advance_recovery"))),
         company=company,
@@ -153,7 +72,6 @@ def _apply_employee_advance_recovery(args, company):
     )
 
 def _apply_salis_support(args):
-    """Create an Issue SLA only when the setup answers include a complete schedule."""
     enabled = bool(cint(args.get("apex_enable_salis_support_sla")))
     if not enabled:
         configure_support_sla(enabled=False)

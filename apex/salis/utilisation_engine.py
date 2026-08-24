@@ -1,19 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Vehicle Utilisation Snapshot engine.
-
-Background engine (system-written, read-only, no-GL) mirroring the Habitat
-daily occupancy snapshot pattern. Humans never enter these rows; the weekly
-scheduler writes one point-in-time utilisation row per active vehicle so that
-utilisation history/trends survive (the live fleet state keeps no history).
-Reports and KPIs derive from the snapshots.
-
-The insert runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site`` connects with
-``set_admin_as_user=True`` (frappe/__init__.py:269) before it ever queues the weekly job, so the
-worker executes as ``Administrator`` and the framework's own permission check already passes —
-"humans never enter these rows" is the DocType's design, enforced by its own DocPerm rows (every
-role carries ``read`` only), not by anything this module adds.
-"""
 
 import frappe
 from frappe.utils import add_days, getdate, today
@@ -23,14 +9,6 @@ PERIOD_DAYS = 7
 
 
 def weekly_vehicle_utilisation_snapshot() -> None:
-    """Write a weekly utilisation row per Active Salis Vehicle.
-
-	Over the trailing 7 days, count Completed Dispatch Trips for the vehicle,
-	derive idle days (days in the window with no completed trip), and compute
-	utilisation as the share of days in the window that had at least one trip.
-	Idempotent on vehicle + snapshot_date. One row per vehicle; per-row
-	try/except so a single failure does not abort the run; no commit in loop.
-	"""
     snapshot_date = today()
     window_start = add_days(snapshot_date, -(PERIOD_DAYS - 1))
 

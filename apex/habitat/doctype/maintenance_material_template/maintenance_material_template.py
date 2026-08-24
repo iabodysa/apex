@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Maintenance Material Template controller."""
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -11,11 +10,6 @@ class MaintenanceMaterialTemplate(Document):
 
 @frappe.whitelist(methods=["POST"])
 def load_template_into_doc(doctype, docname, issue_type):
-    """Load the first active template matching issue_type into the doc's procurement_items.
-
-    Safe: only appends rows. Never creates purchasing, stock, accounting, or payroll records.
-    The caller (JS button) passes doctype = 'Maintenance Request' or 'Maintenance Work Order'.
-    """
     if doctype not in ("Maintenance Request", "Maintenance Work Order"):
         frappe.throw(_("Template loading is only supported for Maintenance Request and Maintenance Work Order."))
 

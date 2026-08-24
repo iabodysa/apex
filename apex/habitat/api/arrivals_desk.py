@@ -1,25 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Arrivals Desk read + lookup API (party-aware).
-
-A presentation/lookup layer for the unified worker-arrival desk page. The page's
-WRITES go through existing whitelisted endpoints (the party-aware Front Desk
-quick_check_in, the Custody Kiosk issue, the Masar worker-link issuer). This
-module adds:
-
-- ``get_arrival_card`` — the party-aware arrival snapshot (Employee | Temporary
-  Worker), built from the same active-occupancy / custody / token semantics as the
-  Front Desk board. ``employee=`` is kept as a legacy alias for an Employee party,
-  and the legacy ``employee``/``employee_name`` keys stay in the response, so the
-  old desk keeps working.
-- ``search_arrivals_workers`` — one combined search returning registered Employees
-  first, then active Temporary Workers, each tagged with its ``party_type``.
-- ``register_temporary_worker`` — register a passport-only new arrival. A housing
-  supervisor may create a Temporary Worker but NEVER an Employee (the doctype is
-  hard-coded; Employee creation is HRMS-gated and unreachable here).
-
-The printed slips live in ``habitat.utils.arrival_slips``; the occupancy and bed
-rules in ``habitat.utils.occupancy``.
-"""
 
 from __future__ import annotations
 
@@ -59,35 +38,12 @@ __all__ = [
 ]
 
 def _expiry_days(expiry_date) -> int | None:
-    """Whole days from today until a Temporary Worker's window expiry.
-
-    Negative once the window has lapsed, ``0`` on the expiry day, ``None`` when
-    no expiry is set. Computed server-side so the desk renders a single source of
-    truth (no client-side date math).
-
-    ``frappe.utils.date_diff`` (frappe/utils/data.py:282) does the subtraction. The
-    one thing it cannot do is distinguish "no expiry" from "expires today": handed a
-    blank it raises rather than answering, so the ``None`` case is decided here."""
     if not expiry_date:
         return None
     return frappe.utils.date_diff(expiry_date, frappe.utils.today())
 
 @frappe.whitelist()
 def get_intake_settings() -> dict:
-    """The Arrivals Desk feature flags, answered without exposing Habitat Settings.
-
-    The desk reads ``enable_passport_mrz_ocr`` here rather than through
-    ``frappe.client.get_single_value``, which needs read on the whole Single. Habitat
-    Settings grants read to System Manager only, so routing through it would meet the
-    Resident Supervisor the page is published to with a blocking permission dialog on
-    every load — a client-side ``.catch()`` cannot suppress it, because the dialog is
-    raised by the transport, not by the promise the caller holds.
-
-    Only the one boolean is returned, and only to a caller who could actually use the
-    passport register sheet it gates (the same ``Temporary Worker`` create right that
-    ``register_temporary_worker`` and ``parse_passport`` already enforce). Anyone else
-    is told the feature is off rather than refused, so the desk still renders.
-    """
     if not frappe.has_permission(PARTY_TEMPORARY_WORKER, "create"):
         return {"enable_passport_mrz_ocr": False}
     return {
@@ -98,19 +54,6 @@ def get_intake_settings() -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def send_masar_link_message(employee, phone=None) -> dict:
-    """Send a worker their already-issued Masar link to their phone (WhatsApp/SMS).
-
-    The per-row desk action on the QR block: resolves the worker's enabled Masar
-    token (the link is server-produced, never trusted from the client — a missing
-    or disabled token is refused), then hands it to the settings-driven messaging
-    gateway. ``phone`` may be passed (the desk already has it from the link
-    issuer); when omitted the Employee's ``cell_number`` is read server-side.
-
-    Permission-gated on read of the Masar Worker Token (the same gate the slip QR
-    uses). Returns the gateway queue/no-op result; when the gateway is not
-    configured the send is a graceful no-op (``queued: False, reason:
-    not_configured``) so the desk can message the operator to wire it, never
-    erroring."""
     frappe.has_permission("Masar Worker Token", "read", throw=True)
     assert_party_in_scope(PARTY_EMPLOYEE, employee)
     destination = credential_delivery_destination(
@@ -152,9 +95,6 @@ def send_masar_link_message(employee, phone=None) -> dict:
         raise
 
 def _arrival_identity(party_type, party):
-    """``(worker_name, image, expiry_date)`` for one party, permission- and
-    scope-gated before any identity leaves the server. Only a Temporary Worker has
-    an expiry; only an Employee has a photo."""
     if party_type == PARTY_EMPLOYEE:
         frappe.has_permission("Employee", "read", throw=True)
         assert_party_in_scope(party_type, party)
@@ -176,8 +116,6 @@ def _arrival_identity(party_type, party):
     frappe.throw(_("Unknown party type: {0}").format(party_type))
 
 def _custody_balance(party) -> int:
-    """Net custody articles still on a worker: issues less returns, cancelled rows
-    excluded."""
     rows = frappe.get_all(
         "Accommodation Stock Ledger",
         filters={"item_type": "Custody Article", "employee": party, "is_cancelled": 0},
@@ -186,7 +124,6 @@ def _custody_balance(party) -> int:
     return int(sum(int(r.signed_qty or 0) for r in rows))
 
 def _masar_is_enabled(party_type, party) -> bool:
-    """True only when the worker holds a token AND it is still enabled."""
     token = (
         frappe.db.get_value(
             "Masar Worker Token", {"party_type": party_type, "party": party},
@@ -198,7 +135,6 @@ def _masar_is_enabled(party_type, party) -> bool:
 
 @frappe.whitelist()
 def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
-    """Party-aware arrival snapshot for one worker (Employee or Temporary Worker)."""
     if not party and employee:
         party_type, party = PARTY_EMPLOYEE, employee
     if not (party_type and party):
@@ -247,13 +183,6 @@ def get_arrival_card(party_type=None, party=None, employee=None) -> dict:
     }
 
 def _housed_employees() -> set:
-    """Every Employee holding a live bed, in any building.
-
-    Deliberately unscoped, because the two axes this endpoint searches are excluded on
-    different grounds. An Employee carries no building of their own, so the only question
-    is whether they already hold a bed anywhere — offering one who is housed in another
-    estate would name an out-of-estate worker AND propose a double assignment.
-    """
     housed = frappe.get_all(
         "Housing Assignment",
         filters=occupancy.active_assignment_filters(),
@@ -262,12 +191,6 @@ def _housed_employees() -> set:
     return {h.employee for h in housed if h.employee}
 
 def _housed_temporary_workers(restrict, allowed) -> set:
-    """Temporary Workers holding a live bed inside the caller's estate.
-
-    Scoped to match ``_temporary_worker_matches``, which filters the candidates on their
-    own ``building`` field: a worker outside the estate is already absent from that list,
-    so widening this read would exclude rows that were never offered.
-    """
     filters = occupancy.active_assignment_filters(party_type="Temporary Worker")
     if restrict:
         filters["building"] = ["in", allowed]
@@ -275,11 +198,6 @@ def _housed_temporary_workers(restrict, allowed) -> set:
     return {h.party for h in housed if h.party}
 
 def _employee_matches(txt, excluded) -> list:
-    """Active Employees matching the typed text who are not already housed.
-
-    The exclusion is part of the QUERY, not a pass over its result: applied after the
-    15-row limit it emptied the list whenever the first fifteen matches happened to be
-    housed, and the desk was told there was nobody to house."""
     filters = {"status": "Active"}
     if excluded:
         filters["name"] = ["not in", sorted(excluded)]
@@ -304,17 +222,6 @@ def _employee_matches(txt, excluded) -> list:
     ]
 
 def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
-    """Active Temporary Workers matching the typed text (name, passport or id) who
-    are not already housed, most recently touched first.
-
-    Housed workers are excluded in the QUERY for the reason _employee_matches gives:
-    dropping them from an already-limited page returns fewer rows than the page holds,
-    and sometimes none at all.
-
-    Dates are rendered with ``frappe.utils.formatdate``, a backwards-compatibility
-    alias for ``format_date`` (frappe/utils/data.py:580); it applies the site's own
-    date format, which a hand-built string cannot, so the desk shows one format
-    everywhere the operator looks."""
     tw_filters = {"status": "Active"}
     if restrict:
         tw_filters["building"] = ["in", allowed]
@@ -350,14 +257,6 @@ def _temporary_worker_matches(txt, restrict, allowed, housed_tw) -> list:
 
 @frappe.whitelist()
 def search_arrivals_workers(building=None, txt=None) -> list:
-    """Combined worker lookup for the desk: registered Employees first, then active
-    Temporary Workers, each tagged with ``party_type`` so the page can house either.
-    Read-permission-gated per doctype (a user who cannot read a doctype gets none).
-
-    The two axes are read SEPARATELY because they are scoped differently. An Employee is
-    excluded when housed anywhere; a Temporary Worker is excluded when housed inside the
-    caller's estate, which is the only place their own list can reach.
-    """
     txt = (txt or "").strip()
     results = []
 
@@ -387,14 +286,6 @@ def register_temporary_worker(
     iqama_number=None,
     batch_row=None,
 ) -> dict:
-    """Register a passport-only new arrival as a Temporary Worker, returned pre-selected
-    for housing. A housing supervisor may create a Temporary Worker but NEVER an
-    Employee — the doctype is hard-coded and Employee creation is HRMS-gated.
-    The Temporary Worker controller enforces its own rules (unique passport, the
-    30/90-day window, expiry computation).
-
-    ``batch_row`` (optional) is an Arrival Batch Worker manifest line tapped on the
-    desk; on success its ``temporary_worker`` link is set so the manifest line ticks."""
     frappe.has_permission("Temporary Worker", "create", throw=True)
     doc = frappe.get_doc(
         {
@@ -419,9 +310,6 @@ def register_temporary_worker(
     }
 
 def _link_manifest_row(batch_row, temporary_worker) -> None:
-    """Tick a tapped Arrival Batch manifest line by linking it to the registered
-    Temporary Worker. Permission-gated on the parent Arrival Batch; best-effort
-    (a missing or already-linked row is a no-op, never blocks the registration)."""
     if not (batch_row and temporary_worker):
         return
     parent = frappe.db.get_value("Arrival Batch Worker", batch_row, "parent")
@@ -449,12 +337,6 @@ _MRZ_NATIONALITY = {
 }
 
 def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
-    """Convert an MRZ ``YYMMDD`` field to an ISO ``YYYY-MM-DD`` date, or None.
-
-    MRZ carries only a two-digit year. A birth date is always in the past; an
-    expiry is always in the future — so the century is inferred from that, not
-    guessed. Returns None on any non-numeric or out-of-range field rather than
-    raising (a bad scan must degrade to manual entry, never error)."""
     value = (value or "").strip()
     if len(value) != 6 or not value.isdigit():
         return None
@@ -472,15 +354,6 @@ def _mrz_yymmdd_to_date(value: str, is_expiry: bool) -> str | None:
         return None
 
 def parse_mrz_text(text: str) -> dict:
-    """Parse passport MRZ text into ``{worker_name, passport_number, nationality,
-    expiry_date}``. Pure + deterministic — the testable core of the feature.
-
-    Handles the TD3 passport format (two 44-char lines). Line 1 carries the issuing
-    country and the name (``SURNAME<<GIVEN<NAMES``); line 2 the passport number,
-    nationality, birth date, sex, and expiry. The scan is rarely perfect, so each
-    field is extracted defensively and missing/garbled fields come back as None —
-    the desk pre-fills what parsed and the supervisor confirms the rest. Returns
-    only the keys that parsed (plus ``raw_lines`` for debugging)."""
     lines = [
         re.sub(r"[^A-Z0-9<]", "", ln.strip().upper())
         for ln in (text or "").splitlines()
@@ -520,20 +393,6 @@ def parse_mrz_text(text: str) -> dict:
     return out
 
 def _ocr_image_to_text(image: str) -> str | None:
-    """Best-effort OCR of a base64 passport image to raw text, or None.
-
-    The OCR engine is OPTIONAL and operator-provided: this tries the engines that
-    might be installed on the bench (``pytesseract`` over Pillow) and returns None
-    when none is available — at which point ``parse_passport`` reports that the
-    OCR engine must be enabled, and the desk falls back to manual entry. Kept fully
-    defensive so a missing dependency degrades gracefully rather than 500-ing.
-
-    Not a circular import: ``pytesseract`` is not a project dependency and is absent
-    on a bench that has not installed the optional OCR engine. Moving this import to
-    module level would make importing ``arrivals_desk`` itself — and every endpoint
-    on it, OCR or not — raise ``ModuleNotFoundError`` on such a bench. It stays here
-    so only a call to this function needs the engine, and only when it is missing.
-    """
     payload = image.split(",", 1)[1] if image.startswith("data:") and "," in image else image
     try:
         raw = base64.b64decode(payload)
@@ -551,18 +410,6 @@ def _ocr_image_to_text(image: str) -> str | None:
 
 @frappe.whitelist(methods=["POST"])
 def parse_passport(image) -> dict:
-    """Read a passport's MRZ from a captured image and return autofill fields.
-
-    The Arrivals Desk camera-capture endpoint: feature-flagged by Habitat
-    Settings ``enable_passport_mrz_ocr`` (a disabled flag returns
-    ``ok=False, reason=disabled`` so the desk keeps manual entry). Permission-gated
-    on create of Temporary Worker — the same right needed to register the arrival
-    this autofills. Runs OCR on the supplied base64 image, then the deterministic
-    MRZ parser, and returns ``{worker_name, passport_number, nationality,
-    expiry_date}`` for the register form to pre-fill. Nothing is written and the
-    image is not persisted; the supervisor reviews and submits the form. When no
-    OCR engine is available it returns ``ok=False, reason=ocr_unavailable`` so the
-    desk degrades to manual entry rather than erroring."""
     frappe.has_permission("Temporary Worker", "create", throw=True)
     if not frappe.db.get_single_value("Habitat Settings", "enable_passport_mrz_ocr"):
         return {"ok": False, "reason": "disabled"}
@@ -585,18 +432,6 @@ def parse_passport(image) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def house_over_capacity(room, party_type, party, project, check_in_date=None) -> dict:
-    """House a worker beyond a full room's physical capacity by minting a TEMPORARY
-    (virtual, ``is_temporary``) Accommodation Bed in the room and assigning to it.
-
-    The building's over-capacity headroom is enforced by Accommodation
-    Assignment.validate (building-level projected occupancy vs ``total_capacity``
-    and ``over_capacity_allowed``). quick_check_in performs no intermediate commit,
-    so when that gate rejects the assignment the whole request — including the
-    just-minted bed — rolls back. ``total_capacity`` is a stored building field and
-    is NOT inflated by the temporary bed, so the cap is measured against true
-    capacity. Each worker still gets his own bed, so the assignment bed-lock and
-    occupancy controllers are untouched.
-    """
 
     frappe.has_permission("Bed", "create", throw=True)
     if not frappe.db.exists("Room", room):
@@ -624,8 +459,6 @@ def house_over_capacity(room, party_type, party, project, check_in_date=None) ->
     return {**result, "is_temporary": True, "bed_code": bed.bed_code}
 
 def _arrival_supplier(arrival, tw_supplier):
-    """Who supplied this arrival: a Temporary Worker's own labour supplier, or the
-    supplier an externally-billed Employee is charged to. Neither means direct hire."""
     if arrival.party_type == PARTY_TEMPORARY_WORKER:
         return tw_supplier.get(arrival.party)
     if arrival.is_external_supplier:
@@ -633,8 +466,6 @@ def _arrival_supplier(arrival, tw_supplier):
     return None
 
 def _supplier_breakdown(arrivals) -> list:
-    """Today's arrivals counted per supplier, biggest first, each named. Two bounded
-    lookups regardless of how many arrivals there are."""
     tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
     tw_supplier = {}
     if tw_parties:
@@ -672,20 +503,11 @@ def _supplier_breakdown(arrivals) -> list:
     )
 
 def _over_capacity_count(bed_ids) -> int:
-    """How many of today's placements went onto a virtual over-capacity bed.
-
-    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
-    rather than by the length of a fetched list, so a busy day does not pull every bed
-    row into memory to be counted. The one thing it cannot do is apply row scope,
-    which is safe here only because the bed ids were produced by an already-scoped
-    read — never call this with client-supplied ids.
-    """
     if not bed_ids:
         return 0
     return frappe.db.count("Bed", {"name": ["in", list(set(bed_ids))], "is_temporary": 1})
 
 def _empty_arrival_summary(date, building):
-    """The summary a scoped supervisor holding no building sees: zeroes, not the estate."""
     return {
         "date": date,
         "building": building,
@@ -697,12 +519,6 @@ def _empty_arrival_summary(date, building):
     }
 
 def _manifest_progress(date, building_filter, housed_count):
-    """``(expected, completion_pct)`` against the day's Arrival Batch manifests.
-    Both are None when no manifest DocType is installed; the percentage is None when
-    nothing was expected, since 0/0 is not 0%.
-
-    ``building_filter`` is a filter VALUE, not a building name: one building, or the
-    ``["in", [...]]`` the caller's building scope resolved to, or None for unscoped."""
     if not frappe.db.exists("DocType", "Arrival Batch"):
         return None, None
     batch_filters = {"expected_date": date}
@@ -717,21 +533,6 @@ def _manifest_progress(date, building_filter, housed_count):
 
 @frappe.whitelist()
 def get_arrival_summary(date=None, building=None) -> dict:
-    """Read-only arrival telemetry for a manager strip / daily ops view.
-
-    Returns, for ``date`` (default today) and an optional ``building`` scope:
-    today's housed count, a by-supplier breakdown, manifest-completion %, and the
-    over-capacity placement count. Built from a BOUNDED set of bulk queries (no
-    per-row round trips), mirroring get_building_grid. Creates and locks nothing.
-
-    ``building`` is OPTIONAL: when omitted, the scope comes from
-    ``permissions.report_building_scope`` and is spliced into the filter explicitly, the
-    same way dashboard.py does it, because ``frappe.get_all`` hardcodes
-    ``ignore_permissions=True`` (frappe/__init__.py:2050) and the registered
-    permission_query_conditions never runs here. Removing that splice would show a
-    building-scoped supervisor the whole estate's housed count, per-supplier split,
-    over-capacity placements and manifest expectation.
-    """
     frappe.has_permission("Housing Assignment", "read", throw=True)
     if building:
         frappe.has_permission("Building", "read", doc=building, throw=True)
@@ -776,7 +577,6 @@ def get_arrival_summary(date=None, building=None) -> dict:
     }
 
 def _empty_manifest(date, building=None):
-    """The manifest with nothing on it: no Arrival Batch DocType, or no building in scope."""
     return {
         "date": date,
         "building": building,
@@ -789,25 +589,6 @@ def _empty_manifest(date, building=None):
 
 @frappe.whitelist()
 def get_expected_arrivals(date=None, building=None) -> dict:
-    """Today's pre-arrival manifest (Arrival Batch) for the Intake zone.
-
-    Returns the expected workers for ``date`` (default today), optionally scoped to
-    one ``building``, each flagged ``arrived`` once its row has been matched to a
-    registered Temporary Worker (the batch row's ``temporary_worker`` link), and
-    ``housed`` once that worker has an active Housing Assignment. Includes running
-    registration and housing tallies. Read-only; bounded queries; the
-    Arrival Batch DocType may not exist yet (returns an empty manifest then).
-
-    ``building`` is OPTIONAL: when omitted, the scope is spliced into the filter
-    explicitly, exactly as ``get_arrival_summary`` above does it, because neither
-    registered scope primitive can reach this read. ``frappe.get_all`` hardcodes
-    ``ignore_permissions=True`` (frappe/__init__.py:2050), so the
-    ``permission_query_conditions`` fragment never runs, and the ``has_permission``
-    hook is dispatched only from ``get_doc_permissions`` (frappe/permissions.py:206),
-    which ``frappe.has_permission`` reaches only when it is given a doc — the
-    type-level gate below passes none. Skipping the splice would hand a
-    building-scoped supervisor every building's manifest for the date, each row
-    carrying the expected worker's name, passport number and nationality."""
     date = date or frappe.utils.today()
     if not frappe.db.exists("DocType", "Arrival Batch"):
         return _empty_manifest(date, building)
@@ -883,13 +664,6 @@ def get_expected_arrivals(date=None, building=None) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def get_arrival_slip(party_type, party) -> dict:
-    """Render the on-demand arrival slip (HTML) for a housed worker. Reuses the
-    party-aware get_arrival_card for identity + active housing, then renders the
-    slip template; the desk opens the HTML in a print window.
-
-    An Employee with an enabled Masar token gets his personal-link QR on the slip
-    plus his designation; a Temporary Worker gets his passport / Iqama / nationality
-    instead (and no QR — his Masar link issues only once he is registered)."""
     card = get_arrival_card(party_type=party_type, party=party)
     ctx = arrival_slips.slip_context(
         card.get("worker_name") or card.get("party"), party_type
@@ -933,11 +707,6 @@ def get_arrival_slip(party_type, party) -> dict:
 
 @frappe.whitelist()
 def get_checkin_slip(party_type, party) -> dict:
-    """Render the accommodation check-in acknowledgment slip (HTML) for a housed
-    worker: identity + bed + project + check-in date, the standard housing terms,
-    an acceptance line, and worker / supervisor signature lines. Reuses
-    get_arrival_card for identity and reads the building address/city for the
-    header. The desk opens the HTML in a print window."""
     card = get_arrival_card(party_type=party_type, party=party)
     building = card.get("current_building")
     if building:
@@ -967,9 +736,6 @@ def get_checkin_slip(party_type, party) -> dict:
     }
 
 def _custody_slip_items(doc):
-    """``(items, show_uom)`` for the handover table. Article names and UOMs come
-    from the master in ONE lookup; a line keeps its own captured name when the
-    master has none, and the UOM column is dropped when no line carries one."""
     article_ids = list({row.article for row in doc.items if row.article})
     masters = {}
     if article_ids:
@@ -994,10 +760,6 @@ def _custody_slip_items(doc):
 
 @frappe.whitelist()
 def get_custody_handover_slip(custody_issue) -> dict:
-    """Render the custody-handover acknowledgment slip (HTML) for a Custody Issue:
-    a line-item table (article, qty, UOM), an acknowledgment line, and worker /
-    supervisor signature lines. Permission-gated on read of the specific Custody
-    Issue. The desk opens the HTML in a print window."""
     frappe.has_permission("Custody Issue", "read", doc=custody_issue, throw=True)
     doc = frappe.get_doc("Custody Issue", custody_issue)
     if not doc.issued_to_employee:
@@ -1027,17 +789,6 @@ def get_custody_handover_slip(custody_issue) -> dict:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def buildings_with_capacity(doctype, txt, searchfield, start, page_len, filters):
-    """Link query for the Arrivals Desk building picker — only buildings that still
-    have at least one available (green) bed.
-
-    A standard Frappe Link query (the `get_query` contract) so the picker offers no
-    full building. Scope mirrors ``front_desk.list_supervisor_buildings``: an
-    unscoped oversight role sees every Active building, a building-scoped user only
-    their User-Permission buildings, a scoped user with none sees nothing. Free-bed
-    availability is computed from the same ``occupancy.bed_color`` rules as the board
-    (one bounded bed/room aggregate, not a per-building round trip), so a building is
-    offered only when its green-bed count is > 0.
-    """
     scope = active_building_scope(frappe.session.user)
     if scope.filters is None:
         return []

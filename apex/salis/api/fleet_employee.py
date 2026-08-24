@@ -1,30 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Fleet employee self-service API — backs the /fleet employee page.
-
-The fuel-request insert runs inside ``as_capacity(DRIVER)`` and no longer bypasses permissions:
-Fuel Request grants the Driver role ``create``, because raising one against his own vehicle is
-exactly the driver's job. The binding rule below is what keeps it to his own vehicle; the DocPerm
-is what makes the write legal.
-
-What remains wrong here is the identity, not the permission: ``_session_driver`` still reads
-``frappe.session.user`` rather than the capacity the portal token carries.
-
-Unlike the supervisor board (fleet_os) these endpoints are IDENTITY-SCOPED: every
-one resolves ``frappe.session.user`` to the caller's own Salis Driver and returns
-ONLY that person's vehicle / trips / fuel requests. The client never supplies a
-driver or vehicle id, so opening /fleet as an ordinary employee can never leak
-another user's data. A user who is not linked to a Salis Driver (a normal office
-employee with no fleet vehicle) gets a friendly EMPTY result, never a 403 — the
-page renders its empty state.
-
-The user -> Employee (user_id) -> Salis Driver (employee) resolution is the shared
-session-only helper, which never reads a portal bearer cookie. "My vehicle" is the
-driver's ``current_vehicle`` or, failing that, the vehicle on an Active Vehicle
-Assignment — the SAME binding rule fuel writes enforce, so a fuel request can only
-ever be raised against the caller's own vehicle. Fuel requests reuse the native
-Fuel Request DocType and its controller validation/workflow (created Pending,
-docstatus 0, for supervisor approval) — no new DocType is invented.
-"""
 
 import frappe
 from frappe import _
@@ -47,7 +21,6 @@ _VEHICLE_STATUS_KEY = {
 _REGISTRATION_TYPE = "Registration (Istimara)"
 
 def _session_driver(required=False):
-    """Resolve only the signed-in user's driver record."""
     driver = get_driver_for_session_user(frappe.session.user)
     if required and not driver:
         frappe.throw(_("Your account is not linked to a fleet representative."), frappe.PermissionError)
@@ -58,7 +31,6 @@ def _session_vehicle(driver):
 
 @frappe.whitelist()
 def get_context():
-    """Return the representative identity derived from the active Frappe session."""
     driver = _session_driver()
     if not driver:
         return {"state": "unlinked", "driver": None, "vehicle": None, "capabilities": {}}
@@ -89,11 +61,6 @@ def get_context():
     }
 
 def _registration_expiry(vehicle):
-    """The vehicle's registration (Istimara) expiry, else its next rolled-up expiry.
-
-    Prefers the explicit ``Registration (Istimara)`` compliance document (the true
-    registration date the employee cares about) and falls back to the vehicle's
-    ``next_expiry_date`` rollup. Returns an ISO date string or None."""
     reg = frappe.db.get_value(
         "Salis Vehicle Compliance",
         {"parent": vehicle, "parenttype": "Salis Vehicle", "compliance_type": _REGISTRATION_TYPE},
@@ -105,16 +72,6 @@ def _registration_expiry(vehicle):
 
 @frappe.whitelist()
 def get_my_vehicle():
-    """The vehicle currently assigned to the session user (read).
-
-    Identity-scoped: resolves the user to their Salis Driver, then returns the
-    bound vehicle (current_vehicle, else Active Vehicle Assignment). Returns
-    ``{"vehicle": None}`` — a clean empty state, never a 403 — when the user is
-    not a driver or has no vehicle bound. Read-only, no commit.
-
-    The payload is shaped for the employee page's "My vehicle" card: plate,
-    model (category label), office (project label), a status key mapped to the
-    page's status-pill vocabulary, odometer, and the registration expiry."""
     driver = get_driver_for_session_user(frappe.session.user)
     vehicle = bound_vehicle(driver) if driver else None
     if not vehicle:
@@ -143,10 +100,6 @@ def get_my_vehicle():
 
 @frappe.whitelist()
 def get_fuel_stations():
-    """The active Fuel Platforms to pick as the fuel-request station (read).
-
-    Replaces the page's hard-coded station list. Returns a list of platform names
-    (the Fuel Platform's autoname = its display name), active only. Read-only."""
     return frappe.get_list(
         "Fuel Platform",
         filters={"status": "Active"},
@@ -157,28 +110,6 @@ def get_fuel_stations():
 
 @frappe.whitelist(methods=["POST"])
 def submit_fuel_request(litres, vehicle=None, fuel_grade=None, station=None, notes=None):
-    """Raise a fuel request for the caller's OWN vehicle, pending approval (write).
-
-    Identity-scoped: the driver is resolved from the session, never client-supplied.
-    ``vehicle`` is optional and, when given, is honoured only after the binding check
-    (it must be the caller's bound vehicle) — so an employee can never charge fuel to
-    a vehicle that is not theirs by passing an arbitrary id; an unbound/omitted id
-    falls back to their bound vehicle.
-
-    Reuses the native Fuel Request DocType and its controller (Standard type,
-    created Pending / docstatus 0 for the Fuel Request Workflow's supervisor
-    approval) — no new DocType. ``litres`` -> requested_litres, ``station`` ->
-    fuel_platform. ``fuel_grade`` and ``notes`` have no dedicated Fuel Request
-    field, so they are preserved as a timeline note on the created request rather
-    than dropped. Returns ``{"name": ...}``.
-
-    The request carries the vehicle's Fuel Quota for its OWN request month, so the
-    controller's allowance gate is live on this door too: with ``fuel_quota`` empty
-    ``_guard_quota_allowance`` returns at its first line, and /fleet was drawing past
-    an allocation the desk and the driver portal are both held to. An oversized draw
-    is refused here, before insert, with the very message the desk raises. A vehicle
-    with NO quota that month still submits — the allocation is what creates the
-    ceiling, not this endpoint."""
     driver = get_driver_for_session_user(frappe.session.user)
     if not driver:
         frappe.throw(
@@ -242,13 +173,6 @@ _FUEL_STATUS_KEY = {
 
 @frappe.whitelist()
 def get_my_fuel_requests(days=90, limit=30):
-    """The session user's own fuel requests, newest first (read).
-
-    Identity-scoped exactly as its siblings are: the driver comes from
-    ``frappe.session.user``, never from a client-supplied id and never from a
-    portal cookie, so an employee sees only what they raised. Returns ``[]`` for a
-    user who is not a driver, so the page renders its empty state rather than a
-    permission error. Read-only, no commit."""
     driver = get_driver_for_session_user(frappe.session.user)
     if not driver:
         return []

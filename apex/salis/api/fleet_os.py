@@ -1,27 +1,4 @@
 # Copyright (c) 2026, Apex contributors
-"""Fleet OS supervisor dashboard API (read + live operations).
-
-Backs the ``/fleet-os`` www page, which is the fleet supervisor's single-screen
-dashboard. The page is a faithful copy of the supervisor's own design; this
-module replaces the design's embedded JSON with LIVE Salis data and routes its
-operations to the real DocTypes.
-
-This module is the endpoint surface: every whitelisted method the dashboard calls
-lives here under the dotted path its bundle already holds. The board READ — which
-fields make a vehicle, how a driver appears on a card, how an incident becomes a
-stolen flag — lives in :mod:`apex.salis.api.fleet_os_board`, so changing what the
-screen shows is one edit in one file.
-
-The `fleet-operations` feature calls this module. The fleet representative feature
-uses `apex.salis.api.fleet_employee` instead.
-
-Every endpoint is permission-gated on ``Salis Vehicle`` and project-scoped
-server-side through the SAME ``_permitted_projects`` resolver the dispatch
-board, fleet control board and the list-view ``permission_query_conditions``
-use, so the dashboard never shows (or mutates) a project a scoped supervisor
-could not already see. Writes reuse the existing controllers (Vehicle
-Assignment, Vehicle Suspension, Vehicle Incident) — no parallel logic.
-"""
 
 from __future__ import annotations
 
@@ -53,11 +30,6 @@ _STOP_REASON_MAP = {
 
 
 def _resolve_plate(plate: str, ptype: str = "write") -> str:
-    """Resolve a plate string from the dashboard to a Salis Vehicle name,
-    permission-checked. Matches plate_number, then plate_normalized, then name.
-    Raises if not found or not permitted. ``ptype`` is "write" for the action
-    endpoints (the default) and "read" for read-only ones (the timeline).
-    """
     if not plate:
         frappe.throw(_("Plate is required."))
     name = frappe.db.get_value("Salis Vehicle", {"plate_number": plate}, "name")
@@ -73,9 +45,6 @@ def _resolve_plate(plate: str, ptype: str = "write") -> str:
 
 
 def _resolve_driver_id(driver_id: str) -> str:
-    """Resolve the dashboard's EXTERNAL fleet identifier (Salis Driver.driver_id)
-    to a Salis Driver name, refusing anything that resolves to nothing.
-    """
     if not driver_id:
         frappe.throw(_("Driver is required."))
     driver = frappe.db.get_value("Salis Driver", {"driver_id": driver_id}, "name")
@@ -88,18 +57,6 @@ def _resolve_driver_id(driver_id: str) -> str:
 
 @frappe.whitelist()
 def get_fleet_os():
-    """Return the full fleet in the design's exact shape (a ``vehicles`` list).
-
-    Project scope is enforced server-side: a scoped user with no permitted
-    project gets an empty list. N+1-free (three bounded queries + the category
-    fuel lookup).
-
-    An empty result carries a typed ``reason`` so the page can tell the two apart:
-    ``scope_empty`` (the user is scoped to no project — an access gap) vs
-    ``data_empty`` (the permitted fleet is genuinely empty). A non-empty result
-    has ``reason: None``. Filtered-empty stays a client concern (the page knows
-    its own active filters).
-    """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     result = build_board()
     can_write = bool(frappe.has_permission("Salis Vehicle", "write"))
@@ -115,7 +72,6 @@ def get_fleet_os():
 
 
 def _queue_scope(project=None):
-    """Return a project filter that can only narrow the caller's User Permissions."""
     unscoped, projects = _permitted_projects()
     if project:
         if unscoped:
@@ -125,14 +81,6 @@ def _queue_scope(project=None):
 
 
 def _project_queue(doctype, fields, project=None, filters=None, order_by="modified desc", limit=100):
-    """One fleet-OS queue, confined to the projects this caller may see.
-
-    ``frappe.get_list`` (frappe/__init__.py:2008) applies row scope, and the explicit
-    ``has_permission(..., throw=True)`` above it is not redundant: ``get_list`` on a
-    doctype the caller cannot read returns an EMPTY list rather than refusing, and an
-    empty queue already means "nothing waiting". Without the throw the two are
-    indistinguishable on screen.
-    """
     frappe.has_permission(doctype, "read", throw=True)
     projects = _queue_scope(project)
     if projects == []:
@@ -161,14 +109,6 @@ def get_assignment_queue(project=None):
 
 
 def _handover_queue(direction, project=None):
-    """Vehicle handovers in one direction, confined to this caller's projects.
-
-    Scoped in TWO steps because a handover carries no project of its own: the
-    vehicles in scope are resolved first with ``frappe.get_list``
-    (frappe/__init__.py:2008), then the handovers are filtered to those vehicles. The
-    one thing a single scoped list cannot do is reach a project that lives one link
-    away from the row.
-    """
     projects = _queue_scope(project)
     if projects == []:
         return []
@@ -267,14 +207,6 @@ def get_pending_fuel_requests_for_overview(project=None):
 
 @frappe.whitelist()
 def get_vehicle_timeline(plate):
-    """Merged per-vehicle audit timeline for the /fleet-os panel Log tab.
-
-    One descending feed of the vehicle's assignments, stops, incidents and
-    Fleet Supervisor queue entries. Read-permission- and project-scope-gated through the SAME
-    ``_resolve_plate`` resolver the actions use (in read mode), and the
-    permlevel-1 PII gate blanks the driver id on assignment rows for a role
-    without it. N+1-free: one bounded ``get_all`` per source, merged in Python.
-    """
     vehicle = _resolve_plate(plate, ptype="read")
     show_pii = driver_pii_visible()
 
@@ -350,14 +282,6 @@ def get_vehicle_timeline(plate):
 
 @frappe.whitelist(methods=["POST"])
 def reassign(plate, driver_id, date=None):
-    """Assign a driver to a vehicle by creating a submitted Vehicle Assignment.
-
-    ``driver_id`` is the EXTERNAL fleet identifier (Salis Driver.driver_id), as
-    the dashboard carries it; ``_resolve_driver_id`` resolves it to the Salis
-    Driver name. The Vehicle Assignment controller handles the link side; we also
-    set the vehicle's current_driver and the driver's current_vehicle so the live
-    state matches immediately (the assignment alone does not mutate those).
-    """
     vehicle = _resolve_plate(plate)
     driver = _resolve_driver_id(driver_id)
     frappe.has_permission("Salis Driver", "write", doc=driver, throw=True)
@@ -369,13 +293,6 @@ def reassign(plate, driver_id, date=None):
 
 @frappe.whitelist(methods=["POST"])
 def stop_vehicle(plate, reason=None):
-    """Stop a vehicle and release its driver by submitting a Vehicle Suspension.
-
-    Vehicle Suspension.on_submit flips Salis Vehicle.status to "Stopped". The free-text
-    reason is mapped to the nearest no-evidence Select option (default "Other")
-    so the submit never trips the evidence gate. The current assignment is ended
-    and the driver link cleared to match the released state.
-    """
     vehicle = _resolve_plate(plate)
     lock_vehicle(vehicle)
     stop_reason = _STOP_REASON_MAP.get((reason or "").strip().lower(), "Other")
@@ -408,19 +325,6 @@ def stop_vehicle(plate, reason=None):
 
 @frappe.whitelist(methods=["POST"])
 def workshop_in(plate, expected_return=None, notes=None):
-    """Send a vehicle to the workshop via a submittable Maintenance Vehicle Suspension.
-
-    Mirrors stop_vehicle/report_theft/reassign: the workshop event is now an
-    audited submitted record, not a bare status flip. The Vehicle Suspension controller
-    (reason Maintenance) captures previous_status, writes the timeline note/comment
-    and flips the vehicle to "Stopped"; we then set "Under Maintenance" so the
-    board's workshop lane stays distinct from a plain stop (both states are the
-    open-workshop set in tasks._overstay_stops, so the overstay rule still fires).
-
-    The stop's return_date is the ACTUAL workshop-exit date (empty == still in the
-    workshop, the invariant _overstay_stops/release rely on), so an EXPECTED return
-    is recorded in the notes rather than pre-filling that field.
-    """
     vehicle = _resolve_plate(plate)
     lock_vehicle(vehicle)
 
@@ -446,14 +350,6 @@ def workshop_in(plate, expected_return=None, notes=None):
 
 @frappe.whitelist(methods=["POST"])
 def workshop_out(plate):
-    """Return a vehicle from the workshop by closing its open Maintenance stop.
-
-    Mirrors operations_control.release_vehicle: stamp the workshop-exit fields on
-    the open submitted Maintenance Vehicle Suspension and cancel it, so the cancel leaves
-    its own audit note. on_cancel only auto-restores when the vehicle still reads
-    "Stopped"; since workshop_in parks it at "Under Maintenance", we restore the
-    stop's captured previous_status here. Throws when there is no open workshop stop.
-    """
     vehicle = _resolve_plate(plate)
     lock_vehicle(vehicle)
 
@@ -476,13 +372,6 @@ def workshop_out(plate):
 
 
 def _close_open_suspension(vehicle):
-    """Close whatever submitted Vehicle Suspension still holds this vehicle.
-
-    Returning a vehicle to service is the act that ends its stop, so the stop record
-    has to end with it — otherwise the vehicle reads Active while a submitted
-    suspension stays open behind it, and the two never agree again. Uses the shared
-    ``close_open_stop``, which stamps the audit fields and cancels through the native
-    lifecycle rather than poking the vehicle a second time."""
     for r in frappe.get_all(
         "Vehicle Suspension",
         filters={"vehicle": vehicle, "docstatus": 1, "released_on": ["is", "not set"]},
@@ -493,14 +382,6 @@ def _close_open_suspension(vehicle):
 
 @frappe.whitelist(methods=["POST"])
 def recover(plate):
-    """Recover a stopped/stolen vehicle back to service.
-
-    When the vehicle has an open Theft Vehicle Incident on record, close it in the
-    same transaction and restore the state it captured at report time
-    (``previous_driver`` / ``previous_status``) — so a recovered vehicle is
-    not left with a Theft incident Open forever. With no theft on record (a plain
-    stop), recover simply returns the vehicle to Active.
-    """
     vehicle = _resolve_plate(plate)
 
     incident = frappe.db.get_value(

@@ -1,10 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A Workflow Action left pointing at a DocType that no longer exists can never
-become actionable again — there is no document left to re-check its state
-against. ``_drop_stale`` must delete that row outright, not merely exclude it
-from the page while it stays Open in the database forever.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase

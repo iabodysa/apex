@@ -7,7 +7,6 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
-    """Returns submitted utility bills ranked by variance from average, with amount summary cards."""
     columns = [
         {"label": frappe._("Bill"), "fieldname": "name", "fieldtype": "Link", "options": "Utility Bill Entry", "width": 150},
         {"label": frappe._("Utility Account"), "fieldname": "utility_account", "fieldtype": "Link", "options": "Utility Account", "width": 150},
@@ -70,7 +69,6 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Bar chart of the highest absolute variance-from-average bills."""
     if not data:
         return None
     ranked = sorted(data, key=lambda r: abs(flt(r.get("variance_from_avg_pct"))), reverse=True)[:10]

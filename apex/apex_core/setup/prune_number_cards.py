@@ -1,20 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Remove a Number Card row whose shipped file is gone.
-
-``sync_all`` upserts a standard record from its file and never prunes one whose file has
-been deleted (frappe/model/sync.py:125-140), so a Number Card removed from
-``apex/**/number_card`` still sits in ``tabNumber Card`` on every site that migrated
-before the deletion, and still answers a dashboard or workspace that links it by name.
-
-Only rows this app shipped are swept: ``is_standard=1`` restricts to file-synced records
-and ``module`` scopes to Apex's own modules, so a card an operator built by hand in the
-desk carries no shipped directory and is never touched. The shipped set is read off disk
-rather than listed here, so this stays correct as cards come and go.
-
-This runs on every migrate rather than once as a patch, because migrate is what creates
-the drift: each deletion of a card file leaves its row behind again, and a patch that
-already executed never fires for the next one.
-"""
 
 import json
 import pathlib
@@ -25,7 +9,6 @@ APEX_MODULES = ["Habitat", "Salis", "Apex Core", "Logistay"]
 
 
 def prune_orphaned_number_cards():
-    """Delete standard Number Card rows in Apex's modules whose shipped file is gone."""
     app_root = pathlib.Path(frappe.get_app_path("apex"))
 
     shipped = set()

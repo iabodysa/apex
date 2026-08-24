@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Worker and driver device opt-in endpoints for background notifications.
-
-The save runs inside ``as_capacity(audience, subject)``: ``resolve_portal_subject`` maps the
-bearer token to a worker or driver first (the authentication), then the capacity role's own
-create/write DocPerm plus ``portal_identity.portal_push_subscription_has_permission`` authorise
-writing that subject's own device registration — never another holder's.
-"""
 
 import frappe
 from frappe import _
@@ -102,12 +95,6 @@ def save_subscription(
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def delete_subscription(entry: str, endpoint: str) -> dict:
-    """Disable one device subscription under the same capacity grant ``save_subscription`` uses.
-
-    ``as_capacity(audience, subject)`` plus ``portal_push_subscription_has_permission`` already
-    authorise this row for its own holder (see the module docstring); there is no need to bypass
-    that with ``frappe.db.set_value`` when ``doc.save()`` reaches the same grant.
-    """
     audience, subject = _resolve_identity(entry)
     endpoint = _clean(endpoint, 2048, _("Notification endpoint"))
     row = frappe.db.get_value(

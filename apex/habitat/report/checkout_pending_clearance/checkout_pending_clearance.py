@@ -1,21 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Checkout Pending Clearance — Script Report.
-
-Row scope. Every query below is ``frappe.get_all``, which forces the
-ignore-permissions path, so the ``Housing Checkout`` row boundary registered in
-``hooks.permission_query_conditions`` never reaches this SQL — a Script Report inherits
-nothing from it. ``Resident Supervisor`` is in the report's audience and is NOT in
-``habitat.permissions.HOUSING_UNSCOPED_ROLES``, so the scope has to be re-applied here in
-Python or that role reads every estate.
-
-Two boundaries, deliberately separate. ``readable`` is the permission boundary and gates
-the joined custody rows; ``listed`` is ``readable`` narrowed by the user's own building
-filter and gates the checkout list. Keeping them apart means an oversight role picking a
-building still gets that employee's full custody counts, while a scoped supervisor's
-counts and damage-assessment names stay confined to buildings they hold — the count and
-the name were the actual disclosure, not just the checkout row.
-"""
 
 import frappe
 from frappe import _
@@ -26,7 +10,6 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for checkouts with unresolved custody clearance."""
     filters = filters or {}
 
     columns = [

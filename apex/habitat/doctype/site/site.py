@@ -5,5 +5,4 @@ from frappe.model.document import Document
 
 class Site(Document):
     def onload(self):
-        """Loads the site's linked addresses and contacts into the document on open."""
         load_address_and_contact(self)

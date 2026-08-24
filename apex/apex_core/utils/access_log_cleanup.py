@@ -1,37 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Size-based cleanup for oversized Frappe ``Access Log`` payload rows.
-
-Why this is not covered by the native primitive
------------------------------------------------
-Frappe already ships the retention primitive for this table: ``Log Settings``
-plus ``AccessLog.clear_old_logs(days)``, driven nightly by ``run_log_clean_up``.
-That primitive is purely AGE-based - it deletes whatever is older than the
-configured window and nothing else, so it cannot see a row's size.
-
-``Access Log`` stores the *body* of what was exported, not just a reference to
-it: ``frappe.utils.print_format`` writes the whole rendered print/PDF HTML into
-``page``, and ``frappe.desk.reportview`` writes the full export ``columns`` and
-``filters`` blobs. One bulk print therefore leaves a multi-megabyte row that is
-comfortably inside the retention window, so age-based clearing keeps it for the
-full window. This module adds the missing SIZE axis and nothing else: it removes
-only rows whose payload columns exceed a configured byte threshold, and leaves
-every normally sized audit row alone regardless of age.
-
-Configuration (site_config.json, all optional - defaults below apply when the
-key is absent or not a positive integer):
-
-* ``apex_access_log_max_payload_bytes`` - a row is oversized when
-  ``page`` + ``columns`` + ``filters`` exceed this many bytes. Default 1000000
-  (1 MB); a normal Access Log row is a few hundred bytes, so only pathological
-  print/export rows qualify. Raise it to effectively disable the purge.
-* ``apex_access_log_purge_batch_size`` - rows deleted per statement. Default 500.
-* ``apex_access_log_purge_max_batches`` - batches per run, bounding one night's
-  work to ``batch_size * max_batches`` rows. Default 20 (10000 rows).
-
-Transaction model: this job never calls ``frappe.db.commit()``. The whole run is
-one transaction that the background-job wrapper commits on success, so a failure
-mid-run rolls the entire purge back rather than leaving it half applied.
-"""
 
 from __future__ import annotations
 
@@ -73,14 +40,11 @@ SCAN_SQL = f"""
 
 
 def _setting(key: str) -> int:
-    """Read a positive integer knob from site config, else its documented default."""
     value = cint((frappe.conf or {}).get(key))
     return value if value > 0 else DEFAULTS[key]
 
 
 def _sanitized_record(row: dict) -> dict:
-    """Project one scan row onto the audit allowlist, so no payload body can leak
-    into a return value or a log line even if the scan query later widens."""
     record = {"name": row.get("name")}
     for key in _SIZE_FIELDS:
         record[key] = cint(row.get(key))
@@ -88,24 +52,11 @@ def _sanitized_record(row: dict) -> dict:
 
 
 def _scan(threshold: int, limit: int) -> list[dict]:
-    """Returns sanitized Access Log rows whose payload exceeds the byte threshold, largest first.
-
-    Raw SQL rather than ``frappe.get_all`` (frappe/__init__.py:1996): the selection
-    is by the BYTE LENGTH of a
-    column, which the query builder has no expression for, and the ordering is on that
-    same computed size. Both parameters are bound, never interpolated.
-    """
     rows = frappe.db.sql(SCAN_SQL, {"threshold": threshold, "limit": limit}, as_dict=True)
     return [_sanitized_record(row) for row in rows or []]
 
 
 def purge_oversized_access_logs(dry_run: bool = False) -> dict:
-    """Delete ``Access Log`` rows whose payload exceeds the configured byte
-    threshold, in bounded batches. Registered as a nightly 23:00 cron job.
-
-    With ``dry_run=True`` nothing is deleted and the caller gets one page of
-    candidates as record names, per-field byte sizes and counts.
-    """
     threshold = _setting("apex_access_log_max_payload_bytes")
     batch_size = _setting("apex_access_log_purge_batch_size")
     result = {"threshold_bytes": threshold, "batch_size": batch_size, "dry_run": bool(dry_run)}

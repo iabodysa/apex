@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled Task Assignment controller."""
 
 from __future__ import annotations
 

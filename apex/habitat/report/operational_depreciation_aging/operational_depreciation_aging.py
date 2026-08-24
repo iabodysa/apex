@@ -13,12 +13,6 @@ DATA_ERROR = "data_error"
 
 
 def status_label(state):
-    """The display text for a state, translated per request.
-
-    Written as literals inside ``frappe._()`` rather than a table of bare strings: the
-    translation scanner reads the source, so a string reached only through a variable is
-    invisible to it and its Arabic row goes stale and is pruned.
-    """
     if state == HEALTHY:
         return frappe._("Healthy")
     if state == FULLY_DEPRECIATED:
@@ -29,22 +23,12 @@ def status_label(state):
 
 
 def depreciation_pct(original_cost, book_value):
-    """How much of an article's cost has been written off, capped at 100 percent.
-
-    Pure arithmetic, so the rule can be exercised without a bench.
-    """
     if not original_cost:
         return 0.0
     return min((original_cost - book_value) / original_cost * 100, 100.0)
 
 
 def health_state(original_cost, book_value):
-    """The article's depreciation state as a STABLE key, never as display text.
-
-    Counting rows by comparing against the translated label instead would make the
-    count depend on the language the row was built in. The key is the fact; the
-    label is a rendering of it.
-    """
     if not original_cost and book_value:
         return DATA_ERROR
     if book_value > 0:
@@ -55,11 +39,6 @@ def health_state(original_cost, book_value):
 
 
 def get_columns():
-    """The register's column set.
-
-    A function, not a module constant: every label goes through ``frappe._()``, and a
-    constant would freeze them in whatever language first imported this module.
-    """
     return [
         {
             "label": frappe._("Snapshot"),
@@ -131,7 +110,6 @@ def get_columns():
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the operational depreciation aging register."""
     columns = get_columns()
 
     parent_filters = {"docstatus": 1}
@@ -219,7 +197,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Returns summary cards for asset count, original cost, book value, and fully-depreciated count."""
     return [
         count_card(frappe._("Assets"), data),
         total_card(frappe._("Original Cost"), data, "original_cost", "Currency"),

@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Material Transfer's own no-items / same-building / non-positive
--qty refusals.
-
-Patterned on test_lease.py. ``validate`` is called directly against an
-unsaved ``frappe.new_doc("Material Transfer")``; no item row carries an
-``item_type``/``item`` pair, so ``resolve_item``'s DB read is never reached
-and nothing is inserted.
-"""
 
 from __future__ import annotations
 

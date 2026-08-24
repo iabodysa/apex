@@ -1,25 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Facility asset movement ledger engine.
-
-Records each facility-asset relocation as an immutable Facility Asset Movement
-Ledger row, mirroring the Habitat no-GL system-written ledger pattern
-(``accommodation_ledger``) and the idempotent reverse-not-delete idiom in
-``salis.fuel_engine``.
-
-Both writes pass ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
-subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
-``in_create``, which removes the New button but refuses nothing on the server
-(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: no role holds create or
-write on the ledger. So this bypass is the only path by which a row can exist, and it is the
-control rather than a hole in one.
-
-The Facility Asset Movement controller already updates the asset's location
-in place (``building``/``location_in_building``) on submit, which leaves no
-history. This engine is additive: it posts one ledger row per submitted
-movement capturing from->to, so the relocation history is queryable, and posts
-a negated reversal row on cancel instead of editing or deleting the original.
-"""
 
 from __future__ import annotations
 
@@ -32,18 +12,6 @@ LEDGER_DOCTYPE = "Facility Asset Movement Ledger"
 
 
 def ensure_asset_still_at(facility_asset: str, **expected) -> None:
-    """Refuse to cancel a relocation record the asset has already moved on from.
-
-    A Facility Asset carries ONE mutable location, so restoring a cancelled
-    record's origin while a LATER relocation is still submitted would silently
-    discard that later move and leave the asset contradicting its own ledger. The
-    honest remedy is last-in-first-out: cancel the newest relocation first.
-
-    ``expected`` maps Facility Asset location fieldnames to the values this record
-    wrote when it moved the asset; only the fields passed are compared, because
-    the delivery path leaves the room untouched when it carries no destination
-    room of its own.
-    """
     fields = list(dict.fromkeys(["building", *expected]))
     current = frappe.db.get_value("Facility Asset", facility_asset, fields, as_dict=True)
     if not current:
@@ -59,14 +27,6 @@ def ensure_asset_still_at(facility_asset: str, **expected) -> None:
 
 
 def ledgered_origin(source_doctype: str, source_name: str):
-    """Where this source took the asset FROM, as it ledgered the move — or None if
-    it never posted a row.
-
-    A Facility Asset Delivery has no origin-room field of its own (only
-    ``to_location_in_building``), so its ledger row is the one place the room the
-    asset actually left survives. Cancel reads it back to return the asset to that
-    room instead of leaving it parked in the destination's.
-    """
     rows = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={
@@ -81,9 +41,6 @@ def ledgered_origin(source_doctype: str, source_name: str):
 
 
 def _latest_surviving_movement(facility_asset: str):
-    """The newest original ledger row for the asset that no reversal points at —
-    i.e. the asset's most recent move that still stands. None once every move it
-    ever made has been cancelled."""
     reversed_originals = set(
         frappe.get_all(
             LEDGER_DOCTYPE,
@@ -104,22 +61,6 @@ def _latest_surviving_movement(facility_asset: str):
 
 
 def restore_asset_audit_trail(facility_asset: str) -> None:
-    """Re-derive the asset's movement audit trail from the history a cancel left
-    standing.
-
-    ``previous_building``, ``previous_location_in_building`` and
-    ``last_movement_date`` are snapshots taken on SUBMIT. A cancel that restores
-    the location but leaves those three behind has the asset citing a movement
-    that no longer exists: reverting the only move on a fresh asset would read "at
-    A, prior location also A", still stamped with the cancelled move's date.
-
-    The ledger is the movement history, so the honest values are the newest
-    surviving row's origin and posting date — or blank when the cancel undid the
-    asset's only move, which is exactly what a never-moved asset reads.
-
-    Call AFTER ``reverse_asset_movement``, so the row being cancelled is already
-    excluded from the history.
-    """
     latest = _latest_surviving_movement(facility_asset)
     frappe.db.set_value(
         "Facility Asset",
@@ -133,13 +74,6 @@ def restore_asset_audit_trail(facility_asset: str) -> None:
 
 
 def post_asset_movement(doc) -> None:
-    """Post the immutable from->to ledger row for a submitted Facility Asset
-    Movement. ``moved_by`` on the source is an Employee link; the ledger records
-    the acting User instead, so map it to the current session user.
-
-    Idempotent on ``(source_doctype, source_name)`` for original rows: a source
-    already ledgered is skipped, so a re-submit cannot double-post.
-    """
     if frappe.db.exists(
         LEDGER_DOCTYPE,
         {
@@ -167,17 +101,6 @@ def post_asset_movement(doc) -> None:
 
 
 def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
-    """Reverse the ledgered movement for a cancelled Facility Asset Movement.
-
-    Posts a mirror row for each original ledger row of that source with from/to
-    swapped and ``is_cancelled`` set, linked back via ``reversal_of`` — the
-    Accommodation Ledger / fuel-engine reversal idiom (negate, don't delete). The
-    original row is preserved for audit.
-
-    Idempotent: an original that already has a reversal pointing at it is skipped,
-    so calling it twice posts at most one reversal per original. Returns the
-    number of reversal rows posted.
-    """
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={

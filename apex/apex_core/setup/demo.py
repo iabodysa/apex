@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Setup-wizard demo data — one coherent accommodation scenario, and its removal.
-
-The writes and the delete pass ``ignore_permissions`` because this is installer context: the
-wizard runs as Administrator on a site that has no operator yet, and the demo user it creates
-does not exist until this module creates it. A DocPerm that made these legal would stay live for
-every real operator afterwards.
-
-The scenario is built by a DEDICATED DEMO USER, so ``owner`` is the removal key:
-every row the build creates is selected back by that one column and nothing else.
-No name pattern, no date window, no "everything in this DocType".
-"""
 
 from __future__ import annotations
 
@@ -168,40 +157,15 @@ _DEMO_RENTAL_OFFICE = "Al Yamamah Rental Office"
 _DEMO_ROOMS = ("101", "102")
 
 def setup_demo(args=None):
-    """`setup_wizard_complete` hook — queue the demo build if the operator asked.
-
-    Separate from erpnext's own demo (erpnext/setup/demo.py:37), which seeds erpnext
-    transactions and cannot create a Building, a Housing Assignment or a Dispatch Trip.
-    Both may run on one site; neither clears the other's rows.
-    """
     args = frappe._dict(args or {})
     if not args.get(DEMO_ARG):
         return
     frappe.enqueue(build_demo_data, enqueue_after_commit=True, at_front=True)
 
 def boot_demo(bootinfo):
-    """`extend_bootinfo` hook — flag whether this site carries removable demo data.
-
-    Derived from the demo user rather than stored anywhere: the user IS the
-    removal key, so the flag cannot drift from what the removal can act on. The
-    build creates that user and the removal deletes it, which sets and clears the
-    flag with no third place to keep in step."""
     bootinfo.apex_demo_data = bool(frappe.db.exists("User", DEMO_OWNER))
 
 def build_demo_data():
-    """Build the demo scenario as the demo user. Background job — never inline.
-
-    Returns ``{"built": bool, "stopped_at": str | None}``. The verdict exists because a
-    step failure rolls the whole scenario back and reports to the operator out of band, so
-    without it a caller cannot tell a full scenario from an empty one — every outcome looked
-    like ``None`` and a build that produced nothing read as one that succeeded.
-
-    ``frappe.set_user`` (frappe/__init__.py:641) makes every record's ``owner`` the
-    demo user, which is what the removal keys on — the one thing a background job
-    cannot do is remember who asked for it, so ownership IS the marker. The bootinfo
-    cache is dropped with ``frappe.cache.delete_keys`` (frappe/utils/redis_wrapper.py)
-    so the "remove demo data" control appears without a re-login.
-    """
     if frappe.db.exists("User", DEMO_OWNER):
         return {"built": False, "stopped_at": "already built"}
 
@@ -235,18 +199,6 @@ def build_demo_data():
     return {"built": True, "stopped_at": None}
 
 def _report_build_failure(operator, doctype, traceback):
-    """Names the step that failed to the operator who ticked the demo box.
-
-    The wizard reports success the moment its stages finish, while this job is still
-    queued, so a raw exception here surfaces only in a worker log the operator never
-    opens. Roll the half-built scenario back, keep the traceback in the Error Log, and
-    say which step stopped.
-
-    ``frappe.db.rollback`` (frappe/database/database.py:1186) unwinds the whole job
-    rather than a savepoint: a half-built scenario is not a smaller demo, it is an
-    inconsistent one. ``frappe.publish_realtime`` (frappe/realtime.py:23) is what
-    reaches the operator — the one thing the Error Log cannot do is tell someone who
-    has already left the wizard that their build stopped."""
     frappe.db.rollback()
     frappe.log_error(title="Apex demo build", message=traceback or doctype)
     frappe.publish_realtime(
@@ -258,19 +210,6 @@ def _report_build_failure(operator, doctype, traceback):
     )
 
 def _break_settlement_payment_cycle():
-    """Clears the demo Rental Settlement's ``payment_request`` link before the removal walks the table.
-
-    ``_build_rental_settlement`` raises the demo Salis Payment Request through
-    ``RentalSettlement.create_payment_request()``, which stamps a link BOTH ways: the
-    settlement's ``payment_request`` points at the request, and the request's
-    ``reference_doctype``/``reference_name`` (Dynamic Link) points back at the
-    settlement. Frappe's own link-existence check then refuses either side first —
-    each cites the other as the still-standing reference — so no processing order of
-    ``DEMO_DOCTYPES`` can ever clear the pair. ``frappe.db.set_value`` breaks the
-    settlement's half of the cycle directly (the field is read-only, so the ORM write
-    path would refuse it), after which the reversed sweep below deletes the request,
-    then the settlement, in the normal order.
-    """
     for name in frappe.get_all(
         "Rental Settlement",
         filters={"owner": ["in", list(DEMO_USERS)], "payment_request": ["is", "set"]},
@@ -279,17 +218,6 @@ def _break_settlement_payment_cycle():
         frappe.db.set_value("Rental Settlement", name, "payment_request", None, update_modified=False)
 
 def _remove_worker_tokens_for_demo_drivers(deleted, residue):
-    """Deletes any Masar Worker Token issued for a demo driver, before Salis Driver is swept.
-
-    ``issue_driver_link`` (``masar_worker_token.py``) is the whitelisted API a Fleet
-    persona calls from the portal to hand a driver their access link; it stamps the
-    token's ``owner`` as whoever called it, never the demo user, and the token is not a
-    demo DocType (``DEMO_DOCTYPES`` never lists it). A demo driver left Active is a
-    normal target for that call — this site carried one such token from outside the
-    build, and it blocked the driver's removal exactly as the settlement/payment cycle
-    above blocks each other. Found by the ``driver`` link rather than by ownership,
-    since ownership is exactly the column that does not identify it.
-    """
     drivers = frappe.get_all(
         "Salis Driver", filters={"owner": ["in", list(DEMO_USERS)]}, pluck="name"
     )
@@ -307,14 +235,6 @@ def _remove_worker_tokens_for_demo_drivers(deleted, residue):
 
 @frappe.whitelist()
 def clear_demo_data():
-    """Remove every row the demo build created, and nothing else.
-
-    Returns ``{"deleted": int, "residue": [...]}``. Residue is reported, never
-    hidden: a row that refuses to go leaves the rest of the clear standing.
-
-    Clears only what this app's demo built. erpnext's ``clear_demo_data``
-    (erpnext/setup/demo.py:37) owns its own rows and is not called from here.
-    """
     frappe.only_for("System Manager")
     if not frappe.db.exists("User", DEMO_OWNER):
         frappe.throw(_("This site has no Apex demo data to remove."))
@@ -343,17 +263,6 @@ def clear_demo_data():
     return {"deleted": deleted, "residue": residue}
 
 def _remove_one(doctype, name):
-    """Cancel-then-delete one record inside its own savepoint.
-
-    Returns None on success, or the error text of a record that survived.
-
-    ``frappe.db.savepoint`` (frappe/database/database.py:1203) isolates each record:
-    the one thing ``frappe.delete_doc`` (frappe/model/delete_doc.py:23) cannot do is
-    fail cleanly — a link that refuses leaves the cancel already written, and without
-    the point the next record inherits it. ``frappe.clear_last_message`` drops the
-    framework's own throw text so a survivable refusal is reported in the residue
-    list rather than raised at whoever pressed the button.
-    """
     save_point = "".join(random.sample(string.ascii_lowercase, 10))
     frappe.db.savepoint(save_point)
     try:
@@ -373,17 +282,6 @@ def _remove_one(doctype, name):
     return None
 
 def _release(save_point, undo=False):
-    """Discard a savepoint, tolerating one that is already gone.
-
-    MariaDB drops every savepoint when anything in the transaction commits, and a
-    delete path may commit for its own reasons. Letting that surface would abort
-    the whole clear from inside the very handler meant to contain one bad record.
-
-    ``frappe.db.release_savepoint`` and ``rollback``
-    (frappe/database/database.py:1186) both accept the point; the one thing neither
-    can do is tell a missing point from a failed release, so the absence is tolerated
-    here rather than distinguished. ``frappe.clear_last_message`` drops the framework
-    throw text that would otherwise reach the operator twice."""
     try:
         if undo:
             frappe.db.rollback(save_point=save_point)
@@ -393,7 +291,6 @@ def _release(save_point, undo=False):
         frappe.clear_last_message()
 
 def _remove_user_permissions(deleted, residue):
-    """Drop the demo users' User Permissions before the records they point at."""
     for permission in frappe.get_all(
         "User Permission", filters={"user": ["in", list(DEMO_USERS)]}, pluck="name"
     ):
@@ -407,17 +304,6 @@ def _remove_user_permissions(deleted, residue):
     return deleted, residue
 
 def _remove_demo_users(deleted, residue):
-    """Delete the demo users, last of all.
-
-    Skipped entirely while any record survives: the demo user IS the removal key,
-    so dropping it on top of residue would leave the site holding demo data that
-    nothing can select any more. Keeping the user keeps the boot flag set and the
-    action re-runnable once the blocker is cleared.
-
-    ``frappe.db.commit`` (frappe/database/database.py:1173) lands the removal before
-    the users go: the demo user is the key every other row is found by, so the one
-    thing that must not happen is losing the key while rows remain.
-    """
     if residue:
         return deleted, residue
 
@@ -448,7 +334,6 @@ def _remove_demo_users(deleted, residue):
     return deleted, residue
 
 def _report(deleted, residue):
-    """Shows a success message when nothing is left, or lists residue rows on partial removal."""
     if not residue:
         frappe.msgprint(
             _("Removed {0} demo records.").format(deleted),
@@ -471,16 +356,6 @@ def _report(deleted, residue):
     )
 
 def _create_demo_users():
-    """The owner key and the scoped persona. Created as the installing user, so
-    they are never swept by the owner filter and are deleted explicitly instead.
-
-    Runs before ``build_demo_data`` switches to ``DEMO_OWNER`` below, so the acting
-    user is still whoever completed the setup wizard's demo checkbox — the only
-    account that could have, since ``setup_demo`` fires from ``setup_wizard_complete``,
-    gated behind ``frappe.is_setup_complete()``
-    (frappe/desk/page/setup_wizard/setup_wizard.py:54-55) — Administrator, who already
-    carries every permission (frappe/permissions.py:107,273,506).
-    """
     for email, full_name, roles in (
         (DEMO_OWNER, "Fahad Al-Dosari", ("System Manager",)),
         (DEMO_SUPERVISOR, "Turki Al-Zahrani", ("Resident Supervisor",)),
@@ -505,7 +380,6 @@ def _create_demo_users():
             user.add_roles(*installed)
 
 def _create(doctype, payload):
-    """Insert one demo record, refusing any DocType the removal would not reach."""
     if doctype not in set(DEMO_DOCTYPES):
         frappe.throw(
             _("{0} is not a demo DocType; the demo removal would never clear it.").format(
@@ -517,16 +391,6 @@ def _create(doctype, payload):
     return doc
 
 def _walk_workflow(doctype, name, actions, user=DEMO_APPROVER):
-    """Applies a sequence of workflow actions to a document while impersonating ``user``
-    (the demo approver by default, so every existing call site is unaffected).
-
-    ``frappe.set_user`` (frappe/__init__.py:641) does the switch and the restore is in
-    a ``finally``: the one thing ``set_user`` cannot do is put the session back, and a
-    background worker is reused, so a session left elevated carries into whatever runs
-    next. ``apply_workflow`` (frappe/model/workflow.py) is the transition itself — the
-    states are never written directly, so the demo exercises the same gate an operator
-    would.
-    """
     previous_user = frappe.session.user
     frappe.set_user(user)
     try:
@@ -537,14 +401,6 @@ def _walk_workflow(doctype, name, actions, user=DEMO_APPROVER):
         frappe.set_user(previous_user)
 
 def _build_partner_company(context):
-    """Creates the demo partner Company, reusing the real company's currency and country.
-
-    The fallback is the SITE's own default, never a pinned code: a demo built on a site
-    whose company trades in another currency would otherwise show every seeded figure in
-    one this operator does not use. The chain is ``resolve_company_or_any``, which ends
-    at ``frappe.defaults.get_global_default`` (frappe/defaults.py) — the one thing a
-    literal currency cannot do is follow the site it lands on.
-    """
     context["company"] = resolve_company_or_any()
     currency = (
         frappe.db.get_value("Company", context["company"], "default_currency")
@@ -569,7 +425,6 @@ def _build_partner_company(context):
     context["currency"] = currency
 
 def _build_supplier(context):
-    """Creates the demo accommodation Supplier record."""
     group = frappe.db.get_value(
         "Supplier Group", {"name": "All Supplier Groups"}
     ) or frappe.db.get_value("Supplier Group", {})
@@ -579,7 +434,6 @@ def _build_supplier(context):
     context["supplier"] = _create("Supplier", payload).name
 
 def _build_project(context):
-    """Creates the demo active Project and a demo completed Project."""
     context["project"] = _create(
         "Project", {"project_name": _DEMO_PROJECT, "company": context["company"]}
     ).name
@@ -593,13 +447,11 @@ def _build_project(context):
     ).name
 
 def _build_site(context):
-    """Creates the demo housing Site."""
     context["site"] = _create(
         "Site", {"site_name": _DEMO_SITE, "status": "Active"}
     ).name
 
 def _build_building(context):
-    """Creates the demo building and its partner-company counterpart building."""
     company = context["company"]
     payload = {
         "building_name": _DEMO_BUILDING,
@@ -635,7 +487,6 @@ def _build_building(context):
     context["partner_building"] = _create("Building", partner_payload).name
 
 def _build_rooms(context):
-    """Creates the two demo rooms inside the demo building."""
     context["rooms"] = [
         _create(
             "Room",
@@ -653,7 +504,6 @@ def _build_rooms(context):
     ]
 
 def _build_beds(context):
-    """Creates two demo beds for each demo room."""
     context["beds"] = [
         _create(
             "Bed",
@@ -669,21 +519,6 @@ def _build_beds(context):
     ]
 
 def _demo_gender():
-    """Returns a Gender that exists on THIS site, creating one only if none ever arrives.
-
-    Employee.gender is mandatory and is a Link, so a hardcoded "Male" fails outright on a
-    site whose Gender records are not there yet — the LinkValidationError measured on a bare
-    site. They are not there yet because Frappe installs its Gender fixtures only after every
-    setup stage has run, while this build is queued from a stage; writing our own row in that
-    window deadlocks against the fixture's insert on tabgender. So wait for the framework's
-    rows first and write one only if the wait runs out. Rolling back between reads is what
-    lets this connection see the other transaction's commit — and is why this is resolved
-    before the build starts rather than at the Employee step, where the same rollback threw
-    away every row already built and left the next link pointing at nothing.
-
-    ``frappe.db.rollback`` (frappe/database/database.py:1186) between reads is not
-    cleanup here — it is the only way this connection sees the fixture transaction's
-    commit, which is the one thing a long-running read cannot do on its own."""
     deadline = time.monotonic() + _GENDER_WAIT_SECONDS
     while True:
         existing = frappe.db.get_value("Gender", {"name": "Male"}) or frappe.db.get_value(
@@ -700,7 +535,6 @@ def _demo_gender():
     return doc.name
 
 def _build_employee(context):
-    """Creates the demo resident, supplier-worker, and leaver Employee records."""
     gender = context["gender"]
     context["employees"] = [
         _create(
@@ -719,20 +553,17 @@ def _build_employee(context):
     context["employee"] = context["employees"][0]
 
 def _build_custody_category(context):
-    """Creates the demo Custody Asset Category."""
     context["custody_category"] = _create(
         "Custody Asset Category", {"category_name": _DEMO_CATEGORY}
     ).name
 
 def _build_custody_article(context):
-    """Creates the demo Custody Article under the demo category."""
     context["article"] = _create(
         "Custody Article",
         {"article_name": _DEMO_ARTICLE, "category": context["custody_category"]},
     ).name
 
 def _build_utility_account(context):
-    """Creates the demo electricity Utility Account for the demo building."""
     context["utility_account"] = _create(
         "Utility Account",
         {
@@ -744,7 +575,6 @@ def _build_utility_account(context):
     ).name
 
 def _build_facility_asset(context):
-    """Creates the demo CCTV Facility Asset for the demo building."""
     context["facility_asset"] = _create(
         "Facility Asset",
         {
@@ -757,24 +587,6 @@ def _build_facility_asset(context):
     ).name
 
 def _grant_demo_scope(context):
-    """Give the scoped demo personas the User Permission their role needs.
-
-    Fleet Supervisor and Resident Supervisor are SCOPED roles — they are absent from
-    ``salis.permissions.UNSCOPED_ROLES``, so ``permission_query_conditions`` confines
-    them to the projects and buildings a User Permission grants, and a persona with no
-    grant can read nothing at all. The demo walks a Driver Clearance workflow as the
-    fleet supervisor, which is refused outright without this.
-
-    This is what a real deployment does for a scoped supervisor, so granting it here
-    exercises the scoping rather than stepping around it: the persona sees the demo
-    project and nothing else, which is the behaviour worth demonstrating.
-
-    Runs under ``frappe.set_user(DEMO_OWNER)`` (``build_demo_data``), and ``DEMO_OWNER``
-    holds System Manager, which already carries create on User Permission — granting
-    a permission scope to someone ELSE is an ordinary create, not a right the grantor
-    needs to hold themselves (``user_permission.py`` validates only for duplicates and
-    the record's own shape).
-    """
     grants = (
         (DEMO_FLEET_SUPERVISOR, "Project", context["project"]),
         (DEMO_SUPERVISOR, "Project", context["project"]),
@@ -799,13 +611,6 @@ def _grant_demo_scope(context):
 
 
 def _build_driver(context):
-    """Creates the demo Salis Driver, on the demo project.
-
-    The project is not decoration. Every Salis document is scoped through the driver's
-    or vehicle's project (``salis.permissions``), so a driver with no project is
-    invisible to every SCOPED role — a Fleet Supervisor is then refused read on the
-    driver's own clearance, and the workflow this demo walks cannot start.
-    """
     context["driver"] = _create(
         "Salis Driver",
         {
@@ -816,12 +621,6 @@ def _build_driver(context):
     ).name
 
 def _build_vehicle(context):
-    """Creates the demo Salis Vehicle.
-
-    ``planned_fuel_grade`` is set here, not on the Fuel Request that follows: it is
-    the vehicle's own fact, and Fuel Request.fuel_grade fetches it from
-    ``vehicle.planned_fuel_grade`` (``fetch_if_empty``).
-    """
     context["vehicle"] = _create(
         "Salis Vehicle",
         {
@@ -833,11 +632,6 @@ def _build_vehicle(context):
     ).name
 
 def _build_telecom_contract(context):
-    """Creates and submits the demo Telecom Contract for the demo supplier.
-
-    Submitted, because SIM Card refuses a contract that is not in force and the demo
-    SIMs that follow read as Assigned and Suspended — states only a live contract has.
-    """
     contract = _create(
         "Telecom Contract",
         {
@@ -854,7 +648,6 @@ def _build_telecom_contract(context):
     context["telecom_contract"] = contract.name
 
 def _build_sim_cards(context):
-    """Creates two assigned SIM Cards and one suspended SIM Card for the demo employee."""
     holder = context["employee"]
     context["sim_cards"] = [
         _create(
@@ -877,9 +670,6 @@ def _build_sim_cards(context):
     ]
 
 def _build_assignment(context):
-    """The one SUBMITTED row. on_submit marks the bed Occupied and recalculates
-    the building's occupancy; on_cancel puts both back — which is why the removal
-    cancels before it deletes."""
     assignment = _create(
         "Housing Assignment",
         {
@@ -928,7 +718,6 @@ def _build_assignment(context):
     context["leaver_assignment"] = leaver_assignment.name
 
 def _build_maintenance_request(context):
-    """Creates the demo open Maintenance Request for an air conditioning issue."""
     context["maintenance_request"] = _create(
         "Maintenance Request",
         {
@@ -944,7 +733,6 @@ def _build_maintenance_request(context):
     ).name
 
 def _build_cleaning_log(context):
-    """Creates the demo Cleaning Log with one room cleaned and one skipped."""
     context["cleaning_log"] = _create(
         "Cleaning Log",
         {
@@ -964,7 +752,6 @@ def _build_cleaning_log(context):
     ).name
 
 def _build_lease(context):
-    """Creates the demo Lease and drives it through Submit for Approval and Approve."""
     lease = _create(
         "Lease",
         {
@@ -981,7 +768,6 @@ def _build_lease(context):
     context["lease"] = lease.name
 
 def _build_utility_bill(context):
-    """Creates the demo Utility Bill Entry and drives it through Submit for Approval and Approve."""
     bill = _create(
         "Utility Bill Entry",
         {
@@ -999,7 +785,6 @@ def _build_utility_bill(context):
     context["utility_bill"] = bill.name
 
 def _build_damage_assessment(context):
-    """Creates the demo Custody Damage Assessment for a damaged mattress."""
     context["damage_assessment"] = _create(
         "Custody Damage Assessment",
         {
@@ -1019,7 +804,6 @@ def _build_damage_assessment(context):
     ).name
 
 def _build_audit_plan(context):
-    """Creates the demo Audit Remediation Plan with two open findings."""
     context["audit_plan"] = _create(
         "Audit Remediation Plan",
         {
@@ -1045,7 +829,6 @@ def _build_audit_plan(context):
     ).name
 
 def _build_asset_movement(context):
-    """Creates the demo intercompany Facility Asset Movement between the demo buildings."""
     context["asset_movement"] = _create(
         "Facility Asset Movement",
         {
@@ -1060,7 +843,6 @@ def _build_asset_movement(context):
     ).name
 
 def _build_depreciation_snapshot(context):
-    """Creates and submits the demo Operational Depreciation Snapshot."""
     snapshot = _create(
         "Operational Depreciation Snapshot",
         {
@@ -1079,7 +861,6 @@ def _build_depreciation_snapshot(context):
     context["depreciation_snapshot"] = snapshot.name
 
 def _build_checkout(context):
-    """Creates and submits the demo Housing Checkout with one damaged custody item."""
     checkout = _create(
         "Housing Checkout",
         {
@@ -1099,7 +880,6 @@ def _build_checkout(context):
     context["checkout"] = checkout.name
 
 def _build_driver_attendance(context):
-    """Creates the demo present Driver Attendance record."""
     context["driver_attendance"] = _create(
         "Driver Attendance",
         {
@@ -1111,13 +891,6 @@ def _build_driver_attendance(context):
     ).name
 
 def _build_driver_clearance(context):
-    """Creates the demo Driver Clearance record and starts its investigation.
-
-    Stops at In Progress rather than walking to Cleared: on_submit's
-    ``_release_driver`` would move the shared demo driver to Released and clear
-    its current vehicle, breaking every later Salis step that still needs it
-    Active.
-    """
     clearance = _create(
         "Driver Clearance",
         {
@@ -1135,15 +908,12 @@ def _build_driver_clearance(context):
     context["driver_clearance"] = clearance.name
 
 def _build_vehicle_snapshots(context):
-    """Runs the weekly vehicle utilisation snapshot job to populate demo data."""
     weekly_vehicle_utilisation_snapshot()
 
 def _build_accommodation_ledger(context):
-    """Allocates today's accommodation cost for the demo building."""
     allocate_building_accommodation_cost(context["building"], today())
 
 def _build_qr_location(context):
-    """Creates the demo QR poster for the building entrance."""
     context["qr_location"] = _create(
         "QR Location",
         {
@@ -1154,7 +924,6 @@ def _build_qr_location(context):
     ).name
 
 def _build_custody_handover(context):
-    """Creates the demo custody handover between the two demo buildings."""
     context["custody_handover"] = _create(
         "Custody Handover",
         {
@@ -1177,12 +946,6 @@ def _build_custody_handover(context):
 _HANDOVER_CHECKS = ("Spare tyre", "Jack and wrench", "First aid kit", "Fire extinguisher")
 
 def _build_handover_checklist_template(context):
-    """Creates the active checklist a receipt must be raised against.
-
-    vehicle_handover.py:89-118 requires a template for a receipt, requires it active, and
-    requires the handover's rows to equal the template's rows EXACTLY — so the two lists
-    are built from one tuple rather than written twice.
-    """
     context["handover_template"] = _create(
         "Vehicle Handover Checklist Template",
         {
@@ -1193,11 +956,6 @@ def _build_handover_checklist_template(context):
     ).name
 
 def _build_vehicle_assignment(context):
-    """Creates the demo vehicle assignment the handover receipt is raised against.
-
-    Submitted, not left a draft: vehicle_handover.py:150 refuses a receipt whose assignment
-    is not both submitted and Active, so a draft here fails the step that follows.
-    """
     assignment = _create(
         "Vehicle Assignment",
         {
@@ -1211,13 +969,6 @@ def _build_vehicle_assignment(context):
     context["vehicle_assignment"] = assignment.name
 
 def _build_vehicle_handover(context):
-    """Creates the demo vehicle handover receipt with its inspection checklist.
-
-    ``Receipt``, not the ``Transfer`` the controller defaults to: this is the vehicle's
-    first handover, so there is no previous driver, and vehicle_handover.py:44-49 requires
-    both drivers for a transfer. A receipt in turn requires the assignment it is raised
-    against (vehicle_handover.py:141), which the step above creates.
-    """
     context["vehicle_handover"] = _create(
         "Vehicle Handover",
         {
@@ -1236,7 +987,6 @@ def _build_vehicle_handover(context):
     ).name
 
 def _build_vehicle_incident(context):
-    """Creates the demo open vehicle incident."""
     context["vehicle_incident"] = _create(
         "Vehicle Incident",
         {
@@ -1251,15 +1001,6 @@ def _build_vehicle_incident(context):
     ).name
 
 def _build_vehicle_write_off(context):
-    """Creates the demo damage write-off and drives it to Closed.
-
-    The DocType makes `evidence` mandatory, so a placeholder File is attached, because a
-    write-off with no photo is a record no approver could act on.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the File; an Attach field stores
-    a URL, so the placeholder must be a real File row rather than a string — the one
-    thing a bare path cannot do is survive the field's own validation.
-    """
     evidence = frappe.new_doc("File")
     evidence.update(
         {
@@ -1292,7 +1033,6 @@ def _build_vehicle_write_off(context):
     context["vehicle_write_off"] = name
 
 def _build_subcontractor_contract(context):
-    """Creates the demo pest-control contract and walks it to Active through its workflow."""
     name = _create(
         "Subcontractor Service Contract",
         {
@@ -1309,7 +1049,6 @@ def _build_subcontractor_contract(context):
     context["subcontractor_contract"] = name
 
 def _build_subcontractor_order(context):
-    """Creates the demo service order against the demo contract."""
     context["subcontractor_order"] = _create(
         "Subcontractor Service Order",
         {
@@ -1324,19 +1063,12 @@ def _build_subcontractor_order(context):
     ).name
 
 def _build_rental_office(context):
-    """Creates the demo rental office that the settlement is raised against."""
     context["rental_office"] = _create(
         "Rental Office",
         {"office_name": _DEMO_RENTAL_OFFICE, "status": "Active"},
     ).name
 
 def _build_goods_receipt(context):
-    """Creates the demo goods receipt into the building store, left in Draft.
-
-    Nothing in the demo is submitted: submitting writes Accommodation Stock Ledger rows, and
-    those rows link the building, the article and the employee, so `clear_demo_data` can no
-    longer take the demo back. A printable draft is worth more than a demo that will not clear.
-    """
     receipt = _create(
         "Goods Receipt",
         {
@@ -1357,7 +1089,6 @@ def _build_goods_receipt(context):
     context["goods_receipt"] = receipt.name
 
 def _build_material_transfer(context):
-    """Creates the demo transfer between the two demo buildings."""
     context["material_transfer"] = _create(
         "Material Transfer",
         {
@@ -1377,12 +1108,6 @@ def _build_material_transfer(context):
     ).name
 
 def _build_custody_issue(context):
-    """Issues two demo articles to the demo employee, left in Draft.
-
-    A Custody Return cannot be raised against a draft issue, so Custody Return Receipt is the
-    one print format with no demo document. The alternative — submitting the issue — writes
-    stock ledger rows the demo removal cannot take back, which costs more than it buys.
-    """
     context["custody_issue"] = _create(
         "Custody Issue",
         {
@@ -1398,7 +1123,6 @@ def _build_custody_issue(context):
     ).name
 
 def _build_work_order(context):
-    """Creates the demo work order against the demo maintenance request."""
     context["work_order"] = _create(
         "Maintenance Work Order",
         {
@@ -1411,7 +1135,6 @@ def _build_work_order(context):
     ).name
 
 def _build_safety_incident(context):
-    """Creates the demo open safety incident."""
     context["safety_incident"] = _create(
         "Safety Incident",
         {
@@ -1426,7 +1149,6 @@ def _build_safety_incident(context):
     ).name
 
 def _build_safety_round(context):
-    """Creates the demo weekly safety round for the building."""
     context["safety_round"] = _create(
         "Safety Round",
         {
@@ -1438,11 +1160,6 @@ def _build_safety_round(context):
     ).name
 
 def _build_fuel_request(context):
-    """Creates the demo fuel request and drives it to Done.
-
-    ``fuel_grade`` is not set here: it fetches from ``vehicle.planned_fuel_grade``
-    (``fetch_if_empty``), which ``_build_vehicle`` now sets.
-    """
     request = _create(
         "Fuel Request",
         {
@@ -1458,7 +1175,6 @@ def _build_fuel_request(context):
     context["fuel_request"] = request.name
 
 def _build_fuel_claim(context):
-    """Creates the demo monthly fuel claim and drives it to Closed."""
     claim = _create(
         "Fuel Claim",
         {
@@ -1478,7 +1194,6 @@ def _build_fuel_claim(context):
     context["fuel_claim"] = claim.name
 
 def _build_passenger_manifest(context):
-    """Creates the demo passenger manifest with the demo employee on board."""
     context["passenger_manifest"] = _create(
         "Passenger Manifest",
         {
@@ -1487,13 +1202,6 @@ def _build_passenger_manifest(context):
     ).name
 
 def _build_rental_settlement(context):
-    """Creates the demo monthly rental settlement and drives it to Paid.
-
-    Raises the demo Salis Payment Request along the way through
-    ``RentalSettlement.create_payment_request()`` — the same whitelisted method
-    Finance uses — rather than re-building the same record by hand;
-    ``_build_salis_payment_request`` then walks it through its own workflow.
-    """
     settlement = _create(
         "Rental Settlement",
         {
@@ -1527,13 +1235,6 @@ def _build_rental_settlement(context):
     context["rental_settlement"] = settlement.name
 
 def _build_route_template(context):
-    """Creates the minimal demo Route Template that Route Assignment requires.
-
-    Neither this DocType nor Work Shift ships any fixture or default row, and
-    Route Assignment's ``route_template``/``work_shift`` links are both
-    mandatory, so a demo Route Assignment cannot exist without building both
-    masters first.
-    """
     context["route_template"] = _create(
         "Route Template",
         {
@@ -1544,7 +1245,6 @@ def _build_route_template(context):
     ).name
 
 def _build_work_shift(context):
-    """Creates the minimal demo Work Shift that Route Assignment requires."""
     context["work_shift"] = _create(
         "Work Shift",
         {
@@ -1556,12 +1256,6 @@ def _build_work_shift(context):
     ).name
 
 def _build_route_assignment(context):
-    """Creates the demo route assignment and approves it.
-
-    Uses the unconditional Fleet Manager approval path: the Fleet Supervisor
-    path is gated on ``doc.route_supervisor == frappe.session.user``, which the
-    demo does not arrange.
-    """
     assignment = _create(
         "Route Assignment",
         {
@@ -1578,13 +1272,6 @@ def _build_route_assignment(context):
     context["route_assignment"] = assignment.name
 
 def _build_dispatch_trip(context):
-    """Creates the demo dispatch trip and dispatches it.
-
-    Stops at Dispatched rather than Completed: reaching Completed submits the
-    trip, and ``before_submit`` then requires at least one route stop plus
-    either an assigned Transport Request or a boarding-state row, none of
-    which this demo wires up.
-    """
     trip = _create(
         "Dispatch Trip",
         {
@@ -1598,7 +1285,6 @@ def _build_dispatch_trip(context):
     context["dispatch_trip"] = trip.name
 
 def _build_transport_request(context):
-    """Creates the demo site-transport request and drives it to Fulfilled."""
     request = _create(
         "Transport Request",
         {
@@ -1617,7 +1303,6 @@ def _build_transport_request(context):
     context["transport_request"] = request.name
 
 def _build_fuel_exception_case(context):
-    """Creates the demo fuel exception case and drives it to Closed."""
     case = _create(
         "Fuel Exception Case",
         {
@@ -1640,16 +1325,6 @@ def _build_fuel_exception_case(context):
     context["fuel_exception_case"] = case.name
 
 def _build_movement_cost_recovery(context):
-    """Creates the demo cost recovery case and drives it to Recovered.
-
-    ``basis_evidence`` is a mandatory Attach field, so a placeholder File is
-    attached — the same pattern ``_build_vehicle_write_off`` uses for its own
-    mandatory evidence field.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the File; an Attach field stores
-    a URL, so the placeholder must be a real File row rather than a string — the one
-    thing a bare path cannot do is survive the field's own validation.
-    """
     evidence = frappe.new_doc("File")
     evidence.update(
         {
@@ -1683,7 +1358,6 @@ def _build_movement_cost_recovery(context):
     context["movement_cost_recovery"] = recovery.name
 
 def _build_movement_cost_transfer(context):
-    """Creates the demo inter-project cost transfer and drives it to Posted (memo)."""
     transfer = _create(
         "Movement Cost Transfer",
         {
@@ -1702,9 +1376,6 @@ def _build_movement_cost_transfer(context):
     context["movement_cost_transfer"] = transfer.name
 
 def _build_salis_payment_request(context):
-    """Walks the Salis Payment Request that ``_build_rental_settlement`` raised
-    (via ``RentalSettlement.create_payment_request()``) through its own Finance
-    approval workflow."""
     name = context["salis_payment_request"]
     _walk_workflow(
         "Salis Payment Request", name, ("Submit to Finance",), user=DEMO_FLEET_MANAGER

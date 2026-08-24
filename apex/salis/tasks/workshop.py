@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
 
 from __future__ import annotations
 
@@ -18,16 +17,6 @@ _ROW_SAVEPOINT = "salis_workshop_row"
 
 
 def _overstay_stops() -> list:
-    """Submitted Maintenance Vehicle Suspensions still open past the overstay cutoff,
-    for vehicles still out of service.
-
-    A vehicle is overstaying if it is still Stopped / Under Maintenance and
-    carries a submitted Vehicle Suspension (reason Maintenance) with no ``return_date``
-    whose ``stop_date`` is on or before the cutoff (``workshop_overstay_days``;
-    Salis Settings, default 14). Shared by ``workshop_overstay_watch`` (the alert)
-    and ``get_workshop_overstay_count`` (the number card) so the rule cannot drift
-    between them. Returns the Vehicle Suspension rows (name, vehicle, stop_date).
-    """
     days = get_salis_int("workshop_overstay_days", 14)
     cutoff = add_days(today(), -days)
     rows = frappe.get_all(
@@ -59,15 +48,6 @@ def _overstay_stops() -> list:
 
 
 def workshop_overstay_watch() -> None:
-    """Flag vehicles in the workshop longer than ``workshop_overstay_days``.
-
-    Each overstaying stop (see ``_overstay_stops`` for the rule) is ASSIGNED to the
-    Fleet Supervisor queue — the Vehicle Suspension is the document the supervisor
-    closes to release the vehicle — and the queue is reconciled at the end of the
-    pass, so a stop that is no longer overstaying has its assignment closed instead
-    of leaving a row nothing could resolve. This job is the only queuer of Vehicle
-    Suspension, so its own findings are the reconcile union.
-    """
     days = get_salis_int("workshop_overstay_days", 14)
     logger = frappe.logger()
     still_overstaying: list[str] = []
@@ -97,13 +77,6 @@ def workshop_overstay_watch() -> None:
 
 @frappe.whitelist()
 def get_workshop_overstay_count(filters=None) -> dict:
-    """Custom Number Card: how many vehicles are overstaying in the workshop.
-
-    Same rule as the Maintenance Overdue alert, shared via ``_overstay_stops`` so
-    the card and the alert cannot disagree. Scoped to the viewer's permitted
-    projects to match the other fleet number cards. ``filters`` is accepted and
-    ignored (the Custom Number Card widget always passes it).
-    """
     frappe.has_permission("Salis Vehicle", "read", throw=True)
     vehicles = {r.vehicle for r in _overstay_stops()}
     if not vehicles:

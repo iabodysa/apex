@@ -46,27 +46,6 @@ class RouteAssignment(Document):
         generate_for_assignment(self.name)
 
     def on_cancel(self):
-        """Withdraw what ``on_submit`` created: the unrun trips and the watermark.
-
-        ``generate_for_assignment`` writes up to fourteen days of Dispatch Trips ahead
-        AND stamps ``generated_through`` so the daily job does not re-cover those days.
-        Without a reversal the trips outlive the assignment that justified them and the
-        dispatch board keeps offering a shift nobody approved any more.
-
-        Only a DRAFT trip still at Planned is withdrawn. Once a trip is submitted it has
-        been dispatched or completed, and cancelling a recurrence must not rewrite an
-        operational record. Deleting rather than cancelling the draft is deliberate:
-        ``DispatchTrip.on_trash`` releases the Transport Requests the draft had claimed,
-        which nothing else can free.
-
-        No permission bypass: the shipped workflow restricts the Cancel transition to
-        Fleet Manager, and Fleet Manager is the role that holds ``delete`` on Dispatch
-        Trip, so the acting user's own rights carry the delete.
-
-        The watermark is cleared last so an amendment — which copies ``generated_through``
-        forward — starts from ``starts_on`` again instead of skipping the days just
-        deleted and leaving them uncovered forever.
-        """
         for trip in frappe.get_all(
             "Dispatch Trip",
             filters={

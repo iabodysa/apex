@@ -1,16 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for the Lease payment-schedule builder's date and money arithmetic.
-
-Patterned on frappe/tests/test_document.py. ``_build_schedule`` reads and
-writes only the in-memory document, so every case here calls it directly on
-an unsaved Document — no Lease is inserted and no company/overlap lookups in
-``validate`` are exercised.
-
-The headline case pins the anchor-recompute invariant the controller's own
-docstring calls out: a lease starting on the 31st must return to the 31st
-once a 31-day month is reached, rather than compounding forward from a
-clamped 28th/30th and staying short for the rest of the term.
-"""
 
 from __future__ import annotations
 

@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain).
-
-Every ``assign_role`` call in this file is not a declarative Assignment Rule: a rule
-picks exactly one user per document event via ``AssignmentRule.do_assignment``
-(frappe/automation/doctype/assignment_rule/assignment_rule.py:88-96), with no
-per-document read check, while these jobs fan out to every current holder of a role
-who can already read the specific document and are triggered by a scheduler's own
-multi-table scan, not one document's own save/submit.
-"""
 
 from __future__ import annotations
 
@@ -38,18 +29,10 @@ SAFETY_ROLE = "Safety Officer"
 
 
 def _zero_rounds_window_days() -> int:
-    """Trailing days a building may go without a submitted Safety Round.
-
-    Read from ``Habitat Settings.safety_zero_rounds_window_days``. The fallback
-    applies to an unset or zero field, which is what a Single returns before an
-    operator has ever opened it; a site that wants no zero-rounds sweep turns the
-    scheduled task off, never by zeroing the window.
-    """
     return cint(frappe.db.get_single_value("Habitat Settings", "safety_zero_rounds_window_days")) or 7
 
 
 def _no_recent_round(building):
-    """No submitted Safety Round of ANY cadence in the trailing window."""
     since = str(getdate(add_days(today(), -_zero_rounds_window_days())))
     return not frappe.db.exists(
         "Safety Round", {"docstatus": 1, "building": building, "round_date": [">=", since]}
@@ -57,7 +40,6 @@ def _no_recent_round(building):
 
 
 def _uncovered_this_week(building):
-    """No submitted Weekly-cadence Safety Round dated inside the current site week."""
     today_date = getdate(today())
     span = [str(get_first_day_of_week(today_date)), str(get_last_day_of_week(today_date))]
     return not frappe.db.exists(
@@ -67,16 +49,6 @@ def _uncovered_this_week(building):
 
 
 def buildings_needing_safety_attention():
-    """Every ACTIVE building failing EITHER safety condition.
-
-    Both jobs reconcile the Building queue against THIS, never against their own pass.
-    The framework gives a document one assignment rather than one per reason
-    (``assign_to.add`` skips a user who already holds an open ToDo for it), so a job that
-    settled only what its own scan found would close the other job's work and the queue
-    would depend on which ran last. The two conditions are independent — a building can
-    have a Daily round today and no Weekly round this week — so the union is computed,
-    never inferred from one.
-    """
     return {
         b
         for b in frappe.get_all("Building", filters={"status": "Active"}, pluck="name")
@@ -85,18 +57,10 @@ def buildings_needing_safety_attention():
 
 
 def zero_rounds_alert_subject(label: str) -> str:
-    """Subject of the daily "no recent safety round" alert for a building.
-
-    Shared with Safety Round's submit-time cleanup: the Safety Officer's copy carries
-    no Building link (that role holds no read on Building), so it is deduped and
-    cleared by SUBJECT. Producer and clearer must not drift, hence one owner here.
-    """
     return f"No recent safety round: {label}"
 
 
 def _instance_priority(template: str | None) -> str:
-    """Resolve a Scheduled Task Instance's effective priority via its template's
-    linked Safety Task Catalog task. Returns "" when no priority can be derived."""
     if not template:
         return ""
     catalog = frappe.db.get_value("Scheduled Task Template", template, "safety_task_catalog")
@@ -106,32 +70,6 @@ def _instance_priority(template: str | None) -> str:
 
 
 def daily_safety_task_compliance_scan() -> None:
-    """Daily — flag overdue Scheduled Task Instances Overdue, escalate the urgent ones,
-    and flag active buildings with no safety round at all in the recent window.
-
-    An instance counts as overdue once today reaches or passes its due_date plus the
-    configured ``safety_overdue_grace_days`` (read as ``value or 0`` — a new Int on the
-    Habitat Settings Single may store 0). With zero grace a task is overdue ON its due
-    day (``due_date <= cutoff``), not the day after. On flipping an instance to Overdue, the effective
-    priority is resolved through its template's Safety Task Catalog task: a High or
-    Critical task is additionally ASSIGNED to every Safety Officer — a native ToDo on the
-    instance itself, in the desk queue that role already watches — with a system
-    Notification beside it, so urgent safety lapses surface immediately.
-
-    Second pass: every ACTIVE Building (``status == "Active"``) with ZERO
-    submitted Safety Rounds of ANY cadence dated within the trailing
-    ``Habitat Settings.safety_zero_rounds_window_days`` window is assigned to the Safety
-    Officer, posts the reminder to
-    the building timeline, and alerts the building's own Responsible Facility
-    Supervisor. This is broader than
-    ``weekly_safety_coverage_gate`` (which only
-    checks for a *Weekly*-cadence round in the current week): it catches buildings
-    with no safety activity whatsoever. Both passes end by reconciling the Building queue
-    against ``buildings_needing_safety_attention``, so a building that no longer fails
-    EITHER condition has its assignment CLOSED — the half an alert row never had.
-
-    Per-row error isolation; paginated 500/batch.
-    """
     grace_days = frappe.db.get_single_value("Habitat Settings", "safety_overdue_grace_days") or 0
     cutoff = str(getdate(add_days(today(), -int(grace_days))))
     logger = frappe.logger()
@@ -145,19 +83,6 @@ def daily_safety_task_compliance_scan() -> None:
 
 
 def weekly_safety_coverage_gate() -> None:
-    """Weekly — every ACTIVE building must be covered by a submitted Weekly Safety
-    Round this week; flag the buildings that are not.
-
-    Gated by Habitat Settings ``require_weekly_all_building_coverage`` (read as
-    ``value if not None else 1`` — the gate defaults ON, but a falsy stored value on
-    the Single turns it off, per the Single new-field caveat). When the gate is ON,
-    each ACTIVE Building (``status == "Active"``) with no submitted
-    Weekly-cadence Safety Round dated within the current week is assigned to the
-    Safety Officer with a system Notification beside it, and a building covered later
-    has that assignment closed on the next run. Per-row
-    error isolation.
-
-    """
     require_coverage = frappe.db.get_single_value(
         "Habitat Settings", "require_weekly_all_building_coverage"
     )
@@ -226,12 +151,6 @@ def weekly_safety_coverage_gate() -> None:
 
 
 def audit_remediation_deadline_watch() -> None:
-    """Daily — flag submitted Client Audit Remediation Plans whose deadline has passed.
-
-    The shared controller rollup decides whether a passed deadline means Overdue or
-    whether fully verified actions already close the plan. Newly overdue plans notify
-    the internal owner and Accommodation Manager.
-    """
     today_date = getdate(today())
     logger = frappe.logger()
     flagged = 0
@@ -295,16 +214,6 @@ def audit_remediation_deadline_watch() -> None:
 
 
 def _flag_overdue_instances(cutoff, logger):
-    """Flag Scheduled Task Instances past their grace window and escalate the urgent ones.
-
-    Returns (total_overdue, escalated).
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
-    the top: the worker rolls back the whole run, so every unit already completed is
-    lost and the next run repeats them all. The failure is recorded through
-    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
-    """
     total_overdue = 0
     escalated = 0
     queued_instances: list[str] = []
@@ -375,26 +284,6 @@ def _flag_overdue_instances(cutoff, logger):
 
 
 def _flag_buildings_without_rounds(logger):
-    """Flag active Buildings with no submitted Safety Round in the trailing window.
-
-    Broader than the weekly coverage gate, which only asks for a Weekly-cadence round
-    in the current week — the site's own week, via ``get_first_day_of_week``
-    (frappe/utils/data.py:427). This catches a building with no safety activity at all.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a scheduler job cannot afford is a raise reaching
-    the top: the worker rolls back the whole run, so every unit already completed is
-    lost and the next run repeats them all. The failure is recorded through
-    ``frappe.get_traceback`` into the Error Log instead, and the loop carries on.
-
-    The rolling window means a building can stay flagged for many days straight —
-    unlike ``audit_remediation_deadline_watch`` and the overdue-instance scan above,
-    whose own query filters drop a row the moment it is flagged. The timeline comment
-    is therefore written only the pass the building is NEWLY queued to the Safety
-    Officer (``assign_role`` returns how many assignees were actually ADDED); the two
-    Notification Log sends stay unconditional because ``notify_user_system`` already
-    dedupes per user against the unread alert.
-    """
     batch_size = 500
     window_days = _zero_rounds_window_days()
     window_start = str(getdate(add_days(today(), -window_days)))

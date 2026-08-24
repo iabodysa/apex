@@ -1,10 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Fuel Claim Register report.
-
-ORM listing of Fuel Claim records with their claimed vs consumed litres and the
-reconciliation variance, by project / vehicle / period / status.
-"""
 
 import frappe
 from frappe import _
@@ -15,7 +10,6 @@ from apex.apex_core.utils.report_summary import count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Fuel Claim Register report."""
     filters = filters or {}
 
     columns = [

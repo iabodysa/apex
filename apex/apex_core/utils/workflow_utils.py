@@ -1,19 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Workflow housekeeping — orphaned Workflow Action cleanup (app-wide).
-
-Frappe creates a Workflow Action per permitted approver when a document enters a
-workflow state, and flips it to Completed when the document transitions. But an Open
-row can be ORPHANED with no native cleanup: the document's state was advanced by a
-direct DB write / data import / a deactivated workflow (Case B), or the document was
-hard-deleted bypassing on_trash (Case A). Either way the stale Open row pollutes
-every permitted user's Action Inbox forever. This daily job deletes ONLY those
-orphaned OPEN rows — Completed rows are the audit trail and are never touched.
-
-Wired into hooks.py scheduler_events["daily"]. Idempotent: a clean site is a no-op.
-DELETE (not mark-Completed) is deliberate: is_workflow_action_already_created has no
-status filter, so a Completed row would block re-creating an Open one if a cyclic
-workflow ever re-entered the state.
-"""
 
 import re
 
@@ -24,22 +9,6 @@ _IDENT = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
 
 def cleanup_orphaned_workflow_actions():
-    """Delete Open Workflow Actions whose document moved past the recorded state
-    (Case B) or no longer exists (Case A). Per-workflow, guarded and isolated so one
-    bad doctype never aborts the run.
-
-    The two bare ``frappe.db.rollback()`` calls below are COMMIT-BOUNDED, which is why
-    they are not the whole-transaction hazard a bare rollback usually is: each sits in a
-    try whose success path commits first, so the rollback can only discard the current
-    doctype's own deletes. A loop that continues past a failure without that commit needs
-    a row savepoint instead — see ``habitat/tasks/common.py``.
-
-    EVERY Workflow row is enumerated, not only the active ones. Deactivating a workflow
-    is itself one of the ways Case B arises, and a hard-deleted document (Case A) leaves
-    its Open rows behind whether or not the workflow is still switched on — so filtering
-    on ``is_active`` skipped exactly the doctypes that most need the sweep, and their
-    rows stayed in every permitted user's Action Inbox forever.
-    """
     for wf in frappe.get_all("Workflow", fields=["document_type", "workflow_state_field"]):
         dt, sf = wf.document_type, wf.workflow_state_field
         if not (dt and sf) or not _IDENT.match(sf) or not frappe.db.table_exists(dt):

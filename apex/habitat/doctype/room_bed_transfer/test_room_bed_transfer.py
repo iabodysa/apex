@@ -1,16 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Room Bed Transfer's source-building resolution and its
-cross-building refusal.
-
-Patterned on test_lease.py. ``_source_building`` and the cross-building
-branch of ``validate`` each read one or two Link targets via
-``frappe.db.get_value``; those reads are mocked by return value so the
-"prefer the live assignment's building, fall back to the origin bed's" and
-"refuse a move that would cross buildings" decisions are exercised without a
-live Housing Assignment/Bed/Room. ``assignment`` is left unset in the
-``validate`` cases so ``sync_party_employee``'s own ``derive_from`` lookup
-(a separate DB read outside this controller's own logic) never fires.
-"""
 
 from __future__ import annotations
 

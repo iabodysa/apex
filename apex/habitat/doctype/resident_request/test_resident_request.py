@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Resident Request's honeypot refusal and its close-without-notes guard.
-
-Patterned on frappe/tests/test_document.py. Every case crosses ``insert`` so
-``validate`` in ``resident_request.py`` -- wired through hooks.py's
-doc_events, not the class body -- is what is exercised, not a stub.
-"""
 
 from __future__ import annotations
 

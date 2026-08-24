@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Goods Receipt Register — what entered each building store, from whom, and whether
-it reached handover.
-
-The rows are ITEM rows, not documents: a receipt of five article lines where one is
-still sitting un-handed-over is one document and five lines, and rolling it up to the
-document would hide the line that matters. Only submitted receipts are listed — a
-draft has not arrived yet, and a cancelled receipt is out with docstatus 2.
-
-Scoped by intake building through the same resolver the permission hook uses, so a
-scope correction reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -20,7 +9,6 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
-    """Returns the columns, line rows and summary cards for the Goods Receipt Register report."""
     filters = filters or {}
     columns = get_columns()
 
@@ -95,7 +83,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Builds summary cards for receipt line count, receipt count and percent handed over."""
     receipts = {r.get("name") for r in data if r.get("name")}
     awaiting = [r for r in data if r.get("status") == "Received"]
     handed = len(data) - len(awaiting)
@@ -108,7 +95,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the Goods Receipt Register report."""
     return [
         {"label": _("Receipt"), "fieldname": "name", "fieldtype": "Link", "options": "Goods Receipt", "width": 170},
         {"label": _("Receipt Date"), "fieldname": "receipt_date", "fieldtype": "Date", "width": 110},

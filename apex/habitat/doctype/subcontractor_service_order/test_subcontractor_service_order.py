@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Subcontractor Service Order's line-amount computation.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``before_save``'s ``_price_from_lines`` in
-``subcontractor_service_order.py`` is what is exercised, not a stub.
-
-``Purchase Invoice`` is excluded from the dependency walk: no case here sets
-``linked_purchase_invoice``, and Purchase Invoice's own closure resolves an
-unmigrated ``Payment Gateway`` and kills record-building before a single
-test runs.
-"""
 
 from __future__ import annotations
 

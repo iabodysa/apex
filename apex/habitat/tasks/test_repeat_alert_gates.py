@@ -1,12 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Two scheduled scans queue a document to a role and then leave a timeline
-comment: ``maintenance._queue_overdue_request`` and
-``safety._flag_buildings_without_rounds``. Both run on a cadence, so the same
-document is re-seen every pass while its condition holds; the comment must be
-written only the pass the document is NEWLY queued (``assign_role`` returns
-how many assignees were actually ADDED), never on every re-scan.
-"""
 
 from unittest.mock import patch
 
@@ -45,9 +38,6 @@ class TestFlagBuildingsWithoutRoundsCommentsOnlyOnANewAssignment(FrappeTestCase)
         calls = iter([[fake_building], []])
 
         def fake_get_all(doctype, *a, **k):
-            """Only the Building scan under test; every incidental internal
-            ``frappe.get_all`` call (Meta's own DocPerm lookups, for one) must
-            not consume this test's fixture queue."""
             if doctype == "Building":
                 return next(calls, [])
             return []

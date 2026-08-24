@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain).
-
-The insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
-connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
-default leaves the session at Administrator, who already satisfies every DocPerm check
-(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
-create on Scheduled Task Instance, so any other actor is refused, unchanged by this module.
-"""
 
 from __future__ import annotations
 
@@ -16,23 +8,11 @@ from frappe.utils import get_first_day, get_first_day_of_week, getdate, today
 _ROW_SAVEPOINT = "scheduled_task_row"
 
 def daily_scheduled_task_instance_generator() -> None:
-    """Generate Scheduled Task Instance records using the Assignment × Item pattern.
-
-    Assignment-based design: iterates active Scheduled Task Assignments, then for
-    each active template item row creates one Scheduled Task Instance per
-    (assignment, task_catalog, due_date). The due_date is resolved from the item's
-    frequency_override if set, or the template-level frequency otherwise. Idempotent:
-    an existing non-cancelled instance for the same (assignment, task_catalog, due_date)
-    is skipped. Per-item error isolation; paginated 500/batch on assignments.
-    """
     today_str = today()
     today_date = getdate(today_str)
     logger = frappe.logger()
 
     def _period_key(freq: str) -> str:
-        """Return the canonical due_date string for the given frequency.
-
-        """
         if freq == "Daily":
             return today_str
         if freq == "Weekly":

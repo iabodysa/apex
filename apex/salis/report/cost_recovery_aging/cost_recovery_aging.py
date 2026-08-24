@@ -1,18 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Cost Recovery Aging - open movement cost-recovery exposure aged into buckets,
-derived from the Movement Cost Recovery document.
-
-By default it ages the still-open recoveries (Open / Acknowledged / Approved)
-by days elapsed since request_date into 0-30, 31-60, 61-90 and 90+ buckets, one
-row per recovery, plus a totals row. Recovered, Waived and Rejected items are
-treated as closed and excluded unless an explicit status filter asks for them.
-It is defensive about the source DocType: if Movement Cost Recovery is not
-migrated yet, the report returns an empty data set rather than raising.
-
-Optional filters: status, recovery_type, vehicle, driver, employee,
-as_on_date (the reference date for aging; defaults to today).
-"""
 
 import frappe
 from frappe import _
@@ -23,7 +10,6 @@ from apex.salis import permissions
 OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
 def _bucket(days):
-    """Returns which aging bucket a recovery falls into based on its days elapsed."""
     if days <= 30:
         return "b_0_30"
     if days <= 60:
@@ -33,7 +19,6 @@ def _bucket(days):
     return "b_90_plus"
 
 def execute(filters=None):
-    """Returns the columns, aged rows, chart and summary cards for the Cost Recovery Aging report."""
     filters = filters or {}
 
     columns = [
@@ -144,7 +129,6 @@ def execute(filters=None):
     return columns, data, None, _build_chart(totals if data else None), summary
 
 def _build_chart(totals):
-    """Bar chart of open recovery exposure across the four aging buckets."""
     if not totals:
         return None
     buckets = ["b_0_30", "b_31_60", "b_61_90", "b_90_plus"]

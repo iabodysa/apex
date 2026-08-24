@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
 
 from __future__ import annotations
 
@@ -15,35 +14,6 @@ _ROW_SAVEPOINT = "salis_alerts_row"
 
 
 def reconcile_operations_alerts() -> None:
-    """Drain the Fleet Supervisor assignment queues whose underlying condition no
-    longer holds, so queued work does not accumulate forever.
-
-    This is the single reconcile point for the two DocTypes more than one job can
-    queue — Salis Vehicle (idle watches + compliance watch) and Salis Driver
-    (attendance watch) — because reconcile_role_queue's contract needs the UNION of
-    every condition per DocType, and a per-writer reconcile would close the other
-    writers' work. Vehicle Suspension, Rental Office and Fuel Quota each have a single
-    writer and reconcile inside it.
-
-    Fuel Quota does NOT drain here. This job is DAILY and reads "the current month";
-    its only queuer, ``fuel_engine.monthly_fuel_reconciliation``, is MONTHLY and fires
-    at 00:00 on the 1st. Draining Fuel Quota here would agree with the queuer on the
-    calendar, so both would look at a month with no ledger rows in it yet and the fuel
-    overage alert would be unreachable. Anchoring the queuer on the closed month
-    without moving the drain would be worse still — this job would close every breach
-    it found the following morning — so the drain lives in the queuer, where the
-    period is decided once.
-
-    A document stays queued while ANY of its writers' conditions holds:
-
-    * **Salis Vehicle** — Active with no submitted Dispatch Trip
-      (Dispatched/Completed) within ``idle_vehicle_days``, OR Active with a
-      compliance row expired or expiring within ``alert_lead_days``.
-    * **Salis Driver** — Active with no submitted Driver Attendance today.
-
-    Idempotent and never aborts: each DocType's drain runs in its own
-    try/except with rollback-before-log.
-    """
     today_str = today()
     logger = frappe.logger()
 

@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Fuel Spend by Vehicle - per-vehicle fuel litres and amount, derived from the
-system-written Fuel Consumption Ledger (which itself consolidates Fuel Daily Log
-and done Fuel Request records).
-
-Aggregates ledger rows in the chosen window: total litres, total amount, an
-average cost per litre, and the count of contributing ledger rows. It is
-defensive about the source DocType: if Fuel Consumption Ledger is not migrated
-yet, the report returns an empty data set rather than raising.
-
-Optional filters: vehicle, period_month (YYYY-MM exact match).
-"""
 
 import frappe
 from frappe import _
@@ -21,7 +10,6 @@ from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, per-vehicle fuel spend rows, chart and summary cards for the report."""
     filters = filters or {}
 
     columns = [
@@ -92,7 +80,6 @@ def execute(filters=None):
 
 
 def _build_chart(data):
-    """Bar chart of total fuel spend for the highest-spend vehicles."""
     if not data:
         return None
     top = data[:10]

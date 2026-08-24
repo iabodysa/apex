@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Payment Router - build the configured target payment from a finance-approved
-Salis Payment Request via the Habitat Settings field map (config-time, no
-hard-coded per-DocType branches); defaults to the native Payment Request when the
-target is unconfigured.
-
-Boundary: this layer routes only - it posts no GL itself. ``enable_gl_posting``
-(Habitat Settings) gates the auto-submit step, because a native payment posts its
-ledger from its own ``on_submit``; OFF leaves the routed doc in Draft.
-"""
 
 from __future__ import annotations
 
@@ -26,44 +17,14 @@ LINK_DOCTYPE_FIELD = "linked_payment_doctype"
 LINK_NAME_FIELD = "linked_payment_entry"
 
 def get_target_doctype(settings=None) -> str:
-    """Resolve the payment DocType to build, defaulting to native Payment Request.
-
-    ``Habitat Settings.target_payment_doctype`` wins when set; otherwise
-    the native ``Payment Request`` primitive is used so the flow works out of the
-    box with no configuration.
-
-    ``frappe.get_single`` (frappe/__init__.py:1335) loads the whole settings document
-    rather than one field, because the caller that resolves the target almost always
-    needs the sibling switches too, and reading them one at a time is one query each.
-    """
     settings = settings or frappe.get_single(SETTINGS_DOCTYPE)
     return settings.target_payment_doctype or DEFAULT_TARGET_DOCTYPE
 
 @frappe.whitelist()
 def get_target_payment_doctype() -> str:
-    """Whitelisted read of the configured target payment DocType.
-
-    The Accommodation Lease ``Generate Payment`` button reads this to decide which
-    payment document to build, replacing the retired
-    ``Habitat Settings.default_payment_method`` Select. Read-only and unparameterised,
-    so any desk user may call it. Returns the native ``Payment Request`` default
-    when the router is unconfigured.
-    """
     return get_target_doctype()
 
 def validate_configured_target(built_doctype: str) -> None:
-    """Refuse when the deployment's configured payment target is not what the caller builds.
-
-    For a surface that can route ANY target, :func:`route_payment` is the answer: it
-    reads the configured target and the field map and builds whatever they name. A
-    surface that can only ever produce ONE document type cannot do that, because the
-    field map is written against :data:`SOURCE_DOCTYPE` fields and describes no other
-    source. Its only honest options are to obey the configuration or to refuse.
-
-    So it refuses. Quietly building a different document type than the one configured
-    is the failure this exists to stop: the operator sees a plausible payment and never
-    learns the deployment's routing choice was ignored on this one screen.
-    """
     configured = get_target_doctype()
     if configured == built_doctype:
         return
@@ -75,30 +36,6 @@ def validate_configured_target(built_doctype: str) -> None:
     )
 
 def validate_target_doctype(target_doctype) -> None:
-    """Refuse a structurally impossible payment target BEFORE anything is built.
-
-    ``frappe.get_meta`` (frappe/model/meta.py:66) answers all three questions — does
-    the DocType exist, is it a Single, is it submittable. The one thing it cannot do
-    is object: it describes the target and has no opinion about whether a payment
-    should be built from it, which is the whole of this function.
-
-    ``frappe.new_doc(dt).insert()`` (frappe/__init__.py:1152) succeeds for far more
-    than payment documents,
-    so without this the router turns a config typo into a convincing artefact that
-    is not a payment - worse than refusing, because nobody re-reads it. Three
-    refusals, each a real failure mode:
-
-    * missing - the operator named a DocType this site does not have (an optional
-      client app that was never installed). Silently falling back to the native
-      default would pay every request through the wrong document.
-    * Single - ``insert`` on a Single writes ``tabSingles``, so routing a payment
-      would OVERWRITE that settings record rather than create anything.
-    * child table - the row would be inserted parentless and belong to nothing.
-
-    Deliberately structural, not semantic: the router supports any client payment
-    DocType by design, so it refuses what cannot be a document at all rather than
-    policing a whitelist it has no authority to define.
-    """
     target_doctype = (target_doctype or "").strip()
     if not target_doctype:
         frappe.throw(
@@ -129,24 +66,6 @@ def validate_target_doctype(target_doctype) -> None:
         )
 
 def validate_field_map(target_doctype, field_map) -> None:
-    """Refuse a field map that cannot build the target, BEFORE any insert.
-
-    Shape checks (a row names a target, names it once, and carries either a source
-    field or a static value) plus the check that actually stops a wrong payment:
-    both fieldnames must EXIST. ``frappe.get_meta(...).has_field``
-    (frappe/model/meta.py:66, :247) is what answers that, and it is asked HERE because
-    nothing downstream will: ``BaseDocument.set`` writes to ``__dict__`` with no
-    meta check and ``get_valid_dict`` then keeps only ``meta.get_valid_columns()``
-    (frappe/model/meta.py:225),
-    so a mistyped target fieldname is dropped in silence and the payment is created
-    with that field simply unset - a 0.00 payment that looks entirely normal. A
-    mistyped SOURCE fieldname is worse still: ``source.get`` returns ``None``, so
-    the field is written, just blank.
-
-    Called from the controller (config time) AND from the router (run time),
-    because ``db_set`` / raw SQL / a patch can all write the Single while skipping
-    ``validate`` - a control that lived only in the controller would be bypassed.
-    """
     target_meta = frappe.get_meta(target_doctype)
     writable = set(target_meta.get_valid_columns())
     source_meta = frappe.get_meta(SOURCE_DOCTYPE)
@@ -197,14 +116,6 @@ def validate_field_map(target_doctype, field_map) -> None:
 _FALLBACK_CURRENCY = "SAR"
 
 def _default_currency(source) -> str:
-    """Resolve the transaction currency for the routed target.
-
-    A real payment document (e.g. the native Payment Request) is currency-bearing,
-    but a Salis Payment Request has no ``currency`` field. Default it to the
-    source company's default currency when a company is set, else to the
-    single-currency baseline (``SAR``). Never throws - currency resolution must
-    not block a finance-approved route.
-    """
     company = source.get("company")
     if company:
         currency = frappe.get_cached_value("Company", company, "default_currency")
@@ -213,15 +124,6 @@ def _default_currency(source) -> str:
     return _FALLBACK_CURRENCY
 
 def _ensure_target_currency(target, source) -> None:
-    """Stamp a transaction ``currency`` on the target if it has the field unset.
-
-    The config-time field map may not include ``currency`` (the default-build
-    case), yet a native payment doc needs one. When the target DocType actually
-    has a ``currency`` field and the map left it blank, default it from the
-    source's company (or the ``SAR`` baseline) so the native default integration
-    produces a valid, currency-bearing payment. Targets without a ``currency``
-    field (e.g. Note, the stub) are untouched - no per-DocType branch.
-    """
     if not target.meta.has_field("currency"):
         return
     if target.get("currency"):
@@ -229,30 +131,9 @@ def _ensure_target_currency(target, source) -> None:
     target.currency = _default_currency(source)
 
 def _is_finance_approved(source) -> bool:
-    """True when the request has cleared the Finance approval gate.
-
-    Approval is proven SOLELY by the stamped approver ``finance_approved_by``,
-    which the source controller's finance gate sets on entry to any
-    finance-gated state, after enforcing the finance-role and Segregation-of-
-    Duties checks. The mutable ``status`` field is deliberately NOT trusted: a
-    write that bypasses the controller's ``validate`` (e.g. a direct ``db_set``
-    or status edit) could land "Paid"/"Approved by Finance" without ever
-    clearing the gate, so routing a real payment off the status alone would be a
-    finance bypass. Gating on the immutable stamp is fail-closed - an un-stamped
-    request never routes.
-    """
     return bool(source.get("finance_approved_by"))
 
 def _apply_field_map(target, source, field_map) -> None:
-    """Populate ``target`` from ``source`` using the configured rows.
-
-    Each row::
-
-        target[target_fieldname] = static_value if is_static else source.get(source_fieldname)
-
-    A static row writes the constant; a mapped row copies the named source field.
-    No per-DocType logic - the rows are the only contract.
-    """
     for row in field_map:
         target_field = (row.target_fieldname or "").strip()
         if not target_field:
@@ -265,30 +146,6 @@ def _apply_field_map(target, source, field_map) -> None:
         target.set(target_field, value)
 
 def route_payment(payment_request: str) -> str:
-    """Build (and optionally submit) the configured target payment from a submitted,
-    finance-approved Salis Payment Request, then stamp the typed link back.
-    Idempotent: returns the existing payment when already linked. Submit is gated on
-    ``auto_submit_target`` + a submittable target + ``enable_gl_posting`` (submit is
-    what posts the native doc's GL). The create uses ``ignore_permissions``, so the
-    caller's write/submit permission on the request is enforced just below.
-
-    Fail-closed: the target and the field map are re-validated here, immediately
-    before the build, and the link stamp carries the created document's own doctype.
-    Refusing is the desired outcome for a bad config - a payment that merely LOOKS
-    right is worse, because it is never read a second time.
-
-    ``frappe.new_doc`` (frappe/__init__.py:1152) builds the target. The one thing it
-    cannot do is know whether the DocType it was handed is a payment at all — it
-    happily constructs any DocType on the site — which is why validation runs first
-    and why it runs again here rather than only where the setting is written.
-
-    The request is loaded with ``for_update=True`` so the LOCK and the READ are the
-    same statement. A locking read whose result is discarded, followed by a plain
-    ``get_doc``, does not protect this: under REPEATABLE READ the second call answers
-    from the snapshot taken before the lock, so a second caller reads the pre-lock
-    world, sees no linked payment, and pays the same request twice. Nothing times out
-    and no exception is raised — both callers report success.
-    """
     settings = frappe.get_single(SETTINGS_DOCTYPE)
     target_doctype = get_target_doctype(settings)
 
@@ -335,13 +192,4 @@ def route_payment(payment_request: str) -> str:
 
 @frappe.whitelist(methods=["POST"])
 def create_routed_payment(payment_request: str) -> str:
-    """Whitelisted POST entry for the Create Payment desk action.
-
-    It forwards to :func:`route_payment`, which enforces the caller's permission, and
-    that forwarding is not what it is for: ``frappe.whitelist(methods=["POST"])``
-    (frappe/__init__.py:819) is the boundary, and it has to sit on a name the desk
-    calls rather than on an internal one. Whitelisting ``route_payment`` itself would
-    either expose a money write to a cacheable GET or publish an internal function as
-    an endpoint. The wrapper IS the restriction, so it is not a pass-through.
-    """
     return route_payment(payment_request)

@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Audit Remediation Plan's derived overall status.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``validate`` in ``audit_remediation_plan.py`` is what is
-exercised, not a stub.
-
-``Project`` is excluded from the dependency walk: ``client_project`` is a
-fake unlinked value here (``ignore_links``), and Project's own closure
-resolves an unmigrated ``Payment Gateway`` and kills record-building before
-a single test runs.
-"""
 
 from __future__ import annotations
 

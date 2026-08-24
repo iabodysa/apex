@@ -1,17 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Missed Cleaning Tasks — cleaning logs marked missed or needing rework.
-
-Reads the Cleaning Log directly, unlike the Cleaning Compliance Today card, whose ledger
-sibling (the immutable Cleaning Compliance Ledger) only gains rows once a log is
-SUBMITTED. Submitting a daily cleaning log is not required, so anything answering from
-the ledger side alone would stay empty on a deployment that never submits them.
-
-A CANCELLED log is excluded from both queries. It had no docstatus filter at all, so a log
-someone cancelled would still be reported as a missed cleaning — sending a supervisor after
-a record that was withdrawn. Drafts are deliberately kept: on a site where the submit step
-is not used, excluding them would empty the report rather than correct it.
-"""
 
 import frappe
 from frappe import _
@@ -22,7 +10,6 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Missed Cleaning Tasks report."""
     filters = filters or {}
 
     date_from = getdate(filters.get("date_from") or add_days(today(), -30))
@@ -48,7 +35,6 @@ def execute(filters=None):
             return columns, []
 
     def apply_building_scope(qf):
-        """Adds the building filter to a query based on the chosen building or the caller's scope."""
         if chosen:
             qf["building"] = chosen
         elif restrict:
@@ -106,7 +92,6 @@ def execute(filters=None):
         employee_name_map = {e.name: e.employee_name for e in emp_rows}
 
     def build_row(log, issue_label):
-        """Builds one report row from a Cleaning Log with the cleaner's name and days since resolved."""
         cleaner_label = log.cleaner_name or ""
         if log.cleaner_employee:
             cleaner_label = employee_name_map.get(log.cleaner_employee) or log.cleaner_employee

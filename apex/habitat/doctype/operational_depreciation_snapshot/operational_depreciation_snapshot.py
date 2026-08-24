@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Operational Depreciation Snapshot controller."""
 
 from __future__ import annotations
 
@@ -16,17 +15,6 @@ from apex.apex_core.doctype.habitat_settings.habitat_settings import effective_r
 class OperationalDepreciationSnapshot(Document):
     @staticmethod
     def clear_old_logs(days=None):
-        """Log Settings cleanup hook. A submittable, NON-financial snapshot of
-        operational asset book values (no GL impact) that managers archive at a point
-        in time for the Operational Depreciation Aging report. Registered in hooks
-        ``default_log_clearing_doctypes`` and invoked by ``daily_maintenance``
-        (run_log_clean_up). A two-year retention caps unbounded growth while keeping
-        enough aging history; only SUBMITTED (docstatus=1) snapshots older than
-        ``days`` are purged — drafts are preserved. The window comes from Habitat
-        Settings ``depreciation_snapshot_retention_days`` (default 730) when the
-        caller does not pass ``days``. The child ``Depreciation Snapshot Item`` rows
-        are deleted explicitly FIRST, because ``frappe.db.delete`` does not cascade
-        to a parent's children (unlike ``frappe.delete_doc``)."""
         days = effective_retention_days("depreciation_snapshot_retention_days", days)
         parent = frappe.qb.DocType("Operational Depreciation Snapshot")
         cutoff = Now() - Interval(days=days)
@@ -46,19 +34,16 @@ class OperationalDepreciationSnapshot(Document):
 
 
 def validate(doc, method=None):
-    """Requires at least one asset line, computes each row's book value, and totals them."""
     _compute_book_values(doc)
     doc.total_book_value = sum(flt(row.book_value) for row in doc.items)
 
 
 def before_cancel(doc, method=None):
-    """Blocks cancellation when no Cancellation Reason has been given."""
     if not doc.cancellation_reason:
         frappe.throw(_("Cancellation Reason is required before cancelling a Depreciation Snapshot."))
 
 
 def _compute_book_values(doc):
-    """Computes each row's book value from its policy's method, useful life, and residual percent."""
     policy_cache: dict[str, "Document"] = {}
     for row in doc.items:
         if row.policy and row.policy not in policy_cache:

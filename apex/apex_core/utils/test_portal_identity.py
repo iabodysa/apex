@@ -1,14 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A portal capacity's User is never a desk user.
-
-``driver@apex.internal`` and ``worker@apex.internal`` are the two shared identities
-every driver's and every worker's portal write runs under (see the module docstring in
-``portal_identity.py`` for why there is no per-person User). Their ``user_type`` is
-what ``frappe/www/app.py:25`` reads to decide whether ``/app`` opens, and that field is
-computed from the ``desk_access`` of the roles the user holds -- so the invariant under
-test is not either role directly, it is the identity those roles' flags ultimately gate.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -27,8 +18,6 @@ WORKER_CAPACITY_ROLE = "Portal Worker Capacity"
 
 
 class TestDriverCapacityHasNoDeskAccess(FrappeTestCase):
-    """Corrupts a role the way ``DocType.make_module_and_roles`` does, then proves
-    the shared driver identity is not left as a desk user."""
 
     def tearDown(self):
         close_capacity_desk_access(DRIVER)
@@ -43,7 +32,6 @@ class TestDriverCapacityHasNoDeskAccess(FrappeTestCase):
         )
 
     def test_a_driver_write_self_heals_the_capacity_users_type(self):
-        """The invariant this ships to prove: a driver's User is not a desk user."""
         frappe.db.set_value("Role", DRIVER_CAPACITY_ROLE, "desk_access", 1, update_modified=False)
         driver = frappe.get_doc(
             {
@@ -63,8 +51,6 @@ class TestDriverCapacityHasNoDeskAccess(FrappeTestCase):
         )
 
     def test_an_already_correct_role_is_left_alone(self):
-        """No write happens when nothing is broken -- ``close_capacity_desk_access``
-        reads before it writes, so a healthy site pays one query and nothing else."""
         close_capacity_desk_access(DRIVER)
         writes = []
         real_get_doc = frappe.get_doc
@@ -83,8 +69,6 @@ class TestDriverCapacityHasNoDeskAccess(FrappeTestCase):
 
 
 class TestWorkerCapacityHasNoDeskAccess(FrappeTestCase):
-    """The Worker mirror of :class:`TestDriverCapacityHasNoDeskAccess` -- same
-    mechanism, same primitive, the other capacity role pair."""
 
     def tearDown(self):
         close_capacity_desk_access(WORKER)
@@ -99,7 +83,6 @@ class TestWorkerCapacityHasNoDeskAccess(FrappeTestCase):
         )
 
     def test_an_employee_write_self_heals_the_capacity_users_type(self):
-        """The invariant this ships to prove: a worker's User is not a desk user."""
         frappe.db.set_value("Role", WORKER_CAPACITY_ROLE, "desk_access", 1, update_modified=False)
         employee = make_employee(name="_Test Portal Worker", company=default_company())
         self.addCleanup(
@@ -113,8 +96,6 @@ class TestWorkerCapacityHasNoDeskAccess(FrappeTestCase):
         )
 
     def test_an_already_correct_role_is_left_alone(self):
-        """No write happens when nothing is broken -- ``close_capacity_desk_access``
-        reads before it writes, so a healthy site pays one query and nothing else."""
         close_capacity_desk_access(WORKER)
         writes = []
         real_get_doc = frappe.get_doc
@@ -133,7 +114,6 @@ class TestWorkerCapacityHasNoDeskAccess(FrappeTestCase):
 
 
 class TestCloseAllCapacityDeskAccess(FrappeTestCase):
-    """The single ``after_migrate`` entry point -- both capacities, one call."""
 
     def tearDown(self):
         close_all_capacity_desk_access()
@@ -153,14 +133,6 @@ class TestCloseAllCapacityDeskAccess(FrappeTestCase):
 
 
 class TestPushSubscriptionListIsShutToACapacity(FrappeTestCase):
-    """A capacity lists no push registration, not even its own subject's.
-
-    ``has_permission`` reaches a controller hook only through ``get_doc_permissions``,
-    which frappe runs under ``if doc:`` (frappe/permissions.py:125-128), so a list is
-    decided by the DocPerm alone -- and both capacity roles carry ``read`` with no
-    ``if_owner``. The list fragment is therefore the only thing standing between one
-    capacity user and every subject's endpoint and keys.
-    """
 
     def setUp(self):
         self.employee = make_employee(company=default_company()).name

@@ -1,18 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Every seeded grant gives exactly the permission types it names, and no other.
-
-``frappe.permissions.add_permission`` grants ``read`` by default, so a row seeded with
-its default would hand a role the ability to open records it is only meant to raise.
-Thirteen of these rows grant ``select`` alone — the Link-field picker — and two grant
-``create`` alone, which is what lets a telecom coordinator raise a draft Material
-Request or Payment Entry without gaining the procurement and payment surface those
-DocTypes otherwise carry.
-
-The test reads Custom DocPerm rather than calling ``has_permission``, because the row is
-the shipped artefact: a User Permission or a role a site adds later changes the answer
-``has_permission`` gives without changing what this app granted.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -24,7 +11,6 @@ from apex.apex_core.setup.app_owned_permissions_seed import (
 
 
 class TestAppOwnedPermissionsGrantOnlyWhatTheyName(FrappeTestCase):
-    """Each seeded row carries its declared permission types and zero others."""
 
     def test_every_seeded_row_matches_its_declaration(self):
         checked = 0

@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``_clean_adhoc_passengers`` takes its JSON-or-list ``passengers`` argument
-straight to ``frappe.parse_json`` (frappe/__init__.py:2491), which already
-runs the ``isinstance(x, str)`` check before calling ``json.loads``. This
-fails the moment the function goes back to a hand-rolled
-``isinstance(passengers, str)`` guard ahead of a bare ``json.loads``.
-"""
 
 import ast
 import inspect

@@ -1,12 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A misconfigured Recovery Salary Component silently no-ops every scheduled
-recovery run. Neither is a Python ``logger`` call — floored at ERROR in
-production (frappe/utils/logger.py:12) — nor a document of its own to carry
-the outcome, so the refusal is reported through ``frappe.log_error``, a
-persisted Error Log entry any System Manager can read in Desk regardless of
-the site's logger floor.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase

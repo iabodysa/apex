@@ -1,34 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Portal Device — one row per device a worker or driver has enrolled through a
-one-time Masar Worker Token key.
-
-The QR a supervisor issues (``masar_worker_token.issue_worker_link`` /
-``issue_driver_link``) is unchanged; what changes is what scanning it MEANS.
-:func:`consume_enrolment_key` treats the presented Masar Worker Token as a
-single-use enrolment key rather than a standing bearer: it mints a fresh,
-device-only secret, stores that secret's hash here, and marks the token row
-``consumed_on`` so a second scan of the same key is refused. The minted secret is
-what ``apex/www/masar.py``/``apex/www/driver.py`` would cookie going forward —
-``portal_identity.resolve_portal_subject`` already accepts it via
-``_resolve_portal_device`` — so every existing portal endpoint recognises a
-device-enrolled holder with no change of its own.
-
-Why a separate DocType and not more fields on Masar Worker Token: that row's
-``autoname`` sets ``name`` to the driver or employee itself, which is a one-row-
-per-subject constraint at the PRIMARY KEY, not only the ``unique`` flags on
-``employee``/``driver`` — dropping those flags alone would still collide on
-``name`` for a second device. Several out-of-scope callers
-(``apex/habitat/api/front_desk.py``, ``apex/habitat/api/arrivals_desk.py``) also
-read that single row with ``frappe.db.get_value(..., {"party_type":...,"party":...})``,
-which is only correct while at most one row exists per subject. Adding a device
-DIMENSION next to the subject's single standing key — rather than multiplying that
-key — leaves every one of those reads correct unchanged.
-
-``track_changes`` stays 0 for the same reason it stays 0 on Masar Worker Token
-(see that DocType's own controller docstring): ``device_hash`` is a Data field, and
-``Version.get_diff`` would otherwise copy a device's hash history into a Version
-row a System Manager can read.
-"""
 
 from __future__ import annotations
 
@@ -65,7 +35,6 @@ _IMMUTABLE_FIELDS = (
 
 
 class PortalDevice(Document):
-    """Controller for one enrolled worker or driver device."""
 
     def validate(self):
         if self.holder_type == WORKER:
@@ -80,12 +49,6 @@ class PortalDevice(Document):
         self._apply_revocation_rules()
 
     def on_update(self):
-        """Fires the audit log staged by :func:`_apply_revocation_rules`, after
-        ``Document.save`` has already committed the row -- the desk supervisor's
-        revoke-by-save is the only revoking writer that reaches this controller at
-        all (the other three go through ``frappe.db.set_value`` and log
-        themselves), so this is also the only place that needs to.
-        """
         if not getattr(self, "_pending_revocation_log", False):
             return
         self._pending_revocation_log = False
@@ -100,7 +63,6 @@ class PortalDevice(Document):
         )
 
     def _validate_immutable_fields(self) -> None:
-        """Blocks any change to the fields only :func:`consume_enrolment_key` may set."""
         if self.is_new():
             return
         persisted = frappe.db.get_value(self.doctype, self.name, _IMMUTABLE_FIELDS, as_dict=True)
@@ -116,19 +78,6 @@ class PortalDevice(Document):
             )
 
     def _apply_revocation_rules(self) -> None:
-        """React to a ``revoked`` transition on a desk SAVE -- the only writer that
-        reaches this controller at all (the other three revoking writers go
-        through ``frappe.db.set_value`` and already stamp and log themselves: see
-        :func:`apex.apex_core.utils.portal_identity.revoke_subject_devices`,
-        :func:`revoke_own_device` below and ``_evict_oldest_if_over_cap`` below).
-
-        1 -> 0 is blocked outright: the field's own description is the contract
-        ("Never cleared -- a returning device enrols afresh with a new key"). 0 ->
-        1 stamps ``revoked_on`` when the caller left it blank and queues the audit
-        log for :meth:`on_update` -- by the time ``validate`` runs, ``Document.save``
-        has already confined this SAVE to the acting supervisor's own project or
-        building (``portal_device_has_permission``'s ``write`` gate).
-        """
         self._pending_revocation_log = False
         if self.is_new():
             return
@@ -145,14 +94,12 @@ class PortalDevice(Document):
 
 
 def _default_label() -> str:
-    """A short, non-identifying default device label from the request's user agent."""
     request = getattr(frappe.local, "request", None)
     agent = (request.headers.get("User-Agent") if request else "") or ""
     return agent[:140] or _("Device")
 
 
 def _refuse_enrolment(audience: str, subject: str | None) -> None:
-    """Throttles, logs the refusal with status Failed, and raises -- as loud as a success."""
     throttle_bad_token_attempt()
     log_portal_device_event(audience, subject, ENROLMENT_REFUSED, "Failed")
     frappe.throw(
@@ -162,16 +109,6 @@ def _refuse_enrolment(audience: str, subject: str | None) -> None:
 
 
 def consume_enrolment_key(audience: str, raw_key: str, device_label: str | None = None) -> str | None:
-    """One-time enrolment: resolve an unconsumed Masar Worker Token key, mint a
-    fresh device bearer secret, insert the Portal Device row, and mark the key
-    consumed — all in ONE transaction, the token row locked before the verdict so
-    two concurrent scans of the SAME key cannot both succeed.
-
-    Returns the RAW device secret on success (the only moment it exists in
-    clear — the caller cookies it exactly as ``portal_identity.set_token_cookie``
-    already does for a Masar Worker Token). A refusal never returns; it throws
-    through :func:`_refuse_enrolment`, which never receives the raw key either.
-    """
     raw_key = (raw_key or "").strip()
     if not raw_key:
         _refuse_enrolment(audience, None)
@@ -241,12 +178,6 @@ def consume_enrolment_key(audience: str, raw_key: str, device_label: str | None 
 
 
 def _evict_oldest_if_over_cap(audience: str, subject: str, keep_name: str) -> str | None:
-    """Evict the oldest un-revoked device once a subject holds more than
-    ``portal_identity.MAX_DEVICES_PER_SUBJECT`` — see that constant's own
-    docstring for why it stands in for ``User.simultaneous_sessions``. The evicted
-    row is REVOKED, not deleted, so it stays in the holder's device list beside the
-    surviving one.
-    """
     field = "employee" if audience == WORKER else "driver"
     cap = MAX_DEVICES_PER_SUBJECT[audience]
     Device = frappe.qb.DocType("Portal Device")
@@ -276,22 +207,6 @@ def _evict_oldest_if_over_cap(audience: str, subject: str, keep_name: str) -> st
 
 
 def list_devices_for(audience: str, subject: str) -> list:
-    """Every device row belonging to one already-authenticated subject, revoked or
-    not — the holder must see an evicted or self-revoked row too, not only the
-    survivors.
-
-    Reads via ``frappe.get_list`` — genuinely permission-checked, unlike
-    ``frappe.get_all``, which sets ``ignore_permissions=True`` unconditionally
-    (frappe/__init__.py:2050) — run as the audience's capacity user so the read
-    carries real DocPerm (``read: 1`` on ``Portal Worker Capacity`` /
-    ``Portal Driver Capacity``) rather than none at all. Scoping to exactly this
-    ``subject`` — never another holder's rows — comes from
-    ``portal_device_scope_query``'s own capacity branch
-    (``permission_query_conditions``, registered in ``hooks.py``), which reads
-    back the SAME ``subject`` :func:`apex.apex_core.utils.portal_identity.
-    as_capacity` bound for this call; ``filters`` here is redundant with it by
-    design, not a second, competing scope.
-    """
     field = "employee" if audience == WORKER else "driver"
     with as_capacity(audience, subject=subject):
         return frappe.get_list(
@@ -304,11 +219,6 @@ def list_devices_for(audience: str, subject: str) -> list:
 
 
 def revoke_own_device(audience: str, subject: str, device_name: str) -> bool:
-    """Revoke exactly one of the CALLING holder's own devices. ``subject`` is the
-    caller's own token-resolved identity; the row's ``employee``/``driver`` must
-    match it or the call is refused as not-found — one holder can never revoke
-    another's device even by guessing a name.
-    """
     field = "employee" if audience == WORKER else "driver"
     row = frappe.db.get_value(
         "Portal Device",

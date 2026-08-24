@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain)."""
 
 from __future__ import annotations
 
@@ -23,14 +22,6 @@ CUSTODY_ROLE = "Resident Supervisor"
 
 
 def consumable_custody_expiry_watch() -> None:
-    """Flag held custody consumables past their per-article lifespan.
-
-    A held position is a net-positive (item, employee) balance in the
-    Accommodation Stock Ledger; its age is months since the EARLIEST still-held
-    issue posting. Articles carry their own ``consumable_lifespan_months`` (0 = no
-    expiry) so linens/mattresses age out without hardcoding a flat year. One
-    bounded grouped query; the alert is one Warning per over-age position per day.
-    """
     sle = frappe.qb.DocType("Accommodation Stock Ledger")
     art = frappe.qb.DocType("Custody Article")
     rows = (
@@ -104,26 +95,6 @@ def consumable_custody_expiry_watch() -> None:
 
 
 def weekly_custody_digest() -> None:
-    """Email each building's responsible supervisor a weekly custody roll-up.
-
-    Per building: open custody issues (Issued / Partially Returned), of those the
-    count already past ``expected_return_date``, the value still in worker
-    hands (net signed ledger value, the same definition as the value-in-hands
-    card), and damage assessed month-to-date. Buildings are grouped by their
-    ``responsible_supervisor`` so each supervisor receives only their own
-    buildings. Buildings with no supervisor, or a disabled supervisor user, are
-    skipped — oversight roles already see the dashboards.
-
-    Gated by the master email kill-switch; per-recipient delivery is isolated
-    (rollback before log) so one bad recipient never aborts the rest. Idempotent:
-    a re-run re-sends the current snapshot and mutates no state.
-
-    Not a native Notification: Notification.send fires per single document event
-    (frappe/email/doctype/notification/notification.py:169), while this is one
-    grouped table aggregated across every open Custody Issue and every building a
-    supervisor owns. No document event corresponds to "a week has elapsed"; this
-    IS the periodic job Notification has no shape for.
-    """
     logger = frappe.logger()
 
     if not frappe.db.get_single_value("Habitat Settings", "enable_email_notifications"):

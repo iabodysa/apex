@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Return controller."""
 
 from __future__ import annotations
 
@@ -24,7 +23,6 @@ class CustodyReturn(Document):
 
 
 def validate(doc, method=None):
-    """Blocks a return with no items, a non-positive qty, bad serials, or qty over what was issued."""
     sync_party_employee(doc, employee_field="returned_by_employee")
     for row in doc.items:
         if (row.qty or 0) <= 0:
@@ -35,15 +33,6 @@ def validate(doc, method=None):
 
 
 def _link_issue_lines(doc):
-    """Resolve every return line to the issue line it answers, once, on save.
-
-    Without it the receipt re-matches article and serial each time it prints, so the
-    reconciliation the paper shows depends on when it was printed rather than on what was
-    agreed. A serial identifies its line outright; an unserialised article resolves only
-    while exactly one issue line carries it, because a guess is worse than a blank. A line
-    that resolves to nothing is cleared, so re-pointing a return never leaves a stale
-    reference behind.
-    """
     issue_rows = frappe.get_all(
         "Custody Issue Item",
         filters={"parent": doc.custody_issue, "parenttype": "Custody Issue"},
@@ -69,9 +58,6 @@ def _link_issue_lines(doc):
 
 
 def _validate_return_quantities(doc):
-    """Reject returning more than was issued, per article, across all submitted
-    returns for the linked Custody Issue (prevents over-return and duplicate
-    full returns)."""
     if not doc.custody_issue or not frappe.db.exists("Custody Issue", doc.custody_issue):
         return
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
@@ -118,19 +104,12 @@ def _validate_return_quantities(doc):
 
 
 def _progress_from(issued, returned):
-    """The status a Custody Issue should carry given its per-article issued vs
-    returned quantities. 'Returned' ONLY when every issued article is fully
-    accounted for — the same per-article model the validator enforces, never a
-    cross-article quantity SUM."""
     fully = bool(issued) and all(returned.get(a, 0) >= q for a, q in issued.items())
     any_returned = any(returned.get(a, 0) > 0 for a in issued)
     return "Returned" if fully else "Partially Returned" if any_returned else "Issued"
 
 
 def _issue_return_progress(issue, exclude=None):
-    """Per-article return progress of a Custody Issue across its SUBMITTED returns
-    (optionally excluding one return being cancelled). Single source of truth shared
-    by on_submit and on_cancel."""
     issued = {}
     for it in issue.items:
         issued[it.article] = issued.get(it.article, 0) + (it.qty or 0)
@@ -153,7 +132,6 @@ def _issue_return_progress(issue, exclude=None):
 
 
 def on_submit(doc, method=None):
-    """Updates the linked Custody Issue's return status and posts the return into the stock ledger."""
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     if issue.docstatus == 1:
         try:
@@ -171,10 +149,6 @@ def on_submit(doc, method=None):
 
 
 def _post_return_stock(doc):
-    """Move stock from the holder's custody back into the building store on the
-    Accommodation Stock Ledger. ``returned_by_employee`` is the older Employee-only
-    field and still wins where set; otherwise the party pair names the holder, which
-    is how a Temporary Worker returns what was issued to them."""
     if doc.get("returned_by_employee"):
         party_type, party = "Employee", doc.returned_by_employee
     else:
@@ -192,10 +166,6 @@ def _post_return_stock(doc):
 
 
 def before_cancel(doc, method=None):
-    """Every refusal a cancel can raise lives here, before db_update() stamps
-    docstatus 2 — so a refused return is left submitted rather than reading as
-    cancelled for the rest of the request. Read-only; writes nothing, which is why
-    the issue-progress recompute stays in on_cancel below."""
     damage = frappe.get_all(
         "Custody Damage Assessment",
         filters={"custody_return": doc.name, "docstatus": 1},
@@ -211,7 +181,6 @@ def before_cancel(doc, method=None):
 
 
 def on_cancel(doc, method=None):
-    """Recomputes the linked Custody Issue's return status and reverses its stock ledger entries."""
     issue = frappe.get_doc("Custody Issue", doc.custody_issue)
     try:
         status = _issue_return_progress(issue, exclude=doc.name)
@@ -230,13 +199,9 @@ _DAMAGED_CONDITIONS = ("Damaged", "Lost")
 
 @frappe.whitelist()
 def make_damage_assessment(source_name, target_doc=None):
-    """Open a draft Custody Damage Assessment pre-filled from a submitted return:
-    only the Damaged/Lost rows carry over, and the back-link + worker derive so the
-    coordinator just fills the per-item damage description and replacement cost."""
     frappe.has_permission("Custody Return", "read", doc=source_name, throw=True)
 
     def set_missing_values(source, target):
-        """Stamps the new Custody Damage Assessment's source return link and today's assessment date."""
         target.custody_return = source.name
         target.assessment_date = nowdate()
 

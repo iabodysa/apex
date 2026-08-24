@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Custody Handover's OTP hash and its own building/supervisor/qty
-refusals.
-
-Patterned on test_lease.py. ``hash_otp`` is pure sha256 arithmetic -- no
-document, no DB. ``validate()``'s refusals are exercised by calling the bound
-method directly on an unsaved ``frappe.new_doc("Custody Handover")`` with no
-item carrying an ``item_type``/``item`` pair, so ``resolve_item``'s one DB
-read is never reached and nothing is inserted.
-"""
 
 from __future__ import annotations
 

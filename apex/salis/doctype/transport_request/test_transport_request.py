@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""``is_assigned``/``assigned_to_trip`` carried ``allow_on_submit: 1`` while every
-writer in the app (``apex.salis.utils.drive_transport_request`` and
-``revert_transport_request``) reaches them only through ``frappe.db.set_value`` —
-a write path that needs no framework permission at all. Removing the flag lets
-the framework refuse a plain ``save()`` edit to them again. Proven through
-``insert()``/``submit()``/``save()``, never by calling a controller method
-directly.
-"""
 
 from __future__ import annotations
 

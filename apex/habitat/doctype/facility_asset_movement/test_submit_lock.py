@@ -1,13 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""``accounting_acknowledged`` and ``accounting_acknowledged_by`` are ONLY ever
-written by ``acknowledge_intercompany_movement``'s ``doc.db_set(...)`` (which
-runs no controller validation and so needs no ``allow_on_submit``); grep across
-``apex/`` and ``frontend/`` turns up no other writer. Both were left
-``allow_on_submit: 1`` regardless, opening a plain ``save()`` edit path the app
-never used. Removing the flag closes it; this proves the framework itself
-(``_validate_update_after_submit``, frappe/model/base_document.py) now refuses
-the edit.
-"""
 
 from __future__ import annotations
 

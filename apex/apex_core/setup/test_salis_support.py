@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``_parse_workdays`` tries ``frappe.parse_json`` (frappe/utils/__init__.py:875)
-before falling back to a comma split for a plain-text weekly-off field. This
-fails the moment the JSON branch goes back to a bare ``json.loads``, since
-``json.JSONDecodeError`` is still the exception the fallback catches either
-way and only the call target tells the two apart.
-"""
 
 import ast
 import inspect

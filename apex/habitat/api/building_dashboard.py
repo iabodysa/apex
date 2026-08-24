@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""On-form dashboard metrics for the Building form.
-
-Frappe's form `get_data()` only renders the links/transactions section; the
-occupancy chart and indicator counts at the top of the form are rendered
-client-side (building.js) from this whitelisted reader.
-"""
 
 from __future__ import annotations
 
@@ -15,16 +9,6 @@ from frappe.utils import flt
 
 @frappe.whitelist()
 def get_building_layout(building: str) -> dict:
-    """Return a floor-grouped room layout for the building dashboard.
-
-    One query, grouped by floor (ascending). Each room carries a server-computed
-    ``room_color``:
-      - green  : status "Available"
-      - orange : status "Partially Occupied" OR readiness_status indicates
-                 needs cleaning / repair
-      - red    : status "Full"
-      - grey   : status "Under Maintenance" or "Out of Service"
-    """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     rooms = frappe.get_list(
@@ -46,7 +30,6 @@ def get_building_layout(building: str) -> dict:
     _NEEDS_ATTENTION = {"Needs Cleaning", "Needs Repair"}
 
     def _color(room):
-        """Picks the dashboard tile colour for a room from its status and readiness flags."""
         s = (room.status or "").strip()
         r = (room.readiness_status or "").strip()
         if s in ("Under Maintenance", "Out of Service"):
@@ -106,14 +89,6 @@ def get_building_layout(building: str) -> dict:
 
 @frappe.whitelist()
 def get_building_metrics(building: str) -> dict:
-    """Occupancy, maintenance and custody counters for one Building's form dashboard.
-
-    Consumed only by ``_renderBuildingDashboard`` in building.js, which calls
-    ``frm.dashboard.reset()`` before drawing these. ``reset()`` also hides the native
-    Connections area, so the client must call ``render_links()`` straight after it or
-    the linked-document groups (Rooms, Beds, Leases, Residents, ...) disappear from the
-    form.
-    """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     snaps = frappe.get_list(

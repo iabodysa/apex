@@ -1,48 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Employee cost recovery on the native HRMS Employee Advance chain.
-
-Native primitive, no bespoke DocType. An operational loss recovered from a worker
-is exactly what HRMS already models:
-
-    Employee Advance          the receivable the worker owes the company. Carries
-                              the balance (``advance_amount`` / ``paid_amount`` /
-                              ``return_amount``) that a one-shot deduction cannot.
-    Journal / Payment Entry   the company payment, raised ONLY through HRMS's own
-                              ``employee_advance.make_bank_entry`` button. This
-                              module posts NO GL, Journal or Payment Entry — there
-                              is exactly one employee-advance accounting path and
-                              it is HRMS's.
-    Additional Salary         one installment, ``ref_doctype``/``ref_docname``
-                              pointed at the advance. HRMS's own
-                              ``update_return_amount_in_employee_advance`` moves
-                              ``return_amount`` on submit and reverses it on
-                              cancel, so the recovered balance is maintained
-                              natively — never recomputed here.
-
-This module only decides WHETHER and HOW MUCH. The deduction side is gated by
-Salis Settings and is OFF by default, so no wage is touched until Accounts and
-Payroll configure the native recovery Salary Component. Raising the
-receivable is NOT policy-gated — an advance is a lawful receivable regardless; only
-its recovery from wages is capped by KSA Labor Law Art. 91.
-
-Outstanding is measured from ``paid_amount``, which only the native payment entry sets, so
-nothing is deducted for money the company never disbursed. Per-period headroom comes from an
-unsaved native Salary Slip preview, leaving deductions, tax, loans and proration HRMS-owned.
-
-The two inserts and the slip preview pass ``ignore_permissions`` because the actor is the
-operator who recorded the loss — a custody or fleet supervisor — and Employee Advance and
-Additional Salary are HRMS payroll documents. Granting a supervisor create on those to satisfy
-this call would hand them the payroll surface, which is the opposite of what a recovery flow
-should cost. The preview is never saved. Both real documents land where HRMS's own submit path
-takes over, and the caller's authority was already checked on the damage or incident record.
-
-Source linkage is two-way and duplicate-safe: the source row is locked before the
-existing-link check and insert, and the source document keeps its own
-``Employee Advance`` link, and the advance carries ``custom_source_doctype`` /
-``custom_source_document`` (Customization shipped in apex_core/custom/employee_advance.json),
-so "one source document maps to at most one advance" survives an amendment on either side.
-Vehicle Incident now uses a native Loan; this module stays wired until its own advances clear.
-"""
 
 from __future__ import annotations
 
@@ -67,16 +23,6 @@ OPEN_ADVANCE_STATUSES = ("Unpaid", "Paid")
 
 
 def find_recovery_advance(source_doctype: str, source_name: str) -> str | None:
-    """The non-cancelled Employee Advance already raised for a source document.
-
-    The "maps once" guarantee: keyed on the advance itself, so it holds even when
-    the source document is amended (an amendment starts with a blank no_copy link).
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
-    the custom field is read, because this app's recovery link is a Custom Field on
-    hrms' Employee Advance: on a site where the fixture has not synced yet the column
-    does not exist, and querying it raises instead of answering "no advance".
-    """
     if not (
         source_name
         and frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD)
@@ -94,7 +40,6 @@ def find_recovery_advance(source_doctype: str, source_name: str) -> str | None:
 
 
 def backfill_recovery_snapshots():
-    """Fill new immutable snapshots from linked Vehicle Incidents after customization sync."""
     meta = frappe.get_meta("Employee Advance")
     if not all(
         meta.has_field(fieldname)
@@ -150,28 +95,6 @@ def raise_recovery_advance(
     company: str | None = None,
     posting_date: str | None = None,
 ) -> str | None:
-    """Raise (once) the submitted Employee Advance recovering ``amount`` from ``employee``.
-
-    Returns the advance name, or the pre-existing one when this source document has
-    already been mapped. Returns ``None`` — recording why in Error Log, never
-    throwing — when the site is not configured for employee advances yet (no
-    company, no Employee Advance account); the operational document must still be
-    submittable on a site whose Accounts setup is incomplete. Each guard's
-    ``frappe.log_error`` carries ``reference_doctype``/``reference_name`` pointed at
-    the source document rather than ``frappe.logger().warning``, which never reaches
-    production (frappe/utils/logger.py:12 floors it above WARNING there) and leaves
-    an operator with no record that the recovery was dropped.
-
-    The advance account is checked to be of type Receivable before the Employee Advance
-    is built: HRMS requires a Receivable advance account and throws on submit, so
-    catching it here degrades to a logged Error Log entry instead of a failed submit.
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) gates the read
-    of this app's Custom Field on hrms' Employee Advance. The one thing the field
-    cannot do is exist before its fixture syncs, so on a site mid-upgrade the column
-    is absent and querying it raises — which would fail the operational submit rather
-    than the advance.
-    """
     logger = frappe.logger()
     amount = flt(amount)
     if not (employee and amount > 0):
@@ -287,13 +210,6 @@ def raise_recovery_advance(
 
 
 def _salary_preview(employee: str, payroll_date: str):
-    """Return an unsaved native Salary Slip preview and its active assignment.
-
-    ``make_salary_slip`` raising is an unexpected native-call failure, not a
-    business "nothing to recover" outcome, so it goes to ``frappe.log_error``
-    (a persisted Error Log entry) rather than a plain logger call that never
-    reaches production (frappe/utils/logger.py:12 floors it above WARNING there).
-    """
     assignment = frappe.db.get_value(
         "Salary Structure Assignment",
         {
@@ -325,7 +241,6 @@ def _salary_preview(employee: str, payroll_date: str):
 
 
 def _salary_period(preview) -> tuple[date, date] | None:
-    """Return the native preview's authoritative payroll boundaries."""
     start = getattr(preview, "start_date", None)
     end = getattr(preview, "end_date", None)
     if not (start and end):
@@ -346,11 +261,6 @@ def _draft_deductions(
     end: str,
     exclude_additional_salary: str | None = None,
 ) -> float:
-    """Other draft deductions not yet visible to HRMS's native Salary Slip preview.
-
-    Submitted Additional Salaries are already included by ``make_salary_slip``. Drafts
-    are subtracted separately using HRMS's same period-end recurring-row semantics.
-    """
     filters = {
         "employee": employee,
         "type": "Deduction",
@@ -384,12 +294,6 @@ def _draft_deductions(
 def _pending_installments(
     advance: str, exclude_additional_salary: str | None = None
 ) -> float:
-    """Installments already queued against an advance but not yet submitted.
-
-    A submitted installment has already moved the advance's ``return_amount``
-    natively; a draft has not, so it must be subtracted from the outstanding balance
-    by hand or the next run would queue the same money twice.
-    """
     filters = {
         "ref_doctype": "Employee Advance",
         "ref_docname": advance,
@@ -409,12 +313,6 @@ def _pending_installments(
 def bounded_installment(
     outstanding: float, configured_limit: float, agreed: float = 0.0
 ) -> float:
-    """The lowest binding limit on one installment, floored at zero.
-
-    Pure arithmetic, deliberately free of any DB read: ``agreed <= 0`` means "no
-    installment agreed" (not "recover nothing"), and either binding limit hitting
-    zero defers the whole recovery.
-    """
     limits = [flt(outstanding), flt(configured_limit)]
     if flt(agreed) > 0:
         limits.append(flt(agreed))
@@ -429,24 +327,6 @@ def compute_recovery_installment(
     locked_advance=None,
     salary_preview=None,
 ) -> float:
-    """The amount recoverable from ONE pay period against ``advance``, in company currency.
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
-    each optional limit is read: several of the ceilings live on Custom Fields, and a
-    site whose fixtures have not synced must recover a SMALLER amount rather than
-    raise. A missing limit therefore drops out of the minimum instead of aborting it.
-
-    The lowest of every binding limit, floored at zero:
-
-      * outstanding — what the company actually paid out and has not recovered yet,
-        minus installments already queued;
-      * the agreed installment snapshotted on the Employee Advance (0 = none agreed);
-      * the configured scheduling limit, never above 50% of actual-period gross pay;
-      * nonnegative native preview net pay less other draft deductions.
-
-    0.0 means "recover nothing this period" (policy off, no wage known, balance
-    cleared, or the period is fully committed) and the caller must defer, not post.
-    """
     payroll_date = payroll_date or today()
     fields = [
         "employee",
@@ -523,7 +403,6 @@ def compute_recovery_installment(
 
 
 def validate_recovery_additional_salary(doc, method=None):
-    """Revalidate an Apex recovery draft immediately before native HRMS submission."""
     if doc.ref_doctype != "Employee Advance" or not doc.ref_docname:
         return
     if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):
@@ -574,15 +453,6 @@ def validate_recovery_additional_salary(doc, method=None):
 
 
 def _refuse_while_recovery_is_disabled():
-    """Refuse a person's deduction, naming the switch that has to be turned on.
-
-    The scheduled run stays a silent no-op while recovery is off, because nobody is
-    waiting on it. A person who presses Deduct, or saves a recovery Additional
-    Salary by hand, IS waiting, and a silent return teaches them the button is
-    broken. The field checks below this cannot carry the message: with recovery off
-    there is no configured component to compare against, so every one of them fails
-    and the reader is sent to inspect a document that is correct.
-    """
     if not bool(
         frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
     ):
@@ -597,15 +467,6 @@ def _refuse_while_recovery_is_disabled():
 
 
 def _recovery_component() -> str | None:
-    """Return the configured native deduction component while recovery is enabled.
-
-    A missing or misconfigured component silently no-ops every scheduled run
-    (``monthly_employee_recovery_run`` calls this once per open advance) with no
-    document of its own to carry the outcome, so it is reported through
-    ``frappe.log_error`` — an Error Log entry any System Manager can read in Desk
-    regardless of the site's logger floor (frappe/utils/logger.py:12 floors it at
-    ERROR in production, above where a warning would ever surface).
-    """
     if not bool(
         frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery")
     ):
@@ -630,12 +491,6 @@ def _recovery_component() -> str | None:
 
 @frappe.whitelist(methods=["POST"])
 def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -> str | None:
-    """Queue one draft Additional Salary installment against ``advance``.
-
-    Draft, not submitted: payroll keeps the final say, exactly as the Custody Damage
-    Assessment deduction does. Returns the Additional Salary name, or ``None`` when
-    recovery is deferred (nothing recoverable this period) or already queued for it.
-    """
     _refuse_while_recovery_is_disabled()
     advance_doc = frappe.get_doc("Employee Advance", advance, for_update=True)
     frappe.has_permission("Employee Advance", "read", doc=advance_doc, throw=True)
@@ -697,12 +552,6 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
 
 
 def monthly_employee_recovery_run() -> None:
-    """Queue this month's installment for every open salary-recovery advance.
-
-    No-op while Employee Advance recovery is disabled (the shipped default), so an
-    unconfigured site never deducts a wage. One advance failing never
-    stops the rest.
-    """
     if not frappe.db.get_single_value("Salis Settings", "enable_employee_advance_recovery"):
         return
     if not frappe.get_meta("Employee Advance").has_field(SOURCE_DOCTYPE_FIELD):

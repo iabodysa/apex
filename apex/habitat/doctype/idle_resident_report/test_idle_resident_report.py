@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Idle Resident Report's resolve-without-notes guard.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``validate`` in ``idle_resident_report.py`` -- wired through
-hooks.py's doc_events, not the class body -- is what is exercised, not a
-stub.
-"""
 
 from __future__ import annotations
 

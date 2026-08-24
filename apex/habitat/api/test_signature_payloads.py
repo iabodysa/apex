@@ -1,19 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A signature reaching a print format must be an image, and must stay in its attribute.
-
-The receipt renders the stored value inside ``<img src="...">`` and Frappe's Jinja
-environment does not autoescape (``frappe/utils/jinja.py`` builds a SandboxedEnvironment
-with autoescape left at its default of False), so a value carrying a quote closes the
-attribute and whatever follows runs in the session of whoever opens the receipt.
-
-Two independent layers, and both are tested here because either alone is one edit from
-being removed: the door refuses anything that is not a verified image, and the template
-escapes what it prints.
-
-The signature field is OPTIONAL. A validator that fires on a blank turns this fix into a
-refusal every kiosk user meets, so the blank case is asserted as loudly as the payload.
-"""
 
 import ast
 import base64
@@ -35,14 +21,12 @@ NOT_AN_IMAGE = "data:image/png;base64,bm90YW5pbWFnZQ=="
 
 
 class TestSignatureIsRefusedAtTheDoor(FrappeTestCase):
-    """``verified_image_type`` is the single validator both signature doors call."""
 
     def test_an_attribute_breaking_payload_is_refused(self):
         with self.assertRaises(frappe.ValidationError):
             verified_image_type(PAYLOAD)
 
     def test_a_bare_data_prefix_is_not_enough(self):
-        """The prefix check this replaces inspected five characters and passed."""
         self.assertTrue(PAYLOAD.startswith("data:"))
         with self.assertRaises(frappe.ValidationError):
             verified_image_type(PAYLOAD)
@@ -52,8 +36,6 @@ class TestSignatureIsRefusedAtTheDoor(FrappeTestCase):
             verified_image_type(NOT_AN_IMAGE)
 
     def test_a_real_image_passes(self):
-        """The positive control: without it a validator that refuses everything looks
-        identical to one that works."""
         self.assertEqual(verified_image_type(_one_pixel_png()), "image/png")
 
     def test_both_doors_call_this_one_validator(self):
@@ -62,12 +44,6 @@ class TestSignatureIsRefusedAtTheDoor(FrappeTestCase):
 
 
 class TestBlankSignatureStaysLegal(FrappeTestCase):
-    """The second negative control the fix must not break.
-
-    Both doors validate INSIDE an ``if signature:`` branch. These assert the branch is
-    still there: an unconditional validator would refuse every unsigned issue and every
-    check-in that collects the signature later.
-    """
 
     def test_the_validator_is_never_reached_for_a_blank(self):
         for module, func in ((custody_kiosk, "issue_cart"), (front_desk, "quick_check_in")):
@@ -90,7 +66,6 @@ class TestBlankSignatureStaysLegal(FrappeTestCase):
 
 
 class TestTemplateEscapesTheValue(FrappeTestCase):
-    """The render layer, proved against the real Jinja environment."""
 
     def test_an_unescaped_interpolation_breaks_the_attribute(self):
         rendered = get_jenv().from_string('<img src="{{ v }}">').render(v=PAYLOAD)
@@ -114,7 +89,6 @@ class TestTemplateEscapesTheValue(FrappeTestCase):
 
 
 def _one_pixel_png():
-    """A minimal real PNG as a data URI, built rather than pasted."""
     buffer = io.BytesIO()
     Image.new("RGB", (1, 1), (0, 0, 0)).save(buffer, format="PNG")
     return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")

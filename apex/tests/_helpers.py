@@ -1,5 +1,4 @@
 # Copyright (c) 2026, AFMCO and contributors
-"""Shared test helpers: session switching, workflow-safe submit/cancel, fixtures."""
 
 from unittest.mock import patch
 
@@ -7,12 +6,6 @@ import frappe
 
 
 class as_user:
-    """Run a block as ``user``, restoring the previous session user on exit.
-
-    Lower-cased on purpose — it is only ever used as ``with as_user(u):``, never
-    held as a value. Restores rather than resetting to Administrator, so a nested
-    block returns the caller to whatever user IT was running as.
-    """
 
     def __init__(self, user):
         self.user = user
@@ -32,15 +25,6 @@ class as_user:
 
 
 class lending_installed:
-    """Run a block as if the ``lending`` app were installed on this site.
-
-    Vehicle Incident refuses ``recover_from_driver`` where ``lending`` is absent,
-    because the recovery has no Loan to land on. A test that exercises the
-    incident's OWN bookkeeping around that flag - the link it stores, the consent
-    stamp - must therefore state the site shape it assumes instead of inheriting
-    the bench's; apex declares only frappe, erpnext and hrms, so either shape is
-    legitimate and CI runs on one of them.
-    """
 
     def __enter__(self):
         installed = frappe.get_installed_apps()
@@ -55,18 +39,6 @@ class lending_installed:
 
 
 def approve_rental_settlement(rs, manager):
-    """Drive a Rental Settlement Draft -> Reconciled -> Approved (which submits it)
-    through its native workflow as ``manager``; returns the reloaded document.
-
-    Falls back to a direct status write + submit when the workflow is not seeded on
-    this site, so the accrual assertions still run on a bench that predates it.
-
-    ``apply_workflow`` and ``get_workflow_name`` (frappe/model/workflow.py) drive the
-    real transition so the test exercises the same gate an operator would.
-    ``frappe.set_user`` (frappe/__init__.py:641) puts the manager in the chair,
-    because the one thing a workflow action cannot do is name an actor other than the
-    session user.
-    """
     from frappe.model.workflow import apply_workflow, get_workflow_name
 
     if get_workflow_name("Rental Settlement") == "Rental Settlement Workflow":
@@ -86,22 +58,6 @@ def approve_rental_settlement(rs, manager):
 
 
 def submit_via_workflow(doc):
-    """Submit a workflow-governed doc the way the workflow guard requires.
-
-    A bare ``doc.submit()`` on a workflow-governed doctype is now refused by
-    ``apex.apex_core.utils.workflow_guard`` unless the current user holds an authorized
-    transition to a submit (doc_status 1) state. Tests whose subject is the controller's
-    ``on_submit`` SIDE-EFFECT (not the approval gate) need a legitimate way to reach
-    docstatus 1: land the PERSISTED workflow state on the first submit (doc_status 1)
-    state via a raw db write —
-    the same endpoint ``set_workflow_state_on_action`` force-jumped to — so both the
-    guard's fast-path and Frappe's ``validate_workflow`` (which rejects a multi-hop
-    in-memory state jump) see the state already at the sanctioned target, then submit.
-    ``on_submit`` fires with the submit-state, exactly as a real workflow approval would.
-
-    For a non-workflow doctype this is a plain submit. NOT a substitute for a real
-    ``apply_workflow`` transition in a test that exercises the approval/self-approval gate.
-    """
     from frappe.model.workflow import get_workflow, get_workflow_name
     from frappe.utils import cint
 
@@ -123,23 +79,6 @@ def submit_via_workflow(doc):
 
 
 def _user(email, role):
-    """Return a User with ``email``, creating it if needed, and ensure it holds
-    ``role``. Idempotent: re-uses an existing user/role grant.
-
-    THE THROTTLE IS RAISED IN SITE CONFIG, NOT WORKED AROUND HERE.
-    ``throttle_user_creation`` (frappe/core/doctype/user/user.py:1250-1255) refuses the
-    sixty-first User created in any sixty-minute window. A site that already carries these
-    accounts never reaches the limit, which is why the ceiling stayed invisible until a freshly
-    rebuilt site had to create every one of them in a single run — and then refused 253 tests
-    with "Throttled". The fix is ``throttle_user_limit`` in the test site's config, which is the
-    knob the framework put there for exactly this.
-
-    ``frappe.flags.in_import`` was tried first and REVERTED: it does return early from the
-    throttle, but it also skips ``_set_defaults`` entirely (frappe/model/document.py:833-834), so
-    the user is inserted with none of its field defaults. Four notification tests then failed
-    because the account never reached the recipient list a defaulted user reaches. A flag that
-    solves the named problem and three unnamed ones is not a fix.
-    """
     if not frappe.db.exists("User", email):
         u = frappe.get_doc({"doctype": "User", "email": email,
                             "first_name": email.split("@")[0], "send_welcome_email": 0})
@@ -152,21 +91,12 @@ def _user(email, role):
 
 
 def _project(project_name="QA Scope Project"):
-    """Return a Project named ``project_name``, creating it if absent. Idempotent —
-    it gives a scoped Salis user a tenant to be permitted for.
-
-    A thin default-carrying alias over ``factories.make_project``: it was a fourth
-    hand-written copy of that get-or-create, written in a shape the copy-paste
-    detector could not group with the other three.
-    """
     from apex.tests.factories import make_project
 
     return make_project(project_name)
 
 
 def _grant_project(user, project):
-    """Grant ``user`` a Project User Permission for ``project`` (idempotent), so the
-    project-scoped Salis permission hooks admit the user's in-scope rows."""
     if not frappe.db.exists(
         "User Permission", {"user": user, "allow": "Project", "for_value": project}
     ):

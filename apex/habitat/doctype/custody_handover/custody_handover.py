@@ -1,20 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Handover controller — the OTP-confirmed move of
-externally-purchased goods from the procurement intake store into a receiving
-accommodation supervisor's building store, via the Accommodation Stock Ledger.
-
-Lifecycle: Draft -> (submit) Pending Receipt -> Under Review -> Approved
--> (confirm_handover with OTP) Confirmed; Rejected and Cancelled reverse the ship
-leg. On submit the ship leg leaves the source store and a one-time password is
-issued to the procurement supervisor; the receiving supervisor confirms receipt
-with that code, which posts the receive leg into the destination store.
-
-The two-leg ship/receive and the ledger helpers mirror Accommodation Material
-Transfer; the OTP confirmation, separation of duties, and review gate live in the
-custody_handover API module. Lifecycle logic lives as Document methods (not
-module functions) so it runs from the class without any hooks.py doc_events
-wiring. OTP generation/hashing are module functions so a regenerate from the API
-re-uses the exact same mechanism."""
 
 from __future__ import annotations
 
@@ -41,7 +25,6 @@ VOUCHER_TYPE = "Custody Handover"
 
 class CustodyHandover(Document):
     def validate(self):
-        """Blocks handovers that share a building, share a supervisor, or carry a non-positive quantity."""
         if self.from_building and self.to_building and self.from_building == self.to_building:
             frappe.throw(_("Source and destination buildings must be different."))
         if self.procurement_supervisor and self.receiving_supervisor and self.procurement_supervisor == self.receiving_supervisor:
@@ -55,8 +38,6 @@ class CustodyHandover(Document):
                 row.uom = uom
 
     def on_submit(self):
-        """Post the ship leg out of the source store, mark the handover Pending
-        Receipt, and issue the one-time password to the procurement supervisor."""
         self._assert_source_availability()
         self._post_ship_leg()
         self.db_set("status", "Pending Receipt")
@@ -64,18 +45,12 @@ class CustodyHandover(Document):
         frappe.response["handover_otp"] = code
 
     def before_cancel(self):
-        """Refuse the cancel here, not in on_cancel: this runs before db_update()
-        stamps docstatus 2, so a handover whose stock has already moved on is left
-        submitted instead of reading as cancelled for the rest of the request."""
         validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
     def on_cancel(self):
-        """Reverse every ledger row this handover posted (ship and, if any, receive)."""
         reverse_and_mark_cancelled(self, VOUCHER_TYPE)
 
     def _assert_source_availability(self):
-        """Reject the handover if the source store cannot cover the requested
-        quantity for any item (aggregated per item, in case of duplicate rows)."""
         needed = {}
         for row in self.items:
             needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
@@ -89,7 +64,6 @@ class CustodyHandover(Document):
                 )
 
     def _post_ship_leg(self):
-        """Stock leaves the source store (employee unset). Idempotent."""
         if has_stock_entries(VOUCHER_TYPE, self.name):
             return
         for row in self.items:
@@ -103,24 +77,10 @@ class CustodyHandover(Document):
 
 
 def hash_otp(code: str, name: str) -> str:
-    """The only place the OTP is hashed: sha256 of the code salted with the
-    document name, so a hash is useless on any other handover."""
     return hashlib.sha256((code + name).encode()).hexdigest()
 
 
 def generate_otp(doc) -> str:
-    """Issue a fresh 6-digit code: store ONLY its hash and an expiry window, lift any
-    lockout, and return the plaintext ONCE. The validity window falls back to 10
-    minutes when the setting is unset (a new Int field on the Habitat Settings Single
-    reads 0, not its DocType default).
-
-    The lockout lives in Redis, so clearing it is a separate call from the db_set:
-    ``otp_attempts`` and ``otp_locked_until`` are written for the record and read by
-    nothing (``apex_core/utils/otp_lockout``). Without the clear, a reissued code is
-    refused for the rest of the window by misses charged against the code it replaced.
-    Shared by the custody handover and the facility asset delivery, so both reissue
-    paths lift their lockout by issuing.
-    """
     code = f"{secrets.randbelow(1_000_000):06d}"
     validity = frappe.db.get_single_value("Habitat Settings", "handover_otp_validity_minutes") or 10
     doc.db_set({

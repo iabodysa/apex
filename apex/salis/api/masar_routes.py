@@ -1,22 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Masar route, trip and stop reading — the shared trip domain.
-
-One home for the question "what does a worker trip look like": the date window a
-trip is boardable in, the Workers-line trips a driver is running today, the
-ordered Route Stops with their Habitat pickups, the registered manifest, which
-stop belongs to which worker, and the ride ETA.
-
-It is shared on purpose. The DRIVER route endpoints
-(``masar.get_my_worker_route_today`` / ``_summary``) and the WORKER transport
-endpoints (``masar.get_worker_transport``, ``masar.get_worker_boarding_pass``,
-``masar.confirm_boarding``) read the same trips from opposite ends, and every one
-of these readers had two callers before it lived here. Changing what a stop
-carries, or when a night run stops being boardable, is one edit in this file.
-
-Reads only: nothing here writes, commits or posts GL. Identity is resolved by the
-caller — every function takes an already-resolved driver or employee id and none
-of them widens that scope.
-"""
 
 import frappe
 
@@ -28,18 +10,6 @@ WORKER_SERVICE_LINES = ("Site Transport", "Inter-City Relocation")
 _FINISHED_TRIP_STATUSES = boarding_window.FINISHED_TRIP_STATUSES
 
 def _fmt_time(value):
-    """Render a Time field as a clean zero-padded ``HH:MM:SS`` string (or None).
-
-    Frappe stores Time as a ``datetime.timedelta``; ``cstr`` on it yields an
-    unpadded value with stray microseconds (e.g. ``6:30:00`` /
-    ``2:05:46.198544``). ``format_time`` normalises it to ``06:30:00`` for a clean
-    JSON payload.
-
-    ``frappe.utils.format_time`` (frappe/utils/data.py:583) treats a blank value
-    and a malformed one the same way a display label would — "" for one, a raised
-    exception for the other — neither of which a JSON API can return; this
-    coalesces blank to ``None`` and a parse failure to the raw ``cstr`` value
-    instead of propagating the exception to the caller."""
     if value in (None, ""):
         return None
     try:
@@ -48,32 +18,9 @@ def _fmt_time(value):
         return frappe.utils.cstr(value)
 
 def _trip_date_window():
-    """The trip_date filter window for "boardable now" — today AND yesterday.
-
-    A night shift that departs before midnight runs past it: at 00:05 the trip's
-    ``trip_date`` is still yesterday, so a ``trip_date = today()`` filter drops it
-    at the exact moment the worker needs to board. Including yesterday keeps that
-    in-progress night trip reachable. The caller drops a YESTERDAY trip that has
-    already finished (see ``_drop_finished_yesterday``), so today's completed trips
-    stay visible while only an in-motion night run carries over — no double-count.
-
-    ``frappe.utils.add_days`` and ``today`` (frappe/utils/data.py:270, :367) do the
-    arithmetic; the one thing they cannot decide is the WIDTH of the window, and the
-    minus-one day is that decision, not a formatting detail."""
     return ["in", [frappe.utils.add_days(frappe.utils.today(), -1), frappe.utils.today()]]
 
 def _drop_finished_yesterday(trips):
-    """Drop carried-over YESTERDAY trips that are already finished.
-
-    The yesterday half of ``_trip_date_window`` exists only to keep a night run
-    still in motion reachable past midnight; a yesterday trip that has already
-    Completed/Cancelled is done and must not resurface. Today's trips pass through
-    untouched in every status (the driver's route view shows today's completed
-    runs). Keyed on ``trip_date``, so a row missing it is kept defensively.
-
-    Pairs with :func:`_trip_date_window` and re-derives yesterday from the same
-    ``frappe.utils.add_days`` / ``today`` (frappe/utils/data.py:270, :367), so the two
-    halves cannot drift onto different days."""
     yesterday = frappe.utils.add_days(frappe.utils.today(), -1)
     return [
         t
@@ -85,12 +32,6 @@ def _drop_finished_yesterday(trips):
     ]
 
 def _today_worker_trips(driver):
-    """Today's (and an in-progress night shift's) Dispatch Trips for ``driver``
-    whose linked Transport Request is on the Workers service line. Returns a list
-    of trip dicts with the route_plan and transport_request resolved, ordered by
-    departure time. A trip that left before midnight is still boardable after it,
-    so the date window spans yesterday+today (see ``_trip_date_window``); a
-    yesterday trip that has already finished is dropped (``_drop_finished_yesterday``)."""
     trips = frappe.get_all(
         "Dispatch Trip",
         filters={
@@ -183,8 +124,6 @@ def _today_worker_trips(driver):
     return result
 
 def _registered_workers(transport_request):
-    """The registered worker manifest for a Transport Request: each row's Employee
-    plus the human-readable pickup point recorded on the request."""
     if not transport_request:
         return []
     rows = frappe.get_all(
@@ -217,7 +156,6 @@ def _registered_workers(transport_request):
     return workers
 
 def _registered_trip_workers(dispatch_trip, transport_request=None):
-    """Return the de-duplicated worker manifest across all trip requests."""
     workers = []
     seen = set()
     for request in _manifest_request_names(dispatch_trip, transport_request):
@@ -231,7 +169,6 @@ def _registered_trip_workers(dispatch_trip, transport_request=None):
     return workers
 
 def _ordered_stops(parent, parenttype="Route Plan"):
-    """Return ordered stops for one route-bearing document."""
     if not parent:
         return []
     rows = frappe.get_all(
@@ -295,7 +232,6 @@ def _ordered_stops(parent, parenttype="Route Plan"):
     return stops
 
 def _ordered_trip_stops(dispatch_trip, route_plan=None):
-    """Read the immutable trip copy; use Route Plan only for legacy trips."""
     stops = _ordered_stops(dispatch_trip, "Dispatch Trip")
     if stops:
         return stops
@@ -304,15 +240,6 @@ def _ordered_trip_stops(dispatch_trip, route_plan=None):
     return _ordered_stops(route_plan, "Route Plan")
 
 def _is_upcoming_pickup(pickup_datetime, now_dt=None):
-    """True when ``pickup_datetime`` (a backend string or datetime) is at or after
-    ``now_dt`` (defaults to now). A missing pickup is treated as upcoming so a
-    not-yet-scheduled request never silently drops off the worker's view.
-
-    ``frappe.utils.get_datetime`` (frappe/utils/data.py:110) normalises before the
-    comparison, because the stored value may be a ``str`` or a ``datetime`` depending
-    on the write path, and comparing the two shapes as text orders them wrongly
-    without raising. An unparseable value is treated as upcoming for the same reason
-    a missing one is: a ride the worker cannot see is worse than one shown early."""
     if not pickup_datetime:
         return True
     now_dt = now_dt or frappe.utils.now_datetime()
@@ -322,12 +249,6 @@ def _is_upcoming_pickup(pickup_datetime, now_dt=None):
         return True
 
 def _worker_pickup_stop(stops, my_building):
-    """The worker's OWN pickup stop from the ordered route stops.
-
-    Prefers the housing pickup whose ``accommodation_building`` matches the
-    worker's active Accommodation Assignment building; falls back to the first
-    housing pickup (a stop carrying any ``accommodation_building``); finally to
-    the first stop. Returns None only for an empty route."""
     if not stops:
         return None
     if my_building:
@@ -340,11 +261,6 @@ def _worker_pickup_stop(stops, my_building):
     return stops[0]
 
 def _route_destination_stop(stops, my_pickup):
-    """The route's destination (final drop-off) stop.
-
-    The drop-off is the last stop on the ordered route — the point AFTER every
-    housing pickup. Returns None when the only stop is the worker's own pickup
-    (a single-stop route has no separate destination to show)."""
     if not stops:
         return None
     last = stops[-1]
@@ -356,23 +272,6 @@ WORKER_TRANSPORT_HISTORY_DAYS = 90
 WORKER_TRANSPORT_ROW_LIMIT = 200
 
 def _worker_transport_requests(employee):
-    """Transport Requests whose worker manifest includes ``employee``, scoped via the
-    child table.
-
-    ``frappe.utils.add_days`` (frappe/utils/data.py:270) bounds the history to
-    ``WORKER_TRANSPORT_HISTORY_DAYS``; the row cap beside it exists because the date
-    bound alone cannot promise a small result on a busy site.
-
-    Rejected and Cancelled are excluded; Fulfilled is included. It is the caller that
-    partitions these rows into the worker's upcoming and past rides, so dropping
-    Fulfilled would empty the past half of his screen.
-
-    Bounded two ways so a long-tenured worker's 10-second poll cannot grow without
-    limit: a floor of ``WORKER_TRANSPORT_HISTORY_DAYS`` on ``pickup_datetime`` (a
-    request with no ``pickup_datetime`` yet is kept regardless — it has nothing to
-    floor against and is usually the newest, unscheduled request), and a hard
-    ``WORKER_TRANSPORT_ROW_LIMIT`` backstop. The floor only trims the PAST half;
-    every upcoming ride is inside it by construction."""
     parents = frappe.get_all(
         "Transport Request Worker",
         filters={"employee": employee, "parenttype": "Transport Request"},
@@ -416,25 +315,6 @@ def _worker_transport_requests(employee):
     return rows
 
 def _worker_today_dispatch_trip(employee, transport_request=None):
-    """Resolve the ONE today's Dispatch Trip this worker may confirm boarding on.
-
-    Resolved FORWARD from today's Dispatch Trips (Dispatch Trip -> Transport
-    Request -> worker manifest), the same direction the driver QR scan and the
-    driver route view resolve — NOT from the request's ``dispatch_trip``
-    back-link, which is only stamped once a trip is Completed (a worker boards
-    BEFORE completion). A trip qualifies only when its linked request carries
-    THIS employee on its manifest, so the resolution can never reach a trip the
-    worker is not on. A client-supplied ``transport_request`` only NARROWS that
-    own-set; an id the worker is not registered on simply does not match. Returns
-    ``(dispatch_trip, transport_request, stop_name, accommodation_building)`` or
-    None when the worker has no boardable trip today.
-
-    THE WORKER IS RESOLVED FIRST, and every read after it is keyed on that worker's
-    own requests. Reading today's Dispatch Trips before narrowing meant a fleet-wide
-    scan on a screen that polls every ten seconds, and the three later reads then
-    fanned out over trips this worker was never on. The three links are unchanged —
-    the trip's own ``transport_request``, an assigned-request child row, or the
-    historical Route Plan's request — they are just resolved from the worker's side."""
     worker_pickup = {}
     for wrow in frappe.get_all(
         "Transport Request Worker",

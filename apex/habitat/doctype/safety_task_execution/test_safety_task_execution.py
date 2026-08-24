@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Safety Task Execution's evidence-photo guard.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``validate``'s ``_enforce_evidence`` in
-``safety_task_execution.py`` is what is exercised, not a stub.
-"""
 
 from __future__ import annotations
 

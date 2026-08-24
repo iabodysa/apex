@@ -1,17 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Accommodation Ledger's party-to-employee mirroring.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``before_save`` in ``accommodation_ledger.py`` -- wired through
-hooks.py's doc_events, not the class body -- is what is exercised, not a
-stub. The mirror direction is pinned by apex/habitat/api/custody_kiosk.py's
-own docstring: an Employee party mirrors onto the ``employee`` column.
-
-``Project`` is excluded from the dependency walk: no case here sets it, and
-its own closure reaches Purchase Invoice's neighbourhood, which resolves an
-unmigrated ``Payment Gateway`` and kills record-building before a single
-test runs.
-"""
 
 from __future__ import annotations
 

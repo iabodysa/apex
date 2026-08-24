@@ -1,25 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The /fleet-os board payload — the fleet read, and the shape the page renders.
-
-``fleet_os.get_fleet_os`` is one whitelisted call over one screen of data, and
-everything that decides what that screen contains lives here: which fields are
-read off a vehicle, how a driver appears on a card, how an incident becomes a
-stolen flag, and how a write-off becomes a damage row.
-
-The split inside this module is deliberate and is the point of it. The ``_read_*``
-functions touch the database and nothing else — each is one bounded query, and
-each is run through :func:`_read` so a single failing enrichment degrades to a
-notice instead of blanking the board. The shapers below them
-(:func:`_vehicle_status`, :func:`_sheet_for`, :func:`_driver_card`,
-:func:`_history_by_vehicle`, :func:`_incident_buckets`, :func:`_damage_rows`)
-take plain rows and return plain rows, so the render contract the SPA depends on
-can be exercised without a bench, a site or a database.
-
-Contract: the ``vehicles`` list item shape matches exactly what the page's render
-code reads (``v.plate``, ``v.history``, ``v.current_driver``, ``h.date_receive``
-…), so the design's render functions run unchanged. Project scope and the
-permlevel-1 PII gate are applied here, on the read — never left to the client.
-"""
 
 from __future__ import annotations
 
@@ -47,29 +26,10 @@ _STATUS_MAP = {
 
 
 def driver_pii_visible() -> bool:
-    """Whether this role may see a driver's identifying columns.
-
-    The gate is permlevel 1 on Salis Driver: a role without read access there
-    gets the driver's display name and nothing that identifies the person —
-    ``driver_id`` and ``phone`` are blanked, not omitted, so the payload shape
-    never changes with the reader. Every fleet-OS surface that carries a driver
-    asks HERE, so the board, the typeahead and the audit timeline can never
-    disagree about who is allowed to see what.
-
-    ``Meta.get_permlevel_access`` (frappe/model/meta.py:633) resolves the levels this
-    caller may read. The one thing a permlevel cannot do is reach a hand-built
-    payload: the framework applies it to a document's own fields, and these columns
-    are assembled into a dict, so the gate has to be asked explicitly here."""
     return 1 in frappe.get_meta("Salis Driver").get_permlevel_access("read")
 
 
 def _vehicle_status(status: str, has_driver: bool, theft=None) -> str:
-    """Map a Salis Vehicle.status to the design's vehicle_status string.
-
-    Theft is not one of Salis Vehicle.status's four options — reporting one submits a
-    Theft Vehicle Incident and the controller flips the vehicle to "Stopped" — so the
-    board's stolen state has to come from the open incident, or it reads as an ordinary
-    stop and the board's stolen filter can never match a vehicle."""
     if theft and theft.get("status") != "closed":
         return "stolen"
     if status == "Active":
@@ -86,15 +46,6 @@ _MOTORCYCLE_PATTERN = re.compile(
 
 
 def _sheet_for(category: str | None) -> str:
-    """Best-effort CAR / MOTORCYCLE bucket for the design's type filter,
-    derived from the category name (the design only has these two chips).
-
-    The tokens are matched at a WORD BOUNDARY, not as bare substrings. Vehicle
-    Category.category_name is a free Data field an admin types, so a bare substring test
-    lets an unrelated category carrying one of these letters inside a longer word land in
-    the wrong bucket \u2014 the same shape as the a/c-matched-jacket defect this repo already
-    fixed in resident_request.py. The trailing \\w* keeps the plural and the compound
-    ('MOTORBIKES', '\u062f\u0631\u0627\u062c\u0627\u062a') matching, which a bare \\b...\\b would have dropped."""
     if not category:
         return "CAR"
     return "MOTORCYCLE" if _MOTORCYCLE_PATTERN.search(category) else "CAR"
@@ -102,15 +53,6 @@ def _sheet_for(category: str | None) -> str:
 
 def _driver_card(driver, driver_row, show_pii, date_receive="", date_deliver="",
                  status="Active", project="") -> dict:
-    """One driver as the design renders them, in the design's exact key set.
-
-    The board shows a driver in two places — every row of a vehicle's assignment
-    history, and the current-driver panel — and the page reads the SAME thirteen
-    keys in both. Building them here is what stops the two drifting apart when a
-    key is added. ``driver_id`` falls back to the Salis Driver name when the row
-    carries no external id, and both identifying columns collapse to "" without
-    the permlevel-1 gate. The empty strings are placeholders the imported design
-    reads but Salis does not yet source. Pure."""
     return {
         "driver_id": ((driver_row.get("driver_id") or driver or "") if show_pii else ""),
         "name_en": (driver_row.get("full_name") or ""),
@@ -129,11 +71,6 @@ def _driver_card(driver, driver_row, show_pii, date_receive="", date_deliver="",
 
 
 def _history_by_vehicle(assignments, drivers, show_pii) -> dict[str, list]:
-    """Group assignment rows into each vehicle's driver history, oldest first.
-
-    An assignment counts as live only when it is Active, submitted AND has no end
-    date — a submitted row someone ended keeps its Active status, so the end date
-    is what decides. Pure: assignments and the driver index are the whole input."""
     history: dict[str, list] = {}
     for a in assignments:
         driver_row = drivers.get(a.driver) or {}
@@ -153,11 +90,6 @@ def _history_by_vehicle(assignments, drivers, show_pii) -> dict[str, list]:
 
 
 def _current_driver_card(vehicle, history, drivers, show_pii):
-    """The panel's current-driver card, or None when the vehicle has no driver.
-
-    Prefers the vehicle's own live assignment row so the card carries the real
-    receive date; falls back to a bare card built from the vehicle's
-    ``current_driver`` link when the link outlives its assignment. Pure."""
     if not vehicle.get("current_driver"):
         return None
     active = next(
@@ -175,12 +107,6 @@ def _current_driver_card(vehicle, history, drivers, show_pii):
 
 
 def _incident_buckets(incidents) -> tuple[dict, dict]:
-    """Split submitted incidents into per-vehicle accidents and one theft each.
-
-    A vehicle keeps at most one theft — the open one wins over a closed one, so a
-    vehicle stolen twice reads as stolen while the second report is open. Every
-    other incident type accumulates in ``accidents``, newest first (the caller
-    reads them in query order). Pure."""
     accidents: dict[str, list] = {}
     theft: dict[str, dict] = {}
     for inc in incidents:
@@ -205,9 +131,6 @@ def _incident_buckets(incidents) -> tuple[dict, dict]:
 
 
 def _damage_rows(write_offs) -> dict[str, list]:
-    """Group submitted write-offs into each vehicle's damage cases. An approved or
-    closed case reads as ``completed``; anything else keeps its own lowercased
-    status. Pure."""
     damages: dict[str, list] = {}
     for w in write_offs:
         damages.setdefault(w.vehicle, []).append({
@@ -224,19 +147,6 @@ def _damage_rows(write_offs) -> dict[str, list]:
 
 
 def _read(reader_errors: list, reader: str, fn, default):
-    """Run one secondary reader, isolating its failure from the board.
-
-    The vehicle set is fatal (no board without it); every enrichment reader
-    (drivers, assignments, incidents, write-offs, category fuel) is best-effort —
-    a failure in one returns ``default`` and is recorded in ``reader_errors`` so
-    the page can show a dismissible inline notice instead of a blank screen.
-
-    The failure is recorded through ``frappe.get_traceback`` (frappe/__init__.py)
-    into the Error Log. The
-    one thing an unhandled raise cannot do is degrade: a single enrichment fault would
-    otherwise take the whole board down, and the vehicles — the part that matters —
-    are already in hand by then.
-    """
     try:
         return fn()
     except Exception:
@@ -249,7 +159,6 @@ def _read(reader_errors: list, reader: str, fn, default):
 
 
 def _read_category_fuel(cat_names) -> dict[str, str]:
-    """The default fuel grade per Vehicle Category, upper-cased for the chips."""
     out: dict[str, str] = {}
     if cat_names:
         for c in frappe.get_all(
@@ -262,7 +171,6 @@ def _read_category_fuel(cat_names) -> dict[str, str]:
 
 
 def _read_office_city(office_names) -> dict[str, str]:
-    """The city per Rental Office — the board's "area" column."""
     out: dict[str, str] = {}
     if office_names:
         for o in frappe.get_all(
@@ -275,7 +183,6 @@ def _read_office_city(office_names) -> dict[str, str]:
 
 
 def _read_drivers(driver_names) -> dict[str, dict]:
-    """The Salis Driver rows behind every current driver and every assignment."""
     out: dict[str, dict] = {}
     if driver_names:
         for d in frappe.get_all(
@@ -289,8 +196,6 @@ def _read_drivers(driver_names) -> dict[str, dict]:
 
 
 def _read_incidents(plates) -> tuple[dict, dict]:
-    """Submitted incidents for the permitted fleet, bucketed by
-    :func:`_incident_buckets` into accidents and one theft per vehicle."""
     incidents = frappe.get_all(
         "Vehicle Incident",
         filters={"vehicle": ["in", plates], "docstatus": 1},
@@ -305,7 +210,6 @@ def _read_incidents(plates) -> tuple[dict, dict]:
 
 
 def _read_write_offs(plates) -> dict[str, list]:
-    """Submitted damage write-offs for the permitted fleet, newest first."""
     write_offs = frappe.get_all(
         "Vehicle Damage Write-Off",
         filters={"vehicle": ["in", plates], "docstatus": 1},
@@ -320,11 +224,6 @@ def _read_write_offs(plates) -> dict[str, list]:
 
 
 def _read_workshop(plates) -> tuple[dict, set]:
-    """The open Maintenance stop per vehicle plus the set already overstaying.
-
-    Open means submitted with no return date — the invariant the overstay rule
-    and the workshop release both rely on. The earliest open stop wins when a
-    vehicle somehow carries two."""
     stops = frappe.get_all(
         "Vehicle Suspension",
         filters={
@@ -345,18 +244,6 @@ def _read_workshop(plates) -> tuple[dict, set]:
 
 
 def build_board() -> dict:
-    """The whole board: the permitted fleet in the design's exact vehicle shape.
-
-    Project scope is enforced server-side: a scoped user with no permitted
-    project gets an empty list. N+1-free — one bounded query per enrichment,
-    grouped in Python.
-
-    An empty result carries a typed ``reason`` so the page can tell the two apart:
-    ``scope_empty`` (the user is scoped to no project — an access gap) vs
-    ``data_empty`` (the permitted fleet is genuinely empty). A non-empty result
-    has ``reason: None``. Filtered-empty stays a client concern (the page knows
-    its own active filters).
-    """
     show_pii = driver_pii_visible()
     reader_errors: list = []
     _unscoped, _projects, base_filters = scope_filter()

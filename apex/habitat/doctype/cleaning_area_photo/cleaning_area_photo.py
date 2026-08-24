@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Cleaning Area Photo (child table) controller."""
 
 from __future__ import annotations
 

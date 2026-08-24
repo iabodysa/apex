@@ -1,18 +1,9 @@
 # Copyright (c) 2026, afmcoltd
-"""My Custody Acknowledgment Web Form context.
-
-Per-user, login-required form. Pre-fills the Custody Issue from an ``?issue=``
-query param (the link a supervisor shares / a QR resolves to) and exposes the
-caller's own submitted, not-yet-acknowledged issues so the holder can pick the
-right one. The acknowledgment is written to its own Custody Acknowledgment
-target, never onto the Custody Issue.
-"""
 
 import frappe
 
 
 def get_context(context):
-    """Loads the caller's unacknowledged Custody Issues and pre-fills the one named in the URL."""
     context.no_cache = 1
 
     user = frappe.session.user

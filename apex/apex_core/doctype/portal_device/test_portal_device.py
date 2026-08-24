@@ -1,16 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Proves the required device-identity behaviour: a consumed enrolment key is
-refused a second time with an Activity Log Failed row; enrolling past the device
-cap evicts the oldest device and leaves both rows visible; a revoked device stops
-resolving immediately; the capacity/desk-issuer permission dispatchers scope a
-device row to its own subject; and no event ever logs a raw secret.
-
-Every ``ignore_permissions=True``/``force=True`` in this file is test-fixture
-setup or teardown -- creating and deleting the Employee/Salis Driver/Portal
-Device/Masar Worker Token rows a test needs, never a bypass of the behaviour
-under test -- matching ``test_portal_identity.py``'s own established pattern in
-this same module.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -129,8 +117,6 @@ class TestConsumeEnrolmentKey(FrappeTestCase):
 
 
 class TestDeviceCapEviction(FrappeTestCase):
-    """Salis Driver's own cap is 1 (MAX_DEVICES_PER_SUBJECT[DRIVER]) -- a second
-    enrolment is already over cap, the smallest case that proves eviction."""
 
     def setUp(self):
         self.driver = _make_driver("_Test Portal Device Driver")
@@ -204,9 +190,6 @@ class TestRevokeOwnDevice(FrappeTestCase):
 
 
 class TestPortalDevicePermissionDispatch(FrappeTestCase):
-    """Direct unit coverage of the two hook functions this change adds --
-    exercised as plain Python calls, independent of whether ``hooks.py`` (out of
-    this change's write scope) has registered them yet."""
 
     def setUp(self):
         self.employee = make_employee(name="_Test Portal Device Perm Worker", company=default_company())
@@ -249,16 +232,6 @@ class TestPortalDevicePermissionDispatch(FrappeTestCase):
 
 
 class TestDeskSupervisorRevocation(FrappeTestCase):
-    """A desk save is the ONLY revoking writer that reaches ``PortalDevice``'s own
-    controller (the other three -- :func:`revoke_own_device`,
-    ``revoke_subject_devices``, ``_evict_oldest_if_over_cap`` -- write through
-    ``frappe.db.set_value`` and stamp/log themselves already), so this exercises
-    ``validate``/``on_update`` directly through ``Document.save`` -- the same shape
-    a scoped desk issuer's revoke-by-save takes. ``ignore_permissions=True`` on
-    ``save`` here is test setup for the STAMPING/LOGGING/GUARD rule under test, not
-    a stand-in for the project/building ``write`` scoping proven separately above
-    (``test_write_is_gated_alongside_read_report_print``,
-    ``TestPortalDevicePermissionDispatch``)."""
 
     def setUp(self):
         self.employee = make_employee(name="_Test Portal Device Desk Worker", company=default_company())
@@ -309,8 +282,6 @@ class TestDeskSupervisorRevocation(FrappeTestCase):
 
 
 def _make_user_with_role(email: str, role: str | None) -> str:
-    """A minimal desk User for the real-permission-stack tests below -- created
-    once per test class and torn down through ``addClassCleanup``."""
     if not frappe.db.exists("User", email):
         frappe.get_doc(
             {"doctype": "User", "email": email, "first_name": "Test", "send_welcome_email": 0}
@@ -321,12 +292,6 @@ def _make_user_with_role(email: str, role: str | None) -> str:
 
 
 class TestRealPermissionStackWiring(FrappeTestCase):
-    """Goes through ``frappe.has_permission`` itself rather than calling
-    ``portal_device_has_permission`` as a plain function (``TestPortalDevice
-    PermissionDispatch`` above does that) -- the only way to prove the two new
-    ``hooks.py`` lines (``has_permission``/``permission_query_conditions`` for
-    ``Portal Device``) are both present and correctly dotted, not merely that the
-    functions themselves are correct in isolation."""
 
     @classmethod
     def setUpClass(cls):
@@ -358,9 +323,6 @@ class TestRealPermissionStackWiring(FrappeTestCase):
         cls.addClassCleanup(
             lambda: frappe.delete_doc("User", cls.hr_user, ignore_permissions=True, force=True)
         )
-        # Resident Supervisor holds `write: 1` on Portal Device in the base DocPerm
-        # (portal_device.json) -- WITHOUT a matching Housing Assignment for this
-        # employee, ONLY the has_permission hook's building-scope check can deny it.
         cls.unmatched_supervisor = _make_user_with_role(
             "_test_pd_unmatched_supervisor@example.com", "Resident Supervisor"
         )

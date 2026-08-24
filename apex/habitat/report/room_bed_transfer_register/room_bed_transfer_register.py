@@ -1,16 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Room Bed Transfer Register — who moved, from which bed to which bed, and when.
-
-The rows are DOCUMENT rows: one transfer moves one resident, so there is no child line
-to unfold. Only submitted transfers are listed — a draft has not moved anyone, and a
-cancelled transfer is out with docstatus 2.
-
-The transfer carries no building of its own; its building is the one on the Housing
-Assignment it amends, which is the same hop the permission map declares. Scoped by that
-building through the same resolver the permission hook uses, so a scope correction
-reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -21,7 +10,6 @@ from apex.habitat import permissions
 
 
 def execute(filters=None):
-    """Returns submitted Room Bed Transfers with building, scoped by permission, with summary cards."""
     filters = filters or {}
     columns = get_columns()
 
@@ -82,8 +70,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     residents = {r.get("party") for r in data if r.get("party")}
     employees = [r for r in data if r.get("party_type") == "Employee"]
     workers = [r for r in data if r.get("party_type") == "Temporary Worker"]
@@ -96,7 +82,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the room bed transfer register."""
     return [
         {"label": _("Transfer"), "fieldname": "name", "fieldtype": "Link", "options": "Room Bed Transfer", "width": 160},
         {"label": _("Transfer Date"), "fieldname": "transfer_date", "fieldtype": "Date", "width": 115},

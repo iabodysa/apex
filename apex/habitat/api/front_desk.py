@@ -1,21 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Front Desk visual bed board API.
-
-A thin presentation + orchestration layer over the existing Accommodation
-Assignment / Accommodation Checkout controllers. This module adds NO posting,
-locking, or ledger logic of its own:
-
-- ``get_building_grid`` is read-only and built from a bounded set of bulk
-  queries (no N+1) — one room query, one bed/room join, one active-assignment
-  query, and one custody-presence query.
-- ``quick_check_in`` and ``quick_check_out`` construct documents and submit
-  them so the existing controllers run natively (the ``SELECT ... FOR UPDATE``
-  bed lock, occupancy recompute, housing-allowance gate, and custody-clearance
-  gate all stay in place).
-
-Active-occupancy semantics, the bed colour rule and the bed mix come from
-``habitat.utils.occupancy``, shared with the Arrivals Desk.
-"""
 
 from __future__ import annotations
 
@@ -32,8 +15,6 @@ from apex.salis.api.driver_portal.images import verified_image_type
 
 
 def _floor_label(n: int) -> str:
-    """Human floor name from a floor number: 0 is the ground floor, negatives are
-    basements counted downwards."""
     if n == 0:
         return _("Ground Floor")
     if n < 0:
@@ -42,14 +23,6 @@ def _floor_label(n: int) -> str:
 
 
 def _grid_bed_rows(building: str) -> list:
-    """Every bed in one building with the room facts the board draws it from, in ONE
-    join rather than a lookup per bed.
-
-    Built with ``frappe.qb`` (frappe/query_builder) because the one thing
-    ``frappe.get_all`` cannot do is LEFT JOIN a sibling DocType: fetching beds and
-    then reading each bed's room is one query per bed, and a large building draws its
-    board hundreds of times over.
-    """
     Bed = frappe.qb.DocType("Bed")
     Room = frappe.qb.DocType("Room")
     return (
@@ -73,7 +46,6 @@ def _grid_bed_rows(building: str) -> list:
 
 
 def _temporary_worker_names(assignments) -> dict:
-    """Display names for the Temporary Worker occupants, in one query or none."""
     tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
     if not tw_parties:
         return {}
@@ -85,19 +57,6 @@ def _temporary_worker_names(assignments) -> dict:
 
 
 def _assignments_holding_custody(assignments) -> set:
-    """Which of these assignments belong to a resident who still holds custody.
-
-    ONE definition serves the board, the quick-checkout guard and the checkout gate:
-    the net Accommodation Stock Ledger balance, which is what
-    ``housing_checkout._outstanding_custody_for_employee`` reads and what the stock
-    balance report and the value-at-risk card already use. Checking instead whether the
-    assignment carries any Accommodation Custody Item child row would break this: those
-    rows are written by the desk form and cleared by nothing, so a resident who returned
-    everything would stay blocked for ever.
-
-    One bulk query regardless of occupancy: the ledger is read once for every
-    employee on the board, never per bed.
-    """
     employees = {a.employee for a in assignments if a.employee}
     if not employees:
         return set()
@@ -117,8 +76,6 @@ def _assignments_holding_custody(assignments) -> set:
 
 
 def _dominant_project_by_room(assignments, bed_to_room) -> dict:
-    """The project most of a room's occupants belong to, so the board can colour a
-    room by crew. Ties resolve to whichever project ``max`` sees first."""
     room_project_tally: dict[str, dict[str, int]] = {}
     for asg in assignments:
         if not asg.project:
@@ -134,8 +91,6 @@ def _dominant_project_by_room(assignments, bed_to_room) -> dict:
 
 
 def _occupant_payload(asg, tw_names, custody_parents) -> dict:
-    """The occupant block on a red bed. A Temporary Worker has no ``employee_name``,
-    so his own worker name stands in; the party id is the last resort."""
     occupant_name = (
         asg.employee_name
         or (tw_names.get(asg.party) if asg.party_type == "Temporary Worker" else None)
@@ -154,8 +109,6 @@ def _occupant_payload(asg, tw_names, custody_parents) -> dict:
 
 
 def _bed_payload(bed, color, occupant) -> dict:
-    """One bed as the board draws it. ``bed_color`` is server-computed; the client
-    must not recompute it."""
     return {
         "bed": bed.bed,
         "bed_code": bed.bed_code,
@@ -168,9 +121,6 @@ def _bed_payload(bed, color, occupant) -> dict:
 
 
 def _room_shell(bed, room_meta, dominant_project) -> dict:
-    """The room a bed sits in, before its beds are attached. Room facts come from the
-    Room record where there is one; the bed's own joined columns stand in when the
-    room row is missing, so an orphaned bed still renders."""
     return {
         "room": bed.room,
         "room_number": room_meta.room_number if room_meta else bed.room,
@@ -186,8 +136,6 @@ def _room_shell(bed, room_meta, dominant_project) -> dict:
 
 
 def _rooms_into_floors(rooms_acc) -> list:
-    """Group the accumulated rooms into ordered floors. Rooms whose floor is unset
-    land in a trailing Unassigned Floor rather than being dropped."""
     floors_acc: dict = {}
     for room in rooms_acc.values():
         key = room.pop("_floor")
@@ -218,19 +166,6 @@ def _rooms_into_floors(rooms_acc) -> list:
 
 @frappe.whitelist()
 def get_building_grid(building: str) -> dict:
-    """Return the floor -> room -> bed grid for one building for the Front Desk board.
-
-    Reads only. Permission-gated on the building. Built from a BOUNDED set of
-    bulk queries (no per-bed or per-room round trips). Each bed gets a
-    server-computed ``bed_color`` (see ``occupancy.bed_color``); the client must not
-    recompute color.
-
-    Args:
-        building: Accommodation Building docname (source of truth).
-
-    Returns:
-        dict shaped as ``{building, building_title, generated_on, summary, floors}``.
-    """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     building_title = frappe.db.get_value("Building", building, "building_name") or building
@@ -299,20 +234,6 @@ def get_building_grid(building: str) -> dict:
 
 @frappe.whitelist()
 def get_buildings_scope_state() -> dict:
-    """Explain WHY ``list_supervisor_buildings`` is empty, for a typed empty state.
-
-    Read-only. The list endpoint returns ``[]`` for two very different reasons —
-    a building-scoped user with no User-Permission buildings (a permission gap to
-    raise with an admin) versus no Active building existing at all. The client
-    can't tell them apart from an empty list, so it reads this when the list comes
-    back empty. Scope is the same ``permissions`` contract as the list endpoint.
-
-    Returns:
-        dict: ``{"is_scoped": bool, "active_buildings": int}``. ``is_scoped`` is
-        True when the caller is confined to User-Permission buildings (not an
-        oversight role); ``active_buildings`` is the count of Active buildings in
-        scope.
-    """
     scope = active_building_scope(frappe.session.user)
     if scope.filters is None:
         return {"is_scoped": True, "active_buildings": 0}
@@ -324,23 +245,6 @@ def get_buildings_scope_state() -> dict:
 
 @frappe.whitelist()
 def list_supervisor_buildings() -> list[dict]:
-    """Return the caller's allowed buildings, each with a server-computed bed mix.
-
-    Read-only portfolio header for the Front Desk (one chip per building). Scope
-    mirrors the list/card/report contract in ``habitat.permissions``: an unscoped
-    oversight role sees every Active building; a building-scoped user sees only
-    their User-Permission buildings; a scoped user with none sees ``[]``.
-
-    The bed mix is computed from a BOUNDED set of queries regardless of building
-    count — one Active-building query, then ONE bed/room aggregate across all the
-    in-scope buildings (no per-building round trip). Each building's counts come
-    from the same ``occupancy.bed_color`` rules as ``get_building_grid``; the client
-    must not recompute color.
-
-    Returns:
-        list of ``{building, building_title, total_beds, available, occupied,
-        blocked, oos, occupancy_pct}`` sorted by building title.
-    """
     scope = active_building_scope(frappe.session.user)
     if scope.filters is None:
         return []
@@ -385,7 +289,6 @@ def list_supervisor_buildings() -> list[dict]:
 
 
 def _site_titles(sites: set) -> dict:
-    """Docname to display title for the Sites the caller's buildings sit under."""
     if not sites:
         return {}
     rows = frappe.get_all(
@@ -398,15 +301,6 @@ _RESIDENT_REQUEST_CLOSED = ("Resolved", "Rejected", "Closed")
 
 
 def _open_resident_request_statuses() -> list[str]:
-    """Open statuses = the Select options minus the terminal set, read from meta
-    so a newly-added non-terminal status is automatically treated as open
-    (no hand-kept list to drift from the DocType).
-
-    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) supplies the
-    options. Only the TERMINAL set is named here, because that is the shorter and more
-    stable half: a status added to the DocType is open until someone decides it ends
-    the request, and defaulting the other way would silently close it.
-    """
     options = frappe.get_meta("Resident Request").get_field("status").options or ""
     return [
         o
@@ -417,19 +311,6 @@ def _open_resident_request_statuses() -> list[str]:
 
 @frappe.whitelist()
 def building_open_requests(building: str) -> dict:
-    """Return the count of OPEN Accommodation Resident Requests for one building.
-
-    Read-only and permission-gated on the building (same gate as
-    ``get_building_grid``). "Open" is every status except the terminal set
-    (Resolved/Rejected/Closed); the open status list is returned too so the
-    client can route to the matching filtered list without hand-keeping it.
-
-    Args:
-        building: Accommodation Building docname.
-
-    Returns:
-        dict: ``{"building", "open_requests", "statuses"}``.
-    """
     frappe.has_permission("Building", "read", doc=building, throw=True)
 
     statuses = _open_resident_request_statuses()
@@ -442,8 +323,6 @@ def building_open_requests(building: str) -> dict:
 
 @frappe.whitelist()
 def get_employee_card(employee):
-    """Read-only HR identity card for the check-in dialog: name + profile photo.
-    Lets the supervisor visually verify the worker before assigning a bed."""
     frappe.has_permission("Employee", "read", throw=True)
     assert_party_in_scope("Employee", employee)
     vals = frappe.db.get_value("Employee", employee, ["employee_name", "image"], as_dict=True) or {}
@@ -451,15 +330,6 @@ def get_employee_card(employee):
 
 
 def _employee_iqama_field() -> str | None:
-    """The Employee field that holds the Iqama number, or None if this HR setup
-    has none. The field name varies across HR configs, so it is probed from meta
-    (same defensive stance Masar uses) rather than hard-coded.
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) answers whether
-    a name exists on this site. The one thing it cannot do is tell which of several
-    candidate names means Iqama, so the order here is the decision — the first match
-    wins, and a site carrying two of them gets the first in this list.
-    """
     meta = frappe.get_meta("Employee")
     for fieldname in ("iqama", "iqama_no", "iqama_number"):
         if meta.has_field(fieldname):
@@ -468,9 +338,6 @@ def _employee_iqama_field() -> str | None:
 
 
 def _has_active_assignment(party_type: str, party: str, employee: str | None) -> bool:
-    """True if the worker holds a live bed: a submitted Accommodation Assignment
-    with no check-out date. Matches on the Employee link when known (the assignment
-    is Employee-keyed once linked) else on the party_type/party pair."""
     filters = occupancy.active_assignment_filters()
     if employee:
         filters["employee"] = employee
@@ -481,8 +348,6 @@ def _has_active_assignment(party_type: str, party: str, employee: str | None) ->
 
 
 def _match_masar_token(identifier):
-    """``(party_type, party, employee, employee_name)`` for a scanned personal Masar
-    link, or None. The raw token is never stored, so the lookup is on its hash."""
     row = frappe.db.get_value(
         "Masar Worker Token",
         {"token": hash_token(identifier), "enabled": 1},
@@ -495,9 +360,6 @@ def _match_masar_token(identifier):
 
 
 def _match_employee_iqama(identifier):
-    """``(party_type, party, employee, employee_name)`` for an Iqama on a working
-    Employee, or None. Returns None outright when this HR setup exposes no Iqama
-    field at all."""
     iqama_field = _employee_iqama_field()
     if not iqama_field:
         return None
@@ -513,8 +375,6 @@ def _match_employee_iqama(identifier):
 
 
 def _match_temporary_worker_iqama(identifier):
-    """``(party_type, party, employee, employee_name)`` for an Iqama on a Temporary
-    Worker, or None. Surfaces his linked permanent Employee when one exists."""
     tw = frappe.db.get_value(
         "Temporary Worker",
         {"iqama_number": identifier},
@@ -529,32 +389,6 @@ def _match_temporary_worker_iqama(identifier):
 @frappe.whitelist()
 @rate_limit(limit=60, seconds=60)
 def resolve_worker(identifier: str) -> dict:
-    """Resolve a scanned identifier to one worker for the Front Desk check-in dialog.
-
-    Accepts either an Iqama number or a scanned personal Masar token and returns
-    the single matching worker, so the supervisor can confirm-and-go instead of
-    typing an Employee link. Read-only — no posting, locking, or document writes.
-
-    Resolution order (first match wins): the unique Masar token, then the Iqama on
-    Employee (only when this HR setup exposes an Iqama field), then a Temporary
-    Worker's Iqama (surfacing its linked permanent Employee when one exists).
-
-    Permission: gated on ``Employee`` read (the same gate as
-    ``get_employee_card``); a Temporary Worker result additionally requires
-    ``Temporary Worker`` read so it cannot leak across DocType permissions. The
-    resolved party is then put through the SAME per-doc building gate as
-    ``get_employee_card`` — a type-level read only proves the caller may read the
-    doctype, not that the worker belongs to their estate, and every lookup below
-    is a ``db.get_value`` that bypasses ``permission_query_conditions``.
-
-    Args:
-        identifier: an Iqama number or a scanned Masar token.
-
-    Returns:
-        dict ``{found, party_type, party, employee, employee_name, image,
-        has_active_assignment, message}``. ``found`` is False with a message when
-        nothing matches.
-    """
     if not frappe.has_permission("Employee", "select") and not frappe.has_permission(
         "Employee", "read"
     ):
@@ -601,15 +435,6 @@ def resolve_worker(identifier: str) -> dict:
 
 @frappe.whitelist()
 def describe_worker(party_type: str, party: str) -> dict:
-    """Resolve a worker the caller already identified into the check-in payload.
-
-    ``resolve_worker`` answers for a SCAN; this answers for a party the caller
-    already holds, which is what a screen navigating from the arrivals list has.
-    It returns the same shape, computed the same way, so no client has to invent
-    ``has_active_assignment`` or ``employee`` — values only the server can know.
-    Same gates: the ``select`` or ``read`` pair a Link picker accepts, the
-    Temporary Worker read grant, and the per-doc estate scope.
-    """
     if not frappe.has_permission("Employee", "select") and not frappe.has_permission(
         "Employee", "read"
     ):
@@ -655,21 +480,6 @@ def describe_worker(party_type: str, party: str) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def set_room_readiness(room, status):
-    """Set Accommodation Room.readiness_status from the Front Desk board.
-
-    A plain field write — NO posting, locking, or ledger logic. The Select value
-    is validated against the field's own options (read from meta, never a
-    hand-kept list) so it can't drift from the DocType. Permission is the
-    document-level ``write`` grant on Accommodation Room (checked below; a
-    read-only role such as Resident Supervisor is refused).
-
-    Args:
-        room: Accommodation Room docname.
-        status: one of the readiness_status Select options.
-
-    Returns:
-        dict: ``{"room": <docname>, "readiness_status": <status>}``.
-    """
     frappe.has_permission("Room", "write", doc=room, throw=True)
 
     options = frappe.get_meta("Room").get_field("readiness_status").options or ""
@@ -686,33 +496,6 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
                    cost_center=None, assignment_type="New Assignment",
                    room_condition_snapshot=None, party_type=None, party=None,
                    terms_signature=None):
-    """Create and submit an Accommodation Assignment from the Front Desk board.
-
-    Room and building are derived SERVER-SIDE from the bed (never trusted from
-    the client). A full Accommodation Assignment is built and submitted so ALL
-    native controller behavior runs: field validation, the ``SELECT ... FOR
-    UPDATE`` bed lock, the double-booking re-check, ``bed.status -> Occupied``,
-    room/building occupancy recompute, and housing-allowance suspension.
-
-    This method adds NO posting, locking, or ledger logic of its own.
-
-    Permission: caller must have ``create`` AND ``submit`` on Accommodation
-    Assignment (checked explicitly below; defense in depth on top of the role
-    grant).
-
-    Args:
-        bed: Accommodation Bed docname (source of truth for room + building).
-        employee: Employee docname.
-        project: Project docname.
-        check_in_date: ISO date string.
-        cost_center: optional Cost Center docname.
-        assignment_type: Select value (defaults to "New Assignment").
-        terms_signature: optional housing-terms acceptance signature data-URI
-            captured on the tablet; stamps ``terms_accepted_on`` when present.
-
-    Returns:
-        dict: ``{"assignment": <docname>, "bed": <bed>}``.
-    """
     frappe.has_permission("Housing Assignment", "create", throw=True)
     frappe.has_permission("Housing Assignment", "submit", throw=True)
 
@@ -759,33 +542,6 @@ def quick_check_in(bed, employee=None, project=None, check_in_date=None,
 
 @frappe.whitelist(methods=["POST"])
 def quick_check_out(bed, checkout_date=None, checkout_reason=None, room_condition_snapshot=None):
-    """Build and submit an Accommodation Checkout for the active assignment on a bed.
-
-    Resolves the single active assignment for the bed server-side
-    (``docstatus == 1`` AND ``check_out_date`` is not set). If that assignment
-    carries custody items, this method REFUSES one-click and signals the client
-    to open the full Checkout form instead (returns
-    ``{"requires_full_form": True, "assignment": <name>}``), because custody
-    clearance and damage-assessment logic must run interactively through the
-    Checkout controller.
-
-    Otherwise it constructs an Accommodation Checkout and submits it, letting
-    the existing Checkout controller run its validation, occupancy/bed release,
-    and posting logic. This method adds NO release or ledger logic of its own.
-
-    Permission: caller must have ``create`` AND ``submit`` on Accommodation
-    Checkout (checked explicitly below).
-
-    Args:
-        bed: Accommodation Bed docname.
-        checkout_date: ISO date string; defaults to today if omitted.
-        checkout_reason: Select value for the Checkout reason.
-
-    Returns:
-        dict: ``{"checkout": <docname>, "bed": <bed>}`` on a completed one-click
-        checkout, or ``{"requires_full_form": True, "assignment": <name>}`` when
-        custody routing is needed.
-    """
     frappe.has_permission("Housing Checkout", "create", throw=True)
     frappe.has_permission("Housing Checkout", "submit", throw=True)
 

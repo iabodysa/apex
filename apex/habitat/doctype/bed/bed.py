@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Accommodation Bed controller. Smallest atomic spatial unit."""
 
 from __future__ import annotations
 
@@ -16,15 +15,6 @@ class Bed(Document):
 
 @frappe.whitelist(methods=["POST"])
 def toggle_service(bed: str) -> str:
-    """Activate / deactivate a bed by flipping its existing ``status`` between Available
-    and Out of Service — the value the assignment and room/bed-transfer guards already
-    honor, so no parallel "active" flag is introduced. An Occupied bed cannot be
-    deactivated; the resident must be checked out first. Returns the new status.
-
-    This is the one bed-state change that never touches occupancy, so it never reaches
-    the ``recalculate_building_occupancy`` choke point that notifies the building's watchers.
-    It rings the Building doc room through ``portal_live.notify_building``, so the portal
-    needs one listener for both paths rather than a bed-specific one."""
     doc = frappe.get_doc("Bed", bed, for_update=True)
     doc.check_permission("write")
     if doc.status == "Occupied":

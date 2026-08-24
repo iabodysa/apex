@@ -1,26 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Payment Request controller.
-
-Enforces the finance boundary: every payable item routes
-through a Finance-exclusive approval gate, and Finance cannot be bypassed.
-
-Status transitions are owned by the native **Salis Payment Request Workflow**
-(see ``salis/workflow/salis_payment_request_workflow/``), not by this
-controller. The finance approval/payment transitions ("Approve (Finance)" and
-"Mark Paid") are **Finance-Manager-only** and carry the Segregation-of-Duties
-condition ``requested_by != session.user`` so the (server-stamped) requester can
-never approve or pay their own request. The same maker != checker rule is also
-held at the permission layer by ``permissions.payment_sod_has_permission`` —
-both gates stand (defence in depth). This controller keeps the finance-gate
-*data* guard ``_enforce_finance_gate`` (the no-bypass finance boundary and the
-approver stamp) so any save that lands the document in a Finance-exclusive state
-— including a path that bypasses the workflow action — is still blocked.
-
-This DocType posts NO General Ledger / Journal / Payment Entry. It is a
-payment request record only. ``linked_payment_entry`` is a reference-only
-field set externally once Finance posts the actual payment in the accounting
-module; this controller must never write accounting.
-"""
 
 from __future__ import annotations
 
@@ -47,21 +25,11 @@ VALID_STATUSES = (
 
 class SalisPaymentRequest(Document):
     def before_insert(self):
-        """Clears any carried-over payment reference on an amendment."""
         if self.amended_from:
             self.linked_payment_doctype = None
             self.linked_payment_entry = None
 
     def validate(self):
-        """Validates the amount and enforces the finance-only approval gate and approver stamp.
-
-        The requester re-stamp here outlives the field's ``__user`` default: that default
-        reaches a document only through ``_set_defaults``, which is ``is_new()``-guarded
-        and fills a field only when it is None (``frappe/model/document.py:836``), so it
-        covers neither a later save nor a request body carrying ``requested_by = ""``. A
-        blank requester makes both maker-checker gates below pass — ``_enforce_finance_gate``
-        and ``permissions.payment_sod_has_permission`` each test the requester truthily.
-        """
         if self.status and self.status not in VALID_STATUSES:
             frappe.throw(_("Invalid status: {0}").format(self.status))
 
@@ -74,26 +42,10 @@ class SalisPaymentRequest(Document):
 
 
     def _old_status(self):
-        """Returns the document's status before this save, defaulting to Draft."""
         previous = self.get_doc_before_save()
         return (previous.status if previous else None) or "Draft"
 
     def _enforce_finance_gate(self):
-        """Finance-exclusive gate (kept as a hard server-side block; defence in
-		depth alongside the workflow condition and the permission hook).
-
-		Entering "Approved by Finance" or "Paid" is permitted ONLY when the
-		current user holds a finance authority role and is not the requester.
-		This step cannot be bypassed, even on a save that does not go through the
-		workflow action. On entering any finance-gated state, stamp the approver.
-
-		CONTRACT: ``finance_approved_by`` and ``finance_approved_on`` sit at
-		``permlevel: 1`` with read granted to All and write granted to no role, so a
-		caller-supplied value is discarded by ``validate_higher_perm_levels``
-		(frappe/model/document.py:783) BEFORE any controller method runs, and this
-		method — which runs after it — is the only writer left. Drop that permlevel
-		and any create/write role can forge the approver identity on an insert at a
-		non-gated status, which the payment router would then route a payment off."""
         new_status = self.status or "Draft"
         old_status = self._old_status()
 

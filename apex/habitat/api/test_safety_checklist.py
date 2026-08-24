@@ -1,13 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""The weekly safety period must follow the site's own first day of the week.
-
-``_current_period`` names the window a walker is filling; ``tasks/safety.py`` grades
-the round they submit from ``get_first_day_of_week``. If the two resolve the week
-differently the screen credits one period while the coverage gate counts another, and
-on the site's own first day they differ by a full week rather than a day. These tests
-fail against any window computed from ``date.weekday()``, which is Monday-based.
-"""
 
 import ast
 import inspect
@@ -25,15 +17,8 @@ SATURDAY = "2026-08-22"
 
 
 class TestCurrentPeriod(FrappeTestCase):
-    """No records, no permissions — the function's own arithmetic."""
 
     def setUp(self):
-        """Remember the site's setting so no case leaks its week start into the next.
-
-        Every case that reads the window MUST pin the setting itself: the rollback
-        restores the row, not the cache ``get_system_settings`` answers from, and a
-        case inheriting a Monday start makes a Monday-based window look correct.
-        """
         self._original_week_start = frappe.db.get_single_value(
             "System Settings", "first_day_of_the_week"
         )
@@ -42,7 +27,6 @@ class TestCurrentPeriod(FrappeTestCase):
         self._set_week_start(self._original_week_start or "Sunday")
 
     def _set_week_start(self, day):
-        """Write the System Setting and drop the cache ``get_system_settings`` reads."""
         frappe.db.set_single_value("System Settings", "first_day_of_the_week", day)
         frappe.clear_cache()
 
@@ -56,7 +40,6 @@ class TestCurrentPeriod(FrappeTestCase):
                 self.assertEqual(period, {"kind": "week"})
 
     def test_the_site_first_day_moves_the_window(self):
-        """A Sunday-start site and a Monday-start site disagree on a Sunday."""
         self._set_week_start("Sunday")
         sunday_start, _, _ = _current_period("Weekly", SUNDAY)
         self._set_week_start("Monday")
@@ -67,8 +50,6 @@ class TestCurrentPeriod(FrappeTestCase):
         self.assertEqual((getdate(SUNDAY) - monday_start).days, 6)
 
     def test_a_round_on_the_first_day_falls_inside_its_own_week(self):
-        """The defect this guards: a round submitted on the site's first day was
-        placed in the week that had just ended."""
         self._set_week_start("Sunday")
         start, end, _ = _current_period("Weekly", SUNDAY)
         self.assertLessEqual(start, getdate(SUNDAY))
@@ -87,13 +68,6 @@ class TestCurrentPeriod(FrappeTestCase):
 
 
 class TestSubmitFunctionsParseThroughTheOneFrappePrimitive(FrappeTestCase):
-    """``submit_round`` and ``submit_due_rounds`` each take their JSON-or-list
-    argument straight to ``frappe.parse_json`` (frappe/utils/__init__.py:875),
-    which already does the ``isinstance(x, str)`` check before calling
-    ``json.loads``. A hand-rolled ``isinstance`` guard ahead of a bare
-    ``json.loads`` duplicates that check; these fail the moment either
-    function goes back to hand-rolling it.
-    """
 
     def _assert_parses_through_frappe_only(self, func):
         tree = ast.parse(inspect.getsource(func))

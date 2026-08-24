@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""The floor-plan room/bed generator.
-
-The generator turns a building's floor_plan rows into Accommodation Room and Bed
-records, idempotently: it never deletes, it reconciles what already exists, and it
-refuses to grow a building silently. This module owns every part of that except the
-whitelisted entry point, which stays on the Building controller.
-
-Room numbering (``room_number`` / ``floor_code``), floor ordering, and the operator
-summary take plain values and return values, so the naming and reporting rules are
-exercisable without a bench.
-"""
 
 from __future__ import annotations
 
@@ -22,11 +11,8 @@ from apex.habitat.utils import building_rollup, occupancy
 
 
 class GenerationStats:
-    """Mutable accumulator threaded through the generator's per-row helpers so the
-    running counts fold in one place; the summary is built from it at the end."""
 
     def __init__(self):
-        """Initializes the zeroed room and bed counters accumulated across one generation run."""
         self.created_rooms = 0
         self.updated_rooms = 0
         self.skipped_rooms = 0
@@ -41,17 +27,11 @@ class GenerationStats:
 
 
 def room_number(abbreviation, floor_code_value, prefix, seq):
-    """Room number ``{abbr}-{floor_code}{prefix}{seq:02d}``. A blank prefix yields the
-    historical ``{abbr}-{floor_code}{seq:02d}`` byte-for-byte (no renumbering), so the
-    prefix only ever ADDS a wing/block segment (e.g. ``JED1-GA01``) for non-blank rows."""
     prefix = (prefix or "").strip()
     return f"{abbreviation}-{floor_code_value}{prefix}{seq:02d}"
 
 
 def floor_code(floor_type, floor_num):
-    """Floor code used in room numbers, driven by the floor's classification so the
-    type is FUNCTIONAL, not cosmetic: Basement -> B<n> (below ground), Ground -> G,
-    Roof -> R, Middle/unspecified -> the numeric floor."""
     ft = (floor_type or "").strip()
     if ft == "Basement":
         return f"B{floor_num}" if floor_num else "B"
@@ -63,14 +43,11 @@ def floor_code(floor_type, floor_num):
 
 
 def floor_sort_key(row):
-    """Order floors bottom-to-top by classification: Basement -> Ground -> Middle -> Roof."""
     priority = {"Basement": 0, "Ground": 1, "Roof": 3}
     return (priority.get((row.floor_type or "").strip(), 2), int(row.floor_number or 0))
 
 
 def validate_floor_plan(doc):
-    """Floor-plan preconditions: at least one row, and no two floors collapsing to the
-    same floor code (which would mint identical room numbers)."""
     if not doc.floor_plan:
         frappe.throw(_("No floor plan defined. Add floor rows before generating."))
 
@@ -91,13 +68,6 @@ def validate_floor_plan(doc):
 
 
 def load_existing(building_name):
-    """Pre-load the building's existing rooms (room_number -> name) and bed codes so the
-    generator stays idempotent without per-iteration lookups.
-
-    Read in two bulk queries rather than probing per room with ``frappe.db.exists``:
-    generating a tower is thousands of iterations, and the one thing an existence
-    probe cannot do is amortise — it is one round trip each time it is asked.
-    """
     existing_room_rows = frappe.db.get_all(
         "Room",
         filters={"building": building_name},
@@ -120,9 +90,6 @@ def load_existing(building_name):
 
 
 def _apply_capacity_reductions(room_number_value, capacity, old_cap, existing_bed_codes, stats):
-    """Retire the surplus beds when a room's planned capacity drops (confirmed path).
-    Sets each unoccupied, non-temporary surplus bed Out of Service; an occupied one blocks
-    the reduction. Returns True when the bed_capacity may be lowered (none blocked)."""
     _surplus_blocked = 0
     for _b_idx in range(capacity + 1, old_cap + 1):
         _surplus_code = f"{room_number_value}-B{_b_idx:02d}"
@@ -152,9 +119,6 @@ def _apply_capacity_reductions(room_number_value, capacity, old_cap, existing_be
 
 def _reconcile_existing_room(room_doc_name, room_number_value, rtype, capacity,
                              confirm_capacity_reduction, existing_bed_codes, stats):
-    """Bring one existing room in line with the plan: update room_type and bed_capacity.
-    A capacity INCREASE applies directly; a DECREASE needs confirmation and surplus-bed
-    retirement (delegated to _apply_capacity_reductions)."""
     current = frappe.db.get_value(
         "Room", room_doc_name,
         ["room_type", "bed_capacity"], as_dict=True,
@@ -180,8 +144,6 @@ def _reconcile_existing_room(room_doc_name, room_number_value, rtype, capacity,
 
 def _create_room(building_name, room_number_value, floor_num, rtype, capacity,
                  existing_room_map, stats):
-    """Insert a NEW room from the plan and register it in the room map. Returns its name,
-    or None when the insert failed (recorded as a row failure)."""
     try:
         room = frappe.get_doc({
             "doctype": "Room",
@@ -204,8 +166,6 @@ def _create_room(building_name, room_number_value, floor_num, rtype, capacity,
 
 def _generate_beds_for_room(room_doc_name, room_number_value, capacity, allow_create,
                             existing_bed_codes, stats):
-    """Mint the room's beds (codes ``{room}-B01..``), skipping any that already exist; when
-    new beds are not yet permitted they are counted pending, not created."""
     for b in range(1, capacity + 1):
         bed_code = f"{room_number_value}-B{b:02d}"
         if bed_code in existing_bed_codes:
@@ -230,7 +190,6 @@ def _generate_beds_for_room(room_doc_name, room_number_value, capacity, allow_cr
 
 def process_floor_row(row, abbreviation, building_name, allow_create,
                       confirm_capacity_reduction, existing_room_map, existing_bed_codes, stats):
-    """Generate/reconcile every room (and its beds) for one floor-plan row, in seq order."""
     floor_num = int(row.floor_number or 0)
     floor_code_value = floor_code(row.floor_type, floor_num)
     start = int(row.starting_room_number or 1)
@@ -280,14 +239,6 @@ def process_floor_row(row, abbreviation, building_name, allow_create,
 
 
 def finalize_building_stats(building_name, stats):
-    """After any room/bed write, refresh the building's setup status + derived totals.
-
-    ``frappe.db.set_value`` writes the derived figures without running the Building's
-    validation: these are recomputed FROM the rows that already exist, so re-validating
-    would grade the building against a total this call is in the middle of correcting.
-    Nothing is written when the pass created nothing, so a no-op generate leaves the
-    building's timestamps alone.
-    """
     if not (stats.created_rooms > 0 or stats.created_beds > 0 or stats.updated_rooms > 0):
         return
     total_floors = building_rollup.distinct_floor_count(building_name)
@@ -303,7 +254,6 @@ def finalize_building_stats(building_name, stats):
 
 
 def needs_confirmation(stats) -> bool:
-    """True when the plan wants to CREATE something the caller has not confirmed."""
     return (
         stats.pending_new_rooms > 0 or stats.pending_new_beds > 0
         or stats.pending_capacity_reductions > 0
@@ -311,7 +261,6 @@ def needs_confirmation(stats) -> bool:
 
 
 def generation_summary(stats) -> dict:
-    """The machine-readable outcome of a run."""
     return {
         "created_rooms": stats.created_rooms,
         "updated_rooms": stats.updated_rooms,
@@ -329,7 +278,6 @@ def generation_summary(stats) -> dict:
 
 
 def generation_message(stats) -> str:
-    """The operator-facing account of the same run."""
     if needs_confirmation(stats):
         msg = _("The floor plan adds {0} new room(s) and {1} new bed(s) that are not yet created. Existing rooms updated: {2}. Confirm to create the new rooms and beds.").format(stats.pending_new_rooms, stats.pending_new_beds, stats.updated_rooms)
         if stats.pending_capacity_reductions:
@@ -347,14 +295,12 @@ def generation_message(stats) -> str:
 
 
 def generation_indicator(stats) -> str:
-    """Green only when the run finished and nothing failed."""
     if needs_confirmation(stats) or stats.row_failures:
         return "orange"
     return "green"
 
 
 def report_generation(stats) -> dict:
-    """Emit the operator msgprint and return the summary dict."""
     summary = generation_summary(stats)
     frappe.msgprint(
         generation_message(stats),

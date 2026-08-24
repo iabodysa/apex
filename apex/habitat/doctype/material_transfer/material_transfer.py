@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Material Transfer controller — moves Custody Article / Maintenance
-Material stock between two building stores via the Accommodation Stock Ledger.
-
-Lifecycle: Draft -> (submit) In Transit -> (mark_received) Received; cancel reverses.
-On submit the ship leg leaves the source store (qty in transit, in neither store);
-on receipt the receive leg lands in the destination store. Availability is checked
-against the source store balance at submit time."""
 
 from __future__ import annotations
 
@@ -30,18 +23,10 @@ VOUCHER_TYPE = "Material Transfer"
 
 class MaterialTransfer(Document):
     def before_cancel(self):
-        """Refuse the cancel here, not in on_cancel: this runs before db_update()
-        stamps docstatus 2, so a transfer whose stock has already moved on is left
-        submitted instead of reading as cancelled for the rest of the request.
-
-        A Document method rather than a module function like the rest of this
-        controller, because Frappe dispatches it from the class with no hooks.py
-        doc_events entry to add — this DocType has none registered for before_cancel."""
         validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
 
 def validate(doc, method=None):
-    """Blocks a Material Transfer with no items, matching source/destination, or a non-positive qty."""
     if not doc.items:
         frappe.throw(_("At least one item is required on a Material Transfer."))
     if doc.from_building and doc.to_building and doc.from_building == doc.to_building:
@@ -56,7 +41,6 @@ def validate(doc, method=None):
 
 
 def on_submit(doc, method=None):
-    """Post the ship leg out of the source store and mark the transfer In Transit."""
     _assert_source_availability(doc)
     _post_ship_leg(doc)
     doc.db_set("issued_by", frappe.session.user)
@@ -64,8 +48,6 @@ def on_submit(doc, method=None):
 
 
 def _assert_source_availability(doc):
-    """Reject the transfer if the source store cannot cover the requested quantity
-    for any item (quantities aggregated per item, in case of duplicate rows)."""
     needed = {}
     for row in doc.items:
         needed[(row.item_type, row.item)] = needed.get((row.item_type, row.item), 0) + flt(row.qty)
@@ -80,7 +62,6 @@ def _assert_source_availability(doc):
 
 
 def _post_ship_leg(doc):
-    """Stock leaves the source store (employee unset). Idempotent."""
     if has_stock_entries(VOUCHER_TYPE, doc.name):
         return
     for row in doc.items:
@@ -95,12 +76,6 @@ def _post_ship_leg(doc):
 
 @frappe.whitelist(methods=["POST"])
 def mark_received(transfer: str, received_date: str = None):
-    """Post the receive leg into the destination store and mark the transfer
-    Received. Only valid for a submitted, In-Transit transfer.
-
-    Idempotent on status, and the transfer is loaded ``for_update`` so that holds
-    under concurrency: without the lock two callers both read "In Transit" and both
-    post the receive leg into the destination store."""
     doc = frappe.get_doc(VOUCHER_TYPE, transfer, for_update=True)
     frappe.has_permission(VOUCHER_TYPE, "write", doc=doc, throw=True)
     if doc.docstatus != 1:
@@ -126,22 +101,6 @@ def mark_received(transfer: str, received_date: str = None):
 
 
 def _notify_finance_on_cost_center_shift(doc):
-    """Memo-only: if the source and destination buildings sit on different cost
-    centers, the stock liability has shifted between them. We do NOT post any GL
-    Entry — we only email Finance so they can record the cross-charge manually,
-    and only when the admin has opted in via Habitat Settings.
-
-    Not a native Notification: the condition would have to read
-    ``Building.default_cost_center`` on BOTH sides of the transfer, and a Notification
-    condition is evaluated against a context carrying only ``doc``, ``nowdate`` and
-    ``frappe.utils`` (frappe/email/doctype/notification/notification.py:556-562) — no
-    ``frappe.db`` and so no lookup on a linked doctype.
-
-    ``frappe.sendmail`` (frappe/__init__.py:681) queues the memo and
-    ``frappe.utils.escape_html`` (frappe/utils/data.py:1521) guards every operator
-    string that reaches its body. The send is wrapped and logged through
-    ``frappe.get_traceback`` rather than raised: the transfer is already submitted by
-    then, and a mail fault must not undo a movement of goods."""
     if not frappe.db.get_single_value("Habitat Settings", "notify_finance_on_liability_transfer"):
         return
     from_cc = frappe.db.get_value("Building", doc.from_building, "default_cost_center")
@@ -182,7 +141,6 @@ def _notify_finance_on_cost_center_shift(doc):
 
 
 def _role_emails(role):
-    """Returns the email addresses of every user holding the given role."""
     users = get_users_with_role(role)
     if not users:
         return []
@@ -192,5 +150,4 @@ def _role_emails(role):
 
 
 def on_cancel(doc, method=None):
-    """Reverse every ledger row this transfer posted (ship and, if any, receive legs)."""
     reverse_and_mark_cancelled(doc, VOUCHER_TYPE)

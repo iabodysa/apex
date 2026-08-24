@@ -1,20 +1,4 @@
 # Copyright (c) 2026, Apex contributors
-"""Merged Habitat portal served at /housing, and through www/safety.py at /safety.
-
-One mobile-first supervisor surface for a whole housing and safety day: the Housing
-Inventory count, the three-exit Facility Asset Delivery clearance, the building bed
-board, the custody kiosk, arrivals intake, bed transfers, and the safety round.
-
-Admission is the UNION of the two former role sets, because both doors already
-redirect a guest to /login and both gate on a role set — one identity model, one
-portal. What a user then SEES is decided here from the DocPerms the endpoints
-themselves enforce, and shipped to the page as a section list. Hiding a section in
-the client is presentation only; every read and write is refused again by its own
-endpoint, and the building scope still confines a supervisor to their own estate.
-
-The gate lives in this module because it serves both doors. www/safety.py is the
-second door and imports it rather than keeping a second copy.
-"""
 
 import frappe
 from apex.apex_core.utils.portal_bootstrap import (
@@ -39,27 +23,12 @@ SAFETY_ROLES = {
 PORTAL_ROLES = HOUSING_ROLES | SAFETY_ROLES
 
 def has_apps_screen_access() -> bool:
-    """Gate for the /apps tiles — the same union check get_context applies, so a tile
-    never advertises a page the portal would turn away."""
     return bool(PORTAL_ROLES & set(frappe.get_roles()))
 
 def _can(doctype: str, *ptypes: str) -> bool:
-    """True only when the caller holds every named permission type on the doctype."""
     return all(frappe.has_permission(doctype, ptype) for ptype in ptypes)
 
 def _clearable_exits() -> list:
-    """The exit numbers this caller may actually clear.
-
-    Write on the delivery is not the gate — each exit is held by its own role
-    (``api.facility_asset_delivery.EXIT_ROLES``), so a screen that offered the button on
-    write alone showed a Procurement Supervisor a large green control that only a Resident
-    Supervisor may press, and the refusal arrived after the tap.
-
-    ``frappe.has_permission`` answers the DocType write and ``frappe.get_roles``
-    (frappe/permissions.py:497) the role set. The one thing a DocPerm cannot express is
-    WHICH EXIT a role may clear — that is a per-value gate inside one document, which
-    has no DocPerm equivalent, so the mapping is stated in ``EXIT_ROLES``.
-    """
     from apex.habitat.api.facility_asset_delivery import EXIT_ROLES
 
     if not _can("Facility Asset Delivery", "write"):
@@ -70,16 +39,6 @@ def _clearable_exits() -> list:
     return sorted(number for number, role in EXIT_ROLES.items() if role in roles)
 
 def portal_capabilities() -> dict:
-    """The per-action grants a section needs, so a control can be disabled with a
-    stated reason instead of failing at the server.
-
-    Every entry is derived from ``frappe.has_permission`` and ``frappe.get_roles``
-    (frappe/permissions.py:497), never from a list of roles kept here: the portal and
-    the desk must refuse the same things, and a second list drifts. The one thing the
-    server checks cannot do is reach the browser, which is the whole purpose of this
-    map — the refusal still happens server-side, this only lets the control say so
-    before the tap rather than after.
-    """
     exits = _clearable_exits()
     roles = set(frappe.get_roles())
     return {
@@ -112,7 +71,6 @@ def portal_capabilities() -> dict:
     }
 
 def portal_landing(capabilities: dict) -> str:
-    """Choose the first useful route from server-derived capabilities."""
     if capabilities.get("estate_read") and capabilities.get("set_readiness"):
         return "/overview"
     if capabilities.get("check_in") or capabilities.get("check_out"):
@@ -124,14 +82,6 @@ def portal_landing(capabilities: dict) -> str:
     return "/access-denied"
 
 def bootstrap_portal_context(context, route: str, entry: str):
-    """Redirect a guest to login, then publish the merged portal's gate and its
-    realtime configuration for whichever door was opened.
-
-    ``frappe.get_roles`` (frappe/permissions.py:497) decides admittance. The language
-    is pinned on ``frappe.local.lang`` because a portal request may arrive with no
-    User preference at all — a session the framework has nothing to derive a language
-    from would otherwise render this Arabic screen in English.
-    """
     guest_redirect(route)
     frappe.local.lang = "ar"
 
@@ -152,5 +102,4 @@ def bootstrap_portal_context(context, route: str, entry: str):
     )
 
 def get_context(context):
-    """Bootstraps the merged portal at its housing door."""
     return bootstrap_portal_context(context, "/housing", "housing")

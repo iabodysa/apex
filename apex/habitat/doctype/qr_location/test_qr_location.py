@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for QR Location's token generation.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so ``before_save`` in ``qr_location.py`` -- wired through hooks.py's
-doc_events, not the class body -- is what is exercised, not a stub.
-"""
 
 from __future__ import annotations
 

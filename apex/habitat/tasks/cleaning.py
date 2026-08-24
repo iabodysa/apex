@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Habitat module (split by domain).
-
-The insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
-connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s
-``set_admin_as_user`` default leaves the session at Administrator, who already satisfies
-every DocPerm check (``frappe/permissions.py`` short-circuits on ``user == "Administrator"``).
-Any other actor is refused by Cleaning Log's own DocPerm rows, unchanged by this module.
-"""
 
 from __future__ import annotations
 
@@ -16,26 +8,6 @@ from frappe.utils import today
 _CLEANING_SAVEPOINT = "cleaning_log_insert"
 
 def daily_cleaning_log_generator() -> None:
-    """Auto-create today's draft Cleaning Log for every ACTIVE building, so
-    housing cleaning becomes a system-of-record instead of relying on a
-    supervisor to remember to open a log.
-
-    For each ACTIVE Building (``status == "Active"``) with at least
-    one room, a draft Cleaning Log dated today is created if one does not already
-    exist, with its ``room_details`` pre-populated from the building's rooms ready
-    to mark. The supervisor then marks each room, attaches the required area-photo
-    evidence, and submits — submit posts the immutable Cleaning Compliance Ledger.
-    The log is left a DRAFT (never auto-submitted): ``CleaningLog.before_submit``
-    demands area-photo evidence a system stub cannot supply, and an unmarked room
-    posts as not-compliant (``cleaned=0``), which is exactly the audit signal a
-    forgotten/unfilled day should carry.
-
-    Idempotent — one Cleaning Log per (building, cleaning_date), mirroring
-    ``daily_occupancy_snapshot``'s one-row-per-building-per-day guard: the set of
-    buildings already logged today is fetched once and looked up in memory.
-    Rooms are pre-aggregated by building in one query (no N+1). Per-building error
-    isolation; paginated 500/batch.
-    """
     cleaning_date = today()
     logger = frappe.logger()
 

@@ -1,20 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""SIM Custody Assignment controller — the SIM custody engine.
-
-Each submitted SIM Custody Assignment is one immutable custody event (Assign,
-Transfer, Return, Suspend, Reactivate, Lost, Terminated). A SIM's live state
-(``status`` and the ``current_*`` fields on SIM Card) is never edited by hand: it
-is REBUILT by replaying every submitted event for that SIM, so the projection
-always equals the latest submitted custody state. State transitions take a row
-lock on the SIM so two concurrent actions cannot both apply — guaranteeing exactly
-one active custody per SIM.
-
-Retirement (Lost / Terminated) is an event in this same chain rather than a status
-edit, so a retired SIM keeps its full history, is reversible by cancelling the
-event, and is never deleted. Retiring CLOSES the active custody: the current_*
-projection is cleared while the event itself keeps the previous_* snapshot of who
-held the SIM, so accountability survives the retirement.
-"""
 
 from __future__ import annotations
 
@@ -59,7 +43,6 @@ _INITIAL_STATE = {
 
 class SIMCustodyAssignment(Document):
     def validate(self):
-        """Runs custodian, retirement, company, cost-center, and prior-status checks before saving."""
         self._validate_custodian_inputs()
         self._require_retirement_reason()
         self._reject_back_dated_event()
@@ -69,7 +52,6 @@ class SIMCustodyAssignment(Document):
             self._check_prior_status(frappe.db.get_value("SIM Card", self.sim_card, "status"))
 
     def _validate_custodian_inputs(self):
-        """Requires a custodian type and matching employee or project on an Assign or Transfer action."""
         if self.action in CUSTODIAN_ACTIONS:
             if not self.custodian_type:
                 frappe.throw(_("Custodian Type is required to {0} a SIM.").format(self.action))
@@ -87,7 +69,6 @@ class SIMCustodyAssignment(Document):
             self.project = None
 
     def _require_retirement_reason(self):
-        """Retiring a SIM must say why, on the server."""
         if self.action in TERMINAL_ACTIONS and not (self.reason or "").strip():
             frappe.throw(
                 _("A Reason is required to record SIM {0} as {1}.").format(
@@ -97,18 +78,6 @@ class SIMCustodyAssignment(Document):
             )
 
     def _reject_back_dated_event(self):
-        """EVERY event must be the LAST one on the SIM by date, not just by clock.
-
-        ``rebuild_sim_projection`` replays events ordered by ``assignment_date``, so a
-        Lost event dated before an existing Assign replays FIRST and the Assign then
-        overwrites it — the operator retires the SIM and the SIM still reads Assigned.
-        The submit-time status check cannot catch this: it reads the CURRENT status,
-        which legitimately allows the transition.
-
-        The replay does not care which action was back-dated: a Return, a Suspend or a
-        Transfer dated behind the chain submits and is overwritten just as silently, and
-        the operator is left with an event that changed nothing.
-        """
         if not (self.sim_card and self.assignment_date):
             return
         latest = frappe.get_all(
@@ -129,9 +98,6 @@ class SIMCustodyAssignment(Document):
             )
 
     def _enforce_company_compatibility(self):
-        """An employee custodian must belong to the SIM's company. The SIM company
-        is the security scope, so a cross-company custody would leak a SIM into a
-        company the holder is not in — fail closed."""
         if (
             self.action in CUSTODIAN_ACTIONS
             and self.custodian_type == "Employee"
@@ -146,8 +112,6 @@ class SIMCustodyAssignment(Document):
                 )
 
     def _snapshot_cost_centers(self):
-        """Resolve and freeze the cost centers on the event itself, so a later edit
-        to the Employee/Department/Project never rewrites this record's history."""
         if self.action in CUSTODIAN_ACTIONS:
             self.employee_cost_center = (
                 resolve_employee_cost_center(self.employee, self.company)
@@ -166,7 +130,6 @@ class SIMCustodyAssignment(Document):
             self.cost_center = None
 
     def _check_prior_status(self, status):
-        """Blocks the action unless the SIM's current status is one it is allowed to start from."""
         allowed = ALLOWED_PRIOR_STATUS.get(self.action, ())
         if status not in allowed:
             frappe.throw(
@@ -179,7 +142,6 @@ class SIMCustodyAssignment(Document):
             )
 
     def before_submit(self):
-        """Snapshots the SIM's previous custodian before this event overwrites the projection."""
         prior = (
             frappe.db.get_value(
                 "SIM Card",
@@ -194,16 +156,6 @@ class SIMCustodyAssignment(Document):
         self.previous_project = prior.get("current_project")
 
     def on_submit(self):
-        """Rechecks the SIM's locked status, rebuilds its custody projection, and on a
-        Suspend notifies each SIM Operations User scoped to THIS event's own company.
-
-        Was a shipped Notification fixture (receiver_by_role: SIM Operations User),
-        which frappe.email.doctype.notification.notification.get_info_based_on_role
-        resolves with ignore_permissions=True -- so a company-scoped SIM Operations
-        User was emailed a suspension from every other company too. Controller-driven
-        so the same report_company_scope narrowing sim_alerts.py already applies to
-        the daily digest applies here, per recipient, on the event that caused it.
-        """
         locked_status = frappe.db.get_value(
             "SIM Card", self.sim_card, "status", for_update=True
         )
@@ -231,13 +183,11 @@ class SIMCustodyAssignment(Document):
             )
 
     def on_cancel(self):
-        """Rebuilds the SIM's custody projection after this event is cancelled."""
         frappe.db.get_value("SIM Card", self.sim_card, "status", for_update=True)
         rebuild_sim_projection(self.sim_card)
 
 
 def _apply_event(state, event):
-    """Folds one custody event into the running projection state."""
     action = event.get("action")
     if action in CUSTODIAN_ACTIONS:
         state.update(
@@ -265,26 +215,6 @@ def _apply_event(state, event):
 
 
 def rebuild_sim_projection(sim_card: str) -> None:
-    """Replay every submitted custody event for a SIM to compute and store its
-    current projection. Deterministic and idempotent — the single source of truth
-    behind "current SIM state matches the latest submitted custody state".
-
-    Built with ``frappe.qb`` (frappe/query_builder) so the whole event chain arrives
-    ordered in ONE read: the one thing ``frappe.get_all`` cannot do here is guarantee
-    a replay sees every event in submitted order without a second pass.
-
-    Retirement is IN the chain (Lost / Terminated are events, not out-of-band status
-    edits), so the replay is the whole truth and nothing is preserved from the row
-    being overwritten. That is what makes retirement reversible: cancelling the Lost
-    event drops it from the replay and the SIM returns to the state it had before.
-
-    The replay is a LOCKING read. The SIM row lock the caller holds serializes the two
-    writers but does not refresh this transaction's REPEATABLE READ view, which
-    ``validate`` already pinned with a plain read of that same SIM row — so a plain
-    ``get_all`` here would replay an event set missing the winner's just-committed
-    event and write the wrong custodian onto the SIM. The lock and the decision have to
-    be one statement, the same shape as the bed allocation and the store balance.
-    """
     Event = frappe.qb.DocType("SIM Custody Assignment")
     events = (
         frappe.qb.from_(Event)

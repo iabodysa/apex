@@ -1,28 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Seed the Maintenance Material catalogue and its default Templates, in that order.
-
-``seed_templates`` reaches here only from ``apex/setup.py``'s ``after_install``/
-``after_migrate``, so the acting user is always Administrator, who already carries
-every permission (frappe/permissions.py:107,273,506).
-
-``TEMPLATE_SEEDS`` child rows are REQUIRED Links onto Maintenance Material, so a
-template can only be created after every material it names exists — Frappe's
-``_validate_links`` walks child rows and rejects the whole document otherwise.
-The catalogue has two writers (the module list in
-``habitat/doctype/maintenance_material/maintenance_material_catalog.py`` and
-``apex_core/setup/data/habitat/maintenance_material.json``, which is the single
-source of truth for its 60 records), and the templates reference both. So
-``seed_templates`` owns the whole sequence: it runs both material writers first,
-which makes the templates independent of where it is called from in the install
-order. ``apex_core/setup/test_catalogue_writers.py`` keeps the two writers from
-drifting apart, and ``test_material_template_order.py`` keeps this order.
-
-Blocked from a fixture: its required Links point to Maintenance Material rows that
-only the python writers above create, from ``after_migrate``. ``sync_fixtures`` runs
-before the ``after_migrate`` loop on every migrate (frappe/migrate.py:143,154-156), so
-a fixture-shipped template would fail Frappe's mandatory-Link validation against
-materials that do not exist yet.
-"""
 import frappe
 
 from apex.apex_core.setup.seed import seed
@@ -110,26 +86,11 @@ TEMPLATE_SEEDS = [
 
 
 def seed_materials():
-    """Run BOTH writers of the Maintenance Material catalogue. Idempotent.
-
-    Both are create-only, so this is safe to call again even though ``seed_all``
-    re-applies the JSON later in the same install.
-    """
     seed_catalog()
     return seed("habitat", only=["Maintenance Material"])
 
 
 def seed_templates():
-    """Insert default templates if not already present. Idempotent.
-
-    The existence probe is what makes it re-runnable: ``insert`` raises on a name that
-    already exists, and this runs on every install AND every migrate.
-
-    ``frappe.db.commit`` (frappe/database/database.py:1173) is called because this runs
-    from an install or migrate step: the one thing an uncommitted seed cannot do is
-    survive a LATER step failing, and a half-seeded catalog leaves the operator with
-    a screen of empty pickers and no error to search for.
-    """
     seed_materials()
     for tpl in TEMPLATE_SEEDS:
         if frappe.db.exists("Maintenance Material Template", tpl["template_name"]):

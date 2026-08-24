@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Driver Portal — trips endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged."""
 
 import frappe
 from frappe import _
@@ -25,7 +24,6 @@ RECENT_TRIP_MAX_LIMIT = 100
 
 
 def _bounded_positive(value, default, maximum):
-    """Clamps a requested positive value to a default and a maximum."""
     parsed = frappe.utils.cint(value)
     if parsed <= 0:
         return default
@@ -35,9 +33,6 @@ def _bounded_positive(value, default, maximum):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trips_today():
-    """Today's Dispatch Trips for the current driver (read), scoped on ``driver`` —
-    resolved from the portal identity via ``_resolve_driver``, never a
-    client-supplied id."""
     _require_enabled()
     driver = _resolve_driver()
     trips = frappe.get_all(
@@ -71,19 +66,6 @@ def my_trips_today():
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trips_recent(days=30, limit=50):
-    """The current driver's recent Dispatch Trips, newest first (read).
-
-	Identity-scoped via endpoint-scoped ``get_all`` (the ``my_trips_today``
-	precedent): the driver is resolved credential-first and every row is filtered
-	on that driver, so this can only return the caller's own trips. Backs the Trips
-	view's "recent/past" tab while ``my_trips_today`` stays the default — the SPA
-	switches endpoints, the card shape is identical (route/vehicle link ids swapped
-	for human labels by the same ``_label_trips``).
-
-	``days`` bounds the window (trip_date >= today - days; defaults to 30) and
-	``limit`` caps the rows, so the list never grows unbounded for a long-tenured
-	driver. ``trip_date`` is included (and stringified) so the SPA can group/sort by
-	day. Read-only, no commit."""
     _require_enabled()
     driver = _resolve_driver()
     days = _bounded_positive(days, RECENT_TRIP_DEFAULT_DAYS, RECENT_TRIP_MAX_DAYS)
@@ -115,17 +97,12 @@ def my_trips_recent(days=30, limit=50):
 
 
 def _worker_phone(employee):
-    """The worker's contact number for a one-tap call, or None. Reads the Employee's
-    ``cell_number`` (the manifest's call target); a missing number simply omits the
-    call action. Read-only."""
     if not employee:
         return None
     return frappe.db.get_value("Employee", employee, "cell_number") or None
 
 
 def _enrich_workers_with_phone(workers):
-    """Stamp each manifest worker dict with a ``phone`` for the tel: call action.
-    Mutates in place. One get per employee (the manifests are small)."""
     for w in workers or []:
         if "phone" not in w:
             w["phone"] = _worker_phone(w.get("employee"))
@@ -134,14 +111,6 @@ def _enrich_workers_with_phone(workers):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_worker_route_today():
-    """The current driver's worker-transport route today (read), surfaced in the
-    driver portal's "My Route" screen.
-
-    Identity-scoped wrapper over ``salis.api.masar.get_my_worker_route_today``
-    (which resolves driver credentials before any session fallback). Lives here so
-    the driver SPA calls one cohesive driver-portal API namespace. Augments each
-    trip's registered worker manifest with the worker's ``phone`` so the portal can
-    offer a one-tap call; masar is imported (read-only), not edited. Read-only."""
     data = masar.get_my_worker_route_today()
     for trip in data.get("trips", []):
         _enrich_workers_with_phone(trip.get("workers"))
@@ -154,20 +123,6 @@ def my_worker_route_today():
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=120, seconds=60)
 def my_trip_route(dispatch_trip):
-    """One trip's ordered route for the current driver (read).
-
-    Backs the driver portal's per-trip drill-in: tapping a "My Trips" card opens
-    this single Dispatch Trip's ordered stops. Identity-scoped — the driver is
-    resolved credential-first, never client-supplied — and the trip is returned
-    only when it belongs to that driver, so one driver can never read another's
-    trip by guessing a ``dispatch_trip`` id.
-
-    Reuses masar's read-only stop-ordering (``_ordered_stops``) so the timeline
-    shape matches the all-trips route view exactly; masar is imported, not edited.
-    A trip with no ``route_plan`` (e.g. an Administrative Trip, excluded from the
-    worker route) returns ``has_route_plan = False`` with an empty ``stops`` list,
-    letting the SPA show an explicit "no route planned" state rather than a blank.
-    Read-only, no commit, no GL."""
     _require_enabled()
     driver = _resolve_driver()
 

@@ -1,18 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Cost by Dimension.
-
-Aggregates operational accommodation cost from the Accommodation Ledger
-(the canonical internal cost-allocation ledger) grouped by the cost
-dimensions Company, Building and Project, over a posting-date range.
-
-Cost magnitude is the per-row ``employee_daily_share`` posted by the
-``daily_accommodation_cost_allocation`` scheduler as Operational Memo
-entries. Reversal rows are excluded so the totals reflect net cost.
-
-Built with frappe.qb (parameterised) so user-supplied filters are bound,
-never string-interpolated.
-"""
 
 import frappe
 from frappe import _
@@ -22,7 +9,6 @@ from apex.apex_core.utils.report_summary import card, total_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and cards for cost aggregated by company, building and project."""
     filters = frappe._dict(filters or {})
     columns = get_columns()
     data = get_data(filters)
@@ -35,7 +21,6 @@ def execute(filters=None):
 
 
 def get_columns():
-    """Returns the column definitions for the cost-by-dimension report."""
     return [
         {"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 200},
         {"label": _("Building"), "fieldname": "building", "fieldtype": "Link", "options": "Building", "width": 200},
@@ -46,7 +31,6 @@ def get_columns():
 
 
 def get_data(filters):
-    """Sums non-reversal ledger cost by company, building and project, per the given filters."""
     ledger = frappe.qb.DocType("Accommodation Ledger")
 
     query = (

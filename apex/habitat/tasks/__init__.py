@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""tasks package.
-
-Split into per-domain submodules. This __init__ re-exports every job and
-helper so the historical ``apex.habitat.tasks.<name>`` import path and every
-scheduler dotted path keep resolving unchanged.
-"""
 
 from __future__ import annotations
 

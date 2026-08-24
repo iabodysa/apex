@@ -1,18 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""A locking read whose result is discarded protects nothing.
-
-The shape these tests guard: ``frappe.db.get_value(..., for_update=True)`` taken for its
-side effect, then a plain ``frappe.get_doc`` that answers from the transaction's own
-snapshot — taken BEFORE the lock. Under MariaDB's REPEATABLE READ the second caller sees
-the pre-lock world and acts on it. The lock works, nothing times out, no exception is
-raised, and both callers report success, which is why this cannot be found by watching a
-run fail.
-
-Each test reads the SOURCE of the path it guards rather than racing two real callers: a
-race that has to be provoked is a race that passes when the machine is fast, and the
-property here — the lock and the read are one statement — is exact and readable.
-"""
 
 import ast
 import inspect
@@ -30,7 +17,6 @@ from apex.salis.api.masar import get_or_create_trip_log
 
 
 def _calls_with_for_update(func, doctype_literal):
-    """True when the function loads ``doctype_literal`` with ``for_update`` set."""
     tree = ast.parse(inspect.getsource(func))
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -44,7 +30,6 @@ def _calls_with_for_update(func, doctype_literal):
 
 
 def _discarded_locking_read(func):
-    """Statements that call for_update and throw the answer away."""
     tree = ast.parse(inspect.getsource(func))
     return [
         ast.unparse(node)
@@ -57,7 +42,6 @@ def _discarded_locking_read(func):
 
 
 class TestPaymentRouterLocksWhatItReads(FrappeTestCase):
-    """A second caller must not pay one request twice."""
 
     def test_the_request_is_loaded_for_update(self):
         self.assertTrue(_calls_with_for_update(route_payment, "SOURCE_DOCTYPE"))
@@ -67,7 +51,6 @@ class TestPaymentRouterLocksWhatItReads(FrappeTestCase):
 
 
 class TestTripStartLogIsCreatedOnce(FrappeTestCase):
-    """A driver scan and a worker self-confirm can arrive together."""
 
     def test_masar_locks_the_trip_before_the_existence_read(self):
         self.assertTrue(_calls_with_for_update(get_or_create_trip_log, "Dispatch Trip"))
@@ -82,14 +65,12 @@ class TestTripStartLogIsCreatedOnce(FrappeTestCase):
         self.assertTrue(_calls_with_for_update(get_or_create_log, "Trip Start Log"))
 
     def test_each_takes_its_own_lock_and_not_the_callers(self):
-        """The lock lives inside the function, so a new caller cannot forget it."""
         for func in (get_or_create_trip_log, get_or_create_log):
             with self.subTest(func=func.__name__):
                 self.assertIn("for_update", inspect.getsource(func))
 
 
 class TestBulkTriageIsNotAppliedTwice(FrappeTestCase):
-    """A double-click must not advance the same rows through two workers."""
 
     def test_each_row_is_loaded_for_update(self):
         self.assertTrue(_calls_with_for_update(apply_bulk_triage, "Resident Request"))
@@ -112,6 +93,5 @@ class TestBulkTriageIsNotAppliedTwice(FrappeTestCase):
         )
 
     def test_an_empty_selection_still_yields_an_id(self):
-        """``deduplicate`` throws without a job_id, so this must never be blank."""
         self.assertTrue(bulk_triage_job_id([]))
         self.assertTrue(bulk_triage_job_id(None))

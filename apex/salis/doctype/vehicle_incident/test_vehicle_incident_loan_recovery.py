@@ -1,17 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Vehicle Incident's own half of the Loan hand-off: the link it stores, and the
-refusal/reversal pair a cancel must run for whichever recovery record it holds.
-
-The Loan itself (its schedule, its cap, hrms's own deduction) is proved in
-apex.apex_core.utils.test_employee_loan_recovery against a real Salary Slip; this
-module never builds one, only the incident's own bookkeeping around it.
-
-``test_ignore`` names ``Loan`` for the same reason ``test_vehicle_incident.py`` does:
-``get_dependencies`` (frappe/test_runner.py:359-381) walks ``recovery_loan``'s Link and
-would abort the whole suite on a site without the ``lending`` app, which apex does not
-declare. Nothing here inserts a real Loan — ``raise_recovery_loan`` is patched — so the
-hatch (test_runner.py:374-377) costs this module no coverage.
-"""
 
 from __future__ import annotations
 
@@ -31,9 +18,6 @@ _MODULE = "apex.salis.doctype.vehicle_incident.vehicle_incident"
 
 class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
     def setUp(self):
-        """This module assumes a site WITH ``lending``: it proves the incident's own
-        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
-        is absent. The one case that asserts that refusal patches the site shape back."""
         self.enterContext(lending_installed())
 
     def _incident(self, **fields):
@@ -85,23 +69,18 @@ class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
         )
 
     def test_flagging_recovery_is_refused_when_the_lending_app_is_absent(self):
-        """A site without ``lending`` has no Loan for the recovery to land on, so the
-        flag is refused at save rather than saved with nothing behind it."""
         doc = self._incident(recover_from_driver=1, recovery_amount=400, installment_amount=100)
         with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
             with self.assertRaises(frappe.ValidationError):
                 doc.insert()
 
     def test_an_unflagged_incident_saves_on_a_site_without_the_lending_app(self):
-        """The event of record never depends on ``lending``."""
         doc = self._incident(recover_from_driver=0)
         with patch("frappe.get_installed_apps", return_value=["frappe", "erpnext", "hrms", "apex"]):
             doc.insert()
         self.assertTrue(frappe.db.exists("Vehicle Incident", doc.name))
 
     def test_raising_never_raises_a_legacy_employee_advance(self):
-        """The regression this guards: a stray import of the retired call would
-        raise BOTH records for one incident."""
         doc = self._incident(recover_from_driver=1, recovery_amount=400)
         doc.insert()
         with patch(f"{_MODULE}.raise_recovery_loan", return_value="LOAN-NEW"):
@@ -111,9 +90,6 @@ class TestVehicleIncidentRaisesALoanNotAnAdvance(FrappeTestCase):
 
 class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
     def setUp(self):
-        """This module assumes a site WITH ``lending``: it proves the incident's own
-        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
-        is absent. The one case that asserts that refusal patches the site shape back."""
         self.enterContext(lending_installed())
 
     def _incident(self, **fields):
@@ -145,10 +121,6 @@ class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
                 doc.before_cancel()
 
     def test_release_cancels_the_disbursement_before_the_loan(self):
-        """The order this guards: Loan.on_cancel refuses while a submitted Loan
-        Disbursement still links it (lending/loan_management/doctype/loan/loan.py:118
-        only ignores GL Entry / Payment Ledger Entry), so the disbursement must go
-        first."""
         doc = self._incident()
         loan_state = frappe._dict(name="LOAN-1", docstatus=1, total_principal_paid=0)
         cancelled_docs = []
@@ -168,9 +140,6 @@ class TestVehicleIncidentCancelGuardsTheLoan(FrappeTestCase):
 
 class TestClearingTheLinkByHandCannotDoubleRaise(FrappeTestCase):
     def setUp(self):
-        """This module assumes a site WITH ``lending``: it proves the incident's own
-        bookkeeping around a Loan, and ``recover_from_driver`` is refused where the app
-        is absent. The one case that asserts that refusal patches the site shape back."""
         self.enterContext(lending_installed())
 
     """Answers a question raised on review: the ``recovery_loan`` link is

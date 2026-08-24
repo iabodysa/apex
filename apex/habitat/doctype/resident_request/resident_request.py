@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Resident Request controller."""
 
 from __future__ import annotations
 
@@ -42,7 +41,6 @@ _CATEGORY_TO_ISSUE_TYPE = {
 }
 
 def before_insert(doc, method=None):
-    """Generates a tracking code, defaults channel and status, resolves location, sets priority."""
     if not doc.anonymous_tracking_code:
         doc.anonymous_tracking_code = frappe.generate_hash(length=8).upper()
 
@@ -56,12 +54,6 @@ def before_insert(doc, method=None):
     _apply_priority_rules(doc)
 
 def validate(doc, method=None):
-    """Resolves the location token, syncs the employee, blocks a bad token, and checks status rules.
-
-    The honeypot is read HERE, not only in submit_resident_request: the live public form
-    saves through Frappe's own ``web_form.accept``, which copies every web form field onto
-    the document (frappe/website/doctype/web_form/web_form.py:632-647) and never touches
-    the hardened endpoint beside it. Checked only there, the trap caught nothing."""
     if doc.get("website_field"):
         frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
@@ -73,35 +65,9 @@ def validate(doc, method=None):
     _validate_status_transition(doc)
 
 def on_update(doc, method=None):
-    """Native ToDo follow-up: when a request is Assigned to a user, put it in that
-    user's desk queue; when it ends (Resolved/Rejected/Closed), close the open
-    ToDos. Idempotent — never creates a duplicate ToDo for the same assignee."""
     _sync_assignment_todo(doc)
 
 def _sync_assignment_todo(doc):
-    """Drive Frappe's own assignment API rather than the records behind it.
-
-    ``_assign`` is a cache the ToDo controller owns: ``ToDo.on_update`` ->
-    ``update_in_reference`` (frappe/desk/doctype/todo/todo.py:87-120) rebuilds it from
-    EVERY live ToDo on the document. Writing it here replaced that aggregate with the
-    one name this field happens to hold, so a second assignee vanished from the desk
-    badge. ``assign_to.set_status`` (frappe/desk/form/assign_to.py:228-230) likewise
-    owns ``assigned_to`` and clears it when the assignment closes.
-
-    ``add`` is already duplicate-safe: an assignee who holds an open ToDo on this
-    document is skipped with a message, not re-assigned.
-
-    The timestamp is re-read because the API writes ``assigned_to`` back on any DocType
-    that owns a field of that name (frappe/desk/form/assign_to.py:97, and :228-230 on the
-    closing side) with no ``update_modified=False``. The row's ``modified`` therefore
-    moves while the caller still holds the pre-assignment value, and its next save of the
-    same handle throws TimestampMismatchError.
-
-    This stays hand-written rather than moving to a native Assignment Rule, and the
-    reason is one field: ``AssignmentRule.do_assignment`` passes no ``priority`` to
-    ``assign_to.add`` (assignment_rule.py:87-97 names every key it does pass),
-    so converting would silently drop the priority the operator reads on the ToDo. The
-    duplication is invisible to him; losing the priority is not."""
     if doc.status in ("Resolved", "Rejected", "Closed"):
         close_all_assignments(doc.doctype, doc.name)
         doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
@@ -120,7 +86,6 @@ def _sync_assignment_todo(doc):
     doc.modified = frappe.db.get_value(doc.doctype, doc.name, "modified")
 
 def _validate_status_transition(doc):
-    """Enforce role-based state transition rules without a full Frappe Workflow."""
     status = doc.status or "New"
 
     if status == "Assigned" and not doc.assigned_to:
@@ -136,7 +101,6 @@ def _validate_status_transition(doc):
         doc.closed_by = frappe.session.user
 
 def _populate_location_from_token(doc):
-    """Sets the accommodation site, building and room from the active QR Location matching the token."""
     if not doc.location_token:
         return
 
@@ -154,7 +118,6 @@ def _populate_location_from_token(doc):
     doc.room = qr[0].room
 
 def _apply_priority_rules(doc):
-    """Sets priority to Critical for hazard keywords, or to High for AC and other urgent keywords."""
     text = f"{doc.request_category or ''} {doc.description or ''}".lower()
 
     critical_terms = (
@@ -174,7 +137,6 @@ def _apply_priority_rules(doc):
     )
 
     def _matches(term):
-        """Returns whether a term appears as a whole word in the combined category and description text."""
         return re.search(r"\b" + re.escape(term) + r"\b", text) is not None
 
     _AC_PATTERN = re.compile(r"\ba[/\-]?c\b|air.?condi", re.IGNORECASE)
@@ -186,13 +148,6 @@ def _apply_priority_rules(doc):
 
 @frappe.whitelist(methods=["POST"])
 def convert_request(source_name):
-    """Create the category-appropriate operational document from a resident
-    request, link it back via target_doctype / target_document, and advance the
-    request to In Progress. Returns the new target's doctype + name so the
-    client can route to it.
-
-    Idempotent: if the request was already converted, the existing target is
-    returned instead of creating a duplicate."""
     frappe.has_permission("Resident Request", "write", doc=source_name, throw=True)
 
     source = frappe.get_doc("Resident Request", source_name)
@@ -229,33 +184,18 @@ def convert_request(source_name):
     }
 
 def _link_target_to_request(source, target_doctype, target_name):
-    """Stamp the read-only traceability fields and advance status. Uses
-    db.set_value (not a full save) so the read_only target_* fields are written
-    server-side without re-running the request's own validate/on_update mid-flow,
-    and without a timestamp-mismatch race."""
     updates = {"target_doctype": target_doctype, "target_document": target_name}
     if source.status in (None, "", "New", "Triaged", "Assigned"):
         updates["status"] = "In Progress"
     frappe.db.set_value("Resident Request", source.name, updates)
 
 def _common_location(source, target):
-    """Copies the building, room and bed from the source request onto the new target document."""
     target.building = source.building
     target.room = source.room
     if source.bed:
         target.bed = source.bed
 
 def _build_maintenance_request(source):
-    """Builds an unsaved Maintenance Request from the request's location, category and description.
-
-    ``get_mapped_doc`` (frappe/model/mapper.py:50) is the framework's mapper and is used
-    elsewhere in this app. Two things it cannot do here: it re-fetches the source by
-    NAME (frappe/model/mapper.py:75-77) when the caller already holds the loaded
-    document, and it refuses on the target's create permission before the caller has
-    decided whether to keep the draft at all. This returns an UNSAVED target the
-    triage flow may discard, so no permission is spent on a document that is never
-    written.
-    """
     target = frappe.new_doc("Maintenance Request")
     _common_location(source, target)
     target.issue_type = _CATEGORY_TO_ISSUE_TYPE.get(source.request_category, "Other")
@@ -266,13 +206,6 @@ def _build_maintenance_request(source):
     return target
 
 def _build_safety_incident(source):
-    """Builds an unsaved Safety Incident from the request's location, severity and description.
-
-    Hand-mapped rather than through ``get_mapped_doc`` (frappe/model/mapper.py:50) for
-    the reason :func:`_build_maintenance_request` gives, and because the severity is
-    DERIVED from the request's priority rather than copied: the two fields share no
-    name and no scale, which a field map cannot express.
-    """
     target = frappe.new_doc("Safety Incident")
     target.incident_datetime = frappe.utils.now_datetime()
     target.building = source.building
@@ -284,13 +217,6 @@ def _build_safety_incident(source):
     return target
 
 def _build_custody_issue(source):
-    """Builds an unsaved Custody Issue from the resident request's building, party and description.
-
-    Hand-mapped rather than through ``get_mapped_doc`` (frappe/model/mapper.py:50) for
-    the reason :func:`_build_maintenance_request` gives. The party pair is copied only
-    when BOTH halves are present: a Dynamic Link with a type and no name is a row the
-    framework cannot resolve later.
-    """
     target = frappe.new_doc("Custody Issue")
     target.issue_date = frappe.utils.today()
     target.building = source.building
@@ -309,10 +235,6 @@ _TRIAGE_NEXT = {
 
 @frappe.whitelist(methods=["POST"])
 def advance_triage_status(name, to_status):
-    """Advance one resident request to the next no-extra-data triage state from a
-    phone-friendly list view. Reuses the controller save path so the canonical
-    _validate_status_transition rule runs; rejects any jump that is not in the
-    guard-free progression. Idempotent: a request already at to_status is a no-op."""
     frappe.has_permission("Resident Request", "write", doc=name, throw=True)
 
     doc = frappe.get_doc("Resident Request", name)
@@ -337,16 +259,6 @@ _BULK_TRIAGE_SAVEPOINT = "resident_request_bulk_triage_row"
 
 @frappe.whitelist(methods=["POST"])
 def bulk_triage(names):
-    """Bulk-advance a selection of New requests to Triaged (the universal first
-    triage step). Skips any row not in New so a mixed selection partially applies
-    rather than failing whole.
-
-    Small selections run inline and return the count actually advanced (the desk
-    list action shows it immediately). A selection larger than
-    ``BULK_TRIAGE_SYNC_LIMIT`` is handed to a background job so the request returns
-    at once instead of blocking the worker thread on an unbounded loop; the
-    response then carries ``queued=True`` and ``advanced=None`` (the job applies
-    the same per-row triage under the enqueuing user's permissions)."""
     if isinstance(names, str):
         names = frappe.parse_json(names)
     names = names or []
@@ -364,50 +276,12 @@ def bulk_triage(names):
     return apply_bulk_triage(names)
 
 def bulk_triage_job_id(names) -> str:
-    """One stable id per SELECTION, so a double-click queues one job and not two.
-
-    ``frappe.enqueue`` (frappe/utils/background_jobs.py:59) drops a duplicate only
-    when ``deduplicate`` is set AND the id matches, and the one thing it cannot do is
-    derive that id itself — without one every click is a distinct job, and the same
-    rows are triaged twice by two workers reading the same pre-lock state.
-
-    The id is a DIGEST of the SORTED names, so the same selection in a different order
-    is the same job.
-
-    ``frappe.utils.sha256_hash`` (frappe/utils/data.py:2151) derives it. NOT
-    ``frappe.generate_hash``: that takes a ``txt`` argument and ignores it entirely —
-    ``frappe/__init__.py:1134-1142`` returns ``secrets.token_hex`` and never reads the
-    input — so an id built that way is random per call, ``deduplicate`` compares two
-    values that never match, and nothing is deduplicated while the code reads as
-    though it is.
-    """
     return "bulk_triage:" + sha256_hash(
         "|".join(sorted(str(n) for n in names or []))
     )[:24]
 
 
 def apply_bulk_triage(names):
-    """Advance each New Resident Request in ``names`` to Triaged (per-row write
-    permission checked); returns the count advanced. Shared body of the inline and
-    the background bulk-triage paths.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    wrap EACH row. The one thing the framework's own transaction cannot do is unwind
-    one document out of a batch: a raise past this loop rolls back every row already
-    saved in the same pass, after the caller was told the batch succeeded.
-
-    Each row saves behind its own savepoint: without it, one row's failure (a
-    permission error, a validation error, a stale timestamp) raised past this
-    loop and the caller's transaction rolled back EVERY row already saved in the
-    same pass, while the caller had already been told the batch succeeded (the
-    sync path returns the advanced count only if nothing raised; the async path
-    reports ``queued`` before the job even runs). A row that fails is logged and
-    skipped so the rest of the selection still advances.
-
-    Each row is loaded ``for_update`` so the LOCK and the READ are one statement.
-    Under REPEATABLE READ a plain read answers from the transaction's own snapshot,
-    so a second caller over an overlapping selection still sees ``New`` on a row the
-    first has already advanced, and triages it a second time."""
     advanced = 0
     for name in names or []:
         frappe.db.savepoint(_BULK_TRIAGE_SAVEPOINT)
@@ -428,8 +302,4 @@ def apply_bulk_triage(names):
     return {"advanced": advanced, "total": len(names or [])}
 
 def _bulk_triage_job(names):
-    """Background runner for a large bulk_triage selection (queued by ``bulk_triage``).
-    Runs under the enqueuing user — frappe.enqueue captures the session user and
-    the worker re-applies it via frappe.set_user — so the per-row write-permission
-    check inside ``apply_bulk_triage`` still applies."""
     apply_bulk_triage(names)

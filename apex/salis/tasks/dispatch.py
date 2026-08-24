@@ -39,17 +39,6 @@ def generation_key(route_assignment: str, trip_date: date) -> str:
 
 
 def _driver_if_still_available(driver):
-    """The assignment's driver, or ``None`` once he is no longer Active.
-
-    A Route Assignment names its driver once and generates a trip from it every shift for
-    the next fortnight. Stopping the driver refuses the stop while trips already name him,
-    but nothing re-reads the assignment, so without this the generator writes his name back
-    on tomorrow's trip the morning after he was stopped.
-
-    The route still runs: the trip is created with no driver, which is what the assignment
-    queue reads as needing one. Dropping the trip instead would strand the workers waiting
-    on that route.
-    """
     if not driver:
         return None
     if frappe.db.get_value("Salis Driver", driver, "status") != "Active":
@@ -58,16 +47,6 @@ def _driver_if_still_available(driver):
 
 
 def generate_for_assignment(route_assignment, start_date=None, end_date=None):
-    """Create the missing Dispatch Trips for ONE approved assignment's horizon.
-
-    The assignment is loaded ``for_update`` so two overlapping runs cannot both read
-    the same ``generated_through`` and both create the same day's trips —
-    ``frappe.new_doc`` (frappe/__init__.py:1152) has no idempotency of its own, and a
-    duplicate trip puts a second bus on one route.
-
-    Returns how many were created; an assignment that is not submitted, approved and
-    enabled creates nothing.
-    """
     assignment = frappe.get_doc("Route Assignment", route_assignment, for_update=True)
     if not (
         assignment.docstatus == 1
@@ -128,17 +107,6 @@ def generate_for_assignment(route_assignment, start_date=None, end_date=None):
 
 
 def generate_recurring_trips(start_date=None, days=HORIZON_DAYS):
-    """Generate the coming horizon's trips for every approved Route Assignment.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a plain try/except cannot do is undo a PARTIAL
-    write: a row that fails midway leaves what it already inserted, and the next unit
-    inherits it. The failure goes to the Error Log through ``frappe.get_traceback``
-    and the loop carries on.
-
-    One bad assignment must not cost the whole horizon: without the per-assignment
-    point, a single malformed schedule leaves every fleet with no trips tomorrow.
-    """
     start = getdate(start_date or today())
     end = start + timedelta(days=days - 1)
     assignments = frappe.get_all(

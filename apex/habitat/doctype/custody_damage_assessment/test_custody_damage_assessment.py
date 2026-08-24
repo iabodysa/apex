@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Custody Damage Assessment's own sign-off/acknowledgement
-stamping and its replacement-cost total.
-
-Patterned on test_lease.py. Every case runs against an unsaved
-``frappe.new_doc("Custody Damage Assessment")`` -- nothing is inserted.
-``validate`` is called directly (with no ``party``/``employee`` set, so its
-``sync_party_employee`` call is a pure in-memory no-op -- see
-``apex/apex_core/utils/party_link.py``) to exercise the item-total rollup
-alongside the two stamping helpers it drives.
-"""
 
 from __future__ import annotations
 

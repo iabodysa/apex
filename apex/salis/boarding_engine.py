@@ -1,29 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Boarding ledger engine for the Salis Movement module.
-
-Posting engine that mirrors the immutable, source-traceable ledger idiom of
-``fuel_engine`` / ``rental_engine`` and the Trip Fulfilment Ledger: it turns each
-worker's FINAL boarding outcome — held only in the mutable ``Trip Boarding State``
-child on Dispatch Trip (operational, retroactively editable) — into one immutable
-Trip Boarding Ledger row, so per-worker boarding reports stay stable when that
-child is later edited.
-
-Two entry points, both idempotent and ignore_permissions (the ledger grants no
-human write role):
-
-* ``post_trip_boarding(dispatch_trip)`` — called from the finalize path
-  (``boarding_flow.depart_and_finalize``) once the Boarded/Absent outcomes have
-  settled. Posts one row per Trip Boarding State worker with a TERMINAL outcome
-  (Boarded or Absent). Idempotent on ``(dispatch_trip, employee)`` for original
-  (non-reversal) rows, so re-running posts no duplicate.
-* ``reverse_trip_boarding(dispatch_trip)`` — reverse-not-delete on trip cancel:
-  for each original posted row, post a mirror reversal row (``is_cancelled=1`` +
-  ``reversal_of`` pointing at the original) and flag the original ``is_cancelled``,
-  so the outcome nets out of every report while the original is preserved for
-  audit. Idempotent: a row already reversed is skipped.
-
-No GL, no money — a categorical operational memo only.
-"""
 
 from __future__ import annotations
 
@@ -40,11 +15,6 @@ TERMINAL_OUTCOMES = ("Boarded", "Absent")
 
 
 def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
-    """Map each manifest worker -> the Accommodation Building of the Transport
-    Request they belong to (their housing pickup). The trip manifest is the union
-    of the Route Plan request and every assigned request; a worker's building is
-    the building of the FIRST request that lists them. Best-available per-worker
-    snapshot — the boarding state child carries no building of its own."""
     transport_request = frappe.db.get_value(
         "Dispatch Trip", dispatch_trip, "transport_request"
     )
@@ -64,24 +34,6 @@ def _worker_buildings(dispatch_trip: str) -> dict[str, str]:
 
 
 def post_trip_boarding(dispatch_trip: str) -> int:
-    """Post one immutable Trip Boarding Ledger row per terminal-outcome worker.
-
-    Reads the trip's Trip Boarding State child and, for every row whose status is
-    a terminal outcome (Boarded / Absent), inserts a ledger row capturing that
-    final outcome. Workers still in a non-terminal state (Pending / Driver Rejected)
-    are NOT posted — they have no settled outcome yet.
-
-    Idempotent on ``(dispatch_trip, employee)``: a worker already posted (original
-    row) is skipped, so calling it again after a re-finalize posts no duplicate.
-
-    ``frappe.db.savepoint`` / ``rollback`` (frappe/database/database.py:1203, :1186)
-    isolate each unit. The one thing a plain try/except cannot do is undo a PARTIAL
-    write: a row that fails midway leaves what it already inserted, and the next unit
-    inherits it. The failure goes to the Error Log through ``frappe.get_traceback``
-    and the loop carries on. No commit inside the loop: the caller owns the transaction, and committing
-    here would publish a half-posted trip. Returns
-    the number of rows posted.
-    """
     if not dispatch_trip:
         return 0
 
@@ -141,20 +93,6 @@ def post_trip_boarding(dispatch_trip: str) -> int:
 
 
 def reverse_trip_boarding(dispatch_trip: str) -> int:
-    """Reverse-not-delete the posted boarding rows for a cancelled trip.
-
-    For each ORIGINAL Trip Boarding Ledger row of the trip (``reversal_of`` unset,
-    not yet cancelled), post a mirror reversal row carrying the same identity,
-    ``is_cancelled=1`` and ``reversal_of`` set to the original, then flag the
-    original ``is_cancelled=1`` via frappe.db.set_value (a direct DB write — the
-    controller blocks every ORM re-save). The outcome then nets out of every
-    report while the original is preserved for audit.
-
-    Mirrors the fuel/rental reversal idiom (negative mirror + ``reversal_of``),
-    adapted to a categorical outcome via the ``is_cancelled`` flag. Idempotent:
-    an original that already has a reversal is skipped. Returns the number of
-    reversal rows posted (0 if the trip was never posted or is already reversed).
-    """
     if not dispatch_trip:
         return 0
 

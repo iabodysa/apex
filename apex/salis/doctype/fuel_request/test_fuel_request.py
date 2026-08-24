@@ -1,11 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Fuel Request's own arithmetic and per-type field guards.
-
-Patterned on frappe/tests/test_document.py: each case builds an unsaved
-Document via frappe.new_doc and calls one guard method directly. The quota
-allowance guard takes its quota as a plain ``frappe._dict`` argument, so its
-arithmetic is exercised without writing a Fuel Quota record at all.
-"""
 
 from __future__ import annotations
 
@@ -33,9 +26,6 @@ class TestFuelRequest(FrappeTestCase):
         self.assertRaises(frappe.ValidationError, doc._guard_quota_allowance, quota)
 
     def test_an_oversized_first_draw_is_refused_even_at_zero_consumed(self):
-        """15 L against a 10 L quota with 0 consumed must not pass on an
-        exhaustion-only check: consumed < monthly is true, so the overrun is
-        caught only by the second, draw-size comparison."""
         doc = self._request(fuel_quota="_Test Quota", requested_litres=15)
         quota = frappe._dict(consumed_litres=0, monthly_litres=10, status="Active")
         self.assertRaises(frappe.ValidationError, doc._guard_quota_allowance, quota)
@@ -123,13 +113,6 @@ class TestFuelRequest(FrappeTestCase):
 
 
 class TestFuelRequestApprovedByIsFrozenAfterSubmit(FrappeTestCase):
-    """``approved_by`` is stamped once, only at the initial Pending -> Approved
-    submission (docstatus 0 -> 1, an unrestricted ``submit`` action); no save on
-    an already-submitted request ever changes it again. ``allow_on_submit``
-    therefore opened a plain-``save()`` edit path nothing in the app used.
-    Removing it lets the framework refuse that edit again. Proven through
-    ``insert()``/the native Workflow ``Approve`` transition/``save()``, never by
-    calling a controller method directly."""
 
     def _approver(self):
         email = "_test-fuel-request-approver@example.com"

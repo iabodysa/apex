@@ -1,13 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""The scope fragment renderers Habitat and Salis both dispatch through.
-
-These build the WHERE fragment that confines a list or report to the caller's own
-estate, so the two properties that matter are the exact SQL emitted and the behaviour
-on a key no table defines. An unknown strategy MUST render ``1=0`` and never an empty
-string: an empty fragment is no restriction at all, which turns a scoping failure into
-a silent grant of every row.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -24,7 +16,6 @@ from apex.salis import permissions as salis
 
 
 class TestScopeFragments(FrappeTestCase):
-    """Pure string construction — no records, no session, no permissions."""
 
     def test_quote_column_wraps_exactly_once(self):
         self.assertEqual(quote_column("building"), "`building`")
@@ -36,8 +27,6 @@ class TestScopeFragments(FrappeTestCase):
         )
 
     def test_render_dual_ors_the_two_endpoints_inside_one_fragment(self):
-        """Frappe AND-joins separate conditions, so an either-endpoint scope has to
-        arrive already OR-ed or a row crossing the boundary is hidden."""
         fragment = render_dual({"first": "from_building", "second": "to_building"}, "'B1'")
         self.assertEqual(
             fragment, "(`from_building` in ('B1') or `to_building` in ('B1'))"
@@ -53,7 +42,6 @@ class TestScopeFragments(FrappeTestCase):
         self.assertEqual(rendered, "`building` in ('B\\'1', 'B2')")
 
     def test_each_module_keeps_its_own_strategy_table(self):
-        """The dispatcher takes the table, so Habitat's keys never resolve Salis's."""
         self.assertIn("column", habitat.FRAGMENTS)
         self.assertIn("column", salis.FRAGMENTS)
         self.assertEqual(
@@ -68,7 +56,6 @@ class TestScopeFragments(FrappeTestCase):
 
 
 class TestResolveUser(FrappeTestCase):
-    """The one answer to "who is asking" that every scope resolver enters through."""
 
     def test_none_falls_back_to_the_session_user(self):
         self.assertEqual(resolve_user(None), frappe.session.user)

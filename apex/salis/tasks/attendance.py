@@ -1,5 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Scheduled tasks for the Salis fleet module (split by domain)."""
 
 from __future__ import annotations
 
@@ -15,15 +14,6 @@ _ROW_SAVEPOINT = "salis_attendance_row"
 
 
 def missing_attendance_watch() -> None:
-    """Flag active drivers with no Driver Attendance recorded today.
-
-    For each Salis Driver ``{status: Active}`` checks for a submitted Driver
-    Attendance for today. If none exists the driver is ASSIGNED to the Fleet
-    Supervisor queue — the Salis Driver is the document the supervisor chases,
-    since the gap is the absence of an attendance record. The Salis Driver queue
-    is reconciled centrally in ``reconcile_operations_alerts`` (it drains once
-    attendance lands or the driver is no longer Active).
-    """
     today_str = today()
     logger = frappe.logger()
 

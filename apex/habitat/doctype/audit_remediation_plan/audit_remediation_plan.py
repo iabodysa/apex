@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Client Audit Remediation Plan lifecycle.
-
-``refresh_overall_status`` saves with no ``ignore_permissions``: its only caller,
-``habitat.tasks.safety.audit_remediation_deadline_watch``, is wired as a scheduler event.
-``frappe.utils.background_jobs.execute_job`` connects a scheduled job with no ``user`` kwarg,
-so ``frappe.connect``'s ``set_admin_as_user`` default leaves the session at Administrator, who
-already satisfies every DocPerm check (``frappe/permissions.py`` short-circuits on
-``user == "Administrator"``). Internal Auditor holds no write on this DocType, so any other
-actor calling this function directly is still refused.
-"""
 
 from __future__ import annotations
 
@@ -37,7 +27,6 @@ _TRANSITION_SAVEPOINT = "audit_remediation_transition"
 
 
 def derive_overall_status(items, remediation_deadline, on_date=None) -> str:
-    """Roll item states and deadline into one deterministic plan state."""
     statuses = [str(item.status or "Open") for item in items]
     if statuses and all(status == "Verified by Client" for status in statuses):
         return "Closed by Client"
@@ -65,14 +54,12 @@ def _snapshot(row, fields):
 
 class AuditRemediationPlan(Document):
     def validate(self):
-        """Keep the parent status derived from item progress and deadline."""
         self.overall_status = derive_overall_status(
             self.remediation_items,
             self.remediation_deadline,
         )
 
     def before_update_after_submit(self):
-        """Reject direct child edits; only server-owned transitions may change them."""
         previous = self.get_doc_before_save()
         if not previous:
             frappe.throw(_("Could not verify the submitted remediation plan changes."))
@@ -164,7 +151,6 @@ def transition_item(
     target_status: str,
     evidence_attached: str | None = None,
 ) -> dict:
-    """Apply one permitted item transition and roll up the parent atomically."""
     plan = frappe.get_doc("Audit Remediation Plan", name, for_update=True)
     plan.check_permission("write")
     if plan.docstatus != 1:
@@ -227,7 +213,6 @@ def transition_item(
 
 
 def refresh_overall_status(name: str, on_date=None) -> dict:
-    """Recompute one submitted plan through the same rollup used by actions."""
     plan = frappe.get_doc("Audit Remediation Plan", name, for_update=True)
     if plan.docstatus != 1:
         frappe.throw(_("Only submitted remediation plans can be rolled up."))

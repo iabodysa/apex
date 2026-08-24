@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Building License's pure expiry-status classifier and its own
-date/status decisions.
-
-Patterned on test_lease.py. ``derive_license_status`` is pure date arithmetic
--- no document, no DB. The two ``BuildingLicense`` methods below run their
-decision entirely off the in-memory document: ``_validate_dates`` is a plain
-comparison, and ``_sync_status`` (on a brand-new, unsaved document) takes the
-``self.is_new()`` branch and never touches ``get_doc_before_save`` or the
-database.
-"""
 
 from __future__ import annotations
 

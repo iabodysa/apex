@@ -1,34 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Housing Inventory count API.
-
-The testable backend for the count surface inside the housing portal
-(``/housing#/count``): a mobile field surface where a supervisor picks a
-building, sees its Housing Inventory lines grouped by room, and records a
-physical count per line. It adds NO inventory model of its own — it reuses the
-Housing Inventory DocType and its existing count fields. The controller is the
-single deriver of ``quantity_variance`` (counted minus expected) and the stamper
-of ``last_count_date``; this API never writes those derived fields.
-
-The housing feature calls this module. The standalone
-``/housing-count`` route is a redirect marker whose controller redirects to
-``/housing#/count``, so it hosts no surface of its own.
-
-Endpoints:
-
-- :func:`get_inventory_for_building` returns the inventory lines for a building
-  (optionally a single room), permission-checked so the caller's building scope
-  applies. Read-only.
-- :func:`submit_counts` records a count per submitted line via ``doc.save()`` so
-  the Housing Inventory controller derives ``quantity_variance`` and stamps
-  ``last_count_date``. Each row is wrapped in its own savepoint, so one bad line
-  never rolls back the rest.
-
-Permission model: NO ``ignore_permissions`` anywhere. The reads run through the
-permission filter (``housing_inventory_query`` building scope), and each write is
-gated by ``frappe.has_permission("Housing Inventory", "write", throw=True)`` plus
-the per-doc ``building_scoped_has_permission`` check Frappe applies on save — so a
-supervisor scoped to building A can neither read nor write building B's items.
-"""
 
 from __future__ import annotations
 
@@ -56,13 +26,6 @@ COUNT_LINE_LIMIT = 200
 
 
 def _condition_options():
-    """Return the Housing Inventory ``condition`` Select option list.
-
-    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) is the source,
-    so the portal's condition picker can never drift from the DocType's option set.
-    The one thing a hardcoded list cannot do is follow the field: adding a condition
-    would leave the portal offering the old set with nothing to say so.
-    """
     df = frappe.get_meta("Housing Inventory").get_field("condition")
     options = (df.options or "") if df else ""
     return [o for o in options.split("\n") if o]
@@ -70,23 +33,6 @@ def _condition_options():
 
 @frappe.whitelist()
 def get_inventory_for_building(building, room=None):
-    """Return the Housing Inventory lines for a building (optionally one room).
-
-    Permission-checked READ: the caller must have ``read`` on Housing Inventory,
-    and the rows are fetched WITHOUT ``ignore_permissions`` so the building-scope
-    ``permission_query_conditions`` confines a scoped supervisor to their own
-    estate's items. A caller scoped off this building gets an empty list.
-
-    Args:
-        building: Accommodation Building docname (the count scope).
-        room: optional Accommodation Room docname to narrow the list.
-
-    Returns:
-        ``{"building", "items": [...], "conditions": [...]}`` — each item carries
-        the render fields in :data:`_ITEM_FIELDS` plus ``room_label`` (the room
-        number for grouping), and ``conditions`` is the DocType's condition option
-        set for the per-line picker.
-    """
     frappe.has_permission("Housing Inventory", "read", throw=True)
     if not building:
         frappe.throw(_("A building is required to load the inventory."))
@@ -126,35 +72,6 @@ def get_inventory_for_building(building, room=None):
 
 @frappe.whitelist(methods=["POST"])
 def submit_counts(building, lines):
-    """Record a physical count per submitted Housing Inventory line.
-
-    Each line stages ``counted_quantity`` (+ optional ``condition`` / ``notes``)
-    onto its existing Housing Inventory row and ``doc.save()``-s it, so the
-    controller's ``before_save`` derives ``quantity_variance`` and stamps
-    ``last_count_date``. The derived ``quantity_variance`` is NEVER written here.
-
-    Permission: ``frappe.has_permission("Housing Inventory", "write",
-    throw=True)`` gates the call up-front; every ``doc.save()`` runs WITHOUT
-    ``ignore_permissions``, so the per-doc ``building_scoped_has_permission`` check
-    fires and a row outside the caller's building scope is rejected. The
-    ``building`` argument is verified to match each row, so a caller cannot smuggle
-    in an out-of-building item id.
-
-    Each row is wrapped in its own DB savepoint: a failure on one line rolls back
-    only that line and is recorded in ``errors`` while the rest still save — a
-    bad single item never voids a whole field count.
-
-    Args:
-        building: Accommodation Building docname (the count scope; every line
-            must belong to it).
-        lines: JSON list (or already-parsed list) of
-            ``{"name", "counted_quantity", "condition"?, "notes"?}``.
-
-    Returns:
-        ``{"ok", "saved", "failed", "rows": [...], "errors": [...]}`` — ``rows``
-        carry the reloaded ``name`` / ``item_name`` / ``quantity_variance`` /
-        ``last_count_date`` so the summary can show the server-derived variance.
-    """
     frappe.has_permission("Housing Inventory", "write", throw=True)
 
     if not building:

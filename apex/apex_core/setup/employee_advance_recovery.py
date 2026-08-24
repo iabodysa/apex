@@ -1,14 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Native Employee Advance recovery wiring, applied at install and migrate.
-
-Every write here runs as Administrator with no session user: hooks.py reaches this
-module only from ``after_install``/``after_migrate``, a patch, or the one-time
-``setup_wizard_complete`` flow that Frappe's own ``setup_complete`` gates behind
-``is_setup_complete()`` (frappe/desk/page/setup_wizard/setup_wizard.py:54-55), which
-only the site's sole account can still reach. Administrator already carries every
-permission (frappe/permissions.py:107,273,506), so no write here needs to ask.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +11,6 @@ RECOVERY_COMPONENT = "Employee Advance Recovery"
 MAX_RECOVERY_PERCENT = 50.0
 
 def seed_recovery_component():
-    """Create the native HRMS deduction component in a safe disabled state."""
     if not frappe.db.exists("DocType", "Salary Component"):
         return None
     existing = frappe.db.exists("Salary Component", RECOVERY_COMPONENT)
@@ -40,16 +30,6 @@ def seed_recovery_component():
     return component.name
 
 def ensure_advance_account(company: str) -> str:
-    """The company's Receivable employee-advance account, created if it is not there yet.
-
-    An advance is money the company paid and expects back, so the account has to be
-    Receivable for the ledger to read the right way round. Two things make that account
-    absent on every new site: erpnext's standard chart creates "Employee Advances" as
-    Payable (standard_chart_of_accounts.py:16), and nothing in erpnext ever writes
-    Company.default_employee_advance_account — the field ships empty and waits for an
-    accountant. Demanding it instead of creating it made the requirement unsatisfiable on
-    a first install, which is what stopped the Setup Wizard finishing.
-    """
     existing = frappe.db.get_value("Company", company, "default_employee_advance_account")
     if existing and frappe.db.get_value("Account", existing, "account_type") == "Receivable":
         return existing
@@ -92,14 +72,6 @@ def ensure_advance_account(company: str) -> str:
     return match
 
 def configure_recovery(*, enabled=False, company=None, salary_component=None, max_percent=None):
-    """Apply setup-wizard recovery choices without bypassing native HRMS validation.
-
-    ``frappe.get_single`` (frappe/__init__.py:1335) loads the settings and saves them
-    once, so the Single's own ``validate`` grades the FINAL combination. The one thing
-    per-field writes cannot do is validate the switches against each other — a
-    recovery percentage means nothing until recovery is enabled, and the two must
-    land together.
-    """
     settings = frappe.get_single("Salis Settings")
     max_percent = (
         MAX_RECOVERY_PERCENT if max_percent in (None, "") else flt(max_percent)

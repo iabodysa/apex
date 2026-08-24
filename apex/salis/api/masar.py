@@ -1,47 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Masar (Worker Movement) portal endpoints.
-
-Masar is the **Workers division of Salis** — the worker-transport experience on
-the shared fleet backbone. This module is the endpoint surface and nothing else:
-every whitelisted method the worker SPA and the driver portal call lives here,
-under the dotted path the clients already hold, and each one resolves identity,
-composes a payload and returns it.
-
-The work those endpoints do is split by subject, and each half has exactly one
-home:
-
-  * :mod:`apex.salis.api.masar_routes` — trips, routes, stops and the ride ETA.
-    Shared by the DRIVER route view and the WORKER transport view, which read the
-    same trips from opposite ends.
-  * :mod:`apex.salis.api.masar_worker` — the worker's identity boundary and the
-    records that worker owns: housing, documents, custody, requests, contacts.
-
-Both are re-exported here under their original names. Callers outside this module
-(``driver_portal``, ``boarding_flow``, ``boarding_window``, ``route_supervisor``)
-import them from ``masar``, and that stays true.
-
-Driver-route endpoints resolve a presented driver credential first, then fall
-back to a linked signed-in driver when no credential was presented. The client
-never supplies a driver id. These route reads feed the worker view inside the
-existing /driver portal and have no GL or write side effects.
-
-The three documents a worker raises about himself — his Resident Request, his Transport Request,
-his trip rating — are now written inside ``as_capacity(WORKER)`` under the Worker role's own
-``create``. The endpoints stay ``allow_guest=True`` and ``frappe.session.user`` is Guest for the
-request; the capacity is opened around the write only, after ``_resolve_worker`` has already
-turned the QR token into an Employee. Authentication is the token, authorisation is the role.
-
-The capacity is never a login: it exists for the duration of one write and is handed back in a
-``finally``, so the role it carries is unreachable from outside. That is what makes granting it
-read on those DocTypes safe — no request ever runs as it.
-
-The Trip Start Log write (the worker's boarding self-confirm, appended to the trip's shared
-execution log) now runs inside ``as_capacity(WORKER, employee)`` too. It is the driver's log, not
-the worker's, so the Worker role's DocPerm alone cannot scope it; the record-level gate is
-``apex.salis.permissions._trip_start_log_capacity_verdict``, which authorises a Worker capacity
-write only when the resolved employee is on the trip's own manifest — the same forward resolution
-``_worker_today_dispatch_trip`` already used to find that trip.
-"""
 
 import frappe
 from frappe import _
@@ -103,40 +60,6 @@ __all__ = [
 
 @frappe.whitelist()
 def get_my_worker_route_today():
-    """Read-only worker-transport trip view for the CURRENT driver.
-
-    Resolves a presented driver credential first, then falls back to the linked
-    signed-in driver when no credential was presented. Returns today's
-    Workers-line route(s): for each trip, the route plan, its ordered stops (each
-    with its Habitat housing pickup when linked), and the registered worker
-    manifest carried by the linked Transport Request.
-
-    Read-only. This feeds the future driver-portal worker view (Phase 1b); it
-    posts no GL and writes nothing.
-
-    Shape::
-
-        {
-          "driver": "DRV-000001",
-          "date": "YYYY-MM-DD",
-          "trips": [
-            {
-              "dispatch_trip": "DT-000007",
-              "transport_request": "TR-000005",
-              "route_plan": "RP-000005",
-              "vehicle": "...", "depart_time": "06:30:00",
-              "return_time": null, "status": "Planned",
-              "expected_count": 3,
-              "stops": [ { "stop_name": "...", "sequence": 1,
-                           "accommodation_building": "...",
-                           "pickup": { "building_name": "...", "city": "...",
-                                       "google_maps_url": "..." } }, ... ],
-              "workers": [ { "employee": "...", "employee_name": "...",
-                             "pickup_point": "..." }, ... ]
-            }
-          ]
-        }
-    """
     _require_enabled()
     driver = _resolve_driver()
     trips = []
@@ -165,30 +88,6 @@ def get_my_worker_route_today():
 
 @frappe.whitelist()
 def get_my_worker_route_summary() -> dict:
-    """Read-only, identity-scoped *summary* of the current driver's worker route
-    today — a compact roll-up for the standalone ``/masar`` page header.
-
-    Resolves a presented driver credential first, then falls back to the linked
-    signed-in driver when no credential was presented. Folds today's Workers-line
-    trips into headline counts plus a single "next pickup" pointer (the earliest
-    housing-pickup stop on the earliest trip). Read-only; writes nothing and posts
-    no GL.
-
-    Shape::
-
-        {
-          "driver": "DRV-000001",
-          "date": "YYYY-MM-DD",
-          "trip_count": 2,
-          "stop_count": 5,
-          "expected_total": 7,
-          "next_pickup": {
-            "dispatch_trip": "DT-000007", "depart_time": "06:30:00",
-            "stop_name": "Housing Pickup", "sequence": 1,
-            "building_name": "...", "city": "...", "google_maps_url": "..."
-          }
-        }
-    """
     _require_enabled()
     driver = _resolve_driver()
 
@@ -267,22 +166,6 @@ _ENUM_SOURCES = {
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=30, seconds=60)
 def get_enum_labels(lang="ar"):
-    """Localized labels for the worker portal's server enums (read, no identity).
-
-    Single source of truth for the Masar Select-option translations: for each enum
-    namespace the SPA renders, this reads the field's LIVE Select options from
-    ``frappe.get_meta`` and maps each English value to its translation from the
-    app's translation files (``ar.csv``) via ``frappe.translate.get_all_translations``. The
-    portal then needs no hand-maintained JS enum map — a new or renamed option is
-    picked up automatically, and the one place a label is authored is the CSV, so
-    the two can never drift (the recurring "English leaks into the Arabic UI"
-    class). The stored value stays English for round-trip; only the label is
-    localized.
-
-    Returns ``{namespace: {english_value: localized_label}}``. Only entries whose
-    translation differs from the raw value are included (English mode renders the
-    raw value, so identity entries add nothing). Public + cacheable: it exposes no
-    worker data, only option metadata + translations, so no token is required."""
     lang = (lang or "ar").strip() or "ar"
     translations = get_all_translations(lang) or {}
     out = {}
@@ -302,12 +185,6 @@ def get_enum_labels(lang="ar"):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_context(token=None):
-    """The worker's own profile + document expiries (read, token-scoped).
-
-    Resolves the token to one Employee and returns the durable identity fields the
-    Masar profile screen shows. Employee field availability varies by HR setup, so
-    every field is read defensively via ``.get()``; missing fields surface as None
-    rather than erroring. Read-only, no commit, no GL."""
     employee = _resolve_worker(token)
     emp = frappe.get_cached_doc("Employee", employee)
 
@@ -332,12 +209,6 @@ def get_worker_context(token=None):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_accommodation(token=None):
-    """The worker's active accommodation (read, token-scoped).
-
-    Resolves the token to one Employee and returns their current housing —
-    building, room, bed, occupancy, the building in-charge contact, and any
-    building notices. Scoped to the resolved employee; a worker with no active
-    assignment gets a friendly ``{"assignment": None}`` empty state. Read-only."""
     employee = _resolve_worker(token)
     assignment = _active_assignment(employee)
     if not assignment:
@@ -415,17 +286,6 @@ def get_worker_accommodation(token=None):
     }
 
 def _live_trips_by_request(request_names, status_map):
-    """The dispatched trip for each request that has no stored link yet, in ONE read.
-
-    ``Transport Request.dispatch_trip`` is stamped only at fulfilment, so during the
-    en-route window — the exact moment a worker opens the screen — the link is empty
-    and the trip has to be resolved from the trip's own back-link. Resolving it per
-    row is one query per request; resolving the whole set is one query total, and the
-    status rides along in the same read so those rows cost nothing extra either.
-
-    ``status_map`` is filled in place for the trips found here, so a caller holding
-    both maps can answer every row's status without another read.
-    """
     live = {}
     if not request_names:
         return live
@@ -443,13 +303,6 @@ def _live_trips_by_request(request_names, status_map):
     return live
 
 def _trip_status(dispatch_trip, status_map):
-    """The Dispatch Trip status, taken from the batches the caller already fetched.
-
-    Membership is tested rather than truthiness because a trip with a null status is
-    in the batch and must not be re-read. A trip absent from both batches is a row
-    neither read covers, and it falls back to a single read rather than reporting a
-    status the endpoint never established.
-    """
     if not dispatch_trip:
         return None
     if dispatch_trip in status_map:
@@ -459,25 +312,6 @@ def _trip_status(dispatch_trip, status_map):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_transport(token=None):
-    """The worker's shuttle(s), split into upcoming vs past (read, token-scoped).
-
-    Resolves the token to one Employee and returns the transport requests that
-    carry them — pickup point + time, the ordered route stops, and (when
-    dispatched) the assigned vehicle/plate and driver name/contact. Scoped to the
-    resolved employee via the Transport Request worker manifest; a worker on no
-    live request gets empty lists. Read-only, no GL.
-
-    Each trip is tagged ``is_upcoming`` against ``now_datetime()`` (the
-    SAME predicate Home's next_ride uses), and the trips are partitioned into
-    ``upcoming`` and ``past`` so the Transport screen can never present a trip
-    that already departed as if it were the next ride — Home and Transport stay
-    in lock-step. ``trips`` is kept as an alias of ``upcoming`` for backward
-    compatibility with any caller that read the old flat list.
-
-    Each trip also carries its ``boarding_window`` — the five-state verdict on the
-    worker's OWN pickup stop (``boarding_window.resolve``) — so the screen renders
-    the state the ride is actually in instead of offering a confirm button the
-    server would refuse."""
     employee = _resolve_worker(token)
     requests = _worker_transport_requests(employee)
     now_dt = frappe.utils.now_datetime()
@@ -501,7 +335,6 @@ def get_worker_transport(token=None):
     }
 
 def _transport_lookups(requests, employee):
-    """Reads every vehicle, driver, trip and rating the request list refers to, in one pass each."""
     vehicle_names = {r["assigned_vehicle"] for r in requests if r.get("assigned_vehicle")}
     driver_names = {r["assigned_driver"] for r in requests if r.get("assigned_driver")}
     trip_names = {r["dispatch_trip"] for r in requests if r.get("dispatch_trip")}
@@ -557,7 +390,6 @@ def _transport_lookups(requests, employee):
     }
 
 def _transport_trip(req, lookups, my_building, now_dt):
-    """Shapes one Transport Request into the trip the Transport screen renders."""
     is_upcoming = _is_upcoming_pickup(req.get("pickup_datetime"), now_dt)
     dispatch_trip = req.get("dispatch_trip") or lookups["live"].get(req["name"])
     stops = (
@@ -609,12 +441,6 @@ def _transport_trip(req, lookups, my_building, now_dt):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def list_worker_requests(token=None):
-    """The worker's own Accommodation Resident Requests (read, token-scoped).
-
-    Resolves the token to one Employee and returns the requests they raised —
-    reusing the native Accommodation Resident Request channel (no separate
-    ticketing engine). Scoped by ``employee``; cannot return another worker's
-    requests. Read-only."""
     employee = _resolve_worker(token)
     rows = frappe.get_all(
         "Resident Request",
@@ -641,24 +467,6 @@ def list_worker_requests(token=None):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_request_detail(token=None, name=None):
-    """One of the worker's OWN resident requests, in full (read, token-scoped).
-
-    Resolves the token to a single Employee via ``_resolve_worker`` (the only
-    place identity is established), then fetches the Accommodation Resident
-    Request named ``name`` ONLY IF its ``employee`` equals that resolved worker —
-    the EXACT same ownership filter ``list_worker_requests`` uses. The lookup is
-    a single ``frappe.db.get_value`` keyed on BOTH ``name`` AND
-    ``employee=<resolved>``: a request belonging to any other worker simply does
-    not match and yields no row, at which point we raise
-    ``frappe.PermissionError``. The client-supplied ``name`` is therefore never
-    trusted on its own — it can only ever address the token-owner's own rows, so
-    this endpoint cannot read another worker's request.
-
-    Returns the request's status, a reconstructed created -> current status
-    timeline (the DocType has no status-history child table, so it is built from
-    creation/modified/closed_on), the triage and resolution notes, the
-    category/priority/location/description, and the attachment file url if any.
-    Read-only, no commit, no GL."""
     employee = _resolve_worker(token)
 
     name = (name or "").strip()
@@ -713,22 +521,6 @@ def get_worker_request_detail(token=None, name=None):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_custody(token=None):
-    """The custody articles the worker currently holds (read, token-scoped).
-
-    Resolves the token to one Employee and returns their live custody holding,
-    derived from the read-only Accommodation Stock Ledger — the same net-balance
-    source as the ``Accommodation Stock Balance`` report, not a Custody Issue
-    replay. Balance per (building, article) is the signed sum of non-cancelled
-    custody-article ledger rows for THIS employee (issues add, returns reverse),
-    so the net is what is still out. A worker who moved buildings still sees
-    prior custody. Scoped strictly to the resolved employee; a client-supplied
-    id can never widen it. Zero/negative-net rows are dropped.
-
-    For each still-held item the worker view surfaces what matters to them — not
-    money: the ``received_date`` (posting date of the latest issue row), the
-    ``issued_by`` supervisor (the source Custody Issue's owner, resolved to a
-    full name; falls back to the building's responsible supervisor, else None),
-    and the ``building``. Read-only, no commit, no GL."""
     employee = _resolve_worker(token)
 
     rows = frappe.get_all(
@@ -771,21 +563,6 @@ def create_worker_request(
     photo=None,
     photo_filename=None,
 ):
-    """Raise an Accommodation Resident Request for the worker (write, token-scoped).
-
-    Reuses the native resident-request channel rather than inventing a ticketing
-    engine. The employee, building, room and bed are taken from the worker's
-    resolved identity + active assignment — NEVER from the client — so a request
-    can only ever be filed for the token's own worker, against their own housing.
-    Inserts a single ``source_channel = QR Web Form`` request as ``requester_type
-    = Worker``; posts no GL. ``subject`` is folded into the description (the native
-    DocType has no subject field).
-
-    The worker may additionally set ``issue_location`` and ``preferred_language``
-    (each validated against the DocType's Select options; an out-of-set value is
-    simply dropped, since both fields are optional) and attach a single ``photo``
-    (a base64 image persisted server-side as a private File on the new request via
-    ``_attach_worker_photo`` — no separate guest upload endpoint is exposed)."""
     employee = _resolve_worker(token)
 
     category = (category or "Other").strip()
@@ -845,54 +622,17 @@ _RESIDENT_REQUEST_CLOSED_STATES = ("Resolved", "Rejected", "Closed")
 
 
 def _rating_stars() -> int:
-    """How many stars a Transport Trip Rating is out of.
-
-    Read from the field's own ``options``, which is the same number the desk
-    multiplies the stored fraction by to draw the stars
-    (frappe/public/js/frappe/form/controls/rating.js:99-101); a second copy here
-    would let the portal's scale and the desk's drift apart. Frappe's own default
-    applies when ``options`` is unset.
-    """
     field = frappe.get_meta("Transport Trip Rating").get_field("rating")
     return cint(field.options) or 5
 
 
 def _alert_lead(fieldname: str, fallback: int) -> int:
-    """Days of notice for one Masar alert window, read from Salis Settings.
-
-    The fallback applies to an unset or zero field, which is what a Single
-    returns before an operator has ever opened it; a site that means "no notice"
-    turns the alert off at its own switch, never by zeroing the window.
-    """
     return cint(frappe.db.get_single_value("Salis Settings", fieldname)) or fallback
 
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_home(token=None):
-    """The worker's composed home/today screen (read, token-scoped).
-
-    Resolves the token to one Employee and folds four already-exposed worker
-    surfaces into a single "today" payload, so the home screen makes one call:
-
-      * ``profile_alerts``    — the profile's own document items
-        (``get_worker_context``) filtered to those expiring soon (``days_left``
-        at or under the Habitat renewal lead) or already past; a list, possibly
-        empty.
-      * ``next_ride``         — the single soonest upcoming shuttle: the head of
-        ``get_worker_transport``'s ``upcoming`` partition (same now_datetime()
-        pivot Transport uses, so the two screens never contradict), or None.
-      * ``bed``               — the worker's current accommodation bed from
-        ``get_worker_accommodation``, ENRICHED with its building + room + check-in
-        so the Home chip reads as a real location, not a bare bed code; or None.
-      * ``open_request_count`` — count of the worker's own resident requests
-        (``list_worker_requests``) not in a settled state.
-      * ``iqama_days_left``    — whole days until the Iqama expires (or None),
-        surfaced for the Home glance tile regardless of the alert window.
-
-    Purely additive: it composes the existing token-scoped endpoints (each
-    re-resolves the same token via ``_resolve_worker``) and changes none of
-    them. Read-only, no commit, no GL."""
     _resolve_worker(token)
 
     profile = get_worker_context(token)
@@ -952,13 +692,6 @@ def get_worker_home(token=None):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_contacts(token=None):
-    """The worker's key contacts for the Masar home (read, token-scoped).
-
-    Resolves the token to one Employee and returns the three contacts the home
-    My Contacts card shows: the building in-charge (from the active assignment's
-    building), today's driver (from the worker's own today Dispatch Trip), and the
-    housing office number (from Habitat Settings). Each is None/absent when not set,
-    so the card degrades cleanly. Scoped to the resolved employee; read-only, no GL."""
     employee = _resolve_worker(token)
     return {
         "building_in_charge": _building_in_charge(employee),
@@ -973,23 +706,6 @@ def get_worker_contacts(token=None):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=6, seconds=60 * 60)
 def notify_hr_iqama_expiring(token=None):
-    """One-tap: notify HR that the worker's Iqama is expiring (write, token-scoped).
-
-    Resolves the token to one Employee via ``_resolve_worker`` (the only place
-    identity is established — the client never supplies a worker id), re-reads
-    that Employee's Iqama number + expiry SERVER-SIDE, and recomputes
-    ``days_left``. The HR notification is raised ONLY when the Iqama is genuinely
-    inside the action window (``days_left`` is known and <=
-    ``Salis Settings.iqama_notify_hr_lead_days``); a worker whose Iqama is comfortably
-    valid, or
-    has no expiry on file, is a silent no-op (``{"notified": False}``) — the
-    client cannot force an alert by faking the threshold.
-
-    When in window, posts a native in-app ``Notification Log`` (type Alert) to the
-    HR inbox (HR Manager, fallback System Manager) — the SAME channel
-    ``temporary_worker_engine._notify_hr`` uses; no separate ticketing engine, no
-    GL. Tight ``rate_limit`` so the personal link cannot spam HR.
-    Returns ``{"notified": bool, "days_left": int|None, "recipients": int}``."""
     employee = _resolve_worker(token)
     emp = frappe.get_cached_doc("Employee", employee)
 
@@ -1027,25 +743,6 @@ def notify_hr_iqama_expiring(token=None):
 _WORKER_BOARDING_METHOD = "Worker"
 
 def get_or_create_trip_log(dispatch_trip, employee=None):
-    """The trip's open (draft) Trip Start Log, created if none exists yet — the
-    same get-or-create the driver QR scan uses (salis/api/boarding.py), so a
-    worker self-confirm and a driver scan append to ONE shared log. A
-    submitted/cancelled log is not reused; a fresh draft is opened so a
-    post-submission confirm never mutates a closed record.
-
-    ``employee`` is the resolved worker a fresh create is authorised under: the log is
-    the driver's, so the create runs inside ``as_capacity(WORKER, employee)`` and
-    ``_trip_start_log_capacity_verdict`` checks the employee against the trip's manifest
-    rather than any field on the row itself.
-
-    Two callers can reach this at once — a driver scan and a worker self-confirm — and
-    each would otherwise see no log and create one. The Dispatch Trip row is locked
-    FIRST, by this function rather than by whatever called it, so the two serialise on
-    a row that always exists; the existence read that follows is itself a locking read,
-    which returns the latest committed row rather than this transaction's pre-lock
-    snapshot. Under REPEATABLE READ a plain read here answers from that snapshot, so
-    the second caller sees no log, creates a second one, and both report success.
-    """
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
     existing = frappe.db.get_value(
         "Trip Start Log",
@@ -1071,32 +768,6 @@ def get_or_create_trip_log(dispatch_trip, employee=None):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=12, seconds=60 * 60)
 def confirm_boarding(token=None, transport_request=None):
-    """"I'm at the pickup": the worker self-confirms boarding (write, token-scoped).
-
-    Resolves the token to one Employee via ``_resolve_worker`` (the sole place
-    identity is established — the client never supplies a worker id), finds that
-    worker's relevant today's Dispatch Trip from their OWN manifest membership,
-    and appends a ``method = Worker`` Trip Boarding Event for THIS worker onto the
-    trip's draft Trip Start Log — the SAME child table + get-or-create log the
-    driver QR scan writes, so the two paths share one boarding manifest.
-
-    Gated on the worker's OWN stop, not on the calendar day: the confirm is accepted
-    only while ``boarding_window`` puts that stop in ``at_stop``, and is refused with
-    a named reason — before the trip is locked and before any log exists — when the
-    bus has not reached it, has already left it, or the trip is over. A refusal
-    writes nothing at all.
-
-    Strictly token-scoped: the boarding row is always written for the resolved
-    employee, and the optional ``transport_request`` can only narrow the worker's
-    own trip set (an id they are not registered on does not match). Re-confirming
-    is idempotent — a worker already on the manifest yields no second row
-    (``created = False``). A bad/blank/disabled token fails closed
-    (PermissionError) before any write; a worker with no boardable trip today is a
-    clean no-op (``{"trip": None}``). Posts no GL.
-
-    Returns ``{"created": bool, "dispatch_trip": str|None, "trip_start_log":
-    str|None, "boarded_count": int|None, "boarding_window": dict}``;
-    ``{"trip": None}`` when nothing is boardable today."""
     employee = _resolve_worker(token)
     transport_request = (transport_request or "").strip() or None
 
@@ -1147,18 +818,6 @@ def confirm_boarding(token=None, transport_request=None):
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)
 def get_worker_boarding_pass(token=None, transport_request=None):
-    """The worker's own signed QR boarding pass for today's trip (read, token-scoped).
-
-    The driver scanner (salis/api/boarding.py) validates a per-(trip, worker)
-    HMAC-signed token; the same signed payload is what the worker shows as a QR for
-    the driver to scan. Here the worker resolves to a single Employee from their
-    token and the trip is resolved FORWARD from their own manifest membership (the
-    same ``_worker_today_dispatch_trip`` boarding self-confirm uses) — the client
-    never supplies a trip or worker id, so a pass can only ever be issued for the
-    token's own worker on a trip they are actually on. Reuses ``boarding._issue_token``
-    so the worker's QR and the driver's scanner share ONE signing scheme; issues no
-    DB write (a pass is just a signed claim). ``{"pass": None}`` when the worker has
-    no boardable trip today."""
     employee = _resolve_worker(token)
     transport_request = (transport_request or "").strip() or None
 
@@ -1214,20 +873,6 @@ def create_worker_transport_request(
     purpose=None,
     adhoc_passengers=None,
 ):
-    """Raise a Transport Request for the worker (write, token-scoped).
-
-    Reuses the native Transport Request channel (no parallel intake DocType). The
-    worker resolves to one Employee from their token (the sole identity source — the
-    client never supplies a worker id); that worker is ALWAYS added to the request's
-    registered manifest, and their active accommodation building + project seed the
-    request, so a request can only ever be filed for the token's own worker. The
-    worker may additionally list ad-hoc (unregistered) co-passengers — each a
-    name+ID(+expiry) row kept in a SEPARATE ``adhoc_passengers`` table so they stay
-    distinguishable from registered workers. ``service_line`` is constrained to the
-    two worker lines and the request type is derived from it server-side. The
-    request is created as a New draft (``source_channel = Masar Worker``) for the
-    fleet desk to validate/schedule; posts no GL. Tight ``rate_limit`` so a personal
-    link cannot spam the desk."""
     employee = _resolve_worker(token)
 
     service_line = (service_line or "Site Transport").strip()
@@ -1284,20 +929,6 @@ def create_worker_transport_request(
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def submit_trip_rating(token=None, dispatch_trip=None, rating=None, feedback=None, transport_request=None):
-    """Allows a worker to submit a rating and feedback for a completed trip.
-
-    Scoped by the worker's token to ensure they actually went on the trip: the
-    caller's identity (``employee``) is resolved here and cannot come from the
-    request body. "Trip must be Completed" and "employee was on the trip" are
-    pure data invariants that need no identity once ``employee`` is known, so
-    they live on Transport Trip Rating's own ``validate`` (reachable from any
-    insertion path, not only this endpoint) and are not repeated here.
-
-    The portal speaks in WHOLE STARS and the field stores a FRACTION: a Frappe
-    Rating holds 0-1 and the desk multiplies it by the field's ``options`` star
-    count to draw it (frappe/public/js/frappe/form/controls/rating.js:99-101), so
-    the star count is divided here rather than written through.
-    """
     employee = _resolve_worker(token)
 
     if not dispatch_trip:
@@ -1341,21 +972,6 @@ _PUBLIC_TRIP_FIELDS = ["name", "route_plan", "vehicle", "depart_time", "status"]
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=30, seconds=60)
 def get_public_trip_board():
-    """Today's trips, published with no token: which vehicle, which route, when it
-    leaves, and where it stands -- an arrivals-board surface anyone standing at the
-    gate can read without signing in.
-
-    Carries nothing about WHO rides. ``passengers``/``employee`` never leave the
-    Route Stop / Passenger Manifest rows, and this reads only the four fields named
-    above plus the stop shape (name, building, planned time) -- no phone number, no
-    national id, no manifest. The personal half (my seat, my housing, my documents)
-    stays behind ``get_worker_transport``/``get_worker_boarding_pass``, which still
-    require a resolved token.
-
-    ``get_all`` stays deliberate here, unpaged: the caller is Guest by design (no
-    token, no employee/project to scope by), and every trip of the day must appear
-    on the board or the sign is wrong for whoever is reading it at the gate.
-    """
     trip_date = frappe.utils.today()
     trips = frappe.get_all(
         "Dispatch Trip",

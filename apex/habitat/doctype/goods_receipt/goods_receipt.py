@@ -1,14 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Goods Receipt controller — books externally-purchased goods INTO a
-procurement intake store via the Accommodation Stock Ledger. This is the first leg of
-the procurement -> handover -> custody chain: stock lands unassigned in the intake
-building's store (employee unset) and is later handed over into custody.
-
-Lifecycle: Draft -> (submit) Received -> (handover, later wave) Handed Over; cancel
-reverses every ledger row this receipt posted. Modeled on Accommodation Material
-Transfer (same post_stock_entry / has_stock_entries / reverse_stock_entries engine).
-Lifecycle logic lives as Document methods so Frappe runs it natively with no hook."""
 
 from __future__ import annotations
 
@@ -30,7 +21,6 @@ VOUCHER_TYPE = "Goods Receipt"
 
 class GoodsReceipt(Document):
     def validate(self):
-        """Requires a positive qty on every line and confirms the intake building is a procurement store."""
         if self.intake_building and not frappe.db.get_value(
             "Building", self.intake_building, "is_procurement_store"
         ):
@@ -48,12 +38,10 @@ class GoodsReceipt(Document):
                 row.uom = uom
 
     def on_submit(self):
-        """Book each line INTO the intake building store and mark the receipt Received."""
         self._post_intake()
         self.db_set("status", "Received")
 
     def _post_intake(self):
-        """Stock lands unassigned in the intake building store (employee unset). Idempotent."""
         if has_stock_entries(VOUCHER_TYPE, self.name):
             return
         for row in self.items:
@@ -66,11 +54,7 @@ class GoodsReceipt(Document):
             )
 
     def before_cancel(self):
-        """Refuse the cancel here, not in on_cancel: this runs before db_update()
-        stamps docstatus 2, so a receipt whose goods have already left the store is
-        left submitted instead of reading as cancelled for the rest of the request."""
         validate_reversal_allowed(VOUCHER_TYPE, self.name)
 
     def on_cancel(self):
-        """Reverse every ledger row this receipt posted."""
         reverse_and_mark_cancelled(self, VOUCHER_TYPE)

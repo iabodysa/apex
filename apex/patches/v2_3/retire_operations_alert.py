@@ -12,7 +12,6 @@ READER_RECORDS = [
 
 
 def execute():
-    """Resolves open Operations Alert records, deletes its readers, and drops the retired DocType."""
     if frappe.db.table_exists("Operations Alert"):
         frappe.db.sql(
             """update `tabOperations Alert`

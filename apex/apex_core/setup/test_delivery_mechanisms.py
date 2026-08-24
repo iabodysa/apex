@@ -1,13 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""What a fresh install receives, an upgraded site must receive too.
-
-Every case here guards one delivery mechanism that reaches an INSTALL and not a MIGRATE,
-or one that reaches a migrate and overwrites what an operator did. Both failures are
-silent by construction — nothing errors, nothing is logged, and the site simply differs
-from a fresh one — which is why they are asserted from the declarations rather than
-observed from a run.
-"""
 
 import ast
 import json
@@ -29,7 +21,6 @@ CUSTOMISED = ("employee", "cost_center", "project")
 
 
 def _hooks_list(name):
-    """One hook list read from the source, so a test cannot be fooled by a live cache."""
     tree = ast.parse((APP_ROOT / "hooks.py").read_text())
     for node in tree.body:
         if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == name:
@@ -38,7 +29,6 @@ def _hooks_list(name):
 
 
 class TestSeedersReachAnUpgradedSite(FrappeTestCase):
-    """A seeder wired only to after_install never reaches a site that already exists."""
 
     def test_the_two_hook_seeders_run_at_migrate_as_well(self):
         after_migrate = _hooks_list("after_migrate")
@@ -58,11 +48,6 @@ class TestSeedersReachAnUpgradedSite(FrappeTestCase):
 
 
 class TestCustodyMastersShipAsFixtures(FrappeTestCase):
-    """Custody Asset Category, Custody Article and Operational Depreciation Policy ship
-    from ``apex/fixtures/`` through ``sync_all``/``sync_fixtures``, so no Python path may
-    create them. Module Profile is deliberately not among them: its controller queues an
-    action on update, and a fixture's forced reimport on every migrate collides with that
-    queue's document lock, so it stays with its seeder."""
 
     def test_no_seeder_creates_the_three_masters(self):
         source = pathlib.Path(
@@ -94,7 +79,6 @@ class TestCustodyMastersShipAsFixtures(FrappeTestCase):
 
 
 class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
-    """A fixture reimport rewrites a workflow whole, so an edit must refuse loudly."""
 
     def test_all_three_workflow_doctypes_are_wired(self):
         events = _hooks_list("doc_events")
@@ -108,7 +92,6 @@ class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
             refuse_shipped_workflow_edit(frappe._dict(doctype="Workflow", name=shipped))
 
     def test_an_operator_workflow_is_untouched(self):
-        """The positive control: a refusal that refuses everything is not a gate."""
         refuse_shipped_workflow_edit(
             frappe._dict(doctype="Workflow", name="Some Operator Workflow")
         )
@@ -121,7 +104,6 @@ class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
             )
 
     def test_the_fixture_import_is_not_refused(self):
-        """The app's own reimport must land, or migrate refuses itself."""
         shipped = sorted(WORKFLOWS)[0]
         frappe.flags.in_migrate = True
         try:
@@ -131,7 +113,6 @@ class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):
 
 
 class TestNoInertWorkflowFilesRemain(FrappeTestCase):
-    """A module-folder workflow JSON is read by nothing and silently ignores an edit."""
 
     def test_the_module_folders_hold_no_workflow_json(self):
         self.assertEqual(list(APP_ROOT.rglob("*/workflow/*/*.json")), [])
@@ -143,7 +124,6 @@ class TestNoInertWorkflowFilesRemain(FrappeTestCase):
 
 
 class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
-    """A custom_perms block is deleted and reinserted whole on every migrate."""
 
     def test_no_customisation_file_carries_custom_perms(self):
         for name in CUSTOMISED:
@@ -159,12 +139,6 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
         self.assertIn(path, _hooks_list("after_migrate"))
 
     def test_the_select_only_rows_do_not_grant_read(self):
-        """The trap: ``add_permission`` defaults to read, and thirteen of these must not.
-
-        A select-only grant lets a supervisor pick an Employee in a Link field without
-        being able to open the record. Seeding them with the default would hand thirteen
-        roles read access to personnel, cost and project data they cannot see today.
-        """
         select_only = [
             (dt, role)
             for dt, role, _lvl, granted in APP_OWNED_PERMISSIONS
@@ -177,13 +151,6 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
                     self.assertNotIn("read", granted)
 
     def test_the_seeder_creates_the_rows_when_they_are_absent(self):
-        """Proved from an EMPTY state, not from a site that already holds them.
-
-        A site upgraded before this change still carries the rows the old mechanism
-        wrote, so calling the seeder there adds nothing and a count that does not move
-        proves neither that it works nor that it is idempotent. The rows are cleared
-        first; ``FrappeTestCase`` rolls the transaction back afterwards.
-        """
         frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
         frappe.clear_cache(doctype="Employee")
         self.assertEqual(frappe.db.count("Custom DocPerm", {"parent": "Employee"}), 0)
@@ -199,7 +166,6 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
         )
 
     def test_a_select_only_role_is_not_granted_read_on_the_site(self):
-        """The escalation this file exists to prevent, read back from the database."""
         frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
         frappe.clear_cache(doctype="Employee")
         seed_app_owned_permissions()
@@ -215,13 +181,6 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
         self.assertEqual(row.read, 0)
 
     def test_the_base_roles_survive_the_dropped_block(self):
-        """Asserted from an EMPTY state, because that is the state the change creates.
-
-        Custom DocPerm is all-or-nothing per DocType (frappe/model/meta.py:552). On a
-        site that still holds rows from the old mechanism this assertion passes for the
-        wrong reason — HR Manager is in those rows — so the rows are cleared first and
-        the STANDARD block is what has to answer.
-        """
         frappe.db.delete("Custom DocPerm", {"parent": "Employee"})
         frappe.clear_cache(doctype="Employee")
 
@@ -231,7 +190,6 @@ class TestAppOwnedPermissionsAreSeededNotShipped(FrappeTestCase):
 
 
 class TestModuleDefsReachAnUpgradedSite(FrappeTestCase):
-    """``add_module_defs`` is called from install_app only, never from migrate."""
 
     def test_the_patch_is_registered(self):
         registered = (APP_ROOT / "patches.txt").read_text()
@@ -248,20 +206,6 @@ class TestModuleDefsReachAnUpgradedSite(FrappeTestCase):
 
 
 class TestSeedersUnfitForAFixtureStayCode(FrappeTestCase):
-    """Every DocType the nine ``apex_core/setup/seeders`` modules write, held out of
-    ``apex/fixtures/`` on purpose: an Auto Email Report and a Salis Settings default
-    resolve a value at runtime a static file cannot hold (the site's own Administrator
-    address, its sole Company or Cost Center); Navbar Settings and the Salis Settings
-    defaults only fill a blank an operator may have already set; Module Profile's
-    ``on_update`` takes a document lock a forced fixture reimport never releases
-    (frappe/core/doctype/module_profile/module_profile.py:29-34,
-    frappe/model/document.py:1590,1623); the User and Role of a portal capacity
-    identity are converged rather than replaced, which a fixture's forced whole-record
-    reimport would overwrite (frappe/modules/import_file.py:230-239, frappe/utils/
-    fixtures.py:41); and Maintenance Material Template's required Links depend on a
-    catalogue two files outside this DocType's own module create, in an order
-    ``sync_fixtures`` cannot guarantee — it runs before ``after_migrate`` hooks on
-    migrate (frappe/migrate.py:143,154-156)."""
 
     def test_none_of_the_nine_doctypes_ship_as_a_fixture_file(self):
         for doctype in (

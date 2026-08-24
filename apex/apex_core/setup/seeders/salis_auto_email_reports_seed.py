@@ -1,30 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Seed native Frappe Auto Email Reports that email an existing Salis Script Report
-on a schedule. These are the periodic movement/fleet operational digests:
-
-- Vehicle Assignment Register — Daily   (Fleet Managers — fleet-status snapshot)
-- Fuel Reconciliation         — Monthly (Finance / Fleet Manager)
-- Cost Recovery Aging         — Weekly  (Finance — chase open recoveries)
-- Worker Transport Plan       — Weekly  (Fleet Manager — service-level watch)
-- Vehicle Compliance Register — Monthly (Government Relations — renewals)
-
-Mirrors ``habitat_auto_email_reports_seed.py``. An Auto Email Report must name a
-real recipient; the customer's users/emails are unknown at install, so each is
-created **disabled** with Administrator as the placeholder user/recipient. An
-admin sets the real recipients and enables it. Idempotent — created only if
-absent, and existence-guarded on the report so a partially installed module never
-aborts migrate.
-
-Email kill-switch: seeding these **disabled** is the gate for this declarative
-path — nothing is sent until an admin both enables the individual report AND
-turns on the master ``enable_email_notifications`` toggle in Habitat Settings.
-We never seed them enabled, so
-the master toggle being OFF by default is upheld here without extra logic.
-
-Blocked from a fixture by the same runtime-resolved-value property as every
-Auto Email Report seeder — the recipient email is only known on the site
-itself; see ``auto_email_report_seed_base.py`` for the framework citation.
-"""
 
 from apex.apex_core.setup.seeders.auto_email_report_seed_base import seed_auto_email_reports_for
 
@@ -38,9 +12,4 @@ _REPORTS = [
 
 
 def seed_salis_auto_email_reports():
-    """Create the Salis operational Auto Email Reports if absent, disabled,
-    addressed to Administrator as a placeholder. Safe to re-run.
-
-    Auto Email Report auto-names from its report, so idempotency is keyed on the
-    `report` link (one scheduled email per report), not a synthetic name."""
     seed_auto_email_reports_for(_REPORTS)

@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``submit_counts`` takes its JSON-or-list ``lines`` argument straight to
-``frappe.parse_json`` (frappe/utils/__init__.py:875), which already runs the
-``isinstance(x, str)`` check before calling ``json.loads``. This fails the
-moment the function goes back to a hand-rolled ``isinstance`` guard ahead of
-a bare ``json.loads``.
-"""
 
 import ast
 import inspect

@@ -1,21 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Custody Return Register — what came back, and in what condition.
-
-Custody Return had no report, so the condition an article came back in was visible only by
-opening one return at a time. That condition is the thing with money behind it: a row
-returned Damaged or Lost is what a Custody Damage Assessment is raised from, and that
-assessment is what becomes a payroll deduction.
-
-The rows are ITEM rows, not documents. A return of five articles where one is damaged is
-one document and five lines, and rolling it up to the document would hide the one line
-that matters — the register would say "returned" about a return that carries a loss.
-
-Only submitted returns are listed: a draft has not come back yet.
-
-Scoped by building through the same resolver the permission hook uses, so a scope
-correction reaches this report and the desk list together.
-"""
 
 import frappe
 from frappe import _
@@ -27,7 +11,6 @@ CHARGEABLE_CONDITIONS = ("Damaged", "Lost")
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for submitted custody return item lines."""
     filters = filters or {}
     columns = get_columns()
 
@@ -96,8 +79,6 @@ def execute(filters=None):
 
 
 def get_report_summary(data):
-    """Built for any result including none, so an empty register reads 0 rather than a
-    blank strip that looks like a page which failed to load."""
     chargeable = [r for r in data if r.get("is_chargeable")]
     return [
         count_card(_("Returned Lines"), data),
@@ -113,7 +94,6 @@ def get_report_summary(data):
 
 
 def get_columns():
-    """Returns the column definitions for the custody return register."""
     return [
         {"label": _("Return"), "fieldname": "name", "fieldtype": "Link", "options": "Custody Return", "width": 170},
         {"label": _("Return Date"), "fieldname": "return_date", "fieldtype": "Date", "width": 110},

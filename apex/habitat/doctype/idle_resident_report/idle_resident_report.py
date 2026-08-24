@@ -13,7 +13,6 @@ class IdleResidentReport(Document):
 
 
 def validate(doc, method=None):
-    """Syncs the linked employee, defaults reported_by, and enforces the status transition rules."""
     sync_party_employee(doc, require_party=True)
 
     if not doc.reported_by:
@@ -30,15 +29,6 @@ _DEPARTMENT_ROLE = {
 
 
 def after_insert(doc, method=None):
-    """Force accountability: put the new report in the responsible department's
-    desk queue as ToDos (one per active role holder who may already read it).
-
-    Routed through ``assign_role`` rather than a raw ``get_users_with_role`` +
-    ``assign_to.add``: a role holder who cannot read this document would otherwise be
-    handed one via a DocShare, or blocked outright with Document Sharing off
-    (assign_to.py:98-110). Every role in ``_DEPARTMENT_ROLE`` holds a read DocPerm here;
-    strip one and that department's reports queue to nobody, without an error.
-    """
     role = _DEPARTMENT_ROLE.get(doc.responsible_department)
     if not role:
         return
@@ -54,11 +44,6 @@ def after_insert(doc, method=None):
 
 
 def _validate_status_transition(doc):
-    """Enforce role-based state transition rules without a full Frappe Workflow.
-
-    Stamps acknowledge/resolve audit fields and prevents more than one active
-    (Open/Acknowledged) report from existing for the same employee.
-    """
     status = doc.status or "Open"
 
     if status == "Resolved":

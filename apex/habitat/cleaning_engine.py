@@ -1,30 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""Cleaning compliance posting engine for the Habitat module.
-
-Posts the immutable Cleaning Compliance Ledger from each Cleaning Log: one row
-per Cleaning Log Room Detail child row, written on Cleaning Log submit and
-reversed on cancel.
-
-The insert passes ``ignore_permissions``, and this is ERPNext's own idiom for an immutable
-subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries
-``in_create``, which removes the New button but refuses nothing on the server
-(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: no role holds create or
-write on the ledger. So this bypass is the only path by which a row can exist, and it is the
-control rather than a hole in one. Mirrors the no-GL, system-written ledger pattern of
-``apex.salis.fuel_engine`` and
-``apex.habitat.doctype.accommodation_stock_ledger``:
-
-* in_create read-only DocType, posted only through ``_insert_ledger_row``;
-* idempotency keyed on (cleaning_log, source_detail_no=child row name) so a
-  re-run or a re-submit never double-posts;
-* reverse-not-delete — a negative-fact mirror row with ``reversal_of`` set and
-  both rows flagged ``is_cancelled`` — so the source nets out of every
-  compliance sum while the original row is preserved for audit.
-
-Reports read from this ledger so historical cleaning compliance is stable even
-when the source Cleaning Log is later amended/cancelled.
-"""
 
 from __future__ import annotations
 
@@ -52,12 +27,6 @@ def _insert_ledger_row(
     source_detail_no: str | None,
     reversal_of: str | None = None,
 ) -> str:
-    """Insert one Cleaning Compliance Ledger row (system-written, no GL).
-
-    ``source_doctype`` mirrors the originating "Cleaning Log"; ``source_name``
-    points to the parent doc and ``source_detail_no`` to the child row name so a
-    row is fully traceable back to the exact Room Detail it posted from.
-    """
     doc = frappe.get_doc(
         {
             "doctype": LEDGER_DOCTYPE,
@@ -81,16 +50,6 @@ def _insert_ledger_row(
 
 
 def post_cleaning_compliance(doc) -> int:
-    """Post one immutable ledger row per Cleaning Log Room Detail child row.
-
-    Fired from ``CleaningLog.on_submit``. Idempotent on (cleaning_log,
-    source_detail_no): a child row already posted (live) is skipped, so a re-run
-    or re-submit never double-posts. Returns the number of rows posted.
-
-    The ``assignee`` is the internal cleaner Employee when known; the cleaned
-    flag and skip reason come straight off the child row so the ledger captures
-    per-room compliance, not just the parent's aggregate.
-    """
     rows = doc.get("room_details") or []
     if not rows:
         return 0
@@ -124,16 +83,6 @@ def post_cleaning_compliance(doc) -> int:
 
 
 def reverse_cleaning_compliance(cleaning_log: str) -> int:
-    """Reverse every live row posted from a cancelled/amended Cleaning Log.
-
-    Fired from ``CleaningLog.on_cancel``. For each live original row (one whose
-    ``reversal_of`` is unset and ``is_cancelled`` is 0) it posts a mirror row
-    with ``cleaned`` zeroed and ``reversal_of`` set, then flags both the original
-    and the mirror ``is_cancelled`` — so the Cleaning Log nets out of every
-    compliance sum while both rows survive for audit. Mirrors the
-    Accommodation Stock Ledger reversal idiom. Idempotent: only a live original
-    is ever mirrored. Returns the number of reversal rows posted.
-    """
     originals = frappe.get_all(
         LEDGER_DOCTYPE,
         filters={

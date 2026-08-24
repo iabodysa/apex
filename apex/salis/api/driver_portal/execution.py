@@ -1,14 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Salis Driver Portal — execution endpoints (split from the driver_portal god module). Kernel helpers are imported from the package so the canonical dotted path apex.salis.api.driver_portal.<fn> is unchanged.
-
-All four endpoints are ``allow_guest`` and identify the driver by presented credential through
-``_resolve_driver``, so ``frappe.session.user`` is Guest until each write opens ``as_capacity``.
-Every Trip Start Log write here runs inside ``as_capacity(DRIVER, driver)`` — the credential
-resolution authenticates, the Driver role's own DocPerm plus
-``apex.salis.permissions._trip_start_log_capacity_verdict`` authorise, and the doc's own
-``driver`` must equal the resolved identity or the write is refused by the framework, not by
-this module.
-"""
 
 import frappe
 from frappe import _
@@ -32,9 +22,6 @@ from apex.salis.api.driver_portal import (
 
 
 def _trip_log_state(driver, dispatch_trip):
-    """The driver's Trip Start Log state for a trip as the portal's display shape.
-	Mirrors the projection ``_next_trip_today`` attaches, so a start/complete response
-	updates the card reactively with no extra round-trip."""
     log = frappe.db.get_value(
         "Trip Start Log",
         {"dispatch_trip": dispatch_trip, "driver": driver, "docstatus": ["<", 2]},
@@ -55,16 +42,6 @@ def _trip_log_state(driver, dispatch_trip):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=10, seconds=60)
 def start_my_trip(dispatch_trip):
-    """Mark the driver's own trip Started, creating its Trip Start Log (write).
-
-	Identity-scoped: the driver is resolved credential-first and the trip is honoured
-	only when it belongs to that driver (``_resolve_my_trip``). Gets-or-creates the
-	Trip Start Log for (trip, driver) and stamps ``start_datetime``; idempotent — a
-	second tap returns the existing state rather than duplicating. Written inside
-	``as_capacity(DRIVER, driver)`` with ``driver`` set on the doc before insert (not left
-	to ``fetch_from``), so the create-permission check already sees the field it must
-	match against the resolved identity. No GL — Trip Start Log is a headcount/execution
-	record only."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -101,13 +78,6 @@ def start_my_trip(dispatch_trip):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
 def complete_my_trip(dispatch_trip):
-    """Mark the driver's own trip Completed on its Trip Start Log (write).
-
-	Identity-scoped (``_resolve_my_trip``). Updates the existing log's status to
-	Completed and stamps ``end_datetime``; if the driver never tapped start, the log is
-	created and immediately completed so the day still records execution. Written inside
-	``as_capacity(DRIVER, driver)``, with ``driver`` set on a freshly-created doc before
-	insert. No GL."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -147,16 +117,6 @@ def complete_my_trip(dispatch_trip):
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
 def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_name=None):
-    """Mark one route stop done/undone on the driver's STARTED trip (write).
-
-	Persists a Trip Stop Progress row on the trip's open Trip Start Log so per-stop
-	completion survives a reload. Identity-scoped (``_resolve_my_trip``); requires the
-	trip to be started (an open Trip Start Log must exist — the driver taps Start first).
-	Idempotent and reversible: a stop already tracked is updated in place (re-marking the
-	same state is a no-op), and ``done=0`` clears it. ``route_stop`` is the source Route
-	Stop child row name — the stable key matched across reloads. Written inside
-	``as_capacity(DRIVER, driver)``, an existing loaded doc so ``driver`` is already
-	populated from its stored row. No GL."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)
@@ -195,7 +155,6 @@ def mark_stop_progress(dispatch_trip, route_stop, done=1, sequence=None, stop_na
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=30, seconds=60)
 def mark_arrived(dispatch_trip, route_stop):
-    """Record arrival at one stop and notify workers waiting there."""
     _require_enabled()
     driver = _resolve_driver()
     trip = _resolve_my_trip(dispatch_trip, driver)

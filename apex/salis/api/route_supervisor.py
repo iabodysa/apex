@@ -1,15 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Masar supervisor API for recurring assignments and actual trips.
-
-No live driver position is served. ``Dispatch Trip.driver_lat`` / ``driver_lng`` /
-``driver_position_updated_at`` still exist as columns, but their only writer —
-``driver_portal.push_driver_position`` — was removed with the legacy portal, and no
-endpoint has written them since. They are Float
-columns, which Frappe emits NOT NULL DEFAULT 0, so a trip that has never reported a fix
-reads back 0.0 and any ``is not None`` test on them answers True forever. Reporting a
-position nobody wrote is worse than reporting none: the supervisor map states the driver
-is at 0,0 off the coast of Africa. The keys are therefore gone from the response, and
-the client renders its own "position unavailable" state for a row that carries none."""
 
 from __future__ import annotations
 
@@ -31,13 +20,6 @@ ROUTER_CALLS_PER_REQUEST = 3
 
 
 def _require_portal_role():
-    """Refuse anyone outside the route-supervisor portal's role set.
-
-    ``frappe.get_roles`` (frappe/permissions.py:497) returns every Role for
-    Administrator, so the explicit branch above it is a shortcut rather than a repair.
-    The one thing a DocPerm cannot gate is a PAGE: this portal is a route, not a
-    DocType, so admission is asserted here or not at all.
-    """
     user = frappe.session.user
     if user == "Administrator":
         return
@@ -100,7 +82,6 @@ def _map_stop(row):
 
 @frappe.whitelist()
 def get_active_driver_positions(start=0, page_length=PLAN_PAGE_LENGTH):
-    """Return today's planned trips and every still-dispatched trip."""
     _require_portal_role()
     start, page_length = _validate_page(start, page_length)
     rows = frappe.get_list(

@@ -11,7 +11,6 @@ from apex.apex_core.utils.report_summary import count_card, percent_card, total_
 
 
 def execute(filters=None):
-    """Returns the per-building operations summary rows and summary cards for the selected date range."""
     filters = filters or {}
 
     date_from = getdate(filters.get("period_from") or add_days(today(), -7))
@@ -74,7 +73,6 @@ def execute(filters=None):
 
 
 def get_columns():
-    """Returns the column definitions for the building operations summary report."""
     return [
         {"label": frappe._("Building"), "fieldname": "building", "fieldtype": "Link",
          "options": "Building", "width": 180},
@@ -99,7 +97,6 @@ def get_columns():
 
 
 def _get_buildings(building_filter):
-    """Returns active buildings restricted to the user's permitted buildings and any building filter."""
     f = {"status": "Active"}
 
     restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Building")
@@ -116,16 +113,6 @@ def _get_buildings(building_filter):
 
 
 def _is_scope_gap(building_filter):
-    """True when an empty result is a building-scope gap (a scoped user with no
-    User-Permission buildings) rather than a genuinely empty estate.
-
-    An explicit out-of-scope ``building_filter`` is treated as a normal empty
-    filter, not a scope gap.
-
-    Reads the SAME narrowed scope ``_get_buildings`` reads. Reading the raw resolver
-    here instead would leave a user whose only Building permission is ``applicable_for``
-    some OTHER doctype with an empty report and no message explaining it.
-    """
     restrict, allowed = permissions.report_building_scope(frappe.session.user, doctype="Building")
     if not restrict:
         return False
@@ -135,7 +122,6 @@ def _is_scope_gap(building_filter):
 
 
 def _occupancy(building_names):
-    """Returns each building's total and occupied bed counts."""
     result = defaultdict(lambda: {"total": 0, "occupied": 0})
 
     beds = frappe.get_all("Bed", filters={"building": ["in", building_names]},
@@ -149,7 +135,6 @@ def _occupancy(building_names):
 
 
 def _cleaning(building_names, date_from, date_to):
-    """Returns each building's cleaning log totals, split into compliant and missed, for the window."""
     result = defaultdict(lambda: {"total": 0, "compliant": 0, "missed": 0})
 
     logs = frappe.get_all(
@@ -170,19 +155,6 @@ def _cleaning(building_names, date_from, date_to):
 
 
 def _safety_inspections(building_names, date_from, date_to):
-    """Submitted safety checks per building in the window, across BOTH records.
-
-    Safety Round is the live one. Safety Inspection Report is deprecated and
-    nothing produces a new one, but it is still counted: it is the only record
-    that exists for a period before the cutover, and reading only Safety Round
-    would silently drop those periods to zero -- a report that empties reads as
-    "the buildings were never checked", which is the opposite of the truth.
-    The legacy leg becomes naturally dead as its window ages out; it is a read of
-    history, not a write, so it does not keep the deprecated record alive.
-
-    Each record carries its own date field (round_date / inspection_date), so the
-    window is applied per leg rather than once.
-    """
     result = defaultdict(int)
     window = ["between", [str(date_from), str(date_to)]]
     for doctype, date_field in (("Safety Round", "round_date"),
@@ -199,11 +171,6 @@ def _safety_inspections(building_names, date_from, date_to):
 
 
 def _maintenance(building_names):
-    """Open and closed Maintenance Request counts per building.
-
-    Native Frappe assignments own assignee state. Request lifecycle remains
-    Open/In Progress/Resolved/Closed.
-    """
     result = defaultdict(lambda: {"open": 0, "closed": 0})
     rows = frappe.get_all(
         "Maintenance Request",
@@ -219,7 +186,6 @@ def _maintenance(building_names):
 
 
 def _resident_requests(building_names):
-    """Returns each building's count of open or triaged requests, mapped through QR location tokens."""
     result = defaultdict(int)
     tokens = frappe.get_all(
         "QR Location",

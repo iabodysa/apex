@@ -8,7 +8,6 @@ from apex.apex_core.utils.report_summary import count_card
 
 
 def execute(filters=None):
-    """Returns the columns, rows and summary cards for the Driver Clearance Register report."""
     columns = [
         {"label": frappe._("Clearance"), "fieldname": "name", "fieldtype": "Link", "options": "Driver Clearance", "width": 180},
         {"label": frappe._("Driver"), "fieldname": "driver", "fieldtype": "Link", "options": "Salis Driver", "width": 200},

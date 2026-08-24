@@ -1,16 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Tests for Maintenance Work Order's planned-date-order guard.
-
-Patterned on frappe/tests/test_document.py. The row is built directly and
-inserted so the module-level ``validate`` in ``maintenance_work_order.py``
--- wired through hooks.py's doc_events, not the class body -- is what is
-exercised, not a stub.
-
-``Maintenance Request`` is excluded from the dependency walk: no case here
-sets a real one (``ignore_links``), and its own closure resolves an
-unmigrated ``Payment Gateway`` and kills record-building before a single
-test runs.
-"""
 
 from __future__ import annotations
 

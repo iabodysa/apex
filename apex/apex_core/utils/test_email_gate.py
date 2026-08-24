@@ -1,11 +1,5 @@
 # Copyright (c) 2026, afmcoltd
 
-"""``mailable`` gates a Frappe User's own consent — the login flag and their
-Notification Settings opt-out. A configured external address
-(``Habitat Settings.finance_notification_email``, ``safety_report_recipient``)
-has neither: it names no User row at all, so it must pass through rather than
-read as a disabled login.
-"""
 
 import frappe
 from frappe.tests.utils import FrappeTestCase

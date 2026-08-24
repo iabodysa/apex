@@ -1,44 +1,9 @@
 # Copyright (c) 2026, afmcoltd
-"""Shared engine for the per-module Auto Email Report seeders.
-
-``seed_auto_email_reports_for`` reaches here only from hooks.py's ``after_install``/
-``after_migrate``, so the acting user is always Administrator, who already carries
-every permission (frappe/permissions.py:107,273,506).
-
-Each module ships its own periodic-digest list (Habitat's accommodation/safety
-digests, Salis's movement/fleet digests) but the create-if-absent routine is one
-rule, so it lives here once and the module seeders keep only their report list.
-
-Two fields are resolved at RUNTIME rather than declared as constants (the
-Administrator's email, and each report's ``report_type``), which is why this
-stays a code seeder instead of externalised seed JSON: a fixture deletes and
-reinserts the record whole from one fixed snapshot on every migrate
-(frappe/modules/import_file.py:230-239, forced by frappe/utils/fixtures.py:41),
-so it could only ship one site's Administrator address to every other site.
-
-Email kill-switch: every report is created **disabled** with Administrator as
-the placeholder recipient — the customer's real users are unknown at install.
-Nothing is sent until an admin both enables the individual report AND turns on
-the master ``enable_email_notifications`` toggle in Habitat Settings, so
-seeding never has to reason about the master toggle itself.
-"""
 
 import frappe
 
 
 def seed_auto_email_reports_for(reports):
-    """Create each ``{"report", "frequency"}`` entry as a disabled Auto Email Report
-    if absent, addressed to Administrator as a placeholder. Safe to re-run.
-
-    Auto Email Report auto-names from its report, so idempotency is keyed on the
-    `report` link (one scheduled email per report), not a synthetic name. A report
-    that is not installed is skipped, so a partially installed module never aborts
-    migrate.
-
-    ``frappe.db.commit`` (frappe/database/database.py:1173) is called because this runs
-    from an install or migrate step: the one thing an uncommitted seed cannot do is
-    survive a LATER step failing, and a half-seeded catalog leaves the operator with
-    a screen of empty pickers and no error to search for."""
     admin_email = frappe.db.get_value("User", "Administrator", "email") or "admin@example.com"
     for cfg in reports:
         if frappe.db.exists("Auto Email Report", {"report": cfg["report"]}):

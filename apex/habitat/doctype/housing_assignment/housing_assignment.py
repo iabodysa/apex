@@ -1,12 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Accommodation Assignment controller.
-
-The Assignment record IS the check-in and the active occupancy stay. It carries
-both check_in_date and check_out_date; Accommodation Checkout closes it.
-
-Housing records have no automatic payroll side effects. Employee cost recovery uses
-the native HRMS Employee Advance path from its originating operational document.
-"""
 
 from __future__ import annotations
 
@@ -27,14 +19,6 @@ class HousingAssignment(Document):
     pass
 
 def on_doctype_update():
-    """Bed-occupancy performance indexes, added here — not only via the legacy
-    ``add_bed_assignment_index`` patch — so a freshly installed site (which marks
-    patches complete without running them) gets them too. Same index names as the
-    patch, so an already-migrated site's indexes are recognised as already present
-    (idempotent no-op) rather than duplicated under a new name. Plain indexes, not
-    UNIQUE: MariaDB has no partial/filtered UNIQUE index, so real bed-occupancy
-    uniqueness stays an application-level guard (validate() + on_submit()'s
-    SELECT ... FOR UPDATE), never a DB constraint."""
     add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
 
     add_index_guarded(
@@ -44,18 +28,6 @@ def on_doctype_update():
     )
 
 def _flag_temporary_worker_past_expiry(doc) -> None:
-    """Soft-flag housing a Temporary Worker whose passport-only window has lapsed.
-
-    Non-blocking on purpose: a supervisor may still need to house an over-window
-    worker pending Iqama issuance, so this warns rather than throws. The check-in
-    date (or today) is compared against the worker's computed ``expiry_date``.
-
-    ``frappe.utils.getdate`` (frappe/utils/data.py) normalises BOTH sides before the
-    comparison, because a stored date may arrive as a string or a date and comparing
-    the two shapes as text orders them wrongly without raising. The date shown to the
-    supervisor goes through ``formatdate``, an alias for ``format_date``
-    (frappe/utils/data.py:580), so it matches the format the rest of the desk uses.
-    """
     if doc.party_type != "Temporary Worker" or not doc.party:
         return
     expiry = frappe.db.get_value("Temporary Worker", doc.party, "expiry_date")
@@ -72,15 +44,6 @@ def _flag_temporary_worker_past_expiry(doc) -> None:
         )
 
 def recalculate_room_occupancy(room_name: str) -> None:
-    """Recounts a room's active assignments and updates its occupancy count and status accordingly.
-
-    ``frappe.db.count`` (frappe/database/database.py:1269) counts in the database
-    rather than by the length of a fetched list. ``Document.db_set``
-    (frappe/model/document.py:1235) writes the result WITHOUT running validation or
-    the save hooks: this is a derived figure recomputed from the rows that already
-    exist, so re-validating the room here would re-run rules against a number this
-    function is in the middle of correcting.
-    """
     if not room_name:
         return
     room = frappe.get_doc("Room", room_name)
@@ -94,18 +57,6 @@ def recalculate_room_occupancy(room_name: str) -> None:
     room.db_set("status", room_status(active, room.bed_capacity))
 
 def recalculate_building_occupancy(building_name: str) -> None:
-    """Recounts a building's active occupants and updates its occupant count and occupancy
-    percentage, notifying watchers of the Building doc room. This is the choke point every
-    bed-occupancy transaction funnels through via ``recalculate_spatial`` — Housing Assignment
-    submit/cancel, Housing Checkout submit/cancel, and Room Bed Transfer submit/cancel all land
-    here — so a single ``notify=True`` on the occupant-count write is enough to tell every
-    portal viewer of this building that its bed picture just changed.
-
-    ``frappe.db.count`` (frappe/database/database.py:1269) does the counting and
-    ``Document.db_set`` (frappe/model/document.py:1235) the write. ``notify=True`` is
-    the reason ``db_set`` is used rather than a bare ``frappe.db.set_value``: only the
-    document method publishes the realtime update, and without it a portal already
-    open shows yesterday's bed picture until it is reloaded."""
     if not building_name:
         return
     building = frappe.get_doc("Building", building_name)
@@ -118,38 +69,14 @@ def recalculate_building_occupancy(building_name: str) -> None:
         building.db_set("occupancy_percent", (active / building.total_capacity) * 100)
 
 def recalculate_spatial(room_name: str, building_name: str) -> None:
-    """Refreshes both the room's and the building's occupancy figures after a bed change."""
     recalculate_room_occupancy(room_name)
     recalculate_building_occupancy(building_name)
 
 def _snapshot_agreed_rate(doc, building):
-    """Fill the agreed monthly rate from the building's cost per bed, the first time only.
-
-    A form charged to a project has to state what the bed costs, and a later re-costing of
-    the building must not silently re-price a stay the resident has already signed for. Only
-    a blank rate is filled, so an operator override survives every subsequent save.
-    """
     if not doc.agreed_monthly_rate:
         doc.agreed_monthly_rate = building.monthly_cost_per_capacity or 0
 
 def _derive_place_from_bed(doc) -> None:
-    """Fill room and building from the bed when a caller supplied only the bed.
-
-    ``fetch_from`` is declared as a CHAIN on this DocType — room fetches from
-    ``bed.room`` and building from ``room.building`` — and a chain only resolves in
-    the desk, where the client fetches one hop, writes the field, and the next hop
-    fires off that write. On the server ``BaseDocument`` resolves each ``fetch_from``
-    once against the values present when validation starts, so the second hop reads a
-    room that is still empty and building stays blank.
-
-    Every desk save therefore worked while every programmatic one — an API call, an
-    import, a scheduled job, the demo builder — produced a row with no building. The
-    controller below returns early on a blank building, so the assignment saved having
-    silently skipped its cost centre, its capacity check and its duplicate-occupancy
-    check; only the field being ``reqd`` turned that into a refusal instead of a bad row.
-
-    Anything the caller set explicitly is left alone.
-    """
     if doc.bed and not doc.room:
         doc.room = frappe.db.get_value("Bed", doc.bed, "room")
     if doc.room and not doc.building:
@@ -157,7 +84,6 @@ def _derive_place_from_bed(doc) -> None:
 
 
 def validate(doc, method=None):
-    """Derives the cost center and rate, and blocks duplicate occupancy, mismatches, and over-capacity."""
     sync_party_employee(doc, require_party=True)
     _derive_place_from_bed(doc)
 
@@ -289,7 +215,6 @@ def validate(doc, method=None):
             )
 
 def on_submit(doc, method=None):
-    """Occupies the bed and refreshes occupancy without creating a payroll deduction."""
     current_status = frappe.db.get_value("Bed", doc.bed, "status", for_update=True)
     if current_status == "Occupied":
         occupying_asg = frappe.db.get_value(
@@ -316,13 +241,6 @@ def on_submit(doc, method=None):
     _post_checkin_custody(doc)
 
 def _post_checkin_custody(doc):
-    """Post the items handed over at check-in to the stock ledger, so a resident who
-    holds a mattress and a locker key shows a custody balance the checkout gate, the
-    balance report and the value-at-risk card can all see. The store leg leaves the
-    building's stock and the holder leg enters the resident's custody, exactly as a
-    Custody Issue does. Idempotent through ``has_stock_entries``, which also means
-    assignments submitted before this shipped stay as they are — history is left alone
-    and the ledger starts from the next check-in."""
     if not doc.get("custody_items") or not doc.party:
         return
     if has_stock_entries("Housing Assignment", doc.name):
@@ -355,7 +273,6 @@ def _post_checkin_custody(doc):
                          posting_date=doc.check_in_date)
 
 def on_cancel(doc, method=None):
-    """Frees the bed if no other active assignment holds it and refreshes occupancy counts."""
     active_on_bed = frappe.db.count(
         "Housing Assignment",
         {

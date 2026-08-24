@@ -1,33 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Custody Kiosk — POS-style custody issue + return API.
-
-A thin presentation + orchestration layer over the existing Custody Issue and
-Custody Return controllers. This module adds NO posting, locking, or ledger
-logic of its own:
-
-- ``get_kiosk_catalog`` is read-only and built from a BOUNDED set of bulk
-  queries (no N+1) — one query over Custody Article and, when a building is
-  given, ONE grouped pass over the Accommodation Stock Ledger for store
-  balances (never one ``get_store_balance`` per article).
-- ``issue_cart`` constructs a Custody Issue and submits it so the existing
-  controller runs natively (``validate`` qty gate, ``on_submit`` status flip,
-  and ``_post_custody_stock`` which posts to the Accommodation Stock Ledger).
-- ``get_party_custody`` is read-only: for one party it reports what is still
-  held, per source Custody Issue, as issued-minus-already-returned per article
-  (the same per-article model the Custody Return over-return guard enforces).
-- ``return_cart`` groups the returned lines by their source Custody Issue and
-  constructs + submits ONE Custody Return per issue, so the existing controller
-  runs natively (``validate`` over-return guard, ``on_submit`` status roll-up,
-  and ``_post_return_stock`` which reverses the Accommodation Stock Ledger).
-
-The kiosk never touches the ledger directly — the no-GL Operational Memo
-boundary is preserved (the ledger is system-written; rows post only through the
-Custody Issue / Custody Return controllers).
-
-The ``image`` field on Custody Article is an Attach Image. The catalog always
-selects it and returns it as-is (may be ``None`` → the client renders
-initials/placeholder).
-"""
 
 from __future__ import annotations
 
@@ -44,24 +15,6 @@ from apex.salis.api.driver_portal.images import verified_image_type
 
 @frappe.whitelist()
 def get_kiosk_catalog(building: str | None = None) -> dict:
-    """Return the Custody Article catalog for the kiosk tile grid.
-
-    Reads only. Built from a BOUNDED set of bulk queries (no per-article round
-    trips). One bulk query over Custody Article; if ``building`` is given, ONE
-    grouped pass over the Accommodation Stock Ledger attaches the live store
-    balance per article (employee unset) — never ``get_store_balance`` per tile.
-
-    Args:
-        building: optional Accommodation Building docname. When set, each
-            article carries the live store balance for that building.
-
-    Returns:
-        dict shaped as ``{has_images, building, articles}`` where each article is
-        ``{article, article_name, uom, image, standard_unit_cost,
-        store_balance}``. ``image`` may be ``None`` (the client falls back to
-        initials/placeholder); ``standard_unit_cost`` drives the cart value
-        subtotal client-side.
-    """
     frappe.has_permission("Custody Article", "read", throw=True)
     articles = frappe.get_list(
         "Custody Article",
@@ -106,36 +59,6 @@ def get_kiosk_catalog(building: str | None = None) -> dict:
 
 @frappe.whitelist()
 def resolve_scan(code: str, party_type: str | None = None, building: str | None = None) -> dict:
-    """Classify a scanned code as a worker badge or an article barcode.
-
-    Read-only. A kiosk scanner (HID device or camera) yields one opaque token;
-    this resolves it without the operator pre-saying which kind it is. The token
-    is the natural docname: a worker badge is the Employee / Temporary Worker
-    docname, an article barcode is the Custody Article docname (its naming series,
-    e.g. ``CUST-ART-0001``) — so no barcode schema field is needed.
-
-    Resolution order, first hit wins:
-      1. worker — exact docname of ``party_type`` (Employee | Temporary Worker);
-      2. article — exact Custody Article docname, else a unique ``article_name``
-         match. When ``building`` is given the article carries the live store
-         balance, mirroring :func:`get_kiosk_catalog`.
-
-    A worker match returns the resolved ``party_type`` so the client can flip the
-    selector if the badge belongs to the other party kind. Returns
-    ``{"kind": "none"}`` when nothing matches (the client shows a not-found hint).
-
-    Args:
-        code: the raw scanned token (whitespace is trimmed).
-        party_type: the kiosk's current party kind; the worker probe targets it
-            first, then the other kind.
-        building: optional building; when set an article hit carries the live
-            store balance for that building.
-
-    Returns:
-        dict: ``{"kind": "worker", "party_type", "party", "party_name"}`` or
-        ``{"kind": "article", "article": {...}}`` (same shape as a catalog tile)
-        or ``{"kind": "none"}``.
-    """
     code = (code or "").strip()
     if not code:
         return {"kind": "none"}
@@ -151,18 +74,6 @@ def resolve_scan(code: str, party_type: str | None = None, building: str | None 
     return {"kind": "none"}
 
 def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
-    """Match a scanned token to an Employee / Temporary Worker docname.
-
-    Probes the current ``party_type`` first, then the other kind, so a badge for
-    the other party kind still resolves (the client flips the selector). Read-only
-    and permission-gated per party DocType. Returns ``None`` on no match.
-
-    ``frappe.get_meta(...).has_field`` (frappe/model/meta.py:66, :247) is asked before
-    each identity field is probed, because Iqama and passport are Custom Fields: on a
-    site whose customization has not synced the column is absent, and querying it
-    raises instead of reporting "no match" — which at a kiosk means a worker standing
-    at the counter with an error rather than a retry.
-    """
     party_type = (party_type or "").strip()
     order = [party_type] if party_type in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER) else []
     for pt in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER):
@@ -184,20 +95,6 @@ def _resolve_worker_scan(code: str, party_type: str | None) -> dict | None:
     return None
 
 def _resolve_article_scan(code: str, building: str | None) -> dict | None:
-    """Match a scanned token to a Custody Article and shape it as a catalog tile.
-
-    Matches the article docname first, then a UNIQUE ``article_name`` (a non-unique
-    name match is ignored — the operator must pick). When ``building`` is given the
-    tile carries the live store balance (same source as the catalog). Read-only and
-    permission-gated. Returns ``None`` on no/ambiguous match.
-
-    The docname probe goes through ``frappe.db.exists`` like the two party gates, so
-    the scanned token cannot clear it on the strength of the string. Latent rather
-    than live: the positional form let ``Custody Article`` take the docname branch,
-    but ``get_value`` then returned ``None`` and the scan degraded into a benign
-    miss. What it cost was the ``article_name`` fallback below, which never ran for
-    that token — an article TITLED "Custody Article" was unfindable by scan.
-    """
     if not frappe.has_permission("Custody Article", "read"):
         return None
 
@@ -224,17 +121,6 @@ def _resolve_article_scan(code: str, building: str | None) -> dict | None:
     return {"kind": "article", "article": match}
 
 def _article_store_balance(article: str, building: str | None) -> float | None:
-    """Live store balance (employee unset) for one article in one building.
-
-    Same ledger source as :func:`get_kiosk_catalog` but scoped to a single article
-    (a scan touches one tile, so one tiny query is fine — no N+1). Returns ``None``
-    when no building is given. Read-only.
-
-    Built with ``frappe.qb`` (frappe/query_builder) rather than ``frappe.get_all``,
-    because the balance is a SUM over signed ledger rows and the one thing the list
-    API cannot do is aggregate — fetching the rows to add them up in Python would pull
-    a building's whole custody history to answer one tile.
-    """
     if not building:
         return None
     if not frappe.has_permission("Building", "read", doc=building):
@@ -262,50 +148,6 @@ def issue_cart(
     signature: str | None = None,
     request_token: str | None = None,
 ) -> dict:
-    """Build and submit ONE Custody Issue from a kiosk cart.
-
-    The recipient is given as a (``party_type``, ``party``) pair (Employee |
-    Temporary Worker) matching the Custody Issue Dynamic Link. The legacy
-    ``employee`` arg is still accepted and treated as ``party_type=Employee`` so
-    older callers keep working. The controller's ``sync_party_employee`` mirrors
-    an Employee party onto ``issued_to_employee`` (and leaves it empty for a
-    Temporary Worker), so the ledger only posts for an Employee recipient.
-
-    Builds a full Custody Issue (``party_type``/``party``, ``building``, and one
-    Custody Issue Item row per cart line) and ``insert().submit()`` so ALL native
-    controller behavior runs: ``validate`` (at least one item, each qty > 0) and
-    ``on_submit`` (status -> Issued, then ``_post_custody_stock`` which posts to
-    the Accommodation Stock Ledger — building store -1, employee custody +1 per
-    line).
-
-    When the kiosk captures the recipient's signature at handover, the data-URL is
-    stored on the issue and ``acknowledged_on`` is stamped — in-person proof of
-    handover at issue time (distinct from the later Custody Acknowledgment record
-    the holder can file from the Web Form).
-
-    No ledger row is written here: the engine is reached only through the Custody
-    Issue controller, which is what keeps the no-GL Operational Memo boundary.
-
-    Permission: caller must have ``create`` AND ``submit`` on Custody Issue
-    (checked explicitly below; defense in depth on top of the role grant).
-
-    Args:
-        building: Accommodation Building docname (the source store).
-        items_json: JSON string of ``[{"article": <name>, "qty": <int>}]``.
-        party_type: ``Employee`` or ``Temporary Worker`` (the recipient kind).
-        party: the recipient docname for ``party_type``.
-        employee: legacy Employee docname; used when no ``party`` is given.
-        signature: optional signature data-URL captured at the kiosk.
-        request_token: client-generated key naming ONE cart submission. A retry after a
-            timed-out request carries the same token and gets the issue the first attempt
-            already created, instead of submitting a second one and decrementing the
-            building store twice. The refusal is the DocType's own ``unique`` index on
-            ``request_token``, not the look-up below: the look-up is a snapshot read and
-            two simultaneous retries would both pass it.
-
-    Returns:
-        dict: ``{"custody_issue": <docname>}``.
-    """
     frappe.has_permission("Custody Issue", "create", throw=True)
     frappe.has_permission("Custody Issue", "submit", throw=True)
 
@@ -358,24 +200,10 @@ def issue_cart(
 _OPEN_ISSUE_STATUSES = ("Issued", "Partially Returned")
 
 def _return_condition_options() -> list[str]:
-    """The Custody Return Item condition values, read from the field's own Select so a
-    kiosk cannot post one the DocType does not offer.
-
-    ``frappe.get_meta(...).get_field`` (frappe/model/meta.py:66, :242) is the source,
-    so the kiosk's options and the DocType's own validation can never disagree. The
-    one thing a hardcoded list cannot do is follow the field: adding a condition to
-    the Select would leave the kiosk offering the old set with nothing to say so.
-    """
     options = frappe.get_meta("Custody Return Item").get_field("condition_on_return").options or ""
     return [o for o in (opt.strip() for opt in options.split("\n")) if o]
 
 def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, str]:
-    """Validate the (party_type, party) pair and return it normalized.
-
-    ``party_type`` must be one of the native options (Employee | Temporary
-    Worker); ``party`` must be a non-empty docname. Read-only — does not touch
-    the ledger.
-    """
     party_type = (party_type or "").strip()
     party = (party or "").strip()
     if party_type not in (PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER):
@@ -387,21 +215,6 @@ def _normalize_party(party_type: str | None, party: str | None) -> tuple[str, st
     return party_type, party
 
 def _open_party_custody(party_type: str, party: str) -> list[dict]:
-    """Compute what one party still holds, per source Custody Issue.
-
-    For every SUBMITTED Custody Issue of this party that is not fully returned,
-    the remaining held quantity of each article is ``issued − already returned``
-    (summed over that issue's SUBMITTED Custody Returns). This mirrors the exact
-    per-article model the Custody Return controller's over-return guard enforces,
-    so every line returned here is genuinely returnable — and each line carries
-    the ``custody_issue`` + ``building`` the return must be booked against.
-
-    Bounded query plan (no N+1): one pass over open Custody Issues for the party,
-    one bulk pass over their issue items, one bulk pass over their submitted
-    returns, one bulk pass over those returns' items. Returns a flat list of
-    ``{custody_issue, building, issue_date, article, article_name, uom, qty}``
-    with ``qty`` (remaining) > 0 only.
-    """
     issue_filters = {
         "party_type": party_type,
         "party": party,
@@ -494,25 +307,6 @@ def _open_party_custody(party_type: str, party: str) -> list[dict]:
 
 @frappe.whitelist()
 def get_party_custody(party_type: str, party: str) -> dict:
-    """Return the articles a party currently holds, as returnable kiosk lines.
-
-    Read-only. For the given (``party_type``, ``party``) pair, lists each still
-    held article line — ``issued − already returned`` per article, per source
-    Custody Issue — so Return mode can show exactly what is returnable and how
-    much. Each line names the ``custody_issue`` and ``building`` the return is
-    booked against (``return_cart`` groups by ``custody_issue``).
-
-    Permission: caller must have ``read`` on Custody Issue.
-
-    Args:
-        party_type: ``Employee`` or ``Temporary Worker``.
-        party: the party docname (an Employee or Temporary Worker name).
-
-    Returns:
-        dict shaped as ``{party_type, party, lines}`` where each line is
-        ``{custody_issue, building, issue_date, article, article_name, uom,
-        qty}`` with ``qty`` (remaining held) > 0.
-    """
     frappe.has_permission("Custody Issue", "read", throw=True)
     party_type, party = _normalize_party(party_type, party)
     return {
@@ -523,38 +317,6 @@ def get_party_custody(party_type: str, party: str) -> dict:
 
 @frappe.whitelist(methods=["POST"])
 def return_cart(party_type: str, party: str, items_json: str) -> dict:
-    """Build and submit Custody Returns from a kiosk return cart.
-
-    Each requested line names the source ``custody_issue`` it is being returned
-    against (as surfaced by :func:`get_party_custody`). Lines are grouped by
-    ``custody_issue`` and ONE Custody Return is constructed + submitted per issue,
-    so ALL native controller behaviour runs per return: ``validate`` (the
-    per-article over-return guard) and ``on_submit`` (rolls the linked Custody
-    Issue status to Partially Returned / Returned, then ``_post_return_stock``
-    which reverses the Accommodation Stock Ledger — employee custody −qty,
-    building store +qty per line).
-
-    This method adds NO posting, locking, or ledger logic of its own. It never
-    writes a Stock Ledger row directly; the read-only ledger engine is reached
-    only through the Custody Return controller (no-GL Operational Memo boundary
-    preserved). If any Custody Return fails to validate/submit (e.g. over-return),
-    the whole call rolls back — no partial returns are left submitted.
-
-    Permission: caller must have ``create`` AND ``submit`` on Custody Return
-    (checked explicitly below; defense in depth on top of the role grant).
-
-    Args:
-        party_type: ``Employee`` or ``Temporary Worker`` (the returning party).
-        party: the party docname.
-        items_json: JSON string of ``[{"custody_issue": <name>, "article":
-            <name>, "qty": <int>, "condition_on_return": <optional select>}]``.
-            The condition is what decides whether a damage or loss charge
-            follows the handback, so a kiosk that can see the item may state it;
-            omitting it leaves the field's own default in place.
-
-    Returns:
-        dict: ``{"custody_returns": [<docname>, ...]}`` — one per source issue.
-    """
     frappe.has_permission("Custody Return", "create", throw=True)
     frappe.has_permission("Custody Return", "submit", throw=True)
 

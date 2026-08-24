@@ -1,10 +1,4 @@
 # Copyright (c) 2026, afmcoltd
-"""Shared Google-Maps deep-link builders for the worker (masar) and driver routes.
-
-Pure, no DB. Both the worker trip view (masar) and the driver portal must open the
-IDENTICAL chained directions URL for the same ordered stops, so the waypoint
-resolution + route-chaining live here once instead of being copied per call site.
-"""
 
 
 import re
@@ -19,17 +13,6 @@ _PLACE_COORD_PATTERNS = (
 
 
 def _stop_waypoint(stop):
-    """A Google-Maps-directions waypoint string for one ordered stop, or None.
-
-    Prefers an exact ``lat,lng`` pair parsed from the stop's building
-    ``google_maps_url`` — but only from a PLACE coordinate carrier (``q=`` /
-    ``query=`` / ``destination=`` / the ``!3d..!4d`` embed), never the ``@lat,lng``
-    map-center (viewport) or a ``/dir/<origin>`` leg of a complex share URL, which
-    would point at the wrong spot. Falls back to a free-form ``q=`` text query in
-    the URL, then a bare ``lat,lng`` only when the URL carries no ``@``/``/dir/``
-    decoy (a clean coordinate link), then the building name + city as a place
-    query, then the stop's own location text. Returns None when the stop carries
-    nothing navigable, so it is skipped rather than breaking the chain."""
     pickup = stop.get("pickup") or {}
     url = pickup.get("google_maps_url") or ""
     for pat in _PLACE_COORD_PATTERNS:
@@ -52,14 +35,6 @@ def _stop_waypoint(stop):
 
 
 def _full_route_maps_url(stops):
-    """A single Google Maps directions URL chaining every ordered stop as waypoints,
-    or None when fewer than two stops are navigable.
-
-    The last navigable stop is the ``destination``; the rest become ordered
-    ``waypoints`` (Google caps these, so the chain is bounded at the first nine
-    intermediate points -- still the whole short housing-pickup route in practice).
-    Takes the already-resolved ordered-stops list (the exact sequence the Transport
-    screen renders), so worker and driver deep-links match."""
     points = [wp for s in stops if (wp := _stop_waypoint(s))]
     if len(points) < 2:
         return None
