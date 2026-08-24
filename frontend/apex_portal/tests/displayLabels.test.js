@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { resetMessages } from "../core/i18n.js";
-import { floorLabel, optionLabel, periodLabel, statusLabel } from "../core/displayLabels.js";
+import { dateTimeLabel, floorLabel, optionLabel, periodLabel, portalTimeZone, statusLabel } from "../core/displayLabels.js";
 
 const catalogue = readCatalogue();
 
@@ -20,9 +20,9 @@ function readCatalogue() {
   return rows;
 }
 
-function serve(messages) {
+function serve(messages, timezone) {
   globalThis.document = {
-    documentElement: { lang: "ar" },
+    documentElement: { lang: "ar", dataset: timezone ? { timezone } : {} },
     getElementById: (id) =>
       id === "apex-portal-messages"
         ? { getAttribute: () => "application/json", textContent: JSON.stringify(messages) }
@@ -61,6 +61,14 @@ describe("portal display labels", () => {
     expect(floorLabel("Floor 3")).toBe(catalogue["Floor {0}"].replace("{0}", "3"));
     expect(periodLabel({ kind: "year", year: 2026 })).toBe(catalogue["Year {0}"].replace("{0}", "2026"));
     expect(periodLabel({ kind: "day" })).toBe(catalogue.Today);
+  });
+
+  it("reads the clock in the time zone the page declares", () => {
+    serve(catalogue, "Asia/Riyadh");
+    expect(portalTimeZone()).toBe("Asia/Riyadh");
+    const riyadh = dateTimeLabel("2026-08-24 21:00:00");
+    serve(catalogue, "UTC");
+    expect(dateTimeLabel("2026-08-24 21:00:00")).not.toBe(riyadh);
   });
 
   it("serves English when no catalogue reaches the page", () => {

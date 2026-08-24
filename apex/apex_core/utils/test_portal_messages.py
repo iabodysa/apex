@@ -6,6 +6,7 @@ from pathlib import Path
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import get_system_timezone
 
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 
@@ -52,4 +53,11 @@ class TestPortalTranslationContract(FrappeTestCase):
 
     def test_the_shell_renders_the_language_and_direction_it_is_given(self):
         markup = _SHELL.read_text(encoding="utf-8")
-        self.assertIn('<html lang="{{ shell_meta.language }}" dir="{{ shell_meta.direction }}">', markup)
+        self.assertIn(
+            '<html lang="{{ shell_meta.language }}" dir="{{ shell_meta.direction }}"'
+            ' data-timezone="{{ shell_meta.time_zone }}">',
+            markup,
+        )
+
+    def test_the_shell_carries_the_time_zone_the_site_settled_on(self):
+        self.assertEqual(self._context("ar").shell_meta["time_zone"], get_system_timezone())

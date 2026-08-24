@@ -11,7 +11,7 @@ import frappe
 from frappe import _lt
 from frappe.sessions import get_csrf_token
 from frappe.translate import get_translations_from_csv
-from frappe.utils import cint
+from frappe.utils import cint, get_system_timezone
 from frappe.utils.jinja_globals import is_rtl
 from frappe.utils.password import get_encryption_key
 
@@ -119,6 +119,7 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
         "title": str(_PORTAL_TITLES[entry]),
         "language": language,
         "direction": "rtl" if is_rtl() else "ltr",
+        "time_zone": get_system_timezone(),
         "canonical_path": public_path,
         "manifest_url": pwa.get("manifest_url"),
         "apple_icon_url": pwa.get("apple_icon_url"),

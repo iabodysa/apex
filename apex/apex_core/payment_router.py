@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import erpnext
 import frappe
 from frappe import _
 from frappe.model import default_fields
@@ -113,15 +114,13 @@ def validate_field_map(target_doctype, field_map) -> None:
                 title=_("Invalid Payment Field Map"),
             )
 
-_FALLBACK_CURRENCY = "SAR"
-
 def _default_currency(source) -> str:
     company = source.get("company")
     if company:
         currency = frappe.get_cached_value("Company", company, "default_currency")
         if currency:
             return currency
-    return _FALLBACK_CURRENCY
+    return erpnext.get_default_currency() or ""
 
 def _ensure_target_currency(target, source) -> None:
     if not target.meta.has_field("currency"):

@@ -44,20 +44,26 @@ const frappeDateTime = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1
 const frappeTime = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
 const frappeDate = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-const dateStyle = { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Riyadh" };
-const timeStyle = { hour: "numeric", minute: "2-digit", timeZone: "Asia/Riyadh" };
+const dateStyle = { day: "numeric", month: "long", year: "numeric" };
+const timeStyle = { hour: "numeric", minute: "2-digit" };
 const formatters = new Map();
+
+export function portalTimeZone() {
+  return globalThis.document?.documentElement?.dataset?.timezone || undefined;
+}
 
 function clockFormatters() {
   const language = globalThis.document?.documentElement?.lang || "ar";
-  let pair = formatters.get(language);
+  const timeZone = portalTimeZone();
+  const key = `${language}|${timeZone}`;
+  let pair = formatters.get(key);
   if (!pair) {
     const locale = `${language}-u-ca-gregory-nu-latn`;
     pair = {
-      date: new Intl.DateTimeFormat(locale, dateStyle),
-      time: new Intl.DateTimeFormat(locale, timeStyle),
+      date: new Intl.DateTimeFormat(locale, { ...dateStyle, timeZone }),
+      time: new Intl.DateTimeFormat(locale, { ...timeStyle, timeZone }),
     };
-    formatters.set(language, pair);
+    formatters.set(key, pair);
   }
   return pair;
 }

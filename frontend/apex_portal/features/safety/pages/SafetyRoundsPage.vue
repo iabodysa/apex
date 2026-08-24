@@ -5,7 +5,7 @@ import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
 import { building } from "../../housing/building.js";
 import SafetyTaskRow from "../components/SafetyTaskRow.vue";
-import { cadenceLabel, periodLabel } from "../../../core/displayLabels.js";
+import { cadenceLabel, periodLabel, portalTimeZone } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
 import { __ } from "../../../core/i18n.js";
 
@@ -72,7 +72,7 @@ function update(task, cadence, value) {
 }
 function today() {
   return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Riyadh",
+    timeZone: portalTimeZone(),
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
