@@ -7,11 +7,14 @@ import frappe
 from apex.apex_core.doctype.portal_device.portal_device import (
     consume_enrolment_key,
     list_devices_for,
+    mark_onboarded,
     revoke_own_device,
+    set_device_language,
 )
 from apex.apex_core.utils.portal_identity import (
     DRIVER,
     WORKER,
+    presented_token,
     resolve_portal_subject,
     set_token_cookie,
 )
@@ -48,6 +51,40 @@ def my_worker_devices() -> list:
 def my_driver_devices() -> list:
     subject = resolve_portal_subject(DRIVER, required=True)
     return list_devices_for(DRIVER, subject)
+
+
+def _finish_onboarding(audience: str) -> dict:
+    resolve_portal_subject(audience, required=True)
+    return {"onboarded": mark_onboarded(audience, presented_token(audience)[0])}
+
+
+def _choose_language(audience: str, language: str) -> dict:
+    resolve_portal_subject(audience, required=True)
+    return {"chosen": set_device_language(audience, presented_token(audience)[0], language)}
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60)
+def choose_worker_language(language: str) -> dict:
+    return _choose_language(WORKER, language)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60)
+def choose_driver_language(language: str) -> dict:
+    return _choose_language(DRIVER, language)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60)
+def finish_worker_onboarding() -> dict:
+    return _finish_onboarding(WORKER)
+
+
+@frappe.whitelist(allow_guest=True, methods=["POST"])
+@rate_limit(limit=10, seconds=60)
+def finish_driver_onboarding() -> dict:
+    return _finish_onboarding(DRIVER)
 
 
 @frappe.whitelist(allow_guest=True, methods=["POST"])

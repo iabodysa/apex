@@ -22,7 +22,9 @@
   "enrolled_by",
   "enrolment_source",
   "column_break_enrolment",
-  "last_seen_on"
+  "last_seen_on",
+  "onboarded_on",
+  "language"
  ],
  "fields": [
   {
@@ -143,6 +145,23 @@
    "fieldtype": "Datetime",
    "label": "Last Seen On",
    "read_only": 1
+  },
+  {
+   "fieldname": "onboarded_on",
+   "fieldtype": "Datetime",
+   "label": "Onboarded On",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Stamped when this device finished the welcome walkthrough. Null sends it back to the walkthrough on its next visit."
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "options": "Language",
+   "label": "Language",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "The language this device chose during the walkthrough. Null serves the portal's default."
   }
  ],
  "index_web_pages_for_search": 0,

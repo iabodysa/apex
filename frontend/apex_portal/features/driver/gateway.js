@@ -42,5 +42,11 @@ export function createDriverGateway(call) {
       submit(`depart:${dispatchTrip}`, "apex.salis.api.boarding_flow.depart_and_finalize", {
         dispatch_trip: dispatchTrip,
       }),
+    chooseLanguage: (language) =>
+      submit(`language:${language}`, "apex.apex_core.api.portal_device.choose_driver_language", {
+        language,
+      }),
+    finishOnboarding: () =>
+      submit("onboarding", "apex.apex_core.api.portal_device.finish_driver_onboarding"),
   });
 }

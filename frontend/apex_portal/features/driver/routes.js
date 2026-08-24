@@ -1,5 +1,6 @@
 import DriverPage from "./DriverPage.vue";
 import DriverTripPage from "./DriverTripPage.vue";
+import DriverWelcomePage from "./DriverWelcomePage.vue";
 import "../worker/masar.css";
 
 const page = (path, name, capability, label, icon, endpoint, view = {}) => ({
@@ -17,6 +18,14 @@ const page = (path, name, capability, label, icon, endpoint, view = {}) => ({
 });
 
 export const driverRoutes = Object.freeze([
+  {
+    path: "/welcome",
+    name: "driver-welcome",
+    feature: "driver",
+    capability: "driver.today",
+    component: DriverWelcomePage,
+    meta: { navigation: false, label: "البداية", icon: "lucide-sparkles" },
+  },
   page("/today", "driver-today", "driver.today", "اليوم", "lucide-home", "apex.salis.api.driver_portal.personal.get_masar_today", { collections: ["trips"], titleFields: ["route_name", "shift_name", "route_plan"], fallbackTitle: "رحلة اليوم", detail: "/route/:trip", empty: "لا توجد رحلة مسندة اليوم." }),
   page("/route", "driver-route", "driver.trip.execute", "خط السير", "lucide-navigation", "apex.salis.api.driver_portal.my_worker_route_today", { collections: ["trips"], titleFields: ["route_name", "shift_name", "route_plan"], fallbackTitle: "رحلة", detail: "/route/:trip", empty: "لا يوجد خط سير مسند." }),
   page("/trips", "driver-history", "driver.trip.read", "السجل", "lucide-clock", "apex.salis.api.driver_portal.my_trips_recent", { collections: ["trips"], titleFields: ["route_name", "shift_name", "route_plan"], fallbackTitle: "رحلة سابقة", detail: "/route/:trip" }),

@@ -236,3 +236,43 @@ def revoke_own_device(audience: str, subject: str, device_name: str) -> bool:
     )
     log_portal_device_event(audience, subject, DEVICE_REVOKED, "Linked", device_name=device_name)
     return True
+
+
+def _live_device_name(audience: str, raw_token: str) -> str | None:
+    if not raw_token or not frappe.db.table_exists("Portal Device"):
+        return None
+    return frappe.db.get_value(
+        "Portal Device",
+        {"device_hash": hash_token(raw_token), "holder_type": audience, "revoked": 0},
+        "name",
+    )
+
+
+def onboarding_complete(audience: str, raw_token: str) -> bool:
+    device = _live_device_name(audience, raw_token)
+    if not device:
+        return True
+    return bool(frappe.db.get_value("Portal Device", device, "onboarded_on"))
+
+
+def device_language(audience: str, raw_token: str) -> str | None:
+    device = _live_device_name(audience, raw_token)
+    return frappe.db.get_value("Portal Device", device, "language") if device else None
+
+
+def set_device_language(audience: str, raw_token: str, language: str) -> bool:
+    device = _live_device_name(audience, raw_token)
+    if not device or not frappe.db.exists("Language", language):
+        return False
+    frappe.db.set_value("Portal Device", device, "language", language, update_modified=False)
+    return True
+
+
+def mark_onboarded(audience: str, raw_token: str) -> bool:
+    device = _live_device_name(audience, raw_token)
+    if not device or frappe.db.get_value("Portal Device", device, "onboarded_on"):
+        return False
+    frappe.db.set_value(
+        "Portal Device", device, "onboarded_on", frappe.utils.now_datetime(), update_modified=False
+    )
+    return True
