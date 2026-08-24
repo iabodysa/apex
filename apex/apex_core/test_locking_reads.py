@@ -21,12 +21,12 @@ from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.payment_router import route_payment
 from apex.habitat.doctype.resident_request.resident_request import (
-    _apply_bulk_triage,
-    _bulk_triage_job_id,
+    apply_bulk_triage,
+    bulk_triage_job_id,
     bulk_triage,
 )
-from apex.salis.api.boarding import _get_or_create_log
-from apex.salis.api.masar import _get_or_create_trip_log
+from apex.salis.api.boarding import get_or_create_log
+from apex.salis.api.masar import get_or_create_trip_log
 
 
 def _calls_with_for_update(func, doctype_literal):
@@ -70,20 +70,20 @@ class TestTripStartLogIsCreatedOnce(FrappeTestCase):
     """A driver scan and a worker self-confirm can arrive together."""
 
     def test_masar_locks_the_trip_before_the_existence_read(self):
-        self.assertTrue(_calls_with_for_update(_get_or_create_trip_log, "Dispatch Trip"))
+        self.assertTrue(_calls_with_for_update(get_or_create_trip_log, "Dispatch Trip"))
 
     def test_masar_existence_read_is_itself_locking(self):
-        self.assertTrue(_calls_with_for_update(_get_or_create_trip_log, "Trip Start Log"))
+        self.assertTrue(_calls_with_for_update(get_or_create_trip_log, "Trip Start Log"))
 
     def test_boarding_locks_the_trip_before_the_existence_read(self):
-        self.assertTrue(_calls_with_for_update(_get_or_create_log, "Dispatch Trip"))
+        self.assertTrue(_calls_with_for_update(get_or_create_log, "Dispatch Trip"))
 
     def test_boarding_existence_read_is_itself_locking(self):
-        self.assertTrue(_calls_with_for_update(_get_or_create_log, "Trip Start Log"))
+        self.assertTrue(_calls_with_for_update(get_or_create_log, "Trip Start Log"))
 
     def test_each_takes_its_own_lock_and_not_the_callers(self):
         """The lock lives inside the function, so a new caller cannot forget it."""
-        for func in (_get_or_create_trip_log, _get_or_create_log):
+        for func in (get_or_create_trip_log, get_or_create_log):
             with self.subTest(func=func.__name__):
                 self.assertIn("for_update", inspect.getsource(func))
 
@@ -92,7 +92,7 @@ class TestBulkTriageIsNotAppliedTwice(FrappeTestCase):
     """A double-click must not advance the same rows through two workers."""
 
     def test_each_row_is_loaded_for_update(self):
-        self.assertTrue(_calls_with_for_update(_apply_bulk_triage, "Resident Request"))
+        self.assertTrue(_calls_with_for_update(apply_bulk_triage, "Resident Request"))
 
     def test_the_background_job_is_deduplicated(self):
         source = inspect.getsource(bulk_triage)
@@ -101,17 +101,17 @@ class TestBulkTriageIsNotAppliedTwice(FrappeTestCase):
 
     def test_the_job_id_is_stable_for_one_selection(self):
         self.assertEqual(
-            _bulk_triage_job_id(["RR-1", "RR-2"]),
-            _bulk_triage_job_id(["RR-2", "RR-1"]),
+            bulk_triage_job_id(["RR-1", "RR-2"]),
+            bulk_triage_job_id(["RR-2", "RR-1"]),
         )
 
     def test_a_different_selection_is_a_different_job(self):
         self.assertNotEqual(
-            _bulk_triage_job_id(["RR-1", "RR-2"]),
-            _bulk_triage_job_id(["RR-1", "RR-3"]),
+            bulk_triage_job_id(["RR-1", "RR-2"]),
+            bulk_triage_job_id(["RR-1", "RR-3"]),
         )
 
     def test_an_empty_selection_still_yields_an_id(self):
         """``deduplicate`` throws without a job_id, so this must never be blank."""
-        self.assertTrue(_bulk_triage_job_id([]))
-        self.assertTrue(_bulk_triage_job_id(None))
+        self.assertTrue(bulk_triage_job_id([]))
+        self.assertTrue(bulk_triage_job_id(None))

@@ -349,15 +349,15 @@ def bulk_triage(names):
         frappe.enqueue(
             "apex.habitat.doctype.resident_request.resident_request._bulk_triage_job",
             queue="short",
-            job_id=_bulk_triage_job_id(names),
+            job_id=bulk_triage_job_id(names),
             deduplicate=True,
             names=names,
         )
         return {"advanced": None, "total": len(names), "queued": True}
 
-    return _apply_bulk_triage(names)
+    return apply_bulk_triage(names)
 
-def _bulk_triage_job_id(names) -> str:
+def bulk_triage_job_id(names) -> str:
     """One stable id per SELECTION, so a double-click queues one job and not two.
 
     ``frappe.enqueue`` (frappe/utils/background_jobs.py:59) drops a duplicate only
@@ -380,7 +380,7 @@ def _bulk_triage_job_id(names) -> str:
     )[:24]
 
 
-def _apply_bulk_triage(names):
+def apply_bulk_triage(names):
     """Advance each New Resident Request in ``names`` to Triaged (per-row write
     permission checked); returns the count advanced. Shared body of the inline and
     the background bulk-triage paths.
@@ -425,5 +425,5 @@ def _bulk_triage_job(names):
     """Background runner for a large bulk_triage selection (queued by ``bulk_triage``).
     Runs under the enqueuing user — frappe.enqueue captures the session user and
     the worker re-applies it via frappe.set_user — so the per-row write-permission
-    check inside ``_apply_bulk_triage`` still applies."""
-    _apply_bulk_triage(names)
+    check inside ``apply_bulk_triage`` still applies."""
+    apply_bulk_triage(names)

@@ -332,7 +332,7 @@ def _trip_manifest_workers(
     return {e for e in _manifest_employees(dispatch_trip, transport_request) if e}
 
 
-def _get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe.model.document.Document":
+def get_or_create_log(dispatch_trip: str, driver: str | None = None) -> "frappe.model.document.Document":
     """Return the open Trip Start Log for the trip, creating a draft one if none
     exists yet. One scan should not need a separately-opened log — the first valid
     scan opens it. A submitted/cancelled log is not reused; a fresh draft is made
@@ -523,7 +523,7 @@ def scan_boarding_pass(pass_token, accommodation_building=None, stop_name=None):
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
     driver = trip.get("driver")
-    log = _get_or_create_log(dispatch_trip, driver)
+    log = get_or_create_log(dispatch_trip, driver)
 
     if already_boarded(log, worker):
         log_name = _log_scan(

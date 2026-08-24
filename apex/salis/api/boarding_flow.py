@@ -565,7 +565,7 @@ def worker_claim_boarded(token=None):
     ``masar_routes`` -> back to ``boarding_flow``)."""
     from apex.salis.api.masar import (
         already_boarded,
-        _get_or_create_trip_log,
+        get_or_create_trip_log,
         _resolve_worker,
         _worker_today_dispatch_trip,
     )
@@ -587,7 +587,7 @@ def worker_claim_boarded(token=None):
     if target is None:
         return {"dispatch_trip": dispatch_trip, "status": None}
 
-    log = _get_or_create_trip_log(dispatch_trip, employee)
+    log = get_or_create_trip_log(dispatch_trip, employee)
     if not already_boarded(log, employee):
         log.append(
             "boarding_events",

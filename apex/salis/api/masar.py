@@ -1026,7 +1026,7 @@ def notify_hr_iqama_expiring(token=None):
 
 _WORKER_BOARDING_METHOD = "Worker"
 
-def _get_or_create_trip_log(dispatch_trip, employee=None):
+def get_or_create_trip_log(dispatch_trip, employee=None):
     """The trip's open (draft) Trip Start Log, created if none exists yet — the
     same get-or-create the driver QR scan uses (salis/api/boarding.py), so a
     worker self-confirm and a driver scan append to ONE shared log. A
@@ -1110,7 +1110,7 @@ def confirm_boarding(token=None, transport_request=None):
 
     frappe.db.get_value("Dispatch Trip", dispatch_trip, "name", for_update=True)
 
-    log = _get_or_create_trip_log(dispatch_trip, employee)
+    log = get_or_create_trip_log(dispatch_trip, employee)
 
     if already_boarded(log, employee):
         return {
