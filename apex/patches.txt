@@ -26,3 +26,4 @@ apex.patches.v2_8.retire_unused_apex_roles
 apex.patches.v2_8.insert_missing_module_defs
 apex.patches.v2_8.drop_seeded_workspace_roles
 apex.patches.v2_9.retire_review_apex_integration_settings
+apex.patches.v2_9.drop_housing_allowance_suspended_column
