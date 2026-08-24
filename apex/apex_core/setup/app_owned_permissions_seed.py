@@ -24,6 +24,7 @@ APP_OWNED_PERMISSIONS = (
     ("Project", "Finance Manager", 0, ("select",)),
     ("Issue", "Portal Driver Capacity", 0, ("create",)),
     ("Activity Log", "System Manager", 0, ("read", "create")),
+    ("Activity Log", "Guest", 0, ("create",)),
     ("Activity Log", "Accommodation Manager", 0, ("create",)),
     ("Activity Log", "Resident Supervisor", 0, ("create",)),
     ("Activity Log", "Fleet Project Manager", 0, ("create",)),

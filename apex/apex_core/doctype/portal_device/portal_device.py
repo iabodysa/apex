@@ -54,12 +54,7 @@ class PortalDevice(Document):
         self._pending_revocation_log = False
         subject = self.employee if self.holder_type == WORKER else self.driver
         log_portal_device_event(
-            self.holder_type,
-            subject,
-            DEVICE_REVOKED,
-            "Linked",
-            device_name=self.name,
-            ignore_permissions=False,
+            self.holder_type, subject, DEVICE_REVOKED, "Linked", device_name=self.name
         )
 
     def _validate_immutable_fields(self) -> None:

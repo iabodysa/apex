@@ -354,3 +354,46 @@ class TestRealPermissionStackWiring(FrappeTestCase):
         self.assertEqual(
             frappe.db.get_value("Portal Device", self.device_name, "revoked"), 0
         )
+
+
+class TestGuestWritesTheEnrolmentLogWithoutABypass(FrappeTestCase):
+    def setUp(self):
+        self.employee = make_employee(name="_Test Guest Log Worker", company=default_company())
+        self.addCleanup(
+            lambda: frappe.delete_doc("Employee", self.employee.name, ignore_permissions=True, force=True)
+        )
+        self.key = issue_worker_link(employee=self.employee.name)["token"]
+        self.addCleanup(
+            lambda: frappe.delete_doc(
+                "Masar Worker Token", self.employee.name, ignore_permissions=True, force=True
+            )
+        )
+        self.addCleanup(frappe.set_user, frappe.session.user)
+
+    def test_an_unauthenticated_enrolment_logs_through_the_permission_stack(self):
+        before = frappe.utils.now_datetime()
+        frappe.set_user("Guest")
+
+        raw_device = consume_enrolment_key(WORKER, self.key)
+        self.assertTrue(raw_device)
+
+        logged = frappe.get_all(
+            "Activity Log",
+            filters={"creation": [">=", before], "link_name": self.employee.name, "status": "Linked"},
+            pluck="name",
+        )
+        self.assertEqual(len(logged), 1)
+
+    def test_an_unauthenticated_refusal_logs_through_the_permission_stack(self):
+        before = frappe.utils.now_datetime()
+        frappe.set_user("Guest")
+
+        with self.assertRaises(frappe.PermissionError):
+            consume_enrolment_key(WORKER, "not-a-real-key")
+
+        failures = frappe.get_all(
+            "Activity Log",
+            filters={"creation": [">=", before], "status": "Failed"},
+            pluck="name",
+        )
+        self.assertEqual(len(failures), 1)

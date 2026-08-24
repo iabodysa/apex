@@ -375,7 +375,6 @@ def log_portal_device_event(
     status: str,
     device_name: str | None = None,
     user=None,
-    ignore_permissions: bool = True,
 ) -> str | None:
     _require_audience(audience)
     payload = {
@@ -390,7 +389,7 @@ def log_portal_device_event(
     if device_name and status != "Failed":
         payload["reference_doctype"] = "Portal Device"
         payload["reference_name"] = device_name
-    return frappe.get_doc(payload).insert(ignore_permissions=ignore_permissions, ignore_links=True).name
+    return frappe.get_doc(payload).insert(ignore_links=True).name
 
 
 def revoke_subject_devices(audience: str, subject: str) -> int:
