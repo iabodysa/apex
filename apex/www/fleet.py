@@ -7,7 +7,6 @@ from apex.salis.api.fleet_employee import get_context as get_fleet_context
 
 def get_context(context):
     guest_redirect("/fleet")
-    frappe.local.lang = "ar"
 
     fleet_context = get_fleet_context()
     grants = ["fleet.self.read"]

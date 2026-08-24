@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import frappe
 from frappe import _
+from frappe.utils.jinja_globals import is_rtl
 
 from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.party_link import PARTY_EMPLOYEE, PARTY_TEMPORARY_WORKER
@@ -14,8 +15,7 @@ def slip_company() -> str:
 
 
 def slip_direction() -> str:
-    lang = (frappe.local.lang or "en").lower()
-    return "rtl" if lang.startswith("ar") else "ltr"
+    return "rtl" if is_rtl() else "ltr"
 
 
 def party_type_label(party_type) -> str:

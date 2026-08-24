@@ -25,7 +25,6 @@ def has_apps_screen_access() -> bool:
 def get_context(context):
     guest_redirect("/masar-supervisor")
 
-    frappe.local.lang = "ar"
     allowed = bool(SUPERVISOR_ROLES & set(frappe.get_roles()))
     return publish_portal_context(
         context,

@@ -83,7 +83,6 @@ def portal_landing(capabilities: dict) -> str:
 
 def bootstrap_portal_context(context, route: str, entry: str):
     guest_redirect(route)
-    frappe.local.lang = "ar"
 
     allowed = bool(PORTAL_ROLES & set(frappe.get_roles()))
     capability_map = portal_capabilities() if allowed else {}

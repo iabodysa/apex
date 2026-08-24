@@ -6,6 +6,8 @@ from frappe import _
 
 from apex.salis.api.maps_links import _full_route_maps_url as _chain_route_maps_url
 from apex.salis.api.maps_links import _stop_waypoint
+from apex.apex_core.doctype.portal_device.portal_device import apply_device_language
+from apex.apex_core.utils.portal_identity import DRIVER
 from apex.salis.utils import get_driver_for_user
 
 def _resolve_driver(user=None):
@@ -15,7 +17,7 @@ def _resolve_driver(user=None):
     return driver
 
 def _require_enabled():
-    frappe.local.lang = "ar"
+    apply_device_language(DRIVER)
     if not frappe.db.get_single_value("Salis Settings", "enable_driver_portal"):
         frappe.throw(_("Driver portal is not enabled."), frappe.PermissionError)
 

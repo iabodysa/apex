@@ -6,8 +6,8 @@ from urllib.parse import quote
 import frappe
 
 from apex.apex_core.doctype.portal_device.portal_device import (
+    apply_device_language,
     consume_enrolment_key,
-    device_language,
     onboarding_complete,
 )
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
@@ -46,7 +46,7 @@ def get_context(context):
         raise frappe.Redirect
 
     cookie_token = presented_token(DRIVER)[0]
-    frappe.local.lang = device_language(DRIVER, cookie_token) or "ar"
+    apply_device_language(DRIVER)
 
     subject = _resolve_token_subject(cookie_token) if cookie_token else None
     if cookie_token and not subject:

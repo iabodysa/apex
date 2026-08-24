@@ -28,3 +28,4 @@ apex.patches.v2_8.drop_seeded_workspace_roles
 apex.patches.v2_9.retire_review_apex_integration_settings
 apex.patches.v2_9.drop_housing_allowance_suspended_column
 apex.patches.v2_9.rename_portal_device_language
+apex.patches.v2_9.set_arabic_as_the_site_language

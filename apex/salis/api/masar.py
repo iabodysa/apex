@@ -2,7 +2,6 @@
 
 import frappe
 from frappe import _
-from frappe.translate import get_all_translations
 from frappe.utils import cint
 
 from apex.apex_core.utils.addresses import get_address_text
@@ -151,36 +150,6 @@ WORKER_ISSUE_LOCATIONS = (
 )
 
 WORKER_PREFERRED_LANGUAGES = ("English", "Arabic", "Urdu", "Hindi", "Bengali")
-
-_ENUM_SOURCES = {
-    "status": ("Employee", "status"),
-    "stayType": ("Housing Assignment", "stay_type"),
-    "requestType": ("Transport Request", "request_type"),
-    "transportStatus": ("Transport Request", "status"),
-    "requestCategory": ("Resident Request", "request_category"),
-    "requestStatus": ("Resident Request", "status"),
-    "priority": ("Resident Request", "priority"),
-    "issueLocation": ("Resident Request", "issue_location"),
-}
-
-@frappe.whitelist(allow_guest=True)
-@rate_limit(limit=30, seconds=60)
-def get_enum_labels(lang="ar"):
-    lang = (lang or "ar").strip() or "ar"
-    translations = get_all_translations(lang) or {}
-    out = {}
-    for ns, (doctype, field) in _ENUM_SOURCES.items():
-        meta_field = frappe.get_meta(doctype).get_field(field)
-        if not meta_field or not meta_field.options:
-            continue
-        labels = {}
-        for opt in meta_field.options.split("\n"):
-            opt = opt.strip()
-            if opt and translations.get(opt) and translations[opt] != opt:
-                labels[opt] = translations[opt]
-        if labels:
-            out[ns] = labels
-    return out
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=60, seconds=60)

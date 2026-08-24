@@ -24,7 +24,6 @@ def has_apps_screen_access() -> bool:
 def get_context(context):
     guest_redirect("/fleet-os")
 
-    frappe.local.lang = "ar"
     allowed = _may_view()
     grants = ["fleet.operations.read"] if allowed else []
     if allowed and frappe.has_permission("Fuel Request", "write"):

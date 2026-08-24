@@ -4,8 +4,8 @@ import re
 
 import frappe
 from apex.apex_core.doctype.portal_device.portal_device import (
+    apply_device_language,
     consume_enrolment_key,
-    device_language,
 )
 from apex.apex_core.utils.portal_bootstrap import publish_portal_context
 from apex.apex_core.utils.portal_identity import (
@@ -42,7 +42,7 @@ def get_context(context):
         raise frappe.Redirect
 
     cookie_token = presented_token(WORKER)[0]
-    frappe.local.lang = device_language(WORKER, cookie_token) or "ar"
+    apply_device_language(WORKER)
     subject = _resolve_token_subject(cookie_token) if cookie_token else None
     if cookie_token and not subject:
         delete_token_cookie(WORKER)

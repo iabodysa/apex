@@ -12,6 +12,7 @@ from frappe import _lt
 from frappe.sessions import get_csrf_token
 from frappe.translate import get_translations_from_csv
 from frappe.utils import cint
+from frappe.utils.jinja_globals import is_rtl
 from frappe.utils.password import get_encryption_key
 
 PORTAL_PUBLIC_PATHS = {
@@ -95,7 +96,11 @@ def build_portal_bootstrap(
 _DEFAULT_THEME_COLOR = "#00844E"
 _SEED_COLOR = re.compile(r"\A#[0-9A-Fa-f]{3,8}\Z")
 _APPEARANCE_FIELDS = ("accent_color", "brand_logo", "show_brand")
-_RTL_LANGUAGES = frozenset({"ar", "fa", "he", "ur"})
+
+def portal_language() -> str:
+    language = getattr(frappe.local, "lang", None) or frappe.db.get_default("lang") or "en"
+    frappe.local.lang = language
+    return language
 
 def portal_seed_color(raw: str | None) -> str:
     candidate = (raw or "").strip()
@@ -109,11 +114,11 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     ) or frappe._dict()
     seed = portal_seed_color(appearance.get("accent_color"))
     show_brand = bool(cint(appearance.get("show_brand")))
-    language = getattr(frappe.local, "lang", None) or "ar"
+    language = portal_language()
     return {
         "title": str(_PORTAL_TITLES[entry]),
         "language": language,
-        "direction": "rtl" if language in _RTL_LANGUAGES else "ltr",
+        "direction": "rtl" if is_rtl() else "ltr",
         "canonical_path": public_path,
         "manifest_url": pwa.get("manifest_url"),
         "apple_icon_url": pwa.get("apple_icon_url"),
@@ -145,7 +150,7 @@ def publish_portal_context(
     conf = frappe.get_site_config()
     context.no_cache = 1
     context.csrf_token = get_csrf_token()
-    language = getattr(frappe.local, "lang", None) or "ar"
+    language = portal_language()
     context.portal_messages = get_translations_from_csv(language, "apex")
     context.shell_meta = build_portal_shell_meta(
         entry=entry,

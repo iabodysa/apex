@@ -17,6 +17,7 @@ from apex.apex_core.utils.portal_identity import (
     as_capacity,
     hash_token,
     log_portal_device_event,
+    presented_token,
     throttle_bad_token_attempt,
     validate_subject_binding,
 )
@@ -253,6 +254,13 @@ def onboarding_complete(audience: str, raw_token: str) -> bool:
 def device_language(audience: str, raw_token: str) -> str | None:
     device = _live_device_name(audience, raw_token)
     return frappe.db.get_value("Portal Device", device, "chosen_language") if device else None
+
+
+def apply_device_language(audience: str, explicit: str | None = None) -> str:
+    token = presented_token(audience, explicit)[0]
+    chosen = device_language(audience, token) if token else None
+    frappe.local.lang = chosen or frappe.db.get_default("lang") or frappe.local.lang
+    return frappe.local.lang
 
 
 def set_device_language(audience: str, raw_token: str, language: str) -> bool:
