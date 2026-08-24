@@ -255,12 +255,13 @@ class TestSeedersUnfitForAFixtureStayCode(FrappeTestCase):
     defaults only fill a blank an operator may have already set; Module Profile's
     ``on_update`` takes a document lock a forced fixture reimport never releases
     (frappe/core/doctype/module_profile/module_profile.py:29-34,
-    frappe/model/document.py:1590,1623); a Role cannot carry the two portal capacity
-    identities because Role is absent from ``IMPORTABLE_DOCTYPES``
-    (frappe/model/sync.py:17-35); and Maintenance Material Template's required Links
-    depend on a catalogue two files outside this DocType's own module create, in an
-    order ``sync_fixtures`` cannot guarantee — it runs before ``after_migrate`` hooks
-    on migrate (frappe/migrate.py:143,154-156)."""
+    frappe/model/document.py:1590,1623); the User and Role of a portal capacity
+    identity are converged rather than replaced, which a fixture's forced whole-record
+    reimport would overwrite (frappe/modules/import_file.py:230-239, frappe/utils/
+    fixtures.py:41); and Maintenance Material Template's required Links depend on a
+    catalogue two files outside this DocType's own module create, in an order
+    ``sync_fixtures`` cannot guarantee — it runs before ``after_migrate`` hooks on
+    migrate (frappe/migrate.py:143,154-156)."""
 
     def test_none_of_the_nine_doctypes_ship_as_a_fixture_file(self):
         for doctype in (

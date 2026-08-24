@@ -20,6 +20,10 @@ path — nothing is sent until an admin both enables the individual report AND
 turns on the master ``enable_email_notifications`` toggle in Habitat Settings.
 We never seed them enabled, so
 the master toggle being OFF by default is upheld here without extra logic.
+
+Blocked from a fixture by the same runtime-resolved-value property as every
+Auto Email Report seeder — the recipient email is only known on the site
+itself; see ``auto_email_report_seed_base.py`` for the framework citation.
 """
 
 from apex.apex_core.setup.seeders.auto_email_report_seed_base import seed_auto_email_reports_for

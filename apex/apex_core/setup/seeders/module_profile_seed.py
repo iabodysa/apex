@@ -14,6 +14,12 @@ NEVER BLOCKED: Apex's four modules, so role gating on the Apex Workspaces stays 
 only thing deciding which a persona sees; and HR and Payroll, which carry the person's
 own leave, attendance, expense-claim and salary-slip records that Apex does not
 replace. Hiding a module someone needs hides the product, the worse failure.
+
+Blocked from a fixture by the write-triggers-a-lock property: ``on_update`` queues
+``update_all_users`` behind a document lock (frappe/core/doctype/module_profile/
+module_profile.py:29-34; frappe/model/document.py:1590), so a fixture's forced
+reimport on every migrate risks ``DocumentLockedError`` (frappe/model/document.py:1623)
+that this seeder avoids by creating once and calling ``doc.unlock()`` itself.
 """
 
 import frappe

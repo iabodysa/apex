@@ -11,7 +11,10 @@ rule, so it lives here once and the module seeders keep only their report list.
 
 Two fields are resolved at RUNTIME rather than declared as constants (the
 Administrator's email, and each report's ``report_type``), which is why this
-stays a code seeder instead of externalised seed JSON.
+stays a code seeder instead of externalised seed JSON: a fixture deletes and
+reinserts the record whole from one fixed snapshot on every migrate
+(frappe/modules/import_file.py:230-239, forced by frappe/utils/fixtures.py:41),
+so it could only ship one site's Administrator address to every other site.
 
 Email kill-switch: every report is created **disabled** with Administrator as
 the placeholder recipient — the customer's real users are unknown at install.

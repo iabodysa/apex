@@ -20,6 +20,12 @@ The consequence to know: ``owner`` on a portal-written record becomes the capaci
 a person. Scoping must therefore come from the record's own ``employee`` field, which is where the
 portal reads it from today — checked before this landed, and one place in the portal reads ``owner``
 at all (``masar_worker.py:254``), which reads a Custody Issue a storekeeper creates.
+
+Blocked from a fixture by the gap-filler property: an existing identity is converged, not
+replaced — ``_close_login`` and ``_grant_role`` touch only the field or role a migration
+requires, leaving the rest of the record as an operator left it. A fixture-shipped User or
+Role is instead deleted and reinserted whole on every migrate (frappe/modules/import_file.py:
+230-239, forced by frappe/utils/fixtures.py:41), which would erase that.
 """
 
 import frappe

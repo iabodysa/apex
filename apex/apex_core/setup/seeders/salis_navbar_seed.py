@@ -10,6 +10,10 @@ overwrite the customer's own navbar on every migrate). Instead this reads the
 existing Single and APPENDS our help links only if absent — additive and
 idempotent, never clobbering existing items.
 
+This is the gap-filler property: a fixture-shipped Single is deleted and
+reinserted whole on every migrate (frappe/modules/import_file.py:230-239, forced
+by frappe/utils/fixtures.py:41), wiping any help-dropdown row a customer added.
+
 The seed logic lives here (single source of truth) and is reused by the app's
 ``after_install`` / ``after_migrate`` hooks, exactly like the other Salis seeds
 (notifications, kanban, assignment rules). A fresh install gets the links

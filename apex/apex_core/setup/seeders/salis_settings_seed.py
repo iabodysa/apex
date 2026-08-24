@@ -20,6 +20,13 @@ worse than an empty one the operator has to fill.
 The failure is swallowed rather than raised because this same function runs on EVERY
 migrate: a run that silently did nothing is re-attempted by the next one, so it is never
 the last chance to fill these defaults. A seed with no such re-run must raise instead.
+
+Blocked from a fixture by two properties. Gap-filler: a fixture-shipped Single is
+deleted and reinserted whole on every migrate (frappe/modules/import_file.py:230-239,
+forced by frappe/utils/fixtures.py:41), overwriting a value an administrator already
+set. Runtime-resolved value: ``default_company`` and ``default_cost_center`` name
+whichever Company or Cost Center is the sole one on THIS site, a fact no file can hold
+for every site.
 """
 
 import frappe

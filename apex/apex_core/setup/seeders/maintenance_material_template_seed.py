@@ -16,6 +16,12 @@ source of truth for its 60 records), and the templates reference both. So
 which makes the templates independent of where it is called from in the install
 order. ``apex_core/setup/test_catalogue_writers.py`` keeps the two writers from
 drifting apart, and ``test_material_template_order.py`` keeps this order.
+
+Blocked from a fixture: its required Links point to Maintenance Material rows that
+only the python writers above create, from ``after_migrate``. ``sync_fixtures`` runs
+before the ``after_migrate`` loop on every migrate (frappe/migrate.py:143,154-156), so
+a fixture-shipped template would fail Frappe's mandatory-Link validation against
+materials that do not exist yet.
 """
 import frappe
 

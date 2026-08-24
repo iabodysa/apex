@@ -11,6 +11,11 @@ set these values on existing sites and on no new one.
 
 Only BLANK fields are filled, so an administrator's later choice is never overwritten,
 and a site whose DocType has not migrated yet is skipped rather than raising.
+
+Blocked from a fixture by the gap-filler property: a fixture-shipped Single is
+deleted and reinserted whole on every migrate (frappe/modules/import_file.py:
+230-239, forced by frappe/utils/fixtures.py:41), which would force this fixed value
+back onto a Single an administrator already set.
 """
 
 import frappe

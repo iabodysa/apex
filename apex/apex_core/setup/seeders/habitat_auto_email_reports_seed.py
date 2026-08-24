@@ -12,6 +12,10 @@ unknown at install, so each is created **disabled** with Administrator as the
 placeholder user/recipient. An admin sets the real recipients and enables it.
 Idempotent — created only if absent.
 
+Blocked from a fixture by the same runtime-resolved-value property as every
+Auto Email Report seeder — the recipient email is only known on the site
+itself; see ``auto_email_report_seed_base.py`` for the framework citation.
+
 Email kill-switch: seeding these **disabled** is the gate for this declarative
 path — nothing is sent until an admin both enables the individual report AND
 turns on the master ``enable_email_notifications`` toggle in Habitat Settings.
