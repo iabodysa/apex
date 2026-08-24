@@ -2892,6 +2892,7 @@ On Leave,في إجازة
 On-Site Code,رمز الموقع
 On-call Only,عند الطلب فقط
 "One company item a departing driver held, and the state it came back in.",صنف واحد للشركة كان بيد سائق مغادر، والحال التي عاد بها.
+Onboarded On,تاريخ إنهاء الترحيب
 One document is created per contract and billing period (e.g. 2026-07).,يُنشأ مستند واحد لكل عقد وفترة فوترة (مثل 2026-07).
 "One enrolled device per worker or driver, minted by a one-time Masar Worker Token enrolment key.",جهاز مسجّل واحد لكل عامل أو سائق، يُنشأ بمفتاح تسجيل يُستخدم مرة واحدة من رمز عامل مسار.
 "One immutable custody event (assign, transfer, return, suspend, reactivate, lost, terminated) for a SIM Card. The SIM's current state is projected from the latest submitted event.",حدث عهدة واحد غير قابل للتعديل (إسناد، نقل، إرجاع، تعليق، إعادة تفعيل، فقدان، إنهاء) لشريحة اتصال. تُشتق حالة الشريحة الحالية من آخر حدث مُعتمد.
@@ -4367,6 +4368,7 @@ Stamped when the status reaches Approved; the person who authorised the deductio
 Stamped when the status reaches Received; the storekeeper who took it in.,يُسجَّل عند وصول الحالة إلى «مستلَم»؛ أمين المستودع الذي استلمها.
 Stamped when the transfer is submitted; the storekeeper who released the stock.,يُسجَّل عند اعتماد النقل؛ أمين المستودع الذي أخرج المواد.
 Stamped when the worker's signature is first recorded.,يُسجَّل عند تدوين توقيع العامل لأول مرة.
+Stamped when this device finished the welcome walkthrough.,يُختم عند إنهاء هذا الجهاز لشاشة الترحيب.
 Stamped with the approval and cleared with it.,يُثبَت مع الاعتماد ويُمسح معه.
 Stand / wall electric fan for accommodation ventilation. Durable appliance.,مروحة كهربائية أرضية / جدارية لتهوية السكن. جهاز معمّر.
 Standard,قياسي
@@ -4671,6 +4673,7 @@ The initiator who shipped the asset cannot confirm its own receipt.,لا يمك�
 "The issue line this return answers, resolved on save instead of re-matched at print time.",سطر الصرف الذي يقابله هذا الإرجاع، يُحدَّد عند الحفظ لا عند الطباعة.
 The keys a worker or driver holds instead of a desk account.,المفاتيح التي يحملها العامل أو السائق بدل حساب المكتب.
 "The last day the driver actually worked. HR settles from this date, not from the day the paper was signed.",آخر يوم عمل فيه السائق فعلاً. تحسب الموارد البشرية المستحقات من هذا التاريخ، لا من يوم توقيع الورقة.
+The language this device chose during the walkthrough.,اللغة التي اختارها هذا الجهاز أثناء الترحيب.
 The lease for,عقد إيجار
 The lease for building {0} ends on {1}.,عقد إيجار المبنى {0} ينتهي في {1}.
 The lease for building {0} has ended ({1}).,عقد إيجار المبنى {0} منتهٍ ({1}).

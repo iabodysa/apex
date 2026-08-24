@@ -152,7 +152,7 @@
    "label": "Onboarded On",
    "read_only": 1,
    "no_copy": 1,
-   "description": "Stamped when this device finished the welcome walkthrough. Null sends it back to the walkthrough on its next visit."
+   "description": "Stamped when this device finished the welcome walkthrough."
   },
   {
    "fieldname": "language",
@@ -161,7 +161,7 @@
    "label": "Language",
    "read_only": 1,
    "no_copy": 1,
-   "description": "The language this device chose during the walkthrough. Null serves the portal's default."
+   "description": "The language this device chose during the walkthrough."
   }
  ],
  "index_web_pages_for_search": 0,
