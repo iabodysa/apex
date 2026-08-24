@@ -40,8 +40,8 @@ Source linkage is two-way and duplicate-safe: the source row is locked before th
 existing-link check and insert, and the source document keeps its own
 ``Employee Advance`` link, and the advance carries ``custom_source_doctype`` /
 ``custom_source_document`` (Customization shipped in apex_core/custom/employee_advance.json),
-so "one source document maps to at most one advance" survives an amendment on
-either side.
+so "one source document maps to at most one advance" survives an amendment on either side.
+Vehicle Incident now uses a native Loan; this module stays wired until its own advances clear.
 """
 
 from __future__ import annotations
