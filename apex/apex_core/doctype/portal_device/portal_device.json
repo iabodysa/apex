@@ -24,7 +24,7 @@
   "column_break_enrolment",
   "last_seen_on",
   "onboarded_on",
-  "language"
+  "chosen_language"
  ],
  "fields": [
   {
@@ -155,7 +155,7 @@
    "description": "Stamped when this device finished the welcome walkthrough."
   },
   {
-   "fieldname": "language",
+   "fieldname": "chosen_language",
    "fieldtype": "Link",
    "options": "Language",
    "label": "Language",
@@ -166,7 +166,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-08-24 16:20:00.000000",
+ "modified": "2026-08-24 20:10:59.870667",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Portal Device",

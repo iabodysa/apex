@@ -7,9 +7,13 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.doctype.masar_worker_token.masar_worker_token import get_or_create_for_driver
+from frappe.translate import get_translations_from_csv
+
 from apex.apex_core.doctype.portal_device.portal_device import (
     consume_enrolment_key,
+    device_language,
     mark_onboarded,
+    set_device_language,
 )
 from apex.apex_core.utils.portal_identity import DRIVER
 from apex.tests.factories import make_test_driver
@@ -67,6 +71,20 @@ class TestDriverEnrolmentLanding(FrappeTestCase):
 
         self.assertEqual(seen["capabilities"], ())
         self.assertIsNone(seen["subject"])
+
+    def test_the_language_a_device_chose_decides_what_its_screens_read(self):
+        device_token = consume_enrolment_key(DRIVER, self.key)
+        source = "Skip to content"
+        self.addCleanup(setattr, frappe.local, "lang", frappe.local.lang)
+
+        frappe.local.lang = device_language(DRIVER, device_token) or "ar"
+        arabic = get_translations_from_csv(frappe.local.lang, "apex")
+        self.assertTrue(arabic.get(source) and arabic[source] != source)
+
+        self.assertTrue(set_device_language(DRIVER, device_token, "en"))
+        frappe.local.lang = device_language(DRIVER, device_token) or "ar"
+        self.assertEqual(frappe.local.lang, "en")
+        self.assertNotIn(source, get_translations_from_csv(frappe.local.lang, "apex"))
 
     def test_a_device_lands_on_the_walkthrough_until_it_finishes_it(self):
         device_token = consume_enrolment_key(DRIVER, self.key)

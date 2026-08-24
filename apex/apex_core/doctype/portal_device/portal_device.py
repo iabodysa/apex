@@ -252,14 +252,14 @@ def onboarding_complete(audience: str, raw_token: str) -> bool:
 
 def device_language(audience: str, raw_token: str) -> str | None:
     device = _live_device_name(audience, raw_token)
-    return frappe.db.get_value("Portal Device", device, "language") if device else None
+    return frappe.db.get_value("Portal Device", device, "chosen_language") if device else None
 
 
 def set_device_language(audience: str, raw_token: str, language: str) -> bool:
     device = _live_device_name(audience, raw_token)
     if not device or not frappe.db.exists("Language", language):
         return False
-    frappe.db.set_value("Portal Device", device, "language", language, update_modified=False)
+    frappe.db.set_value("Portal Device", device, "chosen_language", language, update_modified=False)
     return True
 
 
