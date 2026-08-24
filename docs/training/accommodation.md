@@ -66,8 +66,6 @@ Never practise with an occupied production Bed or a real resident record.
 - **Arrange Departure Transport** is available only after a submitted checkout whose
   reason is **Final Exit** or **End of Contract**. It creates a linked draft
   `Transport Request`; it does not dispatch transport.
-- Housing-allowance suspension applies only when the Rent rule in
-  `Salary Deduction Policy` is active.
 - A submitted `Cleaning Log` does not make a Room ready automatically. Only a user with
   Room write access can choose **Mark Ready** after reviewing the evidence.
 - Do not edit occupancy counters or system-written occupancy and cost records.

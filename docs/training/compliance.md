@@ -68,18 +68,18 @@ without confusing an operational memo with accounting or payroll.
   no-GL memo; `Posted (memo)` is not a journal entry.
 - For a driver-related incident that will be recovered from pay, use the
   `Vehicle Incident` recovery fields once, with the employee, amount, installment,
-  and worker signature. Submission may create one HRMS `Employee Advance` when
-  Accounts is configured. Only after the advance is actually paid and the legally
-  reviewed Damage deduction policy is enabled can the monthly process prepare a
-  draft `Additional Salary`; Payroll reviews and submits it. Do not duplicate the
-  same event in `Movement Cost Recovery`.
+  and worker signature. Submission raises one native `Loan` set to repay from
+  salary, and each installment reaches the Salary Slip through that loan's own
+  repayment schedule. A site without the lending application saves the incident and
+  raises no recovery; installing that application is what enables it. Do not
+  duplicate the same event in `Movement Cost Recovery`.
 - `Salis Payment Request` itself posts no General Ledger entry. **Create Payment**
-  builds the target configured in `Payment Routing Settings`; auto-submit also
-  requires the app-wide GL gate. The shipped gates are off by default. Finance
+  builds the target configured under **Payment Routing** in `Habitat Settings`;
+  auto-submit also requires the app-wide GL gate. The shipped gates are off by default. Finance
   must validate the target and field map before using that action, and **Mark
   Paid** should follow evidence of the actual accounting payment.
-- Cancelling an incident after its Employee Advance carries a paid or recovered
-  amount is refused. Reverse the accounting or payroll transaction through its
+- Cancelling an incident after its recovery carries a disbursed or repaid amount is
+  refused. Reverse the accounting or payroll transaction through its
   own lifecycle first.
 
 ## Evidence of completion
@@ -91,8 +91,7 @@ without confusing an operational memo with accounting or payroll.
 - The write-off shows the derived authority tier and a different approving user.
 - The payment request is `Approved by Finance`, with a Finance approver different
   from the requester and no linked payment document.
-- No `GL Entry`, `Employee Advance`, or `Additional Salary` was created by the
-  exercise.
+- No `GL Entry`, `Loan`, or `Additional Salary` was created by the exercise.
 
 ## Related links
 

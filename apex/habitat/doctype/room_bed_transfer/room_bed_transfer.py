@@ -7,11 +7,11 @@ without closing and re-opening the Housing Assignment.
 Why the rule is a REJECTION and not a re-derivation: the move re-points the live
 assignment with ``db_set``, which writes straight to the row and never runs
 ``Housing Assignment.validate()``. That validate is what derives ``cost_center``
-from the building (and its Company), and ``housing_allowance_suspended`` is only
-ever set in the assignment's own ``on_submit``. A building change made here would
-therefore carry the OLD building's cost centre and allowance state into the NEW
-building's Company. Housing Checkout plus a fresh check-in is the path that runs
-those effects, so a cross-building move goes there.
+from the building's own default and, failing that, from its Company
+(housing_assignment.py:169-173). A building change made here would therefore carry
+the OLD building's cost centre into the NEW building's Company. Housing Checkout
+plus a fresh check-in is the path that runs those effects, so a cross-building
+move goes there.
 """
 
 from __future__ import annotations

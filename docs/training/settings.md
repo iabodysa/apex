@@ -9,24 +9,28 @@ This guide is for System Managers and designated process owners on a non-product
 
 ## Choose the setting by outcome
 
-- **Apex Settings** — shared company behavior, General Ledger posting gate, and snapshot
-  retention.
-- **Habitat Settings** — housing defaults, custody handoffs, safety thresholds,
-  notifications, contact details, and optional passport scanning.
-- **Salis Settings** — fleet defaults, alert thresholds, approvals, boarding, driver access,
-  optional web push, approved external origins, and messaging configuration.
-- **Payment Routing Settings** — controlled creation of the approved native payment target.
-- **Salary Deduction Policy** — legal and HR gate for operational recovery through payroll.
-- **Driver Portal Theme** — shared worker and driver appearance.
+Apex ships one settings record per module, and everything a module configures lives inside
+its own record.
+
+- **Habitat Settings** — housing defaults, company and cost center, custody handoffs, safety
+  thresholds, notifications, contact details, optional passport scanning, the internal store
+  engine, the General Ledger posting gate, snapshot retention, and payment routing.
+- **Salis Settings** — fleet defaults, alert thresholds, approvals and authority limits,
+  boarding, driver access, optional web push, driver portal appearance, approved external
+  origins, and messaging configuration.
+- **Logistay Settings** — the telecom alert windows.
 
 A setting changes the site, not one user. Record the old value, owner, reason, expected
 result, test persona, and rollback before saving.
 
 ## High-risk settings
 
-Keep General Ledger posting, salary deductions, messaging credentials, and automatic target
-submission disabled until the responsible Finance, HR, Legal, and IT owners approve the
-complete process.
+Keep General Ledger posting, messaging credentials, and automatic target submission disabled
+until the responsible Finance, HR, Legal, and IT owners approve the complete process.
+
+Recovering vehicle damage from pay is not configured here. It runs on the lending
+application's own loan, and a site without that application refuses to raise the recovery
+rather than inventing one.
 
 For this release, keep **Payment Entry** as the payment target and target auto-submit off.
 The target selection alone is not a complete field map. Do not use **Create Payment** until
@@ -46,7 +50,7 @@ Do not include the old or new link in the incident record.
 
 ## Controlled exercise
 
-1. Record the current **Driver Portal Theme** and accent.
+1. Record the current accent under **Driver Portal Appearance** in **Salis Settings**.
 2. Identify the fictional worker who will verify the change.
 3. Change only the accent on the training site.
 4. Open the worker experience with a freshly issued training link.
