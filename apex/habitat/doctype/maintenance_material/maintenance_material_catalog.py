@@ -1,8 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """Seed the Maintenance Material catalog on fresh install.
 
-The insert passes ``ignore_permissions`` because a seeder is installer context: it runs from
-install as Administrator, with no session user whose roles could be consulted.
+The insert carries no ``ignore_permissions``: ``after_install``/``after_migrate`` run inside
+the bench process's own ``frappe.connect()``, whose ``set_admin_as_user`` default leaves the
+session at Administrator, who already satisfies every DocPerm check (``frappe/permissions.py``
+short-circuits on ``user == "Administrator"``). Maintenance Material's own DocPerm rows
+(Accommodation Manager, System Manager, Maintenance Technician) are unchanged and still
+refuse every other actor.
 """
 import frappe
 
@@ -70,5 +74,5 @@ def seed_catalog():
             "default_uom": item.get("default_uom", "Piece"),
             "is_active": 1,
         })
-        doc.insert(ignore_permissions=True)
+        doc.insert()
     frappe.db.commit()
