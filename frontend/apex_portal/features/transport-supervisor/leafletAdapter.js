@@ -62,7 +62,6 @@ function loadLeaflet({ documentSource, windowSource }) {
 function driverPopup(documentSource, item) {
   const popup = documentSource.createElement("div");
   popup.className = "transport-map-popup";
-  popup.dir = "rtl";
   const driverName = documentSource.createElement("strong");
   driverName.textContent = item.driver_name || __("driver");
   const plate = documentSource.createElement("bdi");

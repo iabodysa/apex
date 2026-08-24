@@ -92,6 +92,8 @@ app_include_js = [
 app_include_css = ["habitat_desk.bundle.css"]
 web_include_js = ["/assets/apex/js/apex_web_form.js"]
 
+website_redirects = [{"source": "/housing-count", "target": "/housing#/count"}]
+
 after_request = [
     "apex.apex_core.utils.portal_response_headers.apply_portal_response_headers"
 ]
