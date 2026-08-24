@@ -52,9 +52,9 @@ def execute():
                 "attached_to_doctype": "Driver Attendance",
                 "attached_to_name": row.parent,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
 
-    frappe.delete_doc("DocType", "Driver Attendance Image", force=True, ignore_permissions=True)
+    frappe.delete_doc("DocType", "Driver Attendance Image", force=True)
     _drop_orphan_table()
 
 

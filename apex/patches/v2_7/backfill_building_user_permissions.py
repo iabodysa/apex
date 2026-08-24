@@ -41,4 +41,4 @@ def execute():
                 "allow": "Building",
                 "for_value": row.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()

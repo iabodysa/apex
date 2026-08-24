@@ -29,7 +29,7 @@ def execute():
         if not frappe.db.exists("Role", role_name):
             continue
         try:
-            frappe.delete_doc("Role", role_name, ignore_permissions=True)
+            frappe.delete_doc("Role", role_name)
         except frappe.LinkExistsError as e:
             print(f"apex: Role {role_name} is still referenced and was left in place: {e}")
 

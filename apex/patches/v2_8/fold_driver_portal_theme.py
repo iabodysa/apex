@@ -44,7 +44,7 @@ def execute():
     _carry_values()
 
     if frappe.db.exists("DocType", SOURCE):
-        frappe.delete_doc("DocType", SOURCE, force=True, ignore_permissions=True)
+        frappe.delete_doc("DocType", SOURCE, force=True)
 
     _clear_orphan_singles()
 

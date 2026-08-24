@@ -53,7 +53,7 @@ def execute():
     _carry_field_map()
 
     if frappe.db.exists("DocType", SOURCE):
-        frappe.delete_doc("DocType", SOURCE, force=True, ignore_permissions=True)
+        frappe.delete_doc("DocType", SOURCE, force=True)
 
     _clear_orphan_singles()
 
