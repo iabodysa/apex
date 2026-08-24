@@ -14,8 +14,7 @@ This guide is for System Managers and designated process owners on a non-product
 - **Habitat Settings** — housing defaults, custody handoffs, safety thresholds,
   notifications, contact details, and optional passport scanning.
 - **Salis Settings** — fleet defaults, alert thresholds, approvals, boarding, driver access,
-  and optional web push.
-- **Apex Integration Settings** — approved external origins and messaging configuration.
+  optional web push, approved external origins, and messaging configuration.
 - **Payment Routing Settings** — controlled creation of the approved native payment target.
 - **Salary Deduction Policy** — legal and HR gate for operational recovery through payroll.
 - **Driver Portal Theme** — shared worker and driver appearance.

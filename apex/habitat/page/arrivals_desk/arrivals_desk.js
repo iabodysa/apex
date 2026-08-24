@@ -1035,7 +1035,7 @@ class ArrivalsDesk {
 				} else if (res.gateway_configured === false) {
 					$btn.prop('disabled', false).text(__('Send via WhatsApp/SMS'));
 					frappe.show_alert({
-						message: __('Messaging gateway is not configured yet (Apex Integration Settings).'),
+						message: __('Messaging gateway is not configured yet (Salis Settings).'),
 						indicator: 'orange',
 					});
 				} else {

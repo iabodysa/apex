@@ -3,7 +3,7 @@
 
 Pushes short worker-facing messages — a personal Masar link, a ride departure,
 or a request-resolved notice — to a worker's phone through a generic HTTP gateway
-the operator configures in **Apex Integration Settings**. The app bundles no
+the operator configures in **Salis Settings**. The app bundles no
 provider: it POSTs a small JSON body to one configurable URL, so any provider
 (an official WhatsApp Business API host, an SMS aggregator, Twilio, or a thin
 middleware) is wired without code changes.
@@ -26,7 +26,7 @@ from apex.apex_core.utils.portal_identity import (
     credential_delivery_destination,
 )
 
-_SETTINGS = "Apex Integration Settings"
+_SETTINGS = "Salis Settings"
 
 _MAX_MESSAGE_LEN = 1000
 
@@ -200,7 +200,7 @@ def send_masar_link(
 def send_test_message(to: str, message: str | None = None) -> dict:
     """Operator self-test: send one message NOW with the stored credentials.
 
-    Permission-gated on write to Apex Integration Settings (only an operator who
+    Permission-gated on write to Salis Settings (only an operator who
     can see the gateway config may fire a test). Sends synchronously so the
     operator gets the real ``{"sent": ...}`` verdict back, confirming the URL +
     key work end to end. No worker data is exposed — the operator supplies the
@@ -208,7 +208,7 @@ def send_test_message(to: str, message: str | None = None) -> dict:
     frappe.has_permission(_SETTINGS, "write", throw=True)
     if not is_configured():
         frappe.throw(
-            _("The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.")
+            _("The messaging gateway is not enabled or is missing its URL/API key. Configure it in Salis Settings first.")
         )
     message = (message or "").strip() or _("Apex messaging gateway test message.")
     return send_message(to, message)

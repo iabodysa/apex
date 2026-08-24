@@ -1,13 +1,13 @@
 {
  "doctype": "Onboarding Step",
  "name": "Review Apex Integration Settings",
- "title": "Review Apex Integration Settings",
+ "title": "Review Salis Settings",
  "action": "Update Settings",
- "reference_document": "Apex Integration Settings",
+ "reference_document": "Salis Settings",
  "is_single": 1,
  "is_complete": 0,
  "is_skipped": 0,
  "show_full_form": 0,
- "description": "Review the shared integration switchboard: frontend URL, API version, and allowed origins.",
- "action_label": "Review Integration Settings"
+ "description": "Review fleet operations and the shared integration switchboard: frontend URL, API version, and allowed origins.",
+ "action_label": "Review Salis Settings"
 }

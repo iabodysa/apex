@@ -44,7 +44,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, today
 
-from apex.apex_core.doctype.apex_stock_settings.apex_stock_settings import policy, validate_posting_allowed
+from apex.apex_core.doctype.habitat_settings.habitat_settings import policy, validate_posting_allowed
 from apex.apex_core.utils.ledger_index import add_index_guarded
 from apex.habitat.utils.item_master import resolve_item
 
@@ -127,7 +127,7 @@ def _assert_policy_allows(item_type, item, qty, building, party_type, party, pos
 
     A guard in the caller is a convention the next voucher type does not inherit — four of
     the five callers checked availability and one did not, which is how a check-in could
-    drive a store below zero. Apex Stock Settings owns the three rules ERPNext ships and
+    drive a store below zero. Habitat Settings owns the three rules ERPNext ships and
     this ledger lacked: a period freeze, a backdating window, and negative-stock refusal.
 
     Reversals are exempt and pass ``reversal_of``: a mirror row must be able to unwind a

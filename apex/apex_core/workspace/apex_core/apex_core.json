@@ -27,9 +27,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Apex Integration Settings",
+   "label": "Salis Settings",
    "link_type": "DocType",
-   "link_to": "Apex Integration Settings",
+   "link_to": "Salis Settings",
    "idx": 2
   },
   {
@@ -53,5 +53,5 @@
  "number_cards": [],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:01.000000",
- "modified": "2026-08-23 22:10:00.000000"
+ "modified": "2026-08-24 09:00:00.000000"
 }

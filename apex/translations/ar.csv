@@ -107,6 +107,7 @@ Accommodation Custody Return Item,بند إرجاع عهدة السكن
 Accommodation Ledger,سجل تكاليف السكن
 Accommodation Ledger Summary,ملخص سجل تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
+Accommodation Manager by default,مدير السكن افتراضيًا
 Accommodation Occupancy Summary,ملخص الإشغال
 Accommodation Provider,جهة السكن
 Accommodation Stock Balance,رصيد مخزون السكن
@@ -299,15 +300,14 @@ Apartment,شقة
 Apex,أبكس
 "Apex 2.0.4 — Guided first-time setup, ready accommodation supplies, and preserved Item Group organization",أبكس 2.0.4 — إعداد أولي موجّه، وتجهيز مستلزمات السكن، والحفاظ على تنظيم مجموعات الأصناف
 Apex Core,نواة أبكس
-Apex Integration Settings,إعدادات تكامل أبكس
 Apex Setup,إعداد أبكس
-Apex Stock Settings,إعدادات مخزون أبيكس
 Apex is configured. Each module now has its own go-live list.,أبكس مُهيّأ. لكل وحدة الآن قائمة تشغيلها.
 Apex messaging gateway test message.,رسالة اختبار بوابة مراسلة أبكس.
 "Apex runs accommodation, facilities and fleet operations. Field teams work in the portals below on their phones; supervisors and the back office work in the modules in the sidebar.",يدير أبكس عمليات الإسكان والمرافق والأسطول. تعمل الفرق الميدانية من البوابات أدناه على هواتفها، ويعمل المشرفون والإدارة من الوحدات في الشريط الجانبي.
 Apex takes its default company and cost center from the company this wizard creates. Set how it posts costs and which document the Pay action builds. You can change all of these later in Habitat Settings and Salis Settings.,يأخذ أبكس الشركة ومركز التكلفة الافتراضيين من الشركة التي ينشئها هذا المعالج. حدد طريقة ترحيل التكاليف والمستند الذي يبنيه إجراء الدفع. تقدر تغيّر كل هذا لاحقاً من إعدادات هابيتات وإعدادات ساليس.
 Apex — Accounting and Payment Defaults,أبكس — إعدادات المحاسبة والدفع الافتراضية
 Apex — Notifications and Operations,أبكس — التنبيهات والتشغيل
+Apex — Recovery,أبكس — الاسترداد
 "Append-only audit row for one QR boarding-pass scan-validate attempt (valid, duplicate, invalid, wrong-trip, or expired). The operational headcount lives on Trip Start Log; this is the immutable scan trail.",صف تدقيق يُضاف ولا يُعدَّل لكل محاولة مسح والتحقق من بطاقة ركوب QR (صالحة أو مكررة أو غير صالحة أو لرحلة خاطئة أو منتهية). عدد الركاب التشغيلي مكانه سجل بدء الرحلة، وهذا هو أثر المسح غير القابل للتعديل.
 Appliance,جهاز
 Applicable Days,الأيام السارية
@@ -469,6 +469,7 @@ Audit Remediation Item,بند معالجة التدقيق
 Audit Remediation Plan,خطة معالجة التدقيق
 Audit Remediation Plans by Status,خطط معالجة التدقيق حسب الحالة
 Audit Remediation Status,حالة معالجة التدقيق
+Audit remediation overdue: {0},تجاوز خطة معالجة التدقيق موعدها: {0}
 August,أغسطس
 Auth Secret,المفتاح السري للمصادقة
 Authorising Contract,العقد المخوِّل
@@ -652,7 +653,9 @@ Building and Project are required for an Accommodation to Project Shuttle.,ال�
 Building arrival cards…,جارٍ إنشاء بطاقات الوصول…
 Building is at full capacity ({0} of {1}). Over-capacity not allowed.,المبنى ممتلئ بالكامل ({0} من {1}). تجاوز السعة غير مسموح به.
 Building is required to mark Completed.,حدد المبنى لتغيير الحالة إلى «مكتمل».
+Building not covered by a weekly safety round: {0},مبنى غير مشمول بجولة سلامة أسبوعية: {0}
 Building safety inspection.,تفتيش سلامة المبنى.
+Building {0} ({1}) has no submitted Weekly Safety Round for the week of {2} — {3}.,المبنى {0} ({1}) ليس له جولة سلامة أسبوعية معتمدة لأسبوع {2} — {3}.
 Building {0} is not flagged as a Procurement Intake Store.,المبنى {0} غير مُعلَّم كمخزن استلام مشتريات.
 "Building-level fixed asset: CCTV camera, DVR/NVR, hard disk, router, switch, generator. Custody is on the supervisor, not on an employee.",أصل ثابت على مستوى المبنى: كاميرا مراقبة، مسجّل DVR/NVR، قرص صلب، موجّه، مبدّل، مولّد. العهدة على المشرف وليست على موظف.
 Buildings,المباني
@@ -686,6 +689,7 @@ Cannot advance {0} from {1} to {2} here. Open the request to set the required fi
 Cannot cancel Custody Issue {0} because it is referenced by active Custody Return {1}.,لا يمكن إلغاء صرف العهدة {0} لارتباطه بإرجاع العهدة النشط {1}.
 Cannot cancel Custody Return {0} because it is referenced by active Custody Damage Assessment {1}.,لا يمكن إلغاء إرجاع العهدة {0} لارتباطه بتقييم تلفيات العهدة النشط {1}.
 Cannot cancel incident {0}: Employee Advance {1} already carries a paid or recovered amount. Reverse it in Accounts first.,لا يمكن إلغاء الحادث {0}: تتضمن سلفة الموظف {1} مبلغًا مدفوعًا أو مستردًا. اعكسها في الحسابات أولًا.
+Cannot cancel incident {0}: Loan {1} already carries a recovered amount. Reverse it in Accounts first.,لا يمكن إلغاء الحادث {0}: القرض {1} فيه مبلغ مسترد بالفعل. اعكسه في الحسابات أولاً.
 "Cannot check out while the resident still holds custody. Resolve each item (return it, or mark it Lost/Damaged): {0}",لا يمكن إتمام المغادرة بينما لا يزال الساكن يحتفظ بعهدة. عالِج كل بند (أعِده، أو حدّده مفقوداً/تالفاً): {0}
 Cannot hand over {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن تسليم {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
 Cannot issue {0} unit(s) of {1} from {2}: only {3} available in the store.,لا يمكن صرف {0} وحدة من {1} من {2}: المتوفر في المخزن {3} فقط.
@@ -985,6 +989,7 @@ Contract End Date,تاريخ نهاية العقد
 Contract End Date cannot be earlier than Contract Start Date.,لا يمكن أن يكون تاريخ نهاية العقد أقدم من تاريخ بدايته.
 Contract End Date must be after Contract Start Date.,يجب أن يكون تاريخ نهاية العقد بعد تاريخ بدايته.
 Contract End cannot be before Contract Start.,لا يمكن أن يكون تاريخ انتهاء العقد قبل تاريخ بدايته.
+Contract Expiry Notice Days,مهلة تنبيه انتهاء العقد (أيام)
 Contract Period,مدة العقد
 Contract Rate Per Visit,سعر الزيارة بالعقد
 Contract Reference,مرجع العقد
@@ -1264,6 +1269,7 @@ Damage evidence is attached to the case,مرفق دليل على التلف
 Damage or Loss Note,ملاحظة تلف أو فقد
 Damage was recorded but no assessment has been raised,سُجِّل تلف ولم يصدر له تقييم
 Damage write-off {0} cancelled.,أُلغي شطب الأضرار {0}.
+Damage write-off {0} submitted (estimated {1}).,تم ترحيل شطب الضرر {0} (بتقدير {1}).
 Damaged,تالف
 Damaged Items,الأصناف التالفة
 Damaged Parts,الأجزاء المتضررة
@@ -1302,6 +1308,7 @@ Days before a temporary stay's expected check-out date to flag it on the supervi
 Days before expiry to trigger renewal alert,عدد الأيام قبل الانتهاء لإطلاق تنبيه التجديد
 Days from an accepted visit to payment falling due.,عدد الأيام من قبول الزيارة حتى استحقاق السداد.
 Days in Transit,أيام النقل
+"Days of notice before a Telecom Contract's end date. Leave it at zero to keep the shipped 30-day notice; turn the alert off at its scheduled task, not by zeroing this.",عدد أيام التنبيه قبل تاريخ انتهاء عقد الاتصالات. اتركه صفراً للإبقاء على مهلة الثلاثين يوماً الافتراضية، وأوقف التنبيه من مهمته المجدولة لا بتصفير هذا الرقم.
 "Days the worker may remain on a passport-only basis. Standard 30, extendable to a maximum of 90.",عدد الأيام التي يجوز للعامل البقاء فيها بالاعتماد على جواز السفر فقط. القياسي 30، قابل للتمديد إلى حد أقصى 90.
 Days to Expiry,الأيام المتبقية للانتهاء
 Days to expiry at or below which a driver licence or vehicle compliance document is flagged 'expiring' (amber) in the driver portal; blank or zero uses the built-in default.,عدد الأيام المتبقية حتى الانتهاء؛ عند بلوغها أو النزول عنها تظهر رخصة السائق أو وثيقة امتثال المركبة بحالة «قرب الانتهاء» باللون الكهرماني في بوابة السائق. إذا تُرك الحقل فارغًا أو كانت قيمته صفرًا، تُستخدم القيمة الافتراضية للنظام.
@@ -1555,6 +1562,7 @@ Employee,الموظف
 Employee (Custodian),الموظف (مستلم العهدة)
 Employee Advance,سلفة الموظف
 Employee Advance Recovery,استرداد سلفة الموظف
+Employee Advance recovery is off by default. Enable it only after Payroll and Accounts have supplied the native records the recovery schedule needs.,استرداد سلفة الموظف مغلق افتراضيًا. لا تفعّله إلا بعد أن توفّر الرواتب والحسابات السجلات التي يحتاجها جدول الاسترداد.
 Employee Cost Center,مركز تكلفة الموظف
 Employee Custody,عهدة الموظف
 Employee Daily Share,الحصة اليومية للموظف
@@ -1898,6 +1906,7 @@ Fuel Spend by Vehicle,إنفاق الوقود حسب المركبة
 Fuel chip {0} via request {1} (chip {2}).,شريحة وقود {0} عبر الطلب {1} (الشريحة {2}).
 Fuel claimed for the period,الوقود المطالب به عن الفترة
 Fuel consumption {0} L for vehicle {1} in period {2} exceeds the monthly quota of {3} L by {4} L (quota {5}).,استهلاك الوقود {0} لتر للمركبة {1} في الفترة {2} يتجاوز الحصة الشهرية البالغة {3} لتر بمقدار {4} لتر (الحصة {5}).
+"Fuel daily log {0}: {1} L, {2}.",سجل الوقود اليومي {0}: {1} لتر، {2}.
 "Fuel gauge reading recorded at vehicle handover, from empty to full, used to compare fuel state at pickup and return of the rental vehicle.",قراءة مؤشر الوقود المسجلة عند تسليم المركبة، من فارغ إلى ممتلئ، وتُستخدم لمقارنة مستوى الوقود عند استلام المركبة المستأجرة وإعادتها.
 Fuel requests above this litre amount require approval.,طلبات الوقود التي تتجاوز هذا الحد باللترات تتطلب موافقة.
 Fuel service platform or provider used for fueling fleet vehicles.,منصة أو مزوّد خدمة وقود يُستخدم لتزويد مركبات الأسطول بالوقود.
@@ -2174,6 +2183,7 @@ Insurer Takes the Wreck,شركة التأمين تأخذ الحطام
 Intake,الاستلام
 Intake Building,مبنى الاستلام
 Intake Store,مستودع الاستلام
+Integration,التكامل
 Integration Enabled,التكامل مُفعّل
 Integration Help,مساعدة التكامل
 "Intended function of the room, which drives whether it counts toward resident bed capacity, such as worker, driver, or supervisor rooms, or is a non-residential space such as office, storage, isolation, or maintenance.",الغرض المخصص للغرفة، وهو الذي يحدد إن كانت تُحتسب ضمن عدد أسرّة الساكنين، مثل غرف العمال أو السائقين أو المشرفين، أو كانت مساحة غير سكنية مثل المكتب أو المستودع أو العزل أو الصيانة.
@@ -2218,6 +2228,7 @@ Investigation Status,حالة التحقيق
 Invoice,فاتورة
 Iqama,الإقامة
 Iqama EXPIRED — {0} ({1}) requests HR action,الإقامة منتهية — {0} ({1}) تتطلب إجراءً من الموارد البشرية
+Iqama HR Notice Lead Days,مهلة إشعار الموارد البشرية للإقامة (أيام)
 Iqama Number,رقم الإقامة
 Iqama Number (if any),رقم الإقامة (إن وُجد)
 Iqama expiring in {0} day(s) — {1} ({2}) requests HR action,الإقامة تنتهي خلال {0} يوم — {1} ({2}) تتطلب إجراءً من الموارد البشرية
@@ -2363,6 +2374,7 @@ Left on the quota before this voucher,المتبقي من الحصة قبل هذ
 Legacy Primary Request,الطلب الأساسي السابق
 Legacy Route Plan,خطة المسار السابقة
 Legacy Supervision,الإشراف السابق
+Legacy: the Employee Advance raised for this incident before recovery moved onto the native Loan. Left to run out; no new incident writes this field.,قديم: سلفة الموظف التي أُنشئت لهذا الحادث قبل انتقال الاسترداد إلى القرض. تُترك حتى تنتهي، ولا يكتب أي حادث جديد في هذا الحقل.
 Legal,الشؤون القانونية
 Legal Case,قضية قانونية
 Lessee (Tenant),المستأجر
@@ -2431,6 +2443,7 @@ Loading buildings…,جاري تحميل المباني…
 Loading checklist...,جارٍ تحميل قائمة الفحص...
 Loading map…,جارٍ تحميل الخريطة…
 Loading…,جارٍ التحميل…
+Loan,قرض
 Locale,الإعدادات المحلية
 Location,الموقع
 Location & Custody,الموقع والعهدة
@@ -2447,6 +2460,7 @@ Logged to Asset Maintenance History,مُسجَّل في سجل صيانة الأ
 Logging inspection…,جارٍ تسجيل التفتيش…
 Logistay,لوجستي
 Logistay Go-Live,تشغيل لوجستي
+Logistay Settings,إعدادات لوجيستاي
 "Logistay is live. Every SIM traces to a contract and a holder, which is what the exception reports read.",لوجستي قيد التشغيل. كل شريحة مرتبطة بعقد ومستلم، وتعتمد تقارير الاستثناءات على هذه البيانات.
 Logistics Cleared,تم إخلاء اللوجستيات
 Logs,السجلات
@@ -2538,8 +2552,7 @@ Maximum Recovery Percent,الحد الأقصى لنسبة الاسترداد
 Maximum Recovery Percent must be greater than 0 and no more than {0}.,يجب أن تكون نسبة الاسترداد القصوى أكبر من صفر ولا تتجاوز {0}.
 May,مايو
 Medium,متوسطة
-Messaging Gateway,بوابة المراسلة
-Messaging gateway is not configured yet (Apex Integration Settings).,لم تُضبط بوابة المراسلة بعد (إعدادات تكامل أبكس).
+Messaging gateway is not configured yet (Salis Settings).,بوابة الرسائل غير مهيأة بعد (إعدادات ساليس).
 Meter Number,رقم العدّاد
 Meter Readings,قراءات العداد
 Meter and Sharing,العدّاد والمشاركة
@@ -3045,6 +3058,7 @@ Overdue Rental Settlements,تسويات الإيجار المتأخرة
 Overdue Scheduled Tasks,المهام المجدولة المتأخرة
 Overdue temporary top-up {0} is still awaiting completion,شحنة الوقود المؤقتة {0} تجاوزت موعدها وما زالت بانتظار الإتمام
 Overdue temporary top-up {0} was auto-reverted,التزويد المؤقت المتأخر {0} عُكس تلقائياً
+Overdue {0} safety task: {1},مهمة سلامة متأخرة بأولوية {0}: {1}
 Overhead Absorption,تحميل المصاريف غير المباشرة
 Overview,نظرة عامة
 Owned,مملوكة
@@ -3106,6 +3120,7 @@ Payment Entry,قيد الدفع
 Payment Reference,مرجع السداد
 Payment Request,طلب دفع
 Payment Request {0} is linked to this settlement.,تم ربط طلب الدفع {0} بهذه التسوية.
+Payment Request {0} raised for {1}.,أُنشئ طلب دفع {0} بمبلغ {1}.
 Payment Routing,توجيه المدفوعات
 Payment Routing Field Map,تعيين حقول توجيه الدفع
 Payment Schedule,جدول الدفع
@@ -3399,6 +3414,7 @@ Rate Per Visit,سعر الزيارة
 Rate how serious the incident is.,قيّم درجة خطورة الحادث.
 Rating,التقييم
 Rating Details,تفاصيل التقييم
+Rating must be between 1 and {0}.,التقييم لازم يكون بين ١ و{0}.
 Re-inspection,إعادة فحص
 Re-reconcile,إعادة التسوية
 Re-submit,إعادة الإرسال
@@ -3499,12 +3515,16 @@ Recover,استرداد
 Recover Cost from Driver,استرداد التكلفة من السائق
 Recover From Employee,الاسترداد من الموظف
 Recover from Driver,استرداد من السائق
+Recover the repair cost from the driver. On submit this raises one native Loan with Repay From Salary set; HRMS deducts the installment on the employee's own Salary Slip.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد يُنشأ قرض واحد مع تفعيل السداد من الراتب، وتخصم الموارد البشرية القسط في قسيمة راتب الموظف.
 Recovered,مُسترد
 Recovered Share,نسبة المسترد
 Recoveries,الاستردادات
+"Recovering this cost from the driver needs the Lending app, which is not installed on this site. Install it first, or clear Recover From Driver.",خصم هذه التكلفة من السائق يحتاج تطبيق الإقراض، وهو غير مثبّت على هذا الموقع. ثبّته أولاً، أو ألغِ خيار الخصم من السائق.
 Recovery,الاسترداد
+Recovery Advance (legacy),سلفة الاسترداد (قديمة)
 Recovery Amount,مبلغ الاسترداد
 Recovery Details,تفاصيل الاسترداد
+Recovery Loan,قرض الاسترداد
 Recovery Salary Component,مكوّن راتب الاسترداد
 Recovery Salary Component is required to enable recovery.,مكوّن راتب الاسترداد مطلوب لتفعيل الاسترداد.
 Recovery Salary Component must be a Deduction.,يجب أن يكون مكوّن راتب الاسترداد من نوع «خصم».
@@ -3586,6 +3606,7 @@ Remediation action details cannot change after submission.,لا يمكن تغي�
 Remediation action {0} was not found.,إجراء المعالجة {0} غير موجود.
 Remediation action {0}: {1} to {2}.,تغيّرت حالة إجراء المعالجة {0} من {1} إلى {2}.
 "Remediation actions cannot be added, removed, or reordered after submission.",لا يمكن إضافة إجراءات المعالجة أو حذفها أو إعادة ترتيبها بعد اعتماد الخطة.
+Remediation plan {0} (project {1}) passed its deadline {2} and is now Overdue.,تجاوزت خطة المعالجة {0} (المشروع {1}) موعدها النهائي {2} وأصبحت متأخرة.
 Remove,إزالة
 Remove Demo Data,إزالة البيانات التجريبية
 Remove every record the demo build created? Nothing else on this site is touched.,هل تريد إزالة كل سجل أنشأه إعداد البيانات التجريبية؟ لن تتأثر أي بيانات أخرى في هذا الموقع.
@@ -3628,6 +3649,7 @@ Rental Settlement {0} already covers office {1} for period {2}.,تسوية ال�
 Rental Start,بداية التأجير
 Rental Start Date,تاريخ بداية التأجير
 Rental Vehicle Movement,حركة مركبة مستأجرة
+Rental accrual for office {0} in period {1} is unsettled: {2} outstanding with no submitted Rental Settlement. (office {0}),استحقاق إيجار المكتب {0} لفترة {1} غير مسوّى: {2} متبقٍّ بلا تسوية إيجار مرحّلة. (المكتب {0})
 Rental movement {0} ({1}) cancelled.,تم إلغاء حركة الإيجار {0} ({1}).
 Rental settlement {0} for period {1}.,تسوية إيجار {0} عن الفترة {1}.
 Rental {0} via {1} (office {2}).,إيجار {0} عبر {1} (المكتب {2}).
@@ -3639,10 +3661,10 @@ Repair,إصلاح
 Repair Cost,تكلفة الإصلاح
 Repair Quotation Reference,مرجع عرض سعر الإصلاح
 Replace,استبدال
-Replying to a complaint is temporarily unavailable.,الرد على الشكوى غير متاح مؤقتاً.
 Replaced,مُستبدَل
 Replacement Cost,تكلفة الاستبدال
 Reply,الرد
+Replying to a complaint is temporarily unavailable.,الرد على الشكوى غير متاح مؤقتاً.
 Report,تقرير
 Report Incident,الإبلاغ عن حادثة
 Report a Safety Incident,الإبلاغ عن حادث سلامة
@@ -3781,14 +3803,13 @@ Revert Due Date,موعد العودة إلى الوضع السابق
 Revert by,يرجع قبل
 Reverted,أُعيدت إلى الوضع السابق
 Review Alerts,مراجعة التنبيهات
-Review Apex Integration Settings,مراجعة إعدادات تكامل أبكس
-Review Integration Settings,مراجعة إعدادات التكامل
+Review Salis Settings,راجع إعدادات ساليس
 Review and approve the handover before confirming receipt.,راجع التسليم واعتمده قبل تأكيد الاستلام.
 "Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.",راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها.
+"Review fleet operations and the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع تشغيل الأسطول ولوحة التكامل المشتركة: رابط الواجهة، إصدار الواجهة البرمجية، والمصادر المسموح بها.
 "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",مرحلة مراجعة حالة شطب التلف، من مفتوح وقيد المراجعة إلى معتمد أو مرفوض، ثم مغلق أو ملغى.
 Review the Housing Assignment List,راجع قائمة التسكين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة
-"Review the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع لوحة التكامل المشتركة: رابط الواجهة، وإصدار الواجهة البرمجية، والمصادر المسموح بها.
 Reviewed By,راجعه
 Reviewed By (Management),راجعه (الإدارة)
 Reviewed By (Safety Management),راجعه (إدارة السلامة)
@@ -3893,6 +3914,7 @@ SIM Suspended,شريحة موقوفة
 SIM Suspended: {0},تعليق شريحة: {0}
 SIM company {0} must match its contract's company {1}.,شركة الشريحة {0} يجب أن تطابق شركة عقدها {1}.
 SIM details,تفاصيل الشريحة
+SIM {0} was suspended on {1}.,شريحة {0} عُلّقت بتاريخ {1}.
 SIMs,الشرائح
 SIMs & Billing,الشرائح والفوترة
 SIMs Covered,الشرائح المشمولة
@@ -3948,6 +3970,8 @@ Safety rounds were recorded for {0} on {1}.,سُجِّلت جولات السلا
 Safety task '{0}' failed on {1} (result: {2}). Repair required.,فشلت مهمة السلامة '{0}' بتاريخ {1} (النتيجة: {2}). يلزم إجراء إصلاح.
 Salary Component,مكوّن الراتب
 Salary Deduction,خصم من الراتب
+Salary recovery deferred for {0}: no valid Salary Slip preview period for {1}.,تأجّل استرداد الراتب لتاريخ {0}: لا توجد فترة معاينة صالحة لقسيمة الراتب للموظف {1}.
+Salary recovery deferred for {0}: nothing recoverable this period.,تأجّل استرداد الراتب لتاريخ {0}: لا يوجد مبلغ قابل للاسترداد في هذه الفترة.
 "Salary recovery is switched off. Turn on Employee Advance recovery in Salis Settings, and set its deduction Salary Component, before deducting from a worker's wage.",استرداد الراتب معطّل. فعّل استرداد سلفة الموظف من إعدادات ساليس، وحدد مكوّن الراتب الخاص بالخصم، قبل الخصم من راتب العامل.
 Sales Taxes and Charges Template,قالب ضرائب ورسوم المبيعات
 Salis,ساليس
@@ -4002,6 +4026,7 @@ Scheduled Task Instances by Status,المهام المجدولة حسب الحا
 Scheduled Task Template,قالب جدولة المهام
 Scheduled Task Template Item,عنصر قالب مهمة مجدولة
 Scheduled Visit Frequency,تكرار الزيارات المجدولة
+Scheduled task {0} ({1}) is overdue (was due {2}).,المهمة المجدولة {0} ({1}) متأخرة (كان موعد استحقاقها {2}).
 Scheduling,الجدولة
 Scope,النطاق
 Scope and Authorization,النطاق والتفويض
@@ -4122,6 +4147,7 @@ Set an Issue Type to make this finding actionable: on report submit it spawns a 
 Set automatically by the Arrivals Desk once this expected worker is matched to a registered arrival. Read-only by design.,يُحدد تلقائيًا في مكتب الوصول عند مطابقة العامل المتوقع مع وصول مسجل. هذا الحقل للقراءة فقط.
 Set automatically when this request is generated from a safety inspection report.,يُضبط تلقائيًا عند إنشاء هذا الطلب من تقرير فحص السلامة.
 Set automatically when this request is spawned from a failed safety task execution.,يُحدَّد آلياً عند إنشاء هذا الطلب من تنفيذ مهمة سلامة فاشلة.
+Set by Apex,يحدده أبكس
 Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.,يُعيّنه محرك الاستحقاق بعد ترحيل اللترات إلى سجل استهلاك الوقود. يمنع الترحيل المكرر.
 Set by the receiving supervisor once every line has been physically checked. Required before approval.,يحدده المشرف المستلم بعد فحص كل بند فعلياً. مطلوب قبل الاعتماد.
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
@@ -4235,7 +4261,6 @@ Signed handover evidence is required before submitting.,إثبات تسليم م
 Signed on paper below,التوقيع على الورق أدناه
 "Signing records that the notice was served and read, not that its value is agreed.",التوقيع يثبت أن الإشعار سُلِّم وقُرئ، ولا يعني الموافقة على المبلغ.
 Single Bed Frame,هيكل سرير فردي
-"Single configuration record describing how an external frontend integrates with this Frappe backend over HTTP. This DocType documents and surfaces the integration; the real linking uses native Frappe tools (User API Access, OAuth Client, Webhook).",سجل إعداد واحد يوضح تكامل واجهة خارجية مع خادم Frappe عبر HTTP. يعرض هذا المستند إعدادات التكامل، أما الربط الفعلي فيستخدم أدوات Frappe القياسية (User API Access وOAuth Client وWebhook).
 Single configuration record for the Salis Fleet Management module.,سجل إعدادات واحد لوحدة إدارة أسطول ساليس.
 Single mattress for worker accommodation bed. Routinely purchased bedding item.,مرتبة مفردة لسرير سكن العمال. صنف مفروشات يُشترى دورياً.
 Single monthly utility bill linked to a Utility Account. Posts to Accommodation Ledger on submit.,فاتورة مرافق شهرية مرتبطة بحساب مرافق. تُرحّل إلى سجل تكاليف السكن عند الاعتماد.
@@ -4329,6 +4354,7 @@ Standard Contract Rate,السعر القياسي بالعقد
 Standard Rate Per Visit (SAR),أجرة الزيارة القياسية (ريال)
 Standard Unit Cost (SAR),تكلفة الوحدة القياسية (ريال)
 "Standard: quota consumption + ledger posting. Top-up: add litres, optionally temporary. Chip: issue/replace/cancel a fuel chip.",قياسي: استهلاك الحصة والتسجيل في سجل استهلاك الوقود. تعبئة: إضافة لترات ويمكن أن تكون مؤقتة. شريحة: إصدار شريحة وقود أو استبدالها أو إلغاؤها.
+"Stars out of five. A Rating field stores a 0-1 fraction and the desk multiplies it by this options count to draw the stars, so a whole star count written here straight would render as a full five.",عدد النجوم من خمسة. حقل التقييم يخزّن كسراً بين صفر وواحد، وتضربه الشاشة في هذا العدد لرسم النجوم، فكتابة عدد النجوم كما هو تظهر كخمس نجوم كاملة.
 Start Date,تاريخ البدء
 Start Datetime,تاريخ ووقت البدء
 Start Investigation,بدء التحقيق
@@ -4514,6 +4540,7 @@ Telecom Contract Expiring,عقد الاتصالات قارب على الانته
 Telecom Contract Expiry,انتهاء عقود الاتصالات
 Telecom Contract {0} does not exist.,عقد الاتصالات {0} غير موجود.
 "Telecom Contract {0} is not submitted, so no SIM can be attached to it.",عقد الاتصالات {0} غير مُرحَّل، فلا يمكن ربط أي شريحة به.
+Telecom Contract {0} with {1} expires on {2}.,عقد الاتصالات {0} مع {1} ينتهي في {2}.
 Telecom Control,عمليات الاتصالات
 Telecom Cost Allocation,توزيع تكاليف الاتصالات
 Telecom Service Contract,عقد خدمة اتصالات
@@ -4562,6 +4589,7 @@ The Dispatch Trip being executed; its linked Transport Request carries the worke
 The Dispatch Trip the scanned pass was issued against.,رحلة التسيير التي صدر التصريح الممسوح مقابلها.
 "The DocType of the routed payment. Stamped by the Payment Router from the document it actually created, so the link below always resolves against the right table.",نوع مستند الدفع الموجه. يسجله موجه الدفع من المستند الذي أنشأه فعليًا، لذلك يشير الرابط أدناه دائمًا إلى الجدول الصحيح.
 The Incident,الحادث
+"The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",القرض المُنشأ لهذا الحادث مع تفعيل السداد من الراتب. الحادث الواحد يُنشئ قرضاً واحداً على الأكثر، وتدير الموارد البشرية القسط والرصيد المتبقي من جدول السداد الخاص به.
 The Other Party,الطرف الآخر
 "The Safety Round this execution belongs to, if recorded as part of a round.",جولةُ السلامة التي ينتمي إليها هذا التنفيذ، إن سُجِّل ضمن جولة.
 The Salis Driver this barcode token grants portal entry for. Set on a Driver-holder token; the driver enters by scanning the QR with no Frappe User.,سائق ساليس الذي يمنحه رمز الباركود هذا دخول البوابة. يُحدد للرمز الخاص بالسائق، ويدخل السائق بمسح رمز الاستجابة السريعة دون حساب مستخدم في فرابي.
@@ -4628,7 +4656,7 @@ The lease for building {0} has ended ({1}).,عقد إيجار المبنى {0} �
 The linked Custody Issue {0} must be submitted before returning.,يجب اعتماد صرف العهدة المرتبط {0} قبل الإرجاع.
 The linked Employee Advance is no longer open for recovery.,سلفة الموظف المرتبطة ما عادت مفتوحة للاسترداد.
 The manifest worker this boarding state tracks.,العامل في كشف الركاب الذي تتبعه حالة الصعود هذه.
-The messaging gateway is not enabled or is missing its URL/API key. Configure it in Apex Integration Settings first.,بوابة المراسلة غير مفعّلة أو ينقصها الرابط أو مفتاح الواجهة البرمجية. اضبطها أولًا في إعدادات تكامل أبكس.
+The messaging gateway is not enabled or is missing its URL/API key. Configure it in Salis Settings first.,بوابة الرسائل غير مفعّلة أو ينقصها الرابط أو مفتاح الواجهة. هيّئها في إعدادات ساليس أولاً.
 The new expiry date must be later than the current expiry date.,يجب أن يكون تاريخ الانتهاء الجديد لاحقًا لتاريخ الانتهاء الحالي.
 The notice carries an approving officer,الإشعار عليه مسؤول معتمد
 The notification endpoint is not an approved push service.,عنوان التنبيهات لا يتبع خدمة معتمدة.
@@ -4679,7 +4707,7 @@ The statement names the supplier invoice it settles,الكشف يذكر فاتو
 "The station attendant states that he dispensed the litres written in the dispense record above, of the grade shown, into this vehicle at the odometer reading he entered.",يقرّ موظف المحطة أنه صرف اللترات المكتوبة في سجل الصرف أعلاه، من النوع المبيّن، لهذه المركبة عند قراءة العداد التي أدخلها.
 The station recorded what it actually dispensed,المحطة سجّلت ما صرفته فعلاً
 "The station that actually dispensed the fuel. Filled after the voucher is approved, which is what binds the attendant's signature.",المحطة التي صرفت الوقود فعلاً. تُملأ بعد اعتماد السند، وهي ما يلزم توقيع الموظف.
-The stock engine is switched off in Apex Stock Settings.,محرّك المخزون موقوف في إعدادات مخزون أبيكس.
+The stock engine is switched off in Habitat Settings.,محرّك المخزون مُطفأ في إعدادات هابيتات.
 "The store at {0} is closed, so nothing can be posted to it.",المخزن في {0} مغلق، فلا تُسجَّل إليه حركة.
 "The storekeeper confirms receiving the articles shown as Returned Now, in the condition recorded against each line. Any line marked Damaged or Lost, and any quantity still outstanding, stays on the holder's account and is settled through a custody damage assessment. This receipt clears the holder only for what is recorded as returned and sound.",يقر أمين المستودع باستلام الأصناف الموضحة في عمود «المرتجع الآن» بالحالة المسجلة أمام كل سطر. وأي سطر مؤشر كتالف أو مفقود، وأي كمية ما زالت متبقية، تبقى على حساب حائز العهدة وتُسوّى عبر تقييم تلفيات العهدة. ولا يبرئ هذا الإيصال ذمة الحائز إلا عما سُجّل مرتجعًا وسليمًا.
 The submitted Custody Issue whose receipt is being acknowledged.,صرف العهدة المعتمد الذي يجري الإقرار باستلامه.
@@ -5240,12 +5268,14 @@ Work Scope,نطاق العمل
 Work Scope Ordered,نطاق العمل المطلوب
 Work Shift,وردية عمل
 Work Shift Day,يوم وردية العمل
+"Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state. The Maintenance Request Workflow, not this field's read_only flag, is what stops a hand edit — see the Close/Reopen actions.",مرحلة العمل في الطلب. الإسنادات تحدد من يملك العمل ولا تنشئ دورة حياة ثانية. مسار عمل طلب الصيانة، لا خاصية القراءة فقط في هذا الحقل، هو ما يمنع التعديل اليدوي — راجع إجراءي الإغلاق وإعادة الفتح.
 Work started — status set to In Progress.,بدأ العمل — الحالة: قيد التنفيذ.
 Worked Hours,ساعات العمل
 Worker,عامل
 Worker Claimed At,وقت تأكيد العامل صعوده
 Worker Consent Signature,توقيع موافقة العامل
 Worker Count,عدد العمال
+Worker Document Alert Lead Days,مهلة تنبيه مستندات العامل (أيام)
 Worker Identity,هوية العامل
 Worker Manifest,كشف الركاب
 Worker Name,اسم العامل
@@ -5323,6 +5353,7 @@ Your incident report was submitted. A supervisor will review and confirm it.,ت�
 Your request has been submitted. Save your tracking code shown below to follow up with your supervisor.,تم تقديم طلبك. احفظ رمز التتبع أدناه للمتابعة مع مشرفك.
 Your tracking code:,رمز المتابعة الخاص بك:
 Your transport request was submitted. Save your tracking code to follow up with your supervisor.,تم تقديم طلب النقل. احفظ رمز التتبع للمتابعة مع مشرفك.
+Zero Rounds Window (Days),نافذة انعدام الجولات (أيام)
 Zero for a counterparty outside the VAT scope.,صفر إذا كان الطرف الآخر خارج نطاق الضريبة.
 Zero for a rental office outside the VAT scope.,صفر لمكتب تأجير خارج نطاق الضريبة.
 active,نشط
@@ -5341,6 +5372,7 @@ confirmed,مؤكَّد
 currency,العملة
 damages,الأضرار
 days,يوم
+deleted,حذفه
 delivery,تسليم
 draft,مسودة
 driver,السائق
@@ -5362,6 +5394,8 @@ generated,مُنشأ
 has ended,انتهى
 has expired,انتهت صلاحيته
 incidents,البلاغات
+issue priority,أولوية بلاغ
+issue type,نوع بلاغ
 km,كم
 matched,مطابق
 mixed,مختلط
@@ -5386,6 +5420,7 @@ posted,مُرحَّل
 rated,تم التقييم
 received,مُستلَم
 released,تم الإخلاء
+renamed or edited,إعادة تسميته أو تعديله
 reported,مُبلَّغ عنه
 requested,مطلوب
 reversed,معكوس
@@ -5419,6 +5454,7 @@ workshop status,حالة الورشة
 {0} free,{0} متاح
 {0} free of {1} beds,{0} متاح من أصل {1} سرير
 "{0} is a workflow Apex ships, and every update rewrites it as the app defines it. A change made here would be removed the next time the site is updated. Ask for the change to ship with the app.",{0} سير عمل يصدر مع أبكس، وكل تحديث يعيد كتابته كما يعرّفه التطبيق. وأي تغيير هنا سيُزال عند تحديث الموقع القادم. اطلب أن يصدر التغيير مع التطبيق.
+"{0} is an {1} Apex ships, and every update puts it back as the app defines it. It cannot be {2} here. Ask for the change to ship with the app.",{0} هو {1} يشحنه أبكس، وكل تحديث يعيده كما يعرّفه التطبيق. لا يمكن {2} من هنا. اطلب أن يصدر التغيير مع التطبيق.
 {0} is invalid.,قيمة {0} غير صحيحة.
 {0} is not a demo DocType; the demo removal would never clear it.,{0} ليس نوع مستند تجريبي، فإزالة البيانات التجريبية لن تمسحه أبدًا.
 {0} is not a valid readiness status.,{0} ليست حالة جاهزية صالحة.
@@ -5454,45 +5490,5 @@ workshop status,حالة الورشة
 "{0} {1} is billed by {2}, not by {3}.",{0} {1} صادرة من المورّد {2} وليس من {3}.
 {0} {1} is not a stop on this trip.,{0}: المحطة {1} ليست ضمن هذه الرحلة.
 {0} {1} is not submitted. Only an approved invoice can be paid.,{0} {1} غير معتمدة. لا يمكن دفع سوى فاتورة معتمدة.
-{0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
-Accommodation Manager by default,مدير السكن افتراضيًا
-Apex — Recovery,أبكس — الاسترداد
-Damage write-off {0} submitted (estimated {1}).,تم ترحيل شطب الضرر {0} (بتقدير {1}).
-Employee Advance recovery is off by default. Enable it only after Payroll and Accounts have supplied the native records the recovery schedule needs.,استرداد سلفة الموظف مغلق افتراضيًا. لا تفعّله إلا بعد أن توفّر الرواتب والحسابات السجلات التي يحتاجها جدول الاسترداد.
-"Fuel daily log {0}: {1} L, {2}.",سجل الوقود اليومي {0}: {1} لتر، {2}.
-Payment Request {0} raised for {1}.,أُنشئ طلب دفع {0} بمبلغ {1}.
-Rental accrual for office {0} in period {1} is unsettled: {2} outstanding with no submitted Rental Settlement. (office {0}),استحقاق إيجار المكتب {0} لفترة {1} غير مسوّى: {2} متبقٍّ بلا تسوية إيجار مرحّلة. (المكتب {0})
-Set by Apex,يحدده أبكس
-deleted,حذفه
-issue priority,أولوية بلاغ
-issue type,نوع بلاغ
-renamed or edited,إعادة تسميته أو تعديله
-"{0} is an {1} Apex ships, and every update puts it back as the app defines it. It cannot be {2} here. Ask for the change to ship with the app.",{0} هو {1} يشحنه أبكس، وكل تحديث يعيده كما يعرّفه التطبيق. لا يمكن {2} من هنا. اطلب أن يصدر التغيير مع التطبيق.
-Salary recovery deferred for {0}: no valid Salary Slip preview period for {1}.,تأجّل استرداد الراتب لتاريخ {0}: لا توجد فترة معاينة صالحة لقسيمة الراتب للموظف {1}.
-Salary recovery deferred for {0}: nothing recoverable this period.,تأجّل استرداد الراتب لتاريخ {0}: لا يوجد مبلغ قابل للاسترداد في هذه الفترة.
-Building not covered by a weekly safety round: {0},مبنى غير مشمول بجولة سلامة أسبوعية: {0}
-Building {0} ({1}) has no submitted Weekly Safety Round for the week of {2} — {3}.,المبنى {0} ({1}) ليس له جولة سلامة أسبوعية معتمدة لأسبوع {2} — {3}.
-Audit remediation overdue: {0},تجاوز خطة معالجة التدقيق موعدها: {0}
-Remediation plan {0} (project {1}) passed its deadline {2} and is now Overdue.,تجاوزت خطة المعالجة {0} (المشروع {1}) موعدها النهائي {2} وأصبحت متأخرة.
-Scheduled task {0} ({1}) is overdue (was due {2}).,المهمة المجدولة {0} ({1}) متأخرة (كان موعد استحقاقها {2}).
 {0}-priority scheduled task {1} ({2}) is overdue (was due {3}).,مهمة مجدولة بأولوية {0}: {1} ({2}) متأخرة (كان موعد استحقاقها {3}).
-Overdue {0} safety task: {1},مهمة سلامة متأخرة بأولوية {0}: {1}
-Telecom Contract {0} with {1} expires on {2}.,عقد الاتصالات {0} مع {1} ينتهي في {2}.
-SIM {0} was suspended on {1}.,شريحة {0} عُلّقت بتاريخ {1}.
-"Recovering this cost from the driver needs the Lending app, which is not installed on this site. Install it first, or clear Recover From Driver.",خصم هذه التكلفة من السائق يحتاج تطبيق الإقراض، وهو غير مثبّت على هذا الموقع. ثبّته أولاً، أو ألغِ خيار الخصم من السائق.
-Worker Document Alert Lead Days,مهلة تنبيه مستندات العامل (أيام)
-Iqama HR Notice Lead Days,مهلة إشعار الموارد البشرية للإقامة (أيام)
-Zero Rounds Window (Days),نافذة انعدام الجولات (أيام)
-Cannot cancel incident {0}: Loan {1} already carries a recovered amount. Reverse it in Accounts first.,لا يمكن إلغاء الحادث {0}: القرض {1} فيه مبلغ مسترد بالفعل. اعكسه في الحسابات أولاً.
-Legacy: the Employee Advance raised for this incident before recovery moved onto the native Loan. Left to run out; no new incident writes this field.,قديم: سلفة الموظف التي أُنشئت لهذا الحادث قبل انتقال الاسترداد إلى القرض. تُترك حتى تنتهي، ولا يكتب أي حادث جديد في هذا الحقل.
-Loan,قرض
-Recover the repair cost from the driver. On submit this raises one native Loan with Repay From Salary set; HRMS deducts the installment on the employee's own Salary Slip.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد يُنشأ قرض واحد مع تفعيل السداد من الراتب، وتخصم الموارد البشرية القسط في قسيمة راتب الموظف.
-Recovery Advance (legacy),سلفة الاسترداد (قديمة)
-Recovery Loan,قرض الاسترداد
-"The Loan raised for this incident, with Repay From Salary set. One incident raises at most one loan; HRMS runs the installment and the outstanding balance from its own repayment schedule.",القرض المُنشأ لهذا الحادث مع تفعيل السداد من الراتب. الحادث الواحد يُنشئ قرضاً واحداً على الأكثر، وتدير الموارد البشرية القسط والرصيد المتبقي من جدول السداد الخاص به.
-"Work stage of the request. Frappe assignments track who owns the work; they do not create a second lifecycle state. The Maintenance Request Workflow, not this field's read_only flag, is what stops a hand edit — see the Close/Reopen actions.",مرحلة العمل في الطلب. الإسنادات تحدد من يملك العمل ولا تنشئ دورة حياة ثانية. مسار عمل طلب الصيانة، لا خاصية القراءة فقط في هذا الحقل، هو ما يمنع التعديل اليدوي — راجع إجراءي الإغلاق وإعادة الفتح.
-Logistay Settings,إعدادات لوجيستاي
-Contract Expiry Notice Days,مهلة تنبيه انتهاء العقد (أيام)
-"Days of notice before a Telecom Contract's end date. Leave it at zero to keep the shipped 30-day notice; turn the alert off at its scheduled task, not by zeroing this.",عدد أيام التنبيه قبل تاريخ انتهاء عقد الاتصالات. اتركه صفراً للإبقاء على مهلة الثلاثين يوماً الافتراضية، وأوقف التنبيه من مهمته المجدولة لا بتصفير هذا الرقم.
-Rating must be between 1 and {0}.,التقييم لازم يكون بين ١ و{0}.
-"Stars out of five. A Rating field stores a 0-1 fraction and the desk multiplies it by this options count to draw the stars, so a whole star count written here straight would render as a full five.",عدد النجوم من خمسة. حقل التقييم يخزّن كسراً بين صفر وواحد، وتضربه الشاشة في هذا العدد لرسم النجوم، فكتابة عدد النجوم كما هو تظهر كخمس نجوم كاملة.
+{0}: {1} occupied bed(s) prevented capacity reduction.,منعت الأسرّة المشغولة وعددها {1} في {0} تخفيض السعة.
