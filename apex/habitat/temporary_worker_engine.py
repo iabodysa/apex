@@ -96,7 +96,7 @@ def _match_employee(tw) -> str | None:
         "Employee", {"passport_number": tw.passport_number, "status": "Active"}, "name"
     )
 
-def _repoint_party(tw_name: str, employee: str) -> None:
+def repoint_party(tw_name: str, employee: str) -> None:
     """Re-point party_type/party (and the legacy Employee mirror) from the Temporary
     Worker to the Employee on every party-bearing doctype. Built with frappe.qb so
     the (dynamic) table and column identifiers are quoted by the builder, not
@@ -136,7 +136,7 @@ def _link(tw, employee: str) -> None:
     the operator's request and it has already succeeded by then, so a costing fault
     must not undo it. The missed days remain recoverable by re-running the back-date.
     """
-    _repoint_party(tw.name, employee)
+    repoint_party(tw.name, employee)
 
     for asg in frappe.get_all(
         "Housing Assignment",

@@ -2,7 +2,7 @@
 
 import frappe
 
-from apex.habitat.temporary_worker_engine import _repoint_party
+from apex.habitat.temporary_worker_engine import repoint_party
 
 
 def execute():
@@ -27,4 +27,4 @@ def execute():
         filters={"status": "Linked", "linked_employee": ["is", "set"]},
         fields=["name", "linked_employee"],
     ):
-        _repoint_party(tw.name, tw.linked_employee)
+        repoint_party(tw.name, tw.linked_employee)
