@@ -1,9 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Apex first-install Setup Wizard integration (native Frappe setup wizard).
 
-The settings saves pass ``ignore_permissions`` because this is installer context: the wizard runs
-as Administrator on a fresh site before any operator or role assignment exists. A DocPerm that
-made these legal would then let operators edit the same settings afterwards.
+``setup_wizard_complete`` runs once, gated by Frappe's own ``is_setup_complete()``
+(frappe/desk/page/setup_wizard/setup_wizard.py:54-55), and only the site's sole account —
+Administrator — can still be logged in the first time it fires. Administrator already
+carries every permission (frappe/permissions.py:107,273,506), so the settings saves below
+need no flag, and no DocPerm would let an operator repeat them afterwards.
 
 On a fresh site, Frappe's setup wizard renders extra "Apex Configuration" slides
 (registered by public/js/apex_setup_wizard.js via the `setup_wizard_requires` hook).
@@ -95,7 +97,7 @@ def _apply_habitat_settings(args, company):
         1 if cint(args.get("apex_enable_operational_notifications")) else 0
     )
     habitat.enable_gl_posting = 1 if cint(args.get("apex_post_gl")) else 0
-    habitat.save(ignore_permissions=True)
+    habitat.save()
 
 def _apply_salis_settings(args, company, cost_center):
     """Salis Settings — default company + cost center and the driver-portal /
@@ -118,7 +120,7 @@ def _apply_salis_settings(args, company, cost_center):
     salis.enable_driver_portal = 1 if cint(args.get("apex_enable_driver_portal")) else 0
     if "apex_enable_approvals" in args:
         salis.enable_approvals = 1 if cint(args.get("apex_enable_approvals")) else 0
-    salis.save(ignore_permissions=True)
+    salis.save()
 
 def _apply_payment_routing(args):
     """Habitat Settings — route the operator's chosen payment DocType to the
@@ -139,7 +141,7 @@ def _apply_payment_routing(args):
     validate_target_doctype(payment_method)
     router = frappe.get_single("Habitat Settings")
     router.target_payment_doctype = payment_method
-    router.save(ignore_permissions=True)
+    router.save()
 
 def _apply_employee_advance_recovery(args, company):
     """Enable the Apex scheduler only after native HRMS accounts and component exist."""

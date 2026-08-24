@@ -1,7 +1,10 @@
 """Native support desk wiring for Salis, applied at install and migrate.
 
-The holiday-list and SLA inserts pass ``ignore_permissions`` because this is installer context:
-it runs as Administrator with no session user, seeding the records the support flow later reads.
+``ensure_support_holiday_list`` and ``configure_support_sla`` reach here only from
+``setup_wizard.py``, inside the one-time ``setup_wizard_complete`` flow Frappe gates
+behind ``is_setup_complete()`` (frappe/desk/page/setup_wizard/setup_wizard.py:54-55),
+so the acting user is always the site's sole account, Administrator, who already
+carries every permission (frappe/permissions.py:107,273,506).
 """
 
 from __future__ import annotations
@@ -112,7 +115,7 @@ def ensure_support_holiday_list(
         holiday_list.get_weekly_off_dates()
     if country:
         holiday_list.get_local_holidays()
-    holiday_list.insert(ignore_permissions=True)
+    holiday_list.insert()
     return holiday_list.name
 
 def _sla_contract(doc):
@@ -237,7 +240,7 @@ def configure_support_sla(
     for status in ("Resolved", "Closed"):
         doc.append("sla_fulfilled_on", {"status": status})
     frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
-    doc.insert(ignore_permissions=True)
+    doc.insert()
     return doc.name
 
 def refuse_shipped_issue_type_edit(doc, method=None, *args, **kwargs):

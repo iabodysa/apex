@@ -1,8 +1,11 @@
 """Native Employee Advance recovery wiring, applied at install and migrate.
 
-The component insert and the settings saves pass ``ignore_permissions`` because this is installer
-context: it runs as Administrator with no session user, and it configures the payroll records an
-operator later works within rather than acting on their behalf.
+Every write here runs as Administrator with no session user: hooks.py reaches this
+module only from ``after_install``/``after_migrate``, a patch, or the one-time
+``setup_wizard_complete`` flow that Frappe's own ``setup_complete`` gates behind
+``is_setup_complete()`` (frappe/desk/page/setup_wizard/setup_wizard.py:54-55), which
+only the site's sole account can still reach. Administrator already carries every
+permission (frappe/permissions.py:107,273,506), so no write here needs to ask.
 """
 
 from __future__ import annotations
@@ -31,7 +34,7 @@ def seed_recovery_component():
             "disabled": 1,
         }
     )
-    component.insert(ignore_permissions=True)
+    component.insert()
     return component.name
 
 def ensure_advance_account(company: str) -> str:
@@ -80,7 +83,7 @@ def ensure_advance_account(company: str) -> str:
                 "is_group": 0,
             }
         )
-        account.insert(ignore_permissions=True)
+        account.insert()
         match = account.name
 
     frappe.db.set_value("Company", company, "default_employee_advance_account", match)
@@ -115,7 +118,7 @@ def configure_recovery(*, enabled=False, company=None, salary_component=None, ma
         if salary_component:
             settings.employee_advance_recovery_component = salary_component
         settings.employee_advance_recovery_max_percent = max_percent
-        settings.save(ignore_permissions=True)
+        settings.save()
         return False
 
     if not company:
@@ -132,10 +135,10 @@ def configure_recovery(*, enabled=False, company=None, salary_component=None, ma
     else:
         component.append("accounts", {"company": company, "account": advance_account})
     component.disabled = 0
-    component.save(ignore_permissions=True)
+    component.save()
 
     settings.enable_employee_advance_recovery = 1
     settings.employee_advance_recovery_component = salary_component
     settings.employee_advance_recovery_max_percent = max_percent
-    settings.save(ignore_permissions=True)
+    settings.save()
     return bool(cint(settings.enable_employee_advance_recovery))
