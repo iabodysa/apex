@@ -6,7 +6,7 @@
  "subtitle": "Confirm the shared settings that Habitat, Salis and Logistay all build on.",
  "success_message": "Apex is configured. Each module now has its own go-live list.",
  "is_complete": 0,
- "modified": "2026-08-07 04:40:00.000000",
+ "modified": "2026-08-24 12:28:00.000000",
  "allow_roles": [
   {
    "doctype": "Onboarding Permission",
@@ -14,10 +14,6 @@
   }
  ],
  "steps": [
-  {
-   "doctype": "Onboarding Step Map",
-   "step": "Review Apex Integration Settings"
-  },
   {
    "doctype": "Onboarding Step Map",
    "step": "Confirm Habitat Settings"

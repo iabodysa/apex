@@ -950,7 +950,7 @@ Confirm Source,مصدر التأكيد
 Confirm Transfer,تأكيد النقل
 Confirm that all items have been verified before approving.,أكِّد التحقق من جميع البنود قبل الاعتماد.
 Confirm the default payment method and the deduction and GL-posting toggles.,اعتمد طريقة الدفع الافتراضية ومفاتيح الاستقطاع والقيد المحاسبي.
-"Confirm the fleet defaults: company, cost center, approvals, and the fuel-request threshold.",اعتمد القيم الافتراضية للأسطول: الشركة، ومركز التكلفة، والاعتمادات، وحد طلب الوقود.
+"Confirm the fleet defaults: company, cost center, approvals, the fuel-request threshold, the frontend URL, and the approved integration origins.",اعتمد القيم الافتراضية للأسطول: الشركة، ومركز التكلفة، والاعتمادات، وحد طلب الوقود، ورابط الواجهة، والمصادر المعتمدة للتكامل.
 "Confirm the shared settings that Habitat, Salis and Logistay all build on.",أكّد الإعدادات المشتركة التي تعتمد عليها هابيتات وساليس ولوجستي.
 Confirm the standardized safety tasks that drive scheduled work.,راجع مهام السلامة القياسية التي تنشئ العمل المجدول.
 Confirm the type of worker returning the articles.,أكّد نوع العامل الذي يُرجع الأصناف.
@@ -3803,10 +3803,8 @@ Revert Due Date,موعد العودة إلى الوضع السابق
 Revert by,يرجع قبل
 Reverted,أُعيدت إلى الوضع السابق
 Review Alerts,مراجعة التنبيهات
-Review Salis Settings,راجع إعدادات ساليس
 Review and approve the handover before confirming receipt.,راجع التسليم واعتمده قبل تأكيد الاستلام.
 "Review every alert this site can send. Each one has its own on/off switch and, where it warns ahead of a date, its own number of days. Turn off what your team does not need and set the timing on the rest. The list also holds the alerts that came with Frappe and ERPNext, so sort by Module to see only yours.",راجع كل تنبيه يستطيع هذا الموقع إرساله. لكلٍّ مفتاح تشغيل وإيقاف خاص به، ولِما ينبّه قبل موعدٍ عددُ أيامه الخاص. أطفئ ما لا يحتاجه فريقك واضبط توقيت الباقي. تضمّ القائمة أيضًا التنبيهات التي جاءت مع فرابيه وإي آر بي نكست، فرتّبها حسب الوحدة لترى تنبيهاتك وحدها.
-"Review fleet operations and the shared integration switchboard: frontend URL, API version, and allowed origins.",راجع تشغيل الأسطول ولوحة التكامل المشتركة: رابط الواجهة، إصدار الواجهة البرمجية، والمصادر المسموح بها.
 "Review stage of the damage write-off case, from open and under review to approved or rejected, then closed or cancelled.",مرحلة مراجعة حالة شطب التلف، من مفتوح وقيد المراجعة إلى معتمد أو مرفوض، ثم مغلق أو ملغى.
 Review the Housing Assignment List,راجع قائمة التسكين
 Review the Safety Task Catalog,مراجعة دليل مهام السلامة

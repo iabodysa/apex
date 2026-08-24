@@ -8,6 +8,6 @@
  "is_complete": 0,
  "is_skipped": 0,
  "show_full_form": 0,
- "description": "Confirm the fleet defaults: company, cost center, approvals, and the fuel-request threshold.",
+ "description": "Confirm the fleet defaults: company, cost center, approvals, the fuel-request threshold, the frontend URL, and the approved integration origins.",
  "action_label": "Confirm Salis Settings"
 }
