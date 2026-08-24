@@ -129,7 +129,18 @@ class VehicleIncident(Document):
             )
 
     def _guard_public_intake(self):
-        """Resets privileged fields on a new guest-submitted incident and caps free-text field lengths."""
+        """Rejects a honeypot-filled submission, resets privileged fields on a new
+        guest-submitted incident, and caps free-text field lengths.
+
+        Runs from validate() on every insert, because the public web form's Guest
+        submission saves through Frappe's own Web Form ``accept``
+        (frappe/website/doctype/web_form/web_form.py:598-663), which builds this
+        document from the POST body and calls ``insert()`` directly — there is no
+        app-owned endpoint in front of it left to check any of this instead.
+        """
+        if self.get("website_field"):
+            frappe.throw(_("Invalid submission."), frappe.PermissionError)
+
         if self.is_new() and frappe.session.user == "Guest":
             self.status = "Open"
             for field in ("write_off_case", "previous_status", "previous_driver"):
