@@ -3,11 +3,19 @@
 """In-app system notification helper — the one place that writes a Notification Log row.
 
 The same single-row ``Notification Log`` insert (type Alert, ``subject[:140]``,
-``ignore_permissions``, best-effort try/rollback/log_error) was copy-pasted across
-the Habitat safety/audit scheduler jobs and the Temporary Worker engine. The
-``Notification Log`` DocType IS the native in-app alert primitive; this only factors
-out the repeated best-effort system-write boilerplate so a column or default change
-lives in one place.
+best-effort try/rollback/log_error) was copy-pasted across the Habitat safety/audit
+scheduler jobs and the Temporary Worker engine. The ``Notification Log`` DocType IS
+the native in-app alert primitive; this only factors out the repeated best-effort
+system-write boilerplate so a column or default change lives in one place.
+
+The row names a ``for_user`` distinct from the actor writing it — a scheduler job
+alerting HR, a driver's own portal action alerting a supervisor, a SIM suspension
+alerting SIM Operations — so no single named role covers every caller, and every
+future caller of this shared leaf utility would need its own row besides.
+``app_owned_permissions_seed.py`` grants ``All`` a ``create`` alongside its existing
+native ``read``: Notification Log entries are alerts, not sensitive records, and
+``All`` already reads the doctype natively, so this closes the gap at the same
+breadth the doctype already ships with rather than naming roles piecemeal.
 
 A leaf utility under ``apex_core`` so any module can import it without coupling
 to ``habitat.tasks``.
@@ -43,8 +51,7 @@ def notify_user_system(
     """Post one in-app (system) Notification Log of type Alert to ONE user.
 
     Returns ``True`` only when a row was inserted. Falsy or disabled ``user`` is a
-    no-op (returns ``False``). System-written from scheduler jobs, so
-    ``ignore_permissions``. Best-effort: a failure rolls back to this call's OWN
+    no-op (returns ``False``). Best-effort: a failure rolls back to this call's OWN
     savepoint and logs but never raises, so the caller keeps both the rows it already
     wrote and its own outer savepoint. ``document_type``/``document_name`` optionally
     link the alert to its source record (both required to link).
@@ -93,7 +100,7 @@ def notify_user_system(
             dedup_filter["subject"] = clipped_subject
         if frappe.db.exists(LOG_DOCTYPE, dedup_filter):
             return False
-        frappe.get_doc(payload).insert(ignore_permissions=True)
+        frappe.get_doc(payload).insert()
         return True
     except Exception:
         frappe.db.rollback(save_point=_SAVEPOINT)

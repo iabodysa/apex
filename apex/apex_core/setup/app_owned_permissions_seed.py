@@ -1,9 +1,10 @@
 # Copyright (c) 2026, afmcoltd
-"""Grant Apex's own permissions on three DocTypes it does not own.
+"""Grant Apex's own permissions on DocTypes it does not own.
 
-Employee, Cost Center and Project belong to hrms and erpnext. Apex needs a handful of
-extra grants on them, and until now those travelled in the ``custom_perms`` block of
-``apex/habitat/custom/*.json``.
+Employee, Cost Center and Project belong to hrms and erpnext; Activity Log and
+Notification Log belong to frappe. Apex needs a handful of extra grants on each, and
+Employee/Cost Center/Project's rows travelled in the ``custom_perms`` block of
+``apex/habitat/custom/*.json`` until now.
 
 Why that mechanism had to go: ``modules/utils.py:182-187`` DELETES every Custom DocPerm
 row of the DocType and reinserts only the file's, on every migrate. So a row an
@@ -28,6 +29,13 @@ to open one. ``frappe.permissions.add_permission`` grants ``read`` by default, s
 these with its default would hand thirteen roles read access to personnel, cost and project
 records they cannot see today. Every row below therefore names its own permission types
 and ``read`` is set only where the file set it.
+
+Activity Log and Notification Log rows are CREATE-only for the same trap: both DocTypes
+carry an operator-written audit or alert row naming a SUBJECT distinct from the actor
+(``portal_identity.log_credential_event``, ``system_notify.notify_user_system``), so the
+acting role never needs to read what it just wrote. Each row here REPEATS a pre-existing
+native ``read`` (System Manager on Activity Log, ``All`` on Notification Log) alongside
+the new ``create``, so seeding it does not drop that native grant.
 
 CONTRACT: this runs at install AND at migrate, and is guarded per row, so it is safe to
 re-run and never overwrites a row an operator has adjusted.
@@ -56,6 +64,15 @@ APP_OWNED_PERMISSIONS = (
     ("Project", "Fleet Supervisor", 0, ("select",)),
     ("Project", "Finance Manager", 0, ("select",)),
     ("Issue", "Portal Driver Capacity", 0, ("create",)),
+    ("Activity Log", "System Manager", 0, ("read", "create")),
+    ("Activity Log", "Accommodation Manager", 0, ("create",)),
+    ("Activity Log", "Resident Supervisor", 0, ("create",)),
+    ("Activity Log", "Fleet Project Manager", 0, ("create",)),
+    ("Activity Log", "Fleet Supervisor", 0, ("create",)),
+    ("Activity Log", "Fleet Manager", 0, ("create",)),
+    ("Activity Log", "HR User", 0, ("create",)),
+    ("Activity Log", "HR Manager", 0, ("create",)),
+    ("Notification Log", "All", 0, ("read", "create")),
 )
 
 _ALL_PTYPES = (

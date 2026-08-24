@@ -1,10 +1,15 @@
 # Copyright (c) 2026, afmcoltd
 """Shared authorization boundary for worker and driver portal bearer tokens.
 
-``log_credential_event`` inserts with ``ignore_permissions`` because it records credential
-issue, use and revocation — an audit trail written about the actor, never by them. The caller here
-is usually a token holder with no user at all, and a role able to write this log could rewrite the
-record of its own access, which is the one thing an audit trail must refuse.
+``log_credential_event`` records credential issue, use and revocation — an audit trail
+written about the SUBJECT (the Employee/Salis Driver a token names), never by them. Every
+call site reaches it through ``authorize_issuance`` (``frappe.has_permission("Masar Worker
+Token", "write", throw=True)``) or the ``on_employee_change``/``on_salis_driver_change``/
+``on_driver_suspension_submit`` hooks, so the acting user is always a desk role with write
+on one of those four DocTypes — never the passwordless token holder, who cannot open a
+Frappe session in the first place. ``app_owned_permissions_seed.py`` grants exactly those
+roles ``create`` (no ``read``) on Activity Log, so the DocPerm answers "may this role write
+one audit row" without also answering "may this role browse everyone's".
 
 DECISION (2026-08-16), against the two native alternatives raised for this token: REFUSED,
 both times, and named here so the question is not re-opened without new information.
@@ -465,7 +470,7 @@ def log_credential_event(
             "link_doctype": _SUBJECT_DOCTYPES[audience],
             "link_name": subject,
         }
-    ).insert(ignore_permissions=True, ignore_links=True).name
+    ).insert(ignore_links=True).name
 
 def revoke_subject_tokens(audience: str, subject: str) -> int:
     """Disable enabled credentials for one exact audience and subject.
