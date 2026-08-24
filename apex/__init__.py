@@ -6,7 +6,7 @@ Frappe Framework v15 application providing the Habitat, Salis, Logistay and
 Apex Core modules.
 """
 
-__version__ = "2.9.2"
+__version__ = "2.9.3"
 
 
 def check_app_permission() -> bool:
