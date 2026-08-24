@@ -1,170 +1,90 @@
-const statusLabels = Object.freeze({
-  New: "جديد",
-  Validated: "تم التحقق",
-  Pending: "قيد الانتظار",
-  Approved: "معتمد",
-  Rejected: "مرفوض",
-  Planned: "مجدولة",
-  Dispatched: "في الطريق",
-  Boarded: "صعد",
-  Scheduled: "مجدولة",
-  Fulfilled: "مكتملة",
-  Unassigned: "غير مسندة",
-  assigned: "مسندة",
-  available: "متاحة",
-  workshop: "في الورشة",
-  stopped: "متوقفة",
-  Started: "بدأت",
-  Completed: "مكتملة",
-  Cancelled: "ملغاة",
-  Ready: "جاهزة",
-  "Needs Cleaning": "تحتاج تنظيف",
-  "Needs Repair": "تحتاج إصلاح",
-  "Out of Service": "خارج الخدمة",
-  Available: "متاح",
-  Occupied: "مشغول",
-  Good: "جيدة",
-  Excellent: "ممتازة",
-  Average: "متوسطة",
-  Poor: "ضعيفة",
-  "Not Done": "لم تُنفذ",
-  Critical: "حرجة",
-  High: "عالية",
-  Medium: "متوسطة",
-  Low: "منخفضة",
-  Active: "نشط",
-  Inactive: "غير نشط",
-  Exhausted: "مستنفد",
-  Closed: "مغلق",
-  Open: "مفتوح",
-  Unknown: "غير معروف",
-  Scrapped: "مستبعد",
-  Stopped: "متوقف",
-  "On Leave": "في إجازة",
-  "Under Maintenance": "تحت الصيانة",
-  Released: "خارج العهدة",
-  "Not Tracked": "غير متابع",
-  Compliant: "ملتزم",
-  "Expiring Soon": "ينتهي قريباً",
-  Expired: "منتهي",
-  Valid: "ساري",
-  Standard: "عادي",
-  Additional: "إضافي",
-  Draft: "مسودة",
-  "In Progress": "قيد التنفيذ",
-  Resolved: "محلول",
-  Reopened: "أعيد فتحه",
-  "Pending Approval": "بانتظار الاعتماد",
-  "Pending Receipt": "بانتظار الاستلام",
-  "Pending Exits": "بانتظار الخروج",
-  "Under Review": "قيد المراجعة",
-  Confirmed: "مؤكد",
-  Issued: "مصروف",
-  Returned: "مسترجع",
-  "Partially Returned": "مسترجع جزئياً",
-  Lost: "مفقود",
-  Damaged: "تالف",
-  "In Transit": "في الطريق",
-  Received: "مستلم",
-  Delivered: "تم التسليم",
-  Failed: "فشل",
-  Reverted: "أعيد",
-  Done: "منجز",
-  Triaged: "مصنف",
-  Assigned: "مسند",
-  "Waiting Evidence": "بانتظار الإثبات",
-  Absent: "لم يصعد",
-  scheduled: "الرحلة مجدولة",
-  en_route: "الحافلة في الطريق",
-  at_stop: "الحافلة عند نقطة التجمع",
-  departed: "غادرت الحافلة النقطة",
-  finished: "انتهت الرحلة",
+import { __ } from "./i18n.js";
+
+const serverStateLabels = Object.freeze({
+  scheduled: () => __("The trip is scheduled"),
+  en_route: () => __("The bus is on its way"),
+  at_stop: () => __("The bus is at your stop"),
+  departed: () => __("The bus has left your stop"),
+  finished: () => __("The trip has ended"),
+  assigned: () => __("Assigned"),
+  available: () => __("Available"),
+  workshop: () => __("Under Maintenance"),
+  stopped: () => __("Stopped"),
 });
+
+const maintenanceIssues = Object.freeze([
+  "Electrical",
+  "Plumbing",
+  "Furniture",
+  "Air Conditioning",
+  "Fire Safety",
+  "Pest Control",
+  "Structural",
+  "Other",
+]);
+
+const requestCategories = Object.freeze([
+  "Maintenance",
+  "Safety",
+  "Cleaning",
+  "Pest Control",
+  "Custody",
+  "Facility Item",
+  "Water",
+  "Electrical",
+  "AC",
+  "Plumbing",
+  "Reimbursement",
+  "Complaint",
+  "Suggestion",
+  "Other",
+]);
 
 const frappeDateTime = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
 const frappeTime = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2})(?:\.\d+)?)?$/;
 const frappeDate = /^(\d{4})-(\d{2})-(\d{2})$/;
-const dateFormatter = new Intl.DateTimeFormat("ar-SA-u-ca-gregory-nu-latn", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Asia/Riyadh",
-});
-const timeFormatter = new Intl.DateTimeFormat("ar-SA-u-ca-gregory-nu-latn", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "Asia/Riyadh",
-});
+
+const dateStyle = { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Riyadh" };
+const timeStyle = { hour: "numeric", minute: "2-digit", timeZone: "Asia/Riyadh" };
+const formatters = new Map();
+
+function clockFormatters() {
+  const language = globalThis.document?.documentElement?.lang || "ar";
+  let pair = formatters.get(language);
+  if (!pair) {
+    const locale = `${language}-u-ca-gregory-nu-latn`;
+    pair = {
+      date: new Intl.DateTimeFormat(locale, dateStyle),
+      time: new Intl.DateTimeFormat(locale, timeStyle),
+    };
+    formatters.set(language, pair);
+  }
+  return pair;
+}
 
 function riyadhDate(parts) {
   const [year, month, day, hour = "00", minute = "00", second = "00"] = parts;
   return new Date(`${year}-${month}-${day}T${hour.padStart(2, "0")}:${minute.padStart(2, "0")}:${second.padStart(2, "0")}+03:00`);
 }
 
-const cadenceLabels = Object.freeze({
-  Daily: "يومية",
-  Weekly: "أسبوعية",
-  Monthly: "شهرية",
-  Quarterly: "ربع سنوية",
-  Annual: "سنوية",
-});
-
-const vehicleCategoryLabels = Object.freeze({
-  Coach: "حافلة",
-  "Crew Van": "فان طاقم",
-  Minibus: "حافلة صغيرة",
-});
-
-const inventoryConditionLabels = Object.freeze({
-  New: "جديدة",
-  Good: "جيدة",
-  Fair: "مقبولة",
-  "Needs Maintenance": "تحتاج صيانة",
-  Damaged: "تالفة",
-  Missing: "مفقودة",
-});
-
-// Maintenance Request.issue_type options, verbatim from the DocType.
-const maintenanceIssueLabels = Object.freeze({
-  Electrical: "كهرباء",
-  Plumbing: "سباكة",
-  Furniture: "أثاث",
-  "Air Conditioning": "تكييف",
-  "Fire Safety": "سلامة الحريق",
-  "Pest Control": "مكافحة آفات",
-  Structural: "إنشائي",
-  Other: "أخرى",
-});
-
-// Resident Request.request_category options, verbatim from the DocType.
-const requestCategoryLabels = Object.freeze({
-  Maintenance: "صيانة",
-  Safety: "سلامة",
-  Cleaning: "نظافة",
-  "Pest Control": "مكافحة آفات",
-  Custody: "عهدة",
-  "Facility Item": "أثاث ومرافق",
-  Water: "مياه",
-  Electrical: "كهرباء",
-  AC: "تكييف",
-  Plumbing: "سباكة",
-  Reimbursement: "مطالبة مالية",
-  Complaint: "شكوى",
-  Suggestion: "اقتراح",
-  Other: "أخرى",
-});
-
-export function maintenanceIssueLabel(value) {
-  return maintenanceIssueLabels[value] || value || "";
+export function optionLabel(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "";
+  const state = serverStateLabels[text];
+  return state ? state() : __(text);
 }
 
-export function requestCategoryLabel(value) {
-  return requestCategoryLabels[value] || value || "";
-}
+export {
+  optionLabel as cadenceLabel,
+  optionLabel as conditionLabel,
+  optionLabel as maintenanceIssueLabel,
+  optionLabel as requestCategoryLabel,
+  optionLabel as vehicleCategoryLabel,
+};
 
 const fieldLabelReaders = Object.freeze({
-  issue_type: maintenanceIssueLabel,
-  request_category: requestCategoryLabel,
+  issue_type: optionLabel,
+  request_category: optionLabel,
   status: statusLabel,
   priority: statusLabel,
 });
@@ -177,29 +97,23 @@ export function fieldLabel(field, value) {
 }
 
 export function maintenanceIssueOptions() {
-  return Object.entries(maintenanceIssueLabels).map(([value, label]) => ({ value, label }));
+  return maintenanceIssues.map((value) => ({ value, label: optionLabel(value) }));
 }
 
 export function requestCategoryOptions() {
-  return Object.entries(requestCategoryLabels).map(([value, label]) => ({ value, label }));
+  return requestCategories.map((value) => ({ value, label: optionLabel(value) }));
 }
 
 export function statusLabel(value) {
-  return statusLabels[value] || value || "جديد";
+  return optionLabel(value) || __("New");
 }
 
 export function statusOptions(values = []) {
   return values.map((value) => ({ value, label: statusLabel(value) }));
 }
 
-const workerTransportLabels = Object.freeze({
-  Pending: "بانتظار الصعود",
-  Boarded: "تم الصعود",
-  Absent: "لم يصعد",
-});
-
 export function workerTransportStatusLabel(value) {
-  return workerTransportLabels[value] || statusLabel(value) || "بانتظار التحديث";
+  return statusLabel(value);
 }
 
 export function humanLabel(record, valueField, labelField, fallback = "") {
@@ -240,21 +154,21 @@ export function statusTheme(value) {
 export function floorLabel(value) {
   const text = String(value || "");
   const match = text.match(/^Floor\s+(.+)$/i);
-  return match ? `الطابق ${match[1]}` : text;
+  return match ? __("Floor {0}", [match[1]]) : text;
 }
 
 export function dateTimeLabel(value) {
   if (!value) return "";
   const text = String(value).trim();
+  const { date: dateFormatter, time: timeFormatter } = clockFormatters();
   let match = text.match(frappeDateTime);
   if (match) {
-    const date = riyadhDate(match.slice(1));
-    return `${dateFormatter.format(date)}، ${timeFormatter.format(date)}`;
+    const moment = riyadhDate(match.slice(1));
+    return __("{0} at {1}", [dateFormatter.format(moment), timeFormatter.format(moment)]);
   }
   match = text.match(frappeTime);
   if (match) {
-    const date = riyadhDate(["2000", "01", "01", ...match.slice(1)]);
-    return timeFormatter.format(date);
+    return timeFormatter.format(riyadhDate(["2000", "01", "01", ...match.slice(1)]));
   }
   match = text.match(frappeDate);
   if (match) return dateFormatter.format(riyadhDate(match.slice(1)));
@@ -273,19 +187,7 @@ export function remainingSeconds(value, durationSeconds, now = Date.now()) {
   return Math.max(Math.ceil((started + duration - now) / 1000), 0);
 }
 
-export function cadenceLabel(value) {
-  return cadenceLabels[value] || value || "";
-}
-
-export function vehicleCategoryLabel(value) {
-  return vehicleCategoryLabels[value] || value || "";
-}
-
-export function conditionLabel(value) {
-  return inventoryConditionLabels[value] || value || "";
-}
-
-export function recordTitle(record, fields = [], fallback = "سجل") {
+export function recordTitle(record, fields = [], fallback = "") {
   for (const field of fields) {
     const value = String(record?.[field] || "").trim();
     if (value) return fieldLabel(field, value);
@@ -294,15 +196,15 @@ export function recordTitle(record, fields = [], fallback = "سجل") {
     const value = String(record?.[field] || "").trim();
     if (value) return value;
   }
-  return fallback;
+  return fallback || __("Record");
 }
 
 export function periodLabel(period) {
   if (!period || typeof period !== "object") return "";
-  if (period.kind === "day") return "اليوم";
-  if (period.kind === "week") return "هذا الأسبوع";
-  if (period.kind === "month") return `شهر ${period.month} من ${period.year}`;
-  if (period.kind === "quarter") return `الربع ${period.quarter} من ${period.year}`;
-  if (period.kind === "year") return `عام ${period.year}`;
+  if (period.kind === "day") return __("Today");
+  if (period.kind === "week") return __("This week");
+  if (period.kind === "month") return __("Month {0} of {1}", [period.month, period.year]);
+  if (period.kind === "quarter") return __("Quarter {0} of {1}", [period.quarter, period.year]);
+  if (period.kind === "year") return __("Year {0}", [period.year]);
   return "";
 }

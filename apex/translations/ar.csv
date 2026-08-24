@@ -2934,6 +2934,7 @@ Monday,الاثنين
 Money Still Open Against Him,المبلغ الباقي عليه
 Monitoring,المراقبة
 Month,الشهر
+Month {0} of {1},شهر {0} من {1}
 Monthly,شهري
 Monthly Amount (SAR),المبلغ الشهري (ريال)
 Monthly Commitment,الالتزام المالي الشهري
@@ -3831,6 +3832,7 @@ Quantity in Litres,الكمية باللتر
 Quantity physically counted at the last inventory count.,الكمية المعدودة فعليًا في آخر جرد للمخزون.
 Quantity the records say should be present.,الكمية التي تشير السجلات إلى وجوب توفرها.
 Quarter,ربع
+Quarter {0} of {1},الربع {0} من {1}
 Quarterly,ربع سنوي
 Queue resolved: {0},صُفّي الطابور: {0}
 Queue row {0} not found (it may have already drained).,صف الطابور {0} غير موجود (ربما صُفّي بالفعل).
@@ -3943,6 +3945,7 @@ Reconciled On,تاريخ المطابقة
 Reconciliation,المطابقة
 Reconciliation Against the Quota,المطابقة مع الحصة
 "Reconciliation stage of the fuel claim, from draft and submission to the movement team through reconciliation and approval to closure, or held when disputed.",مرحلة مطابقة مطالبة الوقود، من المسودة وإرسالها إلى فريق الحركة، ثم المطابقة والاعتماد حتى الإغلاق، أو تعليقها عند الاعتراض.
+Record,سجل
 Record Actions,إجراءات السجل
 Record Any Damage Deduction,سجّل أي خصم للأضرار
 Record Completion Notes,سجّل ملاحظات الإنجاز
@@ -5170,6 +5173,9 @@ The boarding pass has expired.,انتهت صلاحية بطاقة الصعود.
 The boarding pass is not valid.,بطاقة الصعود غير صحيحة.
 "The building code is locked: {0} room(s) already use it in their room numbers, and renaming it would orphan them. Delete the generated rooms first if the code must change.",رمز المبنى مقفل لأن {0} غرفة تستخدمه في أرقامها، وتغييره سيفصلها عن المبنى. احذف الغرف المولدة أولًا إذا كان تغيير الرمز ضروريًا.
 The building this asset was located in before its current location.,المبنى الذي كان هذا الأصل موجوداً فيه قبل موقعه الحالي.
+The bus has left your stop,غادرت الحافلة النقطة
+The bus is at your stop,الحافلة عند نقطة التجمع
+The bus is on its way,الحافلة في الطريق
 The bus is preparing to depart now.,الحافلة تستعد للمغادرة الآن.
 The checks above are complete but the clearance has not been signed off yet. This paper does not release the driver until the clearance status reads Cleared.,الفحوصات أعلاه مكتملة لكن إخلاء الطرف ما اعتُمد بعد. هذه الورقة ما تخلي طرف السائق حتى تصير حالة إخلاء الطرف مخلى الطرف.
 The claim carries a cost centre to charge,المطالبة عليها مركز تكلفة
@@ -5340,6 +5346,7 @@ The transfer or cheque that paid this claim. Filled after the claim is closed.,�
 The trip has already started.,الرحلة بدأت بالفعل.
 The trip has ended,انتهت الرحلة
 The trip has started,بدأت الرحلة
+The trip is scheduled,الرحلة مجدولة
 The user the camera access is granted for (not the requester).,المستخدم الذي تُمنح له صلاحية الكاميرا (وليس مقدّم الطلب).
 The user who raised this case. Set automatically.,المستخدم الذي أنشأ هذه الحالة. يُضبط آلياً.
 The user who resolved or closed the case. Must differ from Reported By (segregation of duties).,المستخدم الذي عالج الحالة أو أغلقها. يجب أن يختلف عن المُبلِّغ (الفصل بين المهام).
@@ -5444,6 +5451,7 @@ This vehicle is under maintenance and should not be dispatched.,هذه المر�
 "This voucher authorises the dispensing party to give the quantity and the grade written above to this vehicle only, on the chip or the account named on it, inside the validity dates shown, and no more. Anything dispensed beyond it is not payable by the company.",يخوّل هذا السند الجهة الصارفة أن تعطي الكمية والنوع المكتوبين أعلاه لهذه المركبة وحدها، على الشريحة أو الحساب المذكور فيه، وداخل مدة الصلاحية المبيّنة، ولا شيء غير ذلك. وما يُصرف زيادة على ذلك لا تدفعه الشركة.
 This voucher has passed its validity date. Nothing dispensed on it after that day is payable by the company.,انتهت صلاحية هذا السند. ما يُصرف عليه بعد ذلك اليوم لا تدفعه الشركة.
 This voucher is not tied to a monthly quota,هذا الأمر غير مربوط بحصة شهرية
+This week,هذا الأسبوع
 This will clear and rebuild the entire payment schedule. Continue?,سيؤدي هذا إلى حذف جدول الدفعات وإعادة بنائه بالكامل. هل تريد المتابعة؟
 This worker already holds an active bed.,هذا العامل يشغل بالفعل سريراً نشطاً.
 This worker does not hold: {0},هذا العامل لا يحمل: {0}
@@ -5482,6 +5490,7 @@ To Room,إلى غرفة
 To be determined later,يحدد لاحقاً
 To {0},إلى {0}
 ToDo,المهام
+Today,اليوم
 Today's Actions,إجراءات اليوم
 Today's Dispatch Trips,رحلات التسيير اليوم
 Today's List,قائمة اليوم
@@ -6022,6 +6031,7 @@ Written record of who authorized this request outside the system. Nothing in the
 Wrong Trip,رحلة خاطئة
 "YYYY-MM, e.g. 2026-05",YYYY-MM، مثال: 2026-05
 Year,السنة
+Year {0},عام {0}
 Yes,نعم
 "You are already on the bus, so there is no need to request a wait.",أنت على متن الحافلة، ولا حاجة لطلب الانتظار.
 You are at a different bus. Check the trip number before confirming.,أنت عند حافلة مختلفة. راجع رقم الرحلة قبل التأكيد.
@@ -6201,6 +6211,7 @@ workshop status,حالة الورشة
 {0} article line(s) marked Damaged or Lost,{0} سطر مؤشر كتالف أو مفقود
 {0} article line(s) still outstanding,{0} سطر ما زال متبقيًا
 {0} assigned,تم إسناد {0}
+{0} at {1},{0}، {1}
 {0} awaiting approval,{0} بانتظار الاعتماد
 "{0} carries the file it was imported from ({1}). The worker walking the round reads this field, so write the method of inspection here or leave it empty.",{0} يحمل اسم الملف الذي استُورد منه ({1}). العامل الذي يمشي الجولة يقرأ هذا الحقل، فاكتب فيه طريقة الفحص أو اتركه فارغاً.
 {0} check item(s) loaded from template {1},تم تحميل {0} بند فحص من القالب {1}
