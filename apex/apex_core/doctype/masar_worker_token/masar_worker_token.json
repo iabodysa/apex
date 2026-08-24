@@ -19,6 +19,7 @@
   "token",
   "token_enc",
   "expires_on",
+  "consumed_on",
   "section_meta",
   "last_generated_on",
   "col_meta",
@@ -138,6 +139,14 @@
    "description": "After this moment the personal link stops resolving (an expired link is refused). Regenerate to issue a fresh link with a new expiry."
   },
   {
+   "fieldname": "consumed_on",
+   "fieldtype": "Datetime",
+   "label": "Consumed On",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Set once this link/QR has been scanned to enrol a Portal Device. A consumed row refuses a second enrolment attempt; it does not affect the legacy portal cookie flow, which still resolves on token + enabled + expires_on alone until that row is consumed."
+  },
+  {
    "fieldname": "section_meta",
    "fieldtype": "Section Break",
    "label": "System",
@@ -163,7 +172,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-07-27 08:11:35.893365",
+ "modified": "2026-08-24 10:17:38.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Masar Worker Token",

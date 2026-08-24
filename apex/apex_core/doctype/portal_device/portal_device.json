@@ -1,0 +1,242 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "creation": "2026-08-24 10:17:38.000000",
+ "description": "One enrolled device per worker or driver, minted by a one-time Masar Worker Token enrolment key.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_holder",
+  "holder_type",
+  "employee",
+  "driver",
+  "device_label",
+  "column_break_holder",
+  "revoked",
+  "revoked_on",
+  "section_credential",
+  "device_hash",
+  "section_enrolment",
+  "enrolled_on",
+  "enrolled_by",
+  "enrolment_source",
+  "column_break_enrolment",
+  "last_seen_on"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_holder",
+   "fieldtype": "Section Break",
+   "label": "Device"
+  },
+  {
+   "fieldname": "holder_type",
+   "fieldtype": "Select",
+   "label": "Holder Type",
+   "options": "Worker\nDriver",
+   "reqd": 1,
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "description": "Which portal this device belongs to: a housed/transported Worker (Masar) or a fleet Driver."
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1,
+   "in_list_view": 1,
+   "search_index": 1,
+   "depends_on": "eval:doc.holder_type=='Worker'"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Salis Driver",
+   "read_only": 1,
+   "in_list_view": 1,
+   "search_index": 1,
+   "depends_on": "eval:doc.holder_type=='Driver'"
+  },
+  {
+   "fieldname": "device_label",
+   "fieldtype": "Data",
+   "label": "Device Label",
+   "read_only": 1,
+   "in_list_view": 1,
+   "description": "What the holder sees in their own device list, defaulted from the enrolling device's user agent."
+  },
+  {
+   "fieldname": "column_break_holder",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "revoked",
+   "fieldtype": "Check",
+   "label": "Revoked",
+   "in_list_view": 1,
+   "description": "Set by the holder from their own device list, or by an issuing supervisor from the desk -- scoped to their own project or building, never every holder's. Never cleared -- a returning device enrols afresh with a new key."
+  },
+  {
+   "fieldname": "revoked_on",
+   "fieldtype": "Datetime",
+   "label": "Revoked On",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "section_credential",
+   "fieldtype": "Section Break",
+   "label": "Credential",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "device_hash",
+   "fieldtype": "Data",
+   "label": "Device Hash",
+   "read_only": 1,
+   "unique": 1,
+   "search_index": 1,
+   "permlevel": 1,
+   "no_copy": 1,
+   "description": "SHA-256 hash of the device's own bearer secret, minted once at enrolment. The raw secret is never stored; a direct row read exposes nothing usable."
+  },
+  {
+   "fieldname": "section_enrolment",
+   "fieldtype": "Section Break",
+   "label": "Enrolment",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "enrolled_on",
+   "fieldtype": "Datetime",
+   "label": "Enrolled On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "enrolled_by",
+   "fieldtype": "Link",
+   "label": "Enrolled By",
+   "options": "User",
+   "read_only": 1,
+   "description": "The supervisor who issued the enrolment key this device was created from."
+  },
+  {
+   "fieldname": "enrolment_source",
+   "fieldtype": "Link",
+   "label": "Enrolment Source",
+   "options": "Masar Worker Token",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "The Masar Worker Token row consumed as this device's one-time enrolment key."
+  },
+  {
+   "fieldname": "column_break_enrolment",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_seen_on",
+   "fieldtype": "Datetime",
+   "label": "Last Seen On",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-08-24 16:20:00.000000",
+ "modified_by": "Administrator",
+ "module": "Apex Core",
+ "name": "Portal Device",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Resident Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Supervisor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Project Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "role": "Portal Worker Capacity"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "write": 1,
+   "role": "Portal Driver Capacity"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "search_fields": "device_label, employee, driver",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "device_label",
+ "track_changes": 0
+}

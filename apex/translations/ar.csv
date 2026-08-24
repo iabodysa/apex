@@ -68,6 +68,7 @@ A request reference is required.,مرجع الطلب مطلوب.
 A resolution is required to close a Vehicle Incident.,يلزم توضيح نتيجة المعالجة لإغلاق بلاغ المركبة.
 A revoked Building License cannot be cancelled or reinstated.,لا يمكن إلغاء رخصة مبنى مسحوبة أو إعادتها إلى حالة سارية.
 A revoked Building License cannot be renewed.,لا يمكن تجديد رخصة مبنى مسحوبة.
+A revoked Portal Device cannot be un-revoked.,لا يمكن التراجع عن إلغاء جهاز بوابة.
 A round date is required to submit a round.,يلزم تاريخ جولة لاعتماد جولة.
 A round date is required to submit rounds.,يلزم تاريخ الجولة لاعتماد الجولات.
 "A route plan must name its project, or its trips are invisible to every project-scoped supervisor.",يجب أن تذكر خطة المسار مشروعها، وإلا اختفت رحلاتها عن كل مشرف مقيَّد بمشروع.
@@ -1396,7 +1397,6 @@ Describe the work to be performed.,صِف العمل المطلوب تنفيذه
 Describe what happened.,صِف ما حدث.
 Description,الوصف
 Description is too long. Please keep it under 2000 characters.,الوصف طويل جدًا. اجعله أقل من 2000 حرف.
-Description is too long. Please keep it under 4000 characters.,الوصف طويل جداً. يُرجى إبقاؤه دون أربعة آلاف حرف.
 Designation,المسمى الوظيفي
 Desk,سطح المكتب
 Destination,الوجهة
@@ -4167,7 +4167,7 @@ Set automatically when this request is generated from a safety inspection report
 Set automatically when this request is spawned from a failed safety task execution.,يُحدَّد آلياً عند إنشاء هذا الطلب من تنفيذ مهمة سلامة فاشلة.
 Set by Apex,يحدده أبكس
 Set by the accrual engine once litres are posted to the Fuel Consumption Ledger. Guards against double-posting.,يُعيّنه محرك الاستحقاق بعد ترحيل اللترات إلى سجل استهلاك الوقود. يمنع الترحيل المكرر.
-"Set by the holder from their own device list, or by an issuing supervisor from the desk. Never cleared -- a returning device enrols afresh with a new key.",يضبطه الحامل من قائمة أجهزته، أو المشرف المُصدِر من سطح المكتب. لا يُمسح أبداً — الجهاز العائد يسجّل من جديد بمفتاح جديد.
+"Set by the holder from their own device list, or by an issuing supervisor from the desk -- scoped to their own project or building, never every holder's. Never cleared -- a returning device enrols afresh with a new key.",يضبطه الحامل من قائمة أجهزته، أو المشرف المُصدِر من سطح المكتب — ضمن مشروعه أو مبناه فقط، لا كل الحاملين. لا يُمسح أبداً — الجهاز العائد يسجّل من جديد بمفتاح جديد.
 Set by the receiving supervisor once every line has been physically checked. Required before approval.,يحدده المشرف المستلم بعد فحص كل بند فعلياً. مطلوب قبل الاعتماد.
 Set by the scheduled task once the Iqama issues and a permanent Employee record is created.,يُعيَّن بواسطة المهمة المجدولة بمجرد صدور الإقامة وإنشاء سجل موظف دائم.
 Set externally after Finance posts payment. This DocType never creates a GL or Payment Entry. A Dynamic Link because the Payment Routing target is configurable per deployment.,يُحدد خارجيًا بعد ترحيل المالية للدفعة. لا ينشئ هذا المستند قيدًا محاسبيًا أو قيد دفع. وهو رابط ديناميكي لأن وجهة الدفع تختلف حسب البيئة.

@@ -182,7 +182,14 @@ class MasarWorkerToken(Document):
             frappe.throw(_("Not permitted"), frappe.PermissionError)
 
     def _mint(self) -> str:
-        """Generates a fresh raw token, stages its hash and encrypted copy, and resets the expiry."""
+        """Generates a fresh raw token, stages its hash and encrypted copy, and resets the expiry.
+
+        Also clears ``consumed_on``: a freshly minted value is, by definition, an
+        unconsumed enrolment key -- the stale mark from a PREVIOUS mint would
+        otherwise refuse every future enrolment for this subject forever, since
+        ``consume_enrolment_key`` (portal_device.py) treats a set ``consumed_on``
+        as spent regardless of which raw value it was set against.
+        """
         audience, subject = self._issuance_subject()
         authorize_issuance(audience, subject)
         if not self.is_new() and frappe.db.table_exists("Portal Push Subscription"):
@@ -190,9 +197,11 @@ class MasarWorkerToken(Document):
         raw = _new_token()
         self.token = hash_token(raw)
         self.token_enc = encrypt(raw)
+        self.consumed_on = None
         self._pending_token_fields = {
             "token": self.token,
             "token_enc": self.token_enc,
+            "consumed_on": None,
         }
         self._credential_reissue_guard = _CREDENTIAL_REISSUE_GUARD
         self._plaintext_token = raw

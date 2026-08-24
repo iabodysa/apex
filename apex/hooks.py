@@ -257,7 +257,6 @@ doc_events = {
         "before_cancel": "apex.habitat.doctype.scheduled_task_instance.scheduled_task_instance.before_cancel",
     },
     "Maintenance Inspection Report": {
-        "validate": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.validate",
         "before_cancel": "apex.habitat.doctype.maintenance_inspection_report.maintenance_inspection_report.before_cancel",
     },
     "Driver Clearance": {
@@ -369,6 +368,7 @@ permission_query_conditions = {
     "Salis Driver": _SALIS_SCOPE_QUERY,
     "Passenger Manifest": _SALIS_SCOPE_QUERY,
     "Masar Worker Token": "apex.apex_core.utils.portal_identity.masar_worker_token_scope_query",
+    "Portal Device": "apex.apex_core.utils.portal_identity.portal_device_scope_query",
     "Portal Push Subscription": "apex.apex_core.utils.portal_identity.portal_push_subscription_scope_query",
     "Facility Asset Custody Assignment": _HABITAT_NO_BUILDING_QUERY,
     "Operational Depreciation Snapshot": _HABITAT_NO_BUILDING_QUERY,
@@ -443,6 +443,7 @@ has_permission = {
     "Salis Driver": _SALIS_SCOPE_CHECK,
     "Passenger Manifest": _SALIS_SCOPE_CHECK,
     "Masar Worker Token": "apex.apex_core.utils.portal_identity.masar_worker_token_has_permission",
+    "Portal Device": "apex.apex_core.utils.portal_identity.portal_device_has_permission",
     "Portal Push Subscription": "apex.apex_core.utils.portal_identity.portal_push_subscription_has_permission",
     "Facility Asset Custody Assignment": _HABITAT_SCOPE_CHECK,
     "Operational Depreciation Snapshot": _HABITAT_SCOPE_CHECK,
