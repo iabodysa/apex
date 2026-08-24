@@ -76,6 +76,18 @@ def _new_token() -> str:
 
 
 class MasarWorkerToken(Document):
+    """Controller for the worker and driver access link.
+
+    ``track_changes`` stays 0 on this DocType while the configuration masters carry
+    it, and the reason is the credential itself: ``token`` is a Data field, and
+    ``version.get_diff`` (frappe/core/doctype/version/version.py:138-142) skips only
+    the fieldtypes in ``FIELDTYPES_TO_IGNORE``, so every rotation would copy the old
+    and the new link into a Version row that a System Manager can read. Turning the
+    flag on here would publish the secret the record exists to protect. Rotation is
+    already accounted for by the credential events this controller logs, which name
+    the actor and the subject and never the token.
+    """
+
     def _issuance_subject(self) -> tuple[str, str | None]:
         """Returns the issuance audience and its bound subject, the driver or the employee."""
         audience = DRIVER if self.holder_type == DRIVER else WORKER

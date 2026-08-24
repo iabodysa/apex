@@ -1,4 +1,5 @@
 {
+ "track_changes": 1,
   "doctype": "DocType",
   "name": "Custody Asset Category",
   "module": "Habitat",
