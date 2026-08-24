@@ -1,7 +1,7 @@
 {
   "id": "/driver/",
   "name": "مسار السائق",
-  "short_name": "مسار",
+  "short_name": "مسار السائق",
   "description": "رحلات السائق وخط السير والتنفيذ الميداني",
   "lang": "ar",
   "dir": "rtl",

@@ -76,7 +76,7 @@ export function workerParameters({ assetUrls = entryAssets() } = {}) {
       cacheNamespace: "apex:driver:", legacyCachePatterns: ["^driver-pwa-v[0-9]+-[a-f0-9]{12}-(?:shell|data)$"],
       skipWaitingOnInstall: true,
       enablePush: true,
-      push: { title: "مسار", tag: "salis-driver", icon: `${assetBase}/icons/driver-icon-192.png` },
+      push: { title: "مسار السائق", tag: "salis-driver", icon: `${assetBase}/icons/driver-icon-192.png` },
     },
   };
 }
