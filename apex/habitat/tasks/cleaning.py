@@ -1,9 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain).
 
-The insert passes ``ignore_permissions`` because the scheduler runs it with no session user and
-the Cleaning Log it writes belongs to no operator — it is generated for the whole estate from the
-cleaning plan, not filed by anyone. There is no document owner this job could run as instead.
+The insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
+connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s
+``set_admin_as_user`` default leaves the session at Administrator, who already satisfies
+every DocPerm check (``frappe/permissions.py`` short-circuits on ``user == "Administrator"``).
+Any other actor is refused by Cleaning Log's own DocPerm rows, unchanged by this module.
 """
 
 from __future__ import annotations
@@ -82,7 +84,7 @@ def daily_cleaning_log_generator() -> None:
                     "cleaning_date": cleaning_date,
                     "room_details": [{"room": room} for room in rooms],
                 })
-                log.insert(ignore_permissions=True)
+                log.insert()
             except Exception:
                 frappe.db.rollback(save_point=_CLEANING_SAVEPOINT)
                 frappe.log_error(

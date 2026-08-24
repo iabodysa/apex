@@ -1,9 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain).
 
-The insert passes ``ignore_permissions`` because the scheduler runs it with no session user and
-the Scheduled Task Instance it writes belongs to no operator — it is generated from the schedule
-for whoever is later assigned. There is no document owner this job could run as instead.
+The insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
+connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
+default leaves the session at Administrator, who already satisfies every DocPerm check
+(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
+create on Scheduled Task Instance, so any other actor is refused, unchanged by this module.
 """
 
 from __future__ import annotations
@@ -106,7 +108,7 @@ def daily_scheduled_task_instance_generator() -> None:
                         "due_date": due_date,
                         "status": "Open",
                     })
-                    instance.insert(ignore_permissions=True)
+                    instance.insert()
                     created += 1
                     logger.info(
                         "daily_scheduled_task_instance_generator: created %s "

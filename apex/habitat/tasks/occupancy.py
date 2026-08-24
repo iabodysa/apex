@@ -1,9 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain).
 
-The snapshot insert passes ``ignore_permissions`` because the scheduler runs it with no session
-user, and an Accommodation Occupancy Snapshot holds values that cannot be recomputed once live
-data moves. It is a machine record of a moment, owned by nobody and edited by nobody.
+The snapshot insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
+connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
+default leaves the session at Administrator, who already satisfies every DocPerm check
+(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
+create on Occupancy Snapshot, so any other actor is refused, unchanged by this module.
 """
 
 from __future__ import annotations
@@ -232,7 +234,7 @@ def daily_occupancy_snapshot() -> None:
                     "full_rooms": room_bucket.get("Full", 0),
                     "partial_rooms": room_bucket.get("Partially Occupied", 0),
                     "available_rooms": room_bucket.get("Available", 0),
-                }).insert(ignore_permissions=True)
+                }).insert()
             except Exception:
                 frappe.db.rollback(save_point=_ROW_SAVEPOINT)
                 frappe.log_error(

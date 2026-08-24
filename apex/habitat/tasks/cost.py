@@ -1,9 +1,11 @@
 # Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Habitat module (split by domain).
 
-The ledger insert passes ``ignore_permissions`` because the scheduler runs it with no session
-user, and an Accommodation Stock Ledger row is machine-written by definition: it records what the
-period cost, and no operator files it or may edit it afterwards.
+The ledger insert carries no ``ignore_permissions``: ``frappe.utils.background_jobs.execute_job``
+connects a scheduled job with no ``user`` kwarg, so ``frappe.connect``'s ``set_admin_as_user``
+default leaves the session at Administrator, who already satisfies every DocPerm check
+(``frappe/permissions.py`` short-circuits on ``user == "Administrator"``). No role holds
+create on Accommodation Ledger, so any other actor is refused, unchanged by this module.
 """
 
 from __future__ import annotations
@@ -84,7 +86,7 @@ def _post_accommodation_ledger_row(
         "allocation_basis": "Capacity",
         "allocation_period_start": posting_date,
         "allocation_period_end": posting_date,
-    }).insert(ignore_permissions=True)
+    }).insert()
 
 
 def daily_accommodation_cost_allocation() -> None:
