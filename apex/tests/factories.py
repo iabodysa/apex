@@ -76,7 +76,7 @@ def make_building(name=None, company=None, **kwargs):
         "building_name": name,
         "status": "Active",
         "total_capacity": kwargs.pop("total_capacity", 10),
-        "company": company or "Test AFMCO",
+        "company": company or make_company().name,
         **kwargs,
     })
     doc.insert(ignore_permissions=True)
@@ -119,7 +119,7 @@ def make_employee(name=None, company=None, **kwargs):
         "doctype": "Employee",
         "employee_name": name,
         "first_name": name,
-        "company": company or "Test AFMCO",
+        "company": company or make_company().name,
         "status": "Active",
         "gender": "Male",
         "date_of_birth": "1990-01-01",
