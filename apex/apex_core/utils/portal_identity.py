@@ -478,6 +478,11 @@ def revoke_subject_tokens(audience: str, subject: str) -> int:
     Writes go through ``frappe.db.set_value`` with ``update_modified=False``: a
     revocation is a system act, and stamping ``modified`` would show an operator's
     name against a change no operator made.
+
+    ``apex.salis.api.web_push`` imports ``DRIVER``/``WORKER`` from this module at its
+    own top level, so a module-level import here of ``disable_subject_subscriptions``
+    closes the loop and raises ``ImportError`` on either side's first import; the
+    import stays deferred to this call.
     """
     _require_audience(audience)
     if not subject or not _lock_subject_row(audience, subject):
@@ -584,6 +589,13 @@ def authorize_issuance(
 
     Both locks are taken BEFORE the verdict, so a concurrent revocation cannot land
     between the check and the issue.
+
+    ``apex.habitat.permissions`` and ``apex.salis.permissions`` both import
+    ``apex.apex_core.utils.permission_scope`` at their own top level, and
+    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
+    level, so a module-level import here of either sibling closes that loop and
+    raises ``ImportError`` on whichever side imports first; both stay deferred to
+    this call.
     """
     _require_audience(audience)
     user = user or frappe.session.user
@@ -683,6 +695,13 @@ def _audience_scope_clause(audience: str, user: str, roles: set) -> str:
 
     An issuer with no permitted project gets ``1=0`` and not an empty string: an empty
     fragment is no restriction, which would show one issuer every audience's tokens.
+
+    ``apex.salis.permissions`` and ``apex.habitat.permissions`` both import
+    ``apex.apex_core.utils.permission_scope`` at their own top level, and
+    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
+    level, so a module-level import here of either sibling closes that loop and
+    raises ``ImportError`` on whichever side imports first; both stay deferred to
+    this call.
     """
     if roles.intersection(_UNSCOPED_ISSUER_ROLES[audience]):
         return "`holder_type` = '{0}'".format(audience)
@@ -759,6 +778,13 @@ def masar_worker_token_has_permission(doc, ptype, user=None):
 
     Returns False to block, or None to defer to Frappe's default resolution (the
     DocPerm). Never True.
+
+    ``apex.salis.permissions`` and ``apex.habitat.permissions`` both import
+    ``apex.apex_core.utils.permission_scope`` at their own top level, and
+    ``permission_scope`` imports this module's own ``CAPACITY_USERS`` at its top
+    level, so a module-level import here of either sibling closes that loop and
+    raises ``ImportError`` on whichever side imports first; both stay deferred to
+    this call.
     """
     if ptype not in ("read", "report", "print"):
         return None
@@ -832,6 +858,11 @@ def portal_push_subscription_scope_query(user=None, doctype=None) -> str:
     Returns "1=0" for a capacity and None for everyone else, because only System Manager
     holds any other DocPerm here and its estate is the whole site. Delete this and the
     list side opens while the form side stays shut.
+
+    ``apex.apex_core.utils.permission_scope`` imports this module's own
+    ``CAPACITY_USERS`` at its top level, so a module-level import here of
+    ``permission_scope`` closes that loop and raises ``ImportError`` on whichever
+    side imports first; it stays deferred to this call.
     """
     del doctype
     from apex.apex_core.utils.permission_scope import is_portal_capacity, resolve_user
@@ -857,6 +888,11 @@ def portal_push_subscription_has_permission(doc, ptype, user=None):
     individuate anyone. Read/report/print stay denied for a capacity outright: neither
     portal endpoint here ever needs a permission-checked read (both resolve the identity
     first and query ``frappe.db`` directly), so there is nothing to defer.
+
+    ``apex.apex_core.utils.permission_scope`` imports this module's own
+    ``CAPACITY_USERS`` at its top level, so a module-level import here of
+    ``permission_scope`` closes that loop and raises ``ImportError`` on whichever
+    side imports first; it stays deferred to this call.
     """
     from apex.apex_core.utils.permission_scope import (
         is_portal_capacity,
