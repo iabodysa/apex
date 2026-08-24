@@ -150,7 +150,7 @@ def ensure_recovery_loan_product(company: str) -> str | None:
             "doctype": "Loan Product",
             "company": company,
             "product_code": product_code,
-            "product_name": RECOVERY_LOAN_PRODUCT_NAME,
+            "product_name": product_code,
             "is_term_loan": 1,
             "repayment_schedule_type": "Monthly as per repayment start date",
             "rate_of_interest": 0,
