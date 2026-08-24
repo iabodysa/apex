@@ -2948,7 +2948,6 @@ Monthly fuel quota allocated to a vehicle/driver on a project. Tracks allocated 
 Monthly litres must be greater than zero.,يجب أن تكون اللترات الشهرية أكبر من صفر.
 Monthly quota for this vehicle,الحصة الشهرية لهذه المركبة
 Monthly reconciliation of a Rental Office claim against accrued rental days. Computes accrued_total from the vehicle lines and the variance against the claimed amount. On submit it may raise a finance-exclusive Salis Payment Request (expense_type Rental). Posts NO GL.,تسوية شهرية لمطالبة مكتب التأجير مقابل أيام الإيجار المستحقة. تحسب الإجمالي المستحق من سطور المركبات والفرق مقابل المبلغ المطالب به. وقد تنشئ عند الاعتماد طلب دفع في ساليس خاصاً بالمالية (نوع المصروف إيجار). ولا تقيّد محاسبياً.
-More,المزيد
 Morning,صباحي
 Move,نقل
 Move to Contract,نقل إلى عقد

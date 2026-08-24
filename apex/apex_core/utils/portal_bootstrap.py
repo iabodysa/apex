@@ -8,7 +8,7 @@ import hmac
 import re
 
 import frappe
-from frappe import _
+from frappe import _lt
 from frappe.sessions import get_csrf_token
 from frappe.translate import get_translations_from_csv
 from frappe.utils import cint
@@ -24,12 +24,12 @@ PORTAL_PUBLIC_PATHS = {
 }
 
 _PORTAL_TITLES = {
-    "worker": "Apex | Masar",
-    "driver": "Apex | Driver",
-    "transport-supervisor": "Apex | Masar supervision",
-    "fleet-self-service": "Apex | Salis",
-    "fleet-operations": "Apex | Salis operations",
-    "housing": "Apex | Housing",
+    "worker": _lt("Apex | Masar"),
+    "driver": _lt("Apex | Driver"),
+    "transport-supervisor": _lt("Apex | Masar supervision"),
+    "fleet-self-service": _lt("Apex | Salis"),
+    "fleet-operations": _lt("Apex | Salis operations"),
+    "housing": _lt("Apex | Housing"),
 }
 
 _PWA_META = {
@@ -111,7 +111,7 @@ def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     show_brand = bool(cint(appearance.get("show_brand")))
     language = getattr(frappe.local, "lang", None) or "ar"
     return {
-        "title": _(_PORTAL_TITLES[entry]),
+        "title": str(_PORTAL_TITLES[entry]),
         "language": language,
         "direction": "rtl" if language in _RTL_LANGUAGES else "ltr",
         "canonical_path": public_path,

@@ -17,12 +17,12 @@ import "./styles/tokens.css";
 import "./styles/frappe-ui-theme.css";
 
 const CONTEXT_TITLES = Object.freeze({
-  worker: "Masar",
-  driver: "My trips",
-  "transport-supervisor": "Masar operations",
-  "fleet-self-service": "Salis",
-  "fleet-operations": "Salis operations",
-  housing: "Housing management",
+  worker: __("Masar"),
+  driver: __("My trips"),
+  "transport-supervisor": __("Masar operations"),
+  "fleet-self-service": __("Salis"),
+  "fleet-operations": __("Salis operations"),
+  housing: __("Housing management"),
 });
 
 function navigationFrom(router) {
@@ -63,7 +63,7 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
     // apart, and it is read from `meta` because that is the only place vue-router carries a
     // custom record key through to a resolved location; see routes.js.
     const page = to.meta?.label;
-    const persona = __(CONTEXT_TITLES[to.meta?.feature] || CONTEXT_TITLES[context.id]);
+    const persona = CONTEXT_TITLES[to.meta?.feature] || CONTEXT_TITLES[context.id];
     const brand = __("Apex");
     globalThis.document.title = page && page !== persona
       ? `${page} · ${persona} | ${brand}`
@@ -71,7 +71,7 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   });
   const application = createApp(App, {
     context,
-    title: __(CONTEXT_TITLES[context.id]),
+    title: CONTEXT_TITLES[context.id],
     navigation: navigationFrom(router),
   });
   const call = configurePortalApi();
