@@ -33,12 +33,30 @@ class ArrivalBatch(Document):
         if self.get("website_field"):
             frappe.throw(_("Invalid submission."), frappe.PermissionError)
 
+        self._clear_guest_reconciliation_rows()
         self.expected_count = len(self.expected_workers or [])
         if self.expected_count > _MAX_EXPECTED_WORKERS:
             frappe.throw(
                 _("A manifest can list at most {0} expected workers.").format(_MAX_EXPECTED_WORKERS)
             )
         self.title = f"{self.building} - {frappe.utils.formatdate(self.expected_date)}"
+
+    def _clear_guest_reconciliation_rows(self):
+        """Empties each expected worker's "Arrived As" link on a new Guest submission.
+
+        ``temporary_worker`` is read_only because reconciliation sets it at the desk,
+        never the supplier who files the manifest. A Guest reaches this document through
+        Frappe's own Web Form ``accept``, which builds it from the POST body and calls
+        ``insert()`` (frappe/website/doctype/web_form/web_form.py:598-663), and
+        ``validate_higher_perm_levels`` skips the child-row reset while the parent is new
+        (frappe/model/document.py:783-806) — so nothing upstream blanks a value a POST
+        put there. Clearing it here keeps a supplier from naming which Temporary Worker
+        a row already is.
+        """
+        if not (self.is_new() and frappe.session.user == "Guest"):
+            return
+        for row in self.expected_workers or []:
+            row.temporary_worker = None
 
     def on_update(self):
         """Rings the building's watchers so an open Arrivals Desk shows a new or amended
