@@ -441,6 +441,14 @@ h3 {
   flex: 0 0 auto;
 }
 
+.portal-brand-tenant {
+  block-size: 32px;
+  inline-size: auto;
+  max-inline-size: 120px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
 .mobile-shell__title {
   font-size: clamp(1.75rem, 8vw, 2.5rem);
   line-height: 1.25;

@@ -95,7 +95,7 @@ Abbreviation,الاختصار
 Absconding,هروب من العمل
 Absent,غائب
 Accent Color,لون التمييز
-Accent Color must be a valid CSS colour.,يجب أن يكون لون التمييز لون CSS صالحًا.
+Accent Color must be a hex colour such as #00844E.,يجب أن يكون لون التمييز لوناً ست عشرياً مثل #00844E.
 Accept & House,قبول وإسكان
 Accepted on,تم القبول في
 Access Identity,بيانات الصلاحية
@@ -3029,10 +3029,10 @@ Optional future mapping to ERPNext Item/Stock. Leave blank to use Habitat catalo
 Optional integrated-circuit card id. Unique when present.,مُعرّف بطاقة الدائرة المتكاملة الاختياري. فريد عند وجوده.
 Optional link to a native ERPNext Asset record. Informational cross-reference only; depreciation integration is configured separately.,رابط اختياري بسجل أصل في ERPNext. مرجع معلوماتي فقط؛ ويُهيّأ تكامل الإهلاك بشكل منفصل.
 Optional link when this item is a tracked facility fixed asset. Maintenance completed on that asset is reflected back here.,رابط اختياري عندما يكون هذا الصنف أصلًا ثابتًا متعقَّبًا للمرفق. تنعكس الصيانة المكتملة على ذلك الأصل هنا.
-Optional logo shown in the portal header in place of the built-in brand mark.,شعار اختياري يظهر في ترويسة البوابة بدلاً من علامة الهوية المدمجة.
+Optional tenant logo shown in the portal header beside the Apex mark.,شعار اختياري للجهة يظهر في ترويسة البوابة بجانب علامة أبكس.
 Optional photo of the bed/room condition at check-in (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند التسكين (دليل تسليم).
 Optional photo of the bed/room condition at checkout (handover evidence).,صورة اختيارية لحالة السرير/الغرفة عند المغادرة (دليل تسليم).
-Optional primary accent colour override. Leave blank to use the Apex default.,لون تمييز أساسي اختياري. اتركه فارغاً لاستخدام لون أبكس الافتراضي.
+The one colour the portal derives its accent shades from. Leave blank for the Apex default.,اللون الوحيد الذي تشتق منه البوابة درجات التمييز. اتركه فارغاً لاستخدام لون أبكس الافتراضي.
 Optional sender id / from number the gateway should send as (when the provider requires it). Sent as sender_id in the request body.,معرّف مُرسِل / رقم إرسال اختياري ترسل البوابة باسمه (عندما يتطلّب المزوّد ذلك). يُرسَل بوصفه sender_id في جسم الطلب.
 Optional: the specific Facility Asset this inspection covers. On submit its Last Inspected Date is stamped with the Inspection Date.,اختياري: أصل المنشأة المحدد الذي يشمله هذا الفحص. عند الاعتماد، يُحدّث «تاريخ آخر فحص» بتاريخ الفحص.
 Order Issued By (Client),صدر الأمر من (العميل)

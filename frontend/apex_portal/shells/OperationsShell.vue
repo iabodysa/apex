@@ -1,9 +1,11 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { ar } from "../i18n/ar.js";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
+
+const brand = inject("portalBrand", { logo: "" });
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -43,6 +45,7 @@ function groupContainsActiveRoute(group) {
     <aside class="operations-shell__rail">
       <div class="operations-shell__brand">
         <img class="portal-brand-mark" :src="brandMark" alt="" />
+        <img v-if="brand.logo" class="portal-brand-tenant" :src="brand.logo" alt="" />
         <span>{{ ar.brandName }}</span>
       </div>
       <nav v-if="navigation.length && !isMobile" class="operations-shell__nav" :aria-label="ar.primaryNavigation">

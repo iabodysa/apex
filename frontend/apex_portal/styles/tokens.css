@@ -50,3 +50,11 @@
   --font-serif: "Thmanyah Serif Text", serif;
   --font: "Thmanyah Sans", sans-serif;
 }
+
+@supports (color: color-mix(in oklab, #000 50%, #fff)) {
+  :root {
+    --c-primary-hover: color-mix(in oklab, var(--c-primary) 88%, #000);
+    --c-primary-active: color-mix(in oklab, var(--c-primary) 74%, #000);
+    --c-accent-ink: color-mix(in oklab, var(--c-primary) 92%, #000);
+  }
+}

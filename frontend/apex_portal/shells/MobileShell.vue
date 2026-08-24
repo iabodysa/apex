@@ -1,11 +1,13 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject } from "vue";
 import { useRoute } from "vue-router";
 import { ar } from "../i18n/ar.js";
 import PortalPushPrompt from "../components/PortalPushPrompt.vue";
 
 const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
 const primaryLimit = 4;
+
+const brand = inject("portalBrand", { logo: "" });
 
 const props = defineProps({
   title: { type: String, required: true },
@@ -35,6 +37,7 @@ const overflowActive = computed(() => (
     <header class="mobile-shell__header">
       <div class="portal-brand-lockup">
         <img class="portal-brand-mark" :src="reverseBrandMark" alt="" />
+        <img v-if="brand.logo" class="portal-brand-tenant" :src="brand.logo" alt="" />
         <h1 class="mobile-shell__title">{{ title }}</h1>
       </div>
       <div class="mobile-shell__actions"><slot name="actions" /></div>

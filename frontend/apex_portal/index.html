@@ -13,6 +13,7 @@
     {% if shell_meta.apple_icon_url %}<link rel="apple-touch-icon" sizes="180x180" href="{{ shell_meta.apple_icon_url }}" />{% endif %}
     <link rel="stylesheet" href="/assets/apex/vendor/thmanyah-v1/thmanyah.css" />
     <title>{{ shell_meta.title }}</title>
+    {% if shell_meta.seed_color %}<style>:root:root{--c-primary:{{ shell_meta.seed_color }}}</style>{% endif %}
   </head>
   <body>
     <div id="app">
@@ -26,6 +27,7 @@
     <script id="apex-portal-bootstrap" type="application/json">{{ boot["apex_portal"] | tojson }}</script>
     <script id="apex-portal-shell" type="application/json">{{ shell_meta | tojson }}</script>
     <script id="apex-csrf-token" type="application/json">{{ csrf_token | tojson }}</script>
+    <script id="apex-portal-messages" type="application/json">{{ portal_messages | tojson }}</script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

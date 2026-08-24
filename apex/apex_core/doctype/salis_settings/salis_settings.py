@@ -12,16 +12,7 @@ from frappe.utils import cint
 
 from apex.apex_core.setup.employee_advance_recovery import MAX_RECOVERY_PERCENT
 from apex.apex_core.utils.company import resolve_company
-
-_CSS_COLOR_RE = re.compile(
-    r"""^(?:
-		\#[0-9A-Fa-f]{3,8}                      # #rgb / #rgba / #rrggbb / #rrggbbaa
-		| (?:rgb|rgba|hsl|hsla)\(               # functional notation …
-			[0-9.,%\s/deg]+ \)                  # … digits, %, commas, slash, deg, ws only
-		| [A-Za-z]+                             # a CSS colour keyword (red, transparent, …)
-	)$""",
-    re.VERBOSE,
-)
+from apex.apex_core.utils.portal_bootstrap import portal_seed_color
 
 _BRAND_LOGO_RE = re.compile(r"^/files/[^\"'<>\s]+$")
 
@@ -53,8 +44,8 @@ class SalisSettings(Document):
 
     def _validate_portal_appearance(self):
         accent = (self.accent_color or "").strip()
-        if accent and not _CSS_COLOR_RE.match(accent):
-            frappe.throw(_("Accent Color must be a valid CSS colour."))
+        if accent and not portal_seed_color(accent):
+            frappe.throw(_("Accent Color must be a hex colour such as #00844E."))
 
         logo = (self.brand_logo or "").strip()
         if logo and not _BRAND_LOGO_RE.match(logo):

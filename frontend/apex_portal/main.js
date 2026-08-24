@@ -90,6 +90,10 @@ export async function mountPortal({ source, shell, csrfToken, routes = portalRou
   application.provide("workerGateway", createWorkerGateway(call));
   application.provide("driverGateway", createDriverGateway(call));
   application.provide("portalDrafts", portalDrafts);
+  application.provide(
+    "portalBrand",
+    Object.freeze({ logo: (shell?.show_brand !== false && shell?.brand_logo) || "" }),
+  );
   application.use(FrappeUI, { socketio: false });
   application.use(router);
 

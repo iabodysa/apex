@@ -384,13 +384,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Optional primary accent colour override. Leave blank to use the Apex default.",
+   "description": "The one colour the portal derives its accent shades from. Leave blank for the Apex default.",
    "fieldname": "accent_color",
    "fieldtype": "Color",
    "label": "Accent Color"
   },
   {
-   "description": "Optional logo shown in the portal header in place of the built-in brand mark.",
+   "description": "Optional tenant logo shown in the portal header beside the Apex mark.",
    "fieldname": "brand_logo",
    "fieldtype": "Attach Image",
    "label": "Brand Logo"
@@ -579,7 +579,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-24 09:00:00.000000",
+ "modified": "2026-08-24 19:23:00.571697",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Salis Settings",

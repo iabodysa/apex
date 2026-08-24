@@ -91,17 +91,33 @@ def build_portal_bootstrap(
         "subject_scope": subject_scope,
     }
 
+_DEFAULT_THEME_COLOR = "#00844E"
+_SEED_COLOR = re.compile(r"\A#[0-9A-Fa-f]{3,8}\Z")
+_APPEARANCE_FIELDS = ("accent_color", "brand_logo", "show_brand")
+
+def portal_seed_color(raw: str | None) -> str:
+    candidate = (raw or "").strip()
+    return candidate if _SEED_COLOR.fullmatch(candidate) else ""
+
 def build_portal_shell_meta(*, entry: str, public_path: str) -> dict:
     _validate_entry_path(entry, public_path)
     pwa = _PWA_META.get(entry, {})
+    appearance = frappe.db.get_value(
+        "Salis Settings", "Salis Settings", _APPEARANCE_FIELDS, as_dict=True
+    ) or frappe._dict()
+    seed = portal_seed_color(appearance.get("accent_color"))
+    show_brand = bool(cint(appearance.get("show_brand")))
     return {
         "title": _PORTAL_TITLES[entry],
         "canonical_path": public_path,
         "manifest_url": pwa.get("manifest_url"),
         "apple_icon_url": pwa.get("apple_icon_url"),
-        "theme_color": "#00844E",
+        "theme_color": seed or _DEFAULT_THEME_COLOR,
+        "seed_color": seed,
         "service_worker_url": pwa.get("service_worker_url"),
         "service_worker_scope": pwa.get("service_worker_scope"),
+        "show_brand": show_brand,
+        "brand_logo": (appearance.get("brand_logo") or "") if show_brand else "",
     }
 
 def opaque_subject_scope(*, entry: str, subject: str | None) -> str:
