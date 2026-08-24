@@ -14,6 +14,8 @@ const HIGHLIGHTS = Object.freeze([
   { icon: "lucide-user", title: "بياناتك", body: "سكنك وعهدك وطلباتك كلها معك بدون ما تراجع أحد." },
 ]);
 
+const STEPS = 5;
+
 const router = useRouter();
 const driver = inject("driverGateway");
 const push = inject("portalPush", null);
@@ -23,13 +25,7 @@ const language = ref("ar");
 const busy = ref(false);
 const installEvent = ref(null);
 
-const steps = computed(() => ["الجهاز", "التطبيق", "اللغة", "التنبيهات", "التثبيت"]);
-const isLast = computed(() => step.value === steps.value.length - 1);
-const canOfferPush = computed(() => Boolean(push?.canOffer?.value));
-const canPromptInstall = computed(() => Boolean(installEvent.value));
-const isIos = computed(() =>
-  /iphone|ipad|ipod/i.test(globalThis.navigator?.userAgent || ""),
-);
+const isIos = computed(() => /iphone|ipad|ipod/i.test(globalThis.navigator?.userAgent || ""));
 
 function captureInstall(event) {
   event.preventDefault();
@@ -44,12 +40,10 @@ async function chooseLanguage(code) {
   busy.value = true;
   try {
     await driver.chooseLanguage(code);
-  } catch {
+    step.value += 1;
+  } finally {
     busy.value = false;
-    return;
   }
-  busy.value = false;
-  step.value += 1;
 }
 
 async function enablePush() {
@@ -77,151 +71,95 @@ async function finish() {
 </script>
 
 <template>
-  <section class="driver-welcome" aria-live="polite">
-    <ol class="driver-welcome__track" aria-hidden="true">
-      <li v-for="(label, index) in steps" :key="label" :class="{ 'is-done': index <= step }" />
+  <section class="journey-page journey-section" aria-live="polite">
+    <ol class="welcome-track" aria-hidden="true">
+      <li v-for="index in STEPS" :key="index" :class="{ 'is-done': index <= step + 1 }" />
     </ol>
 
-    <template v-if="step === 0">
-      <span class="driver-welcome__seal lucide-shield-check" aria-hidden="true" />
-      <h1>جهازك صار موثّق</h1>
-      <p>ربطنا هذا الجوال باسمك. ما تحتاج رابط مرة ثانية، ولا اسم مستخدم ولا كلمة مرور.</p>
-      <Button theme="green" variant="solid" @click="step += 1">تمام، كمّل</Button>
-    </template>
-
-    <template v-else-if="step === 1">
-      <h1>وش تسوي فيه</h1>
-      <ul class="driver-welcome__highlights">
-        <li v-for="item in HIGHLIGHTS" :key="item.title">
-          <span :class="item.icon" aria-hidden="true" />
-          <div>
-            <strong>{{ item.title }}</strong>
-            <p>{{ item.body }}</p>
-          </div>
-        </li>
-      </ul>
-      <Button theme="green" variant="solid" @click="step += 1">كمّل</Button>
-    </template>
-
-    <template v-else-if="step === 2">
-      <h1>اختر لغتك</h1>
-      <p>تقدر تغيّرها بعدين من بياناتك.</p>
-      <div class="driver-welcome__languages">
-        <Button
-          v-for="option in LANGUAGES"
-          :key="option.code"
-          :theme="language === option.code ? 'green' : 'gray'"
-          variant="solid"
-          :loading="busy"
-          @click="chooseLanguage(option.code)"
-        >
-          {{ option.label }}
-        </Button>
+    <div class="journey-card">
+      <div v-if="step === 0" class="journey-card__main">
+        <span class="welcome-seal lucide-shield-check" aria-hidden="true" />
+        <h3>جهازك صار موثّق</h3>
+        <p>ربطنا هذا الجوال باسمك. ما تحتاج رابط مرة ثانية، ولا اسم مستخدم ولا كلمة مرور.</p>
       </div>
-    </template>
 
-    <template v-else-if="step === 3">
-      <span class="driver-welcome__seal lucide-bell" aria-hidden="true" />
-      <h1>خلّ التنبيه يوصلك</h1>
-      <p>نرسل لك تنبيه أول ما تنسند لك رحلة أو يتغيّر وقتها، حتى والتطبيق مقفل.</p>
-      <p v-if="push?.error?.value" class="driver-welcome__warn">{{ push.error.value }}</p>
-      <Button v-if="canOfferPush" theme="green" variant="solid" :loading="push?.busy?.value" @click="enablePush">
-        فعّل التنبيهات
-      </Button>
-      <Button variant="subtle" @click="step += 1">بعدين</Button>
-    </template>
+      <div v-else-if="step === 1" class="journey-card__main">
+        <h3>وش تسوي فيه</h3>
+        <p v-for="item in HIGHLIGHTS" :key="item.title">
+          <span :class="item.icon" aria-hidden="true" /> <strong>{{ item.title }}</strong> — {{ item.body }}
+        </p>
+      </div>
 
-    <template v-else>
-      <span class="driver-welcome__seal lucide-download" aria-hidden="true" />
-      <h1>ثبّته على جوالك</h1>
-      <p v-if="isIos">اضغط زر المشاركة تحت، ثم «أضف إلى الشاشة الرئيسية».</p>
-      <p v-else>ثبّته عشان يفتح مثل أي تطبيق، بدون متصفح.</p>
-      <Button v-if="canPromptInstall" theme="green" variant="solid" @click="promptInstall">ثبّت الآن</Button>
-      <Button theme="green" variant="solid" :loading="busy" @click="finish">ابدأ</Button>
-    </template>
+      <div v-else-if="step === 2" class="journey-card__main">
+        <h3>اختر لغتك</h3>
+        <p>تقدر تغيّرها بعدين من بياناتك.</p>
+      </div>
+
+      <div v-else-if="step === 3" class="journey-card__main">
+        <span class="welcome-seal lucide-bell" aria-hidden="true" />
+        <h3>خلّ التنبيه يوصلك</h3>
+        <p>نرسل لك تنبيه أول ما تنسند لك رحلة أو يتغيّر وقتها، حتى والتطبيق مقفل.</p>
+        <p v-if="push?.error?.value" class="journey-hint">{{ push.error.value }}</p>
+      </div>
+
+      <div v-else class="journey-card__main">
+        <span class="welcome-seal lucide-download" aria-hidden="true" />
+        <h3>ثبّته على جوالك</h3>
+        <p v-if="isIos">اضغط زر المشاركة تحت، ثم «أضف إلى الشاشة الرئيسية».</p>
+        <p v-else>ثبّته عشان يفتح مثل أي تطبيق، بدون متصفح.</p>
+      </div>
+
+      <div class="journey-actions">
+        <template v-if="step === 2">
+          <Button
+            v-for="option in LANGUAGES"
+            :key="option.code"
+            :theme="language === option.code ? 'green' : 'gray'"
+            variant="solid"
+            :loading="busy"
+            @click="chooseLanguage(option.code)"
+          >
+            {{ option.label }}
+          </Button>
+        </template>
+        <template v-else-if="step === 3">
+          <Button v-if="push?.canOffer?.value" theme="green" variant="solid" :loading="push?.busy?.value" @click="enablePush">
+            فعّل التنبيهات
+          </Button>
+          <Button variant="subtle" @click="step += 1">بعدين</Button>
+        </template>
+        <template v-else-if="step === 4">
+          <Button v-if="installEvent" theme="green" variant="solid" @click="promptInstall">ثبّت الآن</Button>
+          <Button theme="green" variant="solid" :loading="busy" @click="finish">ابدأ</Button>
+        </template>
+        <Button v-else theme="green" variant="solid" @click="step += 1">كمّل</Button>
+      </div>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.driver-welcome {
+.welcome-track {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1.5rem 1.25rem 2.5rem;
-  min-height: 100%;
-}
-
-.driver-welcome__track {
-  display: flex;
-  gap: 0.375rem;
-  width: 100%;
+  gap: var(--sp-1);
   padding: 0;
-  margin: 0 0 0.5rem;
+  margin: 0;
   list-style: none;
 }
 
-.driver-welcome__track li {
+.welcome-track li {
   flex: 1;
-  height: 0.25rem;
+  block-size: 4px;
   border-radius: 999px;
-  background: var(--apex-surface-sunken, #e5e7eb);
+  background: var(--border);
 }
 
-.driver-welcome__track li.is-done {
-  background: var(--apex-brand, #00844e);
+.welcome-track li.is-done {
+  background: var(--brand-green);
 }
 
-.driver-welcome__seal {
-  font-size: 2.5rem;
-  color: var(--apex-brand, #00844e);
-}
-
-.driver-welcome h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.driver-welcome p {
-  margin: 0;
-  color: var(--apex-text-muted, #4b5563);
-  line-height: 1.7;
-}
-
-.driver-welcome__warn {
-  color: var(--apex-danger, #b91c1c);
-}
-
-.driver-welcome__highlights {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  width: 100%;
-}
-
-.driver-welcome__highlights li {
-  display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-}
-
-.driver-welcome__highlights span {
-  font-size: 1.25rem;
-  color: var(--apex-brand, #00844e);
-}
-
-.driver-welcome__highlights strong {
-  display: block;
-  margin-bottom: 0.125rem;
-}
-
-.driver-welcome__languages {
-  display: flex;
-  gap: 0.75rem;
-  width: 100%;
+.welcome-seal {
+  font-size: 2.25rem;
+  color: var(--accent-ink);
 }
 </style>
