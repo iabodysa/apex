@@ -177,6 +177,15 @@ site.
 If a reverse proxy, load balancer, or CDN sits in front of Frappe, preserve the original
 client address and trusted-proxy configuration before exposing Apex.
 
+### Arm the commit gates after cloning
+
+Git never wires hooks on clone. A fresh checkout carries `.githooks/` but runs none of it
+until the path is declared, so run this once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
+
 ## Documentation
 
 - [Documentation home](docs/README.md) — choose the shortest guide for your role
