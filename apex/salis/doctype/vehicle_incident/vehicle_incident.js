@@ -1,3 +1,5 @@
+// Copyright (c) 2026, afmcoltd
+
 frappe.ui.form.on("Vehicle Incident", {
 	refresh(frm) {
 		if (frm.doc.docstatus !== 1 || frm.doc.status !== "Under Review") {

@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Driver fallback when a worker cannot present a scannable boarding pass.
 
 The Boarding Scan Log write keeps ``ignore_permissions`` for the reason in ``boarding.py``: it is

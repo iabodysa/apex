@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Bring existing records onto the v2.6 state contracts.
 
 The writes pass ``ignore_permissions`` because a patch is migrate context: it runs once as

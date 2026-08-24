@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Masar personal service for a driver linked to an active Employee."""
 
 import frappe

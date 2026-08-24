@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Converge the support desk and the advance-recovery records onto the native path.
 
 The writes and the rename pass ``ignore_permissions`` because a patch is migrate context: it runs

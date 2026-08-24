@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 _PORTAL_PAGES = frozenset(
     path
     for route in (

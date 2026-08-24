@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Test package for apex.
 
 A test lives in the folder of the file it tests, which is the framework's own

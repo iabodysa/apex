@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Native Employee Advance recovery wiring, applied at install and migrate.
 
 Every write here runs as Administrator with no session user: hooks.py reaches this

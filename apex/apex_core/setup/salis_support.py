@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 """Native support desk wiring for Salis, applied at install and migrate.
 
 ``ensure_support_holiday_list`` and ``configure_support_sla`` reach here only from

@@ -1,3 +1,5 @@
+# Copyright (c) 2026, afmcoltd
+
 from __future__ import annotations
 
 import frappe
