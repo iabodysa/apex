@@ -44,6 +44,7 @@ skills-lock.json
 ctl
 .ctl/
 .ctl.toml
+.benchx.toml
 
 # A nested checkout — worktree or vendored clone — is never this repo's content.
 **/.git/
@@ -128,3 +129,4 @@ docs/**/*.pem
 apex/public/apex_portal/
 apex/www/masar-sw.min.js
 apex/www/driver-sw.min.js
+.benchx/
