@@ -31,6 +31,16 @@
   "habitat_settings_sec_routing_map",
   "field_map_help",
   "field_map",
+  "habitat_settings_tab_stock_engine",
+  "habitat_settings_sec_stock_engine",
+  "enable_stock_engine",
+  "require_active_store",
+  "habitat_settings_sec_stock_guards",
+  "allow_negative_stock",
+  "backdating_days",
+  "habitat_settings_stock_guards_col",
+  "backdating_role",
+  "stock_frozen_upto",
   "habitat_settings_tab_notifications",
   "operational_notifications_sec",
   "enable_email_notifications",
@@ -230,6 +240,67 @@
    "options": "Payment Routing Field Map"
   },
   {
+   "fieldname": "habitat_settings_tab_stock_engine",
+   "fieldtype": "Tab Break",
+   "label": "Stock Engine"
+  },
+  {
+   "fieldname": "habitat_settings_sec_stock_engine",
+   "fieldtype": "Section Break",
+   "label": "Engine"
+  },
+  {
+   "default": "1",
+   "description": "Turn the building-store engine off to stop every custody and material posting at once.",
+   "fieldname": "enable_stock_engine",
+   "fieldtype": "Check",
+   "label": "Enable Stock Engine"
+  },
+  {
+   "default": "0",
+   "description": "Refuse a posting whose building is not an open store.",
+   "fieldname": "require_active_store",
+   "fieldtype": "Check",
+   "label": "Require An Active Store"
+  },
+  {
+   "fieldname": "habitat_settings_sec_stock_guards",
+   "fieldtype": "Section Break",
+   "label": "Guards"
+  },
+  {
+   "default": "0",
+   "description": "Off, a posting that would drive a store or a holder below zero is refused.",
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
+  },
+  {
+   "default": "0",
+   "description": "How many days back a posting may be dated. Zero means today only.",
+   "fieldname": "backdating_days",
+   "fieldtype": "Int",
+   "label": "Backdating Days",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "habitat_settings_stock_guards_col",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The one role allowed to post further back than the window above.",
+   "fieldname": "backdating_role",
+   "fieldtype": "Link",
+   "label": "Backdating Role",
+   "options": "Role"
+  },
+  {
+   "description": "Nothing posts on or before this date, whatever the window allows.",
+   "fieldname": "stock_frozen_upto",
+   "fieldtype": "Date",
+   "label": "Stock Frozen Upto"
+  },
+  {
    "fieldname": "habitat_settings_tab_notifications",
    "fieldtype": "Tab Break",
    "label": "Notifications"
@@ -415,7 +486,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-08-23 21:40:00.000000",
+ "modified": "2026-08-24 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Apex Core",
  "name": "Habitat Settings",

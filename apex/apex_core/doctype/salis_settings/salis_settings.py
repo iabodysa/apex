@@ -48,6 +48,7 @@ class SalisSettings(Document):
                 frappe.throw(_("Recovery Salary Component must be a Deduction."))
         self._validate_web_push_public_key()
         self._validate_portal_appearance()
+        self._validate_frontend_base_url()
 
     def on_update(self):
         """Applies the approvals switch to the Salis workflows."""
@@ -97,6 +98,16 @@ class SalisSettings(Document):
                     "this one decodes to {0}. Paste the uncompressed public key, not a "
                     "truncated or DER-encoded one."
                 ).format(len(point))
+            )
+
+    def _validate_frontend_base_url(self):
+        """Ensure the frontend base URL looks like an http(s) URL when set."""
+        url = (self.frontend_base_url or "").strip()
+        if not url:
+            return
+        if not (url.startswith("http://") or url.startswith("https://")):
+            frappe.throw(
+                _("Frontend Base URL must start with http:// or https:// (for example https://salis-fleet.com).")
             )
 
 
