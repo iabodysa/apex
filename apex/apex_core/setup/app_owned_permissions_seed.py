@@ -73,6 +73,8 @@ APP_OWNED_PERMISSIONS = (
     ("Activity Log", "HR User", 0, ("create",)),
     ("Activity Log", "HR Manager", 0, ("create",)),
     ("Notification Log", "All", 0, ("read", "create")),
+    ("Material Request", "SIM Operations User", 0, ("create",)),
+    ("Payment Entry", "SIM Operations User", 0, ("create",)),
 )
 
 _ALL_PTYPES = (

@@ -23,11 +23,11 @@ no reversal code and no field to drift out of step with the ledger. That reversa
 only reachable because ``allow_cancel_despite_billing_log`` stops the contract's own
 billing log from vetoing the cancellation; deleting a cited payment stays blocked.
 
-The two inserts pass ``ignore_permissions`` because the telecom operator who raises the billing
-is not a finance user and must not become one: the Material Request and Payment Entry create
-permission belongs to Purchase and Accounts roles, and granting those to a coordinator would hand
-them the whole procurement and payment surface. Both land in Draft for finance to review. The
-billing-log append onto the contract carries no such flag — every role reaching this endpoint
+Neither insert bypasses a permission check. ``app_owned_permissions_seed`` grants SIM
+Operations User ``create`` and NOTHING else on Material Request and Payment Entry, so the
+coordinator raises the draft the framework's own way without gaining read, write or submit
+over the procurement and payment surface. Both land in Draft for finance to review. The
+billing-log append onto the contract carries no flag either — every role reaching this endpoint
 already holds ``write`` on Telecom Contract within its own company scope.
 
 Every action:
@@ -167,7 +167,7 @@ def create_purchase_request(contract: str, billing_period: str):
         },
     )
     mr.set_missing_values()
-    mr.insert(ignore_permissions=True)
+    mr.insert()
 
     _record_link(
         contract_doc,
@@ -217,7 +217,7 @@ def create_payment_entry(contract: str, billing_period: str, purchase_invoice: s
     pe.remarks = _("Telecom {0} — billing period {1} ({2}), settling {3}.").format(
         contract_doc.supplier, billing_period, contract_doc.name, invoice.name
     )
-    pe.insert(ignore_permissions=True)
+    pe.insert()
 
     _record_link(
         contract_doc,
