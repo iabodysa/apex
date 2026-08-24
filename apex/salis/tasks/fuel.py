@@ -1,9 +1,12 @@
 # Copyright (c) 2026, afmcoltd
 """Scheduled tasks for the Salis fleet module (split by domain).
 
-The save passes ``ignore_permissions`` because the scheduler runs with no session user and the
-watch flags a top-up nobody reverted — the record it touches belongs to the operator who raised
-the request, not to the job, so there is no owner this could run as instead.
+The save runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site`` connects with
+``set_admin_as_user=True`` (frappe/__init__.py:269) before the job is queued, so the worker
+already executes as ``Administrator`` before the row-level ``frappe.set_user("Administrator")``
+below ever runs. The record this watch touches belongs to the operator who raised the request,
+not to the job, so ``Administrator`` — not that operator — is who saves the auto-revert; the
+explicit ``set_user`` swap states that, and the framework's own check is what then runs.
 """
 
 from __future__ import annotations
@@ -66,7 +69,7 @@ def unreverted_topup_watch() -> None:
                 actor = frappe.session.user
                 frappe.set_user("Administrator")
                 try:
-                    doc.save(ignore_permissions=True)
+                    doc.save()
                 finally:
                     frappe.set_user(actor)
                 doc.add_comment(

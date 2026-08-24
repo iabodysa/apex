@@ -3,8 +3,12 @@
 
 Background engine — never hand-entered. Mirrors the Habitat daily cost
 allocation pattern (``apex.habitat.tasks.daily_accommodation_cost_allocation``):
-idempotent, per-row error isolation, no commit inside the loop, and inserts
-with ignore_permissions because the target ledger grants no human write role.
+idempotent, per-row error isolation, no commit inside the loop.
+``daily_rental_accrual`` runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site``
+connects with ``set_admin_as_user=True`` (frappe/__init__.py:269) before it queues the job, so
+the worker executes as ``Administrator`` and the framework's own check already passes.
+``reverse_rental_accrual`` keeps the flag — it fires from an interactive on_cancel, and the
+target ledger grants no human write role.
 
 Posts NO General Ledger / accounting entry: each Rental Accrual Ledger row is
 an operational memo, the source for monthly Rental Settlement reconciliation.
@@ -138,7 +142,7 @@ def daily_rental_accrual() -> None:
                         "source_doctype": source_doctype,
                         "source_name": source_name,
                     }
-                ).insert(ignore_permissions=True)
+                ).insert()
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

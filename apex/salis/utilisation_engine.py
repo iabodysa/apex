@@ -8,9 +8,11 @@ scheduler writes one point-in-time utilisation row per active vehicle so that
 utilisation history/trends survive (the live fleet state keeps no history).
 Reports and KPIs derive from the snapshots.
 
-The insert passes ``ignore_permissions`` because the scheduler runs with no session user and the
-snapshot grants no human write role — "humans never enter these rows" is the DocType's design,
-not a description of current practice.
+The insert runs no ``ignore_permissions``: ``scheduler.enqueue_events_for_site`` connects with
+``set_admin_as_user=True`` (frappe/__init__.py:269) before it ever queues the weekly job, so the
+worker executes as ``Administrator`` and the framework's own permission check already passes —
+"humans never enter these rows" is the DocType's design, enforced by its own DocPerm rows (every
+role carries ``read`` only), not by anything this module adds.
 """
 
 import frappe
@@ -91,7 +93,7 @@ def weekly_vehicle_utilisation_snapshot() -> None:
                         "idle_days": idle_days,
                         "utilisation_pct": utilisation_pct,
                     }
-                ).insert(ignore_permissions=True)
+                ).insert()
             except Exception:
                 frappe.db.rollback(save_point=sp)
                 frappe.log_error(

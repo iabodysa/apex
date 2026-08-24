@@ -6,11 +6,15 @@ Background engine that mirrors the Habitat no-GL, system-written ledger pattern
 (``apex.habitat.doctype.accommodation_ledger``) and the batch/idempotent
 scheduled-job style in ``apex.habitat.tasks``.
 
-The inserts pass ``ignore_permissions``, which is ERPNext's own idiom for an immutable subledger —
-``general_ledger.py:412`` sets the same flag on GL Entry. The DocType carries ``in_create``, which
-removes the New button but refuses nothing on the server (``frappe/utils/user.py:112,172``). The
-refusal is in the DocPerm rows: every role on Fuel Consumption Ledger has ``read`` and nothing
-else, System Manager included. So this bypass is the only path by which a row can exist.
+``reverse_fuel_ledger`` posts its mirror row with ``ignore_permissions``, which is ERPNext's own
+idiom for an immutable subledger — ``general_ledger.py:412`` sets the same flag on GL Entry. The
+DocType carries ``in_create``, which removes the New button but refuses nothing on the server
+(``frappe/utils/user.py:112,172``). The refusal is in the DocPerm rows: every role on Fuel
+Consumption Ledger has ``read`` and nothing else, System Manager included, so that reversal write
+is the only path by which a human-triggered cancel can post a row. ``accrue_fuel_consumption``
+runs no such flag: ``scheduler.enqueue_events_for_site`` connects with ``set_admin_as_user=True``
+(frappe/__init__.py:269) before it ever queues a job, so the worker executes as ``Administrator``
+and the framework's own permission check already passes.
 
 Two scheduled jobs:
 
@@ -178,7 +182,7 @@ def accrue_fuel_consumption() -> None:
                             "source_name": log.name,
                             "logged_at": now_datetime(),
                         }
-                    ).insert(ignore_permissions=True)
+                    ).insert()
                 frappe.db.set_value(
                     "Fuel Daily Log", log.name, "ledgered", 1, update_modified=False
                 )
@@ -247,7 +251,7 @@ def accrue_fuel_consumption() -> None:
                         "source_name": req.name,
                         "logged_at": now_datetime(),
                     }
-                ).insert(ignore_permissions=True)
+                ).insert()
                 frappe.db.set_value(
                     "Fuel Request", req.name, "ledgered", 1, update_modified=False
                 )
