@@ -1,7 +1,7 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-import { ar } from "../i18n/ar.js";
+import { __ } from "../core/i18n.js";
 
 const brandMark = "/assets/apex/icons/brand/apex-mark.svg";
 
@@ -41,14 +41,14 @@ function groupContainsActiveRoute(group) {
 
 <template>
   <div class="operations-shell">
-    <a class="skip-link" href="#portal-content">{{ ar.skipToContent }}</a>
+    <a class="skip-link" href="#portal-content">{{ __("Skip to content") }}</a>
     <aside class="operations-shell__rail">
       <div class="operations-shell__brand">
         <img class="portal-brand-mark" :src="brandMark" alt="" />
         <img v-if="brand.logo" class="portal-brand-tenant" :src="brand.logo" alt="" />
-        <span>{{ ar.brandName }}</span>
+        <span>{{ __("Apex") }}</span>
       </div>
-      <nav v-if="navigation.length && !isMobile" class="operations-shell__nav" :aria-label="ar.primaryNavigation">
+      <nav v-if="navigation.length && !isMobile" class="operations-shell__nav" :aria-label="__('Primary navigation')">
         <RouterLink
           v-for="item in navigation"
           :key="item.to"
@@ -67,7 +67,7 @@ function groupContainsActiveRoute(group) {
           </a>
         </RouterLink>
       </nav>
-      <nav v-if="mobileGroups.length && isMobile" class="operations-shell__mobile-nav" :aria-label="ar.primaryNavigation">
+      <nav v-if="mobileGroups.length && isMobile" class="operations-shell__mobile-nav" :aria-label="__('Primary navigation')">
         <details
           v-for="group in mobileGroups"
           :key="group.label"

@@ -381,6 +381,7 @@ Articles Issued,الأصناف المصروفة
 Article…,الصنف…
 As Needed,عند الحاجة
 As On Date,حتى تاريخ
+Ask your supervisor for a new link.,راجع مشرفك ياخذ لك رابط جديد.
 Assess Damage,تقييم الضرر
 Assessed By,قدّر التلف
 Assessed at {0},قُيِّم بمبلغ {0}
@@ -1960,6 +1961,7 @@ Generation Key,مفتاح التوليد
 Generator,مولد كهربائي
 Generator Service,صيانة المولد الكهربائي
 Getting Started,البدء
+Go back to the home page or contact your system administrator.,ارجع إلى الصفحة الرئيسية أو تواصل مع مسؤول النظام.
 Good,جيد
 Goods Receipt,سند استلام بضائع
 Goods Receipt Note,إشعار استلام بضاعة
@@ -4229,6 +4231,7 @@ Settlement,التسوية
 Settlement State,حالة السداد
 "Settlement period, e.g. 2026-05.",فترة التسوية، مثال: 2026-05.
 "Settlement stage of the rental period, from draft through reconciliation and approval to payment, or held as disputed or cancelled.",مرحلة تسوية فترة الإيجار، من المسودة ثم المطابقة والاعتماد حتى السداد، أو تعليقها بسبب نزاع أو إلغائها.
+Primary navigation,التنقل الرئيسي
 Settlements,التسويات
 Settlements Pending Approval,التسويات بانتظار الاعتماد
 Setup,الإعداد
@@ -4301,6 +4304,7 @@ Site of Work,موقع العمل
 "Site-key-encrypted (Fernet) copy of the raw token, kept only so the desk can re-share the SAME link (QR / WhatsApp) without rotating. Useless without the site encryption key.",نسخة من الرمز الأصلي مشفرة بمفتاح الموقع (Fernet)، وتُحفظ فقط ليتمكن المكتب من إعادة مشاركة الرابط نفسه عبر QR أو واتساب دون تجديده. لا يمكن استخدامها دون مفتاح تشفير الموقع.
 Skip,تخطّي
 Skip Reason,سبب التخطّي
+Skip to content,تجاوز إلى المحتوى
 Skipped,تم التخطّي
 Smoke Detector,كاشف دخان
 Smoke Detectors Present,كاشفات الدخان موجودة
@@ -5353,6 +5357,7 @@ You can only save Trip Start Logs assigned to your own driver record.,لا يم�
 You cannot approve or pay a Payment Request you raised; a different Finance approver is required.,لا يمكنك اعتماد طلب دفع أنشأته أو تسديده؛ يلزم معتمد آخر من المالية.
 You cannot read that handover checklist.,ما عندك صلاحية الاطلاع على قائمة فحص التسليم هذه.
 You cannot {0} a fuel request you raised yourself (segregation of duties).,لا يمكنك {0} طلب وقود أنشأته بنفسك (الفصل بين المهام).
+You do not have access,لا تملك صلاحية الوصول
 You do not have permission to create a Dispatch Trip.,ما عندك صلاحية إنشاء رحلة تشغيل.
 You do not have permission to record the accounting acknowledgement.,ما عندك صلاحية تسجيل الإقرار المحاسبي.
 You do not have the approval role.,لا تملك صلاحية الاعتماد.

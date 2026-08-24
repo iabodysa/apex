@@ -1,7 +1,7 @@
 <script setup>
 import { computed, inject } from "vue";
 import { useRoute } from "vue-router";
-import { ar } from "../i18n/ar.js";
+import { __ } from "../core/i18n.js";
 import PortalPushPrompt from "../components/PortalPushPrompt.vue";
 
 const reverseBrandMark = "/assets/apex/icons/brand/apex-mark-reverse.svg";
@@ -33,7 +33,7 @@ const overflowActive = computed(() => (
 
 <template>
   <div class="mobile-shell">
-    <a class="skip-link" href="#portal-content">{{ ar.skipToContent }}</a>
+    <a class="skip-link" href="#portal-content">{{ __("Skip to content") }}</a>
     <header class="mobile-shell__header">
       <div class="portal-brand-lockup">
         <img class="portal-brand-mark" :src="reverseBrandMark" alt="" />
@@ -46,7 +46,7 @@ const overflowActive = computed(() => (
       <PortalPushPrompt />
       <slot />
     </main>
-    <nav v-if="navigation.length" class="mobile-shell__nav" :aria-label="ar.primaryNavigation">
+    <nav v-if="navigation.length" class="mobile-shell__nav" :aria-label="__('Primary navigation')">
       <RouterLink
         v-for="item in primaryNavigation"
         :key="item.to"
