@@ -84,7 +84,10 @@ export function createPortalRouter({
         component: AccessDenied,
         // Without a label the refusal inherits the persona's bare title, so a denied deep link
         // and the landing screen are the same entry in history and in a shared tab.
-        meta: { navigation: false, label: "لا تملك صلاحية" },
+        // `entry` travels with the refusal because the two passwordless personas have no system
+        // administrator to be sent to — a worker or driver whose one-time link is spent is told to
+        // see his supervisor, and everyone else keeps the desk wording.
+        meta: { navigation: false, label: "لا تملك صلاحية", entry: activeContext.id },
       },
       {
         path: "/:pathMatch(.*)*",
