@@ -60,6 +60,7 @@ issuing any personal link.
 - a Transport Request, Route Plan, and Dispatch Trip;
 - a Fuel Platform and a fuel scenario; and
 - one rented vehicle, Supplier, Rental Office, and normally generated accrual period.
+- the `lending` app installed, if the cohort is taught damage recovery: without it a Vehicle Incident saves and raises no recovery, so the lesson has nothing to show.
 
 ### Telecom
 
@@ -130,7 +131,7 @@ bench --site <training-site> restore \
 bench --site <training-site> list-apps
 ```
 
-Do not use `--force`. Confirm that `frappe`, `erpnext`, `hrms`, and `apex` remain installed.
+Do not use `--force`. Confirm that every app the site carried before the restore is installed again — `frappe`, `erpnext`, `hrms`, and `apex` at minimum, and `lending` where damage recovery is taught.
 If that check succeeds, reopen the training site:
 
 ```bash
@@ -192,7 +193,7 @@ bench --site <training-site> restore \
 bench --site <training-site> list-apps
 ```
 
-4. Confirm that `frappe`, `erpnext`, `hrms`, and `apex` still appear, then reopen the site:
+4. Confirm that every app the site carried before the restore still appears — `frappe`, `erpnext`, `hrms`, and `apex` at minimum, and `lending` where damage recovery is taught — then reopen the site:
 
 ```bash
 bench --site <training-site> set-maintenance-mode off
