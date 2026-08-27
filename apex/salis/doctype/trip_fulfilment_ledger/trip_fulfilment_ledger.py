@@ -8,12 +8,15 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
+UNIQUE_KEY = ["dispatch_trip"]
+UNIQUE_KEY_NAME = "unique_tfl_trip"
+
 
 def on_doctype_update():
     add_unique_guarded(
         "Trip Fulfilment Ledger",
-        ["dispatch_trip"],
-        constraint_name="unique_tfl_trip",
+        UNIQUE_KEY,
+        constraint_name=UNIQUE_KEY_NAME,
     )
 
 

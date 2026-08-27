@@ -8,8 +8,14 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
+UNIQUE_KEY = ["dispatch_trip", "employee", "is_reversal"]
+UNIQUE_KEY_NAME = "unique_tbl_trip_employee"
+
 
 class TripBoardingLedger(Document):
+    def before_insert(self):
+        self.is_reversal = 1 if self.reversal_of else 0
+
     def validate(self):
         self._enforce_single_write_immutability()
 
@@ -24,6 +30,6 @@ class TripBoardingLedger(Document):
 def on_doctype_update():
     add_unique_guarded(
         "Trip Boarding Ledger",
-        ["dispatch_trip", "employee", "reversal_of"],
-        constraint_name="unique_tbl_trip_employee",
+        UNIQUE_KEY,
+        constraint_name=UNIQUE_KEY_NAME,
     )

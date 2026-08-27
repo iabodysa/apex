@@ -30,3 +30,4 @@ apex.patches.v2_9.drop_housing_allowance_suspended_column
 apex.patches.v2_9.rename_portal_device_language
 apex.patches.v2_9.set_arabic_as_the_site_language
 apex.patches.v2_9.backfill_rental_accrual_is_reversal
+apex.patches.v2_9.backfill_ledger_is_reversal

@@ -18,7 +18,8 @@
   "source_name",
   "source_detail_no",
   "is_cancelled",
-  "reversal_of"
+  "reversal_of",
+  "is_reversal"
  ],
  "fields": [
   {
@@ -111,11 +112,17 @@
    "label": "Reversal Of",
    "options": "Trip Boarding Ledger",
    "read_only": 1
+  },
+  {
+   "fieldname": "is_reversal",
+   "fieldtype": "Check",
+   "label": "Is Reversal",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-28 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Trip Boarding Ledger",

@@ -57,7 +57,9 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
                 "period_month": row.period_month,
                 "litres": -flt(row.litres),
                 "amount": -flt(row.amount),
+                "source_type": source_type,
                 "source_doctype": source_type,
+                "source_name": source_name,
                 "logged_at": now_datetime(),
                 "reversal_of": row.name,
             }

@@ -6,10 +6,14 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import now_datetime
 
+from apex.salis.doctype.fuel_consumption_ledger.fuel_consumption_ledger import (
+    UNIQUE_KEY,
+    UNIQUE_KEY_NAME,
+)
 from apex.tests.factories import make_vehicle
 
 _TABLE = "tabFuel Consumption Ledger"
-_KEY_COLUMNS = ["source_type", "source_name"]
+_KEY_COLUMNS = UNIQUE_KEY
 
 
 def _unique_index_columns(table, index_name):
@@ -46,9 +50,9 @@ def _fuel_consumption_ledger(**overrides):
 
 
 class TestFuelConsumptionLedgerUniqueIndex(FrappeTestCase):
-    def test_the_source_pair_carries_a_unique_index_in_the_database(self):
+    def test_the_key_the_database_holds_is_the_key_the_controller_declares(self):
         self.assertEqual(
-            _unique_index_columns(_TABLE, "unique_fcl_source"), _KEY_COLUMNS
+            _unique_index_columns(_TABLE, UNIQUE_KEY_NAME), _KEY_COLUMNS
         )
 
 
@@ -61,7 +65,7 @@ class TestFuelConsumptionLedgerDoublePost(FrappeTestCase):
             litres=1.0,
             amount=2.0,
         )
-        with self.assertRaisesRegex(frappe.UniqueValidationError, "unique_fcl_source"):
+        with self.assertRaisesRegex(frappe.UniqueValidationError, UNIQUE_KEY_NAME):
             second.insert(ignore_permissions=True)
 
     def test_the_same_source_name_under_another_source_type_is_accepted(self):
@@ -78,7 +82,7 @@ class TestFuelConsumptionLedgerDoublePost(FrappeTestCase):
         second = _fuel_consumption_ledger().insert(ignore_permissions=True)
         self.assertTrue(frappe.db.exists("Fuel Consumption Ledger", second.name))
 
-    def test_a_reversal_of_a_posted_row_needs_its_own_source_name(self):
+    def test_one_reversal_carrying_the_same_source_is_accepted_and_a_second_is_refused(self):
         first = _fuel_consumption_ledger().insert(ignore_permissions=True)
         reversal = _fuel_consumption_ledger(
             source_type=first.source_type,
@@ -86,9 +90,20 @@ class TestFuelConsumptionLedgerDoublePost(FrappeTestCase):
             reversal_of=first.name,
             litres=-first.litres,
             amount=-first.amount,
-        )
-        with self.assertRaisesRegex(frappe.UniqueValidationError, "unique_fcl_source"):
-            reversal.insert(ignore_permissions=True)
+        ).insert(ignore_permissions=True)
+        self.assertEqual(reversal.is_reversal, 1)
+        with self.assertRaisesRegex(frappe.UniqueValidationError, UNIQUE_KEY_NAME):
+            _fuel_consumption_ledger(
+                source_type=first.source_type,
+                source_name=first.source_name,
+                reversal_of=first.name,
+                litres=-first.litres,
+                amount=-first.amount,
+            ).insert(ignore_permissions=True)
+
+    def test_the_flag_is_derived_from_the_pointer_and_never_supplied(self):
+        row = _fuel_consumption_ledger(is_reversal=1).insert(ignore_permissions=True)
+        self.assertEqual(row.is_reversal, 0)
 
 
 class TestFuelConsumptionLedgerSourceType(FrappeTestCase):

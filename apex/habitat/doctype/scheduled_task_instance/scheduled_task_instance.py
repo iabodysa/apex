@@ -8,6 +8,9 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
+UNIQUE_KEY = ["assignment", "task_catalog", "due_date", "docstatus"]
+UNIQUE_KEY_NAME = "unique_sti_assignment_catalog_due_status"
+
 
 class ScheduledTaskInstance(Document):
     pass
@@ -23,8 +26,8 @@ def on_doctype_update():
 
     add_unique_guarded(
         "Scheduled Task Instance",
-        ["assignment", "task_catalog", "due_date", "docstatus"],
-        constraint_name="unique_sti_assignment_catalog_due_status",
+        UNIQUE_KEY,
+        constraint_name=UNIQUE_KEY_NAME,
     )
 
 

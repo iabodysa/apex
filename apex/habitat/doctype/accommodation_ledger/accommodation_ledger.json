@@ -33,6 +33,7 @@
   "source_line_id",
   "accommodation_ledger_col_source",
   "reversal_of",
+  "is_reversal",
   "accommodation_ledger_sec_system",
   "allocation_basis",
   "allocation_period_start",
@@ -211,6 +212,12 @@
    "read_only": 1
   },
   {
+   "fieldname": "is_reversal",
+   "fieldtype": "Check",
+   "label": "Is Reversal",
+   "read_only": 1
+  },
+  {
    "fieldname": "accommodation_ledger_sec_system",
    "fieldtype": "Section Break",
    "label": "Allocation Audit",
@@ -251,7 +258,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-28 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Accommodation Ledger",

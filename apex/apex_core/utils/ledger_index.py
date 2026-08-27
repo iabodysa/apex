@@ -115,9 +115,50 @@ def add_index_guarded(doctype: str, fields: list[str], index_name: str) -> bool:
     return _index_exists(doctype, index_name)
 
 
+def _constraint_columns(doctype: str, constraint_name: str) -> list[str]:
+    try:
+        rows = frappe.db.sql(
+            """
+            SELECT COLUMN_NAME AS col
+            FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = %s
+              AND INDEX_NAME = %s
+            ORDER BY SEQ_IN_INDEX
+            """,
+            ("tab" + doctype, constraint_name),
+            as_dict=True,
+        )
+    except Exception:
+        return []
+
+    return [(row["col"] or "").lower() for row in rows or []]
+
+
+def _drop_constraint(doctype: str, constraint_name: str) -> bool:
+    try:
+        frappe.db.sql(
+            "ALTER TABLE `tab{dt}` DROP INDEX `{idx}`".format(
+                dt=doctype, idx=constraint_name
+            )
+        )
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Could not drop stale constraint: {constraint_name}"[:140],
+        )
+        return False
+
+    return True
+
+
 def add_unique_guarded(doctype: str, fields: list[str], constraint_name: str) -> bool:
+    wanted = [f.lower() for f in fields]
     if _constraint_exists(doctype, constraint_name):
-        return True
+        if _constraint_columns(doctype, constraint_name) == wanted:
+            return True
+        if not _drop_constraint(doctype, constraint_name):
+            return False
 
     try:
         frappe.db.add_unique(doctype, fields, constraint_name=constraint_name)

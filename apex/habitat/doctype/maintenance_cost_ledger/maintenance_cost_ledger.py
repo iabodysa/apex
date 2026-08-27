@@ -9,8 +9,14 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
+UNIQUE_KEY = ["source_doctype", "source_name", "source_detail_no", "is_reversal"]
+UNIQUE_KEY_NAME = "unique_mcl_source"
+
 
 class MaintenanceCostLedger(Document):
+    def before_insert(self):
+        self.is_reversal = 1 if self.reversal_of else 0
+
     def on_update(self):
         if not self.is_new() and not self.flags.in_insert:
             frappe.throw(_("Maintenance Cost Ledger rows are immutable and cannot be edited."))
@@ -19,6 +25,6 @@ class MaintenanceCostLedger(Document):
 def on_doctype_update():
     add_unique_guarded(
         "Maintenance Cost Ledger",
-        ["source_doctype", "source_name", "source_detail_no", "reversal_of"],
-        constraint_name="unique_mcl_source",
+        UNIQUE_KEY,
+        constraint_name=UNIQUE_KEY_NAME,
     )

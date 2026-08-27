@@ -22,7 +22,8 @@
   "source_doctype",
   "fuel_consumption_ledger_system_col",
   "source_name",
-  "reversal_of"
+  "reversal_of",
+  "is_reversal"
  ],
  "fields": [
   {
@@ -136,13 +137,19 @@
    "label": "Reversal Of",
    "options": "Fuel Consumption Ledger",
    "read_only": 1
+  },
+  {
+   "fieldname": "is_reversal",
+   "fieldtype": "Check",
+   "label": "Is Reversal",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tint",
  "in_create": 1,
  "is_submittable": 0,
  "links": [],
- "modified": "2026-07-27 07:05:37.081061",
+ "modified": "2026-08-28 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Consumption Ledger",

@@ -7,14 +7,18 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
+UNIQUE_KEY = ["source_type", "source_name", "is_reversal"]
+UNIQUE_KEY_NAME = "unique_fcl_source"
+
 
 class FuelConsumptionLedger(Document):
-    pass
+    def before_insert(self):
+        self.is_reversal = 1 if self.reversal_of else 0
 
 
 def on_doctype_update():
     add_unique_guarded(
         "Fuel Consumption Ledger",
-        ["source_type", "source_name"],
-        constraint_name="unique_fcl_source",
+        UNIQUE_KEY,
+        constraint_name=UNIQUE_KEY_NAME,
     )
