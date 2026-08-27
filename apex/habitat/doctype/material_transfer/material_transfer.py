@@ -27,8 +27,6 @@ class MaterialTransfer(Document):
 
 
 def validate(doc, method=None):
-    if not doc.items:
-        frappe.throw(_("At least one item is required on a Material Transfer."))
     if doc.from_building and doc.to_building and doc.from_building == doc.to_building:
         frappe.throw(_("Source and destination buildings must be different."))
     for row in doc.items:

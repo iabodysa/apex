@@ -15,9 +15,13 @@ class TestMaterialTransferValidate(FrappeTestCase):
         return doc
 
     def test_a_transfer_with_no_items_is_refused(self):
-        doc = self._doc(from_building="_Test Building", to_building="_Test Building 2")
-        with self.assertRaises(frappe.ValidationError):
-            validate(doc)
+        doc = self._doc(
+            transfer_date=frappe.utils.today(),
+            from_building="_Test Building",
+            to_building="_Test Building 2",
+        )
+        with self.assertRaises(frappe.MandatoryError):
+            doc.insert()
 
     def test_the_same_building_on_both_sides_is_refused(self):
         doc = self._doc(from_building="_Test Building", to_building="_Test Building")
