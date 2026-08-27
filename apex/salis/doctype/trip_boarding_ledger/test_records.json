@@ -2,6 +2,7 @@
  {
   "doctype": "Trip Boarding Ledger",
   "posting_date": "2026-01-10",
+  "employee": "_T-Employee-00001",
   "building": "_Test Building",
   "outcome": "Boarded",
   "source_doctype": "Dispatch Trip",
@@ -11,6 +12,7 @@
  {
   "doctype": "Trip Boarding Ledger",
   "posting_date": "2026-02-10",
+  "employee": "_T-Employee-00002",
   "building": "_Test Building 2",
   "outcome": "No Show",
   "source_doctype": "Dispatch Trip",
