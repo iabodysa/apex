@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Facility Asset",
-  "naming_series": "FAC-AST-.YYYY.-.####",
   "asset_name": "_T-Camera-Laundry-Room",
   "asset_category": "CCTV Camera",
   "building": "_Test Building",
@@ -10,7 +9,6 @@
  },
  {
   "doctype": "Facility Asset",
-  "naming_series": "FAC-AST-.YYYY.-.####",
   "asset_name": "_T-Generator-Backup",
   "asset_category": "Generator",
   "building": "_Test Building 2",
