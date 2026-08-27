@@ -5,8 +5,8 @@
   "driver": "DRV-000001",
   "attendance_date": "2026-01-10",
   "status": "Present",
-  "check_in": "08:00:00",
-  "check_out": "17:00:00"
+  "check_in": "2026-01-10 08:00:00",
+  "check_out": "2026-01-10 17:00:00"
  },
  {
   "doctype": "Driver Attendance",

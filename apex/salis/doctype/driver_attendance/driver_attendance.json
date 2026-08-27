@@ -58,13 +58,13 @@
   },
   {
    "fieldname": "check_in",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "Attendance Check-In"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "check_out",
-   "fieldtype": "Time",
+   "fieldtype": "Datetime",
    "label": "Attendance Check-Out"
   },
   {

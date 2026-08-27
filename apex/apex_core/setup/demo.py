@@ -886,7 +886,8 @@ def _build_driver_attendance(context):
             "driver": context["driver"],
             "attendance_date": today(),
             "status": "Present",
-            "worked_hours": 8,
+            "check_in": f"{today()} 07:00:00",
+            "check_out": f"{today()} 15:00:00",
         },
     ).name
 

@@ -829,6 +829,7 @@ Check-in slip,قسيمة التسكين
 Check-out Date,تاريخ المغادرة
 Check-out Reason,سبب المغادرة
 Check-out cancelled. Reason: {0},أُلغيت المغادرة. السبب: {0}
+Check-out is earlier than check-in.,وقت الانصراف قبل وقت الحضور.
 Check-out processed via {0} on {1},تمت معالجة المغادرة عبر {0} في {1}
 Checked Out,تمت المغادرة
 Checked in: {0},تم التسكين: {0}
@@ -2600,6 +2601,7 @@ Landlord,المؤجّر
 Landlord Contract Reference,رقم عقد المالك
 Landlord Signatory,الموقّع عن المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
+Language,اللغة
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
 Large Worker Move Needs Escalation,نقل عمالة كبير يحتاج تصعيداً
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد

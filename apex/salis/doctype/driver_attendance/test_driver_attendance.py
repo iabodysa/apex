@@ -44,13 +44,36 @@ class TestDriverAttendanceOneRowPerDay(FrappeTestCase):
 
 class TestDriverAttendanceWorkedHours(FrappeTestCase):
     def test_a_day_shift_is_counted_from_check_in_to_check_out(self):
-        doc = _attendance(_driver(), check_in="07:00:00", check_out="16:30:00").insert(
-            ignore_permissions=True
-        )
+        day = frappe.utils.today()
+        doc = _attendance(
+            _driver(), check_in=f"{day} 07:00:00", check_out=f"{day} 16:30:00"
+        ).insert(ignore_permissions=True)
         self.assertEqual(doc.worked_hours, 9.5)
 
-    def test_a_shift_that_crosses_midnight_is_counted_into_the_next_day(self):
-        doc = _attendance(_driver(), check_in="22:00:00", check_out="06:00:00").insert(
-            ignore_permissions=True
-        )
+    def test_a_shift_that_ends_on_the_next_day_is_counted_across_the_boundary(self):
+        day = frappe.utils.today()
+        doc = _attendance(
+            _driver(),
+            check_in=f"{day} 22:00:00",
+            check_out=f"{frappe.utils.add_days(day, 1)} 06:00:00",
+        ).insert(ignore_permissions=True)
         self.assertEqual(doc.worked_hours, 8.0)
+
+    def test_a_check_out_before_the_check_in_is_refused(self):
+        day = frappe.utils.today()
+        with self.assertRaisesRegex(frappe.ValidationError, "earlier than"):
+            _attendance(
+                _driver(), check_in=f"{day} 16:00:00", check_out=f"{day} 07:00:00"
+            ).insert(ignore_permissions=True)
+
+
+class TestDriverAttendanceUnreadClock(FrappeTestCase):
+    def test_a_new_document_carries_no_reading_nobody_took(self):
+        doc = frappe.new_doc("Driver Attendance")
+        self.assertIsNone(doc.check_in)
+        self.assertIsNone(doc.check_out)
+
+    def test_a_row_without_a_reading_counts_no_hours(self):
+        doc = _attendance(_driver()).insert(ignore_permissions=True)
+        self.assertIsNone(doc.check_in)
+        self.assertEqual(doc.worked_hours, 0)

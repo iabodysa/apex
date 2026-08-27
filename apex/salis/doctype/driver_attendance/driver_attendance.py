@@ -5,7 +5,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, get_datetime, time_diff_in_seconds
+from frappe.utils import time_diff_in_seconds
 
 
 class DriverAttendance(Document):
@@ -33,12 +33,10 @@ class DriverAttendance(Document):
             )
 
     def _compute_worked_hours(self):
-        if self.check_in and self.check_out:
-            check_in = get_datetime(f"{self.attendance_date} {self.check_in}")
-            check_out = get_datetime(f"{self.attendance_date} {self.check_out}")
-            if check_out < check_in:
-                check_out = get_datetime(f"{add_days(self.attendance_date, 1)} {self.check_out}")
-            seconds = time_diff_in_seconds(check_out, check_in)
-            self.worked_hours = round(seconds / 3600, 2) if seconds > 0 else 0
-        else:
+        if not (self.check_in and self.check_out):
             self.worked_hours = 0
+            return
+        seconds = time_diff_in_seconds(self.check_out, self.check_in)
+        if seconds < 0:
+            frappe.throw(_("Check-out is earlier than check-in."))
+        self.worked_hours = round(seconds / 3600, 2)
