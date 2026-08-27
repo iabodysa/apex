@@ -7,12 +7,13 @@ from frappe.model.document import Document
 
 from apex.apex_core.utils.ledger_index import add_unique_guarded
 
-UNIQUE_KEY = ["vehicle", "accrual_date", "reversal_of"]
+UNIQUE_KEY = ["vehicle", "accrual_date", "is_reversal"]
 UNIQUE_KEY_NAME = "unique_ral_vehicle_date"
 
 
 class RentalAccrualLedger(Document):
-    pass
+    def before_insert(self):
+        self.is_reversal = 1 if self.reversal_of else 0
 
 
 def _drop_stale_unique_key():

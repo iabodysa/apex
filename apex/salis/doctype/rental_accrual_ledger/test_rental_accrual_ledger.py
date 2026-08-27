@@ -9,7 +9,7 @@ from frappe.utils import add_days, today
 from apex.tests.factories import make_vehicle
 
 _TABLE = "tabRental Accrual Ledger"
-_KEY_COLUMNS = ["vehicle", "accrual_date", "reversal_of"]
+_KEY_COLUMNS = ["vehicle", "accrual_date", "is_reversal"]
 
 
 def _unique_index_columns(table, index_name):
@@ -42,7 +42,7 @@ def _rental_accrual_ledger(**overrides):
 
 
 class TestRentalAccrualLedgerUniqueIndex(FrappeTestCase):
-    def test_the_vehicle_date_and_reversal_triple_carries_a_unique_index_in_the_database(self):
+    def test_the_vehicle_date_and_reversal_flag_triple_carries_a_unique_index_in_the_database(self):
         self.assertEqual(
             _unique_index_columns(_TABLE, "unique_ral_vehicle_date"), _KEY_COLUMNS
         )
@@ -57,18 +57,40 @@ class TestRentalAccrualLedgerAccrualDay(FrappeTestCase):
         self.assertTrue(frappe.db.exists("Rental Accrual Ledger", second.name))
 
 
+class TestRentalAccrualLedgerDoubleAccrual(FrappeTestCase):
+    def test_a_second_accrual_for_the_same_vehicle_and_day_is_refused_by_the_database(self):
+        first = _rental_accrual_ledger().insert(ignore_permissions=True)
+        with self.assertRaisesRegex(
+            frappe.UniqueValidationError, "unique_ral_vehicle_date"
+        ):
+            _rental_accrual_ledger(accrual_date=first.accrual_date).insert(
+                ignore_permissions=True
+            )
+
+
 class TestRentalAccrualLedgerReversal(FrappeTestCase):
+    def test_the_flag_is_derived_from_the_pointer_and_never_supplied(self):
+        accrual = _rental_accrual_ledger(
+            accrual_date=add_days(today(), 10), is_reversal=1
+        ).insert(ignore_permissions=True)
+        self.assertEqual(accrual.is_reversal, 0)
+
     def test_one_reversal_of_the_same_vehicle_and_day_is_accepted(self):
-        accrual = _rental_accrual_ledger().insert(ignore_permissions=True)
+        accrual = _rental_accrual_ledger(
+            accrual_date=add_days(today(), 20)
+        ).insert(ignore_permissions=True)
         reversal = _rental_accrual_ledger(
             accrual_date=accrual.accrual_date,
             amount=-accrual.amount,
             reversal_of=accrual.name,
         ).insert(ignore_permissions=True)
         self.assertEqual(reversal.reversal_of, accrual.name)
+        self.assertEqual(reversal.is_reversal, 1)
 
     def test_a_second_reversal_of_the_same_accrual_is_refused_by_the_database(self):
-        accrual = _rental_accrual_ledger().insert(ignore_permissions=True)
+        accrual = _rental_accrual_ledger(
+            accrual_date=add_days(today(), 30)
+        ).insert(ignore_permissions=True)
         _rental_accrual_ledger(
             accrual_date=accrual.accrual_date,
             amount=-accrual.amount,
