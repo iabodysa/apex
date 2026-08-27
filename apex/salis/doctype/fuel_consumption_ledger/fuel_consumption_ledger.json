@@ -112,7 +112,8 @@
    "fieldtype": "Select",
    "label": "Source Type",
    "options": "Fuel Request\nFuel Daily Log",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "source_doctype",
@@ -129,6 +130,7 @@
    "fieldtype": "Data",
    "label": "Source Document",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {

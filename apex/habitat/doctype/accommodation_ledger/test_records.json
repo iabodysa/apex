@@ -6,6 +6,8 @@
   "posting_mode": "Operational Memo",
   "building": "_Test Building",
   "cost_center": "_Test Cost Center - _TC",
+  "source_doctype": "Housing Assignment",
+  "source_name": "_T-ACC-ASGN-0001",
   "total_site_cost": 4000
  },
  {
@@ -14,6 +16,8 @@
   "ledger_type": "Electricity",
   "posting_mode": "GL Posted",
   "building": "_Test Building 2",
+  "source_doctype": "Utility Bill Entry",
+  "source_name": "_T-UTIL-0001",
   "total_site_cost": 850
  }
 ]

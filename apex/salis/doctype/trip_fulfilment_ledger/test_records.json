@@ -7,7 +7,8 @@
   "worker_count": 14,
   "has_timestamps": 1,
   "source_doctype": "Dispatch Trip",
-  "source_name": "DT-TEST-0001"
+  "source_name": "DT-TEST-0001",
+  "dispatch_trip": "_T-Dispatch Trip-00001"
  },
  {
   "doctype": "Trip Fulfilment Ledger",
@@ -17,6 +18,7 @@
   "worker_count": 0,
   "has_timestamps": 0,
   "source_doctype": "Dispatch Trip",
-  "source_name": "DT-TEST-0002"
+  "source_name": "DT-TEST-0002",
+  "dispatch_trip": "_T-Dispatch Trip-00002"
  }
 ]
