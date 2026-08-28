@@ -66,6 +66,7 @@ class TestCustodyMastersShipAsFixtures(FrappeTestCase):
             ("Custody Asset Category", "custody_asset_category.json"),
             ("Custody Article", "custody_article.json"),
             ("Operational Depreciation Policy", "operational_depreciation_policy.json"),
+            ("Safety Task Catalog", "safety_task_catalog.json"),
         ):
             with self.subTest(doctype=dt):
                 shipped = json.loads((APP_ROOT / "fixtures" / fixture_file).read_text())

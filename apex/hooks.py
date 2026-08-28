@@ -520,6 +520,10 @@ fixtures = [
             ]
         ],
     },
+    {
+        "dt": "Safety Task Catalog",
+        "filters": [["name", "in", [f"STC-{n:04d}" for n in range(1, 61)]]],
+    },
 ]
 
 after_install = [
