@@ -70,7 +70,9 @@ disconnected records.
 
 Other Apex journeys use the same source-to-outcome structure:
 
-- `Transport Request` -> `Route Plan` -> `Dispatch Trip` for controlled worker movement.
+- `Transport Request` -> `Dispatch Trip` for one-off movement.
+- `Work Shift` + `Route Template` -> approved `Route Assignment` -> generated
+  `Dispatch Trip` for recurring movement.
 - `Telecom Contract` -> `SIM Card` -> `SIM Custody Assignment` for contract-backed custody.
 
 Use the domain guide for the actual decisions, states, and exceptions in each journey.

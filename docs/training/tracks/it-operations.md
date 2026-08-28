@@ -48,3 +48,4 @@ cross-scope access appears.
 ## Related links
 
 - [Trainer Setup and Reset](../trainer-setup.md)
+- [Settings](../settings.md)

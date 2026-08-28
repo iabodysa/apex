@@ -62,9 +62,11 @@ Do not use a production link or capture the training credential in evidence.
 
 ## Background follow-up
 
-Use the **Scheduled Job Type** screen to identify which Apex
-job follows a business condition, what enables it, and what record it may create or update.
-Check the source record and **Scheduled Job Log** before rerunning anything.
+Start from the business record that should be due. Confirm its status, date, owning
+setting, and expected output. Then use the **Scheduled Job Type** screen to identify which
+Apex job follows that business condition and what it may create or update, and check the
+source record and **Scheduled Job Log** before rerunning anything. Do not create the
+expected output by hand to make a dashboard change.
 
 An unchanged dashboard is not proof of failure. No source may be due, the feature may be
 disabled, or the expected record may already exist.
@@ -80,3 +82,4 @@ disabled, or the expected record may already exist.
 ## Related guides
 
 - [IT Operations track](tracks/it-operations.md)
+- [Trainer setup and reset](trainer-setup.md)

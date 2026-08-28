@@ -1,11 +1,12 @@
 <p align="center">
-  <img src="brand/assets/logo/apex-mark.svg" alt="Apex" width="88" height="88">
+  <img src="../apex/public/icons/brand/apex-mark.svg" alt="Apex" width="88" height="88">
 </p>
 
 # Apex Documentation
 
 Use Apex documentation to complete a job, prepare a team, or operate the system safely.
-Start with the product journey that matches your work.
+Start with the product journey that matches your work. These guides explain Apex jobs and
+role handoffs; they do not repeat Frappe or ERPNext documentation.
 
 [Start with the role-based training map](training/README.md) when you are preparing a team.
 

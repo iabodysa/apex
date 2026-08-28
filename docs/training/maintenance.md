@@ -68,3 +68,4 @@ request. For the zero-cost exercise, confirm that no maintenance cost row was cr
 
 - [Accommodation operations](accommodation.md)
 - [Safety operations](safety.md)
+- [Background follow-up](settings.md#background-follow-up)

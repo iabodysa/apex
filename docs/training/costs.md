@@ -69,3 +69,4 @@ payment was created by the exercise.
 
 - [Accommodation operations](accommodation.md)
 - [Rentals](rentals.md)
+- [Background follow-up](settings.md#background-follow-up)

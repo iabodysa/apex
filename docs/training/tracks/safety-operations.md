@@ -37,3 +37,8 @@ Show one complete source chain with the correct Building, distinct maker and
 submitter, required evidence, generated maintenance handoff, and unchanged audit
 ledger. The existence of a Maintenance Request is not evidence that the repair is
 complete.
+
+## Related links
+
+- [Trainer setup and reset](../trainer-setup.md)
+- [Settings](../settings.md)

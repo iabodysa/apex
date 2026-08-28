@@ -64,3 +64,4 @@ exercise created no General Ledger entry.
 
 - [Fleet and movement](fleet-movement.md)
 - [Fleet compliance and financial handoffs](compliance.md)
+- [Background follow-up](settings.md#background-follow-up)

@@ -67,3 +67,4 @@ photo where required, the generated maintenance link, and the matching
 
 - [Maintenance operations](maintenance.md)
 - [Safety Operations track](tracks/safety-operations.md)
+- [Background follow-up](settings.md#background-follow-up)

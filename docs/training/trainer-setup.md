@@ -57,7 +57,9 @@ issuing any personal link.
 
 - two fictional driver Employees and active Salis Driver records;
 - one active owned vehicle and assignment;
-- a Transport Request, Route Plan, and Dispatch Trip;
+- one Work Shift, one Route Template, and one approved Route Assignment for a recurring trip;
+- two approved Transport Requests with different pickup or drop-off stops, and one planned
+  Dispatch Trip that can carry both requests;
 - a Fuel Platform and a fuel scenario; and
 - one rented vehicle, Supplier, Rental Office, and normally generated accrual period.
 - the `lending` app installed, if the cohort is taught damage recovery: without it a Vehicle Incident saves and raises no recovery, so the lesson has nothing to show.
@@ -220,3 +222,4 @@ learners. Never reset a site while another cohort is using it.
 - [Training home](README.md)
 - [Follow Work from Request to Proof](foundations.md)
 - [Worker and Driver Portals](portals-masar-driver.md)
+- [Settings](settings.md)

@@ -71,3 +71,4 @@ Employee balance changes.
 
 - [Accommodation operations](accommodation.md)
 - [Costs and leasing](costs.md)
+- [Background follow-up](settings.md#background-follow-up)

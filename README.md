@@ -153,7 +153,7 @@ experience; they do not open the wider operations workspace.
 
 ## Get started
 
-Apex supports:
+Apex 2.6 supports:
 
 - Frappe Framework 15
 - ERPNext 15
@@ -161,7 +161,7 @@ Apex supports:
 - Python `>=3.10`
 
 Install Frappe, ERPNext, and HRMS on the target site before installing Apex. For an
-evaluation or controlled deployment of the current release:
+evaluation or controlled deployment of the latest published release:
 
 ```bash
 cd frappe-bench
@@ -169,6 +169,9 @@ bench get-app --branch v2.9.3 https://github.com/iabodysa/apex.git
 bench --site <site> install-app apex
 bench --site <site> migrate
 ```
+
+The repository source is version 2.6.0. Until a 2.6 tag is published, the command above
+keeps new installations on the latest reviewed tag, `v2.5.0`.
 
 Production installations should use a reviewed tag and full commit SHA, take a verified
 backup, and prove the same application combination in staging before changing an existing

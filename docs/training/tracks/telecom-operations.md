@@ -20,6 +20,8 @@ only for training administration.
    [Follow Work from Request to Proof](../foundations.md).
 3. Complete the operating and Finance procedures in [Telecom](../telecom.md).
 4. Check the **Error Log** only if the resulting state or Cost Center is unexpected.
+5. If the resulting state or Cost Center is unexpected, compare the SIM Card with its
+   latest submitted custody event before changing either record.
 
 ## Capstone
 
@@ -43,3 +45,8 @@ Show the submitted contract, both SIM identities, both valid custody chains, the
 Employee and Project Cost Center snapshots, the in-place number correction, the
 out-of-scope Company denial, and the two source-linked Finance drafts. A draft
 Payment Entry is a handoff, not proof of settlement.
+
+## Related links
+
+- [Background follow-up](../settings.md#background-follow-up)
+- [Trainer setup and reset](../trainer-setup.md)
