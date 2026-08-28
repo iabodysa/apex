@@ -78,3 +78,36 @@ class TestTripFulfilmentLedgerUniqueness(FrappeTestCase):
             _fulfilment_row(dispatch_trip="_T-DT-9201").insert(
                 ignore_permissions=True, ignore_links=True
             )
+
+
+class TestTripFulfilmentLedgerReversal(FrappeTestCase):
+    def _pair(self, trip):
+        original = _fulfilment_row(dispatch_trip=trip)
+        original.insert(ignore_permissions=True, ignore_links=True)
+        self.addCleanup(
+            lambda: frappe.db.delete("Trip Fulfilment Ledger", {"dispatch_trip": trip})
+        )
+        return original
+
+    def test_a_reversal_of_a_posted_row_is_accepted_beside_it(self):
+        original = self._pair("_T-DT-9301")
+        reversal = _fulfilment_row(
+            dispatch_trip="_T-DT-9301", worker_count=-4, reversal_of=original.name
+        )
+        reversal.insert(ignore_permissions=True, ignore_links=True)
+        self.assertEqual(reversal.is_reversal, 1)
+        self.assertTrue(frappe.db.exists("Trip Fulfilment Ledger", original.name))
+
+    def test_a_row_naming_no_original_is_not_a_reversal(self):
+        original = self._pair("_T-DT-9302")
+        self.assertEqual(original.is_reversal, 0)
+
+    def test_a_second_reversal_of_one_trip_is_refused_by_the_database(self):
+        original = self._pair("_T-DT-9303")
+        _fulfilment_row(
+            dispatch_trip="_T-DT-9303", worker_count=-4, reversal_of=original.name
+        ).insert(ignore_permissions=True, ignore_links=True)
+        with self.assertRaisesRegex(frappe.UniqueValidationError, UNIQUE_KEY_NAME):
+            _fulfilment_row(
+                dispatch_trip="_T-DT-9303", worker_count=-4, reversal_of=original.name
+            ).insert(ignore_permissions=True, ignore_links=True)

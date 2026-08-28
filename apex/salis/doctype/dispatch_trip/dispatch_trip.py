@@ -190,7 +190,9 @@ class DispatchTrip(Document):
             )
 
     def _post_fulfilment_ledger(self):
-        if frappe.db.exists("Trip Fulfilment Ledger", {"dispatch_trip": self.name}):
+        if frappe.db.exists(
+            "Trip Fulfilment Ledger", {"dispatch_trip": self.name, "is_reversal": 0}
+        ):
             return
         request_names = self._request_names()
         worker_count = sum(
@@ -223,15 +225,43 @@ class DispatchTrip(Document):
 
     def on_cancel(self):
         self._revert_transport_requests()
+        self._reverse_fulfilment_ledger()
+        reverse_trip_boarding(self.name)
+
+    def _reverse_fulfilment_ledger(self):
         for row in frappe.get_all(
             "Trip Fulfilment Ledger",
-            filters={"dispatch_trip": self.name},
-            pluck="name",
+            filters={"dispatch_trip": self.name, "is_reversal": 0},
+            fields=[
+                "name",
+                "transport_request",
+                "route_plan",
+                "vehicle",
+                "driver",
+                "trip_date",
+                "worker_count",
+                "has_timestamps",
+            ],
         ):
-            frappe.delete_doc(
-                "Trip Fulfilment Ledger", row, ignore_permissions=True, force=True
-            )
-        reverse_trip_boarding(self.name)
+            if frappe.db.exists("Trip Fulfilment Ledger", {"reversal_of": row.name}):
+                continue
+            frappe.get_doc(
+                {
+                    "doctype": "Trip Fulfilment Ledger",
+                    "dispatch_trip": self.name,
+                    "transport_request": row.transport_request,
+                    "route_plan": row.route_plan,
+                    "vehicle": row.vehicle,
+                    "driver": row.driver,
+                    "trip_date": row.trip_date,
+                    "worker_count": -(row.worker_count or 0),
+                    "has_timestamps": row.has_timestamps,
+                    "logged_at": now_datetime(),
+                    "source_doctype": self.doctype,
+                    "source_name": self.name,
+                    "reversal_of": row.name,
+                }
+            ).insert(ignore_permissions=True)
 
     def on_trash(self):
         for request in self._request_names():

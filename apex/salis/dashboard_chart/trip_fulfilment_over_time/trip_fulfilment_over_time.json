@@ -15,6 +15,6 @@
  "is_standard": 1,
  "module": "Salis",
  "use_report_chart": 0,
- "filters_json": "[]",
- "modified": "2026-06-02 13:30:00.000000"
+ "filters_json": "[[\"Trip Fulfilment Ledger\", \"is_reversal\", \"=\", 0, false]]",
+ "modified": "2026-08-28 00:00:00.000000"
 }
