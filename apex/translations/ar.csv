@@ -493,7 +493,6 @@ Assigns a vehicle to a driver and project for a defined period.,يُسنِد م�
 Assumed Fleet Speed (km/h),السرعة المفترضة للأسطول (كم/س)
 Assumed average fleet speed (km/h) used to estimate the worker's live ride ETA from the driver's GPS position; blank or zero uses the built-in default.,متوسط سرعة الأسطول المفترض (كم/س) المستخدم لتقدير الوقت المتوقع لوصول رحلة العامل المباشرة من موقع السائق عبر تحديد المواقع؛ وتُستخدم القيمة الافتراضية المدمجة عند تركه فارغًا أو صفرًا.
 At,في
-At least one item is required on a Material Transfer.,يجب إدخال صنف واحد على الأقل في نقل المواد.
 At least one worker is required for an Inter-City Relocation.,يلزم عامل واحد على الأقل لعملية النقل بين المدن.
 Attach File,إرفاق ملف
 Attach Photo,إرفاق صورة
