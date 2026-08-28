@@ -1,7 +1,6 @@
 [
  {
   "doctype": "QR Location",
-  "naming_series": "QR-LOC-.####",
   "poster_title": "_T-Front Gate Poster",
   "building": "_Test Building",
   "room": "_T-101",
@@ -9,7 +8,6 @@
  },
  {
   "doctype": "QR Location",
-  "naming_series": "QR-LOC-.####",
   "poster_title": "_T-Retired Poster",
   "building": "_Test Building 2",
   "is_active": 0,

@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Freelancer",
-  "naming_series": "FRL-.######",
   "full_name": "_T-Freelancer One",
   "national_id_or_iqama": "1234567890",
   "contract_start_date": "2026-01-01",
@@ -10,7 +9,6 @@
  },
  {
   "doctype": "Freelancer",
-  "naming_series": "FRL-.######",
   "full_name": "_T-Freelancer Two",
   "national_id_or_iqama": "1234567891",
   "contract_start_date": "2025-01-01",

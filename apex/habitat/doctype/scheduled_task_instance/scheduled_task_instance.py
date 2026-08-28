@@ -32,7 +32,7 @@ def on_doctype_update():
 
 
 def on_submit(doc, method=None):
-    if doc.status not in ("In Progress", "Completed", "Cancelled"):
+    if doc.status not in ("In Progress", "Completed", "Cancelled", "Overdue"):
         doc.db_set("status", "Open")
 
 

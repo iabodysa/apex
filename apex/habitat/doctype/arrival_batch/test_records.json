@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Arrival Batch",
-  "naming_series": "ARR-BATCH-.YYYY.-.####",
   "building": "_Test Building",
   "expected_date": "2026-01-20",
   "expected_workers": [
@@ -13,7 +12,6 @@
  },
  {
   "doctype": "Arrival Batch",
-  "naming_series": "ARR-BATCH-.YYYY.-.####",
   "building": "_Test Building 2",
   "expected_date": "2026-02-05",
   "labour_supplier": "_Test Supplier",

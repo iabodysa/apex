@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Custody Issue",
-  "naming_series": "CUST-ISS-.YYYY.-.####",
   "issue_date": "2026-01-10",
   "building": "_Test Building",
   "party_type": "Employee",
@@ -14,7 +13,6 @@
  },
  {
   "doctype": "Custody Issue",
-  "naming_series": "CUST-ISS-.YYYY.-.####",
   "issue_date": "2026-02-05",
   "building": "_Test Building 2",
   "party_type": "Temporary Worker",

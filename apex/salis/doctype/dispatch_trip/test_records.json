@@ -8,7 +8,7 @@
   "doctype": "Dispatch Trip",
   "trip_type": "Scheduled",
   "trip_date": "2026-02-01",
-  "vehicle": "VEH-000001",
-  "driver": "DRV-000001"
+  "vehicle": "_T-Salis Vehicle-00001",
+  "driver": "_T-Salis Driver-00001"
  }
 ]

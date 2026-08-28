@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Facility Asset Delivery",
-  "naming_series": "FAD-.YYYY.-.#####",
   "delivery_date": "2026-01-05",
   "facility_asset": "_T-Facility Asset-00002",
   "from_building": "_Test Building 2",
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Facility Asset Delivery",
-  "naming_series": "FAD-.YYYY.-.#####",
   "delivery_date": "2026-01-10",
   "facility_asset": "_T-Facility Asset-00001",
   "from_building": "_Test Building",

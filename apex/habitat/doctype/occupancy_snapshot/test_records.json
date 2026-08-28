@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Occupancy Snapshot",
-  "naming_series": "ACC-OCC-.YYYY.-.#####",
   "snapshot_date": "2026-01-01",
   "building": "_Test Building",
   "active_occupants": 2,
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Occupancy Snapshot",
-  "naming_series": "ACC-OCC-.YYYY.-.#####",
   "snapshot_date": "2026-01-01",
   "building": "_Test Building 2",
   "active_occupants": 2,

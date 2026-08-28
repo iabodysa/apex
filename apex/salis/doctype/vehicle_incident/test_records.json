@@ -1,18 +1,16 @@
 [
  {
   "doctype": "Vehicle Incident",
-  "naming_series": "VI-.######",
   "incident_type": "Accident",
-  "vehicle": "VEH-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
   "incident_date": "2026-01-10",
   "description": "_T-Minor fender bender at the site gate",
   "fault": "Other Driver"
  },
  {
   "doctype": "Vehicle Incident",
-  "naming_series": "VI-.######",
   "incident_type": "Theft",
-  "vehicle": "VEH-000002",
+  "vehicle": "_T-Salis Vehicle-00002",
   "incident_date": "2026-02-01",
   "description": "_T-Vehicle reported missing from the rental yard overnight",
   "estimated_cost": 20000

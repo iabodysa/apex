@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Maintenance Request",
-  "naming_series": "MAINT-.YYYY.-.#####",
   "building": "_Test Building",
   "room": "_T-101",
   "issue_type": "Electrical",
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Maintenance Request",
-  "naming_series": "MAINT-.YYYY.-.#####",
   "building": "_Test Building 2",
   "room": "_T-201",
   "bed": "_T-201-A",

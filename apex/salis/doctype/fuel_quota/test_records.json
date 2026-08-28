@@ -1,16 +1,14 @@
 [
  {
   "doctype": "Fuel Quota",
-  "naming_series": "FQ-.######",
-  "vehicle": "VEH-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
   "period_month": "2026-01",
   "monthly_litres": 300,
   "monthly_amount": 900
  },
  {
   "doctype": "Fuel Quota",
-  "naming_series": "FQ-.######",
-  "vehicle": "VEH-000002",
+  "vehicle": "_T-Salis Vehicle-00002",
   "period_month": "2026-02",
   "monthly_litres": 250,
   "consumed_litres": 260,

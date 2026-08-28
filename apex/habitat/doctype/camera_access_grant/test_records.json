@@ -1,14 +1,12 @@
 [
  {
   "doctype": "Camera Access Grant",
-  "naming_series": "CAM-ACC-.YYYY.-.####",
   "requested_for": "test@example.com",
   "access_level": "Live View Only",
   "valid_from": "2026-01-01"
  },
  {
   "doctype": "Camera Access Grant",
-  "naming_series": "CAM-ACC-.YYYY.-.####",
   "requested_for": "Administrator",
   "access_level": "Full Admin",
   "valid_from": "2026-02-01",

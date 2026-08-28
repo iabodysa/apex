@@ -43,13 +43,17 @@ def _unique_index_columns(table, index_name):
 
 class TestTripFulfilmentLedgerImmutability(FrappeTestCase):
     def test_a_posted_row_refuses_a_second_write(self):
-        doc = _fulfilment_row().insert(ignore_permissions=True)
+        doc = _fulfilment_row(dispatch_trip="_T-DT-9001").insert(
+            ignore_permissions=True, ignore_links=True
+        )
         doc.worker_count = 9
         with self.assertRaises(frappe.PermissionError):
             doc.save(ignore_permissions=True)
 
     def test_a_first_write_is_accepted(self):
-        doc = _fulfilment_row().insert(ignore_permissions=True)
+        doc = _fulfilment_row(dispatch_trip="_T-DT-9002").insert(
+            ignore_permissions=True, ignore_links=True
+        )
         self.assertEqual(doc.worker_count, 4)
 
 

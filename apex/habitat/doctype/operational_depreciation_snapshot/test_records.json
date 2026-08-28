@@ -3,7 +3,6 @@
   "doctype": "Operational Depreciation Snapshot",
   "snapshot_date": "2026-01-31",
   "building": "_Test Building",
-  "naming_series": "DEP-SNAP-.YYYY.-.####",
   "items": [
    {
     "article": "_T-Custody Article-00001",
@@ -16,7 +15,6 @@
   "doctype": "Operational Depreciation Snapshot",
   "snapshot_date": "2026-02-28",
   "building": "_Test Building 2",
-  "naming_series": "DEP-SNAP-.YYYY.-.####",
   "items": [
    {
     "article": "_T-Custody Article-00002",

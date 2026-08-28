@@ -1,8 +1,7 @@
 [
  {
   "doctype": "Driver Attendance",
-  "naming_series": "ATT-.######",
-  "driver": "DRV-000001",
+  "driver": "_T-Salis Driver-00001",
   "attendance_date": "2026-01-10",
   "status": "Present",
   "check_in": "2026-01-10 08:00:00",
@@ -10,8 +9,7 @@
  },
  {
   "doctype": "Driver Attendance",
-  "naming_series": "ATT-.######",
-  "driver": "DRV-000002",
+  "driver": "_T-Salis Driver-00002",
   "attendance_date": "2026-01-10",
   "status": "Absent"
  }

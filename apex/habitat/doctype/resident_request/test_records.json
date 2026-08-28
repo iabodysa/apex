@@ -1,13 +1,11 @@
 [
  {
   "doctype": "Resident Request",
-  "naming_series": "REQ-.YYYY.-.####",
   "request_category": "Maintenance",
   "description": "_T-AC not cooling in room"
  },
  {
   "doctype": "Resident Request",
-  "naming_series": "REQ-.YYYY.-.####",
   "request_category": "Complaint",
   "description": "_T-Noise complaint from neighboring room",
   "status": "Resolved",

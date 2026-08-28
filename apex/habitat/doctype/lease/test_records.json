@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Lease",
-  "naming_series": "ACC-LEASE-.YYYY.-.####",
   "building": "_Test Building",
   "lease_start_date": "2026-01-01",
   "lease_end_date": "2026-12-31",
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Lease",
-  "naming_series": "ACC-LEASE-.YYYY.-.####",
   "building": "_Test Building 2",
   "lease_start_date": "2026-01-01",
   "lease_end_date": "2027-12-31",

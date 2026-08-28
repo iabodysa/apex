@@ -2,8 +2,7 @@
  {
   "doctype": "Vehicle Utilisation Snapshot",
   "snapshot_date": "2026-01-05",
-  "vehicle": "VEH-000001",
-  "naming_series": "VUS-.######",
+  "vehicle": "_T-Salis Vehicle-00001",
   "period_days": 7,
   "trips_count": 12,
   "idle_days": 0,
@@ -12,8 +11,7 @@
  {
   "doctype": "Vehicle Utilisation Snapshot",
   "snapshot_date": "2026-01-12",
-  "vehicle": "VEH-000002",
-  "naming_series": "VUS-.######",
+  "vehicle": "_T-Salis Vehicle-00002",
   "period_days": 7,
   "trips_count": 2,
   "idle_days": 5,

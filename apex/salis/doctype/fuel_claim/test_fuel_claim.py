@@ -62,6 +62,7 @@ def _ledger(vehicle, litres):
             "amount": litres * 2,
             "source_type": "Fuel Daily Log",
             "source_doctype": "Fuel Daily Log",
+            "source_name": "_T-FDL-" + frappe.generate_hash(length=8),
             "logged_at": frappe.utils.now_datetime(),
         }
     ).insert(ignore_permissions=True)

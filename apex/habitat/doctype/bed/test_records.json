@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Bed",
-  "naming_series": "BED-.####",
   "room": "_T-101",
   "bed_code": "_T-101-A",
   "status": "Available",
@@ -10,7 +9,6 @@
  },
  {
   "doctype": "Bed",
-  "naming_series": "BED-.####",
   "room": "_T-101",
   "bed_code": "_T-101-B",
   "status": "Available",
@@ -19,7 +17,6 @@
  },
  {
   "doctype": "Bed",
-  "naming_series": "BED-.####",
   "room": "_T-102",
   "bed_code": "_T-102-A",
   "status": "Available",
@@ -28,7 +25,6 @@
  },
  {
   "doctype": "Bed",
-  "naming_series": "BED-.####",
   "room": "_T-102",
   "bed_code": "_T-102-B",
   "status": "Available",
@@ -37,7 +33,6 @@
  },
  {
   "doctype": "Bed",
-  "naming_series": "BED-.####",
   "room": "_T-201",
   "bed_code": "_T-201-A",
   "status": "Available",

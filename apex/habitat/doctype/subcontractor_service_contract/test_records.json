@@ -2,7 +2,6 @@
  {
   "doctype": "Subcontractor Service Contract",
   "supplier": "_Test Supplier",
-  "naming_series": "SUB-CON-.YYYY.-.####",
   "service_type": "Pest Control",
   "visit_frequency": "Monthly",
   "contract_start_date": "2026-01-01",
@@ -12,7 +11,6 @@
  {
   "doctype": "Subcontractor Service Contract",
   "supplier": "_Test Supplier",
-  "naming_series": "SUB-CON-.YYYY.-.####",
   "service_type": "Generator Service",
   "visit_frequency": "Quarterly",
   "contract_start_date": "2026-03-01",

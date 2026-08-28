@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Cleaning Log",
-  "naming_series": "CLEAN-.YYYY.-.####",
   "building": "_Test Building",
   "cleaning_date": "2026-01-10",
   "cleaner_type": "Internal Employee",
@@ -9,7 +8,6 @@
  },
  {
   "doctype": "Cleaning Log",
-  "naming_series": "CLEAN-.YYYY.-.####",
   "building": "_Test Building 2",
   "cleaning_date": "2026-01-11",
   "cleaner_type": "Subcontractor",

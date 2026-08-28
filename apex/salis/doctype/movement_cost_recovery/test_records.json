@@ -1,17 +1,15 @@
 [
  {
   "doctype": "Movement Cost Recovery",
-  "naming_series": "MCR-.######",
   "recovery_type": "Vehicle Damage",
-  "vehicle": "VEH-000001",
-  "driver": "DRV-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
+  "driver": "_T-Salis Driver-00001",
   "request_date": "2026-01-18",
   "amount": 850,
   "basis_evidence": "/files/_test-damage-photo.pdf"
  },
  {
   "doctype": "Movement Cost Recovery",
-  "naming_series": "MCR-.######",
   "recovery_type": "Fine / Violation",
   "employee": "_T-Employee-00001",
   "request_date": "2026-02-22",

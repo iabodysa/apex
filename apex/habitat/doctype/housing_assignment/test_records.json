@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Housing Assignment",
-  "naming_series": "ACC-ASGN-.YYYY.-.####",
   "party_type": "Employee",
   "employee": "_T-Employee-00001",
   "building": "_Test Building",
@@ -14,7 +13,6 @@
  },
  {
   "doctype": "Housing Assignment",
-  "naming_series": "ACC-ASGN-.YYYY.-.####",
   "party_type": "Employee",
   "employee": "_T-Employee-00002",
   "building": "_Test Building 2",

@@ -30,6 +30,25 @@ class TestScheduledTaskInstanceCancelGuard(FrappeTestCase):
             doc.cancel()
 
 
+class TestScheduledTaskInstanceOverdueMark(FrappeTestCase):
+    def test_an_overdue_mark_survives_the_submit_that_follows_it(self):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Scheduled Task Instance",
+                "naming_series": "STI-.YYYY.-.####",
+                "template": "_T-STI-fake-template",
+                "due_date": "2026-03-01",
+                "status": "Overdue",
+            }
+        )
+        doc.insert(ignore_permissions=True, ignore_links=True)
+        self.addCleanup(purge_doc, "Scheduled Task Instance", doc.name)
+        doc.submit()
+        self.assertEqual(
+            frappe.db.get_value("Scheduled Task Instance", doc.name, "status"), "Overdue"
+        )
+
+
 def _unique_index_columns(table, index_name):
     rows = frappe.db.sql(
         """

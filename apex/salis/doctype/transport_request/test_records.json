@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Transport Request",
-  "naming_series": "TR-.######",
   "service_line": "Administrative Trip",
   "request_type": "Administrative Trip / Document Signing",
   "destination": "Riyadh Head Office",
@@ -9,7 +8,6 @@
  },
  {
   "doctype": "Transport Request",
-  "naming_series": "TR-.######",
   "service_line": "Site Transport",
   "request_type": "Accommodation to Project Shuttle",
   "accommodation_building": "_Test Building",

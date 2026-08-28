@@ -1,13 +1,11 @@
 [
  {
   "doctype": "Salis Driver",
-  "naming_series": "DRV-.######",
   "full_name": "_Test Driver",
   "status": "Active"
  },
  {
   "doctype": "Salis Driver",
-  "naming_series": "DRV-.######",
   "full_name": "_Test Driver Two",
   "status": "Active"
  }

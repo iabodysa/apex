@@ -1,16 +1,14 @@
 [
  {
   "doctype": "Vehicle Suspension",
-  "naming_series": "SV-.######",
-  "vehicle": "VEH-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
   "stop_reason": "Maintenance",
   "stop_date": "2026-01-05",
   "estimated_cost": 300
  },
  {
   "doctype": "Vehicle Suspension",
-  "naming_series": "SV-.######",
-  "vehicle": "VEH-000002",
+  "vehicle": "_T-Salis Vehicle-00002",
   "stop_reason": "Accident",
   "stop_date": "2026-02-10",
   "estimated_cost": 5000,

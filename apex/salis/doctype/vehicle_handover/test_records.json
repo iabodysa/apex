@@ -1,22 +1,20 @@
 [
  {
   "doctype": "Vehicle Handover",
-  "naming_series": "GV-.######",
-  "vehicle": "VEH-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
   "direction": "Transfer",
-  "from_driver": "DRV-000001",
-  "to_driver": "DRV-000002",
+  "from_driver": "_T-Salis Driver-00001",
+  "to_driver": "_T-Salis Driver-00002",
   "handover_date": "2026-01-15",
   "odometer_reading": 1000,
   "fuel_level": "Half"
  },
  {
   "doctype": "Vehicle Handover",
-  "naming_series": "GV-.######",
-  "vehicle": "VEH-000002",
+  "vehicle": "_T-Salis Vehicle-00002",
   "direction": "Transfer",
-  "from_driver": "DRV-000002",
-  "to_driver": "DRV-000001",
+  "from_driver": "_T-Salis Driver-00002",
+  "to_driver": "_T-Salis Driver-00001",
   "handover_date": "2026-02-15",
   "odometer_reading": 500,
   "fuel_level": "Full",

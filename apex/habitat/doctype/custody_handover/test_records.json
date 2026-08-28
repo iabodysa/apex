@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Custody Handover",
-  "naming_series": "ACC-HND-.YYYY.-.#####",
   "handover_date": "2026-01-12",
   "from_building": "_Test Building",
   "to_building": "_Test Building 2",
@@ -17,7 +16,6 @@
  },
  {
   "doctype": "Custody Handover",
-  "naming_series": "ACC-HND-.YYYY.-.#####",
   "handover_date": "2026-02-14",
   "from_building": "_Test Building 2",
   "to_building": "_Test Building",

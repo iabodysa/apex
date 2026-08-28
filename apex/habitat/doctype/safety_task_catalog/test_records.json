@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Safety Task Catalog",
-  "naming_series": "STC-.####",
   "task_code": "_T-SAFE-001",
   "task_title": "_Test Fire Extinguisher Check",
   "department": "Fire Safety",

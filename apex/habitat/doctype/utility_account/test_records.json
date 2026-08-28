@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Utility Account",
-  "naming_series": "UTIL-ACC-.####",
   "building": "_Test Building",
   "utility_type": "Electricity",
   "account_number": "_T-UTIL-ELEC-001",
@@ -9,7 +8,6 @@
  },
  {
   "doctype": "Utility Account",
-  "naming_series": "UTIL-ACC-.####",
   "building": "_Test Building 2",
   "utility_type": "Water",
   "account_number": "_T-UTIL-WATER-001",

@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Idle Resident Report",
-  "naming_series": "IDLE-.YYYY.-.####",
   "party_type": "Employee",
   "employee": "_T-Employee-00003",
   "building": "_Test Building",
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Idle Resident Report",
-  "naming_series": "IDLE-.YYYY.-.####",
   "party_type": "Employee",
   "employee": "_T-Employee-00002",
   "building": "_Test Building 2",

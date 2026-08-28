@@ -24,6 +24,8 @@ class TestAccommodationLedgerPartyMirroring(FrappeTestCase):
                 "building": "_Test Building",
                 "party_type": "Employee",
                 "party": "_T-Employee-00001",
+                "source_doctype": "Housing Assignment",
+                "source_name": "_T-HA-9001",
             }
         )
         doc.insert(ignore_permissions=True, ignore_links=True)

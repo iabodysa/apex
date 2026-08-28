@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Material Transfer",
-  "naming_series": "ACC-MTR-.YYYY.-.######",
   "transfer_date": "2026-01-08",
   "from_building": "_Test Building",
   "to_building": "_Test Building 2",
@@ -15,7 +14,6 @@
  },
  {
   "doctype": "Material Transfer",
-  "naming_series": "ACC-MTR-.YYYY.-.######",
   "transfer_date": "2026-02-14",
   "from_building": "_Test Building 2",
   "to_building": "_Test Building",

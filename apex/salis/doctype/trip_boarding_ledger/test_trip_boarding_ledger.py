@@ -26,13 +26,17 @@ def _boarding_row(**overrides):
 
 class TestTripBoardingLedgerImmutability(FrappeTestCase):
     def test_a_posted_row_refuses_a_second_write(self):
-        doc = _boarding_row().insert(ignore_permissions=True)
+        doc = _boarding_row(
+            dispatch_trip="_T-DT-9001", employee="_T-Employee-00001"
+        ).insert(ignore_permissions=True, ignore_links=True)
         doc.outcome = "Missed"
         with self.assertRaises(frappe.PermissionError):
             doc.save(ignore_permissions=True)
 
     def test_a_first_write_is_accepted(self):
-        doc = _boarding_row().insert(ignore_permissions=True)
+        doc = _boarding_row(
+            dispatch_trip="_T-DT-9002", employee="_T-Employee-00001"
+        ).insert(ignore_permissions=True, ignore_links=True)
         self.assertEqual(doc.outcome, "Boarded")
 
 

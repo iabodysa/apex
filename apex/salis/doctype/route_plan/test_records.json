@@ -1,16 +1,14 @@
 [
  {
   "doctype": "Route Plan",
-  "naming_series": "RP-.######",
   "route_name": "_T-Morning Site Shuttle",
   "project": "_T-Project-00001",
   "shift": "Morning",
-  "driver": "DRV-000001",
-  "vehicle": "VEH-000001"
+  "driver": "_T-Salis Driver-00001",
+  "vehicle": "_T-Salis Vehicle-00001"
  },
  {
   "doctype": "Route Plan",
-  "naming_series": "RP-.######",
   "route_name": "_T-Evening Return Shuttle",
   "project": "_T-Project-00001",
   "shift": "Evening"

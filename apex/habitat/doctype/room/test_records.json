@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Room",
-  "naming_series": "ROOM-.####",
   "building": "_Test Building",
   "room_number": "_T-101",
   "room_type": "Worker",
@@ -11,7 +10,6 @@
  },
  {
   "doctype": "Room",
-  "naming_series": "ROOM-.####",
   "building": "_Test Building",
   "room_number": "_T-102",
   "room_type": "Worker",
@@ -21,7 +19,6 @@
  },
  {
   "doctype": "Room",
-  "naming_series": "ROOM-.####",
   "building": "_Test Building 2",
   "room_number": "_T-201",
   "room_type": "Worker",

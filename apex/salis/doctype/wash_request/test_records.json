@@ -1,14 +1,12 @@
 [
  {
   "doctype": "Wash Request",
-  "naming_series": "WR-.######",
-  "vehicle": "VEH-000001",
+  "vehicle": "_T-Salis Vehicle-00001",
   "wash_type": "Exterior"
  },
  {
   "doctype": "Wash Request",
-  "naming_series": "WR-.######",
-  "vehicle": "VEH-000002",
+  "vehicle": "_T-Salis Vehicle-00002",
   "wash_type": "Full",
   "sticker_requested": 1,
   "status": "Cancelled"

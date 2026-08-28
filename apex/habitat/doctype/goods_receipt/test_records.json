@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Goods Receipt",
-  "naming_series": "ACC-GRN-.YYYY.-.#####",
   "receipt_date": "2026-01-05",
   "intake_building": "_Test Building 2",
   "procurement_supervisor": "Administrator",
@@ -17,7 +16,6 @@
  },
  {
   "doctype": "Goods Receipt",
-  "naming_series": "ACC-GRN-.YYYY.-.#####",
   "receipt_date": "2026-02-10",
   "intake_building": "_Test Building 2",
   "procurement_supervisor": "Administrator",
