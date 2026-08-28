@@ -283,7 +283,6 @@ scheduler_events = {
         "apex.logistay.tasks.contract_alerts.contract_expiry_soon_watch",
         "apex.salis.fuel_engine.accrue_fuel_consumption",
         "apex.salis.rental_engine.daily_rental_accrual",
-        "apex.apex_core.utils.workflow_utils.cleanup_orphaned_workflow_actions",
     ],
     "weekly": [
         "apex.habitat.tasks.occupancy.weekly_occupancy_sync",
