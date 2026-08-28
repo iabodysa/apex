@@ -35,6 +35,18 @@ APP_OWNED_PERMISSIONS = (
     ("Notification Log", "All", 0, ("read", "create")),
     ("Material Request", "SIM Operations User", 0, ("create",)),
     ("Payment Entry", "SIM Operations User", 0, ("create",)),
+    ("Dispatch Trip", "Portal Driver Capacity", 0, ("read",)),
+    ("Dispatch Trip", "Portal Worker Capacity", 0, ("read",)),
+    ("Transport Request", "Portal Driver Capacity", 0, ("read",)),
+    ("Transport Request", "Portal Worker Capacity", 0, ("read",)),
+    ("Resident Request", "Portal Driver Capacity", 0, ("read",)),
+    ("Resident Request", "Portal Worker Capacity", 0, ("read",)),
+    ("Accommodation Stock Ledger", "Portal Driver Capacity", 0, ("read",)),
+    ("Accommodation Stock Ledger", "Portal Worker Capacity", 0, ("read",)),
+    ("Salis Vehicle", "Portal Worker Capacity", 0, ("read",)),
+    ("Salis Driver", "Portal Worker Capacity", 0, ("read",)),
+    ("Transport Trip Rating", "Portal Worker Capacity", 0, ("read",)),
+    ("Route Plan", "Portal Worker Capacity", 0, ("read",)),
 )
 
 _ALL_PTYPES = (

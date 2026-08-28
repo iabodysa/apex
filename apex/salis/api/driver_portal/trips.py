@@ -3,6 +3,7 @@
 import frappe
 from frappe import _
 
+from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.apex_core.utils.rate_limit_identity import rate_limit
 from apex.salis.api import masar
 from apex.salis.api.boarding_flow import _manifest_request_names
@@ -35,32 +36,33 @@ def _bounded_positive(value, default, maximum):
 def my_trips_today():
     _require_enabled()
     driver = _resolve_driver()
-    trips = frappe.get_all(
-        "Dispatch Trip",
-        filters={
-            "driver": driver,
-            "trip_date": frappe.utils.today(),
-            "status": "Dispatched",
-        },
-        fields=[
-            "name",
-            "trip_title",
-            "route_assignment",
-            "route_template",
-            "route_plan",
-            "project",
-            "vehicle",
-            "transport_request",
-            "depart_time",
-            "return_time",
-            "status",
-        ],
-        order_by="depart_time asc",
-    )
-    _label_trips(trips)
-    _attach_trip_log_state(trips, driver)
-    _attach_boarding_counts(trips, driver)
-    return trips
+    with as_capacity(DRIVER, driver):
+        trips = frappe.get_list(
+            "Dispatch Trip",
+            filters={
+                "driver": driver,
+                "trip_date": frappe.utils.today(),
+                "status": "Dispatched",
+            },
+            fields=[
+                "name",
+                "trip_title",
+                "route_assignment",
+                "route_template",
+                "route_plan",
+                "project",
+                "vehicle",
+                "transport_request",
+                "depart_time",
+                "return_time",
+                "status",
+            ],
+            order_by="depart_time asc",
+        )
+        _label_trips(trips)
+        _attach_trip_log_state(trips, driver)
+        _attach_boarding_counts(trips, driver)
+        return trips
 
 
 @frappe.whitelist(allow_guest=True)
@@ -70,30 +72,31 @@ def my_trips_recent(days=30, limit=50):
     driver = _resolve_driver()
     days = _bounded_positive(days, RECENT_TRIP_DEFAULT_DAYS, RECENT_TRIP_MAX_DAYS)
     limit = _bounded_positive(limit, RECENT_TRIP_DEFAULT_LIMIT, RECENT_TRIP_MAX_LIMIT)
-    since = frappe.utils.add_days(frappe.utils.today(), -days)
-    trips = frappe.get_all(
-        "Dispatch Trip",
-        filters={"driver": driver, "trip_date": [">=", since]},
-        fields=[
-            "name",
-            "trip_title",
-            "trip_date",
-            "route_assignment",
-            "route_template",
-            "route_plan",
-            "project",
-            "vehicle",
-            "depart_time",
-            "return_time",
-            "status",
-        ],
-        order_by="trip_date desc, depart_time desc",
-        limit=limit,
-    )
-    _label_trips(trips)
-    for t in trips:
-        t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
-    return trips
+    with as_capacity(DRIVER, driver):
+        since = frappe.utils.add_days(frappe.utils.today(), -days)
+        trips = frappe.get_list(
+            "Dispatch Trip",
+            filters={"driver": driver, "trip_date": [">=", since]},
+            fields=[
+                "name",
+                "trip_title",
+                "trip_date",
+                "route_assignment",
+                "route_template",
+                "route_plan",
+                "project",
+                "vehicle",
+                "depart_time",
+                "return_time",
+                "status",
+            ],
+            order_by="trip_date desc, depart_time desc",
+            limit=limit,
+        )
+        _label_trips(trips)
+        for t in trips:
+            t["trip_date"] = frappe.utils.cstr(t["trip_date"]) if t.get("trip_date") else None
+        return trips
 
 
 def _worker_phone(employee):
