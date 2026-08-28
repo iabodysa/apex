@@ -69,3 +69,26 @@ class TestScheduledTaskAssignmentNamingAndDefaults(FrappeTestCase):
     def test_a_new_assignment_is_active_without_the_operator_saying_so(self):
         doc = _assignment().insert(ignore_permissions=True)
         self.assertEqual(doc.is_active, 1)
+
+
+TEST_ASSIGNMENTS = (
+    ("_T-Scheduled Task Assignment-00001", "_Test Monthly AC Check", "2026-01-01"),
+    ("_T-Scheduled Task Assignment-00002", "_Test Weekly Fire Drill", "2026-06-01"),
+)
+
+
+def _make_test_records(verbose=None):
+    names = []
+    for name, template, effective_from in TEST_ASSIGNMENTS:
+        if not frappe.db.exists("Scheduled Task Assignment", name):
+            frappe.get_doc(
+                {
+                    "doctype": "Scheduled Task Assignment",
+                    "template": template,
+                    "building": "_Test Building",
+                    "effective_from": effective_from,
+                }
+            ).insert(set_name=name)
+        names.append(name)
+    frappe.db.commit()
+    return names
