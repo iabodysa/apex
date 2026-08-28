@@ -547,7 +547,8 @@ def schedule_recovery_deduction(advance: str, payroll_date: str | None = None) -
     installment.amount = amount
     installment.payroll_date = payroll_date
     installment.overwrite_salary_structure_amount = 0
-    installment.insert(ignore_permissions=True)
+    frappe.has_permission(installment.doctype, "create", throw=True)
+    installment.insert()
     return installment.name
 
 

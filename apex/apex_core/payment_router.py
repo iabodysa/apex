@@ -174,7 +174,8 @@ def route_payment(payment_request: str) -> str:
     target = frappe.new_doc(target_doctype)
     _apply_field_map(target, source, settings.field_map or [])
     _ensure_target_currency(target, source)
-    target.insert(ignore_permissions=True)
+    frappe.has_permission(target_doctype, "create", throw=True)
+    target.insert()
 
     if (
         settings.auto_submit_target
