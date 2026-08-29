@@ -341,8 +341,8 @@
    "fieldname": "assigned_vehicle",
    "fieldtype": "Link",
    "label": "Assigned Vehicle",
-   "options": "Salis Vehicle",
-   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
+   "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]",
+   "options": "Salis Vehicle"
   },
   {
    "fieldname": "transport_request_sec_assignment_col1",
@@ -352,8 +352,8 @@
    "fieldname": "assigned_driver",
    "fieldtype": "Link",
    "label": "Assigned Driver",
-   "options": "Salis Driver",
-   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]"
+   "link_filters": "[[\"Salis Driver\",\"status\",\"=\",\"Active\"]]",
+   "options": "Salis Driver"
   },
   {
    "fieldname": "dispatch_trip",
@@ -476,13 +476,30 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-23 12:00:00.000000",
+ "modified": "2026-08-29 07:30:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 0,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accommodation Manager",
+   "share": 0,
+   "submit": 0,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Finance Manager"
+  },
   {
    "cancel": 1,
    "create": 1,
@@ -511,24 +528,6 @@
    "role": "Fleet Supervisor",
    "submit": 1,
    "write": 1
-  },
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "read": 1,
-   "role": "Finance Manager"
   },
   {
    "export": 1,
@@ -538,15 +537,42 @@
    "role": "Internal Auditor"
   },
   {
-   "permlevel": 1,
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 0,
+   "print": 1,
    "read": 1,
-   "role": "Fleet Manager",
+   "report": 1,
+   "role": "Resident Supervisor",
+   "share": 0,
+   "submit": 0,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Worker",
    "write": 1
   },
   {
    "permlevel": 1,
    "read": 1,
-   "role": "System Manager",
+   "role": "Fleet Manager",
    "write": 1
   },
   {
@@ -562,9 +588,9 @@
    "write": 1
   },
   {
-   "create": 1,
+   "permlevel": 1,
    "read": 1,
-   "role": "Worker",
+   "role": "System Manager",
    "write": 1
   }
  ],
