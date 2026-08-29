@@ -377,7 +377,7 @@ def create_departure_transport(checkout):
 
     assignment = frappe.get_doc("Housing Assignment", doc.assignment)
     request = _build_departure_transport(doc, assignment)
-    request.insert()
+    request.insert(ignore_permissions=True)
 
     doc.db_set("departure_transport_request", request.name)
     doc.add_comment("Comment", _("Departure Transport Request raised: {0}").format(request.name))
