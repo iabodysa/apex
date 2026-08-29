@@ -475,7 +475,6 @@ has_permission = {
 }
 
 fixtures = [
-    {"dt": "Role", "filters": [["name", "in", ["Admin Manager"]]]},
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
     {
         "dt": "Role Profile",
