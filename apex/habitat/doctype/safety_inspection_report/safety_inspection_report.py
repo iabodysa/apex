@@ -24,7 +24,7 @@ class SafetyInspectionReport(Document):
             return
         docstatus = frappe.db.get_value("Maintenance Request", mr_name, "docstatus")
         if docstatus == 0:
-            frappe.delete_doc("Maintenance Request", mr_name, ignore_permissions=True)
+            frappe.delete_doc("Maintenance Request", mr_name)
         else:
             frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
 

@@ -247,7 +247,7 @@ def on_submit(doc, method=None):
                         "estimated_replacement_cost": 0,
                     })
             try:
-                damage_doc.insert(ignore_permissions=True)
+                damage_doc.insert()
                 doc.add_comment("Comment", _("Draft Damage Assessment created: {0}. Please review and submit.").format(damage_doc.name))
             except Exception:
                 frappe.log_error(
@@ -299,7 +299,7 @@ def _cancel_orphan_damage_assessment(doc):
         filters={"source_checkout": doc.name, "docstatus": 0},
         pluck="name",
     ):
-        frappe.delete_doc("Custody Damage Assessment", cda, ignore_permissions=True)
+        frappe.delete_doc("Custody Damage Assessment", cda)
 
 def before_cancel(doc, method=None):
     if not doc.cancellation_reason:

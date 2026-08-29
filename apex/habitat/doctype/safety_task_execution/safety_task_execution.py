@@ -49,7 +49,7 @@ class SafetyTaskExecution(Document):
         mr.reported_by = self.executed_by or frappe.session.user
         mr.status = "Open"
         mr.source_execution = self.name
-        mr.insert(ignore_permissions=True)
+        mr.insert()
         self.db_set("linked_maintenance_request", mr.name)
 
     def _has_linked_request(self) -> bool:

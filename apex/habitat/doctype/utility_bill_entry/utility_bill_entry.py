@@ -130,7 +130,7 @@ def _post_ledger_row(doc) -> None:
         "allocation_period_start": doc.billing_period_from,
         "allocation_period_end": doc.billing_period_to,
         **({"remarks": remarks} if remarks else {}),
-    }).insert(ignore_permissions=True)
+    }).insert()
 
 
 def _post_reversal_row(doc) -> None:
@@ -153,7 +153,7 @@ def _post_reversal_row(doc) -> None:
         "source_name": doc.name,
         "allocation_basis": "Direct",
         "reversal_of": original,
-    }).insert(ignore_permissions=True)
+    }).insert()
 
 
 def _live_ledger_row(source_name: str) -> str | None:

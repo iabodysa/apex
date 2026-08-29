@@ -45,7 +45,7 @@ def _insert_ledger_row(
             "reversal_of": reversal_of,
         }
     )
-    doc.insert(ignore_permissions=True)
+    doc.insert()
     return doc.name
 
 

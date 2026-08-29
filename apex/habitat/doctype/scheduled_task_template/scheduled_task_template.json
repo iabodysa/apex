@@ -146,14 +146,20 @@
  ],
  "permissions": [
   {
-   "doctype": "DocPerm",
-   "role": "System Manager",
-   "read": 1,
-   "write": 1,
    "create": 1,
-   "delete": 1
+   "delete": 1,
+   "doctype": "DocPerm",
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accommodation Manager",
+   "write": 1
   }
  ],
  "search_fields": "template_name, task_type, frequency",
- "modified": "2026-08-24 12:19:00.000000"
+ "modified": "2026-08-29 00:00:00.000000"
 }

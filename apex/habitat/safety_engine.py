@@ -60,7 +60,7 @@ def post_safety_findings(safety_round) -> int:
                     "source_detail_no": finding.idx,
                     "logged_at": now_datetime(),
                 }
-            ).insert(ignore_permissions=True)
+            ).insert()
             posted += 1
 
     return posted
@@ -111,7 +111,7 @@ def reverse_safety_findings(safety_round_name: str) -> int:
                 "reversal_of": row.name,
                 "logged_at": now_datetime(),
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
 
     return posted

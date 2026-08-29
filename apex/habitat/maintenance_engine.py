@@ -47,7 +47,7 @@ def post_maintenance_cost(work_order) -> int:
                 "source_name": work_order.name,
                 "source_detail_no": detail_no,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
     return posted
 
@@ -98,7 +98,7 @@ def reverse_maintenance_cost(source_name: str) -> int:
                 "source_detail_no": orig.source_detail_no,
                 "reversal_of": orig.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
 
     return posted

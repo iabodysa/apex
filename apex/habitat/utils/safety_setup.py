@@ -46,7 +46,7 @@ def _ensure_building_scope(catalog, building_name, tally) -> None:
     try:
         doc = frappe.get_doc("Safety Task Catalog", catalog.name)
         doc.append("applicable_buildings", {"building": building_name})
-        doc.save(ignore_permissions=True)
+        doc.save()
         tally.created_scopes += 1
     except Exception as exc:
         tally.failures.append(
@@ -68,7 +68,7 @@ def _get_or_create_template(catalog, template_freq):
         if not has_item:
             tmpl = frappe.get_doc("Scheduled Task Template", existing)
             tmpl.append("template_items", {"task_catalog": catalog.name, "is_active": 1})
-            tmpl.save(ignore_permissions=True)
+            tmpl.save()
         return existing, False
 
     title = catalog.task_title or catalog.task_code or catalog.name
@@ -80,7 +80,7 @@ def _get_or_create_template(catalog, template_freq):
         "safety_task_catalog": catalog.name,
         "is_active": 1,
         "template_items": [{"task_catalog": catalog.name, "is_active": 1}],
-    }).insert(ignore_permissions=True)
+    }).insert()
     return tmpl.name, True
 
 
@@ -98,7 +98,7 @@ def _ensure_assignment(catalog, template_name, building_name, tally) -> None:
             "building": building_name,
             "effective_from": today(),
             "is_active": 1,
-        }).insert(ignore_permissions=True)
+        }).insert()
         tally.created_assignments += 1
     except Exception as exc:
         tally.failures.append(

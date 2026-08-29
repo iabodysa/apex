@@ -127,7 +127,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2026-07-26 21:39:30.808627",
+ "modified": "2026-08-29 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Finding Ledger",
@@ -135,6 +135,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
@@ -153,10 +154,15 @@
    "role": "Internal Auditor"
   },
   {
+   "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager"
+  },
+  {
+   "create": 1,
+   "role": "Resident Supervisor"
   }
  ],
  "row_format": "Dynamic",

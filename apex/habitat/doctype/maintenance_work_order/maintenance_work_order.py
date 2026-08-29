@@ -59,7 +59,7 @@ class MaintenanceWorkOrder(Document):
             "source_name": self.name,
             "allocation_basis": "Direct",
             "reversal_of": original.name,
-        }).insert(ignore_permissions=True)
+        }).insert()
 
 
 def validate(doc, method=None):
@@ -218,7 +218,7 @@ def mark_completed(
             "allocation_basis": "Direct",
             "allocation_period_start": doc.actual_start_date,
             "allocation_period_end": doc.actual_end_date,
-        }).insert(ignore_permissions=True)
+        }).insert()
         ledger_posted = True
 
     post_maintenance_cost(doc)

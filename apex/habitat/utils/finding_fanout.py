@@ -35,7 +35,7 @@ def _spawn_request(finding, source_doc) -> str:
     mr.reported_by = _reported_by(source_doc)
     mr.status = "Open"
     _stamp_source(mr, source_doc)
-    mr.insert(ignore_permissions=True)
+    mr.insert()
     return mr.name
 
 

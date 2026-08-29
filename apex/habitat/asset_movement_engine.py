@@ -97,7 +97,7 @@ def post_asset_movement(doc) -> None:
             "source_doctype": doc.doctype,
             "source_name": doc.name,
         }
-    ).insert(ignore_permissions=True)
+    ).insert()
 
 
 def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
@@ -140,7 +140,7 @@ def reverse_asset_movement(source_doctype: str, source_name: str) -> int:
                 "source_name": source_name,
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
 
     return posted
