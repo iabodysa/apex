@@ -17,13 +17,6 @@ class ScheduledTaskInstance(Document):
 
 
 def on_doctype_update():
-    try:
-        frappe.db.sql(
-            "ALTER TABLE `tabScheduled Task Instance` DROP INDEX `unique_sti_template_due_status`"
-        )
-    except Exception:
-        pass
-
     add_unique_guarded(
         "Scheduled Task Instance",
         UNIQUE_KEY,
