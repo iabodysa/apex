@@ -46,7 +46,9 @@ class TestCustodyArticleCategory(FrappeTestCase):
             doc.insert(ignore_permissions=True)
 
     def test_framework_refuses_an_article_with_no_name(self):
-        with self.assertRaises(frappe.MandatoryError):
+        # article_name names the document, so naming refuses it before the
+        # mandatory check is ever reached; the class differs, the refusal does not.
+        with self.assertRaisesRegex(frappe.ValidationError, "Article Name is required"):
             _article(article_name=None).insert(ignore_permissions=True)
 
 
