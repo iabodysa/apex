@@ -110,6 +110,7 @@ Accident Details,تفاصيل الحادث
 Accommodation,السكن
 Accommodation Building (Pickup),مبنى السكن (نقطة الصعود)
 Accommodation Check-in,تسكين الساكن
+Accommodation Cost,تكلفة السكن
 Accommodation Cost Distribution,توزيع تكلفة السكن
 Accommodation Cost by Type,تكلفة الإسكان حسب النوع
 Accommodation Custody Item,بند عهدة السكن
@@ -709,6 +710,7 @@ Building License Expiring Soon,رخصة المبنى قاربت على الان�
 Building License revoked: {0},سُحبت رخصة المبنى: {0}
 Building License {0} ({1} {2}) for building {3} expires on {4}.,رخصة المبنى {0} ({1} {2}) للمبنى {3} تنتهي في {4}.
 Building License {0} for building {1} has expired ({2}).,رخصة المبنى {0} للمبنى {1} منتهية ({2}).
+Building Licenses Expiring Soon,رخص المباني التي تنتهي قريباً
 Building Licenses by Status,رخص المباني حسب الحالة
 Building Number,رقم المبنى
 Building Operations Summary,ملخص عمليات المبنى
@@ -1149,6 +1151,8 @@ Cost of Repair,تكلفة الإصلاح
 Cost of Repair (SAR),تكلفة الإصلاح (ريال)
 Cost of Repair cannot be negative.,لا يمكن أن تكون تكلفة الإصلاح سالبة.
 Cost of the Planned Stay,تكلفة الإقامة المخطَّطة
+Cost per Day,التكلفة اليومية
+Cost per Present Day,التكلفة لكل يوم حضور
 Costing,احتساب التكلفة
 Costing & Mapping,احتساب التكلفة والربط
 Costs and Settlement,التكاليف والتسوية
@@ -1422,6 +1426,7 @@ Custody Issue Register,سجل صرف العهد
 Custody Issue {0} is not held by the selected worker.,العامل المحدد ليس مستلم العهدة في عملية الصرف {0}.
 Custody Issue {0} must be submitted before it can be acknowledged.,يجب اعتماد صرف العهدة {0} قبل التمكّن من الإقرار باستلامه.
 Custody Issue {0} was not found or is not submitted.,صرف العهدة {0} غير موجود أو غير معتمد.
+Custody Issued,العهدة المصروفة
 Custody Issues by Status,عمليات صرف العهدة حسب الحالة
 Custody Items,العهد
 Custody Items He Held,العهد التي كانت بيده
@@ -1698,8 +1703,10 @@ Driver Clearance Item,بند إخلاء طرف سائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
 Driver ID,معرّف السائق
 Driver Latitude,خط عرض السائق
+Driver Licenses Expiring Soon,رخص السائقين التي تنتهي قريباً
 Driver Longitude,خط طول السائق
 Driver Masar,مسار السائق
+Driver Name,اسم السائق
 Driver Not Assigned,السائق غير مسند
 Driver Portal,بوابة السائق
 Driver Portal Appearance,مظهر بوابة السائق
@@ -1837,7 +1844,9 @@ End of Assignment,انتهاء الإسناد
 End of Contract,نهاية العقد
 End trip,إنهاء الرحلة
 Ended,منتهٍ
+Ending Within (Days),تنتهي خلال (أيام)
 Endpoint,عنوان الاشتراك
+Ends,تنتهي
 Ends On,ينتهي في
 Ends On cannot be earlier than Starts On.,لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء.
 Engine,المحرّك
@@ -2055,6 +2064,7 @@ Flat call-off rate against the contract; this order carries no priced lines.,س�
 Fleet,الأسطول
 Fleet (Salis),الأسطول (ساليس)
 Fleet Control,مركز التحكم بالأسطول
+Fleet Cost per Day,تكلفة الأسطول اليومية
 Fleet Go-Live,تشغيل الأسطول
 Fleet Manager,مدير الأسطول
 Fleet Movement,حركة الأسطول
@@ -2087,6 +2097,7 @@ Formal accommodation/housing safety-incident record with severity and automatic 
 Formal lease contract holder for one building. Carries the rent payment schedule. The landlord is identified by the Lease's landlord field.,سجل عقد إيجار رسمي لمبنى واحد، ويتضمن جدول دفعات الإيجار. يُحدَّد المؤجّر في حقل المؤجّر بالعقد.
 Free,شاغر
 Freelancer,مستقل
+Freelancers,المستقلون
 Frequency,التكرار
 Frequency Override,تكرار مخصص
 Freshness Unknown,حداثة غير معروفة
@@ -2126,6 +2137,7 @@ Fuel Claim Variance by Month,فروقات مطالبات الوقود حسب ا�
 Fuel Claim Voucher,سند مطالبة وقود
 Fuel Consumption Ledger,سجل استهلاك الوقود
 Fuel Consumption by Month,استهلاك الوقود حسب الشهر
+Fuel Cost,تكلفة الوقود
 Fuel Cost by Month,تكلفة الوقود حسب الشهر
 Fuel Cost by Platform,تكلفة الوقود حسب المنصة
 Fuel Daily Log,السجل اليومي للوقود
@@ -2135,6 +2147,7 @@ Fuel Grade,نوع الوقود
 Fuel Grade Authorised,نوع الوقود المصرّح به
 Fuel Level,مستوى الوقود
 Fuel Level at Handover,مستوى الوقود عند التسليم
+Fuel Litres,لترات الوقود
 Fuel Misuse,إساءة استخدام الوقود
 Fuel Overage Margin (%),هامش تجاوز الوقود (٪)
 Fuel Plan,خطة الوقود
@@ -2602,6 +2615,7 @@ Landlord Signatory,الموقّع عن المالك
 Landlord-issued contract number or file reference.,رقم العقد أو مرجع الملف الصادر من المؤجر.
 Language,اللغة
 "Language the resident prefers for updates and responses on this request, so notifications and handling can be routed to staff who can communicate with the worker.",اللغة التي يفضّلها الساكن للتحديثات والردود على هذا الطلب، ليتسنى توجيه الإشعارات والمعالجة إلى الموظفين القادرين على التواصل مع العامل.
+Lapsing in 30 Days,تنتهي خلال 30 يوماً
 Large Worker Move Needs Escalation,نقل عمالة كبير يحتاج تصعيداً
 Large Worker Moves Pending Escalation,تنقلات العمالة الكبيرة بانتظار التصعيد
 Last Count Date,تاريخ آخر جرد
@@ -2648,6 +2662,7 @@ Leases Watched,العقود المتابَعة
 Leases by Status,عقود الإيجار حسب الحالة
 Leasing and Utilities,الإيجار والمرافق
 Leave,إجازة
+Leave at zero to list every worker.,اتركه صفراً لعرض جميع العاملين.
 Leave blank for permanent,اتركه فارغاً للدائم
 Leave empty for a flat call-off; any line here becomes the service cost.,اتركه فارغًا للزيارة بسعر مقطوع؛ وأي بند هنا يصبح هو تكلفة الخدمة.
 Leave empty for building-level stock.,اتركه فارغاً إذا كان المخزون على مستوى المبنى.
@@ -2940,6 +2955,7 @@ Month {0} of {1},شهر {0} من {1}
 Monthly,شهري
 Monthly Amount (SAR),المبلغ الشهري (ريال)
 Monthly Commitment,الالتزام المالي الشهري
+Monthly Cost,التكلفة الشهرية
 Monthly Cost per Bed Capacity (SAR),التكلفة الشهرية لكل سرير حسب الطاقة الاستيعابية (ريال)
 Monthly Litres,اللترات الشهرية
 Monthly Rent,الإيجار الشهري
@@ -3019,6 +3035,7 @@ Needs Operations Authorization,يتطلب تفويض العمليات
 Needs Repair,يحتاج إصلاحاً
 Needs Review,يحتاج مراجعة
 Needs Treatment,يحتاج معالجة
+Net Cost,صافي التكلفة
 Net Loss After Salvage,صافي الخسارة بعد الخردة
 Network Switch,مقسم الشبكة (السويتش)
 New,جديد
@@ -3744,6 +3761,7 @@ Prepared By,أعدّه
 Preparing the trip,جارٍ تجهيز الرحلة
 Preparing your account,جاري تجهيز حسابك
 Present,حاضر
+Present Days,أيام الحضور
 Previous,السابق
 Previous Building,المبنى السابق
 Previous Custodian Type,نوع مستلم العهدة السابق
@@ -3991,6 +4009,8 @@ Recover from Driver,استرداد من السائق
 Recover the repair cost from the driver. On submit this raises one native Loan with Repay From Salary set; HRMS deducts the installment on the employee's own Salary Slip.,استرداد تكلفة الإصلاح من السائق. عند الاعتماد يُنشأ قرض واحد مع تفعيل السداد من الراتب، وتخصم الموارد البشرية القسط في قسيمة راتب الموظف.
 Recovered,مُسترد
 Recovered Share,نسبة المسترد
+Recovered from Driver,مسترد من السائق
+Recovered from Employee,مسترد من الموظف
 Recoveries,الاستردادات
 "Recovering this cost from the driver needs the Lending app, which is not installed on this site. Install it first, or clear Recover From Driver.",خصم هذه التكلفة من السائق يحتاج تطبيق الإقراض، وهو غير مثبّت على هذا الموقع. ثبّته أولاً، أو ألغِ خيار الخصم من السائق.
 Recovery,الاسترداد
@@ -4119,6 +4139,7 @@ Rental,إيجار
 Rental Accrual Ledger,سجل استحقاق الإيجار
 Rental Accrual Trend,اتجاه استحقاق الإيجار
 Rental Accrual by Office,استحقاق الإيجار حسب المكتب
+Rental Cost,تكلفة الإيجار
 Rental Cost by Office,تكلفة الإيجار حسب المكتب
 Rental End,نهاية التأجير
 Rental End Date,تاريخ نهاية التأجير
@@ -4677,11 +4698,13 @@ Service Lines,بنود الخدمة
 Service Order marked Completed.,تم تحديد حالة أمر الخدمة كـ 'مكتمل'.
 Service Order marked In Progress.,تم تحديد حالة أمر الخدمة كـ 'قيد التنفيذ'.
 Service Order marked Missed.,تم تحديد حالة أمر الخدمة كـ 'فائت'.
+Service Platform,منصة الخدمة
 Service Provider (Contractor),مقدّم الخدمة (المقاول)
 Service Type,نوع الخدمة
 Service and Objection,التبليغ والاعتراض
 "Service life of a consumable issue (linens, mattresses). 0 = no expiry; a daily job alerts on held items older than this.",مدة استخدام المستهلكات المصروفة، مثل المفروشات والمراتب. القيمة 0 تعني بلا انتهاء، وتنبّه مهمة يومية على الأصناف المحتفظ بها بعد تجاوز هذه المدة.
 Service of Work,الخدمة المطلوبة
+Service platform or provider used by fleet vehicles. Service Type says whether it fuels them or washes them.,منصة أو مزود الخدمة المستخدم لمركبات الأسطول. يحدد نوع الخدمة ما إذا كانت تزود المركبات بالوقود أم تغسلها.
 Service request,طلب خدمة
 Set a Landlord on lease {0} before raising a rent payment — a payment needs a party to settle with.,حدّد المؤجّر في العقد {0} قبل إصدار دفعة إيجار — الدفعة تحتاج طرفًا تُسدَّد له.
 Set a Service Item on the contract before raising a purchase request.,عيّن صنف خدمة على العقد قبل إصدار طلب شراء.
@@ -5136,6 +5159,7 @@ Temporary Worker {0} ({1}) expired without an Employee link — the temporary wi
 Temporary Worker {0} does not exist.,العامل المؤقت {0} غير موجود.
 Temporary Worker {0}'s stay window expired on {1}.,انتهت مهلة إقامة العامل المؤقت {0} في {1}.
 Temporary Worker — use the Arrivals Desk to house this worker.,عامل مؤقت — استخدم مكتب الوصول لتسكين هذا العامل.
+Temporary Workers,العمالة المؤقتة
 Temporary workers board via the trip’s unregistered manifest.,ينضم العمال المؤقتون للرحلة عبر كشف الركاب غير المسجلين.
 Tenant Signatory,الموقّع عن المستأجر
 Term & Status,المدة والحالة
@@ -5887,6 +5911,7 @@ Warning Alert Aging Hours,مدة بقاء التنبيه التحذيري (سا�
 Warning: building occupancy will reach {0:.0f}%.,تحذير: سيبلغ إشغال المبنى {0:.0f}%.
 Warning: vehicle {0} has expired compliance.,تحذير: المركبة {0} منتهية الامتثال.
 Warranty Expiry,انتهاء الضمان
+Wash,غسيل
 Wash Date,تاريخ الغسيل
 Wash Platform,منصة الغسيل
 Wash Request,طلب غسيل
@@ -6260,6 +6285,7 @@ workshop status,حالة الورشة
 {0} vehicles,{0} مركبة
 {0} {1} already has an active Housing Assignment: {2},{0} {1} لديه بالفعل تسكين نشط: {2}
 "{0} {1} belongs to company {2}, not company {3}.",الشركة المسجلة لـ {0} {1} هي {2} وليست {3}.
+"{0} {1} cannot take the name {2}, which is already used.",{0} {1} لا يمكن أن يحمل الاسم {2} لأنه مستخدم بالفعل.
 {0} {1} does not exist.,{0} {1} غير موجود.
 {0} {1} has nothing outstanding — it is already settled.,لا توجد مستحقات على {0} {1}؛ تمت تسويتها مسبقًا.
 "{0} {1} is billed by {2}, not by {3}.",{0} {1} صادرة من المورّد {2} وليس من {3}.
