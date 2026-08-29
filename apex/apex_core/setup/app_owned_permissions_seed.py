@@ -47,8 +47,6 @@ APP_OWNED_PERMISSIONS = (
     ("Salis Driver", "Portal Worker Capacity", 0, ("read",)),
     ("Transport Trip Rating", "Portal Worker Capacity", 0, ("read",)),
     ("Route Plan", "Portal Worker Capacity", 0, ("read",)),
-    ("Transport Request", "Accommodation Manager", 0, ("read", "write", "create")),
-    ("Transport Request", "Resident Supervisor", 0, ("read", "write", "create")),
 )
 
 _ALL_PTYPES = (

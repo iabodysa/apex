@@ -476,7 +476,7 @@
    "link_fieldname": "departure_transport_request"
   }
  ],
- "modified": "2026-08-29 07:30:00.000000",
+ "modified": "2026-08-29 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Transport Request",
@@ -485,16 +485,8 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 0,
-   "email": 1,
-   "export": 0,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "Accommodation Manager",
-   "share": 0,
-   "submit": 0,
-   "write": 1
+   "role": "Accommodation Manager"
   },
   {
    "read": 1,
@@ -538,16 +530,8 @@
   },
   {
    "create": 1,
-   "delete": 0,
-   "email": 1,
-   "export": 0,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "Resident Supervisor",
-   "share": 0,
-   "submit": 0,
-   "write": 1
+   "role": "Resident Supervisor"
   },
   {
    "cancel": 1,
