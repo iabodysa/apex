@@ -1,6 +1,6 @@
 # Copyright (c) 2026, afmcoltd
 
-__version__ = "2.9.4"
+__version__ = "2.10.0"
 
 
 def check_app_permission() -> bool:
