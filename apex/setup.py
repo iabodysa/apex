@@ -23,7 +23,6 @@ ACCOMMODATION_ITEM_GROUPS = [
 KEPT_GENDERS = ("Male", "Female")
 
 def after_install():
-    create_roles()
     frappe.db.commit()
     create_accommodation_item_defaults(allow_deferred=True)
     seed_templates()
@@ -132,11 +131,4 @@ def _load_accommodation_item_records():
     with open(data_path, encoding="utf-8") as source:
         return json.load(source)
 
-
-def create_roles():
-    if not frappe.db.exists("Role", "Admin Manager"):
-        doc = frappe.new_doc("Role")
-        doc.role_name = "Admin Manager"
-        doc.desk_access = 0
-        doc.insert(ignore_permissions=True)
 

@@ -475,6 +475,7 @@ has_permission = {
 }
 
 fixtures = [
+    {"dt": "Role", "filters": [["name", "in", ["Admin Manager"]]]},
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
     {
         "dt": "Role Profile",
@@ -574,7 +575,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_settings_seed.seed_salis_settings",
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
-    "apex.setup.create_roles",
     "apex.apex_core.utils.portal_identity.close_all_capacity_desk_access",
     "apex.apex_core.doctype.salis_settings.salis_settings.apply_approval_switch",
 ]
