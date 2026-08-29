@@ -278,3 +278,52 @@ class TestSeedersUnfitForAFixtureStayCode(FrappeTestCase):
                 self.assertFalse(
                     (APP_ROOT / "fixtures" / f"{frappe.scrub(doctype)}.json").exists()
                 )
+
+
+class TestFixturesShipNaturalKeysNotCounters(FrappeTestCase):
+
+    def _fixture_doctypes(self):
+        for path in sorted((APP_ROOT / "fixtures").glob("*.json")):
+            rows = json.loads(path.read_text())
+            if isinstance(rows, list) and rows and rows[0].get("doctype"):
+                yield path, rows[0]["doctype"], rows
+
+    def test_no_fixture_ships_a_record_named_by_a_counter(self):
+        checked = 0
+        for path, doctype, rows in self._fixture_doctypes():
+            autoname = frappe.get_meta(doctype).autoname or ""
+            checked += 1
+            with self.subTest(fixture=path.name):
+                self.assertFalse(
+                    autoname.startswith("naming_series:") or "#" in autoname,
+                    f"{doctype} is named by a counter, which fixture import never advances",
+                )
+        self.assertGreater(checked, 0)
+
+    def test_every_fixture_name_is_the_value_of_the_field_that_names_it(self):
+        checked = 0
+        for path, doctype, rows in self._fixture_doctypes():
+            autoname = frappe.get_meta(doctype).autoname or ""
+            if not autoname.startswith("field:"):
+                continue
+            keyfield = autoname.split(":", 1)[1]
+            for row in rows:
+                checked += 1
+                with self.subTest(fixture=path.name, name=row["name"]):
+                    self.assertEqual(row["name"], row[keyfield])
+        self.assertGreater(checked, 0)
+
+    def test_a_new_master_takes_its_natural_key_as_its_name(self):
+        doc = frappe.get_doc(
+            {
+                "doctype": "Safety Task Catalog",
+                "task_title": "_T-Natural Key Probe",
+                "department": "Fire Safety",
+                "task_code": "_T-NATKEY-PROBE",
+                "frequency": "Weekly",
+            }
+        ).insert(ignore_permissions=True)
+        self.assertEqual(doc.name, "_T-NATKEY-PROBE")
+        frappe.delete_doc(
+            "Safety Task Catalog", doc.name, ignore_permissions=True, force=True
+        )

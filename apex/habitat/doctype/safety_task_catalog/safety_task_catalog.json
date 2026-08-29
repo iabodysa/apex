@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "naming_series:",
+ "autoname": "field:task_code",
  "creation": "2026-06-08 23:36:36.593424",
  "description": "Reference catalog of standardized safety tasks. Each task defines its department, frequency, priority, and instructions.",
  "doctype": "DocType",
@@ -22,8 +22,7 @@
   "safety_task_catalog_sec_classification",
   "instructions",
   "safety_task_catalog_sec_large_text",
-  "applicable_buildings",
-  "naming_series"
+  "applicable_buildings"
  ],
  "fields": [
   {
@@ -125,15 +124,6 @@
    "fieldtype": "Table",
    "label": "Specific Buildings",
    "options": "Safety Task Building Scope"
-  },
-  {
-   "default": "STC-.####",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "options": "STC-.####",
-   "reqd": 1
   }
  ],
  "links": [
@@ -157,7 +147,7 @@
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Task Catalog",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

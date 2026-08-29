@@ -11,7 +11,6 @@ class TestSafetyTaskCatalogSourceProvenanceGuard(FrappeTestCase):
         doc = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
-                "naming_series": "STC-.####",
                 "task_title": "Fire Drill Steps imported_from_master.xlsx",
                 "department": "Fire Safety",
                 "task_code": "_T-STC-GUARD",

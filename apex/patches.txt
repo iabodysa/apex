@@ -36,3 +36,4 @@ apex.patches.v2_9.repair_driver_attendance_check_datetime
 apex.patches.v2_9.merge_wash_platform_into_service_platform
 apex.patches.v2_9.prune_orphaned_number_cards
 apex.patches.v2_9.drop_retired_scheduled_task_instance_index
+apex.patches.v2_10.rename_fixture_masters_to_their_natural_key

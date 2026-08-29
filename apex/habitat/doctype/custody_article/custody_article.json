@@ -8,8 +8,8 @@
  "istable": 0,
  "engine": "InnoDB",
  "description": "Catalog master for individual issuable articles.",
- "autoname": "naming_series:",
- "naming_rule": "By \"Naming Series\" field",
+ "autoname": "field:article_name",
+ "naming_rule": "By fieldname",
  "fields": [
   {
    "fieldname": "custody_article_tab_details",
@@ -27,7 +27,8 @@
    "fieldtype": "Data",
    "label": "Article Name",
    "reqd": 1,
-   "idx": 3
+   "idx": 3,
+   "unique": 1
   },
   {
    "doctype": "DocField",
@@ -111,16 +112,6 @@
    "fieldtype": "Section Break",
    "label": "System",
    "collapsible": 1
-  },
-  {
-   "doctype": "DocField",
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "CUST-ART-.####",
-   "default": "CUST-ART-.####",
-   "idx": 9,
-   "hidden": 1
   }
  ],
  "links": [
@@ -216,8 +207,7 @@
   "custody_article_sec_large_text",
   "notes",
   "image",
-  "custody_article_sec_system",
-  "naming_series"
+  "custody_article_sec_system"
  ],
  "modified": "2026-08-24 12:19:00.000000",
  "search_fields": "article_name, consumable_lifespan_months"

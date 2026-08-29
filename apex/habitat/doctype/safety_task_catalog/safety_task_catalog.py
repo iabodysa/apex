@@ -28,7 +28,6 @@ class SafetyTaskCatalog(Document):
         frequency: DF.Literal["Daily", "Weekly", "Monthly", "Quarterly", "Annual", "As Needed", "On Entry"]
         instructions: DF.SmallText | None
         is_active: DF.Check
-        naming_series: DF.Literal["STC-.####"]
         priority: DF.Literal["High", "Medium", "Low"]
         task_code: DF.Data
         task_title: DF.Data
