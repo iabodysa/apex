@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import frappe
-from frappe.model.naming import NamingSeries
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cint
 
 
 def _policy():
@@ -26,16 +24,6 @@ def _category(**overrides):
     return frappe.get_doc(fields).insert(ignore_permissions=True)
 
 
-def _free_series_counter():
-    series = NamingSeries("CUST-ART-.####")
-    highest = max(
-        [cint(name.rsplit("-", 1)[-1]) for name in frappe.get_all("Custody Article", pluck="name")]
-        or [0]
-    )
-    if series.get_current_value() < highest:
-        series.update_counter(highest)
-
-
 def _article(**overrides):
     fields = {
         "doctype": "Custody Article",
@@ -45,7 +33,6 @@ def _article(**overrides):
     fields.update(overrides)
     if not fields.get("category"):
         fields["category"] = _category().name
-    _free_series_counter()
     return frappe.get_doc(fields)
 
 
@@ -82,9 +69,9 @@ class TestCustodyArticleDepreciationPolicy(FrappeTestCase):
 
 
 class TestCustodyArticleNaming(FrappeTestCase):
-    def test_the_article_is_named_from_the_declared_series(self):
+    def test_the_article_is_named_by_its_article_name(self):
         doc = _article().insert(ignore_permissions=True)
-        self.assertTrue(doc.name.startswith("CUST-ART-"))
+        self.assertEqual(doc.name, doc.article_name)
 
     def test_the_declared_unit_of_measure_default_is_applied_server_side(self):
         doc = _article().insert(ignore_permissions=True)

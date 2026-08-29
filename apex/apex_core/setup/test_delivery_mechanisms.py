@@ -327,3 +327,13 @@ class TestFixturesShipNaturalKeysNotCounters(FrappeTestCase):
         frappe.delete_doc(
             "Safety Task Catalog", doc.name, ignore_permissions=True, force=True
         )
+
+    def test_the_rename_patch_runs_before_the_model_sync(self):
+        # Model sync builds the unique index on the natural-key field, so a row
+        # still carrying its counter name has to be renamed before sync, not after.
+        sections = (APP_ROOT / "patches.txt").read_text().split("[post_model_sync]")
+        self.assertEqual(len(sections), 2)
+        self.assertIn(
+            "apex.patches.v2_10.rename_fixture_masters_to_their_natural_key",
+            sections[0],
+        )

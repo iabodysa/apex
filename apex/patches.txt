@@ -1,6 +1,7 @@
 [pre_model_sync]
 apex.patches.v2_6.rename_driver_push_subscription
 apex.patches.v2_9.rename_fuel_platform_to_service_platform
+apex.patches.v2_10.rename_fixture_masters_to_their_natural_key
 
 [post_model_sync]
 apex.patches.v2_3.retire_replaced_reports #2026-08-08
@@ -36,4 +37,3 @@ apex.patches.v2_9.repair_driver_attendance_check_datetime
 apex.patches.v2_9.merge_wash_platform_into_service_platform
 apex.patches.v2_9.prune_orphaned_number_cards
 apex.patches.v2_9.drop_retired_scheduled_task_instance_index
-apex.patches.v2_10.rename_fixture_masters_to_their_natural_key

@@ -13,7 +13,6 @@ class TestSafetyTaskExecutionEvidenceGuard(FrappeTestCase):
         catalog = frappe.get_doc(
             {
                 "doctype": "Safety Task Catalog",
-                "naming_series": "STC-.####",
                 "task_title": "_T-STE Guard Task",
                 "department": "Fire Safety",
                 "task_code": "_T-STE-GUARD",
