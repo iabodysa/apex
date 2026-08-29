@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
  "name": "Licenses Expiring Soon",
- "label": "Licenses Expiring Soon",
+ "label": "Building Licenses Expiring Soon",
  "document_type": "Building License",
  "function": "Count",
  "is_public": 1,
@@ -11,5 +11,5 @@
  "module": "Habitat",
  "filters_json": "[[\"Building License\", \"status\", \"=\", \"Expiring Soon\"]]",
  "is_standard": 1,
- "modified": "2026-06-02 13:30:00.000000"
+ "modified": "2026-08-28 09:00:00.000000"
 }

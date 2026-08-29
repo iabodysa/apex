@@ -1,7 +1,7 @@
 {
  "doctype": "Report",
- "name": "Accommodation Ledger Summary",
- "report_name": "Accommodation Ledger Summary",
+ "name": "Employee Cost Summary",
+ "report_name": "Employee Cost Summary",
  "ref_doctype": "Accommodation Ledger",
  "report_type": "Script Report",
  "is_standard": "Yes",

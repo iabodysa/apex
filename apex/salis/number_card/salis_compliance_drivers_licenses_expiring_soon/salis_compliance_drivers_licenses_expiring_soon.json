@@ -1,7 +1,7 @@
 {
  "doctype": "Number Card",
  "name": "Salis Compliance Drivers Licenses Expiring Soon",
- "label": "Licenses Expiring Soon",
+ "label": "Driver Licenses Expiring Soon",
  "document_type": "Salis Driver",
  "function": "Count",
  "is_public": 1,
@@ -12,5 +12,5 @@
  "module": "Salis",
  "color": "#FFC107",
  "filters_json": "[[\"Salis Driver\", \"license_expiry\", \"Timespan\", \"next 30 days\"]]",
- "modified": "2026-06-28 10:00:00.000000"
+ "modified": "2026-08-28 09:00:00.000000"
 }

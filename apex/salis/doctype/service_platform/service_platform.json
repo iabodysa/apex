@@ -2,27 +2,28 @@
  "actions": [],
  "autoname": "field:platform_name",
  "creation": "2026-05-26 10:00:00.000000",
- "description": "Fuel service platform or provider used for fueling fleet vehicles.",
+ "description": "Service platform or provider used by fleet vehicles. Service Type says whether it fuels them or washes them.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "fuel_platform_tab_overview",
-  "fuel_platform_sec_details",
+  "service_platform_tab_overview",
+  "service_platform_sec_details",
   "platform_name",
+  "service_type",
   "provider",
-  "fuel_platform_overview_col",
+  "service_platform_overview_col",
   "status",
-  "fuel_platform_sec_notes",
+  "service_platform_sec_notes",
   "notes"
  ],
  "fields": [
   {
-   "fieldname": "fuel_platform_tab_overview",
+   "fieldname": "service_platform_tab_overview",
    "fieldtype": "Tab Break",
    "label": "Overview"
   },
   {
-   "fieldname": "fuel_platform_sec_details",
+   "fieldname": "service_platform_sec_details",
    "fieldtype": "Section Break",
    "label": "Platform Details"
   },
@@ -35,6 +36,15 @@
    "unique": 1
   },
   {
+   "fieldname": "service_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Service Type",
+   "options": "\nFuel\nWash",
+   "reqd": 1
+  },
+  {
    "fieldname": "provider",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -42,7 +52,7 @@
    "label": "Provider"
   },
   {
-   "fieldname": "fuel_platform_overview_col",
+   "fieldname": "service_platform_overview_col",
    "fieldtype": "Column Break"
   },
   {
@@ -55,7 +65,7 @@
    "options": "Active\nInactive"
   },
   {
-   "fieldname": "fuel_platform_sec_notes",
+   "fieldname": "service_platform_sec_notes",
    "fieldtype": "Section Break",
    "label": "Notes"
   },
@@ -65,7 +75,7 @@
    "label": "Notes"
   }
  ],
-"links": [
+ "links": [
   {
    "group": "Fuel",
    "link_doctype": "Fuel Request",
@@ -75,12 +85,17 @@
    "group": "Fuel",
    "link_doctype": "Fuel Daily Log",
    "link_fieldname": "fuel_platform"
+  },
+  {
+   "group": "Wash",
+   "link_doctype": "Wash Request",
+   "link_fieldname": "wash_platform"
   }
  ],
- "modified": "2026-08-12 08:43:00.000000",
+ "modified": "2026-08-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
- "name": "Fuel Platform",
+ "name": "Service Platform",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -139,7 +154,7 @@
   }
  ],
  "row_format": "Dynamic",
- "search_fields": "platform_name, status",
+ "search_fields": "platform_name, service_type, status",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

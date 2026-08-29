@@ -1,0 +1,31 @@
+[
+ {
+  "doctype": "Service Platform",
+  "platform_name": "_T-Sadad Fuel Card",
+  "service_type": "Fuel",
+  "provider": "Sadad",
+  "status": "Active"
+ },
+ {
+  "doctype": "Service Platform",
+  "platform_name": "_T-Legacy Fuel Coupons",
+  "service_type": "Fuel",
+  "provider": "Aramco",
+  "status": "Inactive"
+ },
+ {
+  "doctype": "Service Platform",
+  "platform_name": "_T-Camp Wash Bay",
+  "service_type": "Wash",
+  "provider": "_T-In-House",
+  "status": "Active"
+ },
+ {
+  "doctype": "Service Platform",
+  "platform_name": "_T-Downtown Wash Center",
+  "service_type": "Wash",
+  "provider": "_T-External Vendor",
+  "status": "Inactive",
+  "notes": "_T-Closed for renovation"
+ }
+]

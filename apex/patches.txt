@@ -1,5 +1,6 @@
 [pre_model_sync]
 apex.patches.v2_6.rename_driver_push_subscription
+apex.patches.v2_9.rename_fuel_platform_to_service_platform
 
 [post_model_sync]
 apex.patches.v2_3.retire_replaced_reports #2026-08-08
@@ -32,3 +33,4 @@ apex.patches.v2_9.set_arabic_as_the_site_language
 apex.patches.v2_9.backfill_rental_accrual_is_reversal
 apex.patches.v2_9.backfill_ledger_is_reversal
 apex.patches.v2_9.repair_driver_attendance_check_datetime
+apex.patches.v2_9.merge_wash_platform_into_service_platform

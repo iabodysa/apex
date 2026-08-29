@@ -184,8 +184,8 @@
    "fieldname": "fuel_platform",
    "fieldtype": "Link",
    "label": "Fuel Platform",
-   "options": "Fuel Platform",
-   "link_filters": "[[\"Fuel Platform\",\"status\",\"=\",\"Active\"]]"
+   "options": "Service Platform",
+   "link_filters": "[[\"Service Platform\", \"status\", \"=\", \"Active\"], [\"Service Platform\", \"service_type\", \"=\", \"Fuel\"]]"
   },
   {
    "description": "The grade this voucher authorises. Defaults from the vehicle; the station may not dispense another.",
@@ -489,7 +489,7 @@
    "link_fieldname": "fuel_request"
   }
  ],
- "modified": "2026-08-23 12:00:00.000000",
+ "modified": "2026-08-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Request",

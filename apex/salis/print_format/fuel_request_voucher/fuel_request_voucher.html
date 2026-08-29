@@ -15,7 +15,7 @@
 {%- set quota = (frappe.db.get_value("Fuel Quota", doc.fuel_quota,
       ["period_month", "monthly_litres", "monthly_amount", "consumed_litres", "status"],
       as_dict=True) if doc.fuel_quota else None) or _dict() -%}
-{%- set plat = (frappe.db.get_value("Fuel Platform", doc.fuel_platform,
+{%- set plat = (frappe.db.get_value("Service Platform", doc.fuel_platform,
       ["platform_name", "provider", "status"], as_dict=True) if doc.fuel_platform else None) or _dict() -%}
 {%- set cur = (frappe.db.get_value("Company", veh.company, "default_currency") if veh.company else None) or frappe.db.get_default("currency") -%}
 {%- set approver = frappe.get_fullname(doc.approved_by) if doc.approved_by else None -%}

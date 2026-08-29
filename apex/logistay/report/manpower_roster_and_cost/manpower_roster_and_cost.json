@@ -1,0 +1,23 @@
+{
+ "doctype": "Report",
+ "name": "Manpower Roster and Cost",
+ "report_name": "Manpower Roster and Cost",
+ "ref_doctype": "Freelancer",
+ "report_type": "Script Report",
+ "is_standard": "Yes",
+ "module": "Logistay",
+ "roles": [
+  {
+   "role": "Accommodation Manager"
+  },
+  {
+   "role": "Finance Manager"
+  },
+  {
+   "role": "Internal Auditor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

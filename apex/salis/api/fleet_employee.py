@@ -101,8 +101,8 @@ def get_my_vehicle():
 @frappe.whitelist()
 def get_fuel_stations():
     return frappe.get_list(
-        "Fuel Platform",
-        filters={"status": "Active"},
+        "Service Platform",
+        filters={"status": "Active", "service_type": "Fuel"},
         pluck="name",
         order_by="platform_name asc",
         limit_page_length=0,

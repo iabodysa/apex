@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import frappe
-from frappe.model.workflow import WorkflowPermissionError
+from frappe.model.workflow import WorkflowPermissionError, apply_workflow
 from frappe.tests.utils import FrappeTestCase
 
 from apex.habitat.doctype.maintenance_request.maintenance_request import (
@@ -30,12 +30,24 @@ class TestMaintenanceRequestWorkflow(FrappeTestCase):
         frappe.delete_doc("Maintenance Request", self.mr.name, force=True)
 
     def _resolve(self):
-        frappe.get_doc("Maintenance Request", self.mr.name).db_set(
-            {"status": "Resolved", "resolution_notes": "Leak repaired."}
-        )
+        doc = frappe.get_doc("Maintenance Request", self.mr.name)
+        apply_workflow(doc, "Start Processing")
+        apply_workflow(doc, "Resolve")
 
     def test_a_new_request_defaults_to_open_with_no_python_default(self):
         self.assertEqual(self.mr.status, "Open")
+
+    def test_open_reaches_resolved_through_declared_transitions(self):
+        doc = frappe.get_doc("Maintenance Request", self.mr.name)
+        apply_workflow(doc, "Start Processing")
+        self.assertEqual(
+            frappe.db.get_value("Maintenance Request", self.mr.name, "status"), "In Progress"
+        )
+
+        apply_workflow(frappe.get_doc("Maintenance Request", self.mr.name), "Resolve")
+        self.assertEqual(
+            frappe.db.get_value("Maintenance Request", self.mr.name, "status"), "Resolved"
+        )
 
     def test_close_then_reopen_travel_through_apply_workflow(self):
         self._resolve()

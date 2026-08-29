@@ -83,3 +83,18 @@ class TestSafetyInspectionReportCancel(FrappeTestCase):
         self.assertIsNone(
             frappe.db.get_value("Maintenance Request", mr_name, "source_inspection")
         )
+
+
+class TestSafetyInspectionReportTakesNoNewReports(FrappeTestCase):
+    def test_no_role_may_create_one(self):
+        meta = frappe.get_meta("Safety Inspection Report")
+        self.assertEqual([p.role for p in meta.permissions if p.create], [])
+
+    def test_no_role_may_amend_a_cancelled_one(self):
+        meta = frappe.get_meta("Safety Inspection Report")
+        self.assertEqual([p.role for p in meta.permissions if p.amend], [])
+
+    def test_every_permission_row_still_reads(self):
+        meta = frappe.get_meta("Safety Inspection Report")
+        self.assertTrue(meta.permissions)
+        self.assertEqual([p.role for p in meta.permissions if not p.read], [])

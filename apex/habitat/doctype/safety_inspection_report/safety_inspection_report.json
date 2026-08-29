@@ -167,7 +167,7 @@
    "link_fieldname": "linked_inspection"
   }
  ],
- "modified": "2026-08-07 18:08:00.000000",
+ "modified": "2026-08-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Safety Inspection Report",
@@ -175,9 +175,7 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "amend": 1,
    "cancel": 1,
-   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
@@ -190,23 +188,19 @@
    "write": 1
   },
   {
-   "amend": 1,
    "cancel": 1,
-   "create": 1,
    "read": 1,
    "role": "Accommodation Manager",
    "submit": 1,
    "write": 1
   },
   {
-   "create": 1,
    "read": 1,
    "role": "Resident Supervisor",
    "submit": 1,
    "write": 1
   },
   {
-   "create": 1,
    "read": 1,
    "role": "Safety Officer",
    "write": 1

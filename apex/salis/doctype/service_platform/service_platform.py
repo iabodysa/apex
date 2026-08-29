@@ -5,7 +5,7 @@ from __future__ import annotations
 from frappe.model.document import Document
 
 
-class WashPlatform(Document):
+class ServicePlatform(Document):
     def validate(self):
         if self.platform_name:
             self.platform_name = self.platform_name.strip()
