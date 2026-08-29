@@ -2,17 +2,8 @@
 
 from __future__ import annotations
 
-import frappe
+from frappe.utils.user import get_users_with_role
 
 
 def sim_operations_users() -> list[str]:
-    users = frappe.get_all(
-        "Has Role",
-        filters={"role": "SIM Operations User", "parenttype": "User"},
-        pluck="parent",
-    )
-    return [
-        u
-        for u in set(users)
-        if u not in ("Administrator", "Guest") and frappe.db.get_value("User", u, "enabled")
-    ]
+    return get_users_with_role("SIM Operations User")
