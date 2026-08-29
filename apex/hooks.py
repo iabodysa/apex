@@ -476,6 +476,25 @@ has_permission = {
 
 fixtures = [
     {"dt": "Party Type", "filters": [["name", "in", ["Freelancer"]]]},
+    {
+        "dt": "Role Profile",
+        "filters": [
+            [
+                "name",
+                "in",
+                [
+                    "Habitat Accommodation Manager",
+                    "Habitat Cleaning Supervisor",
+                    "Habitat Finance Reviewer",
+                    "Habitat Maintenance Technician",
+                    "Habitat Resident Request Coordinator",
+                    "Habitat Resident Supervisor",
+                    "Habitat Safety Officer",
+                    "Salis Driver",
+                ],
+            ]
+        ],
+    },
     {"dt": "Issue Type", "filters": [["name", "in", list(ISSUE_TYPES)]]},
     {"dt": "Issue Priority", "filters": [["name", "in", list(ISSUE_PRIORITIES)]]},
     {"dt": "Workflow State", "filters": [["name", "in", list(WORKFLOW_STATES)]]},
@@ -556,8 +575,6 @@ after_migrate = [
     "apex.apex_core.setup.seeders.salis_portal_theme_seed.seed_salis_portal_theme",
     "apex.apex_core.setup.seeders.module_profile_seed.seed_module_profiles",
     "apex.setup.create_roles",
-    "apex.setup.create_role_profiles",
-    "apex.apex_core.setup.prune_number_cards.prune_orphaned_number_cards",
     "apex.apex_core.utils.portal_identity.close_all_capacity_desk_access",
     "apex.apex_core.doctype.salis_settings.salis_settings.apply_approval_switch",
 ]

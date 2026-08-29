@@ -15,6 +15,7 @@ from apex.apex_core.setup.app_owned_permissions_seed import (
 )
 from apex.apex_core.setup.app_owned_workflows import refuse_shipped_workflow_edit
 from apex.apex_core.setup.workflow_names import WORKFLOWS
+from apex.patches.v2_9 import prune_orphaned_number_cards
 
 APP_ROOT = pathlib.Path(frappe.get_app_path("apex"))
 CUSTOMISED = ("employee", "cost_center", "project")
@@ -67,6 +68,7 @@ class TestCustodyMastersShipAsFixtures(FrappeTestCase):
             ("Custody Article", "custody_article.json"),
             ("Operational Depreciation Policy", "operational_depreciation_policy.json"),
             ("Safety Task Catalog", "safety_task_catalog.json"),
+            ("Role Profile", "role_profile.json"),
         ):
             with self.subTest(doctype=dt):
                 shipped = json.loads((APP_ROOT / "fixtures" / fixture_file).read_text())
@@ -77,6 +79,60 @@ class TestCustodyMastersShipAsFixtures(FrappeTestCase):
                         frappe.db.exists(dt, name),
                         f"{dt} {name} is fixture-declared but not on this site",
                     )
+
+
+class TestRoleProfilesShipAsAFixture(FrappeTestCase):
+
+    def test_no_seeder_creates_the_role_profiles(self):
+        source = pathlib.Path(setup.__file__).read_text()
+        self.assertNotIn("create_role_profiles", source)
+        self.assertNotIn("create_role_profiles", (APP_ROOT / "hooks.py").read_text())
+
+    def test_the_fixture_declares_a_role_for_every_profile(self):
+        shipped = json.loads((APP_ROOT / "fixtures" / "role_profile.json").read_text())
+        self.assertEqual(len(shipped), 8)
+        for row in shipped:
+            with self.subTest(profile=row["name"]):
+                self.assertGreater(len(row["roles"]), 0)
+                for child in row["roles"]:
+                    self.assertTrue(frappe.db.exists("Role", child["role"]))
+
+    def test_every_fixture_profile_is_declared_in_hooks(self):
+        declared = {
+            name
+            for entry in frappe.get_hooks("fixtures", app_name="apex")
+            if isinstance(entry, dict) and entry.get("dt") == "Role Profile"
+            for condition in entry["filters"]
+            for name in condition[2]
+        }
+        shipped = json.loads((APP_ROOT / "fixtures" / "role_profile.json").read_text())
+        self.assertEqual(declared, {row["name"] for row in shipped})
+
+
+class TestOrphanedNumberCardsAreSweptByAPatch(FrappeTestCase):
+
+    def test_the_patch_is_registered(self):
+        self.assertIn(
+            "apex.patches.v2_9.prune_orphaned_number_cards",
+            (APP_ROOT / "patches.txt").read_text(),
+        )
+
+    def test_no_hook_runs_the_sweep_on_every_migrate(self):
+        self.assertNotIn("prune_number_cards", str(_hooks_list("after_migrate")))
+        self.assertFalse((APP_ROOT / "apex_core" / "setup" / "prune_number_cards.py").exists())
+
+    def test_the_sweep_removes_no_shipped_number_card(self):
+        card_filters = {
+            "module": ["in", prune_orphaned_number_cards.APEX_MODULES],
+            "is_standard": 1,
+        }
+        before = frappe.get_all("Number Card", filters=card_filters, pluck="name")
+        self.assertGreater(len(before), 0)
+
+        prune_orphaned_number_cards.execute()
+
+        after = frappe.get_all("Number Card", filters=card_filters, pluck="name")
+        self.assertEqual(sorted(before), sorted(after))
 
 
 class TestShippedWorkflowsRefuseAnEdit(FrappeTestCase):

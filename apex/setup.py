@@ -25,7 +25,6 @@ KEPT_GENDERS = ("Male", "Female")
 def after_install():
     create_roles()
     frappe.db.commit()
-    create_role_profiles()
     create_accommodation_item_defaults(allow_deferred=True)
     seed_templates()
     seed_auto_email_reports()
@@ -140,30 +139,4 @@ def create_roles():
         doc.role_name = "Admin Manager"
         doc.desk_access = 0
         doc.insert(ignore_permissions=True)
-
-
-def create_role_profiles():
-    profiles = {
-        "Habitat Accommodation Manager": ["Accommodation Manager"],
-        "Habitat Resident Supervisor": ["Resident Supervisor"],
-        "Habitat Finance Reviewer": ["Finance Manager", "Internal Auditor"],
-        "Habitat Maintenance Technician": ["Maintenance Technician"],
-        "Habitat Cleaning Supervisor": ["Cleaning Supervisor"],
-        "Habitat Safety Officer": ["Safety Officer"],
-        "Habitat Resident Request Coordinator": ["Resident Request Coordinator"],
-    }
-    for profile_name, roles in profiles.items():
-        if not frappe.db.exists("Role Profile", profile_name):
-            doc = frappe.new_doc("Role Profile")
-            doc.role_profile = profile_name
-            for role in roles:
-                doc.append("roles", {"role": role})
-            doc.insert(ignore_permissions=True)
-            doc.unlock()
-    if not frappe.db.exists("Role Profile", "Salis Driver"):
-        doc = frappe.new_doc("Role Profile")
-        doc.role_profile = "Salis Driver"
-        doc.append("roles", {"role": "Driver"})
-        doc.insert(ignore_permissions=True)
-        doc.unlock()
 

@@ -8,7 +8,7 @@ import frappe
 APEX_MODULES = ["Habitat", "Salis", "Apex Core", "Logistay"]
 
 
-def prune_orphaned_number_cards():
+def execute():
     app_root = pathlib.Path(frappe.get_app_path("apex"))
 
     shipped = set()
