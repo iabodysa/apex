@@ -262,13 +262,14 @@ def _log_scan(
     accommodation_building=None,
     notes=None,
 ):
+    driver = trip.get("driver") if trip else None
     doc = frappe.get_doc(
         {
             "doctype": "Boarding Scan Log",
             "dispatch_trip": dispatch_trip,
             "trip_start_log": trip_start_log,
             "transport_request": trip.get("transport_request") if trip else None,
-            "driver": trip.get("driver") if trip else None,
+            "driver": driver,
             "employee": worker,
             "accommodation_building": accommodation_building,
             "result": result,
@@ -279,7 +280,8 @@ def _log_scan(
             "notes": notes,
         }
     )
-    doc.insert(ignore_permissions=True)
+    with as_capacity(DRIVER, driver):
+        doc.insert()
     return doc.name
 
 

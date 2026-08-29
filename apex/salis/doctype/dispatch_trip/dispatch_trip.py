@@ -221,7 +221,7 @@ class DispatchTrip(Document):
                 "source_name": self.name,
             }
         )
-        ledger.insert(ignore_permissions=True)
+        ledger.insert()
 
     def on_cancel(self):
         self._revert_transport_requests()
@@ -261,7 +261,7 @@ class DispatchTrip(Document):
                     "source_name": self.name,
                     "reversal_of": row.name,
                 }
-            ).insert(ignore_permissions=True)
+            ).insert()
 
     def on_trash(self):
         for request in self._request_names():

@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import today
 
 from apex.apex_core.utils.company import company_for_trip
+from apex.apex_core.utils.portal_identity import DRIVER, as_capacity
 from apex.salis.api.boarding_flow import _assigned_request_names, _request_workers
 
 
@@ -47,47 +48,48 @@ def post_trip_boarding(dispatch_trip: str) -> int:
     posting_date = today()
     posted = 0
 
-    for row in rows:
-        if row.status not in TERMINAL_OUTCOMES or not row.employee:
-            continue
-        sp = "boarding_row"
-        frappe.db.savepoint(sp)
-        try:
-            if frappe.db.exists(
-                LEDGER_DOCTYPE,
-                {
-                    "dispatch_trip": dispatch_trip,
-                    "employee": row.employee,
-                    "reversal_of": ["is", "not set"],
-                },
-            ):
+    with as_capacity(DRIVER, trip.driver):
+        for row in rows:
+            if row.status not in TERMINAL_OUTCOMES or not row.employee:
                 continue
-            boarded_at = (
-                row.worker_claim_at if row.status == "Boarded" else None
-            )
-            frappe.get_doc(
-                {
-                    "doctype": LEDGER_DOCTYPE,
-                    "company": company,
-                    "posting_date": posting_date,
-                    "dispatch_trip": dispatch_trip,
-                    "employee": row.employee,
-                    "building": buildings.get(row.employee),
-                    "outcome": row.status,
-                    "confirm_source": row.confirm_source or None,
-                    "boarded_at": boarded_at,
-                    "source_doctype": "Dispatch Trip",
-                    "source_name": dispatch_trip,
-                    "source_detail_no": row.employee,
-                }
-            ).insert(ignore_permissions=True)
-            posted += 1
-        except Exception:
-            frappe.db.rollback(save_point=sp)
-            frappe.log_error(
-                message=frappe.get_traceback(),
-                title=f"Trip boarding post failed for {dispatch_trip}/{row.employee}"[:140],
-            )
+            sp = "boarding_row"
+            frappe.db.savepoint(sp)
+            try:
+                if frappe.db.exists(
+                    LEDGER_DOCTYPE,
+                    {
+                        "dispatch_trip": dispatch_trip,
+                        "employee": row.employee,
+                        "reversal_of": ["is", "not set"],
+                    },
+                ):
+                    continue
+                boarded_at = (
+                    row.worker_claim_at if row.status == "Boarded" else None
+                )
+                frappe.get_doc(
+                    {
+                        "doctype": LEDGER_DOCTYPE,
+                        "company": company,
+                        "posting_date": posting_date,
+                        "dispatch_trip": dispatch_trip,
+                        "employee": row.employee,
+                        "building": buildings.get(row.employee),
+                        "outcome": row.status,
+                        "confirm_source": row.confirm_source or None,
+                        "boarded_at": boarded_at,
+                        "source_doctype": "Dispatch Trip",
+                        "source_name": dispatch_trip,
+                        "source_detail_no": row.employee,
+                    }
+                ).insert()
+                posted += 1
+            except Exception:
+                frappe.db.rollback(save_point=sp)
+                frappe.log_error(
+                    message=frappe.get_traceback(),
+                    title=f"Trip boarding post failed for {dispatch_trip}/{row.employee}"[:140],
+                )
 
     return posted
 
@@ -135,7 +137,7 @@ def reverse_trip_boarding(dispatch_trip: str) -> int:
                 "is_cancelled": 1,
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         frappe.db.set_value(
             LEDGER_DOCTYPE, row.name, "is_cancelled", 1, update_modified=False
         )

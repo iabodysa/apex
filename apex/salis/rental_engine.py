@@ -139,7 +139,7 @@ def reverse_rental_accrual(source_doctype: str, source_name: str) -> int:
                 "source_doctype": source_doctype,
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
 
     return posted

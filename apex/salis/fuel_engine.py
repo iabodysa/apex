@@ -63,7 +63,7 @@ def reverse_fuel_ledger(source_type: str, source_name: str) -> int:
                 "logged_at": now_datetime(),
                 "reversal_of": row.name,
             }
-        ).insert(ignore_permissions=True)
+        ).insert()
         posted += 1
 
     return posted

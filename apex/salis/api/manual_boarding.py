@@ -26,7 +26,8 @@ def _log_attempt(dispatch_trip, trip, employee, result, trip_start_log=None, cre
             "boarding_event_created": frappe.utils.cint(created),
         }
     )
-    doc.insert(ignore_permissions=True)
+    with as_capacity(DRIVER, trip.get("driver")):
+        doc.insert()
     return doc.name
 
 

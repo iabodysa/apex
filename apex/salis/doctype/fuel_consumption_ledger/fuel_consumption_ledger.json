@@ -151,7 +151,7 @@
  "in_create": 1,
  "is_submittable": 0,
  "links": [],
- "modified": "2026-08-28 00:00:00.000000",
+ "modified": "2026-08-29 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Fuel Consumption Ledger",
@@ -159,6 +159,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
@@ -177,6 +178,7 @@
    "role": "Internal Auditor"
   },
   {
+   "create": 1,
    "export": 1,
    "read": 1,
    "report": 1,
