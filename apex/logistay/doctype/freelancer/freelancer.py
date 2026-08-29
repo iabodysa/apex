@@ -7,8 +7,6 @@ from frappe import _
 from frappe.utils import getdate, nowdate
 from frappe.model.document import Document
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
-
 
 class Freelancer(Document):
     def validate(self) -> None:
@@ -33,9 +31,3 @@ class Freelancer(Document):
             self.status = "Expired"
 
 
-def on_doctype_update():
-    add_unique_guarded(
-        "Freelancer",
-        ["national_id_or_iqama"],
-        constraint_name="uq_freelancer_national_id",
-    )

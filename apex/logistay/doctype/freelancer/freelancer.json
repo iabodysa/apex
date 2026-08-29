@@ -48,7 +48,8 @@
    "label": "National ID / Iqama",
    "permlevel": 1,
    "reqd": 1,
-   "set_only_once": 1
+   "set_only_once": 1,
+   "unique": 1
   },
   {
    "fieldname": "freelance_identity_col",
@@ -143,7 +144,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-07 05:23:00.000000",
+ "modified": "2026-08-29 06:10:00.000000",
  "modified_by": "Administrator",
  "module": "Logistay",
  "name": "Freelancer",
