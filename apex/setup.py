@@ -86,7 +86,7 @@ def create_accommodation_item_groups(item_group_root):
         if exists:
             doc = frappe.get_doc("Item Group", group)
             doc.parent_item_group = item_group_root
-            doc.save(ignore_permissions=True)
+            doc.save()
         else:
             frappe.get_doc(
                 {
@@ -95,7 +95,7 @@ def create_accommodation_item_groups(item_group_root):
                     "parent_item_group": item_group_root,
                     "is_group": 0,
                 }
-            ).insert(ignore_permissions=True)
+            ).insert()
 
 
 def restrict_genders():
@@ -105,7 +105,7 @@ def restrict_genders():
     removed, kept = [], []
     for name in surplus:
         try:
-            frappe.delete_doc("Gender", name, ignore_permissions=True)
+            frappe.delete_doc("Gender", name)
             removed.append(name)
         except frappe.LinkExistsError:
             kept.append(name)
@@ -118,7 +118,7 @@ def create_accommodation_items():
     for record in _load_accommodation_item_records():
         if frappe.db.exists("Item", record["item_code"]):
             continue
-        frappe.get_doc(record).insert(ignore_permissions=True)
+        frappe.get_doc(record).insert()
 
 
 def _load_accommodation_item_records():
