@@ -2,6 +2,7 @@
 
 import frappe
 
+from apex.apex_core.utils.portal_identity import DRIVER, WORKER, as_capacity
 from apex.salis.api import boarding_window
 from apex.salis.api.boarding_flow import _manifest_request_names
 
@@ -61,12 +62,15 @@ def _today_worker_trips(driver):
         return []
     trip_names = [t["name"] for t in trips]
     requests_by_trip = {t["name"]: [] for t in trips}
-    for row in frappe.get_all(
-        "Dispatch Trip Assigned Request",
-        filters={"parent": ["in", trip_names], "parenttype": "Dispatch Trip"},
-        fields=["parent", "transport_request"],
-        order_by="parent asc, idx asc",
-    ):
+    with as_capacity(DRIVER, driver):
+        assigned_rows = frappe.get_list(
+            "Dispatch Trip Assigned Request",
+            filters={"parent": ["in", trip_names], "parenttype": "Dispatch Trip"},
+            fields=["parent", "transport_request"],
+            order_by="parent asc, idx asc",
+            parent_doctype="Dispatch Trip",
+        )
+    for row in assigned_rows:
         if row.get("transport_request"):
             requests_by_trip[row["parent"]].append(row["transport_request"])
 
@@ -272,11 +276,13 @@ WORKER_TRANSPORT_HISTORY_DAYS = 90
 WORKER_TRANSPORT_ROW_LIMIT = 200
 
 def _worker_transport_requests(employee):
-    parents = frappe.get_all(
-        "Transport Request Worker",
-        filters={"employee": employee, "parenttype": "Transport Request"},
-        fields=["parent", "pickup_point"],
-    )
+    with as_capacity(WORKER, employee):
+        parents = frappe.get_list(
+            "Transport Request Worker",
+            filters={"employee": employee, "parenttype": "Transport Request"},
+            fields=["parent", "pickup_point"],
+            parent_doctype="Transport Request",
+        )
     by_request = {}
     for p in parents:
         by_request.setdefault(p["parent"], p.get("pickup_point"))
@@ -316,12 +322,15 @@ def _worker_transport_requests(employee):
 
 def _worker_today_dispatch_trip(employee, transport_request=None):
     worker_pickup = {}
-    for wrow in frappe.get_all(
-        "Transport Request Worker",
-        filters={"parenttype": "Transport Request", "employee": employee},
-        fields=["parent", "pickup_point"],
-        order_by="modified asc",
-    ):
+    with as_capacity(WORKER, employee):
+        worker_rows = frappe.get_list(
+            "Transport Request Worker",
+            filters={"parenttype": "Transport Request", "employee": employee},
+            fields=["parent", "pickup_point"],
+            order_by="modified asc",
+            parent_doctype="Transport Request",
+        )
+    for wrow in worker_rows:
         worker_pickup.setdefault(wrow["parent"], wrow.get("pickup_point"))
     if not worker_pickup:
         return None
@@ -329,15 +338,18 @@ def _worker_today_dispatch_trip(employee, transport_request=None):
     own_requests = list(worker_pickup)
 
     assigned_by_trip = {}
-    for arow in frappe.get_all(
-        "Dispatch Trip Assigned Request",
-        filters={
-            "parenttype": "Dispatch Trip",
-            "transport_request": ["in", own_requests],
-        },
-        fields=["parent", "transport_request"],
-        order_by="idx asc",
-    ):
+    with as_capacity(WORKER, employee):
+        assigned_rows = frappe.get_list(
+            "Dispatch Trip Assigned Request",
+            filters={
+                "parenttype": "Dispatch Trip",
+                "transport_request": ["in", own_requests],
+            },
+            fields=["parent", "transport_request"],
+            order_by="idx asc",
+            parent_doctype="Dispatch Trip",
+        )
+    for arow in assigned_rows:
         assigned_by_trip.setdefault(arow["parent"], []).append(arow["transport_request"])
 
     route_plan_req = {

@@ -85,10 +85,11 @@ def _attach_boarding_counts(trips, driver):
         row["dispatch_trip"]: frappe.utils.cint(row.get("boarded_count")) for row in logs
     }
     expected_by_trip = {name: 0 for name in names}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Trip Boarding State",
         filters={"parent": ["in", names], "parenttype": "Dispatch Trip"},
         fields=["parent"],
+        parent_doctype="Dispatch Trip",
     ):
         expected_by_trip[row["parent"]] += 1
     for t in trips:
