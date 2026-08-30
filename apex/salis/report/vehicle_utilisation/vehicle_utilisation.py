@@ -6,7 +6,6 @@ from frappe import _
 from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
@@ -32,16 +31,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["snapshot_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Utilisation Snapshot")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_vehicles:
-            return columns, []
-        query_filters["vehicle"] = ["in", in_scope_vehicles]
-
-    snapshots = frappe.get_all(
+    snapshots = frappe.get_list(
         "Vehicle Utilisation Snapshot",
         filters=query_filters,
         fields=["vehicle", "period_days", "trips_count", "idle_days", "utilisation_pct"],

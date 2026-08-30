@@ -5,7 +5,6 @@ from frappe import _
 from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 def execute(filters=None):
@@ -31,14 +30,7 @@ def execute(filters=None):
         if filters.get("status"):
             log_filters["status"] = filters["status"]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Trip Start Log")
-    if restrict:
-        in_scope_trips = frappe.get_all("Dispatch Trip", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
-        if not in_scope_trips:
-            return columns, []
-        log_filters["dispatch_trip"] = ["in", in_scope_trips]
-
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Trip Start Log",
         filters=log_filters,
         fields=[

@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import card, count_card, total_card
 
 
@@ -32,16 +31,7 @@ def execute(filters=None):
     if filters.get("period_month"):
         query_filters["period_month"] = filters["period_month"]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Fuel Consumption Ledger")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_vehicles:
-            return columns, []
-        query_filters["vehicle"] = ["in", in_scope_vehicles]
-
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Fuel Consumption Ledger",
         filters=query_filters,
         fields=["vehicle", "company", "litres", "amount"],

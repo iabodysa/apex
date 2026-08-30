@@ -5,7 +5,6 @@ from frappe import _
 from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, percent_card, total_card
 
 
@@ -24,19 +23,9 @@ def execute(filters=None):
         if date_condition is not None:
             attendance_filters["attendance_date"] = date_condition
 
-    or_filters = None
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Driver Attendance")
-    if restrict:
-        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
-        if in_scope_drivers:
-            or_filters = {"driver": ["in", in_scope_drivers], "owner": frappe.session.user}
-        else:
-            attendance_filters["owner"] = frappe.session.user
-
-    records = frappe.get_all(
+    records = frappe.get_list(
         "Driver Attendance",
         filters=attendance_filters,
-        or_filters=or_filters,
         fields=["driver", "status", "worked_hours"],
     )
 

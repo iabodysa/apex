@@ -6,7 +6,6 @@ from frappe.utils import flt
 
 from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import percent_card, total_card
-from apex.salis import permissions
 
 def execute(filters=None):
     columns = [
@@ -28,16 +27,7 @@ def execute(filters=None):
         if date_condition is not None:
             query_filters["request_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Movement Cost Recovery")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_vehicles:
-            return columns, []
-        query_filters["vehicle"] = ["in", in_scope_vehicles]
-
-    records = frappe.get_all(
+    records = frappe.get_list(
         "Movement Cost Recovery",
         filters=query_filters,
         fields=["recovery_type", "amount", "status"],

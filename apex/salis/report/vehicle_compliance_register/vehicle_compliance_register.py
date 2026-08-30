@@ -4,7 +4,6 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, today, date_diff
 
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card
 
 
@@ -32,14 +31,10 @@ def execute(filters=None):
         else:
             row_filters["expiry_date"] = ["<=", filters["to_date"]]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Salis Vehicle")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_vehicles:
-            return columns, []
-        row_filters["parent"] = ["in", in_scope_vehicles]
+    in_scope_vehicles = frappe.get_list("Salis Vehicle", pluck="name")
+    if not in_scope_vehicles:
+        return columns, []
+    row_filters["parent"] = ["in", in_scope_vehicles]
 
     rows = frappe.get_all(
         "Salis Vehicle Compliance",

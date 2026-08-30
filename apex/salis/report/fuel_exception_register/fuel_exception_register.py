@@ -3,7 +3,6 @@
 import frappe
 from frappe import _
 
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, total_card
 
 
@@ -35,13 +34,7 @@ def execute(filters=None):
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Fuel Exception Case")
-    if restrict:
-        if not allowed:
-            return columns, []
-        query_filters["project"] = ["in", allowed]
-
-    data = frappe.get_all(
+    data = frappe.get_list(
         "Fuel Exception Case",
         filters=query_filters,
         fields=[

@@ -5,7 +5,6 @@ from frappe import _
 from frappe.utils import date_diff, flt
 
 from apex.apex_core.utils.report_summary import card, count_card, total_card
-from apex.salis import permissions
 
 
 def execute(filters=None):
@@ -49,17 +48,7 @@ def in_scope_vehicles(filters):
     if filters.get("vehicle"):
         vehicle_filters["name"] = filters["vehicle"]
 
-    restrict, allowed = permissions.report_project_scope(
-        frappe.session.user, doctype="Salis Vehicle"
-    )
-    if restrict:
-        chosen = vehicle_filters.get("project")
-        if not allowed or (chosen and chosen not in allowed):
-            return []
-        if not chosen:
-            vehicle_filters["project"] = ["in", allowed]
-
-    return frappe.get_all(
+    return frappe.get_list(
         "Salis Vehicle",
         filters=vehicle_filters,
         fields=["name", "plate_number", "company", "project"],

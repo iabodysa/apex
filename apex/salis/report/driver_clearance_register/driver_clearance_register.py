@@ -3,7 +3,6 @@
 import frappe
 from frappe import _
 
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card
 
 
@@ -32,16 +31,7 @@ def execute(filters=None):
         elif to_date:
             query_filters["creation"] = ["<=", to_date]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Driver Clearance")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_drivers = frappe.get_all("Salis Driver", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_drivers:
-            return columns, []
-        query_filters["driver"] = ["in", in_scope_drivers]
-
-    data = frappe.get_all(
+    data = frappe.get_list(
         "Driver Clearance",
         filters=query_filters,
         fields=[

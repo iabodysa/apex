@@ -6,7 +6,6 @@ from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import count_card, percent_card
-from apex.salis import permissions
 
 def execute(filters=None):
     filters = filters or {}
@@ -20,38 +19,12 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["dispatch_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Passenger Manifest")
-
-    manifests = frappe.get_all(
+    manifests = frappe.get_list(
         "Passenger Manifest",
         filters=query_filters,
         fields=["name", "dispatch_date", "route_plan", "dispatch_trip", "vehicle", "driver"],
         order_by="dispatch_date desc",
     )
-    if restrict:
-        if not allowed:
-            manifests = []
-        else:
-            trip_names = [m.dispatch_trip for m in manifests if m.dispatch_trip]
-            trip_projects = (
-                frappe._dict(
-                    frappe.get_all(
-                        "Dispatch Trip",
-                        filters={"name": ["in", trip_names]},
-                        fields=["name", "project"],
-                        as_list=True,
-                    )
-                )
-                if trip_names
-                else {}
-            )
-
-            def _in_scope(m):
-                if m.dispatch_trip:
-                    return trip_projects.get(m.dispatch_trip) in allowed
-                return frappe.db.get_value("Route Plan", m.route_plan, "project") in allowed
-
-            manifests = [m for m in manifests if _in_scope(m)]
     if not manifests:
         return columns, [], None, None, get_report_summary([])
 

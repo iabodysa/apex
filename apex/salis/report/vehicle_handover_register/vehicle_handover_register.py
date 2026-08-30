@@ -6,7 +6,6 @@ from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition
 from apex.apex_core.utils.report_summary import count_card, percent_card
-from apex.salis import permissions
 
 
 def execute(filters=None):
@@ -22,16 +21,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["handover_date"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Handover")
-    if restrict:
-        in_scope = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name") if allowed else []
-        chosen = query_filters.get("vehicle")
-        if not in_scope or (chosen and chosen not in in_scope):
-            return columns, [], None, None, get_report_summary([])
-        if not chosen:
-            query_filters["vehicle"] = ["in", in_scope]
-
-    handovers = frappe.get_all(
+    handovers = frappe.get_list(
         "Vehicle Handover",
         filters=query_filters,
         fields=[

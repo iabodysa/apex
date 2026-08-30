@@ -6,7 +6,6 @@ from frappe import _
 from frappe.utils import date_diff, getdate, today
 
 from apex.apex_core.utils.report_summary import count_card, percent_card
-from apex.salis import permissions
 
 LIVE_STATUS = "Active"
 
@@ -23,15 +22,7 @@ def execute(filters=None):
         if filters.get(field):
             query_filters[field] = filters[field]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Vehicle Assignment")
-    if restrict:
-        chosen = query_filters.get("project")
-        if not allowed or (chosen and chosen not in allowed):
-            return columns, [], None, None, get_report_summary([])
-        if not chosen:
-            query_filters["project"] = ["in", allowed]
-
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Vehicle Assignment",
         filters=query_filters,
         fields=[

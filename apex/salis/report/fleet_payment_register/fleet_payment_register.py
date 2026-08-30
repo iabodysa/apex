@@ -4,7 +4,6 @@ import frappe
 from frappe import _
 
 from apex.apex_core.utils.report_helpers import date_range_condition
-from apex.salis import permissions
 from apex.apex_core.utils.report_summary import count_card, total_card
 
 
@@ -31,15 +30,7 @@ def execute(filters=None):
         if date_condition is not None:
             query_filters["creation"] = date_condition
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Salis Payment Request")
-    if restrict:
-        chosen = query_filters.get("project")
-        if not allowed or (chosen and chosen not in allowed):
-            return columns, []
-        if not chosen:
-            query_filters["project"] = ["in", allowed]
-
-    data = frappe.get_all(
+    data = frappe.get_list(
         "Salis Payment Request",
         filters=query_filters,
         fields=[

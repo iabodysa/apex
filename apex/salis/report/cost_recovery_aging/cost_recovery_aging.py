@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, nowdate
 from apex.apex_core.utils.report_summary import count_card, total_card
-from apex.salis import permissions
 
 OPEN_STATUSES = ("Open", "Acknowledged", "Approved")
 
@@ -51,16 +50,7 @@ def execute(filters=None):
     else:
         query_filters["status"] = ["in", list(OPEN_STATUSES)]
 
-    restrict, allowed = permissions.report_project_scope(frappe.session.user, doctype="Movement Cost Recovery")
-    if restrict:
-        if not allowed:
-            return columns, []
-        in_scope_vehicles = frappe.get_all("Salis Vehicle", filters={"project": ["in", allowed]}, pluck="name")
-        if not in_scope_vehicles:
-            return columns, []
-        query_filters["vehicle"] = ["in", in_scope_vehicles]
-
-    records = frappe.get_all(
+    records = frappe.get_list(
         "Movement Cost Recovery",
         filters=query_filters,
         fields=["name", "recovery_type", "company", "vehicle", "driver", "employee", "payment_request", "status", "request_date", "amount"],

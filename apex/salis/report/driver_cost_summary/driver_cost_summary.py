@@ -5,7 +5,6 @@ from frappe import _
 from frappe.utils import flt
 
 from apex.apex_core.utils.report_summary import count_card, total_card
-from apex.salis import permissions
 
 
 def execute(filters=None):
@@ -47,17 +46,7 @@ def in_scope_drivers(filters):
     if filters.get("driver"):
         driver_filters["name"] = filters["driver"]
 
-    restrict, allowed = permissions.report_project_scope(
-        frappe.session.user, doctype="Salis Driver"
-    )
-    if restrict:
-        chosen = driver_filters.get("project")
-        if not allowed or (chosen and chosen not in allowed):
-            return []
-        if not chosen:
-            driver_filters["project"] = ["in", allowed]
-
-    return frappe.get_all(
+    return frappe.get_list(
         "Salis Driver",
         filters=driver_filters,
         fields=["name", "full_name", "project"],
