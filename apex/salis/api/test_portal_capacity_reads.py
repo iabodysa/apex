@@ -4,7 +4,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from apex.apex_core.utils.portal_identity import DRIVER, WORKER, as_capacity
+from apex.habitat.permissions import building_scoped_has_permission
 from apex.salis.api.driver_portal import _attach_boarding_counts
+from apex.salis.permissions import project_scope_query
 
 _REQUEST = "TR-A610-CAPACITY-READ"
 _TRIP = "DT-A610-CAPACITY-READ"
@@ -82,3 +84,32 @@ class TestAChildTableReadUnderAPortalCapacityReturnsItsRows(FrappeTestCase):
         with as_capacity(DRIVER, "DRV-A610"):
             _attach_boarding_counts(trips, "DRV-A610")
         self.assertEqual(trips[0]["expected_count"], 1)
+
+
+class TestThePortalCapacityListScopeIsBoundToItsSubject(FrappeTestCase):
+    def test_the_driver_capacity_reads_only_the_trips_that_name_it(self):
+        with as_capacity(DRIVER, "DRV-A610"):
+            clause = project_scope_query(doctype="Dispatch Trip")
+        self.assertEqual(clause, "`driver` = 'DRV-A610'")
+
+    def test_the_driver_capacity_reads_nothing_on_a_doctype_with_no_driver_column(self):
+        with as_capacity(DRIVER, "DRV-A610"):
+            clause = project_scope_query(doctype="Fuel Claim")
+        self.assertEqual(clause, "1=0")
+
+    def test_the_worker_capacity_reads_only_the_requests_that_carry_it(self):
+        with as_capacity(WORKER, _EMPLOYEE):
+            clause = project_scope_query(doctype="Transport Request")
+        self.assertIn("tabTransport Request Worker", clause)
+        self.assertIn(frappe.db.escape(_EMPLOYEE), clause)
+        self.assertNotEqual(clause, "1=0")
+
+    def test_a_capacity_with_no_bound_subject_reads_nothing(self):
+        with as_capacity(DRIVER, None):
+            clause = project_scope_query(doctype="Dispatch Trip")
+        self.assertEqual(clause, "1=0")
+
+    def test_a_habitat_document_is_never_read_under_a_portal_capacity(self):
+        doc = frappe.get_doc({"doctype": "Building", "name": "BLD-A610-CAPACITY"})
+        with as_capacity(WORKER, _EMPLOYEE):
+            self.assertIs(building_scoped_has_permission(doc, "read"), False)

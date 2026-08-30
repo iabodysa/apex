@@ -3,8 +3,13 @@
 import frappe
 
 from apex.apex_core.utils import permission_scope
-from apex.apex_core.utils.portal_identity import DRIVER, WORKER, capacity_subject
-from apex.salis.api.boarding_flow import _manifest_employees
+from apex.apex_core.utils.portal_identity import (
+    CAPACITY_USERS,
+    DRIVER,
+    WORKER,
+    capacity_subject,
+)
+from apex.salis.api.boarding_flow import _manifest_employees, _request_workers
 from apex.salis.utils import get_driver_for_session_user
 
 UNSCOPED_ROLES = {
@@ -200,13 +205,93 @@ FRAGMENTS = {
 def _fragment(kind, spec, values):
     return permission_scope.render_fragment(kind, spec, values, FRAGMENTS)
 
+PORTAL_DRIVER_COLUMNS = {
+    "Salis Driver": "name",
+    "Salis Vehicle": "current_driver",
+    "Route Plan": "driver",
+    "Dispatch Trip": "driver",
+    "Trip Start Log": "driver",
+    "Passenger Manifest": "driver",
+    "Transport Request": "assigned_driver",
+    "Driver Attendance": "driver",
+    "Driver Suspension": "driver",
+    "Boarding Scan Log": "driver",
+    "Vehicle Damage Write-Off": "driver",
+    "Vehicle Incident": "driver",
+    "Driver Clearance": "driver",
+    "Vehicle Suspension": "related_driver",
+}
+
+_WORKER_REQUESTS = (
+    "select `parent` from `tabTransport Request Worker` "
+    "where `employee` = {subject} and `parenttype` = 'Transport Request'"
+)
+
+_WORKER_TRIPS = (
+    "select `name` from `tabDispatch Trip` where `transport_request` in ({requests}) "
+    "union select `parent` from `tabDispatch Trip Assigned Request` "
+    "where `transport_request` in ({requests}) and `parenttype` = 'Dispatch Trip'"
+)
+
+PORTAL_WORKER_CLAUSES = {
+    "Transport Request": "`name` in ({requests})",
+    "Dispatch Trip": "`name` in ({trips})",
+    "Trip Start Log": "`dispatch_trip` in ({trips})",
+    "Passenger Manifest": "`dispatch_trip` in ({trips})",
+}
+
+def _capacity_audience(user):
+    return DRIVER if user == CAPACITY_USERS[DRIVER] else WORKER
+
+def _portal_capacity_clause(user, doctype):
+    audience = _capacity_audience(user)
+    subject = capacity_subject(audience)
+    if not subject:
+        return "1=0"
+
+    escaped = frappe.db.escape(subject)
+    if audience == DRIVER:
+        column = PORTAL_DRIVER_COLUMNS.get(doctype)
+        if not column:
+            return "1=0"
+        return "{column} = {subject}".format(
+            column=permission_scope.quote_column(column), subject=escaped
+        )
+
+    template = PORTAL_WORKER_CLAUSES.get(doctype)
+    if not template:
+        return "1=0"
+    requests = _WORKER_REQUESTS.format(subject=escaped)
+    return template.format(requests=requests, trips=_WORKER_TRIPS.format(requests=requests))
+
+def _portal_capacity_read_verdict(doc, user):
+    audience = _capacity_audience(user)
+    subject = capacity_subject(audience)
+    doctype = getattr(doc, "doctype", None)
+    if not subject:
+        return False
+
+    if audience == DRIVER:
+        column = PORTAL_DRIVER_COLUMNS.get(doctype)
+        if not column:
+            return False
+        value = doc.name if column == "name" else getattr(doc, column, None)
+        return None if value == subject else False
+
+    if doctype == "Transport Request":
+        return None if subject in _request_workers(doc.name) else False
+    if doctype not in PORTAL_WORKER_CLAUSES:
+        return False
+    trip = doc.name if doctype == "Dispatch Trip" else getattr(doc, "dispatch_trip", None)
+    return None if trip and subject in _manifest_employees(trip) else False
+
 def project_scope_query(user=None, doctype=None):
     user = permission_scope.resolve_user(user)
     if _is_unscoped(user):
         return ""
 
     if permission_scope.is_portal_capacity(user):
-        return "1=0"
+        return _portal_capacity_clause(user, doctype)
 
     kind, spec = SALIS_SCOPE.get(doctype) or _column()
     own = _own_clause(spec, user)
@@ -484,6 +569,8 @@ def project_scoped_has_permission(doc, ptype, user=None):
     if permission_scope.is_portal_capacity(user):
         if getattr(doc, "doctype", None) == "Trip Start Log":
             return _trip_start_log_capacity_verdict(doc, ptype)
+        if ptype == "read":
+            return _portal_capacity_read_verdict(doc, user)
         return permission_scope.portal_capacity_verdict(ptype)
 
     kind, spec = SALIS_SCOPE.get(getattr(doc, "doctype", None)) or _column()

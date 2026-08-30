@@ -248,6 +248,8 @@ def building_scoped_has_permission(doc, ptype, user=None):
         return None
 
     if permission_scope.is_portal_capacity(user):
+        if ptype == "read":
+            return False
         return permission_scope.portal_capacity_verdict(ptype)
 
     estates = _doc_estates(doc)

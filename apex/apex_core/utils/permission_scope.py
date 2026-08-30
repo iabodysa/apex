@@ -7,7 +7,7 @@ from apex.apex_core.utils.portal_identity import CAPACITY_USERS
 
 PORTAL_CAPACITY_USERS = frozenset(CAPACITY_USERS.values())
 
-PORTAL_CAPACITY_PTYPES = frozenset({"create", "write", "submit"})
+PORTAL_CAPACITY_PTYPES = frozenset({"read", "create", "write", "submit"})
 
 
 def resolve_user(user=None):
