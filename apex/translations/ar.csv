@@ -6087,7 +6087,6 @@ You have no custody items registered.,لا توجد عهد مسجلة عليك.
 You have no fleet project assigned,لا يوجد مشروع أسطول مُسنَد إليك
 You have not submitted any request yet.,لم تقدم أي طلب بعد.
 You have used up the wait requests available for this trip.,استهلكت طلبات الانتظار المتاحة لهذه الرحلة.
-You hit the rate limit because of too many requests. Please try after sometime.,لقد تجاوزت الحد المسموح بسبب كثرة الطلبات. يُرجى المحاولة بعد قليل.
 You may only handle boarding for your own trips.,لا يمكنك إدارة الصعود إلا لرحلاتك الخاصة.
 "You submitted this movement, so you cannot acknowledge it yourself.",أنت من أرسل هذه الحركة، فلا يمكنك الإقرار بها بنفسك.
 You were not part of this trip's manifest.,لم تكن ضمن كشف ركاب هذه الرحلة.
