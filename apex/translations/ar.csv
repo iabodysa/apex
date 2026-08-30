@@ -2995,7 +2995,6 @@ Movement fuel claim and reconciliation against a quota. Compares claimed litres/
 "Movement-domain exit clearance for a driver. Confirms vehicle, fuel chip, and custody return and blocks clearance while open fuel exception cases or cost recoveries remain. HR EOSB/visa clearance is out of scope.",إخلاء طرف السائق في نطاق الحركة. يؤكد إعادة المركبة وشريحة الوقود والعهدة، ويمنع الإخلاء ما دامت هناك حالات وقود استثنائية أو استردادات تكاليف مفتوحة. أما إخلاء الموارد البشرية ونهاية الخدمة والتأشيرة فخارج النطاق.
 Movements,الحركات
 Multiple root nodes not allowed.,لا يُسمح بأكثر من عنصر جذري واحد.
-Must be Admin Manager,يجب أن يكون مدير الشؤون الإدارية
 Must be checked before the assignment can be submitted.,يجب تحديده قبل اعتماد الإسناد.
 My Complaints,بلاغاتي
 My Custody,عهدتي
