@@ -52,9 +52,9 @@ personal link private and every action bound to the correct person or trip.
 7. While the trip page remains active and the device grants location permission, the
    supervisor checks live boarding and driver position. A missing or stale position is a
    valid no-location state, not permission to enter a location manually.
-8. The driver uses **Finish trip** to close driver execution. A Fleet Project Manager or
-   Fleet Manager then completes the staff-owned Dispatch Trip. The worker rates that
-   completed trip once.
+8. The driver uses **End trip** to close driver execution. A Fleet Supervisor, Fleet
+   Project Manager, or Fleet Manager then completes the staff-owned Dispatch Trip. The
+   worker rates that trip once.
 
 ## Decisions and exceptions
 
@@ -80,9 +80,9 @@ personal link private and every action bound to the correct person or trip.
 - A Route Assignment defines recurring operation and generates planned trips. A Dispatch
   Trip is the actual journey and may group several Transport Requests with different
   pickup and drop-off stops.
-- The driver's **Finish trip** action closes the `Trip Start Log`; it does not complete the
-  `Dispatch Trip` workflow.
-- Driver location begins after **Start** only when the browser grants location
+- The driver's **End trip** action sets the `Trip Start Log` to Completed and stamps its
+  end time; it does not complete the `Dispatch Trip` workflow.
+- Driver location begins after **Start trip** only when the browser grants location
   access and the trip page remains active. The supervisor view marks an old fix
   as stale; worker ETA and the map cannot promise a current position without a
   recent fix.

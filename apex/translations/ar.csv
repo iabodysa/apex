@@ -954,7 +954,6 @@ Click a free bed to house him.,انقر على سرير شاغر لإسكانه.
 Client,العميل
 Client (Company),العميل (الشركة)
 Client Audit Reference / Ticket,رقم مرجع/تذكرة تدقيق العميل
-Client Code,رمز العميل
 Client Point of Contact,مسؤول التواصل لدى العميل
 Client Project,مشروع العميل
 "Clock time of the incident. A police report and an insurer both ask for it, and it orders two incidents on the same day.",ساعة وقوع الحادث. يطلبها تقرير المرور وشركة التأمين، وترتّب حادثين في يوم واحد.
@@ -3775,7 +3774,6 @@ Previous Repairs Confirmed,تم تأكيد الإصلاحات السابقة
 Previous Status,الحالة السابقة
 Previous Vehicle Status,حالة المركبة السابقة
 Priced Lines,البنود المسعّرة
-Pricing,التسعير
 Primary navigation,التنقل الرئيسي
 Print arrival cards ({0}),طباعة بطاقات الوصول ({0})
 Print handover,طباعة سند التسليم
@@ -4422,7 +4420,6 @@ Row {0}: Stop Name is required,الصف {0}: اسم المحطة مطلوب
 Row {0}: Stop Name is required.,الصف {0}: اسم المحطة مطلوب.
 Rows,الصفوف
 Rule,القاعدة
-Rule Applied,القاعدة المُطبَّقة
 SHA-256 digest of the scanned pass token (the raw token is never stored).,بصمة SHA-256 لرمز البطاقة الممسوح (لا يُخزَّن الرمز الخام أبدًا).
 "SHA-256 hash of the device's own bearer secret, minted once at enrolment. The raw secret is never stored; a direct row read exposes nothing usable.",بصمة SHA-256 لسر الجهاز، تُنشأ مرة واحدة عند التسجيل. السر الأصلي لا يُحفظ أبداً، وقراءة السجل مباشرة لا تكشف شيئاً قابلاً للاستخدام.
 "SHA-256 hash of the worker's personal token — the raw token is never stored, so a direct row read exposes no usable secret. The resolver hashes the presented link and matches it here. Use Regenerate to issue a fresh link (shown once).",بصمة SHA-256 للرمز الشخصي للعامل — لا يُخزَّن الرمز الخام أبداً، لذا لا تكشف قراءة الصف أي سر قابل للاستخدام. يحوّل النظام الرابط المقدَّم إلى بصمة ويطابقه هنا. استخدم إعادة التوليد لإصدار رابط جديد يظهر مرة واحدة.
@@ -4500,7 +4497,6 @@ Salary Deduction,خصم من الراتب
 Salary recovery deferred for {0}: no valid Salary Slip preview period for {1}.,تأجّل استرداد الراتب لتاريخ {0}: لا توجد فترة معاينة صالحة لقسيمة الراتب للموظف {1}.
 Salary recovery deferred for {0}: nothing recoverable this period.,تأجّل استرداد الراتب لتاريخ {0}: لا يوجد مبلغ قابل للاسترداد في هذه الفترة.
 "Salary recovery is switched off. Turn on Employee Advance recovery in Salis Settings, and set its deduction Salary Component, before deducting from a worker's wage.",استرداد الراتب معطّل. فعّل استرداد سلفة الموظف من إعدادات ساليس، وحدد مكوّن الراتب الخاص بالخصم، قبل الخصم من راتب العامل.
-Sales Taxes and Charges Template,قالب ضرائب ورسوم المبيعات
 Salis,ساليس
 Salis Active Trips,رحلات ساليس النشطة
 Salis Compliance Drivers Licenses Expiring Soon,رخص سائقي ساليس التي قاربت على الانتهاء

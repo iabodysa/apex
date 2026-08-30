@@ -37,7 +37,7 @@ def my_trips_today():
     _require_enabled()
     driver = _resolve_driver()
     with as_capacity(DRIVER, driver):
-        trips = frappe.get_all(
+        trips = frappe.get_list(
             "Dispatch Trip",
             filters={
                 "driver": driver,
@@ -74,7 +74,7 @@ def my_trips_recent(days=30, limit=50):
     limit = _bounded_positive(limit, RECENT_TRIP_DEFAULT_LIMIT, RECENT_TRIP_MAX_LIMIT)
     with as_capacity(DRIVER, driver):
         since = frappe.utils.add_days(frappe.utils.today(), -days)
-        trips = frappe.get_all(
+        trips = frappe.get_list(
             "Dispatch Trip",
             filters={"driver": driver, "trip_date": [">=", since]},
             fields=[
