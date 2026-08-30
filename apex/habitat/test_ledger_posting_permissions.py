@@ -217,7 +217,7 @@ class TestSafetySetupWritesTemplatesWithoutBypass(LedgerPostingPermissionCase):
         self.refuse_as("Safety Officer", self._template_row())
 
 
-class TestInspectionReportDeletesItsDraftRequest(LedgerPostingPermissionCase):
+class TestNoHabitatRoleDeletesAMaintenanceRequest(LedgerPostingPermissionCase):
     def _request(self):
         doc = frappe.get_doc(
             {
@@ -232,12 +232,17 @@ class TestInspectionReportDeletesItsDraftRequest(LedgerPostingPermissionCase):
         ).insert(ignore_permissions=True)
         return doc.name
 
-    def test_accommodation_manager_deletes_the_generated_request(self):
+    def test_accommodation_manager_is_refused_the_delete(self):
         name = self._request()
+        self.addCleanup(
+            lambda: frappe.delete_doc(
+                "Maintenance Request", name, force=True, ignore_permissions=True
+            )
+        )
         self.as_role("Accommodation Manager")
-        frappe.delete_doc("Maintenance Request", name)
+        with self.assertRaises(frappe.PermissionError):
+            frappe.delete_doc("Maintenance Request", name)
         frappe.set_user("Administrator")
-        self.assertFalse(frappe.db.exists("Maintenance Request", name))
 
     def test_maintenance_technician_is_refused_the_delete(self):
         name = self._request()

@@ -232,71 +232,9 @@ jobs:
         working-directory: frappe-bench
         run: bench --site test.localhost migrate
 
-      # The test suite is the maintainer's, not the app's, so a clone carries none and
-      # `run-tests` here would exit 0 having run nothing. This asserts what a fresh install
-      # is actually supposed to produce instead: the desk tree, and no broken link in it.
-      # Run through the interpreter, not `bench console`: the console is IPython and swallows a
-      # non-zero exit, so the one step meant to stop a false green would itself produce one.
-      - name: Assert the installed app is usable
-        working-directory: frappe-bench/sites
-        run: |
-          ../env/bin/python - <<'PY'
-          import json
-          import sys
-
-          import frappe
-
-          frappe.init(site="test.localhost")
-          frappe.connect()
-
-          # Only the SHAPE is checked here. A link to a DocType that does not exist cannot
-          # reach the database at all — Workspace Link is a Dynamic Link, so frappe raises
-          # LinkValidationError on save and migrate fails first. Parentage has no such guard:
-          # a workspace whose parent_page names nothing simply disappears from the sidebar.
-          roots = frappe.get_all("Workspace", filters={"parent_page": "Apex"}, pluck="name")
-          missing = {"Apex Core", "Salis", "Habitat", "Logistay", "My Tasks"} - set(roots)
-          if missing:
-              sys.exit(f"workspaces missing under the Apex root: {sorted(missing)}")
-
-          empty = [name for name in roots
-                   if not frappe.get_doc("Workspace", name).links
-                   and not frappe.get_doc("Workspace", name).shortcuts]
-          if empty:
-              sys.exit(f"workspaces that would render blank: {sorted(empty)}")
-
-          # The child tables above are what the sidebar needs; the `content` blocks are what
-          # the PAGE renders, and they are matched to those rows by label at render time. A
-          # block whose name matches no row is dropped silently, and a landing page with no
-          # text block at all renders as an empty card carrying nothing but Edit and New.
-          named_blocks = {
-              "shortcut": ("shortcut_name", "shortcuts"),
-              "card": ("card_name", "links"),
-              "chart": ("chart_name", "charts"),
-              "number_card": ("number_card_name", "number_cards"),
-              "quick_list": ("quick_list_name", "quick_lists"),
-          }
-
-          apex = frappe.get_doc("Workspace", "Apex")
-          if not [b for b in json.loads(apex.content or "[]") if b.get("type") in ("header", "paragraph")]:
-              sys.exit("the Apex landing page carries no text block and would render as an empty card")
-
-          dangling = []
-          for name in ["Apex", *roots]:
-              doc = frappe.get_doc("Workspace", name)
-              for block in json.loads(doc.content or "[]"):
-                  key, table = named_blocks.get(block.get("type"), (None, None))
-                  if not key:
-                      continue
-                  wanted = (block.get("data") or {}).get(key)
-                  if wanted not in {row.label for row in doc.get(table)}:
-                      dangling.append(f"{name}/{block['type']}:{wanted}")
-          if dangling:
-              sys.exit(f"workspace blocks naming nothing that exists: {dangling}")
-
-          print(f"desk tree OK: {len(roots)} workspaces under Apex, none blank")
-          print(f"landing page OK: {len(json.loads(apex.content))} blocks, {len(apex.shortcuts)} portal links")
-          PY
-          
+      # The desk tree a fresh install must produce is asserted by
+      # apex/apex_core/setup/test_workspace_shape.py, which the next step runs against
+      # this same migrated site and which a clone can also run locally.
       - name: Run the apex test suite
         working-directory: frappe-bench
         env:
