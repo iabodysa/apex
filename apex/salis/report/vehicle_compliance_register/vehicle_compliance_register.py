@@ -36,8 +36,9 @@ def execute(filters=None):
         return columns, []
     row_filters["parent"] = ["in", in_scope_vehicles]
 
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Salis Vehicle Compliance",
+        parent_doctype="Salis Vehicle",
         filters=row_filters,
         fields=[
             "parent",
@@ -52,7 +53,7 @@ def execute(filters=None):
     vehicle_names = list({r["parent"] for r in rows if r.get("parent")})
     plate_map = {}
     if vehicle_names:
-        for v in frappe.get_all(
+        for v in frappe.get_list(
             "Salis Vehicle",
             filters={"name": ["in", vehicle_names]},
             fields=["name", "plate_number"],

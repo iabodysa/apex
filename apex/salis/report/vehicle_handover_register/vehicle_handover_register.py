@@ -44,8 +44,9 @@ def execute(filters=None):
         return columns, [], None, None, get_report_summary([])
 
     failed = {}
-    for item in frappe.get_all(
+    for item in frappe.get_list(
         "Vehicle Handover Item",
+        parent_doctype="Vehicle Handover",
         filters={
             "parent": ["in", [h.name for h in handovers]],
             "parenttype": "Vehicle Handover",

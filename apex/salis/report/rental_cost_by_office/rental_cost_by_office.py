@@ -36,7 +36,7 @@ def execute(filters=None):
     if date_condition is not None:
         query_filters["accrual_date"] = date_condition
 
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Rental Accrual Ledger",
         filters=query_filters,
         fields=["rental_office", "company", "vehicle", "amount", "settled"],

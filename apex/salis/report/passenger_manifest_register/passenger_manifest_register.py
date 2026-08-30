@@ -28,8 +28,9 @@ def execute(filters=None):
     if not manifests:
         return columns, [], None, None, get_report_summary([])
 
-    passengers = frappe.get_all(
+    passengers = frappe.get_list(
         "Passenger Manifest Item",
+        parent_doctype="Passenger Manifest",
         filters={"parent": ["in", [m.name for m in manifests]], "parenttype": "Passenger Manifest"},
         fields=["parent", "employee", "passenger_name", "pickup", "dropoff", "boarded"],
         order_by="parent asc, idx asc",

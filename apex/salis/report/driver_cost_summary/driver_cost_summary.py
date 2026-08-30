@@ -58,7 +58,7 @@ def get_data(drivers, window, filters):
     names = [driver.name for driver in drivers]
 
     present_days, worked_hours = {}, {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Driver Attendance",
         filters={"driver": ["in", names], "attendance_date": window},
         fields=["driver", "status", "worked_hours"],
@@ -68,7 +68,7 @@ def get_data(drivers, window, filters):
         worked_hours[row.driver] = worked_hours.get(row.driver, 0.0) + flt(row.worked_hours)
 
     fuel_litres, fuel_cost = {}, {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Fuel Consumption Ledger",
         filters={"driver": ["in", names], "logged_at": window},
         fields=["driver", "sum(litres) as litres", "sum(amount) as amount"],
@@ -87,7 +87,7 @@ def get_data(drivers, window, filters):
         recovery_filters["company"] = filters["company"]
 
     recovered = {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Movement Cost Recovery",
         filters=recovery_filters,
         fields=["driver", "sum(amount) as amount"],

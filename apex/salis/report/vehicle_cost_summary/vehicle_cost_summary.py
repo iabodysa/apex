@@ -60,7 +60,7 @@ def get_data(vehicles, window, period_days, filters):
     names = [vehicle.name for vehicle in vehicles]
 
     fuel_litres, fuel_cost = {}, {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Fuel Consumption Ledger",
         filters={"vehicle": ["in", names], "logged_at": window},
         fields=["vehicle", "sum(litres) as litres", "sum(amount) as amount"],
@@ -70,7 +70,7 @@ def get_data(vehicles, window, period_days, filters):
         fuel_cost[row.vehicle] = flt(row.amount)
 
     rental_cost = {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Rental Accrual Ledger",
         filters={"vehicle": ["in", names], "accrual_date": window},
         fields=["vehicle", "sum(amount) as amount"],
@@ -88,7 +88,7 @@ def get_data(vehicles, window, period_days, filters):
         recovery_filters["company"] = filters["company"]
 
     recovered = {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Movement Cost Recovery",
         filters=recovery_filters,
         fields=["vehicle", "sum(amount) as amount"],

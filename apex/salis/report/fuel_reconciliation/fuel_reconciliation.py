@@ -52,7 +52,7 @@ def execute(filters=None):
     quota_keys = [key for key in groups if key[0] and key[1]]
     quota_map = {}
     if quota_keys:
-        for quota in frappe.get_all(
+        for quota in frappe.get_list(
             "Fuel Quota",
             filters={
                 "vehicle": ["in", list({key[0] for key in quota_keys})],
