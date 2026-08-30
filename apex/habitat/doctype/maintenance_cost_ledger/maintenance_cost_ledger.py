@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 
 UNIQUE_KEY = ["source_doctype", "source_name", "source_detail_no", "is_reversal"]
 UNIQUE_KEY_NAME = "unique_mcl_source"
@@ -23,7 +22,7 @@ class MaintenanceCostLedger(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Maintenance Cost Ledger",
         UNIQUE_KEY,
         constraint_name=UNIQUE_KEY_NAME,

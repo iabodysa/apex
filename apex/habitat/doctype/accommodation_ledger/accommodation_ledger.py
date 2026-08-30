@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import frappe
 from frappe.model.document import Document
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.apex_core.utils.party_link import sync_party_employee
 
 UNIQUE_KEY = ["source_doctype", "source_name", "ledger_type", "posting_date", "is_reversal"]
@@ -22,7 +22,7 @@ def before_save(doc, method=None):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Accommodation Ledger",
         UNIQUE_KEY,
         constraint_name=UNIQUE_KEY_NAME,

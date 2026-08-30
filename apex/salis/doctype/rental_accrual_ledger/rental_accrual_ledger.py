@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import frappe
 from frappe.model.document import Document
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 
 UNIQUE_KEY = ["vehicle", "accrual_date", "is_reversal"]
 UNIQUE_KEY_NAME = "unique_ral_vehicle_date"
@@ -16,7 +16,7 @@ class RentalAccrualLedger(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Rental Accrual Ledger",
         UNIQUE_KEY,
         constraint_name=UNIQUE_KEY_NAME,

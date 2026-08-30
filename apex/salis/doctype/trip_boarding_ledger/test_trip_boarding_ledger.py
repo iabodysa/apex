@@ -5,7 +5,6 @@ from __future__ import annotations
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from apex.apex_core.utils.ledger_index import _constraint_exists
 from apex.salis.doctype.trip_boarding_ledger.trip_boarding_ledger import (
     UNIQUE_KEY,
     UNIQUE_KEY_NAME,
@@ -74,7 +73,7 @@ class TestTripBoardingLedgerUniqueness(FrappeTestCase):
     def test_the_trip_and_employee_pair_carries_a_unique_constraint(self):
         on_doctype_update()
         self.assertTrue(
-            _constraint_exists("Trip Boarding Ledger", UNIQUE_KEY_NAME)
+            frappe.db.has_index("tabTrip Boarding Ledger", UNIQUE_KEY_NAME)
         )
 
     def test_the_key_the_database_holds_is_the_key_the_controller_declares(self):

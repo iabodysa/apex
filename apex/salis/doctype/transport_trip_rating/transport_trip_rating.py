@@ -4,7 +4,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.salis.utils import worker_was_on_trip
 
 
@@ -39,7 +38,7 @@ class TransportTripRating(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Transport Trip Rating",
         ["employee", "dispatch_trip"],
         constraint_name="unique_ttr_employee_trip",

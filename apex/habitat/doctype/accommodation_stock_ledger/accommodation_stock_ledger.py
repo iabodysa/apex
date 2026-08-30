@@ -8,19 +8,18 @@ from frappe.model.document import Document
 from frappe.utils import flt, today
 
 from apex.apex_core.doctype.habitat_settings.habitat_settings import policy, validate_posting_allowed
-from apex.apex_core.utils.ledger_index import add_index_guarded
 from apex.habitat.utils.item_master import resolve_item
 
 class AccommodationStockLedger(Document):
     pass
 
 def on_doctype_update():
-    add_index_guarded(
+    frappe.db.add_index(
         "Accommodation Stock Ledger",
         ["is_cancelled", "item_type", "employee"],
         "idx_asl_cancel_type_emp",
     )
-    add_index_guarded(
+    frappe.db.add_index(
         "Accommodation Stock Ledger",
         ["is_cancelled", "item_type", "party"],
         "idx_asl_cancel_type_party",

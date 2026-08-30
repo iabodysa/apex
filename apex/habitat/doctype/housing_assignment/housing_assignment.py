@@ -5,7 +5,6 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from apex.apex_core.utils.ledger_index import add_index_guarded
 from apex.apex_core.utils.party_link import sync_party_employee
 from apex.habitat.doctype.accommodation_stock_ledger.accommodation_stock_ledger import (
     get_store_balance,
@@ -19,9 +18,7 @@ class HousingAssignment(Document):
     pass
 
 def on_doctype_update():
-    add_index_guarded("Housing Assignment", ["bed"], "idx_asgn_bed")
-
-    add_index_guarded(
+    frappe.db.add_index(
         "Housing Assignment",
         ["bed", "docstatus", "check_out_date"],
         "idx_asgn_bed_active",

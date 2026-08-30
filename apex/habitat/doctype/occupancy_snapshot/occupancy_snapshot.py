@@ -6,7 +6,6 @@ from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
 
 from apex.apex_core.doctype.habitat_settings.habitat_settings import effective_retention_days
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 
 
 class OccupancySnapshot(Document):
@@ -18,7 +17,7 @@ class OccupancySnapshot(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Occupancy Snapshot",
         ["building", "snapshot_date"],
         constraint_name="unique_acc_occ_building_date",

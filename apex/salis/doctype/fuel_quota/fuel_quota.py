@@ -7,7 +7,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.salis.utils import lock_vehicle
 
 
@@ -49,7 +48,7 @@ class FuelQuota(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Fuel Quota",
         ["vehicle", "period_month", "docstatus"],
         constraint_name="uq_fuel_quota_vehicle_period",

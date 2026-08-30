@@ -7,7 +7,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-from apex.apex_core.utils.ledger_index import add_unique_guarded
 from apex.habitat.cleaning_engine import post_cleaning_compliance, reverse_cleaning_compliance
 
 REQUIRED_AREAS = ("Bathrooms", "Kitchen", "Corridors")
@@ -57,7 +56,7 @@ class CleaningLog(Document):
 
 
 def on_doctype_update():
-    add_unique_guarded(
+    frappe.db.add_unique(
         "Cleaning Log",
         ["building", "cleaning_date", "docstatus"],
         "unique_cleaning_log_building_date_status",
