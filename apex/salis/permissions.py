@@ -94,6 +94,9 @@ SALIS_SCOPE = {
     "Fuel Daily Log": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Rental Vehicle Movement": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Movement Cost Recovery": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Fuel Consumption Ledger": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Rental Accrual Ledger": _hop("vehicle", "Salis Vehicle", "scoped"),
+    "Vehicle Utilisation Snapshot": _hop("vehicle", "Salis Vehicle", "scoped"),
     "Transport Trip Rating": _trip_link(),
 }
 

@@ -22,11 +22,7 @@ class SafetyInspectionReport(Document):
     def _reverse_generated_request(self, mr_name: str):
         if not mr_name or not frappe.db.exists("Maintenance Request", mr_name):
             return
-        docstatus = frappe.db.get_value("Maintenance Request", mr_name, "docstatus")
-        if docstatus == 0:
-            frappe.delete_doc("Maintenance Request", mr_name)
-        else:
-            frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
+        frappe.db.set_value("Maintenance Request", mr_name, "source_inspection", None)
 
     def generate_maintenance_requests(self):
         if self.safety_section_clear:
