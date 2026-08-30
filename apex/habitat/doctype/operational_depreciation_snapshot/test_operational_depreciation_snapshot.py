@@ -16,7 +16,7 @@ class TestOperationalDepreciationSnapshotBookValue(FrappeTestCase):
             "building": "_Test Building",
             "items": [
                 {
-                    "article": "_T-Custody Article-DEP-TEST",
+                    "article": "_Test Blanket",
                     "policy": "_Test Straight Line 5yr",
                     "original_cost": 1000,
                     "age_years": 2,

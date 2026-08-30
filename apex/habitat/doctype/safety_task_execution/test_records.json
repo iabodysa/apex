@@ -3,14 +3,14 @@
   "doctype": "Safety Task Execution",
   "execution_date": "2026-01-05",
   "building": "_Test Building",
-  "task": "_T-Safety Task Catalog-00001",
+  "task": "_T-SAFE-001",
   "execution_status": "Excellent"
  },
  {
   "doctype": "Safety Task Execution",
   "execution_date": "2026-02-05",
   "building": "_Test Building 2",
-  "task": "_T-Safety Task Catalog-00001",
+  "task": "_T-SAFE-001",
   "execution_status": "Average",
   "executed_by": "Administrator"
  }

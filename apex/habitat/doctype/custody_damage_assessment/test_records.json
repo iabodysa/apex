@@ -6,7 +6,7 @@
   "party_type": "Employee",
   "items": [
    {
-    "article": "_T-Custody Article-00001",
+    "article": "_Test Blanket",
     "damage_description": "Torn cover",
     "estimated_replacement_cost": 50
    }
@@ -19,7 +19,7 @@
   "party_type": "Temporary Worker",
   "items": [
    {
-    "article": "_T-Custody Article-00002",
+    "article": "_Test Pillow",
     "damage_description": "Missing item",
     "estimated_replacement_cost": 120,
     "serial_no": "SN-002"

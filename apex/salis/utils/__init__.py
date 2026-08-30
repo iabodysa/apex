@@ -360,16 +360,13 @@ def _clearance_assignees(driver):
         candidates.append(driver_sup)
 
     if not candidates:
-        from apex.salis import permissions as salis_permissions
-
-        project = frappe.db.get_value("Salis Driver", driver, "project")
+        driver_doc = frappe.get_doc("Salis Driver", driver)
         for user in frappe.get_all(
             "Has Role",
             filters={"role": "Fleet Supervisor", "parenttype": "User"},
             pluck="parent",
         ):
-            restrict, allowed = salis_permissions.report_project_scope(user)
-            if not restrict or (project and project in allowed):
+            if frappe.has_permission("Salis Driver", doc=driver_doc, user=user):
                 candidates.append(user)
 
     seen = []

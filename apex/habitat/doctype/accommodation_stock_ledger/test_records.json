@@ -3,7 +3,7 @@
   "doctype": "Accommodation Stock Ledger",
   "posting_date": "2026-01-15",
   "item_type": "Custody Article",
-  "item": "_T-Custody Article-00003",
+  "item": "_Test Ledger Article",
   "signed_qty": 10,
   "building": "_Test Building"
  },
@@ -11,7 +11,7 @@
   "doctype": "Accommodation Stock Ledger",
   "posting_date": "2026-02-01",
   "item_type": "Custody Article",
-  "item": "_T-Custody Article-00003",
+  "item": "_Test Ledger Article",
   "signed_qty": -4,
   "building": "_Test Building 2",
   "employee": "_T-Employee-00001",

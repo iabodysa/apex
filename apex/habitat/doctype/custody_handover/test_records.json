@@ -9,7 +9,7 @@
   "items": [
    {
     "item_type": "Custody Article",
-    "item": "_T-Custody Article-00001",
+    "item": "_Test Blanket",
     "qty": 2
    }
   ]
@@ -25,7 +25,7 @@
   "items": [
    {
     "item_type": "Custody Article",
-    "item": "_T-Custody Article-00002",
+    "item": "_Test Pillow",
     "qty": 5,
     "condition_on_transfer": "Good"
    }

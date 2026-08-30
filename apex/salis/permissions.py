@@ -30,11 +30,6 @@ def _allowed_projects_for(user, doctype):
 def _is_unscoped(user):
     return permission_scope.is_unscoped(user, UNSCOPED_ROLES)
 
-def report_project_scope(user=None, doctype=None):
-    return permission_scope.report_scope(
-        user, _is_unscoped, allowed_projects, allow="Project", doctype=doctype
-    )
-
 def _column(rule="scoped", own=None):
     return ("column", {"field": PROJECT, "own": own, "rule": rule})
 
