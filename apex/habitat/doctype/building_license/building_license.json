@@ -135,8 +135,7 @@
    "fieldname": "responsible_role",
    "fieldtype": "Link",
    "label": "Responsible Role",
-   "options": "Role",
-   "default": "Admin Manager"
+   "options": "Role"
   },
   {
    "doctype": "DocField",
@@ -270,5 +269,5 @@
   "naming_series",
   "amended_from"
  ],
- "modified": "2026-08-07 05:23:00.000000"
+ "modified": "2026-08-30 12:00:00.000000"
 }

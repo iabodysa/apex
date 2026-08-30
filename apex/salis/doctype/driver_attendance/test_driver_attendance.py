@@ -77,3 +77,21 @@ class TestDriverAttendanceUnreadClock(FrappeTestCase):
         doc = _attendance(_driver()).insert(ignore_permissions=True)
         self.assertIsNone(doc.check_in)
         self.assertEqual(doc.worked_hours, 0)
+
+
+class TestTheClockFieldsCarryADateAndNotATimeOfDay(FrappeTestCase):
+    """frappe/model/create_new.py stamps every Time field with nowtime() on insert, so a
+    Time clock can never read empty and an overnight shift needs a branch to guess the day.
+    Datetime removes both: the emptiness tests above are only meaningful while this holds."""
+
+    def test_check_in_and_check_out_are_datetime_fields(self):
+        meta = frappe.get_meta("Driver Attendance")
+        for fieldname in ("check_in", "check_out"):
+            with self.subTest(field=fieldname):
+                self.assertEqual(meta.get_field(fieldname).fieldtype, "Datetime")
+
+    def test_no_clock_field_carries_a_default_that_would_stamp_itself(self):
+        meta = frappe.get_meta("Driver Attendance")
+        for fieldname in ("check_in", "check_out"):
+            with self.subTest(field=fieldname):
+                self.assertFalse(meta.get_field(fieldname).default)

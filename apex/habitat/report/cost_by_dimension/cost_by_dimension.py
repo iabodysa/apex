@@ -43,7 +43,6 @@ def get_data(filters):
             Sum(ledger.employee_daily_share).as_("total_cost"),
         )
         .where(ledger.posting_mode == "Operational Memo")
-        .where(ledger.reversal_of.isnull())
         .groupby(ledger.company, ledger.building, ledger.project)
         .orderby(ledger.company)
         .orderby(ledger.building)

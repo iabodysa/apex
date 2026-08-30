@@ -164,10 +164,6 @@ def my_trip_route(dispatch_trip):
                 workers.append(worker)
     _enrich_workers_with_phone(workers)
 
-    vehicle = trip.get("vehicle")
-    if vehicle:
-        vehicle = frappe.db.get_value("Salis Vehicle", vehicle, "plate_number") or vehicle
-
     return {
         "dispatch_trip": trip["name"],
         "trip_title": trip.get("trip_title"),
@@ -176,7 +172,7 @@ def my_trip_route(dispatch_trip):
         "route_plan": route_plan,
         "route_name": trip.get("trip_title") or trip["name"],
         "project": trip.get("project"),
-        "vehicle": vehicle,
+        "vehicle": trip.get("vehicle"),
         "depart_time": masar._fmt_time(trip.get("depart_time")),
         "return_time": masar._fmt_time(trip.get("return_time")),
         "status": trip.get("status"),

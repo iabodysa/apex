@@ -58,3 +58,43 @@ class TestTheFileIsTheSourceOfTruth(FrappeTestCase):
         self.assertGreater(
             sum(1 for count in declared.values() if count), 0, declared
         )
+
+
+class TestTheWorkspaceOrderShipsAsData(FrappeTestCase):
+    """The runtime compensator that rewrote the root workspace timestamp on every
+    install and migrate was removed because each shipped workspace now pins its own
+    creation to its sequence. These tests hold that reason in place."""
+
+    def test_each_workspace_pins_a_distinct_creation_so_no_compensator_rewrites_the_root(self):
+        creations = {
+            name: data.get("creation") for name, data in _shipped_workspaces().items()
+        }
+        self.assertNotIn(None, creations.values(), creations)
+        self.assertEqual(len(set(creations.values())), len(creations), creations)
+
+    def test_the_root_workspace_is_created_before_every_workspace_beneath_it(self):
+        shipped = _shipped_workspaces()
+        roots = [d for d in shipped.values() if not d.get("parent_page")]
+        self.assertEqual(len(roots), 1, [d["name"] for d in roots])
+        earliest = min(d["creation"] for d in shipped.values())
+        self.assertEqual(roots[0]["creation"], earliest)
+
+    def test_siblings_sort_the_same_way_by_creation_and_by_sequence(self):
+        siblings = {}
+        for data in _shipped_workspaces().values():
+            siblings.setdefault(data.get("parent_page") or "", []).append(data)
+        for parent, rows in siblings.items():
+            with self.subTest(parent=parent or "root"):
+                by_creation = [r["name"] for r in sorted(rows, key=lambda r: r["creation"])]
+                by_sequence = [
+                    r["name"] for r in sorted(rows, key=lambda r: float(r["sequence_id"]))
+                ]
+                self.assertEqual(by_creation, by_sequence)
+
+    def test_no_patch_reorders_the_root_workspace_creation_at_runtime(self):
+        offenders = [
+            str(p)
+            for p in APP_ROOT.rglob("patches/**/*.py")
+            if "creation" in p.read_text() and "Workspace" in p.read_text()
+        ]
+        self.assertEqual(offenders, [])

@@ -313,7 +313,7 @@ def _transport_lookups(requests, employee):
         for v in frappe.get_all(
             "Salis Vehicle",
             filters={"name": ["in", list(vehicle_names)]},
-            fields=["name", "plate_number", "vehicle_category"],
+            fields=["name", "vehicle_category"],
         ):
             vehicle_map[v["name"]] = v
 
@@ -963,19 +963,6 @@ def get_public_trip_board():
         else {}
     )
 
-    vehicle_ids = {t["vehicle"] for t in trips if t.get("vehicle")}
-    plate_by_vehicle = (
-        {
-            v["name"]: v["plate_number"]
-            for v in frappe.get_all(
-                "Salis Vehicle", filters={"name": ["in", list(vehicle_ids)]},
-                fields=["name", "plate_number"],
-            )
-        }
-        if vehicle_ids
-        else {}
-    )
-
     board = []
     for t in trips:
         board.append(
@@ -983,7 +970,6 @@ def get_public_trip_board():
                 "dispatch_trip": t["name"],
                 "route_name": route_title.get(t.get("route_plan")) or t.get("route_plan"),
                 "depart_time": _fmt_time(t.get("depart_time")),
-                "vehicle_plate": plate_by_vehicle.get(t.get("vehicle")) or t.get("vehicle"),
                 "status": t.get("status"),
                 "stops": [
                     {

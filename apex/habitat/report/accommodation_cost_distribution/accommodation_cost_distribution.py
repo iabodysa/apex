@@ -28,7 +28,6 @@ def execute(filters=None):
 
     query_filters = {
         "posting_mode": "Operational Memo",
-        "reversal_of": ["is", "not set"],
         "posting_date": ["between", [from_date, to_date]],
     }
     if filters.get("building"):

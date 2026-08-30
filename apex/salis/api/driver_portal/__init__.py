@@ -31,9 +31,6 @@ def _label_trips(trips):
         )
         return {r["name"]: r[field] for r in rows}
 
-    plates = labels(
-        "Salis Vehicle", {t.get("vehicle") for t in trips if t.get("vehicle")}, "plate_number"
-    )
     legacy_routes = labels(
         "Route Plan",
         {
@@ -44,8 +41,6 @@ def _label_trips(trips):
         "route_name",
     )
     for t in trips:
-        if t.get("vehicle"):
-            t["vehicle"] = plates.get(t["vehicle"], t["vehicle"])
         t["route_name"] = (
             t.get("trip_title")
             or legacy_routes.get(t.get("route_plan"))
