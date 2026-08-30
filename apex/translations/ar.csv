@@ -116,7 +116,6 @@ Accommodation Cost by Type,تكلفة الإسكان حسب النوع
 Accommodation Custody Item,بند عهدة السكن
 Accommodation Custody Return Item,بند إرجاع عهدة السكن
 Accommodation Ledger,سجل تكاليف السكن
-Accommodation Ledger Summary,ملخص سجل تكاليف السكن
 Accommodation Manager Dashboard,لوحة معلومات مدير السكن
 Accommodation Manager by default,مدير السكن افتراضيًا
 Accommodation Occupancy Summary,ملخص الإشغال
@@ -559,7 +558,6 @@ Automation Links,روابط الأتمتة
 Available,متاح
 Available Beds,الأسرّة المتاحة
 Available Capacity,السعة المتاحة
-Available Capacity Trend,اتجاه السعة المتاحة
 Available Rooms,الغرف المتاحة
 Available: {0},متاح: {0}
 Average,متوسط
@@ -1701,6 +1699,7 @@ Driver Clearance Blocked,إخلاء طرف السائق موقوف
 Driver Clearance Certificate,شهادة إخلاء طرف السائق
 Driver Clearance Item,بند إخلاء طرف سائق
 Driver Clearance Register,سجل إخلاء طرف السائقين
+Driver Cost Summary,ملخص تكاليف السائق
 Driver ID,معرّف السائق
 Driver Latitude,خط عرض السائق
 Driver Licenses Expiring Soon,رخص السائقين التي تنتهي قريباً
@@ -1798,6 +1797,7 @@ Employee Advance,سلفة الموظف
 Employee Advance Recovery,استرداد سلفة الموظف
 Employee Advance recovery is off by default. Enable it only after Payroll and Accounts have supplied the native records the recovery schedule needs.,استرداد سلفة الموظف مغلق افتراضيًا. لا تفعّله إلا بعد أن توفّر الرواتب والحسابات السجلات التي يحتاجها جدول الاسترداد.
 Employee Cost Center,مركز تكلفة الموظف
+Employee Cost Summary,ملخص تكاليف الموظف
 Employee Custody,عهدة الموظف
 Employee Daily Share,الحصة اليومية للموظف
 Employee Daily Share (SAR),حصة الموظف اليومية (ريال)
@@ -2043,7 +2043,6 @@ Finding Description,وصف الملاحظة
 Findings,الملاحظات
 Findings Raised and Who Must Clear Them,الملاحظات المرصودة ومن يجب أن يعالجها
 Findings Still Open,ملاحظات ما زالت مفتوحة
-Findings by Severity,الملاحظات حسب درجة الخطورة
 Fine / Violation,مخالفة
 Fire,حريق
 Fire Alarm Panel,لوحة إنذار الحريق
@@ -2852,6 +2851,7 @@ Manifest,كشف الركاب
 Manifest Not Reconciled,كشف الركاب غير مطابق
 Manifests,كشوف الركاب
 Manpower,القوى العاملة
+Manpower Roster and Cost,كشف القوى العاملة وتكلفتها
 Manual,يدوي
 Manual Check-in,تسجيل يدوي
 Manual Entry,إدخال يدوي
@@ -2959,6 +2959,7 @@ Monthly Cost,التكلفة الشهرية
 Monthly Cost per Bed Capacity (SAR),التكلفة الشهرية لكل سرير حسب الطاقة الاستيعابية (ريال)
 Monthly Litres,اللترات الشهرية
 Monthly Rent,الإيجار الشهري
+Monthly Rent (SAR),الإيجار الشهري (ريال)
 Monthly Rent at Risk,الإيجار الشهري المعرّض للخطر
 Monthly Retainer (SAR),المبلغ الشهري الثابت (ريال)
 Monthly Salary (SAR),الراتب الشهري (ريال)
@@ -3406,7 +3407,6 @@ Open Safety Map,فتح خريطة السلامة
 Open Safety Round Tour,افتح جولة نموذج جولة السلامة
 Open Subcontractor Service Orders,أوامر خدمة مقاول الباطن المفتوحة
 Open Target Document,فتح المستند المستهدف
-Open Theft Reports,بلاغات السرقة المفتوحة
 Open Transport Requests,طلبات النقل المفتوحة
 Open Trip Operation,فتح تشغيل الرحلة
 Open Vehicle,فتح المركبة
@@ -3434,7 +3434,6 @@ Open the visual Front Desk board to check residents in and out.,افتح لوح�
 "Open the work-order queue. Select a manager-created work order assigned to you, or ask an authorized creator when the queue is empty.",افتح قائمة أوامر العمل. اختر أمر عمل أنشأه المدير وأُسند إليك، أو اطلب من مخوّل بالإنشاء إنشاء أمر وإسناده عندما تكون القائمة فارغة.
 Open your personal worker portal (Masar): {0},افتح بوابتك الشخصية للعامل (مسار): {0}
 Operating Card,بطاقة التشغيل
-Operating Days Trend,اتجاه أيام التشغيل
 Operation,التشغيل
 Operation Type,نوع العملية
 Operational,تشغيلي
@@ -4127,14 +4126,12 @@ Renewal Management,إدارة التجديد
 Renews Automatically,يتجدد تلقائيًا
 Rent,الإيجار
 Rent & Billing,الإيجار والفوترة
-Rent (SAR),الإيجار (ريال)
 Rent Payment Due,دفعة إيجار مستحقة
 Rent Payment Schedule,جدول سداد الإيجارات
 "Rent for {0} — instalment due {1} ({2}), settling {3}.",إيجار {0} — قسط مستحق في {1} ({2})، تسديد {3}.
+Rent for one month. The instalment on the schedule is this amount multiplied by the months in the billing cycle.,الإيجار عن شهر واحد. قيمة الدفعة في الجدول هي هذا المبلغ مضروبًا في عدد أشهر دورة الفوترة.
 Rent payment generated for building: {0} under lease {1},أُنشئت دفعة الإيجار للمبنى: {0} ضمن عقد الإيجار {1}
 Rent payments can only be raised from a submitted lease.,دفعات الإيجار تُصدر من عقد معتمد فقط.
-Rent per Billing Cycle,الإيجار لكل دفعة
-Rent per Cycle Including VAT,الإيجار لكل دفعة شامل الضريبة
 Rental,إيجار
 Rental Accrual Ledger,سجل استحقاق الإيجار
 Rental Accrual Trend,اتجاه استحقاق الإيجار
@@ -5534,7 +5531,6 @@ Top-up,تعبئة
 Top-up Applied,تمت إضافة الزيادة
 Top-up Litres,لترات التعبئة
 Top-up Litres must be greater than zero.,يجب أن تكون لترات التعبئة أكبر من صفر.
-Topups by Status,التعبئات حسب الحالة
 Total,الإجمالي
 Total Accommodation Cost This Month,إجمالي تكلفة الإسكان هذا الشهر
 Total Accrued,إجمالي المستحق
@@ -5764,7 +5760,6 @@ VAT Amount (SAR),مبلغ الضريبة (ريال)
 VAT Rate,نسبة ضريبة القيمة المضافة
 VAT on the Amount Payable,الضريبة على المبلغ المستحق
 VAT on the Billed Amount,الضريبة على المبلغ المفوتر
-VAT on the Rent Cycle,الضريبة على دفعة الإيجار
 VAT per Billing Cycle,الضريبة لكل دورة فوترة
 Vacant Capacity Cost Trend (Monthly),اتجاه تكلفة السعة الشاغرة (شهري)
 Valid,ساري
@@ -5807,6 +5802,7 @@ Vehicle Code,رمز المركبة
 Vehicle Compliance,امتثال المركبة
 Vehicle Compliance Expiring Soon,امتثال المركبة قارب الانتهاء
 Vehicle Compliance Register,سجل امتثال المركبات
+Vehicle Cost Summary,ملخص تكاليف المركبة
 Vehicle Custody,عهدة المركبة
 Vehicle Damage,أضرار مركبة
 Vehicle Damage Write-Off,شطب أضرار مركبة

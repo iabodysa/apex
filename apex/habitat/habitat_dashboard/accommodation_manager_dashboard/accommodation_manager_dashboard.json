@@ -24,10 +24,6 @@
    "width": "Half"
   },
   {
-   "chart": "Available Capacity Trend",
-   "width": "Half"
-  },
-  {
    "chart": "Leases by Status",
    "width": "Full"
   }
@@ -40,5 +36,5 @@
  "is_standard": 1,
  "module": "Habitat",
  "name": "Accommodation Manager Dashboard",
- "modified": "2026-08-24 02:39:34.806308"
+ "modified": "2026-08-30 06:41:00.000000"
 }

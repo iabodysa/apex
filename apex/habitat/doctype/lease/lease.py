@@ -9,7 +9,6 @@ from frappe.utils import add_months, flt, getdate
 
 from apex.apex_core.utils.company import resolve_company
 from apex.apex_core.utils.date_ranges import has_overlapping_record
-from apex.apex_core.utils.vat import apply_vat
 
 _CYCLE_MONTHS = {
     "Monthly": 1,
@@ -21,6 +20,14 @@ _CYCLE_MONTHS = {
 
 class Lease(Document):
     pass
+
+
+def _cycle_months(doc):
+    return _CYCLE_MONTHS.get(doc.billing_cycle or "Monthly", 1)
+
+
+def _instalment_amount(doc):
+    return flt(doc.rent_amount) * _cycle_months(doc)
 
 
 def validate(doc, method=None):
@@ -54,8 +61,6 @@ def validate(doc, method=None):
                 _("An overlapping lease already exists for this building: {0}").format(conflict)
             )
 
-    apply_vat(doc, doc.rent_amount)
-
     _maybe_build_schedule(doc)
 
     doc.total_scheduled = sum(
@@ -80,8 +85,8 @@ def _build_schedule(doc):
     if not (doc.first_payment_date and doc.lease_end_date and flt(doc.rent_amount) > 0):
         return
 
-    step = _CYCLE_MONTHS.get(doc.billing_cycle or "Monthly", 1)
-    amount = flt(doc.rent_amount) * step
+    step = _cycle_months(doc)
+    amount = _instalment_amount(doc)
 
     doc.payment_schedule = []
     anchor = getdate(doc.first_payment_date)

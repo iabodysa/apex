@@ -44,7 +44,7 @@
    "role": "Administrator"
   }
  ],
- "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habScCleaning\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cleaning Log\", \"col\": 3}}, {\"id\": \"habScSafety\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"habScSim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"SIM Custody Assignment\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
+ "content": "[{\"id\": \"habHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Habitat</b></span>\", \"col\": 12}}, {\"id\": \"habHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"habScAssign\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Housing Assignment\", \"col\": 3}}, {\"id\": \"habScMaint\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Request\", \"col\": 3}}, {\"id\": \"habScCustody\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"habScBuilding\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Building\", \"col\": 3}}, {\"id\": \"habScInbox\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Action Inbox\", \"col\": 3}}, {\"id\": \"habScCleaning\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Cleaning Log\", \"col\": 3}}, {\"id\": \"habScSafety\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Safety Round\", \"col\": 3}}, {\"id\": \"habScSim\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"SIM Custody Assignment\", \"col\": 3}}, {\"id\": \"habHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"habNc0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Occupancy Percent\", \"col\": 3}}, {\"id\": \"habNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Maintenance Requests\", \"col\": 3}}, {\"id\": \"habNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"habChOccupancyPercentTrend\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Occupancy Percent Trend\", \"col\": 6}}, {\"id\": \"habChVacantCapacityCostTrendM\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vacant Capacity Cost Trend (Monthly)\", \"col\": 6}}, {\"id\": \"secSetup\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Setup</b></span>\", \"col\": 12}}, {\"id\": \"habCardSetup\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}, {\"id\": \"habCardLogs\", \"type\": \"card\", \"data\": {\"card_name\": \"Logs\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -167,7 +167,18 @@
    "idx": 7
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Occupancy Percent Trend",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Vacant Capacity Cost Trend (Monthly)",
+   "idx": 2
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -190,5 +201,5 @@
  ],
  "quick_lists": [],
  "creation": "2020-01-01 00:00:06.000000",
- "modified": "2026-08-08 05:06:00.000000"
+ "modified": "2026-08-30 06:41:00.000000"
 }

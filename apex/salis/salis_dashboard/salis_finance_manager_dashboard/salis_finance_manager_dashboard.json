@@ -12,10 +12,6 @@
   {
    "chart": "Fuel Requests by Status",
    "width": "Half"
-  },
-  {
-   "chart": "Topups by Status",
-   "width": "Full"
   }
  ],
  "dashboard_name": "Salis Finance Manager Dashboard",
@@ -26,5 +22,5 @@
  "is_standard": 1,
  "module": "Salis",
  "name": "Salis Finance Manager Dashboard",
- "modified": "2026-08-24 02:39:34.806308"
+ "modified": "2026-08-30 06:41:00.000000"
 }

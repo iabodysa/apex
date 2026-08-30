@@ -25,7 +25,7 @@
  ],
  "sequence_id": 2.2,
  "parent_page": "Habitat",
- "content": "[{\"id\": \"custodyHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody and Costs</b></span>\", \"col\": 12}}, {\"id\": \"onbCaCG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody and Costs Go-Live\", \"col\": 12}}, {\"id\": \"custodySc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"custodySc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"custodySc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"custodySc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"custodySc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"custodySc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease\", \"col\": 3}}, {\"id\": \"custodySc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"custodySc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"custodySc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"custodyNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"custodyNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"custodyNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"custodyNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"custodyNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"custodyNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"custodyNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"custodyNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"custodyNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rejected Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"custodyNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"custodyNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"custodyNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"custodyNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Accommodation Cost This Month\", \"col\": 3}}, {\"id\": \"custodyCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"custodyCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"custodyCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing and Utilities\", \"col\": 4}}, {\"id\": \"custodyCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"custodyCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"custodyCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"custodyCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "content": "[{\"id\": \"custodyHdr\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Custody and Costs</b></span>\", \"col\": 12}}, {\"id\": \"onbCaCG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Custody and Costs Go-Live\", \"col\": 12}}, {\"id\": \"custodySc1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Kiosk\", \"col\": 3}}, {\"id\": \"custodySc2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Issue\", \"col\": 3}}, {\"id\": \"custodySc3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Custody Return\", \"col\": 3}}, {\"id\": \"custodySc4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Goods Receipt\", \"col\": 3}}, {\"id\": \"custodySc5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Telecom Control\", \"col\": 3}}, {\"id\": \"custodySc6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease\", \"col\": 3}}, {\"id\": \"custodySc7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Utility Bill Entry\", \"col\": 3}}, {\"id\": \"custodySc8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Subcontractor Service Order\", \"col\": 3}}, {\"id\": \"custodySc9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Finance Manager Dashboard\", \"col\": 3}}, {\"id\": \"custodyNc1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Items Pending Return\", \"col\": 3}}, {\"id\": \"custodyNc2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Custody Issues\", \"col\": 3}}, {\"id\": \"custodyNc4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Damage Assessments\", \"col\": 3}}, {\"id\": \"custodyNc5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Custody Value in Employee Hands (SAR)\", \"col\": 3}}, {\"id\": \"custodyNc6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Total\", \"col\": 3}}, {\"id\": \"custodyNc7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"SIM Cards Assigned\", \"col\": 3}}, {\"id\": \"custodyNc8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Telecom Contracts\", \"col\": 3}}, {\"id\": \"custodyNc9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"custodyNc10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Rejected Utility Bills\", \"col\": 3}}, {\"id\": \"custodyNc12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Utility Bills Under Review\", \"col\": 3}}, {\"id\": \"custodyNc13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Subcontractor Service Orders\", \"col\": 3}}, {\"id\": \"custodyNc14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Missed Subcontractor Visits\", \"col\": 3}}, {\"id\": \"custodyNc15\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Supplier-Billed Cost This Month\", \"col\": 3}}, {\"id\": \"custodyNc16\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Accommodation Cost This Month\", \"col\": 3}}, {\"id\": \"ccChCustodyIssuesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Custody Issues by Status\", \"col\": 6}}, {\"id\": \"ccChTopWorkersbyCustodyValue\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Top Workers by Custody Value\", \"col\": 6}}, {\"id\": \"ccChDamageCostbyBuilding\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Damage Cost by Building\", \"col\": 6}}, {\"id\": \"ccChFacilityAssetsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Status\", \"col\": 6}}, {\"id\": \"ccChFacilityAssetsbyCategory\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Facility Assets by Category\", \"col\": 6}}, {\"id\": \"ccChAssetMovementsOverTime\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Movements Over Time\", \"col\": 6}}, {\"id\": \"ccChUtilityBillsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Utility Bills by Status\", \"col\": 6}}, {\"id\": \"ccChLeasesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Leases by Status\", \"col\": 6}}, {\"id\": \"ccChSubcontractorServiceOrde\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Subcontractor Service Orders by Status\", \"col\": 6}}, {\"id\": \"ccChAccommodationCostbyType\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Accommodation Cost by Type\", \"col\": 6}}, {\"id\": \"custodyCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Custody Flow\", \"col\": 4}}, {\"id\": \"custodyCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Facility Assets\", \"col\": 4}}, {\"id\": \"custodyCard3\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing and Utilities\", \"col\": 4}}, {\"id\": \"custodyCard4\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontractors\", \"col\": 4}}, {\"id\": \"custodyCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"custodyCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"custodyCard7\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "shortcuts": [
   {
    "doctype": "Workspace Shortcut",
@@ -307,9 +307,9 @@
   {
    "doctype": "Workspace Link",
    "type": "Link",
-   "label": "Accommodation Ledger Summary",
+   "label": "Employee Cost Summary",
    "link_type": "Report",
-   "link_to": "Accommodation Ledger Summary",
+   "link_to": "Employee Cost Summary",
    "idx": 26,
    "is_query_report": 1
   },
@@ -351,9 +351,18 @@
   },
   {
    "doctype": "Workspace Link",
+   "type": "Link",
+   "label": "Manpower Roster and Cost",
+   "link_type": "Report",
+   "link_to": "Manpower Roster and Cost",
+   "idx": 31,
+   "is_query_report": 1
+  },
+  {
+   "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Dashboards",
-   "idx": 31,
+   "idx": 32,
    "description": "Dashboards: live monitoring boards that refresh automatically."
   },
   {
@@ -362,13 +371,13 @@
    "label": "Finance Manager Dashboard",
    "link_type": "Dashboard",
    "link_to": "Finance Manager Dashboard",
-   "idx": 32
+   "idx": 33
   },
   {
    "doctype": "Workspace Link",
    "type": "Card Break",
    "label": "Master Data",
-   "idx": 33,
+   "idx": 34,
    "description": "Reference data: durable records you set up once, not daily work."
   },
   {
@@ -377,7 +386,7 @@
    "label": "Custody Article",
    "link_type": "DocType",
    "link_to": "Custody Article",
-   "idx": 34
+   "idx": 35
   },
   {
    "doctype": "Workspace Link",
@@ -385,7 +394,7 @@
    "label": "Custody Asset Category",
    "link_type": "DocType",
    "link_to": "Custody Asset Category",
-   "idx": 35
+   "idx": 36
   },
   {
    "doctype": "Workspace Link",
@@ -393,7 +402,7 @@
    "label": "QR Location",
    "link_type": "DocType",
    "link_to": "QR Location",
-   "idx": 36
+   "idx": 37
   },
   {
    "doctype": "Workspace Link",
@@ -401,7 +410,7 @@
    "label": "Utility Account",
    "link_type": "DocType",
    "link_to": "Utility Account",
-   "idx": 37
+   "idx": 38
   },
   {
    "doctype": "Workspace Link",
@@ -409,7 +418,7 @@
    "label": "Subcontractor Service Contract",
    "link_type": "DocType",
    "link_to": "Subcontractor Service Contract",
-   "idx": 38
+   "idx": 39
   },
   {
    "doctype": "Workspace Link",
@@ -417,10 +426,61 @@
    "label": "Operational Depreciation Policy",
    "link_type": "DocType",
    "link_to": "Operational Depreciation Policy",
-   "idx": 39
+   "idx": 40
   }
  ],
- "charts": [],
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Custody Issues by Status",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Top Workers by Custody Value",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Damage Cost by Building",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Facility Assets by Status",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Facility Assets by Category",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Asset Movements Over Time",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Utility Bills by Status",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Leases by Status",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Subcontractor Service Orders by Status",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Accommodation Cost by Type",
+   "idx": 10
+  }
+ ],
  "number_cards": [
   {
    "doctype": "Workspace Number Card",
@@ -514,6 +574,6 @@
   }
  ],
  "quick_lists": [],
- "modified": "2026-08-24 02:39:34.806308",
+ "modified": "2026-08-30 06:41:00.000000",
  "creation": "2020-01-01 00:00:03.000000"
 }

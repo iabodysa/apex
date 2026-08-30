@@ -23,10 +23,6 @@
    "width": "Half"
   },
   {
-   "chart": "Findings by Severity",
-   "width": "Half"
-  },
-  {
    "chart": "Safety Inspections Over Time",
    "width": "Half"
   },
@@ -43,5 +39,5 @@
  "is_standard": 1,
  "module": "Habitat",
  "name": "Internal Auditor Dashboard",
- "modified": "2026-08-24 02:39:34.806308"
+ "modified": "2026-08-30 06:41:00.000000"
 }

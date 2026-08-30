@@ -1,6 +1,57 @@
 {
- "charts": [],
- "content": "[{\"id\": \"fltHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"onbFG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Fleet Go-Live\", \"col\": 12}}, {\"id\": \"fltHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fltQP\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet OS\", \"col\": 3}}, {\"id\": \"fltQMsup\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Masar Supervisor\", \"col\": 3}}, {\"id\": \"fltQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"fltQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"fltQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover\", \"col\": 3}}, {\"id\": \"foQctrl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet Control\", \"col\": 3}}, {\"id\": \"foQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Incident\", \"col\": 3}}, {\"id\": \"fltQStop\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Suspension\", \"col\": 3}}, {\"id\": \"fltQHandoverTpl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover Checklist Template\", \"col\": 3}}, {\"id\": \"fltQFuelAppr\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Approval Console\", \"col\": 3}}, {\"id\": \"fltHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"fltKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"fltKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"foKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Vehicle Incidents\", \"col\": 3}}, {\"id\": \"foKM1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Theft Reports\", \"col\": 3}}, {\"id\": \"foKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workshop Overstay\", \"col\": 3}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"fltCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicle Custody\", \"col\": 4}}, {\"id\": \"fltCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"foCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Incidents and Recovery\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"fltCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"fltCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"fltCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
+ "charts": [
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Vehicles by Status",
+   "idx": 1
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Active Vehicles by Category",
+   "idx": 2
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Requests by Status",
+   "idx": 3
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Cost by Month",
+   "idx": 4
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Cost by Platform",
+   "idx": 5
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Consumption by Month",
+   "idx": 6
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Fuel Claim Variance by Month",
+   "idx": 7
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Incidents by Type",
+   "idx": 8
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Vehicle Activations",
+   "idx": 9
+  },
+  {
+   "doctype": "Workspace Chart",
+   "chart_name": "Avg Vehicle Utilisation % (All-Time)",
+   "idx": 10
+  }
+ ],
+ "content": "[{\"id\": \"fltHdrGS\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Getting Started</b></span>\", \"col\": 12}}, {\"id\": \"onbFG\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Fleet Go-Live\", \"col\": 12}}, {\"id\": \"fltHdrQA\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"fltQP\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet OS\", \"col\": 3}}, {\"id\": \"fltQMsup\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Masar Supervisor\", \"col\": 3}}, {\"id\": \"fltQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Salis Vehicle\", \"col\": 3}}, {\"id\": \"fltQ1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Assignment\", \"col\": 3}}, {\"id\": \"fltQ2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover\", \"col\": 3}}, {\"id\": \"foQctrl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fleet Control\", \"col\": 3}}, {\"id\": \"foQ0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Incident\", \"col\": 3}}, {\"id\": \"fltQStop\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Suspension\", \"col\": 3}}, {\"id\": \"fltQHandoverTpl\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle Handover Checklist Template\", \"col\": 3}}, {\"id\": \"fltQFuelAppr\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fuel Approval Console\", \"col\": 3}}, {\"id\": \"fltHdrKM\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Metrics</b></span>\", \"col\": 12}}, {\"id\": \"fltKM4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Fuel Requests\", \"col\": 3}}, {\"id\": \"fltKM6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Fuel Exception Cases\", \"col\": 3}}, {\"id\": \"foKM0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Vehicle Incidents\", \"col\": 3}}, {\"id\": \"foKM7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workshop Overstay\", \"col\": 3}}, {\"id\": \"fltChVehiclesbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicles by Status\", \"col\": 6}}, {\"id\": \"fltChActiveVehiclesbyCategory\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active Vehicles by Category\", \"col\": 6}}, {\"id\": \"fltChFuelRequestsbyStatus\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Requests by Status\", \"col\": 6}}, {\"id\": \"fltChFuelCostbyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Cost by Month\", \"col\": 6}}, {\"id\": \"fltChFuelCostbyPlatform\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Cost by Platform\", \"col\": 6}}, {\"id\": \"fltChFuelConsumptionbyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Consumption by Month\", \"col\": 6}}, {\"id\": \"fltChFuelClaimVariancebyMonth\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Fuel Claim Variance by Month\", \"col\": 6}}, {\"id\": \"fltChIncidentsbyType\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Incidents by Type\", \"col\": 6}}, {\"id\": \"fltChVehicleActivations\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Vehicle Activations\", \"col\": 6}}, {\"id\": \"fltChAvgVehicleUtilisationAll\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Avg Vehicle Utilisation % (All-Time)\", \"col\": 6}}, {\"id\": \"secDaily\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Daily Tasks</b></span>\", \"col\": 12}}, {\"id\": \"fltCard1\", \"type\": \"card\", \"data\": {\"card_name\": \"Vehicle Custody\", \"col\": 4}}, {\"id\": \"fltCard2\", \"type\": \"card\", \"data\": {\"card_name\": \"Fuel\", \"col\": 4}}, {\"id\": \"foCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Incidents and Recovery\", \"col\": 4}}, {\"id\": \"secReports\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Key Reports</b></span>\", \"col\": 12}}, {\"id\": \"fltCard5\", \"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}, {\"id\": \"fltCard6\", \"type\": \"card\", \"data\": {\"card_name\": \"Dashboards\", \"col\": 4}}, {\"id\": \"secMasters\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Master Data</b></span>\", \"col\": 12}}, {\"id\": \"fltCard0\", \"type\": \"card\", \"data\": {\"card_name\": \"Master Data\", \"col\": 4}}]",
  "creation": "2020-01-01 00:00:05.000000",
  "doctype": "Workspace",
  "icon": "tool",
@@ -263,7 +314,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-29 02:30:00.000000",
+ "modified": "2026-08-30 06:41:00.000000",
  "module": "Salis",
  "name": "Fleet",
  "number_cards": [
@@ -288,12 +339,6 @@
   {
    "doctype": "Workspace Number Card",
    "idx": 4,
-   "label": "Open Theft Reports",
-   "number_card_name": "Open Theft Reports"
-  },
-  {
-   "doctype": "Workspace Number Card",
-   "idx": 5,
    "label": "Workshop Overstay",
    "number_card_name": "Workshop Overstay"
   }
