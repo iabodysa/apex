@@ -40,6 +40,13 @@ def _unique_index_columns(table, index_name):
     return [row["col"] for row in rows]
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live TFL- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Trip Fulfilment Ledger", "_T-TFL-")
+
+
 class TestTripFulfilmentLedgerImmutability(FrappeTestCase):
     def test_a_posted_row_refuses_a_second_write(self):
         doc = _fulfilment_row(dispatch_trip="_T-DT-9001").insert(

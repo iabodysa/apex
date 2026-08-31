@@ -108,3 +108,37 @@ def _grant_project(user, project):
                 "for_value": project,
             }
         ).insert(ignore_permissions=True)
+
+
+def make_named_test_records(doctype, prefix):
+    """Insert a doctype's test_records.json rows under fixed, pinned names.
+
+    A doctype whose autoname is a bare FORMAT string and which carries no
+    naming_series field burns its live counter on every fresh test run:
+    frappe/test_runner.py:436 only defaults naming_series when the field
+    exists, frappe/model/naming.py:154 wipes any name already on the doc,
+    and frappe/test_runner.py:424 only reverts the series when the doc has a
+    naming_series. Document.insert(set_name=...) is honoured at
+    frappe/model/document.py:541-542, which sets flags.name_set and skips
+    frappe.model.naming.set_new_name, so no counter is read or written.
+
+    Returns the list of names, matching frappe.test_runner.make_test_objects.
+    """
+    names = []
+
+    for index, row in enumerate(frappe.get_test_records(doctype), start=1):
+        name = f"{prefix}{index:05d}"
+        names.append(name)
+
+        if frappe.db.exists(doctype, name):
+            continue
+
+        doc = frappe.copy_doc(row)
+        docstatus = doc.docstatus
+        doc.docstatus = 0
+        doc.insert(set_name=name, ignore_if_duplicate=True)
+
+        if docstatus == 1:
+            doc.submit()
+
+    return names

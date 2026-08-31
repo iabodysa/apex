@@ -17,6 +17,13 @@ def _route_template(**overrides):
     return frappe.get_doc(fields)
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live RT- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Route Template", "_T-RT-")
+
+
 class TestRouteTemplateStops(FrappeTestCase):
     def test_a_template_with_no_stop_is_refused_by_the_controller(self):
         doc = _route_template(stops=[])

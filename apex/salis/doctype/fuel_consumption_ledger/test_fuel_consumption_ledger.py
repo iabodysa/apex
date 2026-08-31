@@ -49,6 +49,13 @@ def _fuel_consumption_ledger(**overrides):
     return frappe.get_doc(fields)
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live FCL- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Fuel Consumption Ledger", "_T-FCL-")
+
+
 class TestFuelConsumptionLedgerUniqueIndex(FrappeTestCase):
     def test_the_key_the_database_holds_is_the_key_the_controller_declares(self):
         self.assertEqual(

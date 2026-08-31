@@ -14,6 +14,13 @@ test_dependencies = ["Building"]
 test_ignore = ["Facility Asset"]
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live FAML- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Facility Asset Movement Ledger", "_T-FAML-")
+
+
 class TestFacilityAssetMovementLedgerImmutability(FrappeTestCase):
     def _row(self, **fields):
         data = {

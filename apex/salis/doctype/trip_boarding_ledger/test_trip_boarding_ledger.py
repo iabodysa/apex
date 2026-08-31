@@ -23,6 +23,13 @@ def _boarding_row(**overrides):
     return frappe.get_doc(fields)
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live TBL- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Trip Boarding Ledger", "_T-TBL-")
+
+
 class TestTripBoardingLedgerImmutability(FrappeTestCase):
     def test_a_posted_row_refuses_a_second_write(self):
         doc = _boarding_row(

@@ -19,6 +19,13 @@ test_ignore = [
 ]
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live MCL- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Maintenance Cost Ledger", "_T-MCL-")
+
+
 class TestMaintenanceCostLedgerImmutability(FrappeTestCase):
     def _row(self, **fields):
         data = {

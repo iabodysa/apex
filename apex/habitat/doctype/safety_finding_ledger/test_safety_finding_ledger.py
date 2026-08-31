@@ -8,6 +8,13 @@ from frappe.tests.utils import FrappeTestCase
 test_dependencies = ["Building"]
 
 
+def _make_test_records(verbose=None):
+    """Pin the test-record names so the live SFL- counter is never advanced."""
+    from apex.tests._helpers import make_named_test_records
+
+    return make_named_test_records("Safety Finding Ledger", "_T-SFL-")
+
+
 class TestSafetyFindingLedgerImmutability(FrappeTestCase):
     def _row(self, **fields):
         data = {

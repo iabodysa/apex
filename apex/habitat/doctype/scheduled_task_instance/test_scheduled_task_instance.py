@@ -20,6 +20,8 @@ class TestScheduledTaskInstanceCancelGuard(FrappeTestCase):
                 "doctype": "Scheduled Task Instance",
                 "naming_series": "STI-.YYYY.-.####",
                 "template": "_T-STI-fake-template",
+                "assignment": "_T-STA-9201",
+                "task_catalog": "_T-STC-9201",
                 "due_date": "2026-03-01",
             }
         )
@@ -37,6 +39,8 @@ class TestScheduledTaskInstanceOverdueMark(FrappeTestCase):
                 "doctype": "Scheduled Task Instance",
                 "naming_series": "STI-.YYYY.-.####",
                 "template": "_T-STI-fake-template",
+                "assignment": "_T-STA-9202",
+                "task_catalog": "_T-STC-9202",
                 "due_date": "2026-03-01",
                 "status": "Overdue",
             }

@@ -52,6 +52,7 @@
    "label": "Assignment",
    "options": "Scheduled Task Assignment",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -60,6 +61,7 @@
    "label": "Task Catalog",
    "options": "Safety Task Catalog",
    "read_only": 1,
+   "reqd": 1,
    "link_filters": "[[\"Safety Task Catalog\",\"is_active\",\"=\",1]]"
   },
   {
@@ -169,7 +171,7 @@
    "link_fieldname": "scheduled_task_instance"
   }
  ],
- "modified": "2026-08-22 15:00:00.000000",
+ "modified": "2026-08-31 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Habitat",
  "name": "Scheduled Task Instance",
