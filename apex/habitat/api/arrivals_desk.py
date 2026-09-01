@@ -116,7 +116,7 @@ def _arrival_identity(party_type, party):
     frappe.throw(_("Unknown party type: {0}").format(party_type))
 
 def _custody_balance(party) -> int:
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Accommodation Stock Ledger",
         filters={"item_type": "Custody Article", "employee": party, "is_cancelled": 0},
         fields=["signed_qty"],
@@ -469,7 +469,7 @@ def _supplier_breakdown(arrivals) -> list:
     tw_parties = [a.party for a in arrivals if a.party_type == PARTY_TEMPORARY_WORKER and a.party]
     tw_supplier = {}
     if tw_parties:
-        for row in frappe.get_all(
+        for row in frappe.get_list(
             "Temporary Worker",
             filters={"name": ["in", list(set(tw_parties))]},
             fields=["name", "labour_supplier"],

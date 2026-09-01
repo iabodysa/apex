@@ -49,7 +49,7 @@ def _temporary_worker_names(assignments) -> dict:
     tw_parties = {a.party for a in assignments if a.party_type == "Temporary Worker" and a.party}
     if not tw_parties:
         return {}
-    rows = frappe.get_all(
+    rows = frappe.get_list(
         "Temporary Worker", filters={"name": ["in", list(tw_parties)]},
         fields=["name", "worker_name"]
     )
@@ -61,7 +61,7 @@ def _assignments_holding_custody(assignments) -> set:
     if not employees:
         return set()
     balances: dict[str, float] = {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Accommodation Stock Ledger",
         filters={
             "is_cancelled": 0,
