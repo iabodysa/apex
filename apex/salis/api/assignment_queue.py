@@ -31,7 +31,7 @@ def _vehicle_driver_refs(groups: list[dict]) -> None:
     driver_of: dict[tuple[str, str], str | None] = {}
     for doctype, fields in (("Vehicle Suspension", ["vehicle"]), ("Fuel Quota", ["vehicle", "driver"])):
         for r in (
-            frappe.get_all(
+            frappe.get_list(
                 doctype,
                 filters={"name": ["in", names_by_type[doctype]]},
                 fields=["name"] + fields,
@@ -120,7 +120,7 @@ def queue_ref(name: str):
 def queue_events_for_vehicle(vehicle: str, statuses, limit: int) -> list:
     refs = {("Salis Vehicle", vehicle)}
     for doctype in ("Vehicle Suspension", "Fuel Quota"):
-        for n in frappe.get_all(
+        for n in frappe.get_list(
             doctype, filters={"vehicle": vehicle}, pluck="name", limit_page_length=0
         ):
             refs.add((doctype, n))

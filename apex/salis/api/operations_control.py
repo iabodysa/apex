@@ -84,7 +84,7 @@ def get_fleet(status=None, rental_office=None, project=None, search=None, compli
     plates = [v.name for v in vehicles]
     inc = {}
     if plates:
-        for r in frappe.get_all(
+        for r in frappe.get_list(
             "Vehicle Incident",
             filters={"vehicle": ["in", plates], "status": "Open", "docstatus": ["<", 2]},
             fields=["vehicle", "count(name) as c"],

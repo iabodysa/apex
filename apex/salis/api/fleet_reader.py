@@ -36,7 +36,7 @@ def driver_names(vehicle_rows):
         return {}
     return {
         d.name: d.full_name
-        for d in frappe.get_all(
+        for d in frappe.get_list(
             "Salis Driver",
             filters={"name": ["in", ids]},
             fields=["name", "full_name"],

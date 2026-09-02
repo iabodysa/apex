@@ -46,7 +46,7 @@ def _label_map(doctype, label_field, names):
         return {}
     return {
         row.name: row.get(label_field) or row.name
-        for row in frappe.get_all(
+        for row in frappe.get_list(
             doctype,
             filters={"name": ["in", names]},
             fields=["name", label_field],

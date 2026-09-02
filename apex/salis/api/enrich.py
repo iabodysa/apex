@@ -16,7 +16,7 @@ def vehicle_driver_titles(rows, *, vehicle_field: str = "vehicle", driver_field:
 
     plate_by_vehicle: dict = {}
     if vehicle_ids:
-        for v in frappe.get_all(
+        for v in frappe.get_list(
             "Salis Vehicle",
             filters={"name": ["in", vehicle_ids]},
             fields=["name", "plate_number"],
@@ -25,7 +25,7 @@ def vehicle_driver_titles(rows, *, vehicle_field: str = "vehicle", driver_field:
 
     name_by_driver: dict = {}
     if driver_ids:
-        for d in frappe.get_all(
+        for d in frappe.get_list(
             "Salis Driver",
             filters={"name": ["in", driver_ids]},
             fields=["name", "full_name"],

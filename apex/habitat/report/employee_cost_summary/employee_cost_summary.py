@@ -154,7 +154,7 @@ def recovered_by_employee(employees, window, filters):
             recovery_filters[field] = filters[field]
 
     totals = {}
-    for row in frappe.get_all(
+    for row in frappe.get_list(
         "Movement Cost Recovery",
         filters=recovery_filters,
         fields=["employee", "sum(amount) as amount"],
