@@ -15,8 +15,6 @@
   "project",
   "driver",
   "vehicle",
-  "shift_start_time",
-  "shift_end_time",
   "ra_sec_schedule",
   "starts_on",
   "ends_on",
@@ -105,22 +103,6 @@
    "label": "Default Vehicle",
    "options": "Salis Vehicle",
    "link_filters": "[[\"Salis Vehicle\",\"status\",\"=\",\"Active\"]]"
-  },
-  {
-   "fetch_from": "work_shift.start_time",
-   "fetch_if_empty": 1,
-   "fieldname": "shift_start_time",
-   "fieldtype": "Time",
-   "label": "Shift Start Time",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "work_shift.end_time",
-   "fetch_if_empty": 1,
-   "fieldname": "shift_end_time",
-   "fieldtype": "Time",
-   "label": "Shift End Time",
-   "read_only": 1
   },
   {
    "fieldname": "ra_sec_schedule",
@@ -217,7 +199,7 @@
    "link_fieldname": "route_assignment"
   }
  ],
- "modified": "2026-08-23 12:00:00.000000",
+ "modified": "2026-09-04 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Salis",
  "name": "Route Assignment",
