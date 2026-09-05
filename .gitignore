@@ -125,8 +125,11 @@ docs/**/*.pem
 # root package.json build script for every installed app (frappe/esbuild/esbuild.js:439-458),
 # so the deploy produces them and the repository does not carry them — the same split hrms
 # ships with. Committing them again would put a second copy of every asset in the history
-# and let a hand edit disagree with its source.
+# and let a hand edit disagree with its source. The generated shell is the same build's third
+# output (vite.config.js indexHtmlPath) and carries the same hashed asset names, so it is
+# build output on the identical ground and stays out for the identical reason.
 apex/public/apex_portal/
 apex/www/masar-sw.min.js
 apex/www/driver-sw.min.js
+apex/templates/includes/apex_portal_app.html
 .benchx/
