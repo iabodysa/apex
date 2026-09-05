@@ -1198,12 +1198,13 @@ Could not load more trips.,تعذّر تحميل رحلات إضافية.
 Could not load pending fuel requests.,تعذّر تحميل طلبات الوقود المعلّقة.
 Could not load the alerts.,تعذّر تحميل التنبيهات.
 Could not load the approval queue,تعذّر تحميل قائمة الاعتماد
-Could not load the arrivals list.,تعذّر تحميل قائمة الوصول.
+Could not load the arrivals list,تعذّر تحميل قائمة الوصول
 Could not load the balance,تعذّر تحميل الرصيد
-Could not load the bed.,تعذر تحميل السرير.
-Could not load the beds.,تعذر تحميل الأسرّة.
+Could not load the bed,تعذّر تحميل السرير
+Could not load the beds,تعذّر تحميل الأسرّة
 Could not load the board for this building.,تعذّر تحميل اللوحة لهذا المبنى.
 Could not load the board. Check your connection and try again.,تعذّر تحميل اللوحة. تحقق من اتصالك وحاول مجدداً.
+Could not load the building's items.,تعذّر تحميل أصناف المبنى.
 Could not load the building's rooms.,تعذّر تحميل غرف المبنى.
 Could not load the building.,تعذّر تحميل المبنى.
 Could not load the building. Please retry.,تعذّر تحميل المبنى. يرجى المحاولة مجدداً.
@@ -1212,11 +1213,11 @@ Could not load the catalog.,تعذّر تحميل الدليل.
 Could not load the checklist template. Please try again.,تعذّر تحميل قالب قائمة الفحص. يرجى المحاولة مجدداً.
 Could not load the data,تعذّر تحميل البيانات
 Could not load the data.,تعذّر تحميل البيانات.
-Could not load the delivery.,تعذر تحميل عملية التسليم.
+Could not load the delivery,تعذّر تحميل التسليم
 Could not load the dispatch board. Please check your connection and try again.,تعذّر تحميل لوحة التسيير. تحقق من اتصالك وحاول مرة أخرى.
 Could not load the housing scope,تعذّر تحميل نطاق السكن
 "Could not load the inspection template. Check your connection, then try again.",تعذّر تحميل قالب الفحص. تحقق من الاتصال ثم حاول مرة أخرى.
-Could not load the inventory.,تعذر تحميل الجرد.
+Could not load the inventory,تعذّر تحميل الجرد
 Could not load the list,تعذر تحميل القائمة
 Could not load the map,تعذّر تحميل الخريطة
 Could not load the map.,تعذّر تحميل الخريطة.
@@ -1227,9 +1228,9 @@ Could not load the planned trips. Check the trips permission then try again.,ت�
 Could not load the ready transport requests. Check the requests permission then try again.,تعذّر تحميل طلبات النقل الجاهزة. تحقق من صلاحية الطلبات ثم أعد المحاولة.
 Could not load the record,تعذّر تحميل السجل
 "Could not load the record. Check your connection, then try again.",تعذّر تحميل السجل. تحقق من الاتصال ثم حاول مرة أخرى.
-Could not load the round.,تعذر تحميل الجولة.
+Could not load the round,تعذّر تحميل الجولة
 Could not load the safety map. Please try again.,تعذّر تحميل خريطة السلامة. يرجى المحاولة مجدداً.
-Could not load the safety rounds.,تعذر تحميل جولات السلامة.
+Could not load the safety rounds,تعذّر تحميل جولات السلامة
 Could not load the stops for the selected trip.,تعذّر تحميل توقفات الرحلة المختارة.
 Could not load the timeline,تعذّر تحميل السجل الزمني
 Could not load the timeline.,تعذّر تحميل السجل الزمني.
@@ -2770,11 +2771,13 @@ Loading buildings…,جاري تحميل المباني…
 Loading checklist...,جارٍ تحميل قائمة الفحص...
 Loading fuel requests,جارٍ تحميل طلبات الوقود
 Loading fuel stations…,جارٍ تحميل محطات الوقود…
+Loading held items…,جارٍ تحميل العهدة المحتفظ بها…
 Loading incident details,جارٍ تحميل تفاصيل الحادث
 Loading map…,جارٍ تحميل الخريطة…
 Loading operations metrics,جارٍ تحميل مؤشرات التشغيل
 Loading the approved inspection template,جارٍ تحميل قالب الفحص المعتمد
 Loading the balance,جاري تحميل الرصيد
+Loading the building's items…,جارٍ تحميل أصناف المبنى…
 Loading the building's rooms.,جارٍ تحميل غرف المبنى.
 Loading the complaint,جاري تحميل البلاغ
 Loading the data,جارٍ تحميل البيانات
@@ -3179,6 +3182,7 @@ No stops are planned for this trip.,لا توجد محطات مخططة لهذه
 No transport requested,لا يوجد طلب نقل
 No transport requests need follow-up.,لا توجد طلبات نقل تحتاج متابعة.
 "No trip has been assigned to you yet, so you cannot request a wait.",لم تُسند لك رحلة بعد، فلا يمكن طلب الانتظار.
+No trips match these filters.,لا توجد رحلات مطابقة لهذه المرشّحات.
 No trips scheduled for today.,لا توجد رحلات مجدولة لليوم.
 No unauthorised guests or visitors are allowed in the accommodation.,لا يُسمح بدخول ضيوف أو زوّار غير مصرّح لهم إلى السكن.
 No vehicle is assigned to you.,لا توجد مركبة مسندة إليك.
