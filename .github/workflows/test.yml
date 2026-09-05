@@ -168,18 +168,17 @@ jobs:
         run: pip install frappe-bench
 
       - name: Create bench
-        # DELIBERATELY UNPINNED — read this before adding a pin. `--frappe-branch
-        # version-15` resolves to that branch's HEAD at job time, so CI runs the
-        # framework the app must actually ship against. A pin would have HIDDEN A-155:
-        # frappe replaced validate_order_by_and_group_by's function BLACKLIST with an
-        # ALLOWLIST between 15.109.0 (the bench) and 15.116.0 (CI), and the portal's
-        # `field(...)` order_by stopped being legal. Tracking HEAD caught that before a
-        # user did; a pin defers the same break to production and leaves a version
-        # nobody owns to move. What makes the drift safe is the next step recording the
-        # resolved version: a framework-caused red is then dated on sight — diff it
-        # against the last green run before suspecting the app. Pin only to reproduce a
-        # specific red run, and drop the pin again in that same PR.
-        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+        # PINNED to the frappe commit the job summary of run 33966137651 (head 3946a2ad,
+        # Ran 719 tests OK) printed as version 15.120.0. `--frappe-branch` clones the tip
+        # of version-15 at job time, so this second fetch+checkout lands it on the exact
+        # commit that suite passed against — `bench init` has no flag for a commit, and
+        # `git clone --branch <sha>` fails outright (git only resolves --branch against a
+        # branch or tag ref). To move the pin: read the same job-summary table from the
+        # newest successful Tests run and replace the hash below with the one it prints.
+        run: |
+          bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+          git -C frappe-bench/apps/frappe fetch --depth 1 upstream 755b5cb81fabb431265690fca07f4a8038a5599a
+          git -C frappe-bench/apps/frappe checkout 755b5cb81fabb431265690fca07f4a8038a5599a
 
       - name: Configure bench Redis hosts
         working-directory: frappe-bench
@@ -190,16 +189,24 @@ jobs:
 
       - name: Get required Frappe apps
         working-directory: frappe-bench
+        # PINNED to the same run 33966137651 (head 3946a2ad, Ran 719 tests OK) that fixed
+        # the frappe commit above; same reason and same move-the-pin instructions apply.
         run: |
           bench get-app --branch version-15 --skip-assets erpnext
+          git -C apps/erpnext fetch --depth 1 upstream 1a0bf0bf6c4aeaae5acde90c74b186312f49b95c
+          git -C apps/erpnext checkout 1a0bf0bf6c4aeaae5acde90c74b186312f49b95c
           bench get-app --branch version-15 --skip-assets hrms
+          git -C apps/hrms fetch --depth 1 upstream b2d9a3cc753890788ecfef63d972616db505e203
+          git -C apps/hrms checkout b2d9a3cc753890788ecfef63d972616db505e203
           bench get-app --branch version-15 --skip-assets lending
+          git -C apps/lending fetch --depth 1 upstream 73022a94edf8bf3ca52fb1b116931f554a1cb3e6
+          git -C apps/lending checkout 73022a94edf8bf3ca52fb1b116931f554a1cb3e6
 
       - name: Record the resolved framework versions
         working-directory: frappe-bench
-        # Nothing pins these four, so "which framework did this run get?" has to be
-        # answerable from the run itself. Also written to the job summary, where it
-        # survives log truncation and is readable without opening the job.
+        # All four are pinned above, so this table is now a drift check, not a discovery
+        # step: it names on sight the app whose commit stopped matching what CI pinned.
+        # Still written to the job summary, where it survives log truncation.
         run: |
           set -uo pipefail
           {
