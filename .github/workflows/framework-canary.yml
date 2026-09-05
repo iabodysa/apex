@@ -1,0 +1,145 @@
+name: Framework Canary (advisory)
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-queue:
+        image: redis:7
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-cache:
+        image: redis:7
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis-socketio:
+        image: redis:7
+        ports:
+          - 12000:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install bench CLI
+        run: pip install frappe-bench
+
+      - name: Create bench
+        run: bench init --skip-redis-config-generation --frappe-branch version-15 frappe-bench
+
+      - name: Configure bench Redis hosts
+        working-directory: frappe-bench
+        run: |
+          bench set-config -g redis_cache "redis://127.0.0.1:13000"
+          bench set-config -g redis_queue "redis://127.0.0.1:11000"
+          bench set-config -g redis_socketio "redis://127.0.0.1:12000"
+
+      - name: Get required Frappe apps
+        working-directory: frappe-bench
+        run: |
+          bench get-app --branch version-15 --skip-assets erpnext
+          bench get-app --branch version-15 --skip-assets hrms
+          bench get-app --branch version-15 --skip-assets lending
+
+      - name: Record the resolved framework versions
+        working-directory: frappe-bench
+        run: |
+          set -uo pipefail
+          {
+            echo "| app | version | commit | committed |"
+            echo "| --- | --- | --- | --- |"
+            for app in frappe erpnext hrms lending; do
+              d="apps/$app"
+              [ -d "$d" ] || continue
+              printf '| %s | %s | %s | %s |\n' "$app" \
+                "$(grep -m1 '^__version__' "$d/$app/__init__.py" | tr -d ' "' | cut -d= -f2)" \
+                "$(git -C "$d" rev-parse --short HEAD)" \
+                "$(git -C "$d" show -s --format=%cI HEAD)"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+      - name: Diff against the pinned lane
+        working-directory: frappe-bench
+        run: |
+          set -uo pipefail
+          pinned_file="${{ github.workspace }}/.github/workflows/test.yml"
+          {
+            echo "| app | pinned (test.yml) | canary (branch tip) | moved |"
+            echo "| --- | --- | --- | --- |"
+            for app in frappe erpnext hrms lending; do
+              d="apps/$app"
+              [ -d "$d" ] || continue
+              pinned=$(grep -oE "apps/${app} checkout [0-9a-f]{40}" "$pinned_file" | head -1 | awk '{print substr($3,1,7)}')
+              canary=$(git -C "$d" rev-parse --short HEAD)
+              moved="no"
+              [ "$pinned" != "$canary" ] && moved="YES"
+              printf '| %s | %s | %s | %s |\n' "$app" "${pinned:-unknown}" "$canary" "$moved"
+            done
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+      - name: Get apex app
+        working-directory: frappe-bench
+        run: bench get-app --skip-assets ${{ github.workspace }}
+
+      - name: Create test site
+        working-directory: frappe-bench
+        run: |
+          bench new-site test.localhost --db-root-password ${{ secrets.DB_ROOT_PASSWORD }} --admin-password ${{ secrets.ADMIN_PASSWORD }} --no-mariadb-socket
+          bench --site test.localhost install-app erpnext
+          bench --site test.localhost install-app hrms
+          bench --site test.localhost install-app lending
+          bench --site test.localhost install-app apex
+
+      - name: Migrate (apply fixtures, workflows and patches)
+        working-directory: frappe-bench
+        run: bench --site test.localhost migrate
+
+      - name: Run the apex test suite
+        working-directory: frappe-bench
+        env:
+          CI: "true"
+        run: |
+          set -o pipefail
+          bench --site test.localhost run-tests --app apex 2>&1 | tee "${{ runner.temp }}/apex-test-output.log"
+
+      - name: Enforce minimum test count floor
+        if: always()
+        run: python3 "${{ github.workspace }}/.github/scripts/check_test_floor.py" "${{ runner.temp }}/apex-test-output.log"
