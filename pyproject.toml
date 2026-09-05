@@ -1,6 +1,6 @@
 [project]
 name = "apex"
-version = "2.10.1"
+dynamic = ["version"]
 description = "Apex: Frappe Framework v15 application providing the Habitat, Salis, Logistay, and Apex Core modules."
 authors = [
     { name = "AFMCO Support Services Co. Ltd", email = "afm@afmcoltd.com" }
@@ -39,6 +39,14 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["apex*"]
+
+# apex builds with setuptools, not flit (erpnext and frappe's backend), so it takes
+# setuptools' own supported form of a dynamic version: `attr` reads __version__ off the
+# named module via AST, without importing it. Verified against setuptools 80.9.0 (bench
+# env) and 81.0.0 (system): https://setuptools.pypa.io/en/latest/userguide/
+# pyproject_config.html#dynamic-metadata, section "attr".
+[tool.setuptools.dynamic]
+version = { attr = "apex.__version__" }
 
 [tool.ruff]
 target-version = "py310"
