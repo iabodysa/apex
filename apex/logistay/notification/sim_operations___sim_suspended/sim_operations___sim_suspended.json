@@ -11,7 +11,7 @@
  "is_standard": 1,
  "message": "{{ _(\"SIM {0} was suspended on {1}.\").format(doc.sim_card, doc.assignment_date) }}",
  "message_type": "HTML",
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-09-05 17:47:00.000000",
  "module": "Logistay",
  "name": "SIM Operations - SIM Suspended",
  "recipients": [

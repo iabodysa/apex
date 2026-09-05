@@ -13,7 +13,7 @@
  "is_standard": 1,
  "message": "{{ _(\"Telecom Contract {0} with {1} expires on {2}.\").format(doc.name, doc.supplier, doc.contract_end_date) }}",
  "message_type": "HTML",
- "modified": "2026-08-22 18:40:00.000000",
+ "modified": "2026-09-05 17:47:00.000000",
  "module": "Logistay",
  "name": "SIM Operations - Contract Expiry Soon",
  "recipients": [
