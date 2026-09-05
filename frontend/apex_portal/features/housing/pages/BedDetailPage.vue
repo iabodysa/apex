@@ -2,6 +2,7 @@
 import { computed, inject, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { Button, ErrorMessage, FormControl, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { housingCandidateFromQuery } from "../arrivalFlow.js";
 import { statusLabel } from "../../../core/displayLabels.js";
@@ -98,7 +99,7 @@ async function depart() {
   <section class="feature-page">
     <h2>{{ __("Bed Details") }}</h2>
     <PortalSkeleton v-if="bed.get.loading && !bed.doc" :rows="3" :label="__('Loading...')" />
-    <ErrorMessage v-else-if="bed.get.error" :message="__('Could not load the bed.')" />
+    <PortalErrorState v-else-if="bed.get.error" :title="__('Could not load the bed')" :message="bed.get.error" @retry="bed.reload()" />
     <template v-else-if="bed.doc">
       <article class="feature-card"><strong><bdi dir="auto" translate="no">{{ bed.doc.bed_code || bed.doc.name }}</bdi></strong><span><bdi dir="auto" translate="no">{{ bed.doc.room }}</bdi></span><small>{{ statusLabel(bed.doc.status) }} · {{ statusLabel(bed.doc.condition) }}</small></article>
       <form v-if="!occupied && canCheckIn" class="feature-form" @submit.prevent="arrive">

@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Button, ErrorMessage, createDocumentResource, createListResource, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { cadenceLabel, statusLabel } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
@@ -44,7 +45,7 @@ async function ratify() {
   <section class="feature-page">
     <h2>{{ __("Safety Round Review") }}</h2>
     <PortalSkeleton v-if="round.get.loading || executions.list.loading" :rows="3" :label="__('Loading...')" />
-    <ErrorMessage v-else-if="round.get.error || executions.list.error" :message="__('Could not load the round.')" />
+    <PortalErrorState v-else-if="round.get.error || executions.list.error" :title="__('Could not load the round')" :message="round.get.error || executions.list.error" @retry="round.reload(); executions.reload()" />
     <template v-else>
       <div class="feature-card">
         <div class="record-identity">

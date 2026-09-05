@@ -121,7 +121,8 @@ onBeforeUnmount(() => {
         </dl>
         <RouterLink class="transport-map-selection__action" :to="`/trips/${selected.dispatch_trip}`">{{ __("Open Trip Operation") }}</RouterLink>
       </article>
-      <div class="transport-map-list" aria-live="polite">
+      <p v-if="!visible.length" class="feature-page__empty">{{ __("No trips match these filters.") }}</p>
+      <div v-else class="transport-map-list" aria-live="polite">
         <button v-for="item in visible" :key="item.dispatch_trip" type="button" class="feature-card transport-map-card" :aria-pressed="item.dispatch_trip === selected?.dispatch_trip" @click="selectTrip(item.dispatch_trip)">
           <div>
             <strong dir="auto">{{ item.route_name || item.route_plan }}</strong>

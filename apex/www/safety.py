@@ -14,4 +14,4 @@ __all__ = [
 ]
 
 def get_context(context):
-    return bootstrap_portal_context(context, "/safety", "safety")
+    return bootstrap_portal_context(context, "/safety")

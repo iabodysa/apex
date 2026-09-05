@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Badge, Button, ErrorMessage, FormControl, createDocumentResource, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { statusLabel, statusTheme } from "../../../core/displayLabels.js";
 import { safeErrorMessage } from "../../../core/errorMessage.js";
@@ -59,7 +60,7 @@ async function run(resource, params, message) {
   <section class="feature-page">
     <h2>{{ __("Asset Handover Details") }}</h2>
     <PortalSkeleton v-if="delivery.get.loading" :rows="3" :label="__('Loading...')" />
-    <ErrorMessage v-else-if="delivery.get.error" :message="__('Could not load the delivery.')" />
+    <PortalErrorState v-else-if="delivery.get.error" :title="__('Could not load the delivery')" :message="delivery.get.error" @retry="delivery.reload()" />
     <template v-else-if="delivery.doc">
       <article class="feature-card">
         <div class="record-identity">

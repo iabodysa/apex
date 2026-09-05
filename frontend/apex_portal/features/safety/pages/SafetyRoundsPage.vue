@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../../housing/components/BuildingPicker.vue";
 import { building } from "../../housing/building.js";
@@ -117,7 +118,7 @@ async function saveRound() {
   <section class="feature-page safety-rounds-page">
     <header class="feature-page__header"><h2>{{ __("Safety Rounds") }}</h2><BuildingPicker /></header>
     <PortalSkeleton v-if="due.loading" :rows="3" :label="__('Loading Safety Rounds')" />
-    <ErrorMessage v-else-if="due.error" :message="__('Could not load the safety rounds.')" />
+    <PortalErrorState v-else-if="due.error" :title="__('Could not load the safety rounds')" :message="due.error" @retry="due.fetch()" />
     <template v-else-if="building">
       <section v-if="awaiting.length" class="feature-card">
         <h3>{{ __("Rounds Awaiting Review") }}</h3>

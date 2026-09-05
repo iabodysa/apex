@@ -389,6 +389,9 @@
 
 .driver-stop-meta a,
 .passenger-call {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
   color: var(--accent-ink);
   font-weight: 700;
 }

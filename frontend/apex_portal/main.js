@@ -23,6 +23,7 @@ const CONTEXT_TITLES = Object.freeze({
   "fleet-self-service": __("Salis"),
   "fleet-operations": __("Salis operations"),
   housing: __("Housing management"),
+  safety: __("Safety"),
 });
 
 function navigationFrom(router) {

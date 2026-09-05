@@ -81,7 +81,7 @@ def portal_landing(capabilities: dict) -> str:
         return "/rounds"
     return "/access-denied"
 
-def bootstrap_portal_context(context, route: str, entry: str):
+def bootstrap_portal_context(context, route: str):
     guest_redirect(route)
 
     allowed = bool(PORTAL_ROLES & set(frappe.get_roles()))
@@ -101,4 +101,4 @@ def bootstrap_portal_context(context, route: str, entry: str):
     )
 
 def get_context(context):
-    return bootstrap_portal_context(context, "/housing", "housing")
+    return bootstrap_portal_context(context, "/housing")

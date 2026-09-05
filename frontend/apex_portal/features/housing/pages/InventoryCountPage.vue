@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { Button, ErrorMessage, FormControl, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import BuildingPicker from "../components/BuildingPicker.vue";
 import { building } from "../building.js";
@@ -59,7 +60,7 @@ async function submit() {
   <section class="feature-page">
     <header class="feature-page__header"><h2>{{ __("Housing Inventory") }}</h2><BuildingPicker /></header>
     <PortalSkeleton v-if="inventory.loading" :rows="3" :label="__('Loading Inventory')" />
-    <ErrorMessage v-else-if="inventory.error" :message="__('Could not load the inventory.')" />
+    <PortalErrorState v-else-if="inventory.error" :title="__('Could not load the inventory')" :message="inventory.error" @retry="inventory.fetch()" />
     <p v-else-if="!rows.length && building" class="feature-page__empty">{{ __("No inventory items for this building.") }}</p>
     <form v-else-if="rows.length" class="inventory-form" @submit.prevent="submit">
       <article v-for="row in rows" :key="row.name" class="feature-card inventory-row">

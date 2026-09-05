@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, ref, watch } from "vue";
 import { Badge, Button, ErrorMessage, Progress, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { useRouter } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
@@ -126,7 +127,7 @@ onBeforeUnmount(stopLive);
 
     <div v-if="!building" class="feature-page__empty">{{ __("Select the building to view the arrivals list.") }}</div>
     <PortalSkeleton v-else-if="arrivals.loading && !workers.length" :rows="3" :label="__('Loading Arrivals')" />
-    <ErrorMessage v-else-if="arrivals.error" :message="__('Could not load the arrivals list.')" />
+    <PortalErrorState v-else-if="arrivals.error" :title="__('Could not load the arrivals list')" :message="arrivals.error" @retry="load" />
 
     <template v-else-if="building">
       <div class="arrival-metrics">

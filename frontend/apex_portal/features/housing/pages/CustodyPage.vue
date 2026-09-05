@@ -55,10 +55,14 @@ const submitReason = computed(() => {
 
 function replace(change) { Object.assign(state, nextCustodySelection(state, change)); }
 async function refreshBalances() {
-  const requests = [];
-  if (state.building) requests.push(catalog.fetch());
-  if (state.holder) requests.push(held.fetch());
-  await Promise.all(requests);
+  try {
+    const requests = [];
+    if (state.building) requests.push(catalog.fetch());
+    if (state.holder) requests.push(held.fetch());
+    await Promise.all(requests);
+  } catch (exception) {
+    error.value = safeErrorMessage(exception, __("Could not load the building's items."));
+  }
 }
 // The picker's selection survives navigation, so the catalogue must load for a building
 // that was already chosen on another screen — not only when the choice changes here.
@@ -131,17 +135,23 @@ async function submit() {
       <p v-if="scanReason" class="feature-reason">{{ scanReason }}</p>
       <Button variant="subtle" :disabled="!state.holder || !scan" :loading="resolver.loading" @click="addScan">{{ __("Add Item") }}</Button>
       <div v-if="state.holder && mode === 'issue'" class="feature-page__list">
-        <!-- A greyed article is out of stock in this building's store; the number alone
-             inside the label does not say that is why it cannot be picked. -->
-        <p v-if="outOfStock.length" class="feature-page__empty">{{ __("Items with no balance in the building store cannot be handed over: {0}.", [outOfStock.join("، ")]) }}</p>
-        <Button v-for="article in articles" :key="article.article" variant="subtle" :disabled="Number(article.store_balance) <= 0" @click="addArticle(article)">
-          {{ article.article_name }} · {{ article.store_balance ?? '—' }}
-        </Button>
+        <p v-if="catalog.loading" class="feature-reason">{{ __("Loading the building's items…") }}</p>
+        <template v-else>
+          <!-- A greyed article is out of stock in this building's store; the number alone
+               inside the label does not say that is why it cannot be picked. -->
+          <p v-if="outOfStock.length" class="feature-page__empty">{{ __("Items with no balance in the building store cannot be handed over: {0}.", [outOfStock.join("، ")]) }}</p>
+          <Button v-for="article in articles" :key="article.article" variant="subtle" :disabled="Number(article.store_balance) <= 0" @click="addArticle(article)">
+            {{ article.article_name }} · {{ article.store_balance ?? '—' }}
+          </Button>
+        </template>
       </div>
       <div v-else-if="state.holder" class="feature-page__list">
-        <Button v-for="line in heldLines" :key="`${line.custody_issue}:${line.article}`" variant="subtle" @click="addReturn(line)">
-          {{ line.article_name }} · {{ line.qty }}
-        </Button>
+        <p v-if="held.loading" class="feature-reason">{{ __("Loading held items…") }}</p>
+        <template v-else>
+          <Button v-for="line in heldLines" :key="`${line.custody_issue}:${line.article}`" variant="subtle" @click="addReturn(line)">
+            {{ line.article_name }} · {{ line.qty }}
+          </Button>
+        </template>
       </div>
       <ul><li v-for="row in state.cart" :key="row.key || row.article" dir="auto">{{ row.article_name || row.article }} × {{ row.qty }}</li></ul>
       <p v-if="!allowed" class="feature-page__empty">{{ __("You can view the custody items, but you do not have permission to perform this operation.") }}</p>

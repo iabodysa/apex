@@ -1,6 +1,7 @@
 <script setup>
 import { computed, inject, onBeforeUnmount, ref, watch } from "vue";
 import { Button, ErrorMessage, createResource, toast } from "frappe-ui";
+import PortalErrorState from "../../../components/PortalErrorState.vue";
 import PortalSkeleton from "../../../components/PortalSkeleton.vue";
 import { RouterLink, useRoute } from "vue-router";
 import BuildingPicker from "../components/BuildingPicker.vue";
@@ -61,7 +62,7 @@ async function setReady(room) {
       <RouterLink to="/arrivals">{{ __("Change Worker") }}</RouterLink>
     </article>
     <PortalSkeleton v-if="grid.loading && !grid.data" :rows="3" :label="__('Loading Beds')" />
-    <ErrorMessage v-else-if="grid.error" :message="__('Could not load the beds.')" />
+    <PortalErrorState v-else-if="grid.error" :title="__('Could not load the beds')" :message="grid.error" @retry="grid.fetch()" />
     <p v-else-if="!rooms.length && building" class="feature-page__empty">{{ __("No rooms in this building.") }}</p>
     <section v-for="room in rooms" :key="room.room" class="feature-card room-card">
       <header>
