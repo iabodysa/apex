@@ -239,4 +239,14 @@ jobs:
         working-directory: frappe-bench
         env:
           CI: "true"
-        run: bench --site test.localhost run-tests --app apex
+        run: |
+          set -o pipefail
+          bench --site test.localhost run-tests --app apex 2>&1 | tee "${{ runner.temp }}/apex-test-output.log"
+
+      # The floor is a separate step, run even when the step above already failed
+      # (a setup death exits non-zero with no `Ran N tests` line at all), so the
+      # job's failure reason is legible instead of a bare non-zero exit. The floor
+      # value lives in one place: MINIMUM_TEST_COUNT in the script below.
+      - name: Enforce minimum test count floor
+        if: always()
+        run: python3 "${{ github.workspace }}/.github/scripts/check_test_floor.py" "${{ runner.temp }}/apex-test-output.log"
